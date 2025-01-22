@@ -26,7 +26,7 @@ import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import { setUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/plugin';
 import { mockUnifiedDocViewerServices } from '@kbn/unified-doc-viewer-plugin/public/__mocks__';
-import type { FlyoutCustomization} from '../../customizations';
+import type { FlyoutCustomization } from '../../customizations';
 import { useDiscoverCustomization } from '../../customizations';
 import { discoverServiceMock } from '../../__mocks__/services';
 

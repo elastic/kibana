@@ -8,7 +8,7 @@
 import { assign, createMachine } from 'xstate';
 import { isEmpty, isError, omitBy } from 'lodash';
 import { createComparatorByField } from '../../../utils/comparator_by_field';
-import type { Dataset} from '../../../../common/datasets';
+import type { Dataset } from '../../../../common/datasets';
 import { Integration } from '../../../../common/datasets';
 import type { IDatasetsClient } from '../../../services/datasets';
 import { createDefaultContext } from './defaults';

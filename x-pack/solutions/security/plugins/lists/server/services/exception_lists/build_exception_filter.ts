@@ -17,7 +17,8 @@ import type {
   EntryNested,
   ExceptionListItemSchema,
   OsTypeArray,
-  Type} from '@kbn/securitysolution-io-ts-list-types';
+  Type,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   entriesExists,
   entriesList,

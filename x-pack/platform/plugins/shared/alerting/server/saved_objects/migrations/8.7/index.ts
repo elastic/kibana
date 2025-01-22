@@ -14,7 +14,7 @@ import {
   isLogThresholdRuleType,
   pipeMigrations,
 } from '../utils';
-import type { RawRule} from '../../../types';
+import type { RawRule } from '../../../types';
 import { RuleLastRunOutcomeOrderMap } from '../../../types';
 
 function addGroupByToEsQueryRule(

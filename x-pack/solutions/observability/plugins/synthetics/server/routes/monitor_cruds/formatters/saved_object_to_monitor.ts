@@ -10,10 +10,9 @@ import { mergeWith, omit, omitBy } from 'lodash';
 import type {
   EncryptedSyntheticsMonitor,
   MonitorFields,
-  MonitorFieldsResult} from '../../../../common/runtime_types';
-import {
-  ConfigKey
+  MonitorFieldsResult,
 } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 
 const keysToOmit = [
   ConfigKey.URLS,

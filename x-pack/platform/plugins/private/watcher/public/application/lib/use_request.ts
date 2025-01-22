@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  SendRequestConfig,
-  SendRequestResponse,
-  UseRequestConfig} from '../shared_imports';
-import {
-  sendRequest as _sendRequest,
-  useRequest as _useRequest,
-} from '../shared_imports';
+import type { SendRequestConfig, SendRequestResponse, UseRequestConfig } from '../shared_imports';
+import { sendRequest as _sendRequest, useRequest as _useRequest } from '../shared_imports';
 
 import { getHttpClient } from './api';
 

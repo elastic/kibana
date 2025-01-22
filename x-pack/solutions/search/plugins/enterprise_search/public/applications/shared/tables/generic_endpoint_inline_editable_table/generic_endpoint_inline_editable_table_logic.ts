@@ -12,11 +12,8 @@ import { toastAPIErrors } from '../../flash_messages';
 import { getErrorsFromHttpResponse } from '../../flash_messages/handle_api_errors';
 
 import { HttpLogic } from '../../http';
-import type {
-  InlineEditableTableProps as InlineEditableTableLogicProps} from '../inline_editable_table/inline_editable_table_logic';
-import {
-  InlineEditableTableLogic
-} from '../inline_editable_table/inline_editable_table_logic';
+import type { InlineEditableTableProps as InlineEditableTableLogicProps } from '../inline_editable_table/inline_editable_table_logic';
+import { InlineEditableTableLogic } from '../inline_editable_table/inline_editable_table_logic';
 
 import type { ItemWithAnID } from '../types';
 

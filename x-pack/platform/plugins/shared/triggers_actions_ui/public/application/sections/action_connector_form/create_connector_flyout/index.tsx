@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiButton,

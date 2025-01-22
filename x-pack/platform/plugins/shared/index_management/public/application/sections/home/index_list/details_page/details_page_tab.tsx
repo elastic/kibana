@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';

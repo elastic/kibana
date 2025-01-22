@@ -38,8 +38,7 @@ import {
 } from '../actions';
 import type { MapSerializedState } from './types';
 import { getCharts, getExecutionContextService } from '../kibana_services';
-import type {
-  EventHandlers} from '../reducers/non_serializable_instances';
+import type { EventHandlers } from '../reducers/non_serializable_instances';
 import {
   getInspectorAdapters,
   setChartsPaletteServiceGetColor,

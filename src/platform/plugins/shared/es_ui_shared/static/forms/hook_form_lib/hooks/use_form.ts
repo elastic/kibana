@@ -12,14 +12,13 @@ import { get, mergeWith } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
 
 import type { FormHook, FieldHook, FormData, FieldsMap, FormConfig } from '../types';
-import type {
-  Subscription} from '../lib';
+import type { Subscription } from '../lib';
 import {
   mapFormFields,
   unflattenObject,
   flattenObject,
   stripOutUndefinedValues,
-  Subject
+  Subject,
 } from '../lib';
 import { createArrayItem, getInternalArrayFieldPath } from '../components/use_array';
 

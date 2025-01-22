@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  CreateMicrosoftDefenderConnectorMockResponse} from './mocks';
-import {
-  microsoftDefenderEndpointConnectorMocks,
-} from './mocks';
+import type { CreateMicrosoftDefenderConnectorMockResponse } from './mocks';
+import { microsoftDefenderEndpointConnectorMocks } from './mocks';
 
 describe('Microsoft Defender for Endpoint Connector', () => {
   let connectorMock: CreateMicrosoftDefenderConnectorMockResponse;

@@ -6,16 +6,15 @@
  */
 
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
-import type {
-  ExecutionContextSearch} from '@kbn/es-query';
+import type { ExecutionContextSearch } from '@kbn/es-query';
 import {
   type AggregateQuery,
   type Filter,
   isOfAggregateQueryType,
   type Query,
-  type TimeRange
+  type TimeRange,
 } from '@kbn/es-query';
-import type { PublishingSubject} from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesTimeslice } from '@kbn/presentation-publishing';
 import type { LensRuntimeState } from '../types';
 import { nonNullable } from '../../utils';

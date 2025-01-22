@@ -14,14 +14,8 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
-import type {
-  EuiSelectableOption,
-  EuiSelectableProps} from '@elastic/eui';
-import {
-  EuiFormRow,
-  EuiSelectable,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import { EuiFormRow, EuiSelectable, EuiSpacer } from '@elastic/eui';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 
 import { FieldTypeFilter } from './field_type_filter';

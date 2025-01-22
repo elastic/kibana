@@ -9,9 +9,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import type * as t from 'io-ts';
 import { fold } from 'fp-ts/lib/Either';
 import { exactCheck, formatErrors, validate } from '@kbn/securitysolution-io-ts-utils';
-import type {
-  NamespaceType,
-  NonEmptyEntriesArray} from '@kbn/securitysolution-io-ts-list-types';
+import type { NamespaceType, NonEmptyEntriesArray } from '@kbn/securitysolution-io-ts-list-types';
 import {
   foundExceptionListItemSchema,
   nonEmptyEndpointEntriesArray,

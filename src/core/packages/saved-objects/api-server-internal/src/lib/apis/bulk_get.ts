@@ -13,11 +13,9 @@ import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-
 import type {
   DecoratedError,
   SavedObjectsRawDocSource,
-  AuthorizeBulkGetObject} from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObject
+  AuthorizeBulkGetObject,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type {
   SavedObjectsBulkGetObject,
@@ -25,8 +23,7 @@ import type {
   SavedObjectsGetOptions,
 } from '@kbn/core-saved-objects-api-server';
 import { includedFields } from '../utils';
-import type {
-  Either} from './utils';
+import type { Either } from './utils';
 import {
   errorContent,
   getSavedObjectFromSource,

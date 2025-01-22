@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 
-import type {
-  HostsUncommonProcessesStrategyResponse} from '@kbn/security-solution-plugin/common/search_strategy';
-import {
-  HostsQueries
-} from '@kbn/security-solution-plugin/common/search_strategy';
+import type { HostsUncommonProcessesStrategyResponse } from '@kbn/security-solution-plugin/common/search_strategy';
+import { HostsQueries } from '@kbn/security-solution-plugin/common/search_strategy';
 import type TestAgent from 'supertest/lib/agent';
 import type { SearchService } from '@kbn/ftr-common-functional-services';
 import type { FtrProviderContextWithSpaces } from '../../../../../ftr_provider_context_with_spaces';

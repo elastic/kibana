@@ -12,8 +12,7 @@ import { LAYER_TYPE } from '../../../../common/constants';
 import type { HeatmapLayerDescriptor } from '../../../../common/descriptor_types';
 import type { ESGeoGridSource } from '../../sources/es_geo_grid_source';
 import { hasESSourceMethod } from '../../sources/es_source';
-import type {
-  MvtSourceData} from '../vector_layer';
+import type { MvtSourceData } from '../vector_layer';
 import {
   NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
   syncBoundsData,

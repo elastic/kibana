@@ -6,11 +6,8 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import type {
-  EsDeprecationLogsTestBed} from './es_deprecation_logs.helpers';
-import {
-  setupESDeprecationLogsPage,
-} from './es_deprecation_logs.helpers';
+import type { EsDeprecationLogsTestBed } from './es_deprecation_logs.helpers';
+import { setupESDeprecationLogsPage } from './es_deprecation_logs.helpers';
 import { setupEnvironment, advanceTime } from '../helpers';
 import type { DeprecationLoggingStatus } from '../../../common/types';
 import {

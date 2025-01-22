@@ -7,8 +7,7 @@
 
 import React from 'react';
 import type { Visualization, Suggestion } from '../../types';
-import type {
-  DatasourceMock} from '../../mocks';
+import type { DatasourceMock } from '../../mocks';
 import {
   createMockVisualization,
   createMockDatasource,
@@ -17,7 +16,7 @@ import {
 } from '../../mocks';
 import { act } from 'react-dom/test-utils';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import type { SuggestionPanelProps} from './suggestion_panel';
+import type { SuggestionPanelProps } from './suggestion_panel';
 import { SuggestionPanel, SuggestionPanelWrapper } from './suggestion_panel';
 import { getSuggestions } from './suggestion_helpers';
 import { EuiIcon, EuiPanel, EuiToolTip, EuiAccordion } from '@elastic/eui';
@@ -25,15 +24,8 @@ import { IconChartDatatable } from '@kbn/chart-icons';
 import { mountWithProvider } from '../../mocks';
 import { coreMock } from '@kbn/core/public/mocks';
 
-import type {
-  LensAppState,
-  PreviewState,
-  VisualizationState} from '../../state_management';
-import {
-  applyChanges,
-  setState,
-  setToggleFullscreen
-} from '../../state_management';
+import type { LensAppState, PreviewState, VisualizationState } from '../../state_management';
+import { applyChanges, setState, setToggleFullscreen } from '../../state_management';
 import { setChangesApplied } from '../../state_management/lens_slice';
 
 const SELECTORS = {

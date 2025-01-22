@@ -11,7 +11,7 @@ import { notificationServiceMock, scopedHistoryMock } from '@kbn/core/public/moc
 
 import type { LocationDescriptorObject } from 'history';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { Props} from '..';
+import type { Props } from '..';
 import { ProcessorsEditorContextProvider, PipelineEditor } from '..';
 
 import {

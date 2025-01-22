@@ -13,7 +13,8 @@ import type {
   UserCommentAttachmentAttributes,
   AlertAttachmentAttributes,
   ExternalReferenceSOAttachmentPayload,
-  AlertAttachmentPayload} from '@kbn/cases-plugin/common/types/domain';
+  AlertAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
 import {
   AttachmentType,
   CaseStatuses,

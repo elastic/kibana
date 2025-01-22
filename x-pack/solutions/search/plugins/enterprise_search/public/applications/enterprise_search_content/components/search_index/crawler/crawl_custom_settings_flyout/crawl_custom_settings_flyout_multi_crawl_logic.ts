@@ -31,11 +31,8 @@ import {
 } from './crawl_custom_settings_flyout_domain_logic';
 
 import { filterSeedUrlsByDomainUrls } from './crawl_custom_settings_flyout_logic';
-import type {
-  PostCustomSchedulingArgs} from './crawl_custom_settings_flyout_schedule_api_logic';
-import {
-  PostCustomSchedulingApiLogic
-} from './crawl_custom_settings_flyout_schedule_api_logic';
+import type { PostCustomSchedulingArgs } from './crawl_custom_settings_flyout_schedule_api_logic';
+import { PostCustomSchedulingApiLogic } from './crawl_custom_settings_flyout_schedule_api_logic';
 
 export interface CrawlCustomSettingsFlyoutMultiCrawlLogicValues {
   crawlerConfigActiveTab: number;

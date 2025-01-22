@@ -21,7 +21,7 @@ import {
 
 import { TargetField } from './common_fields/target_field';
 
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { to, from, EDITOR_PX_HEIGHT, isXJsonField } from './shared';
 import { XJsonEditor } from '../field_components';
 

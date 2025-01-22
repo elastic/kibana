@@ -23,11 +23,8 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import type {
-  ScreenshotModePluginSetup} from '@kbn/screenshot-mode-plugin/public';
-import {
-  KBN_SCREENSHOT_MODE_HEADER,
-} from '@kbn/screenshot-mode-plugin/public';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/public';
+import { KBN_SCREENSHOT_MODE_HEADER } from '@kbn/screenshot-mode-plugin/public';
 
 import { PLUGIN_NAME, BASE_API_ROUTE } from '../../common';
 

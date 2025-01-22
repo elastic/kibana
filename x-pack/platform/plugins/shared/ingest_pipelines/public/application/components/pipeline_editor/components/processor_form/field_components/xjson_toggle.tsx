@@ -4,15 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  FunctionComponent,
-  MouseEventHandler} from 'react';
-import React, {
-  useCallback,
-  useEffect,
-  useState,
-  useMemo
-} from 'react';
+import type { FunctionComponent, MouseEventHandler } from 'react';
+import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';

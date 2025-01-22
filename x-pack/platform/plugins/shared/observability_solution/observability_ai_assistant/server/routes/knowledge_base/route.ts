@@ -17,7 +17,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import moment from 'moment';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
-import type { Instruction, KnowledgeBaseEntry} from '../../../common/types';
+import type { Instruction, KnowledgeBaseEntry } from '../../../common/types';
 import { KnowledgeBaseEntryRole } from '../../../common/types';
 
 const getKnowledgeBaseStatus = createObservabilityAIAssistantServerRoute({

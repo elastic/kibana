@@ -7,8 +7,7 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import type {
-  EuiSuperSelectOption} from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiPanel,
   EuiTitle,
@@ -27,12 +26,8 @@ import { i18n } from '@kbn/i18n';
 import type { TimeRange } from '@kbn/es-query';
 import { isEmpty } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
-import type {
-  ReadStreamDefinition} from '@kbn/streams-schema';
-import {
-  FIELD_DEFINITION_TYPES,
-  isWiredReadStream,
-} from '@kbn/streams-schema';
+import type { ReadStreamDefinition } from '@kbn/streams-schema';
+import { FIELD_DEFINITION_TYPES, isWiredReadStream } from '@kbn/streams-schema';
 import { useController, useFieldArray } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { flattenObject } from '@kbn/object-utils';

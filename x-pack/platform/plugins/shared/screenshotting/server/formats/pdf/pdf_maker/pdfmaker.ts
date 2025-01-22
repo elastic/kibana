@@ -9,7 +9,7 @@ import type { Logger, PackageInfo } from '@kbn/core/server';
 import type { SerializableRecord } from '@kbn/utility-types';
 import path from 'path';
 import type { Content, ContentImage, ContentText } from 'pdfmake/interfaces';
-import type { MessagePort} from 'worker_threads';
+import type { MessagePort } from 'worker_threads';
 import { MessageChannel, Worker } from 'worker_threads';
 import type { Layout } from '../../../layouts';
 import { errors } from '../../../../common';
@@ -23,13 +23,8 @@ import {
 } from './constants';
 import { REPORTING_TABLE_LAYOUT } from './get_doc_options';
 import { getFont } from './get_font';
-import type {
-  GeneratePdfResponse} from './worker';
-import {
-  GeneratePdfResponseType,
-  type GeneratePdfRequest,
-  type WorkerData
-} from './worker';
+import type { GeneratePdfResponse } from './worker';
+import { GeneratePdfResponseType, type GeneratePdfRequest, type WorkerData } from './worker';
 
 // Ensure that all dependencies are included in the release bundle.
 import './worker_dependencies';

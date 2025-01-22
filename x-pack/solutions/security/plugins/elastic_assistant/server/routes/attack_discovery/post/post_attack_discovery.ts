@@ -7,12 +7,11 @@
 
 import type { IRouter, Logger } from '@kbn/core/server';
 import { type IKibanaResponse } from '@kbn/core/server';
-import type {
-  Replacements} from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostRequestBody,
   AttackDiscoveryPostResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION
+  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { transformError } from '@kbn/securitysolution-es-utils';

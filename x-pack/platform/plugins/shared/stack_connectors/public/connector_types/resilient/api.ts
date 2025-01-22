@@ -7,7 +7,7 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
-import type { ConnectorExecutorResult} from '../lib/rewrite_response_body';
+import type { ConnectorExecutorResult } from '../lib/rewrite_response_body';
 import { rewriteResponseToCamelCase } from '../lib/rewrite_response_body';
 
 export async function getIncidentTypes({

@@ -15,10 +15,9 @@ import type {
   DragDropOperation,
   IndexPatternMap,
   VisualizationDimensionGroupConfig,
-  DraggedField} from '../../../../types';
-import {
-  isOperation
+  DraggedField,
 } from '../../../../types';
+import { isOperation } from '../../../../types';
 import {
   insertOrReplaceColumn,
   getColumnOrder,

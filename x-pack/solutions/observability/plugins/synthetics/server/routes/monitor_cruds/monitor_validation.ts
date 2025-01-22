@@ -18,7 +18,8 @@ import type {
   Locations,
   MonitorFields,
   ProjectMonitor,
-  SyntheticsMonitor} from '../../../common/runtime_types';
+  SyntheticsMonitor,
+} from '../../../common/runtime_types';
 import {
   BrowserFieldsCodec,
   CodeEditorMode,

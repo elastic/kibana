@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IKibanaResponse} from '@kbn/core/server';
+import type { IKibanaResponse } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import type { File } from '../../../common';
 import type { FileServiceStart } from '../../file_service';

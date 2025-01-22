@@ -14,10 +14,9 @@ import {
 import type { SavedObjectsFindResponse } from '@kbn/core/server';
 import type {
   MaintenanceWindowClientContext,
-  MaintenanceWindowStatus} from '../../../../../common';
-import {
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE
+  MaintenanceWindowStatus,
 } from '../../../../../common';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 import { findMaintenanceWindowsParamsSchema } from './schemas';
 

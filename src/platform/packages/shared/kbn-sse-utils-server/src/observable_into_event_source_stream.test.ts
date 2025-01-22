@@ -11,7 +11,7 @@ import type { Logger } from '@kbn/logging';
 import { observableIntoEventSourceStream } from './observable_into_event_source_stream';
 import type { PassThrough } from 'node:stream';
 import { Subject } from 'rxjs';
-import type { ServerSentEvent} from '@kbn/sse-utils/src/events';
+import type { ServerSentEvent } from '@kbn/sse-utils/src/events';
 import { ServerSentEventType } from '@kbn/sse-utils/src/events';
 import {
   ServerSentEventErrorCode,

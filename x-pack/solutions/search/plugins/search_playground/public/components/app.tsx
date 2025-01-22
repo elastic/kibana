@@ -13,7 +13,7 @@ import { QueryMode } from './query_mode/query_mode';
 import { ChatSetupPage } from './setup_page/chat_setup_page';
 import { Header } from './header';
 import { useLoadConnectors } from '../hooks/use_load_connectors';
-import type { ChatForm} from '../types';
+import type { ChatForm } from '../types';
 import { ChatFormFields, PlaygroundPageMode } from '../types';
 import { Chat } from './chat';
 import { SearchMode } from './search_mode/search_mode';

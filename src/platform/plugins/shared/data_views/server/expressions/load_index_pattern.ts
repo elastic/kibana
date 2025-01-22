@@ -12,10 +12,9 @@ import type { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 
 import type {
   IndexPatternLoadExpressionFunctionDefinition,
-  IndexPatternLoadStartDependencies} from '../../common/expressions';
-import {
-  getIndexPatternLoadMeta
+  IndexPatternLoadStartDependencies,
 } from '../../common/expressions';
+import { getIndexPatternLoadMeta } from '../../common/expressions';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from '../types';
 
 /**

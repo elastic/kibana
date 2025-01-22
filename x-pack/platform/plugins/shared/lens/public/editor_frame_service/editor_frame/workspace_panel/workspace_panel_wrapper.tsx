@@ -13,7 +13,7 @@ import classNames from 'classnames';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import type { ChartSizeUnit } from '@kbn/chart-expressions-common/types';
-import type { Interpolation, Theme} from '@emotion/react';
+import type { Interpolation, Theme } from '@emotion/react';
 import { css } from '@emotion/react';
 import type {
   DatasourceMap,
@@ -24,8 +24,7 @@ import type {
 } from '../../../types';
 import { DONT_CLOSE_DIMENSION_CONTAINER_ON_CLICK_CLASS } from '../../../utils';
 import { MessageList } from './message_list';
-import type {
-  DatasourceStates} from '../../../state_management';
+import type { DatasourceStates } from '../../../state_management';
 import {
   useLensDispatch,
   updateVisualizationState,

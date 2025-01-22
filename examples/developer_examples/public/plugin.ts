@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Plugin, AppMountParameters} from '@kbn/core/public';
+import type { CoreSetup, Plugin, AppMountParameters } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import type { ExampleDefinition } from './types';

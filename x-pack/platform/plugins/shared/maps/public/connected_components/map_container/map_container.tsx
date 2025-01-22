@@ -22,7 +22,7 @@ import { ToolbarOverlay } from '../toolbar_overlay';
 import { EditLayerPanel } from '../edit_layer_panel';
 import { AddLayerPanel } from '../add_layer_panel';
 import { isScreenshotMode } from '../../kibana_services';
-import type { RawValue} from '../../../common/constants';
+import type { RawValue } from '../../../common/constants';
 import { RENDER_TIMEOUT } from '../../../common/constants';
 import { FLYOUT_STATE } from '../../reducers/ui';
 import type { MapSettings } from '../../../common/descriptor_types';

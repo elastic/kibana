@@ -14,8 +14,7 @@ import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react'
 import { NumberField } from '../helpers/number_field';
 import { RRuleFrequency } from '../../../../../../types';
 import { I18N_WEEKDAY_OPTIONS } from './constants';
-import type {
-  CustomFrequencyState} from './helpers';
+import type { CustomFrequencyState } from './helpers';
 import {
   buildCustomRecurrenceSchedulerState,
   getInitialByweekday,

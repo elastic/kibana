@@ -5,7 +5,12 @@
  * 2.0.
  */
 import React, { useCallback, useMemo, useState } from 'react';
-import type { BrushEvent, TooltipSpec, LineAnnotationEvent, RectAnnotationEvent } from '@elastic/charts';
+import type {
+  BrushEvent,
+  TooltipSpec,
+  LineAnnotationEvent,
+  RectAnnotationEvent,
+} from '@elastic/charts';
 import { FormProvider, useForm } from 'react-hook-form';
 import moment from 'moment';
 import useKey from 'react-use/lib/useKey';

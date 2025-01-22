@@ -59,11 +59,12 @@ import type {
   RuleActionParam,
   RuleActionAlertsFilterProperty,
   RuleActionKey,
-  Flapping} from '@kbn/alerting-plugin/common';
+  Flapping,
+} from '@kbn/alerting-plugin/common';
 import {
   ALERTING_FEATURE_ID,
   RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId
+  isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
 import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import { AlertConsumers } from '@kbn/rule-data-utils';

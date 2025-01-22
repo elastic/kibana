@@ -13,11 +13,8 @@ import { i18n } from '@kbn/i18n';
 import { Route } from '@kbn/shared-ux-router';
 import { OVERVIEW_ROUTE } from '../../../../common/constants';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type {
-  SyntheticsUrlParams} from '../utils/url_params/get_supported_url_params';
-import {
-  getSupportedUrlParams,
-} from '../utils/url_params/get_supported_url_params';
+import type { SyntheticsUrlParams } from '../utils/url_params/get_supported_url_params';
+import { getSupportedUrlParams } from '../utils/url_params/get_supported_url_params';
 import { makeBaseBreadcrumb, useBreadcrumbs } from './use_breadcrumbs';
 import { SyntheticsSettingsContext } from '../contexts';
 import { BehaviorSubject } from 'rxjs';

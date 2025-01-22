@@ -5,7 +5,7 @@
  * 2.0.
  */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import type { EcsFields} from '../../../common/ecs';
+import type { EcsFields } from '../../../common/ecs';
 import { ECS_FULL } from '../../../common/ecs';
 import { mergeSamples } from '../../util/samples';
 import { ECS_RESERVED } from './constants';

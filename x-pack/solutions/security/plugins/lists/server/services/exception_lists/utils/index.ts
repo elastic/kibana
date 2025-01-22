@@ -21,11 +21,9 @@ import type {
   FoundExceptionListItemSchema,
   FoundExceptionListSchema,
   UpdateCommentsArrayOrUndefined,
-  UpdateExceptionListItemSchema} from '@kbn/securitysolution-io-ts-list-types';
-import {
-  exceptionListItemType,
-  exceptionListType,
+  UpdateExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { exceptionListItemType, exceptionListType } from '@kbn/securitysolution-io-ts-list-types';
 import { getExceptionListType } from '@kbn/securitysolution-list-utils';
 
 import type { ExceptionListSoSchema } from '../../../schemas/saved_objects';

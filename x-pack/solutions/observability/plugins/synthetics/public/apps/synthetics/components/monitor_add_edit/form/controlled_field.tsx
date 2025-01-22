@@ -9,7 +9,7 @@ import type { EuiFormRowProps } from '@elastic/eui';
 import { EuiFormRow } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import useDebounce from 'react-use/lib/useDebounce';
-import type { ControllerRenderProps, ControllerFieldState} from 'react-hook-form';
+import type { ControllerRenderProps, ControllerFieldState } from 'react-hook-form';
 import { useFormContext } from 'react-hook-form';
 import { useKibanaSpace, useIsEditFlow } from '../hooks';
 import { selectServiceLocationsState } from '../../../state';

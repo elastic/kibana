@@ -10,10 +10,9 @@
 import type { CoreSetup, CoreStart } from '@kbn/core-lifecycle-browser';
 import type {
   RouteRepositoryClient,
-  ServerRouteRepository} from '@kbn/server-route-repository-utils';
-import {
-  formatRequest,
+  ServerRouteRepository,
 } from '@kbn/server-route-repository-utils';
+import { formatRequest } from '@kbn/server-route-repository-utils';
 import { httpResponseIntoObservable } from '@kbn/sse-utils-client';
 import { from } from 'rxjs';
 import type { HttpFetchQuery, HttpResponse } from '@kbn/core-http-browser';

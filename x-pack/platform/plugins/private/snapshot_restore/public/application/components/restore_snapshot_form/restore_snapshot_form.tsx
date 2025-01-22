@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { FEATURE_STATES_NONE_OPTION } from '../../../../common/constants';
 import type { SnapshotDetails, RestoreSettings } from '../../../../common/types';
-import type { RestoreValidation} from '../../services/validation';
+import type { RestoreValidation } from '../../services/validation';
 import { validateRestore } from '../../services/validation';
 import {
   RestoreSnapshotStepLogistics,

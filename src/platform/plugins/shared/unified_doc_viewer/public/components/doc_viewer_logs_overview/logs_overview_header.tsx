@@ -17,12 +17,8 @@ import {
   useGeneratedHtmlId,
   EuiTitle,
 } from '@elastic/eui';
-import type {
-  LogDocumentOverview} from '@kbn/discover-utils';
-import {
-  fieldConstants,
-  getMessageFieldWithFallbacks,
-} from '@kbn/discover-utils';
+import type { LogDocumentOverview } from '@kbn/discover-utils';
+import { fieldConstants, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import { Timestamp } from './sub_components/timestamp';
 import { HoverActionPopover } from './sub_components/hover_popover_action';

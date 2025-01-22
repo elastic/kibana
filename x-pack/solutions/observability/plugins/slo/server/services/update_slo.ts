@@ -5,8 +5,13 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
-import type { UpdateSLOParams, UpdateSLOResponse} from '@kbn/slo-schema';
+import type {
+  ElasticsearchClient,
+  IBasePath,
+  IScopedClusterClient,
+  Logger,
+} from '@kbn/core/server';
+import type { UpdateSLOParams, UpdateSLOResponse } from '@kbn/slo-schema';
 import { updateSLOResponseSchema } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';

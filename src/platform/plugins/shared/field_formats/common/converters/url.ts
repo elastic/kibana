@@ -16,10 +16,9 @@ import type {
   TextContextTypeConvert,
   HtmlContextTypeConvert,
   FieldFormatMetaParams,
-  FieldFormatParams} from '../types';
-import {
-  FIELD_FORMAT_IDS
+  FieldFormatParams,
 } from '../types';
+import { FIELD_FORMAT_IDS } from '../types';
 
 const templateMatchRE = /{{([\s\S]+?)}}/g;
 const allowedUrlSchemes = ['http://', 'https://', 'mailto:'];

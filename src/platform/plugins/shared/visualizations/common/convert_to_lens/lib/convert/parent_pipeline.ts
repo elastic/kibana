@@ -13,11 +13,8 @@ import type { MovingAverageParams } from '../../types';
 import { convertMetricToColumns, getFormulaForPipelineAgg } from '../metrics';
 import { createColumn } from './column';
 import { createFormulaColumn } from './formula';
-import type {
-  MetricAggregationColumnWithoutSpecialParams} from './metric';
-import {
-  convertMetricAggregationColumnWithoutSpecialParams
-} from './metric';
+import type { MetricAggregationColumnWithoutSpecialParams } from './metric';
+import { convertMetricAggregationColumnWithoutSpecialParams } from './metric';
 import { SUPPORTED_METRICS } from './supported_metrics';
 import type {
   MovingAverageColumn,

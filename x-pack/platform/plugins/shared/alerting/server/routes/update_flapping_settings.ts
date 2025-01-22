@@ -10,14 +10,10 @@ import { schema } from '@kbn/config-schema';
 import type { ILicenseState } from '../lib';
 import type { RewriteResponseCase, RewriteRequestCase } from './lib';
 import { verifyAccessAndContext } from './lib';
-import type { AlertingRequestHandlerContext} from '../types';
+import type { AlertingRequestHandlerContext } from '../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import type {
-  RulesSettingsFlapping,
-  RulesSettingsFlappingProperties} from '../../common';
-import {
-  API_PRIVILEGES
-} from '../../common';
+import type { RulesSettingsFlapping, RulesSettingsFlappingProperties } from '../../common';
+import { API_PRIVILEGES } from '../../common';
 
 const bodySchema = schema.object({
   enabled: schema.boolean(),

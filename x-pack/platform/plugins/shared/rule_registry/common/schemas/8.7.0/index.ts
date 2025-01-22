@@ -17,11 +17,9 @@ import type {
   SPACE_IDS,
   ALERT_RULE_TAGS,
   TIMESTAMP,
-  ALERT_RULE_PARAMETERS} from '@kbn/rule-data-utils';
-import {
-  ALERT_INSTANCE_ID,
-  ALERT_UUID
+  ALERT_RULE_PARAMETERS,
 } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_UUID } from '@kbn/rule-data-utils';
 import type { AlertWithCommonFields800 } from '../8.0.0';
 
 import type { SuppressionFields860 } from '../8.6.0';

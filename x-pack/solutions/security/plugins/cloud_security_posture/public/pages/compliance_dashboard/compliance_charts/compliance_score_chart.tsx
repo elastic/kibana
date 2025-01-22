@@ -15,8 +15,7 @@ import {
   timeFormatter,
   Tooltip,
 } from '@elastic/charts';
-import type {
-  EuiToolTipProps} from '@elastic/eui';
+import type { EuiToolTipProps } from '@elastic/eui';
 import {
   useEuiTheme,
   EuiFlexGroup,

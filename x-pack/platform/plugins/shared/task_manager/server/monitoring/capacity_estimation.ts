@@ -9,7 +9,7 @@ import { mapValues } from 'lodash';
 import stats from 'stats-lite';
 import type { JsonObject } from '@kbn/utility-types';
 import type { Logger } from '@kbn/core/server';
-import type { RawMonitoringStats, RawMonitoredStat} from './monitoring_stats_stream';
+import type { RawMonitoringStats, RawMonitoredStat } from './monitoring_stats_stream';
 import { HealthStatus } from './monitoring_stats_stream';
 import type { AveragedStat } from './task_run_calculators';
 import type { TaskPersistenceTypes } from './task_run_statistics';

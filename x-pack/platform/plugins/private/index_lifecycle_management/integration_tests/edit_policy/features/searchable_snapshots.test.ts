@@ -11,11 +11,8 @@ import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../helpers';
 import { getDefaultHotPhasePolicy } from '../constants';
 import { API_BASE_PATH } from '../../../common/constants';
-import type {
-  SearchableSnapshotsTestBed} from './searchable_snapshots.helpers';
-import {
-  setupSearchableSnapshotsTestBed,
-} from './searchable_snapshots.helpers';
+import type { SearchableSnapshotsTestBed } from './searchable_snapshots.helpers';
+import { setupSearchableSnapshotsTestBed } from './searchable_snapshots.helpers';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 describe('<EditPolicy /> searchable snapshots', () => {

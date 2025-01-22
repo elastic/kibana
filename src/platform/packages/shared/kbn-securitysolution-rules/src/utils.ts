@@ -8,7 +8,7 @@
  */
 
 import { isPlainObject } from 'lodash';
-import type { RuleType, RuleTypeId} from './rule_type_mappings';
+import type { RuleType, RuleTypeId } from './rule_type_mappings';
 import { ruleTypeMappings } from './rule_type_mappings';
 
 export const isRuleType = (ruleType: unknown): ruleType is RuleType => {

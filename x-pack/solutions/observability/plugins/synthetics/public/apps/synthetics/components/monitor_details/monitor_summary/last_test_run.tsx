@@ -30,11 +30,9 @@ import { getErrorDetailsUrl } from '../monitor_errors/errors_list';
 import type {
   EncryptedSyntheticsSavedMonitor,
   Ping,
-  SyntheticsJourneyApiResponse} from '../../../../../../common/runtime_types';
-import {
-  ConfigKey,
-  MonitorTypeEnum
+  SyntheticsJourneyApiResponse,
 } from '../../../../../../common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '../../../../../../common/runtime_types';
 
 import { useSyntheticsRefreshContext, useSyntheticsSettingsContext } from '../../../contexts';
 import { BrowserStepsList } from '../../common/monitor_test_result/browser_steps_list';

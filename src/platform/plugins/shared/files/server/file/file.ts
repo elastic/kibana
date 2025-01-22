@@ -9,18 +9,8 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { Readable } from 'stream';
-import type {
-  Observable} from 'rxjs';
-import {
-  map,
-  from,
-  race,
-  defer,
-  NEVER,
-  mergeMap,
-  catchError,
-  lastValueFrom,
-} from 'rxjs';
+import type { Observable } from 'rxjs';
+import { map, from, race, defer, NEVER, mergeMap, catchError, lastValueFrom } from 'rxjs';
 import type { UploadOptions } from '../blob_storage_service';
 import type { FileShareJSON, FileShareJSONWithToken } from '../../common/types';
 import type { File as IFile, UpdatableFileMetadata, FileJSON } from '../../common';

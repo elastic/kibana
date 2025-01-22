@@ -9,12 +9,8 @@ import type { Logger } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { ExecutorParams, ServiceNowPublicConfigurationType } from '../lib/servicenow/types';
-import type {
-  ServiceNowConnectorType,
-  ServiceNowConnectorTypeExecutorOptions} from '.';
-import {
-  getServiceNowSIRConnectorType,
-} from '.';
+import type { ServiceNowConnectorType, ServiceNowConnectorTypeExecutorOptions } from '.';
+import { getServiceNowSIRConnectorType } from '.';
 import { api } from './api';
 
 jest.mock('./api', () => ({

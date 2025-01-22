@@ -13,12 +13,8 @@ import deepEqual from 'react-fast-compare';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import type { SerializedPanelState } from '@kbn/presentation-containers';
 import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
-import type {
-  SavedSearch,
-  SavedSearchAttributes} from '@kbn/saved-search-plugin/common';
-import {
-  toSavedSearchAttributes,
-} from '@kbn/saved-search-plugin/common';
+import type { SavedSearch, SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
+import { toSavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import type { SavedSearchUnwrapResult } from '@kbn/saved-search-plugin/public';
 
 import { extract, inject } from '../../../common/embeddable/search_inject_extract';

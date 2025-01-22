@@ -6,7 +6,7 @@
  */
 
 import { API_URLS } from '../../../../common/constants';
-import type { StatesIndexStatus} from '../../../../common/runtime_types';
+import type { StatesIndexStatus } from '../../../../common/runtime_types';
 import { StatesIndexStatusType } from '../../../../common/runtime_types';
 import { apiService } from './utils';
 

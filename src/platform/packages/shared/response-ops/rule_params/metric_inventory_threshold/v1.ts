@@ -11,8 +11,7 @@ import type { Type } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 
-import type {
-  TimeUnitChar} from '../common/utils';
+import type { TimeUnitChar } from '../common/utils';
 import {
   LEGACY_COMPARATORS,
   oneOfLiterals,

@@ -14,8 +14,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useCallback } from 'react';
-import type {
-  SaveModalDashboardProps} from '@kbn/presentation-util-plugin/public';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,

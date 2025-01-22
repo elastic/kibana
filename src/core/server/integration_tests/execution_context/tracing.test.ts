@@ -8,8 +8,7 @@
  */
 
 import { ExecutionContextContainer } from '@kbn/core-execution-context-browser-internal';
-import type {
-  createRoot} from '@kbn/core-test-helpers-kbn-server';
+import type { createRoot } from '@kbn/core-test-helpers-kbn-server';
 import {
   createTestServers,
   createRootWithCorePlugins,

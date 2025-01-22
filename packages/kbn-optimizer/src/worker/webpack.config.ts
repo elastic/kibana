@@ -23,7 +23,7 @@ import StatoscopeWebpackPlugin from '@statoscope/webpack-plugin';
 import VisualizerPlugin from 'webpack-visualizer-plugin2';
 import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer';
 
-import type { Bundle, BundleRemotes, WorkerConfig} from '../common';
+import type { Bundle, BundleRemotes, WorkerConfig } from '../common';
 import { parseDllManifest } from '../common';
 import { BundleRemotesPlugin } from './bundle_remotes_plugin';
 import { BundleMetricsPlugin } from './bundle_metrics_plugin';

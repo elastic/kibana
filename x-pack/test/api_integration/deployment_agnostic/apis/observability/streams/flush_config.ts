@@ -10,11 +10,8 @@ import type { ClientRequestParamsOf } from '@kbn/server-route-repository-utils';
 import type { StreamsRouteRepository } from '@kbn/streams-plugin/server';
 import type { ReadStreamDefinition, WiredReadStreamDefinition } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import type {
-  StreamsSupertestRepositoryClient} from './helpers/repository_client';
-import {
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
 
 type StreamPutItem = ClientRequestParamsOf<

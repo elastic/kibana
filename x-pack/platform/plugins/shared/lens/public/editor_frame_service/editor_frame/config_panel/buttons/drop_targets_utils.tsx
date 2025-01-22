@@ -10,10 +10,9 @@ import type {
   FramePublicAPI,
   Visualization,
   DragDropOperation,
-  VisualizationDimensionGroupConfig} from '../../../../types';
-import {
-  isOperation
+  VisualizationDimensionGroupConfig,
 } from '../../../../types';
+import { isOperation } from '../../../../types';
 
 export interface OnVisDropProps<T> {
   prevState: T;

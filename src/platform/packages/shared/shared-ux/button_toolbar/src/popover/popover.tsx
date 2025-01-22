@@ -11,7 +11,7 @@ import React, { useState } from 'react';
 import { EuiPopover } from '@elastic/eui';
 import type { Props as EuiPopoverProps } from '@elastic/eui/src/components/popover/popover';
 
-import type { ToolbarButtonProps} from '../buttons';
+import type { ToolbarButtonProps } from '../buttons';
 import { ToolbarButton } from '../buttons';
 
 type AllowedButtonProps = Omit<

@@ -7,11 +7,8 @@
 
 import { expect } from 'expect';
 
-import type {
-  MachineLearningRuleCreateProps} from '@kbn/security-solution-plugin/common/api/detection_engine';
-import {
-  RuleExecutionStatusEnum,
-} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { MachineLearningRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
+import { RuleExecutionStatusEnum } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { Anomaly } from '@kbn/security-solution-plugin/server/lib/machine_learning';
 import {
   ALERT_LAST_DETECTED,

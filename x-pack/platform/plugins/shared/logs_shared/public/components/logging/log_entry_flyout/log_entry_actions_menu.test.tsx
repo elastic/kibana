@@ -9,10 +9,11 @@ import { coreMock } from '@kbn/core/public/mocks';
 import type {
   TransactionDetailsByTraceIdLocatorParams,
   UptimeOverviewLocatorInfraParams,
-  UptimeOverviewLocatorParams} from '@kbn/deeplinks-observability';
+  UptimeOverviewLocatorParams,
+} from '@kbn/deeplinks-observability';
 import {
   TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
-  uptimeOverviewLocatorID
+  uptimeOverviewLocatorID,
 } from '@kbn/deeplinks-observability';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MockUrlService } from '@kbn/share-plugin/common/mocks';

@@ -10,9 +10,9 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 import { faker } from '@faker-js/faker';
-import type { RenderOptions} from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
 import { render } from '@testing-library/react';
-import type { DragContextState} from './providers';
+import type { DragContextState } from './providers';
 import { RootDragDropProvider } from './providers';
 
 export const EXACT = {

@@ -23,10 +23,9 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
   YConfig,
-  XYAnnotationLayerConfig} from './types';
-import {
-  visualizationSubtypes
+  XYAnnotationLayerConfig,
 } from './types';
+import { visualizationSubtypes } from './types';
 import {
   getDataLayers,
   isAnnotationsLayer,

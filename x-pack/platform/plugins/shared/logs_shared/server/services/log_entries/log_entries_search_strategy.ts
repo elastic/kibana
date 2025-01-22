@@ -20,21 +20,20 @@ import type {
   LogEntry,
   LogEntryAfterCursor,
   LogEntryBeforeCursor,
-  LogEntryContext} from '../../../common/log_entry';
+  LogEntryContext,
+} from '../../../common/log_entry';
 import {
   getLogEntryCursorFromHit,
   logEntryAfterCursorRT,
-  logEntryBeforeCursorRT
+  logEntryBeforeCursorRT,
 } from '../../../common/log_entry';
-import type {
-  LogViewColumnConfiguration} from '../../../common/log_views';
-import {
-  logViewFieldColumnConfigurationRT,
-} from '../../../common/log_views';
+import type { LogViewColumnConfiguration } from '../../../common/log_views';
+import { logViewFieldColumnConfigurationRT } from '../../../common/log_views';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
   LogEntriesSearchRequestParams,
-  LogEntriesSearchResponsePayload} from '../../../common/search_strategies/log_entries/log_entries';
+  LogEntriesSearchResponsePayload,
+} from '../../../common/search_strategies/log_entries/log_entries';
 import {
   logEntriesSearchRequestParamsRT,
   logEntriesSearchResponsePayloadRT,
@@ -45,18 +44,13 @@ import {
   jsonFromBase64StringRT,
 } from '../../utils/typed_search_strategy';
 import type { LogViewsServiceStart } from '../log_views/types';
-import type {
-  CompiledLogMessageFormattingRule} from './message';
-import {
-  compileFormattingRules,
-  getBuiltinRules,
-} from './message';
-import type {
-  LogEntryHit} from './queries/log_entries';
+import type { CompiledLogMessageFormattingRule } from './message';
+import { compileFormattingRules, getBuiltinRules } from './message';
+import type { LogEntryHit } from './queries/log_entries';
 import {
   createGetLogEntriesQuery,
   getLogEntriesResponseRT,
-  getSortDirection
+  getSortDirection,
 } from './queries/log_entries';
 
 type LogEntriesSearchRequest = IKibanaSearchRequest<LogEntriesSearchRequestParams>;

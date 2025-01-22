@@ -11,7 +11,7 @@ import React from 'react';
 // @ts-expect-error untyped local
 import { getDefaultWorkpad } from '../../../../state/defaults';
 
-import type { Argument, Arguments} from '../simple_template';
+import type { Argument, Arguments } from '../simple_template';
 import { SimpleTemplate } from '../simple_template';
 
 const defaultValues: Arguments = {

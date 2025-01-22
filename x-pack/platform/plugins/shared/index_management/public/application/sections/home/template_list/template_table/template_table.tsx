@@ -9,14 +9,14 @@ import React, { useState, Fragment } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiButton, EuiLink, EuiIcon } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
 import type { TemplateListItem } from '../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../common/constants';
-import type { UseRequestResponse} from '../../../../../shared_imports';
+import type { UseRequestResponse } from '../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { useServices } from '../../../../app_context';
 import { TemplateDeleteModal } from '../../../../components';

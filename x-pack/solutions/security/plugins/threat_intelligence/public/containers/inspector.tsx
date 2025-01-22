@@ -6,7 +6,7 @@
  */
 
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type { FC, PropsWithChildren} from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useMemo } from 'react';
 
 export interface InspectorContextValue {

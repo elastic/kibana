@@ -7,11 +7,10 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type {
-  Indicator} from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
 import {
   generateMockIndicator,
-  generateMockUrlIndicator
+  generateMockUrlIndicator,
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import {

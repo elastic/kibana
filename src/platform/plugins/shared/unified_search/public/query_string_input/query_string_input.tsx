@@ -11,9 +11,7 @@ import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import type {
-  EuiIconProps,
-  PopoverAnchorPosition} from '@elastic/eui';
+import type { EuiIconProps, PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -30,12 +28,12 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { compact, debounce, isEmpty, isEqual, isFunction, partition } from 'lodash';
 import type { CoreStart, DocLinksStart, Toast } from '@kbn/core/public';
-import type { Query , Filter } from '@kbn/es-query';
+import type { Query, Filter } from '@kbn/es-query';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { getQueryLog } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { type DataView } from '@kbn/data-views-plugin/public';
-import type { PersistedLog , DataPublicPluginStart} from '@kbn/data-plugin/public';
+import type { PersistedLog, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   getFieldSubtypeNested,
   KIBANA_USER_QUERY_LANGUAGE_KEY,
@@ -57,7 +55,7 @@ import type {
 import { SuggestionsComponent } from '../typeahead';
 import { onRaf } from '../utils';
 import { FilterButtonGroup } from '../filter_bar/filter_button_group/filter_button_group';
-import type { AutocompleteService, QuerySuggestion} from '../autocomplete';
+import type { AutocompleteService, QuerySuggestion } from '../autocomplete';
 import { QuerySuggestionTypes } from '../autocomplete';
 import { getCoreStart } from '../services';
 import './query_string_input.scss';

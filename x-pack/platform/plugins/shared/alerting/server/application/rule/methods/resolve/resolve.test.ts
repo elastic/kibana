@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ConstructorOptions} from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import {
   savedObjectsClientMock,

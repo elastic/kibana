@@ -12,10 +12,10 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import type { DataViewFieldBase, TimeRange } from '@kbn/es-query';
 
-import type { AggTypesDependencies, TimeRangeBounds} from '../../..';
+import type { AggTypesDependencies, TimeRangeBounds } from '../../..';
 import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../..';
 
-import type { ExtendedBounds} from '../../expressions';
+import type { ExtendedBounds } from '../../expressions';
 import { extendedBoundsToAst, timerangeToAst } from '../../expressions';
 import { intervalOptions, autoInterval, isAutoInterval } from './_interval_options';
 import { createFilterDateHistogram } from './create_filter/date_histogram';

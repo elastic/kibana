@@ -14,10 +14,9 @@ import type {
   HasEditCapabilities,
   PublishesDataViews,
   PublishesSavedObjectId,
-  PublishingSubject} from '@kbn/presentation-publishing';
-import {
-  apiHasAppContext
+  PublishingSubject,
 } from '@kbn/presentation-publishing';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
 import type { DiscoverServices } from '../build_services';
 import type { PublishesSavedSearch } from './types';
 import { getDiscoverLocatorParams } from './utils/get_discover_locator_params';

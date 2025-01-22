@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -13,10 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiSpacer, EuiText, EuiButton, EuiLink, EuiCode, EuiButtonEmpty } from '@elastic/eui';
 
 import { parseJson, stringifyJson } from '../../../../../../lib';
-import type {
-  FieldConfig,
-  ValidationFuncArg,
-  FormHook} from '../../../../../../../shared_imports';
+import type { FieldConfig, ValidationFuncArg, FormHook } from '../../../../../../../shared_imports';
 import {
   getUseField,
   Field,

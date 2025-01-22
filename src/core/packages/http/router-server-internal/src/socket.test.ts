@@ -8,7 +8,7 @@
  */
 
 import { Socket } from 'net';
-import type { DetailedPeerCertificate} from 'tls';
+import type { DetailedPeerCertificate } from 'tls';
 import { TLSSocket } from 'tls';
 import { KibanaSocket } from './socket';
 

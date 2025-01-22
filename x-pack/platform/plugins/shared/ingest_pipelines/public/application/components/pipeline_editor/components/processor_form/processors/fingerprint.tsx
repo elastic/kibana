@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiCode } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';

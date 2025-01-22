@@ -12,9 +12,7 @@ import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  HasParentApi,
-  HasType} from '@kbn/presentation-publishing';
+import type { HasParentApi, HasType } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
@@ -22,18 +20,14 @@ import {
   apiHasUniqueId,
   apiIsOfType,
   type EmbeddableApiContext,
-  type HasUniqueId
+  type HasUniqueId,
 } from '@kbn/presentation-publishing';
-import type {
-  FrequentCompatibilityChangeAction} from '@kbn/ui-actions-plugin/public';
-import {
-  IncompatibleActionError,
-  type Action,
-} from '@kbn/ui-actions-plugin/public';
-import type { PresentationContainer} from '@kbn/presentation-containers';
+import type { FrequentCompatibilityChangeAction } from '@kbn/ui-actions-plugin/public';
+import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
+import type { PresentationContainer } from '@kbn/presentation-containers';
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import { CONTROL_GROUP_TYPE } from '../../common';
-import type { CanClearSelections} from '../types';
+import type { CanClearSelections } from '../types';
 import { isClearableControl } from '../types';
 
 import { ACTION_CLEAR_CONTROL } from './constants';

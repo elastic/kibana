@@ -9,7 +9,7 @@ import type { Observable } from 'rxjs';
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import type { LoggerFactory } from '@kbn/logging';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { DataUsageConfigType} from './config';
+import type { DataUsageConfigType } from './config';
 import { createConfig } from './config';
 import type {
   DataUsageContext,

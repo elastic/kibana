@@ -4,10 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  DropResult,
-  DragStart,
-  EuiBreadcrumb} from '@elastic/eui';
+import type { DropResult, DragStart, EuiBreadcrumb } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -29,7 +26,7 @@ import {
   EuiText,
   useEuiTheme,
   euiDragDropReorder,
-  EuiBreadcrumbs
+  EuiBreadcrumbs,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
@@ -39,11 +36,9 @@ import React, { useCallback, useEffect } from 'react';
 import type {
   StreamChild,
   ReadStreamDefinition,
-  WiredStreamConfigDefinition} from '@kbn/streams-schema';
-import {
-  isRoot,
-  isDescendantOf,
+  WiredStreamConfigDefinition,
 } from '@kbn/streams-schema';
+import { isRoot, isDescendantOf } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import type { DraggableProvided } from '@hello-pangea/dnd';

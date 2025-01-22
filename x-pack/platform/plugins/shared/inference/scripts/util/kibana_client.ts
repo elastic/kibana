@@ -6,12 +6,12 @@
  */
 
 import type { ToolingLog } from '@kbn/tooling-log';
-import type { AxiosInstance, AxiosResponse} from 'axios';
+import type { AxiosInstance, AxiosResponse } from 'axios';
 import axios, { isAxiosError } from 'axios';
 import type { IncomingMessage } from 'http';
 import { omit, pick } from 'lodash';
 import { from, map, switchMap, throwError } from 'rxjs';
-import type { UrlObject} from 'url';
+import type { UrlObject } from 'url';
 import { format, parse } from 'url';
 import { inspect } from 'util';
 import { isReadable } from 'stream';
@@ -21,7 +21,8 @@ import type {
   OutputAPI,
   ChatCompletionEvent,
   InferenceTaskErrorEvent,
-  ChatCompleteOptions} from '@kbn/inference-common';
+  ChatCompleteOptions,
+} from '@kbn/inference-common';
 import {
   InferenceTaskError,
   InferenceTaskEventType,

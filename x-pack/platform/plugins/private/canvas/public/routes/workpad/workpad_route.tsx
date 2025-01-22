@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren} from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useCallback } from 'react';
 import { Redirect, useParams } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';

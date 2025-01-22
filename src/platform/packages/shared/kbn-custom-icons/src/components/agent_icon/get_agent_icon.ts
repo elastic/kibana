@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  OpenTelemetryAgentName} from '@kbn/elastic-agent-utils';
+import type { OpenTelemetryAgentName } from '@kbn/elastic-agent-utils';
 import {
   isAndroidAgentName,
   isIosAgentName,

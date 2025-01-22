@@ -9,7 +9,7 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 
-import type { KbnClientRequester} from './kbn_client_requester';
+import type { KbnClientRequester } from './kbn_client_requester';
 import { pathWithSpace } from './kbn_client_requester';
 
 export type UiSettingValues = Record<string, string | number | boolean | string[]>;

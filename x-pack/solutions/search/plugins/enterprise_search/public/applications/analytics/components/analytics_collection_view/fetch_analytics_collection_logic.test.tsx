@@ -8,7 +8,7 @@
 import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_logic';
 
 import type { AnalyticsCollection } from '../../../../../common/types/analytics';
-import type { HttpError} from '../../../../../common/types/api';
+import type { HttpError } from '../../../../../common/types/api';
 import { Status } from '../../../../../common/types/api';
 
 import { FetchAnalyticsCollectionAPILogic } from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';

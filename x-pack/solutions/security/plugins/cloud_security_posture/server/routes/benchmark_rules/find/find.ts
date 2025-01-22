@@ -7,10 +7,9 @@
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type {
   FindCspBenchmarkRuleRequest,
-  FindCspBenchmarkRuleResponse} from '@kbn/cloud-security-posture-common/schema/rules/latest';
-import {
-  findCspBenchmarkRuleRequestSchema,
+  FindCspBenchmarkRuleResponse,
 } from '@kbn/cloud-security-posture-common/schema/rules/latest';
+import { findCspBenchmarkRuleRequestSchema } from '@kbn/cloud-security-posture-common/schema/rules/latest';
 import { findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV1 } from '@kbn/cloud-security-posture-common/schema/rules/v3';
 import type { FindCspBenchmarkRuleRequest as FindCspBenchmarkRuleRequestV1 } from '@kbn/cloud-security-posture-common/schema/rules/v3';
 import { findCspBenchmarkRuleRequestSchema as findCspBenchmarkRuleRequestSchemaV2 } from '@kbn/cloud-security-posture-common/schema/rules/v4';

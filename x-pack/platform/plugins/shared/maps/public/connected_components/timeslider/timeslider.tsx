@@ -6,11 +6,10 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { switchMap, tap } from 'rxjs';
 
-import type {
-  ControlGroupRendererApi} from '@kbn/controls-plugin/public';
+import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import {
   ControlGroupRenderer,
   type ControlGroupRuntimeState,

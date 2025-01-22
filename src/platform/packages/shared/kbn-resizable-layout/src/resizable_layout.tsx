@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement} from 'react';
+import type { ReactElement } from 'react';
 import { useState } from 'react';
 import React from 'react';
 import { round } from 'lodash';
 import { PanelsResizable } from './panels_resizable';
 import { PanelsStatic } from './panels_static';
-import type { ResizableLayoutDirection} from '../types';
+import type { ResizableLayoutDirection } from '../types';
 import { ResizableLayoutMode } from '../types';
 import { getContainerSize, pixelsToPercent } from './utils';
 

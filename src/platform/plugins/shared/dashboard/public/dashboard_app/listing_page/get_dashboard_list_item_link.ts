@@ -8,7 +8,7 @@
  */
 
 import type { QueryState } from '@kbn/data-plugin/public';
-import type { IKbnUrlStateStorage} from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 
 import { DASHBOARD_APP_ID } from '../../plugin_constants';

@@ -12,8 +12,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlyoutBody, EuiFlyoutHeader, EuiTitle } from '@elastic/eui';
 import type { SavedObjectCommon } from '@kbn/saved-objects-finder-plugin/common';
-import type {
-  SavedObjectFinderProps} from '@kbn/saved-objects-finder-plugin/public';
+import type { SavedObjectFinderProps } from '@kbn/saved-objects-finder-plugin/public';
 import {
   SavedObjectFinder,
   type SavedObjectMetaData,

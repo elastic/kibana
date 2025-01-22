@@ -8,7 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { isEmpty } from 'lodash';
 import type { ConfigKey, MonitorFields } from '../../../common/runtime_types';
-import type { ParsedVars} from './lightweight_param_formatter';
+import type { ParsedVars } from './lightweight_param_formatter';
 import { replaceVarsWithParams } from './lightweight_param_formatter';
 import variableParser from './variable_parser';
 

@@ -8,7 +8,7 @@
  */
 
 import * as Rx from 'rxjs';
-import type { ImageMetadataFactory} from '@kbn/shared-ux-file-util';
+import type { ImageMetadataFactory } from '@kbn/shared-ux-file-util';
 import { getImageMetadata, isImage } from '@kbn/shared-ux-file-util';
 import type {
   FileKindBrowser,

@@ -28,7 +28,7 @@ import {
   getTimeOptions,
   parseAggregationResults,
 } from '@kbn/triggers-actions-ui-plugin/public/common';
-import type { EsQueryRuleParams, EsQueryRuleMetaData} from '../types';
+import type { EsQueryRuleParams, EsQueryRuleMetaData } from '../types';
 import { SearchType } from '../types';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';
 import { useTriggerUiActionServices } from '../util';

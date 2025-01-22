@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { KueryNode} from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type { SavedObject, SavedObjectsFindOptionsReference } from '@kbn/core/server';
 import { buildKueryNodeFilter } from '../../../../rules_client/common';

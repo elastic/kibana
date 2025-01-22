@@ -7,9 +7,7 @@
 import { errors } from '@elastic/elasticsearch';
 import Boom from '@hapi/boom';
 import type { CoreSetup, Logger, RouteRegistrar } from '@kbn/core/server';
-import type {
-  IoTsParamsObject,
-  ServerRouteRepository} from '@kbn/server-route-repository';
+import type { IoTsParamsObject, ServerRouteRepository } from '@kbn/server-route-repository';
 import {
   decodeRequestParams,
   stripNullishRequestParameters,

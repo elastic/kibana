@@ -11,11 +11,9 @@ import type {
   Connector,
   ConnectorConfiguration,
   ConnectorDocument,
-  IngestPipelineParams} from '../types/connectors';
-import {
-  ConnectorStatus,
-  FilteringValidationState
+  IngestPipelineParams,
 } from '../types/connectors';
+import { ConnectorStatus, FilteringValidationState } from '../types/connectors';
 
 export function createConnectorDocument({
   configuration,

@@ -11,11 +11,10 @@ import type {
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/public';
-import {
-  DEFAULT_APP_CATEGORIES
+  PluginInitializerContext,
 } from '@kbn/core/public';
-import type { DefaultClientOptions} from '@kbn/server-route-repository-client';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { DefaultClientOptions } from '@kbn/server-route-repository-client';
 import { createRepositoryClient } from '@kbn/server-route-repository-client';
 import { lazy } from 'react';
 import { BehaviorSubject, firstValueFrom } from 'rxjs';

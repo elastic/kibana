@@ -8,7 +8,7 @@
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeResolveWorkpadRoute } from './resolve';
-import type { RequestHandler} from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { workpadWithGroupAsElement } from '../../../__fixtures__/workpads';

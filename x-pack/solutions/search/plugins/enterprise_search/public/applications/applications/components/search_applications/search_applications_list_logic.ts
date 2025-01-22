@@ -19,17 +19,11 @@ import type {
 
 import type { Actions } from '../../../shared/api_logic/create_api_logic';
 
-import type {
-  DeleteSearchApplicationApiLogicActions} from '../../api/search_applications/delete_search_application_api_logic';
-import {
-  DeleteSearchApplicationAPILogic
-} from '../../api/search_applications/delete_search_application_api_logic';
+import type { DeleteSearchApplicationApiLogicActions } from '../../api/search_applications/delete_search_application_api_logic';
+import { DeleteSearchApplicationAPILogic } from '../../api/search_applications/delete_search_application_api_logic';
 
-import type {
-  SearchApplicationsListAPIArguments} from '../../api/search_applications/fetch_search_applications_api_logic';
-import {
-  FetchSearchApplicationsAPILogic,
-} from '../../api/search_applications/fetch_search_applications_api_logic';
+import type { SearchApplicationsListAPIArguments } from '../../api/search_applications/fetch_search_applications_api_logic';
+import { FetchSearchApplicationsAPILogic } from '../../api/search_applications/fetch_search_applications_api_logic';
 
 import { DEFAULT_META, updateMetaPageIndex, updateMetaTotalState } from './types';
 

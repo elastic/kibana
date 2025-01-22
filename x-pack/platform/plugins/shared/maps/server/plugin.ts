@@ -11,10 +11,9 @@ import type {
   CoreStart,
   Logger,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/server';
-import {
-  DEFAULT_APP_CATEGORIES,
+  PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { EMSSettings } from '@kbn/maps-ems-plugin/server';

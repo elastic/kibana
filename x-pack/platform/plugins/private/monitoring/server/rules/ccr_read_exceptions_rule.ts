@@ -10,7 +10,11 @@ import type { ElasticsearchClient } from '@kbn/core/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
-import type { SanitizedRule, RawAlertInstance, AlertInstanceContext } from '@kbn/alerting-plugin/common';
+import type {
+  SanitizedRule,
+  RawAlertInstance,
+  AlertInstanceContext,
+} from '@kbn/alerting-plugin/common';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import { BaseRule } from './base_rule';
 import type {

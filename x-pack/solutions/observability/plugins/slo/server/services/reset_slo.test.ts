@@ -6,13 +6,11 @@
  */
 
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  ElasticsearchClientMock,
-  ScopedClusterClientMock} from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServiceMock,
-  loggingSystemMock
+  loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { SLO_MODEL_VERSION } from '../../common/constants';

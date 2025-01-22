@@ -14,11 +14,8 @@ import type { FilterCompareOptions } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
-import type {
-  UnifiedHistogramVisContext} from '@kbn/unified-histogram-plugin/public';
-import {
-  canImportVisContext
-} from '@kbn/unified-histogram-plugin/public';
+import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import { canImportVisContext } from '@kbn/unified-histogram-plugin/public';
 import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isEqual, isFunction } from 'lodash';
 import { VIEW_MODE } from '../../../../common/constants';
@@ -26,7 +23,7 @@ import { restoreStateFromSavedSearch } from '../../../services/saved_searches/re
 import { updateSavedSearch } from './utils/update_saved_search';
 import { addLog } from '../../../utils/add_log';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import type { DiscoverAppState} from './discover_app_state_container';
+import type { DiscoverAppState } from './discover_app_state_container';
 import { isEqualFilters } from './discover_app_state_container';
 import type { DiscoverServices } from '../../../build_services';
 import { getStateDefaults } from './utils/get_state_defaults';

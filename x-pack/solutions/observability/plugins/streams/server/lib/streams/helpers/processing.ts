@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ProcessingDefinition} from '@kbn/streams-schema';
+import type { ProcessingDefinition } from '@kbn/streams-schema';
 import { getProcessorType } from '@kbn/streams-schema';
 import { get } from 'lodash';
 import type { IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';

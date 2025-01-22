@@ -11,10 +11,9 @@ import { i18n } from '@kbn/i18n';
 import type { Validation } from '../../../../../../../common/types';
 import type {
   ThrottlingConfig,
-  ThrottlingConfigValue} from '../../../../../../../common/runtime_types';
-import {
-  ConfigKey
+  ThrottlingConfigValue,
 } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
 import { OptionalLabel } from '../optional_label';
 
 export const ThrottlingLatencyField = ({

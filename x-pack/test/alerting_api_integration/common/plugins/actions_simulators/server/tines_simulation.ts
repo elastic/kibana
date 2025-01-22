@@ -13,7 +13,7 @@ import type {
   IKibanaResponse,
   IRouter,
 } from '@kbn/core/server';
-import type { ProxyArgs} from './simulator';
+import type { ProxyArgs } from './simulator';
 import { Simulator } from './simulator';
 
 export const tinesStory1 = { name: 'story 1', id: 1, team: 'team', published: true };

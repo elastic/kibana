@@ -10,7 +10,10 @@
 import type { Filter } from '@kbn/es-query';
 import expect from '@kbn/expect';
 
-import type { FilterManager as QueryFilterManager, DataViewsContract } from '@kbn/data-plugin/public';
+import type {
+  FilterManager as QueryFilterManager,
+  DataViewsContract,
+} from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { PhraseFilterManager } from './phrase_filter_manager';
 

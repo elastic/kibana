@@ -17,7 +17,7 @@ import type { Query } from '@elastic/eui';
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer } from '@elastic/eui';
 import { SnapshotDeleteProvider } from '../../../../components';
 import type { SnapshotDetails } from '../../../../../../common/types';
-import type { SnapshotListParams} from '../../../../lib';
+import type { SnapshotListParams } from '../../../../lib';
 import { getQueryFromListParams, getListParams } from '../../../../lib';
 
 const SEARCH_DEBOUNCE_VALUE_MS = 200;

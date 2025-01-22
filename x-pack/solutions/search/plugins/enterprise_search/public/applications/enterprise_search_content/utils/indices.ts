@@ -12,7 +12,8 @@ import { i18n } from '@kbn/i18n';
 import type {
   ConnectorViewIndex,
   ConnectorIndex,
-  ElasticsearchIndex} from '@kbn/search-connectors';
+  ElasticsearchIndex,
+} from '@kbn/search-connectors';
 import {
   SyncStatus,
   ConnectorStatus,
@@ -21,7 +22,10 @@ import {
 } from '@kbn/search-connectors';
 
 import { ENTERPRISE_SEARCH_CONNECTOR_CRAWLER_SERVICE_TYPE } from '../../../../common/constants';
-import type { CrawlerIndex, ElasticsearchIndexWithIngestion } from '../../../../common/types/indices';
+import type {
+  CrawlerIndex,
+  ElasticsearchIndexWithIngestion,
+} from '../../../../common/types/indices';
 
 import type { ApiViewIndex, CrawlerViewIndex, ElasticsearchViewIndex } from '../types';
 

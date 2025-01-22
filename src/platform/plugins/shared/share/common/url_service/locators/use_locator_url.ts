@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DependencyList} from 'react';
+import type { DependencyList } from 'react';
 import { useEffect, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { SerializableRecord } from '@kbn/utility-types';

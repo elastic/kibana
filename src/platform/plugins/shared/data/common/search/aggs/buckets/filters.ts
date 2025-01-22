@@ -12,7 +12,7 @@ import { size, transform, cloneDeep } from 'lodash';
 import type { Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 
-import type { QueryFilter} from '../../expressions';
+import type { QueryFilter } from '../../expressions';
 import { queryFilterToAst } from '../../expressions';
 import { createFilterFilters } from './create_filter/filters';
 import { BucketAggType } from './bucket_agg_type';

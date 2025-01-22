@@ -16,7 +16,8 @@ import type {
   TCPAdvancedFields,
   TCPSimpleFields,
   ThrottlingConfig,
-  TLSFields} from '../runtime_types/monitor_management';
+  TLSFields,
+} from '../runtime_types/monitor_management';
 import {
   CodeEditorMode,
   MonitorTypeEnum,

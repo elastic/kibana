@@ -9,11 +9,9 @@
 
 import type {
   TestServerlessESUtils,
-  TestServerlessKibanaUtils} from '@kbn/core-test-helpers-kbn-server';
-import {
-  request,
-  createTestServerlessInstances,
+  TestServerlessKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { request, createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
 import { getFips } from 'crypto';
 
 describe('Basic smoke test', function () {

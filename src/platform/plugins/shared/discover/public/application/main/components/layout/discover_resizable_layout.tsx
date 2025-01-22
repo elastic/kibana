@@ -13,7 +13,7 @@ import {
   ResizableLayoutDirection,
   ResizableLayoutMode,
 } from '@kbn/resizable-layout';
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import useLocalStorage from 'react-use/lib/useLocalStorage';

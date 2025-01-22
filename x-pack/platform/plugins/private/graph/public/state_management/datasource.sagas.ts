@@ -13,13 +13,8 @@ import type { GraphStoreDependencies } from './store';
 import { loadFields } from './fields';
 import { mapFields } from '../services/persistence';
 import { settingsSelector } from './advanced_settings';
-import type {
-  IndexpatternDatasource} from './datasource';
-import {
-  datasourceLoaded,
-  setDatasource,
-  requestDatasource,
-} from './datasource';
+import type { IndexpatternDatasource } from './datasource';
+import { datasourceLoaded, setDatasource, requestDatasource } from './datasource';
 
 /**
  * Saga loading field information when the datasource is switched. This will overwrite current settings

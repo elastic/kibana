@@ -11,7 +11,7 @@ import { validateQuery, FilterQueryInput } from '@kbn/visualization-ui-component
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { FilterQueryInputProps } from '@kbn/visualization-ui-components/components/query_input/filter_query_input';
 import { LENS_APP_NAME } from '../../../../common/constants';
-import type { GenericIndexPatternColumn} from '../operations';
+import type { GenericIndexPatternColumn } from '../operations';
 import { operationDefinitionMap } from '../operations';
 import type { FormBasedLayer } from '../types';
 import type { IndexPattern } from '../../../types';

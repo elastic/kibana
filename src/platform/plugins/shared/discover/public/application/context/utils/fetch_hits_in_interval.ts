@@ -9,7 +9,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { lastValueFrom } from 'rxjs';
-import type { ISearchSource, EsQuerySortValue} from '@kbn/data-plugin/public';
+import type { ISearchSource, EsQuerySortValue } from '@kbn/data-plugin/public';
 import { SortDirection } from '@kbn/data-plugin/public';
 import { buildDataTableRecordList } from '@kbn/discover-utils';
 import type { DataTableRecord } from '@kbn/discover-utils/types';

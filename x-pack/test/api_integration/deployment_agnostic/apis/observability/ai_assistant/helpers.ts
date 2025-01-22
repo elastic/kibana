@@ -9,10 +9,9 @@ import type { Readable } from 'stream';
 import type {
   ConversationCreateEvent,
   ConversationUpdateEvent,
-  StreamingChatResponseEvent} from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import {
-  StreamingChatResponseEventType,
+  StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import { StreamingChatResponseEventType } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 
 export function decodeEvents(body: Readable | string) {
   return String(body)

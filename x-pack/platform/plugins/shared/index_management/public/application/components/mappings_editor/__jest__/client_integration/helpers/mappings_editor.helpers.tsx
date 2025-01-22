@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
-import type { TestBed} from '@kbn/test-jest-helpers';
+import type { TestBed } from '@kbn/test-jest-helpers';
 import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 
 // This import needs to come first as it sets the jest.mock calls

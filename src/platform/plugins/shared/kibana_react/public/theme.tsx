@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import type {
-  KibanaThemeProviderProps as KbnThemeProviderProps} from '@kbn/react-kibana-context-theme';
+import type { KibanaThemeProviderProps as KbnThemeProviderProps } from '@kbn/react-kibana-context-theme';
 import {
   KibanaThemeProvider as KbnThemeProvider,
   wrapWithTheme as kbnWrapWithTheme,

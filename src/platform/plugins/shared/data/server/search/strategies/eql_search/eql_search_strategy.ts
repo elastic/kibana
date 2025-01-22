@@ -15,10 +15,9 @@ import type { SearchConfigSchema } from '../../../config';
 import type {
   EqlSearchStrategyRequest,
   EqlSearchStrategyResponse,
-  IAsyncSearchOptions} from '../../../../common';
-import {
-  pollSearch,
+  IAsyncSearchOptions,
 } from '../../../../common';
+import { pollSearch } from '../../../../common';
 import { toEqlKibanaSearchResponse } from './response_utils';
 import type { EqlSearchResponse } from './types';
 import type { ISearchStrategy } from '../../types';

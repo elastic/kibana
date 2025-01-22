@@ -10,10 +10,11 @@ import { PassThrough } from 'stream';
 import type {
   BufferFlushEvent,
   ChatCompletionErrorEvent,
-  StreamingChatResponseEventWithoutError} from '../../../common/conversation_complete';
+  StreamingChatResponseEventWithoutError,
+} from '../../../common/conversation_complete';
 import {
   isChatCompletionError,
-  StreamingChatResponseEventType
+  StreamingChatResponseEventType,
 } from '../../../common/conversation_complete';
 
 export function observableIntoStream(

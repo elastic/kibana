@@ -15,7 +15,8 @@ import type {
   ConversationsBulkCrudActionResults,
   BulkCrudActionSummary,
   PerformBulkActionResponse,
-  ConversationResponse} from '@kbn/elastic-assistant-common';
+  ConversationResponse,
+} from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CONVERSATIONS_URL_BULK_ACTION,
   PerformBulkActionRequestBody,
@@ -31,11 +32,8 @@ import {
   transformESToConversations,
   transformESSearchToConversations,
 } from '../../ai_assistant_data_clients/conversations/transforms';
-import type {
-  UpdateConversationSchema} from '../../ai_assistant_data_clients/conversations/update_conversation';
-import {
-  transformToUpdateScheme,
-} from '../../ai_assistant_data_clients/conversations/update_conversation';
+import type { UpdateConversationSchema } from '../../ai_assistant_data_clients/conversations/update_conversation';
+import { transformToUpdateScheme } from '../../ai_assistant_data_clients/conversations/update_conversation';
 import type { EsConversationSchema } from '../../ai_assistant_data_clients/conversations/types';
 import { performChecks } from '../helpers';
 

@@ -8,7 +8,7 @@
  */
 
 import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import type { MapConfig} from './config';
+import type { MapConfig } from './config';
 import { mapConfigSchema } from './config';
 export type { EMSSettings } from '../common';
 export type { MapsEmsPluginServerSetup } from './plugin';

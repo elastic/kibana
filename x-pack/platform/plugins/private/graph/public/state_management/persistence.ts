@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { takeLatest, call, put, select, cps } from 'redux-saga/effects';
 import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/public';
 import type { GraphWorkspaceSavedObject, Workspace } from '../types';
-import type { GraphStoreDependencies, GraphState} from '.';
+import type { GraphStoreDependencies, GraphState } from '.';
 import { submitSearch } from '.';
 import { datasourceSelector } from './datasource';
 import type { IndexpatternDatasource } from './datasource';

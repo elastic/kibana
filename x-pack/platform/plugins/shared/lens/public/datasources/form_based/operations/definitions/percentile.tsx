@@ -12,11 +12,9 @@ import { i18n } from '@kbn/i18n';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import type {
   ExpressionAstExpressionBuilder,
-  ExpressionAstFunctionBuilder} from '@kbn/expressions-plugin/public';
-import {
-  buildExpression,
-  buildExpressionFunction
+  ExpressionAstFunctionBuilder,
 } from '@kbn/expressions-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { PERCENTILE_ID, PERCENTILE_NAME } from '@kbn/lens-formula-docs';
 import type { OperationDefinition } from '.';

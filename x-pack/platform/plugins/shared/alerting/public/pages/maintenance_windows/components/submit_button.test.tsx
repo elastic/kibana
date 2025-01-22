@@ -13,7 +13,7 @@ import { useForm, Form } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import { SubmitButton } from './submit_button';
 import type { FormProps } from './schema';
 import { schema } from './schema';
-import type { AppMockRenderer} from '../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 
 describe('SubmitButton', () => {

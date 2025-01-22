@@ -6,8 +6,7 @@
  */
 
 import React, { memo } from 'react';
-import type {
-  IconType} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import {
   EuiBadge,
   EuiTitle,

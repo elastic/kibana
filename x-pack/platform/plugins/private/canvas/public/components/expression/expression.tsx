@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 import {

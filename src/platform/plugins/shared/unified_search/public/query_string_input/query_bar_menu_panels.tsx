@@ -12,17 +12,10 @@ import React, { useState, useRef, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import type {
   EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
-import {
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiButton
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
-import type {
-  Filter,
-  Query,
-  TimeRange} from '@kbn/es-query';
+import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButton } from '@elastic/eui';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import {
   enableFilter,
   disableFilter,

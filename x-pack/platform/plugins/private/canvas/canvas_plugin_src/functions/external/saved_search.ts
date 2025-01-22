@@ -10,12 +10,8 @@ import type { SearchEmbeddableSerializedState } from '@kbn/discover-plugin/publi
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { Filter } from '@kbn/es-query';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type {
-  EmbeddableExpression} from '../../expression_types';
-import {
-  EmbeddableTypes,
-  EmbeddableExpressionType
-} from '../../expression_types';
+import type { EmbeddableExpression } from '../../expression_types';
+import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';
 
 import { buildEmbeddableFilters } from '../../../common/lib/build_embeddable_filters';
 import type { ExpressionValueFilter } from '../../../types';

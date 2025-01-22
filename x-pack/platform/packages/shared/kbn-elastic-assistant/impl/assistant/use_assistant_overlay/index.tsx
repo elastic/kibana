@@ -15,7 +15,7 @@ import { useConversation } from '../use_conversation';
 import { getDefaultConnector, mergeBaseWithPersistedConversations } from '../helpers';
 import { getGenAiConfig } from '../../connectorland/helpers';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
-import type { FetchConversationsResponse} from '../api';
+import type { FetchConversationsResponse } from '../api';
 import { useFetchCurrentUserConversations } from '../api';
 import type { Conversation } from '../../assistant_context/types';
 

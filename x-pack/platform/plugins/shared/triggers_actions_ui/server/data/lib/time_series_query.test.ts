@@ -8,7 +8,7 @@
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { Logger } from '@kbn/core/server';
-import type { TimeSeriesQuery} from './time_series_query';
+import type { TimeSeriesQuery } from './time_series_query';
 import { timeSeriesQuery, getResultFromEs } from './time_series_query';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 

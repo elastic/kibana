@@ -12,7 +12,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { UseRequestConfig} from '@kbn/es-ui-shared-plugin/public';
+import type { UseRequestConfig } from '@kbn/es-ui-shared-plugin/public';
 import { useRequest as _useRequest } from '@kbn/es-ui-shared-plugin/public';
 
 interface GenericObject {

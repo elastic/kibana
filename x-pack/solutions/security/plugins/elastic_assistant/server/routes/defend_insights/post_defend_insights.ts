@@ -10,13 +10,12 @@ import moment from 'moment/moment';
 import type { IKibanaResponse } from '@kbn/core/server';
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
-import type {
-  Replacements} from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   DEFEND_INSIGHTS,
   DefendInsightsPostRequestBody,
   DefendInsightsPostResponse,
-  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION
+  ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
 } from '@kbn/elastic-assistant-common';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { IRouter, Logger } from '@kbn/core/server';

@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  DecodedStackTraceResponse,
-  StackTraceResponse} from './stack_traces';
-import {
-  decodeStackTraceResponse,
-  makeFrameID
-} from './stack_traces';
+import type { DecodedStackTraceResponse, StackTraceResponse } from './stack_traces';
+import { decodeStackTraceResponse, makeFrameID } from './stack_traces';
 
 describe('Stack trace response operations', () => {
   test('empty stack trace response', () => {

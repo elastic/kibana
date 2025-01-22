@@ -12,7 +12,7 @@ import { getSLOSummaryTransformId, getSLOTransformId } from '@kbn/slo-plugin/com
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { DEFAULT_SLO } from './fixtures/slo';
 import { DATA_FORGE_CONFIG } from './helpers/dataforge';
-import type { TransformHelper} from './helpers/transform';
+import type { TransformHelper } from './helpers/transform';
 import { createTransformHelper } from './helpers/transform';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {

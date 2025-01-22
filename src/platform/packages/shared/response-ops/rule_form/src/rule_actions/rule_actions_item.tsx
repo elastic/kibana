@@ -9,8 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React, { Suspense, useCallback, useMemo, useState } from 'react';
-import type {
-  RecursivePartial} from '@elastic/eui';
+import type { RecursivePartial } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -36,8 +35,7 @@ import type {
   RuleActionParam,
   RuleActionParams,
 } from '@kbn/alerting-types';
-import type {
-  ActionConnector} from '@kbn/alerts-ui-shared';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import {
   checkActionFormActionTypeEnabled,
   getAvailableActionVariables,

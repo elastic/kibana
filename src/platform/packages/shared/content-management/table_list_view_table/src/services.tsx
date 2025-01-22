@@ -15,11 +15,8 @@ import {
   ContentEditorKibanaProvider,
   type SavedObjectsReference,
 } from '@kbn/content-management-content-editor';
-import type {
-  ContentInsightsClientPublic} from '@kbn/content-management-content-insights-public';
-import {
-  ContentInsightsProvider,
-} from '@kbn/content-management-content-insights-public';
+import type { ContentInsightsClientPublic } from '@kbn/content-management-content-insights-public';
+import { ContentInsightsProvider } from '@kbn/content-management-content-insights-public';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { MountPoint, OverlayRef } from '@kbn/core-mount-utils-browser';
@@ -30,11 +27,8 @@ import type { FormattedRelative } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { RedirectAppLinksKibanaProvider } from '@kbn/shared-ux-link-redirect-app';
 import { UserProfilesKibanaProvider } from '@kbn/content-management-user-profiles';
-import type {
-  FavoritesClientPublic} from '@kbn/content-management-favorites-public';
-import {
-  FavoritesContextProvider,
-} from '@kbn/content-management-favorites-public';
+import type { FavoritesClientPublic } from '@kbn/content-management-favorites-public';
+import { FavoritesContextProvider } from '@kbn/content-management-favorites-public';
 
 import { TAG_MANAGEMENT_APP_URL } from './constants';
 import type { Tag } from './types';

@@ -6,7 +6,10 @@
  */
 
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import type { UpdateInvestigationParams, UpdateInvestigationResponse } from '@kbn/investigation-shared';
+import type {
+  UpdateInvestigationParams,
+  UpdateInvestigationResponse,
+} from '@kbn/investigation-shared';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';

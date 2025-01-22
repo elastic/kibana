@@ -8,8 +8,7 @@
  */
 
 import { getESQLQueryColumns } from '@kbn/esql-utils';
-import type {
-  LensDataset} from '@kbn/lens-embeddable-utils/config_builder';
+import type { LensDataset } from '@kbn/lens-embeddable-utils/config_builder';
 import {
   LensConfigBuilder,
   type LensConfig,

@@ -22,11 +22,8 @@ import type { LogCategory } from '../../types';
 import type { ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import { LogCategoriesErrorContent } from './log_categories_error_content';
 import { LogCategoriesLoadingContent } from './log_categories_loading_content';
-import type {
-  LogCategoriesResultContentDependencies} from './log_categories_result_content';
-import {
-  LogCategoriesResultContent
-} from './log_categories_result_content';
+import type { LogCategoriesResultContentDependencies } from './log_categories_result_content';
+import { LogCategoriesResultContent } from './log_categories_result_content';
 
 export interface LogCategoriesProps {
   dependencies: LogCategoriesDependencies;

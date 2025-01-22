@@ -11,7 +11,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 import { mount, shallow } from 'enzyme';
-import type { EuiComboBoxProps} from '@elastic/eui';
+import type { EuiComboBoxProps } from '@elastic/eui';
 import { EuiComboBox } from '@elastic/eui';
 
 import type { IAggConfig, AggParam } from '@kbn/data-plugin/public';

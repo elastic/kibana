@@ -8,11 +8,9 @@
 import type {
   SendRequestConfig,
   UseRequestConfig,
-  Error as CustomError} from '../../../shared_imports';
-import {
-  sendRequest as _sendRequest,
-  useRequest as _useRequest
+  Error as CustomError,
 } from '../../../shared_imports';
+import { sendRequest as _sendRequest, useRequest as _useRequest } from '../../../shared_imports';
 
 import { httpService } from '.';
 

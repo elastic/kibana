@@ -26,7 +26,8 @@ import { SearchResponseWarningsCallout } from '@kbn/search-response-warnings';
 import type {
   DataGridDensity,
   UnifiedDataTableProps,
-  UseColumnsProps} from '@kbn/unified-data-table';
+  UseColumnsProps,
+} from '@kbn/unified-data-table';
 import {
   DataLoadingState,
   useColumns,
@@ -68,8 +69,7 @@ import { onResizeGridColumn } from '../../../../utils/on_resize_grid_column';
 import { useContextualGridCustomisations } from '../../hooks/grid_customisations';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { useAdditionalFieldGroups } from '../../hooks/sidebar/use_additional_field_groups';
-import type {
-  CellRenderersExtensionParams} from '../../../../context_awareness';
+import type { CellRenderersExtensionParams } from '../../../../context_awareness';
 import {
   DISCOVER_CELL_ACTIONS_TRIGGER,
   useAdditionalCellActions,

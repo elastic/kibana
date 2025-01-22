@@ -6,8 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import type {
-  IconType} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import {
   EuiButton,
   EuiPopover,
@@ -25,7 +24,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import type { AddLayerFunction, VisualizationLayerDescription } from '../../types';
 import { LoadAnnotationLibraryFlyout } from './load_annotation_library_flyout';
 import type { ExtraAppendLayerArg } from './visualization';
-import type { SeriesType, XYState} from './types';
+import type { SeriesType, XYState } from './types';
 import { visualizationTypes } from './types';
 import { isHorizontalChart, isHorizontalSeries, isPercentageSeries } from './state_helpers';
 import { getDataLayers } from './visualization_helpers';

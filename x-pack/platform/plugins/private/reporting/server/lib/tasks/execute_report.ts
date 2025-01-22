@@ -14,8 +14,7 @@ import { setTimeout } from 'timers/promises';
 
 import type { UpdateResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger } from '@kbn/core/server';
-import type {
-  ReportingError} from '@kbn/reporting-common';
+import type { ReportingError } from '@kbn/reporting-common';
 import {
   CancellationToken,
   KibanaShuttingDownError,
@@ -39,14 +38,8 @@ import type {
 import { throwRetryableError } from '@kbn/task-manager-plugin/server';
 
 import type { ExportTypesRegistry } from '@kbn/reporting-server/export_types_registry';
-import type {
-  ReportTaskParams,
-  ReportingTask} from '.';
-import {
-  REPORTING_EXECUTE_TYPE,
-  ReportingTaskStatus,
-  TIME_BETWEEN_ATTEMPTS,
-} from '.';
+import type { ReportTaskParams, ReportingTask } from '.';
+import { REPORTING_EXECUTE_TYPE, ReportingTaskStatus, TIME_BETWEEN_ATTEMPTS } from '.';
 import { getContentStream } from '..';
 import type { ReportingCore } from '../..';
 import {

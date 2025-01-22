@@ -7,7 +7,7 @@
 
 import React, { useState } from 'react';
 
-import type { EuiTabbedContentTab} from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import { EuiSpacer, EuiTabbedContent, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import { DetailPanelAlertTab } from '.';
 import { mockAlerts } from '../../../common/mocks/constants/session_view_process.mock';

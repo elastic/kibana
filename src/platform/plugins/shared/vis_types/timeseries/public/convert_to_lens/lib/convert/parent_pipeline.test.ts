@@ -10,17 +10,15 @@
 import { createSeries } from '../__mocks__';
 import type { Metric, MetricType } from '../../../../common/types';
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
-import type {
-  MetricAggregationColumn,
-  ParentPipelineAggColumn} from './parent_pipeline';
+import type { MetricAggregationColumn, ParentPipelineAggColumn } from './parent_pipeline';
 import {
   computeParentPipelineColumns,
   convertMetricAggregationColumnWithoutSpecialParams,
   convertMetricAggregationToColumn,
   convertParentPipelineAggToColumns,
-  createParentPipelineAggregationColumn
+  createParentPipelineAggregationColumn,
 } from './parent_pipeline';
-import type { SupportedMetric} from '../metrics';
+import type { SupportedMetric } from '../metrics';
 import { SUPPORTED_METRICS } from '../metrics';
 import type { ColumnWithMeta, FormulaColumn } from './types';
 import { TSVB_METRIC_TYPES } from '../../../../common/enums';

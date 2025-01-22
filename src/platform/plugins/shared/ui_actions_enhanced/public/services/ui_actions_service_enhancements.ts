@@ -18,10 +18,9 @@ import type {
   ActionFactoryDefinition,
   BaseActionConfig,
   BaseActionFactoryContext,
-  SerializedEvent} from '../dynamic_actions';
-import {
-  ActionFactory
+  SerializedEvent,
 } from '../dynamic_actions';
+import { ActionFactory } from '../dynamic_actions';
 import type { ActionFactoryRegistry } from '../types';
 
 import type { DynamicActionsState } from '../../common/types';

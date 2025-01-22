@@ -10,12 +10,8 @@
 import sinon from 'sinon';
 
 import type { HttpSetup, HttpFetchOptions } from '@kbn/core/public';
-import type {
-  SendRequestConfig,
-  SendRequestResponse} from './send_request';
-import {
-  sendRequest as originalSendRequest,
-} from './send_request';
+import type { SendRequestConfig, SendRequestResponse } from './send_request';
+import { sendRequest as originalSendRequest } from './send_request';
 
 export interface SendRequestHelpers {
   getSendRequestSpy: () => sinon.SinonStub;

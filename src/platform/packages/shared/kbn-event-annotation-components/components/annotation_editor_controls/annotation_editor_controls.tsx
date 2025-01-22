@@ -11,8 +11,7 @@ import './index.scss';
 import { isFieldLensCompatible } from '@kbn/visualization-ui-components';
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiSwitch,
@@ -30,8 +29,7 @@ import {
   FieldPicker,
   type QueryInputServices,
 } from '@kbn/visualization-ui-components';
-import type { FieldOptionValue ,
-  FieldOption} from '@kbn/visualization-ui-components';
+import type { FieldOptionValue, FieldOption } from '@kbn/visualization-ui-components';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
 import moment from 'moment';

@@ -10,10 +10,11 @@ import { v4 as uuidv4 } from 'uuid';
 import type {
   Case,
   ExternalReferenceAttachmentPayload,
-  PersistableStateAttachmentPayload} from '@kbn/cases-plugin/common/types/domain';
+  PersistableStateAttachmentPayload,
+} from '@kbn/cases-plugin/common/types/domain';
 import {
   ExternalReferenceStorageType,
-  AttachmentType
+  AttachmentType,
 } from '@kbn/cases-plugin/common/types/domain';
 import { expect } from 'expect';
 import type { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';

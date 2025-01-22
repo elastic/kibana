@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import type {
-  StreamsSupertestRepositoryClient} from './helpers/repository_client';
-import {
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 import {
   disableStreams,
   enableStreams,

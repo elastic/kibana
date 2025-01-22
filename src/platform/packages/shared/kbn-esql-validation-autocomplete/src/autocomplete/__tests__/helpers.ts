@@ -24,10 +24,9 @@ import type {
   FieldType,
   FunctionParameterType,
   FunctionReturnType,
-  SupportedDataType} from '../../definitions/types';
-import {
-  fieldTypes
+  SupportedDataType,
 } from '../../definitions/types';
+import { fieldTypes } from '../../definitions/types';
 import { joinIndices } from '../../__tests__/helpers';
 
 export interface Integration {

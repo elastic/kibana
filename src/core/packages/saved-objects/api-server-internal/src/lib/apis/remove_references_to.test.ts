@@ -20,7 +20,7 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
-import type { ApiExecutionContextMock} from '../../mocks';
+import type { ApiExecutionContextMock } from '../../mocks';
 import { apiContextMock, kibanaMigratorMock } from '../../mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 

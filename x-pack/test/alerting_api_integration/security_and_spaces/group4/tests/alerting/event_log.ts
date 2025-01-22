@@ -7,11 +7,8 @@
 
 import expect from '@kbn/expect';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
-import type {
-  SavedObjectDescriptor} from '@kbn/encrypted-saved-objects-plugin/server/crypto';
-import {
-  descriptorToArray
-} from '@kbn/encrypted-saved-objects-plugin/server/crypto';
+import type { SavedObjectDescriptor } from '@kbn/encrypted-saved-objects-plugin/server/crypto';
+import { descriptorToArray } from '@kbn/encrypted-saved-objects-plugin/server/crypto';
 import { Spaces } from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover, getEventLog } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';

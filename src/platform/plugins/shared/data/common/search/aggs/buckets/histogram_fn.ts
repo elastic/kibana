@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 import type { Assign } from '@kbn/utility-types';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { ExtendedBoundsOutput } from '../../expressions';
-import type { AggExpressionType, AggExpressionFunctionArgs} from '..';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
 import { BUCKET_TYPES } from '..';
 
 export const aggHistogramFnName = 'aggHistogram';

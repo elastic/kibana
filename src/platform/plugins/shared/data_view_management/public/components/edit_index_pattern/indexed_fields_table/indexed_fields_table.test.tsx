@@ -11,7 +11,7 @@ import React from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { DataView} from '@kbn/data-views-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import { DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { IndexedFieldsTable } from './indexed_fields_table';
 import { getFieldInfo } from '../../utils';

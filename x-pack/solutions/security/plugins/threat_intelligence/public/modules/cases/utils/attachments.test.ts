@@ -8,12 +8,8 @@
 import type { CaseAttachmentsWithoutOwner } from '@kbn/cases-plugin/public';
 import type { Indicator } from '../../../../common/types/indicator';
 import { generateMockFileIndicator } from '../../../../common/types/indicator';
-import type {
-  AttachmentMetadata} from './attachments';
-import {
-  generateAttachmentsMetadata,
-  generateAttachmentsWithoutOwner,
-} from './attachments';
+import type { AttachmentMetadata } from './attachments';
+import { generateAttachmentsMetadata, generateAttachmentsWithoutOwner } from './attachments';
 
 describe('generateAttachmentsWithoutOwner', () => {
   it('should return empty array if external reference id is empty', () => {

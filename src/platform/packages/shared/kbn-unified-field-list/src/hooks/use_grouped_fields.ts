@@ -14,15 +14,13 @@ import { type CoreStart } from '@kbn/core-lifecycle-browser';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { type DataViewsContract } from '@kbn/data-views-plugin/public';
 import { type UseNewFieldsParams, useNewFields } from './use_new_fields';
-import type {
-  FieldsGroupNames,
-  AdditionalFieldGroups} from '../types';
+import type { FieldsGroupNames, AdditionalFieldGroups } from '../types';
 import {
   type FieldListGroups,
   type FieldsGroup,
   type FieldListItem,
   type OverrideFieldGroupDetails,
-  ExistenceFetchStatus
+  ExistenceFetchStatus,
 } from '../types';
 import { useExistingFieldsReader } from './use_existing_fields';
 import {

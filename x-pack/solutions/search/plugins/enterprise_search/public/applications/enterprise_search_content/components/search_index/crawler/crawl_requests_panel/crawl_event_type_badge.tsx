@@ -11,7 +11,7 @@ import { EuiBadge } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 
-import type { CrawlEvent} from '../../../../api/crawler/types';
+import type { CrawlEvent } from '../../../../api/crawler/types';
 import { CrawlType } from '../../../../api/crawler/types';
 
 import { readableCrawlTypes } from './constants';

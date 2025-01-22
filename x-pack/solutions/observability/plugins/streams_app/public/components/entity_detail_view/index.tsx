@@ -10,7 +10,7 @@ import React from 'react';
 import { css } from '@emotion/css';
 import type { IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import { ILM_LOCATOR_ID } from '@kbn/index-lifecycle-management-common-shared';
-import type { ReadStreamDefinition, StreamLifecycle} from '@kbn/streams-schema';
+import type { ReadStreamDefinition, StreamLifecycle } from '@kbn/streams-schema';
 import { isIngestStream } from '@kbn/streams-schema';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';

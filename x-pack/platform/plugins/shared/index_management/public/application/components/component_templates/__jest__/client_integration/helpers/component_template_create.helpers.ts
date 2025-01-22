@@ -12,11 +12,8 @@ import { BASE_PATH } from '../../../../../../../common';
 import { ComponentTemplateCreate } from '../../../component_template_wizard';
 
 import { WithAppDependencies } from './setup_environment';
-import type {
-  ComponentTemplateFormTestSubjects} from './component_template_form.helpers';
-import {
-  getFormActions
-} from './component_template_form.helpers';
+import type { ComponentTemplateFormTestSubjects } from './component_template_form.helpers';
+import { getFormActions } from './component_template_form.helpers';
 
 export type ComponentTemplateCreateTestBed = TestBed<ComponentTemplateFormTestSubjects> & {
   actions: ReturnType<typeof getFormActions>;

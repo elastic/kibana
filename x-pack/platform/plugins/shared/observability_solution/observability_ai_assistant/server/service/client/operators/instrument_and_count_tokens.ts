@@ -6,8 +6,7 @@
  */
 
 import apm from 'elastic-apm-node';
-import type {
-  OperatorFunction} from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
 import {
   catchError,
   ignoreElements,

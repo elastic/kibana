@@ -7,8 +7,7 @@
 
 import React, { useState } from 'react';
 import { FieldValueSelection } from '@kbn/observability-shared-plugin/public';
-import type {
-  SyntheticsMonitorFilterItem} from '../../../../utils/filters/filter_fields';
+import type { SyntheticsMonitorFilterItem } from '../../../../utils/filters/filter_fields';
 import {
   getSyntheticsFilterDisplayValues,
   valueToLabelWithEmptyCount,

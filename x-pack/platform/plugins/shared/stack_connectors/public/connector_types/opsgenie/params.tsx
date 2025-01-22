@@ -6,12 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useRef } from 'react';
-import type {
-  ActionParamsProps,
-  IErrorObject} from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  ActionConnectorMode
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { isEmpty, unset, cloneDeep } from 'lodash';
 import { OpsgenieSubActions } from '../../../common';

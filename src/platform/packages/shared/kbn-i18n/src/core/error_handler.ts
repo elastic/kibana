@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OnErrorFn} from '@formatjs/intl';
+import type { OnErrorFn } from '@formatjs/intl';
 import { IntlErrorCode } from '@formatjs/intl';
 
 export const handleIntlError: OnErrorFn = (error) => {

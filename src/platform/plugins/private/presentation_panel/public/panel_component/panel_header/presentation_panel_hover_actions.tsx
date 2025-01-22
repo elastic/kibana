@@ -9,20 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
-import type {
-  MouseEventHandler,
-  ReactElement} from 'react';
-import React, {
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { MouseEventHandler, ReactElement } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 
-import type {
-  EuiContextMenuPanelDescriptor,
-  IconType} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor, IconType } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -33,16 +23,14 @@ import {
   EuiToolTip,
   useEuiTheme,
 } from '@elastic/eui';
-import type { ActionExecutionContext} from '@kbn/ui-actions-plugin/public';
+import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { buildContextMenuForActions } from '@kbn/ui-actions-plugin/public';
 
-import type {
-  EmbeddableApiContext,
-  ViewMode} from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext, ViewMode } from '@kbn/presentation-publishing';
 import {
   apiCanLockHoverActions,
   getViewModeSubject,
-  useBatchedOptionalPublishingSubjects
+  useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { Subscription } from 'rxjs';
 import { css } from '@emotion/react';

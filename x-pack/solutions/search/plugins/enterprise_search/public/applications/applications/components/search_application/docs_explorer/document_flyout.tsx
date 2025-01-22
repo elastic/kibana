@@ -9,8 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlyout,
@@ -26,13 +25,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { FieldIcon } from '../field_icon';
 
-import type {
-  ConvertedResultWithType,
-  FieldValue} from './convert_results';
-import {
-  addTypeToResults,
-  convertResultToFieldsAndIndex
-} from './convert_results';
+import type { ConvertedResultWithType, FieldValue } from './convert_results';
+import { addTypeToResults, convertResultToFieldsAndIndex } from './convert_results';
 import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';
 import { useSelectedDocument } from './document_context';
 import { FieldValueCell } from './field_value_cell';

@@ -8,8 +8,7 @@
 import React, { Fragment } from 'react';
 import { css } from '@emotion/react';
 import { capitalize, get } from 'lodash';
-import type {
-  UseEuiTheme} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiHealth,

@@ -7,8 +7,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type { FC , ElementType } from 'react';
-import type { EuiCommentProps} from '@elastic/eui';
+import type { FC, ElementType } from 'react';
+import type { EuiCommentProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import type {

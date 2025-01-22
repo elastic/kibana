@@ -7,11 +7,8 @@
 
 import { isDevMode } from '@kbn/xstate-utils';
 import { useInterpret } from '@xstate/react';
-import type {
-  OriginInterpreterStateMachineDependencies} from './state_machine';
-import {
-  createOriginInterpreterStateMachine
-} from './state_machine';
+import type { OriginInterpreterStateMachineDependencies } from './state_machine';
+import { createOriginInterpreterStateMachine } from './state_machine';
 
 export const OriginInterpreter: React.FC<OriginInterpreterStateMachineDependencies> = ({
   history,

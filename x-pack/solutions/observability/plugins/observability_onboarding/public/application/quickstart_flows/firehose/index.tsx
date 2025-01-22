@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiStepStatus} from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiButtonGroup,
   EuiLink,

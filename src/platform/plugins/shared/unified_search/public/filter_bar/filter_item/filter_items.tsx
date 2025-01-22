@@ -10,7 +10,7 @@
 import React, { useRef } from 'react';
 import { css } from '@emotion/react';
 import { EuiFlexItem } from '@elastic/eui';
-import type { InjectedIntl} from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
 import { METRIC_TYPE } from '@kbn/analytics';

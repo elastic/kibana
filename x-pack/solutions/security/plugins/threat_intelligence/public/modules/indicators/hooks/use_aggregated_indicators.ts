@@ -16,10 +16,9 @@ import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { useSourcererDataView } from './use_sourcerer_data_view';
 import type {
   ChartSeries,
-  FetchAggregatedIndicatorsParams} from '../services/fetch_aggregated_indicators';
-import {
-  createFetchAggregatedIndicators
+  FetchAggregatedIndicatorsParams,
 } from '../services/fetch_aggregated_indicators';
+import { createFetchAggregatedIndicators } from '../services/fetch_aggregated_indicators';
 import { useDateFormat, useTimeZone } from '../../../hooks/use_kibana_ui_settings';
 
 export interface UseAggregatedIndicatorsParam {

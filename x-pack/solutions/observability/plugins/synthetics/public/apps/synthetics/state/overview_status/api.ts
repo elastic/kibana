@@ -9,10 +9,9 @@ import type { MonitorOverviewPageState } from '..';
 import { SYNTHETICS_API_URLS } from '../../../../../common/constants';
 import type {
   FetchMonitorOverviewQueryArgs,
-  OverviewStatus} from '../../../../../common/runtime_types';
-import {
-  OverviewStatusCodec,
+  OverviewStatus,
 } from '../../../../../common/runtime_types';
+import { OverviewStatusCodec } from '../../../../../common/runtime_types';
 import { apiService } from '../../../../utils/api_service';
 
 export function toStatusOverviewQueryArgs(

@@ -6,7 +6,7 @@
  */
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
 import type { TTYTextSizerDeps } from '.';

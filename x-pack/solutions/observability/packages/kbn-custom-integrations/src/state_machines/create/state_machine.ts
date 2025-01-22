@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ActorRefFrom, EmittedFrom} from 'xstate';
+import type { ActorRefFrom, EmittedFrom } from 'xstate';
 import { actions, createMachine, SpecialTargets } from 'xstate';
 import deepEqual from 'react-fast-compare';
 import type { OmitDeprecatedState } from '@kbn/xstate-utils';

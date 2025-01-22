@@ -10,7 +10,7 @@ import type { Filter } from '@kbn/es-query';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import { useIndicatorsFiltersContext } from '../../indicators/hooks/use_filters_context';
 import type { Indicator } from '../../../../common/types/indicator';
-import type { FilterIn, FilterOut} from '../utils/filter';
+import type { FilterIn, FilterOut } from '../utils/filter';
 import { updateFiltersArray } from '../utils/filter';
 import { useSourcererDataView } from '../../indicators/hooks/use_sourcerer_data_view';
 

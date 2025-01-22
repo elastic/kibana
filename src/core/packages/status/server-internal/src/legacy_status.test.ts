@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ServiceStatus} from '@kbn/core-status-common';
+import type { ServiceStatus } from '@kbn/core-status-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 import { calculateLegacyStatus } from './legacy_status';
 

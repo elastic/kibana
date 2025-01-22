@@ -12,11 +12,8 @@ import { nextTick } from '@kbn/test-jest-helpers';
 
 import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
-import type {
-  Sorting} from './analytics_collection_explore_table_logic';
-import {
-  AnalyticsCollectionExploreTableLogic
-} from './analytics_collection_explore_table_logic';
+import type { Sorting } from './analytics_collection_explore_table_logic';
+import { AnalyticsCollectionExploreTableLogic } from './analytics_collection_explore_table_logic';
 import { ExploreTableColumns, ExploreTables } from './analytics_collection_explore_table_types';
 import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 

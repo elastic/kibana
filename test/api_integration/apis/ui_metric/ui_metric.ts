@@ -9,7 +9,7 @@
 
 import expect from '@kbn/expect';
 import { ReportManager, METRIC_TYPE } from '@kbn/analytics';
-import type { UserAgentMetric , UiCounterMetricType } from '@kbn/analytics';
+import type { UserAgentMetric, UiCounterMetricType } from '@kbn/analytics';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

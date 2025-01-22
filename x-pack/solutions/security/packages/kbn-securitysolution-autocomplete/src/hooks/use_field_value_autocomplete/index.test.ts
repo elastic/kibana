@@ -8,7 +8,7 @@
 import { waitFor, renderHook } from '@testing-library/react';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 
-import type { UseFieldValueAutocompleteReturn} from '.';
+import type { UseFieldValueAutocompleteReturn } from '.';
 import { useFieldValueAutocomplete } from '.';
 import { getField } from '../../fields/index.mock';
 import { autocompleteStartMock } from '../../autocomplete/index.mock';

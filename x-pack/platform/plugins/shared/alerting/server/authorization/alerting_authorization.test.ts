@@ -6,7 +6,7 @@
  */
 
 import Boom from '@hapi/boom';
-import type { KueryNode} from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { toKqlExpression } from '@kbn/es-query';
 import type { KibanaRequest } from '@kbn/core/server';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';

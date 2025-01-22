@@ -7,12 +7,8 @@
 
 import React from 'react';
 import type { DataViewBase } from '@kbn/es-query';
-import type {
-  KibanaReactContextValue,
-  KibanaServices} from '@kbn/kibana-react-plugin/public';
-import {
-  withKibana
-} from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import type { InfraClientStartDeps, RendererFunction } from '../custom_threshold/types';

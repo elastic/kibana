@@ -8,7 +8,10 @@
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
 import { CUSTOM_PALETTE } from '@kbn/coloring';
-import type { ExpressionAstExpression, ExpressionAstFunction } from '@kbn/expressions-plugin/common';
+import type {
+  ExpressionAstExpression,
+  ExpressionAstFunction,
+} from '@kbn/expressions-plugin/common';
 import { euiLightVars, euiThemeVars } from '@kbn/ui-theme';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import { createMockDatasource, createMockFramePublicAPI, generateActiveData } from '../../mocks';

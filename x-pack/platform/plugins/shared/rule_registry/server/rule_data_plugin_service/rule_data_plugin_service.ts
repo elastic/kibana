@@ -11,12 +11,8 @@ import type { ValidFeatureId } from '@kbn/rule-data-utils';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type {
-  PublicFrameworkAlertsService,
-  DataStreamAdapter} from '@kbn/alerting-plugin/server';
-import {
-  InstallShutdownError,
-} from '@kbn/alerting-plugin/server';
+import type { PublicFrameworkAlertsService, DataStreamAdapter } from '@kbn/alerting-plugin/server';
+import { InstallShutdownError } from '@kbn/alerting-plugin/server';
 import { INDEX_PREFIX } from '../config';
 import type { WaitResult } from '../rule_data_client';
 import { type IRuleDataClient, RuleDataClient } from '../rule_data_client';

@@ -10,7 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { Provider, useStore } from 'react-redux';
 import type { AppMountParameters, Capabilities, CoreStart } from '@kbn/core/public';
 import { useHistory, useLocation } from 'react-router-dom';
-import type { Start as InspectorPublicPluginStart, RequestAdapter } from '@kbn/inspector-plugin/public';
+import type {
+  Start as InspectorPublicPluginStart,
+  RequestAdapter,
+} from '@kbn/inspector-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { datasourceSelector, hasFieldsSelector } from '../../state_management';

@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  SavedObject,
-  SavedObjectsClientContract} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { uniqBy } from 'lodash';
 import {
   legacyPrivateLocationsSavedObjectId,

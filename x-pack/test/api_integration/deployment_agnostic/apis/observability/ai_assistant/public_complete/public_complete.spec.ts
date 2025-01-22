@@ -5,22 +5,19 @@
  * 2.0.
  */
 import expect from '@kbn/expect';
-import type {
-  FunctionDefinition} from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  MessageRole,
-  type Message,
-} from '@kbn/observability-ai-assistant-plugin/common';
+import type { FunctionDefinition } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { type StreamingChatResponseEvent } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import { pick } from 'lodash';
 import type OpenAI from 'openai';
 import { type AdHocInstruction } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type {
   LlmProxy,
-  LlmResponseSimulator} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+  LlmResponseSimulator,
+} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import {
   createLlmProxy,
-  isFunctionTitleRequest
+  isFunctionTitleRequest,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 

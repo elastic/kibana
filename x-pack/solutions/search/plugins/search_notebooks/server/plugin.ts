@@ -15,7 +15,11 @@ import type {
 
 import type { SearchNotebooksConfig } from './config';
 import { defineRoutes } from './routes';
-import type { SearchNotebooksPluginSetup, SearchNotebooksPluginStart, NotebooksCache } from './types';
+import type {
+  SearchNotebooksPluginSetup,
+  SearchNotebooksPluginStart,
+  NotebooksCache,
+} from './types';
 import { createNotebooksCache } from './utils';
 
 export class SearchNotebooksPlugin

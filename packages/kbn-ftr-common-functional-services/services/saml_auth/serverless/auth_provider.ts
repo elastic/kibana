@@ -8,7 +8,7 @@
  */
 
 import getopts from 'getopts';
-import type { ServerlessProjectType} from '@kbn/es';
+import type { ServerlessProjectType } from '@kbn/es';
 import { SERVERLESS_ROLES_ROOT_PATH } from '@kbn/es';
 import { type Config } from '@kbn/test';
 import { isServerlessProjectType, readRolesDescriptorsFromResource } from '@kbn/es/src/utils';

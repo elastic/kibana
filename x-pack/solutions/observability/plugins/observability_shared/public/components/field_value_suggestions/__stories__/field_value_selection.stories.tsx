@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentType} from 'react';
+import type { ComponentType } from 'react';
 import React, { useEffect, useState } from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { Observable } from 'rxjs';

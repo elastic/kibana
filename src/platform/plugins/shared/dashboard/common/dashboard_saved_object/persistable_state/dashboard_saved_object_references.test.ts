@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  InjectExtractDeps} from './dashboard_saved_object_references';
-import {
-  extractReferences,
-  injectReferences
-} from './dashboard_saved_object_references';
+import type { InjectExtractDeps } from './dashboard_saved_object_references';
+import { extractReferences, injectReferences } from './dashboard_saved_object_references';
 
 import {
   createExtract,

@@ -5,16 +5,14 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
-import type {
-  EuiButtonIconProps,
-  EuiRangeProps} from '@elastic/eui';
+import type { EuiButtonIconProps, EuiRangeProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiPanel,
   EuiFlexGroup,
   EuiFlexItem,
   EuiButtonIcon,
-  EuiToolTip
+  EuiToolTip,
 } from '@elastic/eui';
 import { findIndex } from 'lodash';
 import type { ProcessStartMarker, ProcessEvent } from '../../../common';

@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  CoreSetup,
-  Logger,
-  Plugin,
-  PluginInitializerContext} from '@kbn/core/server';
-import {
-  DEFAULT_APP_CATEGORIES
-} from '@kbn/core/server';
+import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';

@@ -8,8 +8,7 @@
 import './toolbar.scss';
 import React, { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFormRow,
@@ -17,7 +16,7 @@ import {
   EuiIcon,
   EuiFieldNumber,
   EuiButtonGroup,
-  EuiFlexItem
+  EuiFlexItem,
 } from '@elastic/eui';
 import type { Position } from '@elastic/charts';
 import { LegendValue } from '@elastic/charts';

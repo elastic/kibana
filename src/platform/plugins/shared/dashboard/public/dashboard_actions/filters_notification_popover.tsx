@@ -22,12 +22,11 @@ import {
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';
-import type { AggregateQuery} from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 import { getAggregateQueryMode, isOfQueryType } from '@kbn/es-query';
 import { ACTION_EDIT_PANEL } from '@kbn/presentation-panel-plugin/public';
 import { FilterItems } from '@kbn/unified-search-plugin/public';
-import type {
-  EmbeddableApiContext} from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   apiCanLockHoverActions,
   getViewModeSubject,

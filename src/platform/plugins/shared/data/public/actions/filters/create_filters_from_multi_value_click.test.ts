@@ -11,7 +11,7 @@ import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { dataPluginMock } from '../../mocks';
 import { setIndexPatterns, setSearchService } from '../../services';
 import { createFiltersFromMultiValueClickAction } from './create_filters_from_multi_value_click';
-import type { FieldFormatsGetConfigFn} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { BytesFormat } from '@kbn/field-formats-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { Filter } from '@kbn/es-query';

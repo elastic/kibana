@@ -8,9 +8,7 @@
 import './toolbar.scss';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  PaletteRegistry,
-  ColorMapping} from '@kbn/coloring';
+import type { PaletteRegistry, ColorMapping } from '@kbn/coloring';
 import {
   CategoricalColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,

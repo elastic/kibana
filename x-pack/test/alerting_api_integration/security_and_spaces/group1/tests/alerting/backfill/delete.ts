@@ -10,13 +10,8 @@ import moment from 'moment';
 import { asyncForEach } from '@kbn/std';
 import type { GetResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { UserAtSpaceScenarios } from '../../../../scenarios';
-import type {
-  TaskManagerDoc} from '../../../../../common/lib';
-import {
-  getTestRuleData,
-  getUrlPrefix,
-  ObjectRemover
-} from '../../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../../common/lib';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

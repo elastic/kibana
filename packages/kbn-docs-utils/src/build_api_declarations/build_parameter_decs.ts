@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ParameterDeclaration, JSDoc} from 'ts-morph';
+import type { ParameterDeclaration, JSDoc } from 'ts-morph';
 import { SyntaxKind } from 'ts-morph';
 import { extractImportReferences } from './extract_import_refs';
 import type { ApiDeclaration } from '../types';

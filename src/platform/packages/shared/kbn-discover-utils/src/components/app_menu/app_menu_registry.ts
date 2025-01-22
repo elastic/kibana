@@ -17,10 +17,9 @@ import type {
   AppMenuItemCustom,
   AppMenuItemPrimary,
   AppMenuItemSecondary,
-  AppMenuSubmenuActionCustom} from './types';
-import {
-  AppMenuActionType
+  AppMenuSubmenuActionCustom,
 } from './types';
+import { AppMenuActionType } from './types';
 
 export class AppMenuRegistry {
   static CUSTOM_ITEMS_LIMIT = 2;

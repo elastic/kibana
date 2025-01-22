@@ -9,7 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { ExpressionFunctionDefinition, Datatable, Render } from '@kbn/expressions-plugin/public';
+import type {
+  ExpressionFunctionDefinition,
+  Datatable,
+  Render,
+} from '@kbn/expressions-plugin/public';
 
 // @ts-ignore
 import { vislibSeriesResponseHandler } from './vislib/response_handler';

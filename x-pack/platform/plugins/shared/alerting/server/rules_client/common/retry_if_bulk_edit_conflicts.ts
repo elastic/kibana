@@ -8,7 +8,11 @@
 import pMap from 'p-map';
 import { chunk } from 'lodash';
 import type { KueryNode } from '@kbn/es-query';
-import type { Logger, SavedObjectsBulkUpdateObject, SavedObjectsUpdateResponse } from '@kbn/core/server';
+import type {
+  Logger,
+  SavedObjectsBulkUpdateObject,
+  SavedObjectsUpdateResponse,
+} from '@kbn/core/server';
 import type { BulkActionSkipResult } from '../../../common/bulk_edit';
 import { convertRuleIdsToKueryNode } from '../../lib';
 import type { BulkOperationError } from '../types';

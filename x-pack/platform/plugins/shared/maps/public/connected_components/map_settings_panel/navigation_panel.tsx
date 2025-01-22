@@ -7,8 +7,7 @@
 
 import type { ChangeEvent } from 'react';
 import React from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFieldNumber,

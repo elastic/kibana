@@ -13,16 +13,10 @@ import { EuiSpacer } from '@elastic/eui';
 import type { RuleType, ActionType, ResolvedRule } from '../../../../types';
 import { RuleDetailsWithApi as RuleDetails } from './rule_details';
 import { throwIfAbsent, throwIfIsntContained } from '../../../lib/value_validators';
-import type {
-  ComponentOpts as RuleApis} from '../../common/components/with_bulk_rule_api_operations';
-import {
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
-import type {
-  ComponentOpts as ActionApis} from '../../common/components/with_actions_api_operations';
-import {
-  withActionOperations,
-} from '../../common/components/with_actions_api_operations';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
+import type { ComponentOpts as ActionApis } from '../../common/components/with_actions_api_operations';
+import { withActionOperations } from '../../common/components/with_actions_api_operations';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';
 

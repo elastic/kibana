@@ -10,10 +10,9 @@ import type { GetInvestigationNotesResponse } from '@kbn/investigation-shared';
 import type {
   QueryObserverResult,
   RefetchOptions,
-  RefetchQueryFilters} from '@tanstack/react-query';
-import {
-  useQuery,
+  RefetchQueryFilters,
 } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { investigationKeys } from './query_key_factory';
 import { useKibana } from './use_kibana';
 

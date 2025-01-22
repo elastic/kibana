@@ -14,12 +14,8 @@ import { JsonCodeEditor } from '@kbn/unified-doc-viewer-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
-import type {
-  ShouldShowFieldInTableHandler} from '@kbn/discover-utils';
-import {
-  getLogDocumentOverview,
-  getMessageFieldWithFallbacks,
-} from '@kbn/discover-utils';
+import type { ShouldShowFieldInTableHandler } from '@kbn/discover-utils';
+import { getLogDocumentOverview, getMessageFieldWithFallbacks } from '@kbn/discover-utils';
 import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { Resource } from './resource';
 import { Content } from './content';

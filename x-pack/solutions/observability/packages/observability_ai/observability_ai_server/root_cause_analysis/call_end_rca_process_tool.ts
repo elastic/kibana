@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { from, of, switchMap } from 'rxjs';
 import { RCA_END_PROCESS_TOOL_NAME } from '@kbn/observability-ai-common/root_cause_analysis';
-import type { AssistantMessage} from '@kbn/inference-common';
+import type { AssistantMessage } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import { writeFinalReport } from './tasks/write_final_report';
 import type { EndProcessToolMessage, RootCauseAnalysisContext } from './types';

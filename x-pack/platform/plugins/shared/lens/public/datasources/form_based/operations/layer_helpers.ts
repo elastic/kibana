@@ -9,7 +9,7 @@ import { partition, mapValues, pickBy } from 'lodash';
 import type { CoreStart } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import memoizeOne from 'memoize-one';
-import type { DataPublicPluginStart} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { DateRange } from '../../../../common/types';
 import type {
@@ -38,7 +38,7 @@ import type {
   ReferenceBasedIndexPatternColumn,
   BaseIndexPatternColumn,
 } from './definitions/column_types';
-import type { FormulaIndexPatternColumn} from './definitions/formula';
+import type { FormulaIndexPatternColumn } from './definitions/formula';
 import { insertOrReplaceFormulaColumn } from './definitions/formula';
 import type { TimeScaleUnit } from '../../../../common/expressions';
 import { documentField } from '../document_field';

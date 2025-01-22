@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  SyntheticsMonitorDocument} from '@kbn/apm-synthtrace-client';
-import {
-  generateShortId,
-  syntheticsMonitor,
-} from '@kbn/apm-synthtrace-client';
+import type { SyntheticsMonitorDocument } from '@kbn/apm-synthtrace-client';
+import { generateShortId, syntheticsMonitor } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';
 import { withClient } from '../lib/utils/with_client';
 import { MORE_THAN_1024_CHARS, getIpAddress } from './helpers/logs_mock_data';

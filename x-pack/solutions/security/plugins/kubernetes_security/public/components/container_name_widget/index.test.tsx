@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ENTRY_LEADER_ENTITY_ID, CONTAINER_IMAGE_NAME } from '../../../common/constants';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import type { GlobalFilter } from '../../types';
 import {

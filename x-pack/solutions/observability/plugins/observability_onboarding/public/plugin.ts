@@ -18,16 +18,18 @@ import type {
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/public';
-import {
-  DEFAULT_APP_CATEGORIES
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { DiscoverSetup, DiscoverStart } from '@kbn/discover-plugin/public';
 import type { FleetSetup, FleetStart } from '@kbn/fleet-plugin/public';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 import type { ObservabilityOnboardingConfig } from '../server';
 import { PLUGIN_ID } from '../common';
 import { ObservabilityOnboardingLocatorDefinition } from './locators/onboarding_locator/locator_definition';

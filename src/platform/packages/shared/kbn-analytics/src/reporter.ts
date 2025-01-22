@@ -11,9 +11,9 @@ import type { Logger } from '@kbn/logging';
 import { wrapArray } from './util';
 import type { Metric, ApplicationUsageMetric } from './metrics';
 import { createUiCounterMetric, trackUsageAgent } from './metrics';
-import type { Storage} from './storage';
+import type { Storage } from './storage';
 import { ReportStorageManager } from './storage';
-import type { Report} from './report';
+import type { Report } from './report';
 import { ReportManager } from './report';
 
 export interface ReporterConfig {

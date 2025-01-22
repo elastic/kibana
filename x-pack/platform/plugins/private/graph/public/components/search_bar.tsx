@@ -22,9 +22,7 @@ import type { ContentManagementPublicStart } from '@kbn/content-management-plugi
 
 import type { IndexPatternSavedObject, IndexPatternProvider, WorkspaceField } from '../types';
 import { openSourceModal } from '../services/source_modal';
-import type {
-  GraphState,
-  IndexpatternDatasource} from '../state_management';
+import type { GraphState, IndexpatternDatasource } from '../state_management';
 import {
   datasourceSelector,
   requestDatasource,

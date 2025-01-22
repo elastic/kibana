@@ -9,13 +9,8 @@
 
 import React, { useCallback, useState } from 'react';
 import type { ReactWrapper } from 'enzyme';
-import type {
-  EuiDataGridCellValueElementProps,
-  EuiDataGridCustomBodyProps} from '@elastic/eui';
-import {
-  EuiButton,
-  EuiDataGrid
-} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridCustomBodyProps } from '@elastic/eui';
+import { EuiButton, EuiDataGrid } from '@elastic/eui';
 import { waitForEuiPopoverOpen } from '@elastic/eui/lib/test/rtl';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { act } from 'react-dom/test-utils';

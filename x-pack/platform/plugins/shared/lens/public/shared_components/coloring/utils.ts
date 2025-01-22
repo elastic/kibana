@@ -12,7 +12,8 @@ import type {
   PaletteRegistry,
   PaletteOutput,
   CustomPaletteParams,
-  ColorMapping} from '@kbn/coloring';
+  ColorMapping,
+} from '@kbn/coloring';
 import {
   getFallbackDataBounds,
   reversePalette,

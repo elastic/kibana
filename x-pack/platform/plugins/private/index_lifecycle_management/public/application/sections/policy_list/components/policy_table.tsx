@@ -6,16 +6,14 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import type {
-  EuiSearchBarProps,
-  EuiInMemoryTableProps} from '@elastic/eui';
+import type { EuiSearchBarProps, EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiLink,
   EuiInMemoryTable,
   EuiToolTip,
   EuiFlexItem,
-  EuiSwitch
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

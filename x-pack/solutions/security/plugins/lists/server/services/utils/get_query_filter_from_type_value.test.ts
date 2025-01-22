@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  QueryFilterType} from './get_query_filter_from_type_value';
+import type { QueryFilterType } from './get_query_filter_from_type_value';
 import {
   getEmptyQuery,
   getQueryFilterFromTypeValue,

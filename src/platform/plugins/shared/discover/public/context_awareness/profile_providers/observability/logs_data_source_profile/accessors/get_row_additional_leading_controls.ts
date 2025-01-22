@@ -9,7 +9,7 @@
 
 import { createDegradedDocsControl, createStacktraceControl } from '@kbn/discover-utils';
 import { retrieveMetadataColumns } from '@kbn/esql-utils';
-import type { AggregateQuery} from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { BasicPrettyPrinter, mutate, parse } from '@kbn/esql-ast';
 import { IGNORED_FIELD } from '@kbn/discover-utils/src/field_constants';

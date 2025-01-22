@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { fireEvent, render, screen, waitFor, within } from '@testing-library/react';
-import type { Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 import type { FilterEditorProps } from './filter_editor';
 import { FilterEditor } from './filter_editor';

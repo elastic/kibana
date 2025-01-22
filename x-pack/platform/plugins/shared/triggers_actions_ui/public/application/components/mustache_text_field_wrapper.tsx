@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  FieldHook} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  getFieldValidityAndErrorMessage,
-} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { getFieldValidityAndErrorMessage } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback } from 'react';
 import type { ActionVariable } from '@kbn/alerting-plugin/common';
 import { TextFieldWithMessageVariables } from './text_field_with_message_variables';

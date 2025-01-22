@@ -25,10 +25,9 @@ import {
 import type {
   CertResult,
   EncryptedSyntheticsMonitorAttributes,
-  Ping} from '../../../common/runtime_types';
-import {
-  ConfigKey
+  Ping,
 } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import type { SyntheticsMonitorClient } from '../../synthetics_service/synthetics_monitor/synthetics_monitor_client';
 import { monitorAttributes } from '../../../common/types/saved_objects';
 import { AlertConfigKey } from '../../../common/constants/monitor_management';

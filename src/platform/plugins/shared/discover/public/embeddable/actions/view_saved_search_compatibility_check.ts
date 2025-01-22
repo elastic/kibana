@@ -12,12 +12,13 @@ import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type {
   CanAccessViewMode,
   EmbeddableApiContext,
-  HasType} from '@kbn/presentation-publishing';
+  HasType,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
-  getInheritedViewMode
+  getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 
 import type { PublishesSavedSearch } from '../types';

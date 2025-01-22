@@ -6,11 +6,8 @@
  */
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import type {
-  SyntheticsMonitorWithSecretsAttributes} from '../../../../common/runtime_types';
-import {
-  ConfigKey
-} from '../../../../common/runtime_types';
+import type { SyntheticsMonitorWithSecretsAttributes } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { SYNTHETICS_MONITOR_ENCRYPTED_TYPE } from '../../synthetics_monitor';
 
 export type SyntheticsMonitor890 = Omit<

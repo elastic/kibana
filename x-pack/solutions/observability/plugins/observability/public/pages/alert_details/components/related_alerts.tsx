@@ -25,7 +25,7 @@ import {
   ALERT_UUID,
   TAGS,
 } from '@kbn/rule-data-utils';
-import type { BoolQuery, Filter} from '@kbn/es-query';
+import type { BoolQuery, Filter } from '@kbn/es-query';
 import { type Query } from '@kbn/es-query';
 import { AlertsGrouping } from '@kbn/alerts-grouping';
 import type { ObservabilityFields } from '../../../../common/utils/alerting/types';
@@ -39,11 +39,8 @@ import {
   getSharedFields,
 } from '../../../../common/utils/alerting/get_related_alerts_query';
 import type { TopAlert } from '../../..';
-import type {
-  AlertSearchBarContainerState} from '../../../components/alert_search_bar/containers/state_container';
-import {
-  DEFAULT_STATE,
-} from '../../../components/alert_search_bar/containers/state_container';
+import type { AlertSearchBarContainerState } from '../../../components/alert_search_bar/containers/state_container';
+import { DEFAULT_STATE } from '../../../components/alert_search_bar/containers/state_container';
 import { ObservabilityAlertSearchbarWithUrlSync } from '../../../components/alert_search_bar/alert_search_bar_with_url_sync';
 import { renderGroupPanel } from '../../../components/alerts_table/grouping/render_group_panel';
 import { getGroupStats } from '../../../components/alerts_table/grouping/get_group_stats';

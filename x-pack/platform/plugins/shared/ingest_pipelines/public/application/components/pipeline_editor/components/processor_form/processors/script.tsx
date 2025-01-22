@@ -21,15 +21,8 @@ import {
 
 import { XJsonEditor, TextEditor } from '../field_components';
 
-import type {
-  FieldsConfig,
-  FormFieldsComponent} from './shared';
-import {
-  to,
-  from,
-  EDITOR_PX_HEIGHT,
-  isXJsonField,
-} from './shared';
+import type { FieldsConfig, FormFieldsComponent } from './shared';
+import { to, from, EDITOR_PX_HEIGHT, isXJsonField } from './shared';
 
 const { emptyField } = fieldValidators;
 

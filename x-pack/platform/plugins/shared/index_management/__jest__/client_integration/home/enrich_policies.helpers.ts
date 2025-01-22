@@ -7,13 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 
-import type {
-  TestBed,
-  AsyncTestBedConfig} from '@kbn/test-jest-helpers';
-import {
-  registerTestBed,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 import type { HttpSetup } from '@kbn/core/public';
 import { IndexManagementHome } from '../../../public/application/sections/home';
 import { indexManagementStore } from '../../../public/application/store';

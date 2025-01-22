@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Dictionary} from 'lodash';
+import type { Dictionary } from 'lodash';
 import { countBy, defaults, uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';

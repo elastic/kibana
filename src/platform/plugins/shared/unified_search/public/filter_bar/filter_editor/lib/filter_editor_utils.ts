@@ -8,7 +8,7 @@
  */
 
 import dateMath from '@kbn/datemath';
-import type { Filter, RangeFilter, ScriptedRangeFilter} from '@kbn/es-query';
+import type { Filter, RangeFilter, ScriptedRangeFilter } from '@kbn/es-query';
 import { isRangeFilter } from '@kbn/es-query';
 import { ES_FIELD_TYPES } from '@kbn/field-types';
 import isSemverValid from 'semver/functions/valid';

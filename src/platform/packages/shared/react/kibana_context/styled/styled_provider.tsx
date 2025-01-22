@@ -14,7 +14,7 @@ import * as styledComponents from 'styled-components';
 
 import type { ThemedStyledComponentsModule, ThemeProviderProps } from 'styled-components';
 import { ThemeProvider } from 'styled-components';
-import type { euiThemeVars} from '@kbn/ui-theme';
+import type { euiThemeVars } from '@kbn/ui-theme';
 import { euiLightVars, euiDarkVars } from '@kbn/ui-theme';
 
 /**

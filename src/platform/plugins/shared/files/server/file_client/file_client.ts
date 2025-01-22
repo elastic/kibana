@@ -37,12 +37,8 @@ import { createAuditEvent } from '../audit_events';
 import type { FileClient, CreateArgs, DeleteArgs, P1, ShareArgs } from './types';
 import { serializeJSON, toJSON } from '../file/to_json';
 import { createDefaultFileAttributes } from './utils';
-import type {
-  PerfArgs} from '../performance';
-import {
-  withReportPerformanceMetric,
-  FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME,
-} from '../performance';
+import type { PerfArgs } from '../performance';
+import { withReportPerformanceMetric, FILE_DOWNLOAD_PERFORMANCE_EVENT_NAME } from '../performance';
 import { createFileHashTransform } from './stream_transforms/file_hash_transform';
 import { isFileHashTransform } from './stream_transforms/file_hash_transform/file_hash_transform';
 import type { SupportedFileHashAlgorithm } from '../saved_objects/file';

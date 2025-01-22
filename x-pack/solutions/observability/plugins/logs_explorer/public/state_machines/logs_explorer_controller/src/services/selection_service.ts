@@ -11,13 +11,12 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
 import type { LogsExplorerCustomizations } from '../../../../controller';
 import { Dataset } from '../../../../../common/datasets';
-import type {
-  UnresolvedDatasetSelection} from '../../../../../common/data_source_selection';
+import type { UnresolvedDatasetSelection } from '../../../../../common/data_source_selection';
 import {
   DataViewSelection,
   isDataViewSelection,
   isUnresolvedDatasetSelection,
-  SingleDatasetSelection
+  SingleDatasetSelection,
 } from '../../../../../common/data_source_selection';
 import type { IDatasetsClient } from '../../../../services/datasets';
 import type { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';

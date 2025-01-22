@@ -8,10 +8,9 @@ import React from 'react';
 import type {
   EuiButtonEmptyProps,
   EuiDataGridColumnCellAction,
-  EuiDataGridColumnCellActionProps} from '@elastic/eui';
-import {
-  EuiButtonEmpty,
+  EuiDataGridColumnCellActionProps,
 } from '@elastic/eui';
+import { EuiButtonEmpty } from '@elastic/eui';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { render, screen } from '@testing-library/react';
 import type { ReactNode } from 'react';

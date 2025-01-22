@@ -13,7 +13,7 @@ import { EuiEmptyPrompt, EuiSpacer, EuiLink } from '@elastic/eui';
 import { useKibana } from '../../../../shared_imports';
 import { usePipelineProcessorsContext } from '../context';
 import { AddProcessorButton } from './add_processor_button';
-import type { OnDoneLoadJsonHandler} from './load_from_json';
+import type { OnDoneLoadJsonHandler } from './load_from_json';
 import { LoadFromJsonButton } from './load_from_json';
 
 const i18nTexts = {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf} from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import moment from 'moment';
 

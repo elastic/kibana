@@ -8,9 +8,7 @@
 import type { Logger } from '@kbn/logging';
 import { decode, encode } from 'gpt-tokenizer';
 import { last, pick, take } from 'lodash';
-import type {
-  Observable,
-  OperatorFunction} from 'rxjs';
+import type { Observable, OperatorFunction } from 'rxjs';
 import {
   catchError,
   concat,
@@ -23,13 +21,10 @@ import {
   throwError,
 } from 'rxjs';
 import { CONTEXT_FUNCTION_NAME } from '../../../functions/context';
-import type { Message} from '../../../../common';
+import type { Message } from '../../../../common';
 import { createFunctionNotFoundError, MessageRole } from '../../../../common';
-import type {
-  MessageOrChatEvent} from '../../../../common/conversation_complete';
-import {
-  createFunctionLimitExceededError
-} from '../../../../common/conversation_complete';
+import type { MessageOrChatEvent } from '../../../../common/conversation_complete';
+import { createFunctionLimitExceededError } from '../../../../common/conversation_complete';
 import { FunctionVisibility } from '../../../../common/functions/types';
 import type { AdHocInstruction, Instruction } from '../../../../common/types';
 import { createFunctionResponseMessage } from '../../../../common/utils/create_function_response_message';

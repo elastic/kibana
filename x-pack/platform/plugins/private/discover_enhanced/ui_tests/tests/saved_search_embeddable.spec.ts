@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ScoutWorkerFixtures} from '@kbn/scout';
+import type { ScoutWorkerFixtures } from '@kbn/scout';
 import { expect, tags } from '@kbn/scout';
 import { test, testData } from '../fixtures';
 

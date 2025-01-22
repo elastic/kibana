@@ -5,7 +5,7 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import type { KueryNode} from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 import { findRulesSo } from '../../../../data/rule/methods/find_rules_so';
 import type { RuleTagsParams, RuleTagsAggregationResult } from '.';

@@ -13,7 +13,10 @@ import { i18n } from '@kbn/i18n';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { Assign, Ensure } from '@kbn/utility-types';
 
-import type { ExpressionAstExpression, ExpressionAstArgument } from '@kbn/expressions-plugin/common';
+import type {
+  ExpressionAstExpression,
+  ExpressionAstArgument,
+} from '@kbn/expressions-plugin/common';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import type { ISearchOptions } from '@kbn/search-types';

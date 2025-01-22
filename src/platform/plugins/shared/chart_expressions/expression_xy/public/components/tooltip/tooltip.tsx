@@ -16,13 +16,12 @@ import type { CommonXYDataLayerConfig } from '../../../common';
 import type {
   DatatablesWithFormatInfo,
   LayersAccessorsTitles,
-  LayersFieldFormats} from '../../helpers';
-import {
-  getMetaFromSeriesId
+  LayersFieldFormats,
 } from '../../helpers';
+import { getMetaFromSeriesId } from '../../helpers';
 import type { XDomain } from '../x_domain';
 import { EndzoneTooltipHeader } from './endzone_tooltip_header';
-import type { TooltipData} from './tooltip_row';
+import type { TooltipData } from './tooltip_row';
 import { TooltipRow } from './tooltip_row';
 import { isEndzoneBucket } from './utils';
 

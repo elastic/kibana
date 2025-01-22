@@ -15,7 +15,7 @@ import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
 import { NoFieldsCallout } from './no_fields_callout';
 import { FieldsAccordion, type FieldsAccordionProps, getFieldKey } from './fields_accordion';
-import type { FieldListGroups, FieldListItem , FieldsGroup, FieldsGroupNames } from '../../types';
+import type { FieldListGroups, FieldListItem, FieldsGroup, FieldsGroupNames } from '../../types';
 import { ExistenceFetchStatus } from '../../types';
 import './field_list_grouped.scss';
 

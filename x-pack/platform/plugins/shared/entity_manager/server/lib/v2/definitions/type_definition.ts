@@ -7,8 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import { DEFINITIONS_ALIAS, TEMPLATE_VERSION } from '../constants';
-import type { EntityTypeDefinition, InternalClusterClient, StoredEntityTypeDefinition } from '../types';
-import type { SourceAs} from '../run_esql_query';
+import type {
+  EntityTypeDefinition,
+  InternalClusterClient,
+  StoredEntityTypeDefinition,
+} from '../types';
+import type { SourceAs } from '../run_esql_query';
 import { runESQLQuery } from '../run_esql_query';
 import { EntityDefinitionConflict } from '../errors/entity_definition_conflict';
 import { UnknownEntityType } from '../errors/unknown_entity_type';

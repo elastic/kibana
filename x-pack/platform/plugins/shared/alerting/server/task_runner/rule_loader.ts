@@ -14,13 +14,8 @@ import type { Logger } from '@kbn/logging';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { RunRuleParams, TaskRunnerContext } from './types';
 import { ErrorWithReason, validateRuleTypeParams } from '../lib';
-import type {
-  RawRule,
-  RuleTypeRegistry,
-  RuleTypeParamsValidator} from '../types';
-import {
-  RuleExecutionStatusErrorReasons
-} from '../types';
+import type { RawRule, RuleTypeRegistry, RuleTypeParamsValidator } from '../types';
+import { RuleExecutionStatusErrorReasons } from '../types';
 import type { RuleTypeParams } from '../../common';
 import { MONITORING_HISTORY_LIMIT } from '../../common';
 import { RULE_SAVED_OBJECT_TYPE } from '../saved_objects';

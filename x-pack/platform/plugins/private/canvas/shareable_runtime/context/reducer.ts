@@ -6,7 +6,7 @@
  */
 
 import type { CanvasShareableState } from '../types';
-import type { CanvasShareableAction} from './actions';
+import type { CanvasShareableAction } from './actions';
 import { CanvasShareableActions } from './actions';
 
 /**

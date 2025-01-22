@@ -9,7 +9,7 @@ import { isLeft } from 'fp-ts/Either';
 import { PathReporter } from 'io-ts/lib/PathReporter';
 import { promises } from 'fs';
 import yaml from 'js-yaml';
-import type { Config, Schedule, PartialConfig} from '../types';
+import type { Config, Schedule, PartialConfig } from '../types';
 import { ConfigRT, DatasetRT, PartialConfigRT } from '../types';
 import { DEFAULTS } from '../constants';
 

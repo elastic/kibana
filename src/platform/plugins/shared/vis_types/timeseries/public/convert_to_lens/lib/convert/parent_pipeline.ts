@@ -29,8 +29,7 @@ import type {
 } from './types';
 import type { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import type { Metric } from '../../../../common/types';
-import type {
-  SupportedMetric} from '../metrics';
+import type { SupportedMetric } from '../metrics';
 import {
   getFilterRatioFormula,
   getFormulaFromMetric,

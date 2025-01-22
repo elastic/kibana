@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Dispatch, SetStateAction} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import React, { useCallback, useState } from 'react';
 import styled from '@emotion/styled';
 import type { LensEmbeddableInput, TypedLensByValueInput } from '@kbn/lens-plugin/public';

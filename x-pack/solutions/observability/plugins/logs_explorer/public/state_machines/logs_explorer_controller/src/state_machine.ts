@@ -8,7 +8,7 @@
 import { type Subject } from 'rxjs';
 import type { IToasts, IUiSettingsClient } from '@kbn/core/public';
 import type { QueryStart } from '@kbn/data-plugin/public';
-import type { InterpreterFrom} from 'xstate';
+import type { InterpreterFrom } from 'xstate';
 import { actions, createMachine, interpret, raise } from 'xstate';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';

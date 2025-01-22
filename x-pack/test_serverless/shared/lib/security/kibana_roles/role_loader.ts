@@ -12,12 +12,8 @@ import type { Role } from '@kbn/security-plugin/common';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { inspect } from 'util';
 import type { AxiosError } from 'axios';
-import type {
-  ServerlessSecurityRoles,
-  YamlRoleDefinitions} from './kibana_roles';
-import {
-  getServerlessSecurityKibanaRoleDefinitions
-} from './kibana_roles';
+import type { ServerlessSecurityRoles, YamlRoleDefinitions } from './kibana_roles';
+import { getServerlessSecurityKibanaRoleDefinitions } from './kibana_roles';
 import { STANDARD_HTTP_HEADERS } from '../default_http_headers';
 
 const ignoreHttp409Error = (error: AxiosError) => {

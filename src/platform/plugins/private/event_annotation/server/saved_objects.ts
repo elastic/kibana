@@ -8,12 +8,8 @@
  */
 
 import { ANALYTICS_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
-import type {
-  CoreSetup,
-  SavedObjectMigrationMap} from '@kbn/core/server';
-import {
-  mergeSavedObjectMigrationMaps
-} from '@kbn/core/server';
+import type { CoreSetup, SavedObjectMigrationMap } from '@kbn/core/server';
+import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import { VISUALIZE_APP_NAME } from '@kbn/visualizations-plugin/common/constants';

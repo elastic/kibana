@@ -7,15 +7,8 @@
 
 import datemath from '@elastic/datemath';
 import moment from 'moment';
-import type {
-  EuiThemeComputed,
-  EuiThemeColorModeStandard} from '@elastic/eui';
-import {
-  tint,
-  transparentize,
-  VISUALIZATION_COLORS,
-  COLOR_MODES_STANDARD,
-} from '@elastic/eui';
+import type { EuiThemeComputed, EuiThemeColorModeStandard } from '@elastic/eui';
+import { tint, transparentize, VISUALIZATION_COLORS, COLOR_MODES_STANDARD } from '@elastic/eui';
 import type { BrushEvent } from '@elastic/charts';
 import type { MonitorStatusHeatmapBucket } from '../../../../../../common/runtime_types';
 

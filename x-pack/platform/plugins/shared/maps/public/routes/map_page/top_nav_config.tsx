@@ -8,12 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import type { Adapters } from '@kbn/inspector-plugin/public';
-import type {
-  OnSaveProps} from '@kbn/saved-objects-plugin/public';
-import {
-  SavedObjectSaveModalOrigin,
-  showSaveModal,
-} from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModalOrigin, showSaveModal } from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,

@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  BrushEndListener,
-  XYChartElementEvent,
-  ElementClickListener} from '@elastic/charts';
+import type { BrushEndListener, XYChartElementEvent, ElementClickListener } from '@elastic/charts';
 import {
   Axis,
   BarSeries,
@@ -16,7 +13,7 @@ import {
   ScaleType,
   Settings,
   Position,
-  timeFormatter
+  timeFormatter,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import React from 'react';

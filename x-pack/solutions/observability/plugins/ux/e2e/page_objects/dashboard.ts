@@ -6,7 +6,7 @@
  */
 
 import type { Page } from '@elastic/synthetics';
-import type { Locator} from './utils';
+import type { Locator } from './utils';
 import { byTestId } from './utils';
 
 export class UXDashboardFilters {

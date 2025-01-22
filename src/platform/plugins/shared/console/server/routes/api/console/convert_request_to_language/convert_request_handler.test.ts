@@ -8,7 +8,7 @@
  */
 
 import { kibanaResponseFactory } from '@kbn/core/server';
-import type { MockRouter} from '../../__mocks__/routes.mock';
+import type { MockRouter } from '../../__mocks__/routes.mock';
 import { createMockRouter, routeHandlerContextMock } from '../../__mocks__/routes.mock';
 import { createRequestMock } from '../../__mocks__/request.mock';
 import { handleEsError } from '../../../../shared_imports';

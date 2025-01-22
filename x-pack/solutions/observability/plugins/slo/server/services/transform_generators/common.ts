@@ -6,7 +6,7 @@
  */
 
 import { buildEsQuery, fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { QuerySchema} from '@kbn/slo-schema';
+import type { QuerySchema } from '@kbn/slo-schema';
 import { kqlQuerySchema } from '@kbn/slo-schema';
 import type { Logger } from '@kbn/logging';
 import type { DataView } from '@kbn/data-views-plugin/common';

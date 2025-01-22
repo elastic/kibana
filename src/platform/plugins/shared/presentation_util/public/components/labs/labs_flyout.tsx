@@ -21,10 +21,16 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
 
-import type { EnvironmentName, Project, ProjectID, ProjectStatus, SolutionName } from '../../../common';
+import type {
+  EnvironmentName,
+  Project,
+  ProjectID,
+  ProjectStatus,
+  SolutionName,
+} from '../../../common';
 import { LabsStrings } from '../../i18n';
 
 import { getPresentationLabsService } from '../../services/presentation_labs_service';

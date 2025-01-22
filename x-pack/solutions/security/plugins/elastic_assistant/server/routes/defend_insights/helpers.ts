@@ -22,9 +22,9 @@ import type {
   DefendInsightsPostRequestBody,
   DefendInsightsResponse,
   Replacements,
-
   DefendInsightType,
-  DefendInsightsGetRequestQuery} from '@kbn/elastic-assistant-common';
+  DefendInsightsGetRequestQuery,
+} from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 
@@ -32,10 +32,7 @@ import { ActionsClientLlm } from '@kbn/langchain/server';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import {
-  DEFEND_INSIGHTS_TOOL_ID,
-  DefendInsightStatus
-} from '@kbn/elastic-assistant-common';
+import { DEFEND_INSIGHTS_TOOL_ID, DefendInsightStatus } from '@kbn/elastic-assistant-common';
 
 import type { GetRegisteredTools } from '../../services/app_context';
 import type { AssistantTool, ElasticAssistantApiRequestHandlerContext } from '../../types';

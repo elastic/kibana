@@ -8,12 +8,8 @@
 import type { Logger } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import type { TaskManagerConfig } from '../config';
-import type {
-  MonitoringStats} from './monitoring_stats_stream';
-import {
-  createAggregators,
-  createMonitoringStatsStream,
-} from './monitoring_stats_stream';
+import type { MonitoringStats } from './monitoring_stats_stream';
+import { createAggregators, createMonitoringStatsStream } from './monitoring_stats_stream';
 import type { TaskStore } from '../task_store';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
 import type { ManagedConfiguration } from '../lib/create_managed_configuration';

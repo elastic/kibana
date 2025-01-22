@@ -19,8 +19,7 @@ const mockLogger: Logger = {
   error: jest.fn(),
 } as Partial<Logger> as Logger;
 
-import type {
-  NotebookCatalogFetchOptions} from './notebook_catalog';
+import type { NotebookCatalogFetchOptions } from './notebook_catalog';
 import {
   getNotebook,
   getNotebookCatalog,

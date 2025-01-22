@@ -10,7 +10,7 @@
 import { utc } from 'moment';
 import { search } from '@kbn/data-plugin/public';
 import dateMath from '@kbn/datemath';
-import type { TimeRange} from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { TimeScaleUnit } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { getUISettings } from '../../../services';

@@ -17,11 +17,8 @@ import type {
   RangeFieldMeta,
   StyleMetaDescriptor,
 } from '../../../../../common/descriptor_types';
-import type {
-  IDynamicStyleProperty} from '../../../styles/vector/properties/dynamic_style_property';
-import {
-  OTHER_CATEGORY_KEY,
-} from '../../../styles/vector/properties/dynamic_style_property';
+import type { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';
+import { OTHER_CATEGORY_KEY } from '../../../styles/vector/properties/dynamic_style_property';
 
 const POINTS = [GEO_JSON_TYPE.POINT, GEO_JSON_TYPE.MULTI_POINT];
 const LINES = [GEO_JSON_TYPE.LINE_STRING, GEO_JSON_TYPE.MULTI_LINE_STRING];

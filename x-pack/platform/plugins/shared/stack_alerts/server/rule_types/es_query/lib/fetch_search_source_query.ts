@@ -11,10 +11,9 @@ import type {
   DataView,
   DataViewsContract,
   ISearchSource,
-  ISearchStartSearchSource} from '@kbn/data-plugin/common';
-import {
-  SortDirection,
+  ISearchStartSearchSource,
 } from '@kbn/data-plugin/common';
+import { SortDirection } from '@kbn/data-plugin/common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,
@@ -24,7 +23,7 @@ import {
 import { isGroupAggregation } from '@kbn/triggers-actions-ui-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
-import type { Logger} from '@kbn/core/server';
+import type { Logger } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { PublicRuleResultService } from '@kbn/alerting-plugin/server/types';

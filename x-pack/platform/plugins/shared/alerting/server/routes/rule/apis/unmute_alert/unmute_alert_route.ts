@@ -6,14 +6,11 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type {
-  UnmuteAlertRequestParamsV1} from '../../../../../common/routes/rule/apis/unmute_alert';
-import {
-  unmuteAlertParamsSchemaV1,
-} from '../../../../../common/routes/rule/apis/unmute_alert';
-import type { ILicenseState} from '../../../../lib';
+import type { UnmuteAlertRequestParamsV1 } from '../../../../../common/routes/rule/apis/unmute_alert';
+import { unmuteAlertParamsSchemaV1 } from '../../../../../common/routes/rule/apis/unmute_alert';
+import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { transformRequestParamsToApplicationV1 } from './transforms';

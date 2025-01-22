@@ -16,10 +16,9 @@ import type {
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type {
   ObservabilityOnboardingPluginSetup,
-  ObservabilityOnboardingPluginStart} from './plugin';
-import {
-  ObservabilityOnboardingPlugin
+  ObservabilityOnboardingPluginStart,
 } from './plugin';
+import { ObservabilityOnboardingPlugin } from './plugin';
 
 export interface ConfigSchema {
   ui: {

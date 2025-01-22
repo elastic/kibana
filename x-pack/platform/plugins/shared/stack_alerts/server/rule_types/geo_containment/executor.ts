@@ -22,7 +22,7 @@ import type {
   GeoContainmentRuleState,
 } from './types';
 
-import type { ActionGroupId} from './constants';
+import type { ActionGroupId } from './constants';
 import { GEO_CONTAINMENT_ID } from './constants';
 
 export async function executor({

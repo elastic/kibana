@@ -9,8 +9,7 @@
 
 import _ from 'lodash';
 import type { Datatable } from '@kbn/expressions-plugin/public';
-import type {
-  Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import {
   compareFilters,
   COMPARE_ALL_OPTIONS,

@@ -11,12 +11,11 @@ import { fetchOverviewStatusAction, quietFetchOverviewStatusAction } from '../ov
 import { enableDefaultAlertingAction } from '../alert_rules';
 import type {
   EncryptedSyntheticsSavedMonitor,
-  SyntheticsMonitorWithId} from '../../../../../common/runtime_types';
-import {
-  ConfigKey
+  SyntheticsMonitorWithId,
 } from '../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../common/runtime_types';
 import { kibanaService } from '../../../../utils/kibana_service';
-import type { MonitorOverviewPageState} from '../overview';
+import type { MonitorOverviewPageState } from '../overview';
 import { selectOverviewPageState } from '../overview';
 import { selectOverviewState } from '../overview/selectors';
 import { fetchEffectFactory, sendErrorToast, sendSuccessToast } from '../utils/fetch_effect';

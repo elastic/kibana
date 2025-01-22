@@ -14,12 +14,11 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { IndexThresholdRuleParams } from './types';
 import { validateExpression } from './validation';
-import type {
-  TIME_UNITS} from '@kbn/triggers-actions-ui-plugin/public';
+import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   builtInAggregationTypes,
   builtInComparators,
-  getTimeUnitLabel
+  getTimeUnitLabel,
 } from '@kbn/triggers-actions-ui-plugin/public';
 
 jest.mock('@kbn/triggers-actions-ui-plugin/public', () => {

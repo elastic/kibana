@@ -13,10 +13,9 @@ import type { MlInferenceHistoryItem } from '../../../../../../common/types/pipe
 import type { Actions } from '../../../../shared/api_logic/create_api_logic';
 import type {
   FetchMlInferencePipelineHistoryApiLogicArgs,
-  FetchMlInferencePipelineHistoryApiLogicResponse} from '../../../api/pipelines/fetch_ml_inference_pipeline_history';
-import {
-  FetchMlInferencePipelineHistoryApiLogic,
+  FetchMlInferencePipelineHistoryApiLogicResponse,
 } from '../../../api/pipelines/fetch_ml_inference_pipeline_history';
+import { FetchMlInferencePipelineHistoryApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_history';
 import { IndexNameLogic } from '../index_name_logic';
 
 export interface InferenceHistoryActions {

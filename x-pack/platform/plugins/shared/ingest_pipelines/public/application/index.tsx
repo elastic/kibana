@@ -10,7 +10,12 @@ import React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 
 import type { ApplicationStart } from '@kbn/core/public';
-import type { NotificationsSetup, IUiSettingsClient, OverlayStart, HttpStart } from '@kbn/core/public';
+import type {
+  NotificationsSetup,
+  IUiSettingsClient,
+  OverlayStart,
+  HttpStart,
+} from '@kbn/core/public';
 import type { ManagementAppMountParams } from '@kbn/management-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';

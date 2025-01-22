@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useEffect } from 'react';
 import { get } from 'lodash';
 
-import type {
-  EuiFieldNumberProps} from '@elastic/eui';
+import type { EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFieldNumber,
   EuiFlexGroup,

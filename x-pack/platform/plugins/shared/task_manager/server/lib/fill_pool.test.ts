@@ -12,7 +12,7 @@ import { fillPool } from './fill_pool';
 import { TaskPoolRunResult } from '../task_pool';
 import type { Result } from './result_type';
 import { asOk } from './result_type';
-import type { ConcreteTaskInstance} from '../task';
+import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import type { TaskManagerRunner } from '../task_running/task_runner';
 import type { ClaimOwnershipResult } from '../queries/task_claiming';

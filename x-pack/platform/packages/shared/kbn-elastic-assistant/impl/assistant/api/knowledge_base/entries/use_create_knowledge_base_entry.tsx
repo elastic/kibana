@@ -12,10 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 import type {
   KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryResponse} from '@kbn/elastic-assistant-common';
+  KnowledgeBaseEntryResponse,
+} from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
 } from '@kbn/elastic-assistant-common';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
 

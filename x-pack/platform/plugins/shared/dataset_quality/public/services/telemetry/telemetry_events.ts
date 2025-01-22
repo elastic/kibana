@@ -11,10 +11,9 @@ import type {
   DatasetEbtFilter,
   DatasetEbtProps,
   DatasetNavigatedEbtProps,
-  DatasetQualityTelemetryEvent} from './types';
-import {
-  DatasetQualityTelemetryEventTypes,
+  DatasetQualityTelemetryEvent,
 } from './types';
+import { DatasetQualityTelemetryEventTypes } from './types';
 
 const dataStreamSchema: SchemaObject<DatasetEbtProps['data_stream']> = {
   properties: {

@@ -10,8 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { PainlessContext } from '@kbn/monaco';
 import { PainlessLang } from '@kbn/monaco';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,18 +22,8 @@ import {
   EuiCode,
 } from '@elastic/eui';
 
-import type {
-  FormHook,
-  ValidationFunc,
-  FieldConfig} from '../../shared_imports';
-import {
-  useForm,
-  useFormData,
-  Form,
-  UseField,
-  TextField,
-  CodeEditor
-} from '../../shared_imports';
+import type { FormHook, ValidationFunc, FieldConfig } from '../../shared_imports';
+import { useForm, useFormData, Form, UseField, TextField, CodeEditor } from '../../shared_imports';
 import type { RuntimeField, RuntimeType } from '../../types';
 import { RUNTIME_FIELD_OPTIONS } from '../../constants';
 import { schema } from './schema';

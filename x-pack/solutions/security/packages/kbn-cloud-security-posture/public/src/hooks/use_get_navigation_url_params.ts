@@ -9,7 +9,7 @@ import type { CoreStart } from '@kbn/core-lifecycle-browser';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useCallback } from 'react';
 import type { CspClientPluginStartDeps } from '../types';
-import type { NavFilter} from '../utils/query_utils';
+import type { NavFilter } from '../utils/query_utils';
 import { encodeQueryUrl, composeQueryFilters } from '../utils/query_utils';
 
 export const useGetNavigationUrlParams = () => {

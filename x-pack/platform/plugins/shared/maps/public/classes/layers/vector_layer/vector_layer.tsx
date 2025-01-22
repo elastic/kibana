@@ -17,29 +17,26 @@ import _ from 'lodash';
 import { EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { AbstractLayer } from '../layer';
-import type { IVectorStyle} from '../../styles/vector/vector_style';
+import type { IVectorStyle } from '../../styles/vector/vector_style';
 import { VectorStyle } from '../../styles/vector/vector_style';
-import type {
-  FieldFormatter,
-  VECTOR_STYLES} from '../../../../common/constants';
+import type { FieldFormatter, VECTOR_STYLES } from '../../../../common/constants';
 import {
   AGG_TYPE,
   SOURCE_META_DATA_REQUEST_ID,
   SOURCE_FORMATTERS_DATA_REQUEST_ID,
   LAYER_TYPE,
   FIELD_ORIGIN,
-  STYLE_TYPE
+  STYLE_TYPE,
 } from '../../../../common/constants';
 import { TermJoinTooltipProperty } from '../../tooltips/term_join_tooltip_property';
 import { DataRequestAbortError } from '../../util/data_request';
 import { canSkipStyleMetaUpdate, canSkipFormattersUpdate } from '../../util/can_skip_fetch';
-import type {
-  TimesliceMaskConfig} from '../../util/mb_filter_expressions';
+import type { TimesliceMaskConfig } from '../../util/mb_filter_expressions';
 import {
   getLabelFilterExpression,
   getFillFilterExpression,
   getLineFilterExpression,
-  getPointFilterExpression
+  getPointFilterExpression,
 } from '../../util/mb_filter_expressions';
 import type {
   AbstractESJoinSourceDescriptor,

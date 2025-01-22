@@ -23,14 +23,8 @@ import { useHistory, useLocation } from 'react-router-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import type {
-  GuideFilterValues,
-  GuideCardConstants} from '@kbn/guided-onboarding/guide';
-import {
-  GuideCards,
-  GuideFilters,
-  guideCards,
-} from '@kbn/guided-onboarding/guide';
+import type { GuideFilterValues, GuideCardConstants } from '@kbn/guided-onboarding/guide';
+import { GuideCards, GuideFilters, guideCards } from '@kbn/guided-onboarding/guide';
 import {
   GuideCardsClassic,
   GuideFiltersClassic,

@@ -16,14 +16,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 import { areRefreshIntervalsDifferent, areTimeRangesDifferent } from './lib/diff_time_picker_vals';
 import type { TimefilterConfig, InputTimeRange, TimeRangeBounds } from './types';
 import type { NowProviderInternalContract } from '../../now_provider';
-import type {
-  RefreshInterval} from '../../../common';
-import {
-  calculateBounds,
-  getAbsoluteTimeRange,
-  getTime,
-  getRelativeTime
-} from '../../../common';
+import type { RefreshInterval } from '../../../common';
+import { calculateBounds, getAbsoluteTimeRange, getTime, getRelativeTime } from '../../../common';
 import type { TimeHistoryContract } from './time_history';
 import type { AutoRefreshDoneFn } from './lib/auto_refresh_loop';
 import { createAutoRefreshLoop } from './lib/auto_refresh_loop';

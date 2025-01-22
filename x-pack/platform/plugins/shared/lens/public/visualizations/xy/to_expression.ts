@@ -8,12 +8,8 @@
 import type { Ast } from '@kbn/interpreter';
 import { Position, ScaleType } from '@elastic/charts';
 import type { PaletteRegistry } from '@kbn/coloring';
-import type {
-  ExpressionFunctionTheme} from '@kbn/expressions-plugin/common';
-import {
-  buildExpression,
-  buildExpressionFunction
-} from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionTheme } from '@kbn/expressions-plugin/common';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import {
   isManualPointAnnotationConfig,

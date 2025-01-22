@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import moment from 'moment';
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { MockedLogger} from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,
@@ -19,13 +19,8 @@ import type { ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionTypeRegistry } from '../action_type_registry';
 import { ActionsClient } from './actions_client';
 import type { ExecutorType, ActionType } from '../types';
-import type {
-  ILicenseState} from '../lib';
-import {
-  ActionExecutor,
-  TaskRunnerFactory,
-  asHttpRequestExecutionSource,
-} from '../lib';
+import type { ILicenseState } from '../lib';
+import { ActionExecutor, TaskRunnerFactory, asHttpRequestExecutionSource } from '../lib';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { getActionsConfigurationUtilities } from '../actions_config';

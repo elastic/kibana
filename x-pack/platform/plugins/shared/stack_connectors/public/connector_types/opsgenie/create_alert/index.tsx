@@ -6,15 +6,13 @@
  */
 
 import React, { lazy, Suspense, useCallback, useState } from 'react';
-import type {
-  ActionParamsProps} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
   SectionLoading,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiErrorBoundary,
   EuiFlexGroup,

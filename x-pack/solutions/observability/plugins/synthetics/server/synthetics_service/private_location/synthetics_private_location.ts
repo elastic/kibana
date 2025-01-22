@@ -20,7 +20,8 @@ import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_
 import type {
   HeartbeatConfig,
   MonitorFields,
-  PrivateLocation} from '../../../common/runtime_types';
+  PrivateLocation,
+} from '../../../common/runtime_types';
 import {
   ConfigKey,
   SourceType,

@@ -9,8 +9,7 @@ import React, { useEffect } from 'react';
 
 import dedent from 'dedent';
 
-import type {
-  EuiAccordionProps} from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButton,

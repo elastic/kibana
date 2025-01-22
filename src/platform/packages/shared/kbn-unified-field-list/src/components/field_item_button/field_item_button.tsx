@@ -11,7 +11,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import classnames from 'classnames';
 import { FieldButton, type FieldButtonProps } from '@kbn/react-field';
-import type { EuiButtonIconProps} from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiHighlight, EuiIcon, EuiToolTip } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { FieldIcon, getFieldIconProps, getFieldSearchMatchingHighlight } from '@kbn/field-utils';

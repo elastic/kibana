@@ -12,11 +12,8 @@ import {
   uiSettingsServiceMock,
 } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
-import type {
-  MaintenanceWindowClientContext} from '../../../../../common';
-import {
-  MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE,
-} from '../../../../../common';
+import type { MaintenanceWindowClientContext } from '../../../../../common';
+import { MAINTENANCE_WINDOW_SAVED_OBJECT_TYPE } from '../../../../../common';
 import { getMockMaintenanceWindow } from '../../../../data/maintenance_window/test_helpers';
 
 const savedObjectsClient = savedObjectsClientMock.create();

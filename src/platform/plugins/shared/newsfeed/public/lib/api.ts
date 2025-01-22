@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, timer, of } from 'rxjs';
 import { map, catchError, filter, mergeMap, tap } from 'rxjs';
 import { i18n } from '@kbn/i18n';

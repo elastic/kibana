@@ -27,8 +27,7 @@ import { DashboardToDiscoverDrilldown } from './drilldowns/dashboard_to_discover
 import { App1ToDashboardDrilldown } from './drilldowns/app1_to_dashboard_drilldown';
 import { App1HelloWorldDrilldown } from './drilldowns/app1_hello_world_drilldown';
 import { DashboardHelloWorldOnlyRangeSelectDrilldown } from './drilldowns/dashboard_hello_world_only_range_select_drilldown';
-import type {
-  SampleApp2ClickContext} from './triggers';
+import type { SampleApp2ClickContext } from './triggers';
 import {
   sampleApp1ClickTrigger,
   sampleApp2ClickTrigger,

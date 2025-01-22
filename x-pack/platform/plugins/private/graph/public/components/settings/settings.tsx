@@ -15,8 +15,7 @@ import { AdvancedSettingsForm } from './advanced_settings_form';
 import { BlocklistForm } from './blocklist_form';
 import { UrlTemplateList } from './url_template_list';
 import type { AdvancedSettings, BlockListedNode, UrlTemplate, WorkspaceField } from '../../types';
-import type {
-  GraphState} from '../../state_management';
+import type { GraphState } from '../../state_management';
 import {
   settingsSelector,
   templatesSelector,

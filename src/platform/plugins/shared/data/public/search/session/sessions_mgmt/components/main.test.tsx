@@ -15,7 +15,7 @@ import moment from 'moment';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { SearchUsageCollector} from '../../..';
+import type { SearchUsageCollector } from '../../..';
 import { SessionsClient } from '../../..';
 import { SearchSessionsMgmtAPI } from '../lib/api';
 import { AsyncSearchIntroDocumentation } from '../lib/documentation';

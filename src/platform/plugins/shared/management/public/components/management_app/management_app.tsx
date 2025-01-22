@@ -24,12 +24,8 @@ import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import useObservable from 'react-use/lib/useObservable';
 import type { ChromeStyle } from '@kbn/core-chrome-browser';
 import { AppContextProvider } from './management_context';
-import type {
-  ManagementSection} from '../../utils';
-import {
-  MANAGEMENT_BREADCRUMB,
-  MANAGEMENT_BREADCRUMB_NO_HREF,
-} from '../../utils';
+import type { ManagementSection } from '../../utils';
+import { MANAGEMENT_BREADCRUMB, MANAGEMENT_BREADCRUMB_NO_HREF } from '../../utils';
 import { ManagementRouter } from './management_router';
 import { managementSidebarNav } from '../management_sidebar_nav/management_sidebar_nav';
 import type { SectionsServiceStart, NavigationCardsSubject, AppDependencies } from '../../types';

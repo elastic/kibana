@@ -8,15 +8,14 @@
  */
 
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import type {
-  PieVisConfig} from '../types/expression_renderers';
+import type { PieVisConfig } from '../types/expression_renderers';
 import {
   EmptySizeRatios,
   LabelPositions,
   ValueFormats,
   LegendDisplay,
 } from '../types/expression_renderers';
-import type { ExpressionValueVisDimension} from '@kbn/visualizations-plugin/common';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import { LegendSize } from '@kbn/visualizations-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { pieVisFunction } from './pie_vis_function';

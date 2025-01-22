@@ -24,7 +24,7 @@ import type { ExportType } from '@kbn/reporting-server';
 import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counter';
 import type { ReportingCore } from '../../..';
 import type { ReportingInternalSetup, ReportingInternalStart } from '../../../core';
-import type { ContentStream} from '../../../lib';
+import type { ContentStream } from '../../../lib';
 import { getContentStream } from '../../../lib';
 import { reportingMock } from '../../../mocks';
 import {

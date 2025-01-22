@@ -18,7 +18,7 @@ import type { Scroll } from '../lists/types';
 import { getQueryFilter } from './get_query_filter';
 import { getSortWithTieBreaker } from './get_sort_with_tie_breaker';
 import { getSourceWithTieBreaker } from './get_source_with_tie_breaker';
-import type { TieBreaker} from './get_search_after_with_tie_breaker';
+import type { TieBreaker } from './get_search_after_with_tie_breaker';
 import { getSearchAfterWithTieBreaker } from './get_search_after_with_tie_breaker';
 
 interface GetSearchAfterOptions {

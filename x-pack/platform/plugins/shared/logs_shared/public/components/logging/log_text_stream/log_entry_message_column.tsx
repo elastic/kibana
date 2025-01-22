@@ -17,12 +17,11 @@ import {
 } from '../../../utils/log_entry';
 import { FieldValue } from './field_value';
 import { LogEntryColumnContent } from './log_entry_column';
-import type {
-  WrapMode} from './text_styles';
+import type { WrapMode } from './text_styles';
 import {
   longWrappedContentStyle,
   preWrappedContentStyle,
-  unwrappedContentStyle
+  unwrappedContentStyle,
 } from './text_styles';
 
 export interface LogEntryMessageColumnProps {

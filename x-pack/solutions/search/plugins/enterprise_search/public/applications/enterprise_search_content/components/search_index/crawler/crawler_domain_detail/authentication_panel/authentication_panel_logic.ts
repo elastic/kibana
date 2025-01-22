@@ -10,11 +10,8 @@ import { kea } from 'kea';
 
 import type { CrawlerAuth } from '../../../../../api/crawler/types';
 import { isRawCrawlerAuth, isBasicCrawlerAuth } from '../../../../../api/crawler/utils';
-import type {
-  CrawlerDomainDetailActions} from '../crawler_domain_detail_logic';
-import {
-  CrawlerDomainDetailLogic,
-} from '../crawler_domain_detail_logic';
+import type { CrawlerDomainDetailActions } from '../crawler_domain_detail_logic';
+import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
 interface AuthenticationPanelValues {
   headerContent: string;

@@ -8,7 +8,7 @@
 import React, { Fragment } from 'react';
 import { EuiTitle, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EmsTmsSourceConfig} from './tile_service_select';
+import type { EmsTmsSourceConfig } from './tile_service_select';
 import { TileServiceSelect } from './tile_service_select';
 import type { OnSourceChangeArgs } from '../source';
 

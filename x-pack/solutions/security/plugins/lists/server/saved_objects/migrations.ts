@@ -10,11 +10,9 @@ import type { SavedObjectSanitizedDoc, SavedObjectUnsanitizedDoc } from '@kbn/co
 import type {
   EntriesArray,
   NonEmptyNestedEntriesArray,
-  OsTypeArray} from '@kbn/securitysolution-io-ts-list-types';
-import {
-  entriesNested,
-  entry,
+  OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { entriesNested, entry } from '@kbn/securitysolution-io-ts-list-types';
 import {
   ENDPOINT_LIST_ID,
   ENDPOINT_TRUSTED_APPS_LIST_ID,

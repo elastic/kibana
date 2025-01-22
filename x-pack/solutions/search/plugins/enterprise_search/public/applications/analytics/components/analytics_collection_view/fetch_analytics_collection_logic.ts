@@ -11,11 +11,8 @@ import { kea } from 'kea';
 import type { AnalyticsCollection } from '../../../../../common/types/analytics';
 import { Status } from '../../../../../common/types/api';
 import type { Actions } from '../../../shared/api_logic/create_api_logic';
-import type {
-  FetchAnalyticsCollectionApiLogicResponse} from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';
-import {
-  FetchAnalyticsCollectionAPILogic
-} from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';
+import type { FetchAnalyticsCollectionApiLogicResponse } from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';
+import { FetchAnalyticsCollectionAPILogic } from '../../api/fetch_analytics_collection/fetch_analytics_collection_api_logic';
 
 export interface FetchAnalyticsCollectionActions {
   apiSuccess: Actions<{}, FetchAnalyticsCollectionApiLogicResponse>['apiSuccess'];

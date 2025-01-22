@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { useHistory} from 'react-router-dom';
+import type { useHistory } from 'react-router-dom';
 import { useRouteMatch } from 'react-router-dom';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiIcon } from '@elastic/eui';

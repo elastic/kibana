@@ -7,12 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  SavedObjectsRawDocSource} from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
-  type SavedObjectSanitizedDoc
+  type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import type {

@@ -10,7 +10,7 @@
 import { EuiDelayRender, EuiSkeletonText } from '@elastic/eui';
 import type { FieldFormat, FieldFormatParams } from '@kbn/field-formats-plugin/common';
 import { memoize } from 'lodash';
-import type { LazyExoticComponent} from 'react';
+import type { LazyExoticComponent } from 'react';
 import React, { PureComponent } from 'react';
 import type { FormatEditorServiceStart } from '../../service';
 import type { FieldFormatEditor, FieldFormatEditorFactory } from './editors';

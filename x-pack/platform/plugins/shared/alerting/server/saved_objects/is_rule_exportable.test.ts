@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MockedLogger} from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { TaskRunnerFactory } from '../task_runner';
 import type { ConstructorOptions } from '../rule_type_registry';

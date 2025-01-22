@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElementType} from 'react';
+import type { ElementType } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {
@@ -23,15 +23,15 @@ import styled from 'styled-components';
 import type {
   ExceptionListType,
   ListSchema,
-  OsTypeArray} from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ListOperatorTypeEnum as OperatorTypeEnum
+  OsTypeArray,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import type {
   BuilderEntry,
   DataViewField,
   FormattedBuilderEntry,
-  OperatorOption} from '@kbn/securitysolution-list-utils';
+  OperatorOption,
+} from '@kbn/securitysolution-list-utils';
 import {
   EXCEPTION_OPERATORS_ONLY_LISTS,
   fieldSupportsMatches,

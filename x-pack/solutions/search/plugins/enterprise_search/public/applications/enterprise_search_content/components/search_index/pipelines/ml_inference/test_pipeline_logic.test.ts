@@ -9,7 +9,7 @@ import { mockMlInferenceValues } from './__mocks__/ml_inference_logic.mock';
 import { LogicMounter } from '../../../../../__mocks__/kea_logic';
 import { nerModel } from '../../../../__mocks__/ml_models.mock';
 
-import type { HttpError} from '../../../../../../../common/types/api';
+import type { HttpError } from '../../../../../../../common/types/api';
 import { Status } from '../../../../../../../common/types/api';
 import type { MlInferencePipeline } from '../../../../../../../common/types/pipelines';
 import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';

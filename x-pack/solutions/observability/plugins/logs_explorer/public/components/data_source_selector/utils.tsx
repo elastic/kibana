@@ -7,7 +7,10 @@
 
 import type { RefCallback } from 'react';
 import React from 'react';
-import type { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import { PackageIcon } from '@kbn/fleet-plugin/public';
 import type { AllDatasetSelection } from '../../../common';
 import type { Integration } from '../../../common/datasets';

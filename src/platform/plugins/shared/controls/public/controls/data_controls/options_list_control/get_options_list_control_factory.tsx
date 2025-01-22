@@ -21,7 +21,7 @@ import {
 
 import type { Filter } from '@kbn/es-query';
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter } from '@kbn/es-query';
-import type { PublishingSubject} from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { OPTIONS_LIST_CONTROL } from '../../../../common';

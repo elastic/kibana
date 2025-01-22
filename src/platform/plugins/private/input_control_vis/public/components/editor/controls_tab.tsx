@@ -23,16 +23,14 @@ import {
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { ControlEditor } from './control_editor';
-import type {
-  ControlParams,
-  ControlParamsOptions} from '../../editor_utils';
+import type { ControlParams, ControlParamsOptions } from '../../editor_utils';
 import {
   addControl,
   moveControl,
   newControl,
   removeControl,
   setControl,
-  CONTROL_TYPES
+  CONTROL_TYPES,
 } from '../../editor_utils';
 import { getLineageMap, getParentCandidates } from '../../lineage';
 import type { InputControlVisDependencies } from '../../plugin';

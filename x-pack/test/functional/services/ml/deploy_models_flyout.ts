@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { IngestInferenceProcessor, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IngestInferenceProcessor,
+  IngestPipeline,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ProvidedType } from '@kbn/test';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';

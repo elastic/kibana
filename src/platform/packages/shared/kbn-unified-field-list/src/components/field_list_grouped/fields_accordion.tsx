@@ -19,7 +19,7 @@ import {
 } from '@elastic/eui';
 import classNames from 'classnames';
 import { type DataViewField } from '@kbn/data-views-plugin/common';
-import type { FieldsGroupNames} from '../../types';
+import type { FieldsGroupNames } from '../../types';
 import { type FieldListItem, type RenderFieldItemParams } from '../../types';
 import './fields_accordion.scss';
 

@@ -10,17 +10,11 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import type {
-  LogEntryColumnWidth,
-  LogEntryColumnWidths} from './log_entry_column';
-import {
-  LogEntryColumn,
-  LogEntryColumnContent
-} from './log_entry_column';
+import type { LogEntryColumnWidth, LogEntryColumnWidths } from './log_entry_column';
+import { LogEntryColumn, LogEntryColumnContent } from './log_entry_column';
 import { useLogPositionStateContext } from '../../../containers/logs/log_position';
 import { localizedDate } from '../../../../common/formatters/datetime';
-import type {
-  LogColumnRenderConfiguration} from '../../../utils/log_column_render_configuration';
+import type { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 import {
   isTimestampColumnRenderConfiguration,
   isMessageColumnRenderConfiguration,

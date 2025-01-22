@@ -4,16 +4,17 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { SavedObject, SavedObjectsClientContract, SavedObjectsFindResult } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectsClientContract,
+  SavedObjectsFindResult,
+} from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginStart } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SyntheticsServerSetup } from '../../types';
 import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { normalizeSecrets } from '../utils';
-import type {
-  PrivateConfig} from '../private_location/synthetics_private_location';
-import {
-  SyntheticsPrivateLocation,
-} from '../private_location/synthetics_private_location';
+import type { PrivateConfig } from '../private_location/synthetics_private_location';
+import { SyntheticsPrivateLocation } from '../private_location/synthetics_private_location';
 import type { SyntheticsService } from '../synthetics_service';
 import type {
   EncryptedSyntheticsMonitorAttributes,
@@ -21,14 +22,14 @@ import type {
   MonitorFields,
   MonitorServiceLocation,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecretsAttributes} from '../../../common/runtime_types';
+  SyntheticsMonitorWithSecretsAttributes,
+} from '../../../common/runtime_types';
 import {
   ConfigKey,
   ScheduleUnit,
   type SyntheticsPrivateLocations,
 } from '../../../common/runtime_types';
-import type {
-  ConfigData} from '../formatters/public_formatters/format_configs';
+import type { ConfigData } from '../formatters/public_formatters/format_configs';
 import {
   formatHeartbeatRequest,
   mixParamsWithGlobalParams,

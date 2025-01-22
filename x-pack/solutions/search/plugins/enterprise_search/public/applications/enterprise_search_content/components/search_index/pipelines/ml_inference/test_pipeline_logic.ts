@@ -18,24 +18,21 @@ import type { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import { getErrorsFromHttpResponse } from '../../../../../shared/flash_messages/handle_api_errors';
 import type {
   GetDocumentsArgs,
-  GetDocumentsResponse} from '../../../../api/documents/get_document_logic';
-import {
-  GetDocumentsApiLogic
+  GetDocumentsResponse,
 } from '../../../../api/documents/get_document_logic';
+import { GetDocumentsApiLogic } from '../../../../api/documents/get_document_logic';
 import type {
   SimulateExistingMlInterfacePipelineArgs,
-  SimulateExistingMlInterfacePipelineResponse} from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
-import {
-  SimulateExistingMlInterfacePipelineApiLogic
+  SimulateExistingMlInterfacePipelineResponse,
 } from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
+import { SimulateExistingMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_existing_ml_inference_pipeline';
 import type {
   SimulateMlInterfacePipelineArgs,
-  SimulateMlInterfacePipelineResponse} from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
-import {
-  SimulateMlInterfacePipelineApiLogic
+  SimulateMlInterfacePipelineResponse,
 } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
+import { SimulateMlInterfacePipelineApiLogic } from '../../../../api/pipelines/simulate_ml_inference_pipeline_processors';
 
-import type { AddInferencePipelineModal} from './ml_inference_logic';
+import type { AddInferencePipelineModal } from './ml_inference_logic';
 import { MLInferenceLogic } from './ml_inference_logic';
 
 export interface TestPipelineActions {

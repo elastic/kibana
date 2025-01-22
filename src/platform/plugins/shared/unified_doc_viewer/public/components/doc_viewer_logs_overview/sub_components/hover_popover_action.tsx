@@ -8,8 +8,7 @@
  */
 
 import React, { useRef, useState } from 'react';
-import type {
-  PopoverAnchorPosition} from '@elastic/eui';
+import type { PopoverAnchorPosition } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiPopover,

@@ -20,7 +20,7 @@ import {
 import type { FormHook } from '../../../../../shared_imports';
 import type { Document } from '../../types';
 
-import type { TestPipelineFlyoutTab} from './test_pipeline_tabs';
+import type { TestPipelineFlyoutTab } from './test_pipeline_tabs';
 import { Tabs, OutputTab, DocumentsTab } from './test_pipeline_tabs';
 import type { TestPipelineFlyoutForm } from './test_pipeline_flyout.container';
 

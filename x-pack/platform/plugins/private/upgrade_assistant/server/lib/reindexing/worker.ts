@@ -5,16 +5,21 @@
  * 2.0.
  */
 
-import type { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from '@kbn/core/server';
+import type {
+  IClusterClient,
+  Logger,
+  SavedObjectsClientContract,
+  FakeRequest,
+} from '@kbn/core/server';
 import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import moment from 'moment';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import type { ReindexSavedObject} from '../../../common/types';
+import type { ReindexSavedObject } from '../../../common/types';
 import { ReindexStatus } from '../../../common/types';
 import type { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
-import type { ReindexService} from './reindex_service';
+import type { ReindexService } from './reindex_service';
 import { reindexServiceFactory } from './reindex_service';
 import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
 

@@ -43,7 +43,7 @@ import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugi
 
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
-import type { ActionsConfig, EnabledConnectorTypes} from './config';
+import type { ActionsConfig, EnabledConnectorTypes } from './config';
 import { AllowedHosts, getValidatedConfig } from './config';
 import { resolveCustomHosts } from './lib/custom_host_settings';
 import { events } from './lib/event_based_telemetry';
@@ -51,14 +51,8 @@ import { ActionsClient } from './actions_client/actions_client';
 import { ActionTypeRegistry } from './action_type_registry';
 import { createBulkExecutionEnqueuerFunction } from './create_execute_function';
 import { registerActionsUsageCollector } from './usage';
-import type {
-  ILicenseState} from './lib';
-import {
-  ActionExecutor,
-  TaskRunnerFactory,
-  LicenseState,
-  spaceIdToNamespace,
-} from './lib';
+import type { ILicenseState } from './lib';
+import { ActionExecutor, TaskRunnerFactory, LicenseState, spaceIdToNamespace } from './lib';
 import type {
   Services,
   ActionType,
@@ -70,7 +64,7 @@ import type {
   UnsecuredServices,
 } from './types';
 
-import type { ActionsConfigurationUtilities} from './actions_config';
+import type { ActionsConfigurationUtilities } from './actions_config';
 import { getActionsConfigurationUtilities } from './actions_config';
 
 import { defineRoutes } from './routes';
@@ -93,11 +87,8 @@ import { ACTIONS_FEATURE_ID, AlertHistoryEsIndexConnectorId } from '../common';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER } from './constants/event_log';
 import { ConnectorTokenClient } from './lib/connector_token_client';
 import { InMemoryMetrics, registerClusterCollector, registerNodeCollector } from './monitoring';
-import type {
-  ConnectorWithOptionalDeprecation} from './application/connector/lib';
-import {
-  isConnectorDeprecated
-} from './application/connector/lib';
+import type { ConnectorWithOptionalDeprecation } from './application/connector/lib';
+import { isConnectorDeprecated } from './application/connector/lib';
 import { createSubActionConnectorFramework } from './sub_action_framework';
 import type {
   ICaseServiceAbstract,

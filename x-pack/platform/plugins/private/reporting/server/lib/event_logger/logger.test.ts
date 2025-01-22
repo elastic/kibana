@@ -10,7 +10,7 @@ import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { BasePayload } from '@kbn/reporting-common/types';
 
 import { Report } from '../store';
-import type { ReportingEventLogger} from './logger';
+import type { ReportingEventLogger } from './logger';
 import { reportingEventLoggerFactory } from './logger';
 
 describe('Event Logger', () => {

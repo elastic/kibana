@@ -10,10 +10,11 @@ import { ReadableStream } from 'stream/web';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 import type {
   ChatCompletionChunkEvent,
-  StreamingChatResponseEventWithoutError} from '../../common/conversation_complete';
+  StreamingChatResponseEventWithoutError,
+} from '../../common/conversation_complete';
 import {
   ChatCompletionError,
-  StreamingChatResponseEventType
+  StreamingChatResponseEventType,
 } from '../../common/conversation_complete';
 import { concatenateChatCompletionChunks } from '../../common/utils/concatenate_chat_completion_chunks';
 import type { ObservabilityAIAssistantChatService } from '../types';

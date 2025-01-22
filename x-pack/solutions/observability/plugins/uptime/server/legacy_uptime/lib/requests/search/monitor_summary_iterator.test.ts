@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ChunkFetcher,
-  ChunkResult} from './monitor_summary_iterator';
-import {
-  CHUNK_SIZE,
-  MonitorSummaryIterator,
-} from './monitor_summary_iterator';
+import type { ChunkFetcher, ChunkResult } from './monitor_summary_iterator';
+import { CHUNK_SIZE, MonitorSummaryIterator } from './monitor_summary_iterator';
 import { simpleQueryContext } from './test_helpers';
 import type { QueryContext } from './query_context';
 import type { MonitorSummary } from '../../../../../common/runtime_types';

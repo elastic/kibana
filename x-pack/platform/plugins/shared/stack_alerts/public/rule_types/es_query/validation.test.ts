@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EsQueryRuleParams} from './types';
+import type { EsQueryRuleParams } from './types';
 import { SearchType } from './types';
 import { validateExpression, hasExpressionValidationErrors } from './validation';
 

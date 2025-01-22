@@ -21,7 +21,8 @@ import type { AssistantResourceNames, GetElser } from '../types';
 import { AIAssistantConversationsDataClient } from '../ai_assistant_data_clients/conversations';
 import type {
   InitializationPromise,
-  ResourceInstallationHelper} from './create_resource_installation_helper';
+  ResourceInstallationHelper,
+} from './create_resource_installation_helper';
 import {
   createResourceInstallationHelper,
   errorResult,
@@ -32,11 +33,8 @@ import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/f
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
 import { knowledgeBaseFieldMap } from '../ai_assistant_data_clients/knowledge_base/field_maps_configuration';
-import type {
-  GetAIAssistantKnowledgeBaseDataClientParams} from '../ai_assistant_data_clients/knowledge_base';
-import {
-  AIAssistantKnowledgeBaseDataClient
-} from '../ai_assistant_data_clients/knowledge_base';
+import type { GetAIAssistantKnowledgeBaseDataClientParams } from '../ai_assistant_data_clients/knowledge_base';
+import { AIAssistantKnowledgeBaseDataClient } from '../ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from '../lib/attack_discovery/persistence';
 import { DefendInsightsDataClient } from '../ai_assistant_data_clients/defend_insights';
 import {

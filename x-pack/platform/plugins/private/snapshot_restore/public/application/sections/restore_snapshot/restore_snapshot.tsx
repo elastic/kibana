@@ -11,7 +11,7 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { EuiPageSection, EuiPageHeader, EuiSpacer } from '@elastic/eui';
 
 import type { SnapshotDetails, RestoreSettings } from '../../../../common/types';
-import type { Error} from '../../../shared_imports';
+import type { Error } from '../../../shared_imports';
 import { SectionError, PageError } from '../../../shared_imports';
 import { BASE_PATH } from '../../constants';
 import { PageLoading, RestoreSnapshotForm } from '../../components';

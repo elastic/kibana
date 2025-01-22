@@ -18,13 +18,8 @@ import { eventLogMock } from '@kbn/event-log-plugin/server/mocks';
 import { serverlessPluginMock } from '@kbn/serverless/server/mocks';
 import type { ActionType, ActionsApiRequestHandlerContext, ExecutorType } from './types';
 import type { ActionsConfig } from './config';
-import type {
-  ActionsPluginsSetup,
-  ActionsPluginsStart,
-  PluginSetupContract} from './plugin';
-import {
-  ActionsPlugin
-} from './plugin';
+import type { ActionsPluginsSetup, ActionsPluginsStart, PluginSetupContract } from './plugin';
+import { ActionsPlugin } from './plugin';
 import {
   AlertHistoryEsIndexConnectorId,
   DEFAULT_MICROSOFT_EXCHANGE_URL,

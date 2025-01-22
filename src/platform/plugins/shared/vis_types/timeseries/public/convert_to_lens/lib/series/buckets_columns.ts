@@ -10,15 +10,11 @@
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { Panel } from '../../../../common/types';
 import { getFieldsForTerms } from '../../../../common/fields_utils';
-import type {
-  Column,
-  TermsSeries,
-  FiltersSeries,
-  DateHistogramSeries} from '../convert';
+import type { Column, TermsSeries, FiltersSeries, DateHistogramSeries } from '../convert';
 import {
   convertToFiltersColumn,
   convertToDateHistogramColumn,
-  convertToTermsColumn
+  convertToTermsColumn,
 } from '../convert';
 import { getValidColumns } from './columns';
 

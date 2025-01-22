@@ -16,7 +16,7 @@ import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kb
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { NewsfeedPluginBrowserConfig, NewsfeedPluginStartDependencies } from './types';
 import { NewsfeedNavButton } from './components/newsfeed_header_nav_button';
-import type { NewsfeedApi} from './lib/api';
+import type { NewsfeedApi } from './lib/api';
 import { getApi, NewsfeedApiEndpoint } from './lib/api';
 
 export type NewsfeedPublicPluginSetup = ReturnType<NewsfeedPublicPlugin['setup']>;

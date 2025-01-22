@@ -13,18 +13,12 @@ import type { HttpSetup, NotificationsSetup, DocLinksStart } from '@kbn/core/pub
 
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type { RouteComponentProps} from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect, useLocation } from 'react-router-dom';
 import { Router, Route, Routes } from '@kbn/shared-ux-router';
 import { CONFIG_TAB_ID, HISTORY_TAB_ID, SHELL_TAB_ID } from './containers/main';
-import type {
-  AutocompleteInfo} from '../services';
-import {
-  createStorage,
-  createHistory,
-  createSettings,
-  setStorage,
-} from '../services';
+import type { AutocompleteInfo } from '../services';
+import { createStorage, createHistory, createSettings, setStorage } from '../services';
 import { createUsageTracker } from '../services/tracker';
 import { loadActiveApi } from '../lib/kb';
 import * as localStorageObjectClient from '../lib/local_storage_object_client';

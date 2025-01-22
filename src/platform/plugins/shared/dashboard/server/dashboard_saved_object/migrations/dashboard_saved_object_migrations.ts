@@ -9,11 +9,8 @@
 
 import { flow, mapValues } from 'lodash';
 
-import type {
-  MigrateFunctionsObject} from '@kbn/kibana-utils-plugin/common';
-import {
-  mergeMigrationFunctionMaps
-} from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/server';
 

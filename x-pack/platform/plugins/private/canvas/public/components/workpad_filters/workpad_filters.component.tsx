@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { Fragment } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSelect, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

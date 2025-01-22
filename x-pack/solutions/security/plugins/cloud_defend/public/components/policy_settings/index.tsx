@@ -4,10 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FormEvent} from 'react';
+import type { FormEvent } from 'react';
 import React, { useCallback, useState } from 'react';
-import type {
-  EuiSwitchProps} from '@elastic/eui';
+import type { EuiSwitchProps } from '@elastic/eui';
 import {
   EuiTextArea,
   EuiSwitch,
@@ -18,7 +17,7 @@ import {
   EuiForm,
   EuiFormRow,
   EuiFieldText,
-  EuiHorizontalRule
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { INPUT_CONTROL } from '../../../common/constants';
 import { getInputFromPolicy } from '../../../common/utils/helpers';

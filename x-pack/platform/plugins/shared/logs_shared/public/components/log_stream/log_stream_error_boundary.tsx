@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { KQLSyntaxError } from '@kbn/es-query';
-import type { RenderErrorFunc} from '../resettable_error_boundary';
+import type { RenderErrorFunc } from '../resettable_error_boundary';
 import { ResettableErrorBoundary } from '../resettable_error_boundary';
 
 export const LogStreamErrorBoundary: FC<

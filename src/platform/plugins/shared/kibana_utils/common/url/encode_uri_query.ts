@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ParsedQuery} from 'query-string';
+import type { ParsedQuery } from 'query-string';
 import { parse, stringify } from 'query-string';
 import { transform } from 'lodash';
 

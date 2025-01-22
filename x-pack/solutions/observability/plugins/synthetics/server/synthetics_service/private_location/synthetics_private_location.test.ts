@@ -6,14 +6,8 @@
  */
 import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
-import type {
-  MonitorFields,
-  HeartbeatConfig} from '../../../common/runtime_types';
-import {
-  MonitorTypeEnum,
-  ScheduleUnit,
-  SourceType
-} from '../../../common/runtime_types';
+import type { MonitorFields, HeartbeatConfig } from '../../../common/runtime_types';
+import { MonitorTypeEnum, ScheduleUnit, SourceType } from '../../../common/runtime_types';
 import { SyntheticsPrivateLocation } from './synthetics_private_location';
 import { testMonitorPolicy } from './test_policy';
 import { formatSyntheticsPolicy } from '../formatters/private_formatters/format_synthetics_policy';

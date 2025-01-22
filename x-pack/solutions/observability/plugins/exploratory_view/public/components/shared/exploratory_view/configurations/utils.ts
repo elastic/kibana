@@ -5,9 +5,7 @@
  * 2.0.
  */
 import rison from '@kbn/rison';
-import type {
-  PhraseFilter,
-  ExistsFilter} from '@kbn/es-query';
+import type { PhraseFilter, ExistsFilter } from '@kbn/es-query';
 import {
   buildQueryFilter,
   buildPhraseFilter as esBuildPhraseFilter,

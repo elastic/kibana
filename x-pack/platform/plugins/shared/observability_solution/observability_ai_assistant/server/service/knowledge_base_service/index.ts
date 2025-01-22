@@ -11,13 +11,8 @@ import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
 import { resourceNames } from '..';
-import type {
-  Instruction,
-  KnowledgeBaseEntry} from '../../../common/types';
-import {
-  KnowledgeBaseEntryRole,
-  KnowledgeBaseType,
-} from '../../../common/types';
+import type { Instruction, KnowledgeBaseEntry } from '../../../common/types';
+import { KnowledgeBaseEntryRole, KnowledgeBaseType } from '../../../common/types';
 import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import {

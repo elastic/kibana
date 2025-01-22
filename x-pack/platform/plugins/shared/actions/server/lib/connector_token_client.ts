@@ -7,7 +7,7 @@
 
 import { omitBy, isUndefined } from 'lodash';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
-import type { Logger, SavedObjectsClientContract} from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { retryIfConflicts } from './retry_if_conflicts';
 import type { ConnectorToken } from '../types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Config, FtrConfigProviderContext} from '@kbn/test';
+import type { Config, FtrConfigProviderContext } from '@kbn/test';
 import { kbnTestConfig } from '@kbn/test';
 import type { UrlObject } from 'url';
 import { format } from 'url';

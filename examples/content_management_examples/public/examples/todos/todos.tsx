@@ -32,10 +32,9 @@ import type {
   TodoUpdateOut,
   TodoCreateOut,
   TodoSearchOut,
-  TodoDeleteOut} from '../../../common/examples/todos';
-import {
-  TODO_CONTENT_ID
+  TodoDeleteOut,
 } from '../../../common/examples/todos';
+import { TODO_CONTENT_ID } from '../../../common/examples/todos';
 
 const useCreateTodoMutation = () => useCreateContentMutation<TodoCreateIn, TodoCreateOut>();
 const useDeleteTodoMutation = () => useDeleteContentMutation<TodoDeleteIn, TodoDeleteOut>();

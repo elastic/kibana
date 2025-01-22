@@ -9,9 +9,7 @@
 import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiBasicTableColumn,
-  CustomItemAction} from '@elastic/eui';
+import type { EuiBasicTableColumn, CustomItemAction } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,

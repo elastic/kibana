@@ -16,8 +16,7 @@ import { SortDirection } from '@kbn/data-plugin/public';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { fetchAnchor } from '../services/anchor';
 import { fetchSurroundingDocs, SurrDocType } from '../services/context';
-import type {
-  ContextFetchState} from '../services/context_query_state';
+import type { ContextFetchState } from '../services/context_query_state';
 import {
   FailureReason,
   getInitialContextQueryState,

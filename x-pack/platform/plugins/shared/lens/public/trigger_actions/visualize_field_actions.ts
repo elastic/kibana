@@ -6,12 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  VisualizeFieldContext} from '@kbn/ui-actions-plugin/public';
-import {
-  createAction,
-  ACTION_VISUALIZE_LENS_FIELD
-} from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
+import { createAction, ACTION_VISUALIZE_LENS_FIELD } from '@kbn/ui-actions-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 
 export const visualizeFieldAction = (application: ApplicationStart) =>

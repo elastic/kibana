@@ -9,7 +9,7 @@
 
 import type { Client } from '@elastic/elasticsearch';
 import type { EntityFields, ESDocumentWithOperation } from '@kbn/apm-synthtrace-client';
-import type { Readable} from 'stream';
+import type { Readable } from 'stream';
 import { pipeline, Transform } from 'stream';
 import type { SynthtraceEsClientOptions } from '../shared/base_client';
 import { SynthtraceEsClient } from '../shared/base_client';

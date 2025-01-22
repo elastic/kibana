@@ -7,12 +7,8 @@
 import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { cloneDeep, keys, merge } from 'lodash';
 import { Alert } from '../alert/alert';
-import type {
-  AlertFactory} from '../alert/create_alert_factory';
-import {
-  createAlertFactory,
-  getPublicAlertFactory,
-} from '../alert/create_alert_factory';
+import type { AlertFactory } from '../alert/create_alert_factory';
+import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';
 import {
   determineAlertsToReturn,
   processAlerts,
@@ -21,12 +17,13 @@ import {
 } from '../lib';
 import { trimRecoveredAlerts } from '../lib/trim_recovered_alerts';
 import { logAlerts } from '../task_runner/log_alerts';
-import type { AlertInstanceContext, AlertInstanceState, WithoutReservedActionGroups } from '../types';
 import type {
-  RulesSettingsFlappingProperties} from '../../common/rules_settings';
-import {
-  DEFAULT_FLAPPING_SETTINGS
-} from '../../common/rules_settings';
+  AlertInstanceContext,
+  AlertInstanceState,
+  WithoutReservedActionGroups,
+} from '../types';
+import type { RulesSettingsFlappingProperties } from '../../common/rules_settings';
+import { DEFAULT_FLAPPING_SETTINGS } from '../../common/rules_settings';
 import type {
   IAlertsClient,
   InitializeExecutionOpts,

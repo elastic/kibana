@@ -20,9 +20,7 @@ import type {
 } from '../../../../types';
 import { getSuggestions, switchToSuggestion } from '../../suggestion_helpers';
 import { showMemoizedErrorNotification } from '../../../../lens_ui_errors';
-import type {
-  VisualizationState,
-  DatasourceStates} from '../../../../state_management';
+import type { VisualizationState, DatasourceStates } from '../../../../state_management';
 import {
   insertLayer,
   removeLayers,

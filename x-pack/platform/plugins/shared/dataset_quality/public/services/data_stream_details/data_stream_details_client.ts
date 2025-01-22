@@ -13,7 +13,8 @@ import type {
   DegradedFieldAnalysis,
   DegradedFieldValues,
   IntegrationDashboardsResponse,
-  UpdateFieldLimitResponse} from '../../../common/api_types';
+  UpdateFieldLimitResponse,
+} from '../../../common/api_types';
 import {
   checkAndLoadIntegrationResponseRt,
   dataStreamRolloverResponseRt,

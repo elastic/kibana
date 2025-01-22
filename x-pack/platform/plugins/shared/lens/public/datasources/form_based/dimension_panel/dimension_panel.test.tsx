@@ -12,24 +12,14 @@ import React from 'react';
 import { screen, act, render, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import type {
-  EuiListGroupItemProps,
-  EuiComboBoxProps} from '@elastic/eui';
-import {
-  EuiComboBox,
-  EuiListGroup,
-  EuiRange,
-  EuiSelect
-} from '@elastic/eui';
+import type { EuiListGroupItemProps, EuiComboBoxProps } from '@elastic/eui';
+import { EuiComboBox, EuiListGroup, EuiRange, EuiSelect } from '@elastic/eui';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
-import type {
-  FormBasedDimensionEditorProps} from './dimension_panel';
-import {
-  FormBasedDimensionEditorComponent
-} from './dimension_panel';
+import type { FormBasedDimensionEditorProps } from './dimension_panel';
+import { FormBasedDimensionEditorComponent } from './dimension_panel';
 import { mount } from 'enzyme';
 import type { IUiSettingsClient, HttpSetup, CoreStart, NotificationsStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
@@ -40,10 +30,9 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type {
   FiltersIndexPatternColumn,
   GenericIndexPatternColumn,
-  TermsIndexPatternColumn} from '../operations';
-import {
-  replaceColumn
+  TermsIndexPatternColumn,
 } from '../operations';
+import { replaceColumn } from '../operations';
 import { documentField } from '../document_field';
 import type { OperationMetadata } from '../../../types';
 import type { DateHistogramIndexPatternColumn } from '../operations/definitions/date_histogram';

@@ -11,14 +11,13 @@ import type { ReactNode } from 'react';
 import React, { useMemo, useState } from 'react';
 import type { estypes } from '@elastic/elasticsearch';
 import { i18n } from '@kbn/i18n';
-import type {
-  Criteria} from '@elastic/eui';
+import type { Criteria } from '@elastic/eui';
 import {
   Comparators,
   EuiBasicTable,
   type EuiBasicTableColumn,
   EuiButtonIcon,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { ClusterView } from './cluster_view';
 import { ClusterHealth } from '../clusters_health';

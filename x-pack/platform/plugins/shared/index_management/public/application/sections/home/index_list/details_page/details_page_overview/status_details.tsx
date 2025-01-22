@@ -8,8 +8,7 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiBadgeProps} from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexGroup,

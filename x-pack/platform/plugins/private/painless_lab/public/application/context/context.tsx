@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { createContext, useState, useContext } from 'react';
 import type { HttpSetup, ChromeStart } from '@kbn/core/public';
 

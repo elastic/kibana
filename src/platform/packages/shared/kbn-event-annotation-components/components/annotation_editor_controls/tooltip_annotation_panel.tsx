@@ -13,9 +13,7 @@ import React, { useCallback, useState } from 'react';
 import fastIsEqual from 'fast-deep-equal';
 import { getFieldIconType } from '@kbn/field-utils';
 import { useExistingFieldsReader } from '@kbn/unified-field-list';
-import type {
-  FieldOption,
-  FieldOptionValue} from '@kbn/visualization-ui-components';
+import type { FieldOption, FieldOptionValue } from '@kbn/visualization-ui-components';
 import {
   FieldPicker,
   NewBucketButton,

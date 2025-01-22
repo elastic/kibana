@@ -15,7 +15,7 @@ import {
   POLICY_WITH_INCLUDE_EXCLUDE,
   POLICY_WITH_KNOWN_AND_UNKNOWN_FIELDS,
 } from '../constants';
-import type { SerializationTestBed} from './policy_serialization.helpers';
+import type { SerializationTestBed } from './policy_serialization.helpers';
 import { setupSerializationTestBed } from './policy_serialization.helpers';
 
 describe('<EditPolicy /> serialization', () => {

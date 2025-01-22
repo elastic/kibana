@@ -10,8 +10,7 @@
 import classNames from 'classnames';
 import React, { useEffect, useState } from 'react';
 
-import type {
-  EuiImageProps} from '@elastic/eui';
+import type { EuiImageProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiEmptyPrompt,

@@ -11,7 +11,7 @@ import type { TaskManagerStartContract } from '../plugin';
 import { TaskManagerPlugin } from '../plugin';
 import { injectTask, retry, setupTestServers } from './lib';
 import type { TestElasticsearchUtils, TestKibanaUtils } from '@kbn/core-test-helpers-kbn-server';
-import type { ConcreteTaskInstance} from '../task';
+import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import type { CreateWorkloadAggregatorOpts } from '../monitoring/workload_statistics';
 

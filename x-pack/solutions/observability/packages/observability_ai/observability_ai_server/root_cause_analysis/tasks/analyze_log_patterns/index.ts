@@ -12,11 +12,8 @@ import {
   P_VALUE_SIGNIFICANCE_HIGH,
   P_VALUE_SIGNIFICANCE_MEDIUM,
 } from '@kbn/observability-utils-common/ml/p_value_to_label';
-import type {
-  FieldPatternResultWithChanges} from '@kbn/observability-utils-server/entities/get_log_patterns';
-import {
-  getLogPatterns,
-} from '@kbn/observability-utils-server/entities/get_log_patterns';
+import type { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
+import { getLogPatterns } from '@kbn/observability-utils-server/entities/get_log_patterns';
 import { castArray, compact, groupBy, orderBy } from 'lodash';
 import { RCA_PROMPT_CHANGES, RCA_PROMPT_ENTITIES } from '../../prompts';
 import type { RootCauseAnalysisContext } from '../../types';

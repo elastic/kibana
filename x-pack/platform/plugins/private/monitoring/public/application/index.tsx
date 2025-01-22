@@ -22,7 +22,7 @@ import {
   CODE_PATH_LOGSTASH,
 } from '../../common/constants';
 import type { MonitoringStartPluginDependencies, MonitoringStartServices } from '../types';
-import type { ExternalConfig} from './contexts/external_config_context';
+import type { ExternalConfig } from './contexts/external_config_context';
 import { ExternalConfigContext } from './contexts/external_config_context';
 import { GlobalStateProvider } from './contexts/global_state_context';
 import { HeaderActionMenuContext } from './contexts/header_action_menu_context';

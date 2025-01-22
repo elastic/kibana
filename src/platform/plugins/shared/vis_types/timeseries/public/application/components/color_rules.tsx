@@ -8,9 +8,7 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import type {
-  EuiComboBoxOptionOption,
-  WithEuiThemeProps} from '@elastic/eui';
+import type { EuiComboBoxOptionOption, WithEuiThemeProps } from '@elastic/eui';
 import {
   htmlIdGenerator,
   EuiComboBox,
@@ -18,7 +16,7 @@ import {
   EuiFormLabel,
   EuiFlexGroup,
   EuiFlexItem,
-  withEuiTheme
+  withEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';

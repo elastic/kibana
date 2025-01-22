@@ -37,11 +37,8 @@ import {
   viewInAppUrlActionVariableDescription,
 } from './translations';
 import { oneOfLiterals, validateKQLStringFilter } from './utils';
-import type {
-  CustomThresholdLocators} from './custom_threshold_executor';
-import {
-  createCustomThresholdExecutor
-} from './custom_threshold_executor';
+import type { CustomThresholdLocators } from './custom_threshold_executor';
+import { createCustomThresholdExecutor } from './custom_threshold_executor';
 import { CUSTOM_THRESHOLD_AAD_FIELDS, FIRED_ACTION, NO_DATA_ACTION } from './constants';
 import type { ObservabilityConfig } from '../../..';
 import type { CustomThresholdAlert } from './types';

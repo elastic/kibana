@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TimeRange} from '@kbn/data-plugin/common';
+import type { TimeRange } from '@kbn/data-plugin/common';
 import { TimeBuckets, UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { Datatable, DatatableColumn, DatatableRow } from '@kbn/expressions-plugin/common';
 import { omit, pick } from 'lodash';

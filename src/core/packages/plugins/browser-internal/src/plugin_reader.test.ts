@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreWindow} from './plugin_reader';
+import type { CoreWindow } from './plugin_reader';
 import { read } from './plugin_reader';
 
 const coreWindow: CoreWindow & {

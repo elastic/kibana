@@ -8,15 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  EmbeddableApiContext,
-  HasType,
-  HasAppContext} from '@kbn/presentation-publishing';
-import {
-  apiHasAppContext
-} from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext, HasType, HasAppContext } from '@kbn/presentation-publishing';
+import { apiHasAppContext } from '@kbn/presentation-publishing';
 import { ADD_PANEL_LEGACY_GROUP } from '@kbn/embeddable-plugin/public';
-import type { Action} from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { apiHasType } from '@kbn/presentation-publishing';
 import type { CanAddNewPanel } from '@kbn/presentation-containers';

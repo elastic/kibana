@@ -12,11 +12,8 @@ import type { DataView } from '@kbn/data-views-plugin/common';
 
 import { findOrCreateDataView } from '../../utils/find_or_create_data_view';
 
-import type {
-  FetchAnalyticsCollectionActions} from './fetch_analytics_collection_logic';
-import {
-  FetchAnalyticsCollectionLogic,
-} from './fetch_analytics_collection_logic';
+import type { FetchAnalyticsCollectionActions } from './fetch_analytics_collection_logic';
+import { FetchAnalyticsCollectionLogic } from './fetch_analytics_collection_logic';
 
 export interface AnalyticsCollectionDataViewLogicValues {
   dataView: DataView | null;

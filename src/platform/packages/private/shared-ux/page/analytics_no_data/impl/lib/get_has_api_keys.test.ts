@@ -9,7 +9,7 @@
 
 import type { HttpSetup } from '@kbn/core-http-browser';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
-import type { HasApiKeysResponse} from './get_has_api_keys';
+import type { HasApiKeysResponse } from './get_has_api_keys';
 import { getHasApiKeys$ } from './get_has_api_keys';
 
 describe('getHasApiKeys$', () => {

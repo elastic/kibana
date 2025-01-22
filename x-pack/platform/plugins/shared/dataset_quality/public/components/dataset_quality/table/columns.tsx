@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiCode,

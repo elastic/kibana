@@ -9,7 +9,7 @@
 
 import util from 'util';
 import { parentPort, isMainThread, workerData } from 'worker_threads';
-import type { Logger} from '../../lib/utils/create_logger';
+import type { Logger } from '../../lib/utils/create_logger';
 import { createLogger, LogLevel } from '../../lib/utils/create_logger';
 import { logPerf } from '../../lib/utils/log_perf';
 import type { WorkerData } from './synthtrace_worker';

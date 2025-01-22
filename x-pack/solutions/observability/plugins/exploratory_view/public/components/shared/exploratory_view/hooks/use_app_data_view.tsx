@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Context} from 'react';
+import type { Context } from 'react';
 import React, { createContext, useContext, useState, useCallback, useMemo } from 'react';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { DataView } from '@kbn/data-views-plugin/common';

@@ -6,8 +6,7 @@
  */
 
 import React, { useState, useCallback, useMemo } from 'react';
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   formatDate,
   EuiFlexGroup,
@@ -23,12 +22,8 @@ import * as i18n from '../translations';
 import { useEditMaintenanceWindowsNavigation } from '../../../hooks/use_navigation';
 import { STATUS_DISPLAY, STATUS_SORT } from '../constants';
 import { UpcomingEventsPopover } from './upcoming_events_popover';
-import type {
-  MaintenanceWindowStatus,
-  MaintenanceWindow} from '../../../../common';
-import {
-  MAINTENANCE_WINDOW_DATE_FORMAT
-} from '../../../../common';
+import type { MaintenanceWindowStatus, MaintenanceWindow } from '../../../../common';
+import { MAINTENANCE_WINDOW_DATE_FORMAT } from '../../../../common';
 import { StatusFilter } from './status_filter';
 import type { TableActionsPopoverProps } from './table_actions_popover';
 import { TableActionsPopover } from './table_actions_popover';

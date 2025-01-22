@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type {
-  AvgIndexPatternColumn,
-  DerivativeIndexPatternColumn} from './definitions';
+import type { AvgIndexPatternColumn, DerivativeIndexPatternColumn } from './definitions';
 import {
   sumOperation,
   averageOperation,
@@ -15,7 +13,7 @@ import {
   counterRateOperation,
   movingAverageOperation,
   cumulativeSumOperation,
-  derivativeOperation
+  derivativeOperation,
 } from './definitions';
 import { getFieldByNameFactory } from '../pure_helpers';
 import { documentField } from '../document_field';

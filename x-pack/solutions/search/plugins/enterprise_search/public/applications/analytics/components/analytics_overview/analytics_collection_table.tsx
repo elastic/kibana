@@ -7,8 +7,7 @@
 
 import React, { useMemo, useState } from 'react';
 
-import type {
-  EuiSuperDatePickerCommonRange} from '@elastic/eui';
+import type { EuiSuperDatePickerCommonRange } from '@elastic/eui';
 import {
   EuiFlexGrid,
   EuiFlexItem,

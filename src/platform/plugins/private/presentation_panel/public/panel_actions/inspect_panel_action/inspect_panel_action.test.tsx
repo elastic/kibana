@@ -9,7 +9,7 @@
 
 import type { TracksOverlays } from '@kbn/presentation-containers';
 import { inspector } from '../../kibana_services';
-import type { InspectPanelActionApi} from './inspect_panel_action';
+import type { InspectPanelActionApi } from './inspect_panel_action';
 import { InspectPanelAction } from './inspect_panel_action';
 
 describe('Inspect panel action', () => {

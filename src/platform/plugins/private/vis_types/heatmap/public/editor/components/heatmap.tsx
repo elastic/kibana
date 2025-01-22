@@ -15,7 +15,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import type {
   SetColorRangeValue,
-  SetColorSchemaOptionsValue} from '@kbn/vis-default-editor-plugin/public';
+  SetColorSchemaOptionsValue,
+} from '@kbn/vis-default-editor-plugin/public';
 import {
   BasicOptions,
   SelectOption,

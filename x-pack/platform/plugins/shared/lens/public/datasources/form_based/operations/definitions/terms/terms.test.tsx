@@ -8,15 +8,8 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { shallow, mount } from 'enzyme';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
-import {
-  EuiButtonGroup,
-  EuiComboBox,
-  EuiFieldNumber,
-  EuiSelect,
-  EuiSwitch,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonGroup, EuiComboBox, EuiFieldNumber, EuiSelect, EuiSwitch } from '@elastic/eui';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
@@ -27,13 +20,8 @@ import { coreMock as corePluginMock } from '@kbn/core/public/mocks';
 import { createMockedIndexPattern } from '../../../mocks';
 import { ValuesInput } from './values_input';
 import type { TermsIndexPatternColumn } from '.';
-import type {
-  GenericOperationDefinition,
-  LastValueIndexPatternColumn} from '..';
-import {
-  termsOperation,
-  operationDefinitionMap,
-} from '..';
+import type { GenericOperationDefinition, LastValueIndexPatternColumn } from '..';
+import { termsOperation, operationDefinitionMap } from '..';
 import type { FormBasedLayer, FormBasedPrivateState } from '../../../types';
 import type { FramePublicAPI } from '../../../../../types';
 import type { DateHistogramIndexPatternColumn } from '../date_histogram';

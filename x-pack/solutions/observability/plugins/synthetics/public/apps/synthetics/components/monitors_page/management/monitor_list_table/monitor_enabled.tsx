@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiSwitch, EuiLoadingSpinner } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { FETCH_STATUS } from '@kbn/observability-shared-plugin/public';

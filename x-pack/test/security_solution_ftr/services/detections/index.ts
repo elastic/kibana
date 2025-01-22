@@ -14,11 +14,8 @@ import {
 } from '@kbn/security-solution-plugin/common/constants';
 import type { estypes } from '@elastic/elasticsearch';
 import type { Rule } from '@kbn/security-solution-plugin/public/detection_engine/rule_management/logic/types';
-import type {
-  IndexedEndpointRuleAlerts} from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
-import {
-  indexEndpointRuleAlerts,
-} from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import type { IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
+import { indexEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
 import { ELASTIC_SECURITY_RULE_ID } from '@kbn/security-solution-plugin/common';
 import { FtrService } from '../../../functional/ftr_provider_context';
 

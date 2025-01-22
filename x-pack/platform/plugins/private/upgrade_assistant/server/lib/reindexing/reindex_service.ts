@@ -10,13 +10,8 @@ import { firstValueFrom } from 'rxjs';
 
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
-import type {
-  ReindexSavedObject,
-  ReindexWarning} from '../../../common/types';
-import {
-  ReindexStatus,
-  ReindexStep
-} from '../../../common/types';
+import type { ReindexSavedObject, ReindexWarning } from '../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../common/types';
 
 import { esIndicesStateCheck } from '../es_indices_state_check';
 

@@ -15,7 +15,11 @@ import type {
 } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
 
-import type { CreateResult, DeleteResult, SearchQuery } from '@kbn/content-management-plugin/common';
+import type {
+  CreateResult,
+  DeleteResult,
+  SearchQuery,
+} from '@kbn/content-management-plugin/common';
 import type { StorageContext } from '@kbn/content-management-plugin/server';
 import { DASHBOARD_SAVED_OBJECT_TYPE } from '../dashboard_saved_object';
 import { cmServicesDefinition } from './cm_services';

@@ -8,7 +8,7 @@
  */
 
 import { DynamicActionManager } from './dynamic_action_manager';
-import type { ActionStorage} from './dynamic_action_storage';
+import type { ActionStorage } from './dynamic_action_storage';
 import { MemoryActionStorage } from './dynamic_action_storage';
 import { UiActionsService } from '@kbn/ui-actions-plugin/public';
 import type { ActionRegistry } from '@kbn/ui-actions-plugin/public/types';

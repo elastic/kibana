@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode, ReactElement} from 'react';
+import type { ReactNode, ReactElement } from 'react';
 import React, { useState, useEffect } from 'react';
 import type { PopoverAnchorPosition } from '@elastic/eui';
 import { EuiTourStep } from '@elastic/eui';

@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type {
-  EuiContextMenuPanelDescriptor} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiText,
   EuiFlexGroup,
@@ -16,7 +15,7 @@ import {
   EuiSpacer,
   EuiFlyout,
   EuiPopover,
-  EuiContextMenu
+  EuiContextMenu,
 } from '@elastic/eui';
 import { useUiActions } from '../../context';
 import type { SampleMlJob, SampleApp1ClickContext } from '../../triggers';

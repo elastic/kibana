@@ -9,7 +9,7 @@
 
 import { rangeControlFactory } from './range_control_factory';
 import { listControlFactory } from './list_control_factory';
-import type { ControlParams} from '../editor_utils';
+import type { ControlParams } from '../editor_utils';
 import { CONTROL_TYPES } from '../editor_utils';
 
 export function getControlFactory(controlParams: ControlParams) {

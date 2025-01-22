@@ -31,10 +31,9 @@ import { initSavedObjects } from './saved_objects';
 import { ExceptionListClient } from './services/exception_lists/exception_list_client';
 import type {
   ExtensionPointStorageClientInterface,
-  ExtensionPointStorageInterface} from './services/extension_points';
-import {
-  ExtensionPointStorage
+  ExtensionPointStorageInterface,
 } from './services/extension_points';
+import { ExtensionPointStorage } from './services/extension_points';
 
 export class ListPlugin implements Plugin<ListPluginSetup, ListsPluginStart, {}, PluginsStart> {
   private readonly logger: Logger;

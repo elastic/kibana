@@ -26,7 +26,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import type { DiscoverHistogramLayoutProps } from './discover_histogram_layout';
 import { DiscoverHistogramLayout } from './discover_histogram_layout';
-import type { SavedSearch} from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createSearchSessionMock } from '../../../../__mocks__/search_session';

@@ -9,9 +9,7 @@ import React, { useMemo, useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import type {
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiConfirmModal,

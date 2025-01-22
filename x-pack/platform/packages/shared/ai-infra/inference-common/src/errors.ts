@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InferenceTaskEventBase} from './inference_task';
+import type { InferenceTaskEventBase } from './inference_task';
 import { InferenceTaskEventType } from './inference_task';
 
 /**

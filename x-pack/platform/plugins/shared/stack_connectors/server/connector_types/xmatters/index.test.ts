@@ -7,13 +7,8 @@
 
 import axios from 'axios';
 import type { Logger } from '@kbn/core/server';
-import type {
-  ConnectorTypeConfigType,
-  ConnectorTypeSecretsType,
-  XmattersConnectorType} from '.';
-import {
-  getConnectorType
-} from '.';
+import type { ConnectorTypeConfigType, ConnectorTypeSecretsType, XmattersConnectorType } from '.';
+import { getConnectorType } from '.';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';

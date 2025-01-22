@@ -6,8 +6,7 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import type {
-  CreateAgentPolicyResponse} from '@kbn/fleet-plugin/common';
+import type { CreateAgentPolicyResponse } from '@kbn/fleet-plugin/common';
 import {
   AGENT_POLICY_API_ROUTES,
   EPM_API_ROUTES,

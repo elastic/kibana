@@ -15,7 +15,7 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 
 import { applyFipsOverrides } from '../lib/fips_overrides';
-import type { Config} from '../../functional_test_runner';
+import type { Config } from '../../functional_test_runner';
 import { readConfigFile } from '../../functional_test_runner';
 
 import { checkForEnabledTestsInFtrConfig, runFtr } from '../lib/run_ftr';

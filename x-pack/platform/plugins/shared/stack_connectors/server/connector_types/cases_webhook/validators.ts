@@ -9,7 +9,10 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import type { ValidatorServices } from '@kbn/actions-plugin/server/types';
 import { isEmpty } from 'lodash';
 import * as i18n from './translations';
-import type { CasesWebhookPublicConfigurationType, CasesWebhookSecretConfigurationType } from './types';
+import type {
+  CasesWebhookPublicConfigurationType,
+  CasesWebhookSecretConfigurationType,
+} from './types';
 
 export const validateCasesWebhookConfig = (
   configObject: CasesWebhookPublicConfigurationType,

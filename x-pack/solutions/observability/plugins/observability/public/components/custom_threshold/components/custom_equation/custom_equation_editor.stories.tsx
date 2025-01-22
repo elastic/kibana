@@ -11,11 +11,8 @@ import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { decorateWithGlobalStorybookThemeProviders } from '../../../../test_utils/use_global_storybook_theme';
-import type {
-  CustomMetricExpressionParams} from '../../../../../common/custom_threshold_rule/types';
-import {
-  Aggregators
-} from '../../../../../common/custom_threshold_rule/types';
+import type { CustomMetricExpressionParams } from '../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import type { TimeUnitChar } from '../../../../../common';
 
 import type { CustomEquationEditorProps } from './custom_equation_editor';

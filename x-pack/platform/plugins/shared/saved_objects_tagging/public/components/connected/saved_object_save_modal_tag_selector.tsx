@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import { EuiFormRow, EuiText } from '@elastic/eui';

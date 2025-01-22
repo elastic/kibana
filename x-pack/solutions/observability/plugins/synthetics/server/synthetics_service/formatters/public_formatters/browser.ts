@@ -6,9 +6,9 @@
  */
 
 import { DEFAULT_BROWSER_ADVANCED_FIELDS } from '../../../../common/constants/monitor_defaults';
-import type { BrowserFields} from '../../../../common/runtime_types';
+import type { BrowserFields } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
-import type { Formatter} from './common';
+import type { Formatter } from './common';
 import { commonFormatters } from './common';
 import { tlsFormatters } from './tls';
 import { arrayFormatter, objectFormatter, stringToObjectFormatter } from './formatting_utils';

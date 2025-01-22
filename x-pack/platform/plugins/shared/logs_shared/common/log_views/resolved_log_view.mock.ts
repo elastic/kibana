@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { DataViewsContract} from '@kbn/data-views-plugin/common';
+import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { fieldList } from '@kbn/data-views-plugin/common';
 import { createStubDataView } from '@kbn/data-views-plugin/common/stubs';
 import { defaultLogViewsStaticConfig } from './defaults';
-import type { ResolvedLogView} from './resolved_log_view';
+import type { ResolvedLogView } from './resolved_log_view';
 import { resolveLogView } from './resolved_log_view';
 import type { LogViewAttributes } from './types';
 import type { DataViewSpec } from '@kbn/data-views-plugin/common';

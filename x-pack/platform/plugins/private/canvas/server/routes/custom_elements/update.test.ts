@@ -10,13 +10,8 @@ import type { AwaitedProperties } from '@kbn/utility-types';
 import type { CustomElement } from '../../../types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateCustomElementRoute } from './update';
-import type {
-  RequestHandlerContext,
-  RequestHandler} from '@kbn/core/server';
-import {
-  kibanaResponseFactory,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { okResponse } from '../ok_response';
 import { getMockedRouterDeps } from '../test_helpers';

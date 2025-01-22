@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -15,7 +14,7 @@ import {
   EuiToolTip,
   EuiHealth,
   EuiHighlight,
-  EuiComboBox
+  EuiComboBox,
 } from '@elastic/eui';
 
 import { css } from '@emotion/react';

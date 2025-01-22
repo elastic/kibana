@@ -8,7 +8,7 @@
  */
 
 import type { Profile } from '../types';
-import type { AsyncProfileProvider} from '../profile_service';
+import type { AsyncProfileProvider } from '../profile_service';
 import { AsyncProfileService } from '../profile_service';
 
 /**

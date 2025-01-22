@@ -7,7 +7,7 @@
 
 import { z } from '@kbn/zod';
 import { notFound, internal, badRequest } from '@hapi/boom';
-import type { FieldDefinitionConfig} from '@kbn/streams-schema';
+import type { FieldDefinitionConfig } from '@kbn/streams-schema';
 import { processingDefinitionSchema } from '@kbn/streams-schema';
 import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import type {

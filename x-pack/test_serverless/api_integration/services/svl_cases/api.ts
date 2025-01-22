@@ -6,7 +6,7 @@
  */
 
 import { CASES_URL } from '@kbn/cases-plugin/common';
-import type { Case} from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';

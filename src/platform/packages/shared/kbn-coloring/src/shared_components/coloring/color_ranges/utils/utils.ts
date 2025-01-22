@@ -8,15 +8,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  PaletteContinuity,
-  DataBounds,
-  CustomPaletteParams} from '../../../../palettes';
+import type { PaletteContinuity, DataBounds, CustomPaletteParams } from '../../../../palettes';
 import {
   checkIsMaxContinuity,
   checkIsMinContinuity,
   roundValue,
-  getDataMinMax
+  getDataMinMax,
 } from '../../../../palettes';
 import { InfinityIcon } from '../../assets/infinity';
 import { ValueMaxIcon } from '../../assets/value_max';

@@ -20,7 +20,7 @@ import usePrevious from 'react-use/lib/usePrevious';
 import type { LogEntryCursor } from '../../../common/log_entry';
 import type { LogViewReference } from '../../../common/log_views';
 import { defaultLogViewsStaticConfig } from '../../../common/log_views';
-import type { BuiltEsQuery} from '../../containers/logs/log_stream';
+import type { BuiltEsQuery } from '../../containers/logs/log_stream';
 import { useLogStream } from '../../containers/logs/log_stream';
 import { useLogView } from '../../hooks/use_log_view';
 import { LogViewsClient } from '../../services/log_views';

@@ -14,10 +14,9 @@ import type {
   LogMeta,
   Logger,
   LogMessageSource,
-  LogLevelId} from '@kbn/logging';
-import {
-  LogLevel
+  LogLevelId,
 } from '@kbn/logging';
+import { LogLevel } from '@kbn/logging';
 
 /**
  * @internal

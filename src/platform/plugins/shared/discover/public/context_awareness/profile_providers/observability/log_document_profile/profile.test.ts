@@ -12,12 +12,9 @@ import { DocViewsRegistry } from '@kbn/unified-doc-viewer';
 import type {
   DataSourceContext,
   DocumentProfileProviderParams,
-  RootContext} from '../../../profiles';
-import {
-  DataSourceCategory,
-  DocumentType,
-  SolutionType,
+  RootContext,
 } from '../../../profiles';
+import { DataSourceCategory, DocumentType, SolutionType } from '../../../profiles';
 import { createContextAwarenessMocks } from '../../../__mocks__';
 import { createObservabilityLogDocumentProfileProvider } from './profile';
 import type { ContextWithProfileId } from '../../../profile_service';

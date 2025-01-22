@@ -13,10 +13,9 @@ import type {
   ActionType,
   GenericValidationResult,
   ActionVariables,
-  NotifyWhenSelectOptions} from '../../../types';
-import {
-  ActionConnectorMode
+  NotifyWhenSelectOptions,
 } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 import { act } from 'react-dom/test-utils';
 import { EuiFieldText } from '@elastic/eui';
 import { I18nProvider, __IntlProvider as IntlProvider } from '@kbn/i18n-react';

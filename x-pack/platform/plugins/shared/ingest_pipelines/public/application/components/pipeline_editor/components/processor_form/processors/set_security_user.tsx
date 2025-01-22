@@ -13,7 +13,7 @@ import { EuiCode } from '@elastic/eui';
 
 import { FIELD_TYPES, UseField, ComboBoxField } from '../../../../../../shared_imports';
 
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { to, from } from './shared';
 
 import { FieldNameField } from './common_fields/field_name_field';

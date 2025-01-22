@@ -11,7 +11,7 @@ import { EuiButtonEmpty, EuiEmptyPrompt, EuiText } from '@elastic/eui';
 import React, { useEffect, useMemo, useState } from 'react';
 
 import type { ErrorLike } from '@kbn/expressions-plugin/common';
-import type { EmbeddableApiContext} from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { renderSearchError } from '@kbn/search-errors';
 import { Markdown } from '@kbn/shared-ux-markdown';

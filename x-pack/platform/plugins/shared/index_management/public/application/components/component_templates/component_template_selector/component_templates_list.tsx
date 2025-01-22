@@ -8,11 +8,8 @@
 import React from 'react';
 
 import type { ComponentTemplateListItem } from '../../../../../common';
-import type {
-  Props as ComponentTemplatesListItemProps} from './component_templates_list_item';
-import {
-  ComponentTemplatesListItem
-} from './component_templates_list_item';
+import type { Props as ComponentTemplatesListItemProps } from './component_templates_list_item';
+import { ComponentTemplatesListItem } from './component_templates_list_item';
 
 interface Props {
   components: ComponentTemplateListItem[];

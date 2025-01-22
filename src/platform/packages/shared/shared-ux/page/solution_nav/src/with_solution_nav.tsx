@@ -7,16 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, ReactNode} from 'react';
+import type { ComponentType, ReactNode } from 'react';
 import React, { useState } from 'react';
 import classNames from 'classnames';
-import type {
-  EuiPageSidebarProps} from '@elastic/eui';
-import {
-  useIsWithinBreakpoints,
-  useEuiTheme,
-  useIsWithinMinBreakpoint
-} from '@elastic/eui';
+import type { EuiPageSidebarProps } from '@elastic/eui';
+import { useIsWithinBreakpoints, useEuiTheme, useIsWithinMinBreakpoint } from '@elastic/eui';
 import type { SolutionNavProps } from './solution_nav';
 import { SolutionNav } from './solution_nav';
 import { WithSolutionNavStyles } from './with_solution_nav.styles';

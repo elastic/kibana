@@ -12,7 +12,7 @@ import url, { URL } from 'node:url';
 import type { Duration } from 'moment';
 import type { ByteSizeValue, TypeOf } from '@kbn/config-schema';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
-import type { IHttpConfig} from '@kbn/server-http-tools';
+import type { IHttpConfig } from '@kbn/server-http-tools';
 import { SslConfig, sslSchema, TLS_V1_2, TLS_V1_3 } from '@kbn/server-http-tools';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { uuidRegexp } from '@kbn/core-base-server-internal';

@@ -12,12 +12,8 @@ import type { SavedObjectMigrationFn, SavedObjectMigrationMap } from '@kbn/core/
 import { mergeSavedObjectMigrationMaps } from '@kbn/core/server';
 import type { MigrateFunctionsObject, MigrateFunction } from '@kbn/kibana-utils-plugin/common';
 
-import type {
-  SerializedSearchSourceFields} from '@kbn/data-plugin/common';
-import {
-  DEFAULT_QUERY_LANGUAGE,
-  isSerializedSearchSource
-} from '@kbn/data-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
+import { DEFAULT_QUERY_LANGUAGE, isSerializedSearchSource } from '@kbn/data-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import {
   commonAddSupportOfDualIndexSelectionModeInTSVB,

@@ -9,10 +9,9 @@ import { map, mergeMap } from 'rxjs';
 import type {
   ISearchStrategy,
   PluginStart,
-  SearchStrategyDependencies} from '@kbn/data-plugin/server';
-import {
-  shimHitsTotal,
+  SearchStrategyDependencies,
 } from '@kbn/data-plugin/server';
+import { shimHitsTotal } from '@kbn/data-plugin/server';
 import type { ISearchOptions } from '@kbn/search-types';
 import { ENHANCED_ES_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
@@ -22,10 +21,9 @@ import type { z } from '@kbn/zod';
 import { searchStrategyRequestSchema } from '../../../common/api/search_strategy';
 import type {
   TimelineFactoryQueryTypes,
-  TimelineStrategyRequestType} from '../../../common/search_strategy/timeline';
-import {
-  EntityType
+  TimelineStrategyRequestType,
 } from '../../../common/search_strategy/timeline';
+import { EntityType } from '../../../common/search_strategy/timeline';
 import { timelineFactory } from './factory';
 import type { TimelineFactory } from './factory/types';
 import { isAggCardinalityAggregate } from './factory/helpers/is_agg_cardinality_aggregate';

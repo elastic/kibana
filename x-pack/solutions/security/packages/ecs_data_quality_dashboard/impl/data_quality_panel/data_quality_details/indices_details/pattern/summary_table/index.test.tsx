@@ -19,7 +19,7 @@ import {
   TestExternalProviders,
 } from '../../../../mock/test_providers/test_providers';
 import type { SortConfig } from '../../../../types';
-import type { Props} from '.';
+import type { Props } from '.';
 import { SummaryTable } from '.';
 import { getSummaryTableItems } from '../../../../utils/get_summary_table_items';
 

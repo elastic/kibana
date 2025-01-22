@@ -8,7 +8,7 @@
 import _ from 'lodash';
 import React from 'react';
 import { css } from '@emotion/react';
-import type { EuiComboBoxProps, EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiToolTip } from '@elastic/eui';
 import { FieldIcon } from '@kbn/react-field';
 import type { DataViewField } from '@kbn/data-views-plugin/public';

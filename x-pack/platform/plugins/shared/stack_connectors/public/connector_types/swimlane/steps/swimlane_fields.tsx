@@ -6,10 +6,9 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiComboBoxOptionOption, EuiComboBoxProps} from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
-import type {
-  FieldConfig} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   getFieldValidityAndErrorMessage,
   UseField,
@@ -20,12 +19,8 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { ComboBoxField, ButtonGroupField } from '@kbn/es-ui-shared-plugin/static/forms/components';
 
 import * as i18n from '../translations';
-import type {
-  MappingConfigurationKeys,
-  SwimlaneFieldMappingConfig} from '../types';
-import {
-  SwimlaneConnectorType
-} from '../types';
+import type { MappingConfigurationKeys, SwimlaneFieldMappingConfig } from '../types';
+import { SwimlaneConnectorType } from '../types';
 import { isRequiredField, isValidFieldForConnector } from '../helpers';
 
 const { emptyField } = fieldValidators;

@@ -7,7 +7,7 @@
 
 import type { ComponentProps } from 'react';
 import { useEffect, useState } from 'react';
-import type { Controller, ControllerFieldState} from 'react-hook-form';
+import type { Controller, ControllerFieldState } from 'react-hook-form';
 import { useFormContext } from 'react-hook-form';
 import type { FieldMeta, FormConfig } from '../types';
 

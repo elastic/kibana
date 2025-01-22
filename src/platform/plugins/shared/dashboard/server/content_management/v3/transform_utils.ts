@@ -23,7 +23,7 @@ import {
   DEFAULT_CONTROL_WIDTH,
   DEFAULT_IGNORE_PARENT_SETTINGS,
 } from '@kbn/controls-plugin/common';
-import type { SerializedSearchSourceFields} from '@kbn/data-plugin/common';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { parseSearchSourceJSON } from '@kbn/data-plugin/common';
 
 import type { SavedObject, SavedObjectReference } from '@kbn/core-saved-objects-api-server';

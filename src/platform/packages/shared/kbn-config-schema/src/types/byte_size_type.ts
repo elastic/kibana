@@ -8,7 +8,7 @@
  */
 
 import typeDetect from 'type-detect';
-import type { ByteSizeValue} from '../byte_size_value';
+import type { ByteSizeValue } from '../byte_size_value';
 import { ensureByteSizeValue } from '../byte_size_value';
 import { SchemaTypeError } from '../errors';
 import { internals } from '../internals';

@@ -13,7 +13,7 @@ import { flatMap, get, isEmpty } from 'lodash';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { parseDuration } from '.';
-import type { IExecutionLog, IExecutionLogResult} from '../../common';
+import type { IExecutionLog, IExecutionLogResult } from '../../common';
 import { EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 10000; // do not retrieve more than this number of executions. UI limits 1000 to display, but we need to fetch all 10000 to accurately reflect the KPIs

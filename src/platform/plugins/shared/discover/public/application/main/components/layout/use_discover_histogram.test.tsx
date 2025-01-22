@@ -21,11 +21,8 @@ import { setTimeout } from 'timers/promises';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { RequestAdapter } from '@kbn/inspector-plugin/public';
-import type {
-  UnifiedHistogramState} from '@kbn/unified-histogram-plugin/public';
-import {
-  UnifiedHistogramFetchStatus
-} from '@kbn/unified-histogram-plugin/public';
+import type { UnifiedHistogramState } from '@kbn/unified-histogram-plugin/public';
+import { UnifiedHistogramFetchStatus } from '@kbn/unified-histogram-plugin/public';
 import { createMockUnifiedHistogramApi } from '@kbn/unified-histogram-plugin/public/mocks';
 import { checkHitCount, sendErrorTo } from '../../hooks/use_saved_search_messages';
 import type { InspectorAdapters } from '../../hooks/use_inspector';

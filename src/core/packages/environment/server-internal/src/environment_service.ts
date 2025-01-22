@@ -8,15 +8,15 @@
  */
 
 import { firstValueFrom, of } from 'rxjs';
-import type { PathConfigType} from '@kbn/utils';
+import type { PathConfigType } from '@kbn/utils';
 import { config as pathConfigDef } from '@kbn/utils';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
-import type { CoreContext} from '@kbn/core-base-server-internal';
+import type { CoreContext } from '@kbn/core-base-server-internal';
 import { coreConfigPaths, CriticalError } from '@kbn/core-base-server-internal';
 import type { AnalyticsServicePreboot } from '@kbn/core-analytics-server';
 import type { HttpConfigType } from './types';
-import type { PidConfigType} from './pid_config';
+import type { PidConfigType } from './pid_config';
 import { pidConfig as pidConfigDef } from './pid_config';
 import { resolveInstanceUuid } from './resolve_uuid';
 import { createDataFolder } from './create_data_folder';

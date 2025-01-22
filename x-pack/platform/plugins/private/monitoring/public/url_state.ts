@@ -5,16 +5,17 @@
  * 2.0.
  */
 import type { Subscription } from 'rxjs';
-import type { History} from 'history';
+import type { History } from 'history';
 import { createHashHistory } from 'history';
 import type { TimeRange } from '@kbn/es-query';
-import type { RefreshInterval} from '@kbn/data-plugin/public';
+import type { RefreshInterval } from '@kbn/data-plugin/public';
 import { syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type {
   StateContainer,
   INullableBaseStateContainer,
   IKbnUrlStateStorage,
-  ISyncStateRef} from '@kbn/kibana-utils-plugin/public';
+  ISyncStateRef,
+} from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,

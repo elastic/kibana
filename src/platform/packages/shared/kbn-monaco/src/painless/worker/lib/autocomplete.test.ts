@@ -9,15 +9,14 @@
 
 import type { PainlessCompletionItem } from '../../types';
 
-import type {
-  Suggestion} from './autocomplete';
+import type { Suggestion } from './autocomplete';
 import {
   getStaticSuggestions,
   getFieldSuggestions,
   getClassMemberSuggestions,
   getConstructorSuggestions,
   getKeywords,
-  getTypeSuggestions
+  getTypeSuggestions,
 } from './autocomplete';
 
 const keywords: PainlessCompletionItem[] = getKeywords();

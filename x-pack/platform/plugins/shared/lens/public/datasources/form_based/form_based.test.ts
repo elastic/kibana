@@ -42,11 +42,9 @@ import type {
   CountIndexPatternColumn,
   SumIndexPatternColumn,
   AvgIndexPatternColumn,
-  MedianIndexPatternColumn} from './operations';
-import {
-  operationDefinitionMap,
-  getErrorMessages
+  MedianIndexPatternColumn,
 } from './operations';
+import { operationDefinitionMap, getErrorMessages } from './operations';
 import { createMockedFullReference } from './operations/mocks';
 import { cloneDeep } from 'lodash';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';

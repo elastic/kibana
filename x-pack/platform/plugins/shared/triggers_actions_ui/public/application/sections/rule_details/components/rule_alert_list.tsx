@@ -11,8 +11,7 @@ import moment from 'moment';
 import { padStart, chunk } from 'lodash';
 import { EuiBasicTable, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  AlertStatus} from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { DiscoveredPlugin, PluginOpaqueId} from '@kbn/core-base-common';
+import type { DiscoveredPlugin, PluginOpaqueId } from '@kbn/core-base-common';
 import { PluginType } from '@kbn/core-base-common';
 import { type MockedLogger, loggerMock } from '@kbn/logging-mocks';
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';

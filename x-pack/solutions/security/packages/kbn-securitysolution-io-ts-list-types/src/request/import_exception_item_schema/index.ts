@@ -7,9 +7,9 @@
 
 import * as t from 'io-ts';
 
-import type { OsTypeArray} from '../../common/os_type';
+import type { OsTypeArray } from '../../common/os_type';
 import { osTypeArrayOrUndefined } from '../../common/os_type';
-import type { Tags} from '../../common/tags';
+import type { Tags } from '../../common/tags';
 import { tags } from '../../common/tags';
 import type { NamespaceType } from '../../common/default_namespace';
 import { name } from '../../common/name';

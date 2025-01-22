@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { ISavedObjectsRepository } from '@kbn/core/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';

@@ -10,7 +10,7 @@
 import { get, has } from 'lodash';
 import React, { useEffect, useCallback, useState } from 'react';
 
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

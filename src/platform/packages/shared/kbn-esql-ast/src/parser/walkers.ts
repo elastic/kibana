@@ -9,8 +9,7 @@
 
 import type { TerminalNode } from 'antlr4';
 import { ParserRuleContext } from 'antlr4';
-import type {
-  InlinestatsCommandContext} from '../antlr/esql_parser';
+import type { InlinestatsCommandContext } from '../antlr/esql_parser';
 import {
   default as esql_parser,
   ArithmeticBinaryContext,
@@ -60,7 +59,7 @@ import {
   type ValueExpressionContext,
   ValueExpressionDefaultContext,
   InlineCastContext,
-  IndexPatternContext
+  IndexPatternContext,
 } from '../antlr/esql_parser';
 import {
   createSource,

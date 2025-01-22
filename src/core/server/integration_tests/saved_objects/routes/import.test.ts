@@ -17,11 +17,8 @@ import {
   coreUsageStatsClientMock,
   coreUsageDataServiceMock,
 } from '@kbn/core-usage-data-server-mocks';
-import type {
-  SavedObjectConfig} from '@kbn/core-saved-objects-base-server-internal';
-import {
-  LEGACY_URL_ALIAS_TYPE
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectConfig } from '@kbn/core-saved-objects-base-server-internal';
+import { LEGACY_URL_ALIAS_TYPE } from '@kbn/core-saved-objects-base-server-internal';
 import { SavedObjectsImporter } from '@kbn/core-saved-objects-import-export-server-internal';
 import {
   registerImportRoute,

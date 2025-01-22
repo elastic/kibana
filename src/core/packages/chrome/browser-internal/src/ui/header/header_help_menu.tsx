@@ -12,9 +12,7 @@ import type { Observable, Subscription } from 'rxjs';
 import { combineLatest } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiButtonEmptyProps,
-  WithEuiThemeProps} from '@elastic/eui';
+import type { EuiButtonEmptyProps, WithEuiThemeProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -25,7 +23,7 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiPopoverFooter,
-  withEuiTheme
+  withEuiTheme,
 } from '@elastic/eui';
 
 import type { InternalApplicationStart } from '@kbn/core-application-browser-internal';

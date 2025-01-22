@@ -8,7 +8,7 @@
 import React, { useCallback, useRef } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import type { ReactExpressionRendererType } from '@kbn/expressions-plugin/public';
-import type { DragDropIdentifier} from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { type DragDropAction, RootDragDropProvider } from '@kbn/dom-drag-drop';
 import { getAbsoluteDateRange } from '../../utils';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';

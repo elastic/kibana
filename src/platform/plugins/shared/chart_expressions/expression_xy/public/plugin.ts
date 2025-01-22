@@ -31,7 +31,7 @@ import {
   extendedAnnotationLayerFunction,
   referenceLineDecorationConfigFunction,
 } from '../common/expression_functions';
-import type { GetStartDeps} from './expression_renderers';
+import type { GetStartDeps } from './expression_renderers';
 import { getXyChartRenderer } from './expression_renderers';
 import { eventAnnotationsResult } from '../common/expression_functions/event_annotations_result';
 

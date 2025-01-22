@@ -16,7 +16,10 @@ import { taskStoreMock } from './task_store.mock';
 import { mockLogger } from './test_utils';
 import { taskClaimingMock } from './queries/task_claiming.mock';
 import { TaskClaiming } from './queries/task_claiming';
-import type { TaskClaiming as TaskClaimingClass , ClaimOwnershipResult } from './queries/task_claiming';
+import type {
+  TaskClaiming as TaskClaimingClass,
+  ClaimOwnershipResult,
+} from './queries/task_claiming';
 import type { Err, Ok } from './lib/result_type';
 import { asOk, isErr, isOk } from './lib/result_type';
 import { FillPoolResult } from './lib/fill_pool';

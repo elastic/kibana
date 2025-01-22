@@ -31,7 +31,7 @@ import {
   type HasSupportedTriggers,
   type HasType,
 } from '@kbn/presentation-publishing';
-import type { Action} from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
 import type { StartDependencies } from '../../../../plugin';

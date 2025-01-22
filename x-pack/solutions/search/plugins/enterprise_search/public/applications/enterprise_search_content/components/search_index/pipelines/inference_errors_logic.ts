@@ -10,11 +10,8 @@ import { kea } from 'kea';
 
 import { Status } from '../../../../../../common/types/api';
 import type { MlInferenceError } from '../../../../../../common/types/pipelines';
-import type {
-  FetchMlInferenceErrorsApiLogicResponse} from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
-import {
-  FetchMlInferenceErrorsApiLogic,
-} from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
+import type { FetchMlInferenceErrorsApiLogicResponse } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
+import { FetchMlInferenceErrorsApiLogic } from '../../../api/pipelines/fetch_ml_inference_pipeline_errors';
 import { IndexNameLogic } from '../index_name_logic';
 
 interface InferenceErrorsValues {

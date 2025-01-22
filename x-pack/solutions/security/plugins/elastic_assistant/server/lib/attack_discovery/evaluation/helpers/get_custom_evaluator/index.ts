@@ -9,7 +9,7 @@ import type { ActionsClientLlm } from '@kbn/langchain/server';
 import { PromptTemplate } from '@langchain/core/prompts';
 import type { EvaluationResult } from 'langsmith/evaluation';
 import type { Run, Example } from 'langsmith/schemas';
-import type { CriteriaLike} from 'langchain/evaluation';
+import type { CriteriaLike } from 'langchain/evaluation';
 import { loadEvaluator } from 'langchain/evaluation';
 
 import { getExampleAttackDiscoveriesWithReplacements } from './get_example_attack_discoveries_with_replacements';

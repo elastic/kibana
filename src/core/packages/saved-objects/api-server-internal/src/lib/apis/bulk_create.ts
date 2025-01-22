@@ -11,11 +11,12 @@ import type { Payload } from '@hapi/boom';
 import type {
   DecoratedError,
   AuthorizeCreateObject,
-  SavedObjectsRawDoc} from '@kbn/core-saved-objects-server';
+  SavedObjectsRawDoc,
+} from '@kbn/core-saved-objects-server';
 import {
   SavedObjectsErrorHelpers,
   type SavedObject,
-  type SavedObjectSanitizedDoc
+  type SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type {
@@ -24,8 +25,7 @@ import type {
   SavedObjectsBulkResponse,
 } from '@kbn/core-saved-objects-api-server';
 import { DEFAULT_REFRESH_SETTING } from '../constants';
-import type {
-  Either} from './utils';
+import type { Either } from './utils';
 import {
   getBulkOperationError,
   getCurrentTime,

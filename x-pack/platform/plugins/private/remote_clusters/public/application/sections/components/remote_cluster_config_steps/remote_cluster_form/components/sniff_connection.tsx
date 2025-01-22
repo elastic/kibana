@@ -5,18 +5,12 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
-import {
-  EuiComboBox,
-  EuiFieldNumber,
-  EuiFormRow,
-  EuiLink,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFieldNumber, EuiFormRow, EuiLink } from '@elastic/eui';
 
 import { transportPortUrl } from '../../../../../services/documentation';
 import { validateSeed } from '../validators';

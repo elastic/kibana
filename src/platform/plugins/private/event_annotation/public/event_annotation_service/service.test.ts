@@ -8,7 +8,10 @@
  */
 
 import type { CoreStart, SimpleSavedObject } from '@kbn/core/public';
-import type { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type {
+  ContentClient,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import type { EventAnnotationConfig } from '@kbn/event-annotation-common';
 import { getEventAnnotationService } from './service';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, Subject, BehaviorSubject } from 'rxjs';
 import { map, distinctUntilChanged } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
@@ -20,10 +20,9 @@ import type {
   CoreSetup,
   Logger,
   CoreStart,
-  CoreStatus} from '@kbn/core/server';
-import {
-  ServiceStatusLevels
+  CoreStatus,
 } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import {
   registerDeleteInactiveNodesTaskDefinition,
@@ -36,9 +35,9 @@ import type { Middleware } from './lib/middleware';
 import { createInitialMiddleware, addMiddlewareToChain } from './lib/middleware';
 import { removeIfExists } from './lib/remove_if_exists';
 import { setupSavedObjects, BACKGROUND_TASK_NODE_SO_NAME, TASK_SO_NAME } from './saved_objects';
-import type { TaskDefinitionRegistry} from './task_type_dictionary';
+import type { TaskDefinitionRegistry } from './task_type_dictionary';
 import { TaskTypeDictionary } from './task_type_dictionary';
-import type { AggregationOpts, FetchResult, SearchOpts} from './task_store';
+import type { AggregationOpts, FetchResult, SearchOpts } from './task_store';
 import { TaskStore } from './task_store';
 import { createManagedConfiguration } from './lib/create_managed_configuration';
 import { TaskScheduling } from './task_scheduling';

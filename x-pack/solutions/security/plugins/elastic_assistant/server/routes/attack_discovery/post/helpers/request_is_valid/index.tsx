@@ -8,10 +8,9 @@
 import type { KibanaRequest } from '@kbn/core/server';
 import type {
   AttackDiscoveryPostRequestBody,
-  ExecuteConnectorRequestBody} from '@kbn/elastic-assistant-common';
-import {
-  sizeIsOutOfRange,
+  ExecuteConnectorRequestBody,
 } from '@kbn/elastic-assistant-common';
+import { sizeIsOutOfRange } from '@kbn/elastic-assistant-common';
 
 import { requestHasRequiredAnonymizationParams } from '../../../../../lib/langchain/helpers';
 

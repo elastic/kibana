@@ -6,8 +6,7 @@
  */
 import type { ReactNode } from 'react';
 import React from 'react';
-import type {
-  IconType} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import {
   EuiText,
   EuiSpacer,
@@ -18,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleNotifyWhenType } from '@kbn/alerting-plugin/common';
-import type { ActionTypeRegistryContract} from '../../../..';
+import type { ActionTypeRegistryContract } from '../../../..';
 import { suspendedComponentWithProps } from '../../../..';
 import { useFetchRuleActionConnectors } from '../../../hooks/use_fetch_rule_action_connectors';
 import { NOTIFY_WHEN_OPTIONS } from '../../rule_form/rule_notify_when';

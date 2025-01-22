@@ -24,7 +24,7 @@ import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { DiscoverMainProvider } from '../../state_management/discover_state_provider';
 import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock';
 import type { DiscoverAppState } from '../../state_management/discover_app_state_container';
-import type { DiscoverCustomization} from '../../../../customizations';
+import type { DiscoverCustomization } from '../../../../customizations';
 import { DiscoverCustomizationProvider } from '../../../../customizations';
 import { createCustomizationService } from '../../../../customizations/customization_service';
 import { DiscoverGrid } from '../../../../components/discover_grid';

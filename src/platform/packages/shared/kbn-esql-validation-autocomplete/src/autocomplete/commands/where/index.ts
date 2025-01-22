@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ESQLAst} from '@kbn/esql-ast';
+import type { ESQLAst } from '@kbn/esql-ast';
 import {
   Walker,
   type ESQLAstItem,
   type ESQLCommand,
   type ESQLSingleAstItem,
-  type ESQLFunction
+  type ESQLFunction,
 } from '@kbn/esql-ast';
 import { logicalOperators } from '../../../definitions/builtin';
 import { isParameterType, type SupportedDataType } from '../../../definitions/types';

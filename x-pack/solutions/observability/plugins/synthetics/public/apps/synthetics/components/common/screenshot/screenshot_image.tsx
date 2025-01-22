@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import type { EuiThemeComputed} from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import { useEuiTheme, keys } from '@elastic/eui';
 
 import { EmptyThumbnail } from './empty_thumbnail';

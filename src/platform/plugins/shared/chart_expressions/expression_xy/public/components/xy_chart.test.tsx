@@ -10,10 +10,7 @@
 import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type {
-  GeometryValue,
-  SeriesNameFn,
-  XYChartSeriesIdentifier} from '@elastic/charts';
+import type { GeometryValue, SeriesNameFn, XYChartSeriesIdentifier } from '@elastic/charts';
 import {
   AreaSeries,
   Axis,
@@ -59,7 +56,11 @@ import {
 } from '../../common/__mocks__';
 import type { XYChartRenderProps } from './xy_chart';
 import { XYChart } from './xy_chart';
-import type { ExtendedDataLayerConfig, XYProps, AnnotationLayerConfigResult } from '../../common/types';
+import type {
+  ExtendedDataLayerConfig,
+  XYProps,
+  AnnotationLayerConfigResult,
+} from '../../common/types';
 import { DataLayers } from './data_layers';
 import { SplitChart } from './split_chart';
 import { LegendSize } from '@kbn/visualizations-plugin/common';

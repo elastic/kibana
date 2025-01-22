@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { MappingKeywordProperty, MappingTextProperty } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MappingKeywordProperty,
+  MappingTextProperty,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import { textAnalysisSettings } from './text_analysis';

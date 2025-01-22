@@ -8,7 +8,7 @@
  */
 
 import useObservable from 'react-use/lib/useObservable';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { map } from 'rxjs';
 import type {

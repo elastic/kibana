@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { AggExpressionType, AggExpressionFunctionArgs} from '..';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
 import { METRIC_TYPES } from '..';
 
 export const aggGeoBoundsFnName = 'aggGeoBounds';

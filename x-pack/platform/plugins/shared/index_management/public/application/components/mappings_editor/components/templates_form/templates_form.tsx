@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import { EuiText, EuiLink, EuiSpacer } from '@elastic/eui';
-import type { SerializerFunc} from '../../shared_imports';
+import type { SerializerFunc } from '../../shared_imports';
 import { useForm, Form, UseField, JsonEditorField } from '../../shared_imports';
 import type { MappingsTemplates } from '../../types';
 import { useDispatch } from '../../mappings_state_context';

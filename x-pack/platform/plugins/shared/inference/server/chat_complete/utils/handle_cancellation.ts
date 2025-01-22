@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OperatorFunction} from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
 import { Observable, Subject, takeUntil } from 'rxjs';
 import { createInferenceRequestAbortedError } from '@kbn/inference-common';
 

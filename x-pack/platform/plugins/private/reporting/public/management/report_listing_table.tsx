@@ -8,8 +8,7 @@
 import { Component, Fragment, default as React } from 'react';
 import type { Subscription } from 'rxjs';
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiFlexGroup,

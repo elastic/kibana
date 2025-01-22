@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren} from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useContext } from 'react';
 import type { CustomIntegrationsFindService } from './find';
 import type { CustomIntegrationsPlatformService } from './platform';

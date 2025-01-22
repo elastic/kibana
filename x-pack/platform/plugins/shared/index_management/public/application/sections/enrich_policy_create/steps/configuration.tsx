@@ -20,8 +20,7 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
-import type {
-  FormSchema} from '../../../../shared_imports';
+import type { FormSchema } from '../../../../shared_imports';
 import {
   useForm,
   Form,

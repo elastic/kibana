@@ -16,7 +16,7 @@ import { kqlQuerySchema } from '@kbn/slo-schema';
 import { EuiResizableContainer, EuiProgress, EuiCallOut, EuiSpacer } from '@elastic/eui';
 import type { TimeRange } from '@kbn/es-query';
 import { buildFilter, FILTERS } from '@kbn/es-query';
-import type { FieldPath} from 'react-hook-form';
+import type { FieldPath } from 'react-hook-form';
 import { useFormContext } from 'react-hook-form';
 import type { Serializable } from '@kbn/utility-types';
 import { useKibana } from '../../../../hooks/use_kibana';

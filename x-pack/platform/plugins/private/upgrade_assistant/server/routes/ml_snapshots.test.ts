@@ -10,8 +10,7 @@ import { kibanaResponseFactory } from '@kbn/core/server';
 
 import { errors as esErrors } from '@elastic/elasticsearch';
 import { handleEsError } from '../shared_imports';
-import type {
-  MockRouter} from './__mocks__/routes.mock';
+import type { MockRouter } from './__mocks__/routes.mock';
 import {
   createMockRouter,
   routeHandlerContextMock,

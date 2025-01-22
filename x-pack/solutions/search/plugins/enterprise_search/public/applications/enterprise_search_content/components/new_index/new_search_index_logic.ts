@@ -11,29 +11,25 @@ import { kea } from 'kea';
 import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import type {
   AddConnectorApiLogicArgs,
-  AddConnectorApiLogicResponse} from '../../api/connector/add_connector_api_logic';
-import {
-  AddConnectorApiLogic
+  AddConnectorApiLogicResponse,
 } from '../../api/connector/add_connector_api_logic';
+import { AddConnectorApiLogic } from '../../api/connector/add_connector_api_logic';
 import type {
   CreateCrawlerIndexArgs,
-  CreateCrawlerIndexResponse} from '../../api/crawler/create_crawler_index_api_logic';
-import {
-  CreateCrawlerIndexApiLogic
+  CreateCrawlerIndexResponse,
 } from '../../api/crawler/create_crawler_index_api_logic';
+import { CreateCrawlerIndexApiLogic } from '../../api/crawler/create_crawler_index_api_logic';
 import type {
   CreateApiIndexApiLogicArgs,
-  CreateApiIndexApiLogicResponse} from '../../api/index/create_api_index_api_logic';
-import {
-  CreateApiIndexApiLogic
+  CreateApiIndexApiLogicResponse,
 } from '../../api/index/create_api_index_api_logic';
+import { CreateApiIndexApiLogic } from '../../api/index/create_api_index_api_logic';
 
 import type {
   IndexExistsApiParams,
-  IndexExistsApiResponse} from '../../api/index/index_exists_api_logic';
-import {
-  IndexExistsApiLogic
+  IndexExistsApiResponse,
 } from '../../api/index/index_exists_api_logic';
+import { IndexExistsApiLogic } from '../../api/index/index_exists_api_logic';
 
 import { isValidIndexName } from '../../utils/validate_index_name';
 

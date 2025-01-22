@@ -8,7 +8,7 @@
 import React from 'react';
 import { render, screen, waitFor, cleanup } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { ActionGroup} from '@kbn/alerting-plugin/common';
+import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import type { RuleEventLogListProps } from './rule_event_log_list';

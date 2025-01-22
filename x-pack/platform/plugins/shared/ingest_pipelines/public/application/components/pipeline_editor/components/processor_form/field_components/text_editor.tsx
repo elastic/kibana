@@ -9,12 +9,8 @@ import { EuiPanel } from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import { EuiFormRow } from '@elastic/eui';
-import type {
-  FieldHook} from '../../../../../../shared_imports';
-import {
-  CodeEditor,
-  getFieldValidityAndErrorMessage,
-} from '../../../../../../shared_imports';
+import type { FieldHook } from '../../../../../../shared_imports';
+import { CodeEditor, getFieldValidityAndErrorMessage } from '../../../../../../shared_imports';
 
 import './text_editor.scss';
 

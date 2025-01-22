@@ -32,7 +32,7 @@ import { selectedFiltersReducer } from './selected_filters';
 import type { SelectedFilters } from '../actions/selected_filters';
 import type { AlertState } from '../alerts/alerts';
 import { alertsReducer } from '../alerts/alerts';
-import type { JourneyKVP} from './journey';
+import type { JourneyKVP } from './journey';
 import { journeyReducer } from './journey';
 import type { NetworkEventsState } from './network_events';
 import { networkEventsReducer } from './network_events';

@@ -8,14 +8,8 @@
  */
 
 import type { Query } from '../filters';
-import type {
-  KueryNode,
-  KueryQueryOptions} from '../kuery';
-import {
-  fromKueryExpression,
-  toElasticsearchQuery,
-  nodeTypes
-} from '../kuery';
+import type { KueryNode, KueryQueryOptions } from '../kuery';
+import { fromKueryExpression, toElasticsearchQuery, nodeTypes } from '../kuery';
 import type { BoolQuery, DataViewBase } from './types';
 
 /** @internal */

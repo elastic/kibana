@@ -9,7 +9,7 @@ import { noop } from 'lodash';
 import React from 'react';
 import { BehaviorSubject, Observable, of } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { ChatCompletionChunkEvent, FunctionDefinition} from '.';
+import type { ChatCompletionChunkEvent, FunctionDefinition } from '.';
 import { MessageRole } from '.';
 import type { StreamingChatResponseEventWithoutError } from '../common/conversation_complete';
 import type { ObservabilityAIAssistantAPIClient } from './api';

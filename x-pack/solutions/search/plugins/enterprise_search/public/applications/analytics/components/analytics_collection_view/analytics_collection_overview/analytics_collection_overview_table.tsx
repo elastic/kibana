@@ -9,8 +9,7 @@ import React, { useEffect, useMemo } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButton,
@@ -44,11 +43,9 @@ import type {
   ClickedTable,
   ReferrersTable,
   WorsePerformersTable,
-  LocationsTable} from '../analytics_collection_explore_table_types';
-import {
-  ExploreTableColumns,
-  ExploreTables
+  LocationsTable,
 } from '../analytics_collection_explore_table_types';
+import { ExploreTableColumns, ExploreTables } from '../analytics_collection_explore_table_types';
 import { FetchAnalyticsCollectionLogic } from '../fetch_analytics_collection_logic';
 
 const tabsByFilter: Record<FilterBy, Array<{ id: ExploreTables; name: string }>> = {

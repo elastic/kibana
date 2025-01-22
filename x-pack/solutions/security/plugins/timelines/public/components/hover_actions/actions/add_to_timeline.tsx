@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo } from 'react';
-import type { EuiContextMenuItem, EuiButtonEmpty} from '@elastic/eui';
+import type { EuiContextMenuItem, EuiButtonEmpty } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import type { DraggableId } from '@hello-pangea/dnd';
 import { isEmpty } from 'lodash';

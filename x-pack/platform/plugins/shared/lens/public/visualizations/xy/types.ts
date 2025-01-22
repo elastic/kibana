@@ -21,7 +21,10 @@ import type {
   FillStyle,
   YAxisConfig,
 } from '@kbn/expression-xy-plugin/common';
-import type { EventAnnotationConfig, EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import type {
+  EventAnnotationConfig,
+  EventAnnotationGroupConfig,
+} from '@kbn/event-annotation-common';
 import {
   IconChartArea,
   IconChartLine,

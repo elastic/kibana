@@ -5,16 +5,9 @@
  * 2.0.
  */
 
-import type {
-  IconType} from '@elastic/eui';
-import {
-  EuiButton,
-  EuiEmptyPrompt,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiCard,
-} from '@elastic/eui';
-import type { MouseEventHandler, ReactNode} from 'react';
+import type { IconType } from '@elastic/eui';
+import { EuiButton, EuiEmptyPrompt, EuiFlexGroup, EuiFlexItem, EuiCard } from '@elastic/eui';
+import type { MouseEventHandler, ReactNode } from 'react';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/react';
 

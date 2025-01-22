@@ -7,7 +7,7 @@
 
 import path from 'path';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
-import type { FtrConfigProviderContext} from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { findTestPluginPaths } from '@kbn/test';
 
 import { getAllExternalServiceSimulatorPaths } from '@kbn/actions-simulators-plugin/server/plugin';

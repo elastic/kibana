@@ -8,9 +8,7 @@
 import React, { useEffect, useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
-import type {
-  FieldConfig,
-  FieldHook} from '../../../shared_imports';
+import type { FieldConfig, FieldHook } from '../../../shared_imports';
 import {
   useForm,
   Form,

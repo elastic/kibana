@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { ApplicationStart, ChromeBreadcrumb, ChromeStart } from '@kbn/core/public';
-import type { MouseEvent} from 'react';
+import type { MouseEvent } from 'react';
 import { useEffect, useMemo } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { ChromeBreadcrumbsAppendExtension } from '@kbn/core-chrome-browser';

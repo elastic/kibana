@@ -6,10 +6,7 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  AnalyticsServiceStart,
-  KibanaRequest,
-  Logger} from '@kbn/core/server';
+import type { AnalyticsServiceStart, KibanaRequest, Logger } from '@kbn/core/server';
 import {
   type AuthenticatedUser,
   type SecurityServiceStart,
@@ -20,7 +17,7 @@ import { set } from '@kbn/safer-lodash-set';
 import { withSpan } from '@kbn/apm-utils';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
-import type { IEventLogger} from '@kbn/event-log-plugin/server';
+import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
@@ -46,10 +43,9 @@ import type {
   RawAction,
   Services,
   UnsecuredServices,
-  ValidatorServices} from '../types';
-import {
-  UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS
+  ValidatorServices,
 } from '../types';
+import { UNALLOWED_FOR_UNSECURE_EXECUTION_CONNECTOR_TYPE_IDS } from '../types';
 import { EVENT_LOG_ACTIONS } from '../constants/event_log';
 import type { ActionExecutionSource, ActionExecutionSourceType } from './action_execution_source';
 import type { RelatedSavedObjects } from './related_saved_objects';

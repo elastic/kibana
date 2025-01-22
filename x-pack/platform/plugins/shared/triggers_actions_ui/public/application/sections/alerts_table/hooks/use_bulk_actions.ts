@@ -15,15 +15,11 @@ import type {
   BulkActionsPanelConfig,
   BulkActionsState,
   BulkActionsReducerAction,
-  UseBulkActionsRegistry} from '../../../../types';
-import {
-  BulkActionsVerbs
+  UseBulkActionsRegistry,
 } from '../../../../types';
-import type {
-  GetLeadingControlColumn} from '../bulk_actions/get_leading_control_column';
-import {
-  getLeadingControlColumn as getBulkActionsLeadingControlColumn
-} from '../bulk_actions/get_leading_control_column';
+import { BulkActionsVerbs } from '../../../../types';
+import type { GetLeadingControlColumn } from '../bulk_actions/get_leading_control_column';
+import { getLeadingControlColumn as getBulkActionsLeadingControlColumn } from '../bulk_actions/get_leading_control_column';
 import type { CasesService } from '../types';
 import {
   ADD_TO_EXISTING_CASE,

@@ -17,7 +17,7 @@ import type { IngestCodeSnippetParameters } from '../../types';
 import { LanguageSelector } from '../shared/language_selector';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 import { useUsageTracker } from '../../contexts/usage_tracker_context';
-import type { AvailableLanguages} from '../../code_examples';
+import type { AvailableLanguages } from '../../code_examples';
 import { LanguageOptions, Languages } from '../../code_examples';
 import { AnalyticsEvents } from '../../analytics/constants';
 import { CodeSample } from '../shared/code_sample';

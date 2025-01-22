@@ -12,15 +12,8 @@ import {
   getSeriesAndDomain,
   getSidebarItems,
 } from './data_formatting';
-import type {
-  NetworkItems} from './types';
-import {
-  MimeType,
-  FriendlyFlyoutLabels,
-  FriendlyTimingLabels,
-  Timings,
-  Metadata,
-} from './types';
+import type { NetworkItems } from './types';
+import { MimeType, FriendlyFlyoutLabels, FriendlyTimingLabels, Timings, Metadata } from './types';
 import { mockMoment } from '../../../../../lib/helper/test_helpers';
 import type { WaterfallDataEntry } from '../../waterfall/types';
 

@@ -9,8 +9,7 @@ import React, { memo } from 'react';
 import type { RulesSettingsFlappingProperties } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiSwitchProps} from '@elastic/eui';
+import type { EuiSwitchProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -22,8 +21,7 @@ import {
   EuiEmptyPrompt,
 } from '@elastic/eui';
 import { flappingOffMessage } from '@kbn/alerts-ui-shared/src/rule_settings/rule_settings_flapping_message';
-import type {
-  RulesSettingsFlappingFormSectionProps} from './rules_settings_flapping_form_section';
+import type { RulesSettingsFlappingFormSectionProps } from './rules_settings_flapping_form_section';
 import {
   RulesSettingsFlappingFormSection,
   RulesSettingsFlappingTitle,

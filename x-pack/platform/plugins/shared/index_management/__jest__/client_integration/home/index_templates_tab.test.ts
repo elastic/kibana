@@ -15,7 +15,7 @@ import {
 import { API_BASE_PATH } from '../../../common/constants';
 import { setupEnvironment, getRandomString } from '../helpers';
 
-import type { IndexTemplatesTabTestBed} from './index_templates_tab.helpers';
+import type { IndexTemplatesTabTestBed } from './index_templates_tab.helpers';
 import { setup } from './index_templates_tab.helpers';
 
 const removeWhiteSpaceOnArrayValues = (array: any[]) =>

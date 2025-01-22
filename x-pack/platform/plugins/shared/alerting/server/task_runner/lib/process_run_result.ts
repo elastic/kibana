@@ -9,15 +9,14 @@ import type { Logger } from '@kbn/core/server';
 import type { Outcome } from 'elastic-apm-node';
 import type { RuleExecutionStatus, RuleLastRun } from '../../../common';
 import type { ElasticsearchError } from '../../lib';
-import type { ILastRun} from '../../lib/last_run_status';
+import type { ILastRun } from '../../lib/last_run_status';
 import { lastRunFromError, lastRunFromState } from '../../lib/last_run_status';
 import type { Result } from '../../lib/result_type';
 import { map } from '../../lib/result_type';
-import type {
-  IExecutionStatusAndMetrics} from '../../lib/rule_execution_status';
+import type { IExecutionStatusAndMetrics } from '../../lib/rule_execution_status';
 import {
   executionStatusFromError,
-  executionStatusFromState
+  executionStatusFromState,
 } from '../../lib/rule_execution_status';
 import type { RuleRunMetrics } from '../../lib/rule_run_metrics_store';
 import type { RuleResultService } from '../../monitoring/rule_result_service';

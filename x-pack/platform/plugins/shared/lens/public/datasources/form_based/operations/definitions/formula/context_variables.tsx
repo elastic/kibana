@@ -8,12 +8,8 @@
 import { i18n } from '@kbn/i18n';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import { partition } from 'lodash';
-import type {
-  ExpressionFunctionDefinitions} from '@kbn/expressions-plugin/common';
-import {
-  buildExpressionFunction,
-  buildExpression
-} from '@kbn/expressions-plugin/common';
+import type { ExpressionFunctionDefinitions } from '@kbn/expressions-plugin/common';
+import { buildExpressionFunction, buildExpression } from '@kbn/expressions-plugin/common';
 import type {
   ExpressionFunctionFormulaInterval,
   ExpressionFunctionFormulaNow,

@@ -24,8 +24,7 @@ import { v4 as uuidv4 } from 'uuid';
 import type { FeatureCollection } from 'geojson';
 import { DataRequest } from '../util/data_request';
 import { hasIncompleteResults } from '../util/tile_meta_feature_utils';
-import type {
-  LAYER_TYPE} from '../../../common/constants';
+import type { LAYER_TYPE } from '../../../common/constants';
 import {
   MAX_ZOOM,
   MB_SOURCE_ID_LAYER_ID_PREFIX_DELIMITER,

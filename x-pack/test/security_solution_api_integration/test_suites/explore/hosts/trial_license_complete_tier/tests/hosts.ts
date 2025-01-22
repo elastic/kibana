@@ -9,12 +9,13 @@ import expect from '@kbn/expect';
 import type {
   HostsStrategyResponse,
   HostDetailsStrategyResponse,
-  FirstLastSeenStrategyResponse} from '@kbn/security-solution-plugin/common/search_strategy';
+  FirstLastSeenStrategyResponse,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   HostsQueries,
   Direction,
   HostsFields,
-  FirstLastSeenQuery
+  FirstLastSeenQuery,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import type TestAgent from 'supertest/lib/agent';
 import type { SearchService } from '@kbn/ftr-common-functional-services';

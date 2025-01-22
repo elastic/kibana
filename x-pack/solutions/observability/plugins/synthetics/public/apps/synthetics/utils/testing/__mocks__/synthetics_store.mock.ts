@@ -6,8 +6,7 @@
  */
 
 import type { SyntheticsAppState } from '../../../state/root_reducer';
-import type {
-  TLSVersion} from '../../../../../../common/runtime_types';
+import type { TLSVersion } from '../../../../../../common/runtime_types';
 import {
   ConfigKey,
   MonitorTypeEnum,
@@ -15,7 +14,7 @@ import {
   LocationStatus,
   ScheduleUnit,
   SourceType,
-  VerificationMode
+  VerificationMode,
 } from '../../../../../../common/runtime_types';
 import type { MonitorDetailsState } from '../../../state';
 

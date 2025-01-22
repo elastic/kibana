@@ -19,7 +19,8 @@ import type {
   RanTask,
   TaskTiming,
   TaskManagerStat,
-  TaskClaim} from '../task_events';
+  TaskClaim,
+} from '../task_events';
 import {
   isTaskRunEvent,
   isTaskPollingCycleEvent,
@@ -27,14 +28,13 @@ import {
   TaskPersistence,
   isTaskClaimEvent,
 } from '../task_events';
-import type { Ok} from '../lib/result_type';
+import type { Ok } from '../lib/result_type';
 import { isOk, unwrap } from '../lib/result_type';
 import type { ConcreteTaskInstance } from '../task';
 import { TaskRunResult } from '../task_running';
 import type { ClaimAndFillPoolResult } from '../lib/fill_pool';
 import { FillPoolResult } from '../lib/fill_pool';
-import type {
-  AveragedStat} from './task_run_calculators';
+import type { AveragedStat } from './task_run_calculators';
 import {
   calculateRunningAverage,
   calculateFrequency,

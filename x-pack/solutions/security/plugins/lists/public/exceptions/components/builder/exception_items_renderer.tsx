@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElementType} from 'react';
+import type { ElementType } from 'react';
 import React, { useCallback, useEffect, useMemo, useReducer, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import styled from 'styled-components';
@@ -15,7 +15,8 @@ import type {
   ExceptionListItemSchema,
   ExceptionListType,
   NamespaceType,
-  OsTypeArray} from '@kbn/securitysolution-io-ts-list-types';
+  OsTypeArray,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
@@ -27,7 +28,8 @@ import type {
   DataViewField,
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
-  OperatorOption} from '@kbn/securitysolution-list-utils';
+  OperatorOption,
+} from '@kbn/securitysolution-list-utils';
 import {
   containsValueListEntry,
   filterExceptionItems,
@@ -44,7 +46,7 @@ import { AndOrBadge } from '../and_or_badge';
 import { BuilderExceptionListItemComponent } from './exception_item_renderer';
 import { BuilderLogicButtons } from './logic_buttons';
 import { getTotalErrorExist } from './selectors';
-import type { EntryFieldError, State} from './reducer';
+import type { EntryFieldError, State } from './reducer';
 import { exceptionsBuilderReducer } from './reducer';
 const MyInvisibleAndBadge = styled(EuiFlexItem)`
   visibility: hidden;

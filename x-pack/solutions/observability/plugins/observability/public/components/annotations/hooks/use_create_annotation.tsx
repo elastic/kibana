@@ -8,7 +8,7 @@
 import React from 'react';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import type { FindSLOResponse } from '@kbn/slo-schema';
-import type { QueryKey} from '@tanstack/react-query';
+import type { QueryKey } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FormattedMessage } from '@kbn/i18n-react';

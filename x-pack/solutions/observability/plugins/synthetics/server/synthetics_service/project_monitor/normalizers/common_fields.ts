@@ -16,7 +16,8 @@ import type {
   MonitorTypeEnum,
   Locations,
   ProjectMonitor,
-  MonitorFields} from '../../../../common/runtime_types';
+  MonitorFields,
+} from '../../../../common/runtime_types';
 import {
   ConfigKey,
   ScheduleUnit,

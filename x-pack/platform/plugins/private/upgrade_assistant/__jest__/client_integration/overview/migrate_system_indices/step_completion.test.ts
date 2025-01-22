@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import type { OverviewTestBed} from '../overview.helpers';
+import type { OverviewTestBed } from '../overview.helpers';
 import { setupOverviewPage } from '../overview.helpers';
 import { setupEnvironment, advanceTime } from '../../helpers';
 import { SYSTEM_INDICES_MIGRATION_POLL_INTERVAL_MS } from '../../../../common/constants';

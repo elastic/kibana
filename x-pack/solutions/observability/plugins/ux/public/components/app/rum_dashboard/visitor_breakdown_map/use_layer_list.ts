@@ -11,7 +11,8 @@ import type {
   ESTermSourceDescriptor,
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
-  VectorStyleDescriptor} from '@kbn/maps-plugin/common';
+  VectorStyleDescriptor,
+} from '@kbn/maps-plugin/common';
 import {
   AGG_TYPE,
   COLOR_MAP_TYPE,
@@ -21,7 +22,7 @@ import {
   LAYER_TYPE,
   SOURCE_TYPES,
   STYLE_TYPE,
-  SYMBOLIZE_AS_TYPES
+  SYMBOLIZE_AS_TYPES,
 } from '@kbn/maps-plugin/common';
 
 import { useMemo } from 'react';

@@ -10,8 +10,7 @@ import type {
   CreateExceptionListSchema,
   ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  ENDPOINT_ARTIFACT_LIST_IDS} from '@kbn/securitysolution-list-constants';
+import type { ENDPOINT_ARTIFACT_LIST_IDS } from '@kbn/securitysolution-list-constants';
 import {
   ENDPOINT_ARTIFACT_LISTS,
   EXCEPTION_LIST_ITEM_URL,

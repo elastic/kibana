@@ -8,9 +8,7 @@
  */
 
 import React, { Fragment, useCallback, useMemo, useState } from 'react';
-import type {
-  EuiDataGridCellValueElementProps,
-  EuiDataGridControlColumn} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps, EuiDataGridControlColumn } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenuItem,

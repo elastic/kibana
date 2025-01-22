@@ -19,11 +19,8 @@ import { createAddToQueryLog } from './lib';
 import type { TimefilterSetup } from './timefilter';
 import { TimefilterService } from './timefilter';
 import { createSavedQueryService } from './saved_query/saved_query_service';
-import type {
-  QueryState$} from './state_sync/create_query_state_observable';
-import {
-  createQueryStateObservable
-} from './state_sync/create_query_state_observable';
+import type { QueryState$ } from './state_sync/create_query_state_observable';
+import { createQueryStateObservable } from './state_sync/create_query_state_observable';
 import type { QueryState } from './query_state';
 import { getQueryState } from './query_state';
 import type { QueryStringContract } from './query_string';

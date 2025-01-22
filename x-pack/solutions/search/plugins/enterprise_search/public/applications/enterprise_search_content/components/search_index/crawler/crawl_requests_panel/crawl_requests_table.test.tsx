@@ -16,7 +16,7 @@ import { shallow } from 'enzyme';
 import { EuiBasicTable } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 
-import type { CrawlEvent} from '../../../../api/crawler/types';
+import type { CrawlEvent } from '../../../../api/crawler/types';
 import { CrawlerStatus, CrawlType } from '../../../../api/crawler/types';
 
 import { CrawlRequestsTable } from './crawl_requests_table';

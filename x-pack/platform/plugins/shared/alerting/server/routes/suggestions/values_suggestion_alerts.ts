@@ -18,13 +18,8 @@ import { ALERT_RULE_CONSUMER, ALERT_RULE_TYPE_ID, SPACE_IDS } from '@kbn/rule-da
 
 import { verifyAccessAndContext } from '../lib';
 import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
-import type {
-  AlertingAuthorizationFilterOpts,
-  AuthorizedRuleTypes} from '../../authorization';
-import {
-  AlertingAuthorizationEntity,
-  AlertingAuthorizationFilterType
-} from '../../authorization';
+import type { AlertingAuthorizationFilterOpts, AuthorizedRuleTypes } from '../../authorization';
+import { AlertingAuthorizationEntity, AlertingAuthorizationFilterType } from '../../authorization';
 import type { AlertingRequestHandlerContext } from '../../types';
 import type { GetAlertIndicesAlias, ILicenseState } from '../../lib';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';

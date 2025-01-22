@@ -12,7 +12,7 @@ import type { RenderHookResult } from '@testing-library/react';
 import { renderHook, act } from '@testing-library/react';
 import { Subject } from 'rxjs';
 import type { IInterpreterRenderHandlers } from '../../common';
-import type { ExpressionRendererParams} from './use_expression_renderer';
+import type { ExpressionRendererParams } from './use_expression_renderer';
 import { useExpressionRenderer } from './use_expression_renderer';
 import * as loader from '../loader';
 

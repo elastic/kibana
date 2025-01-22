@@ -8,7 +8,7 @@
  */
 
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import type { WebElement, WebDriver} from 'selenium-webdriver';
+import type { WebElement, WebDriver } from 'selenium-webdriver';
 import { By, Key } from 'selenium-webdriver';
 import { PNG } from 'pngjs';
 import cheerio from 'cheerio';

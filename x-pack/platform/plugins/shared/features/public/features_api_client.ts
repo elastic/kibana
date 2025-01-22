@@ -6,7 +6,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type { KibanaFeatureConfig} from '.';
+import type { KibanaFeatureConfig } from '.';
 import { KibanaFeature } from '.';
 
 export class FeaturesAPIClient {

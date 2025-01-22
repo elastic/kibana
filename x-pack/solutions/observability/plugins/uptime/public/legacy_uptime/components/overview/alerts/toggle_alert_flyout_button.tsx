@@ -7,13 +7,9 @@
 
 import type {
   EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
-import {
-  EuiHeaderLink,
-  EuiContextMenu,
-  EuiLink,
-  EuiPopover,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { EuiHeaderLink, EuiContextMenu, EuiLink, EuiPopover } from '@elastic/eui';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

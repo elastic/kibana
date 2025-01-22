@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  DashboardEnhancedAbstractDashboardDrilldownConfig as Config} from '@kbn/dashboard-enhanced-plugin/public';
-import {
-  DashboardEnhancedAbstractDashboardDrilldown as AbstractDashboardDrilldown
-} from '@kbn/dashboard-enhanced-plugin/public';
+import type { DashboardEnhancedAbstractDashboardDrilldownConfig as Config } from '@kbn/dashboard-enhanced-plugin/public';
+import { DashboardEnhancedAbstractDashboardDrilldown as AbstractDashboardDrilldown } from '@kbn/dashboard-enhanced-plugin/public';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import type { SampleApp2ClickContext } from '../../triggers';
 import { SAMPLE_APP2_CLICK_TRIGGER } from '../../triggers';

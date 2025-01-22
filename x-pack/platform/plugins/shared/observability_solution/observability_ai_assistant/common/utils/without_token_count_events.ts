@@ -7,12 +7,8 @@
 
 import type { OperatorFunction } from 'rxjs';
 import { filter } from 'rxjs';
-import type {
-  StreamingChatResponseEvent,
-  TokenCountEvent} from '../conversation_complete';
-import {
-  StreamingChatResponseEventType
-} from '../conversation_complete';
+import type { StreamingChatResponseEvent, TokenCountEvent } from '../conversation_complete';
+import { StreamingChatResponseEventType } from '../conversation_complete';
 
 export function withoutTokenCountEvents<T extends StreamingChatResponseEvent>(): OperatorFunction<
   T,

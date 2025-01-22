@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import type {
-  DropResult} from '@elastic/eui';
+import type { DropResult } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,

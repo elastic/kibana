@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import type { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  CollectorFetchContext,
+  UsageCollectionSetup,
+} from '@kbn/usage-collection-plugin/server';
 import type { TelemetryCollector } from '../../types';
 
 import type { WorkpadTelemetry } from './workpad_collector';
 import { workpadCollector, workpadSchema } from './workpad_collector';
-import type {
-  CustomElementTelemetry} from './custom_element_collector';
-import {
-  customElementCollector,
-  customElementSchema,
-} from './custom_element_collector';
+import type { CustomElementTelemetry } from './custom_element_collector';
+import { customElementCollector, customElementSchema } from './custom_element_collector';
 
 type CanvasUsage = WorkpadTelemetry & CustomElementTelemetry;
 

@@ -13,9 +13,7 @@ import {
   stubLogstashDataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
 import { stubLogstashFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
-import type {
-  InputFormat,
-  OutputFormat} from '../../../application/components/lib/durations';
+import type { InputFormat, OutputFormat } from '../../../application/components/lib/durations';
 import {
   durationInputOptions,
   durationOutputOptions,

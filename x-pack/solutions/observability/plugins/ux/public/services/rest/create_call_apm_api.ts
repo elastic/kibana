@@ -15,7 +15,7 @@ import type {
 import { formatRequest } from '@kbn/server-route-repository-utils';
 import type { APMServerRouteRepository, APIEndpoint } from '@kbn/apm-plugin/server';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
-import type { CallApi} from './call_api';
+import type { CallApi } from './call_api';
 import { callApi } from './call_api';
 import type { FetchOptions } from '../../../common/fetch_options';
 

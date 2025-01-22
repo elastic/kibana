@@ -16,7 +16,7 @@ import type {
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import type { ReindexOperation} from '../../../common/types';
+import type { ReindexOperation } from '../../../common/types';
 import { ReindexStatus } from '../../../common/types';
 
 import { reindexActionsFactory } from '../../lib/reindexing/reindex_actions';

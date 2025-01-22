@@ -7,7 +7,7 @@
 
 import React, { useState, useMemo, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiStepStatus} from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
 import { EuiStepsHorizontal, EuiSpacer, EuiPageSection } from '@elastic/eui';
 
 import { RemoteClusterSetupTrust, RemoteClusterForm } from '../components';

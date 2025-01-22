@@ -6,11 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
-import type { SubmitHandler} from 'react-hook-form';
+import type { SubmitHandler } from 'react-hook-form';
 import { FormProvider, useForm } from 'react-hook-form';
 import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ProcessingDefinition, ReadStreamDefinition} from '@kbn/streams-schema';
+import type { ProcessingDefinition, ReadStreamDefinition } from '@kbn/streams-schema';
 import { getProcessorType } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { dynamic } from '@kbn/shared-ux-utility';

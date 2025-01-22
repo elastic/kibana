@@ -9,7 +9,7 @@ import type { AwaitedProperties } from '@kbn/utility-types';
 import sinon from 'sinon';
 import { CANVAS_TYPE } from '../../../common/lib/constants';
 import { initializeUpdateWorkpadRoute, initializeUpdateWorkpadAssetsRoute } from './update';
-import type { RequestHandler} from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { workpads } from '../../../__fixtures__/workpads';

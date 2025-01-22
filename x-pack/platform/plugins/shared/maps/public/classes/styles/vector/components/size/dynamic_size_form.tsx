@@ -7,15 +7,8 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiSwitch
-} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldSelect } from '../field_select';
 import { SizeRangeSelector } from './size_range_selector';

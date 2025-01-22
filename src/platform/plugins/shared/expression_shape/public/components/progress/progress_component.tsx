@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CSSProperties, RefCallback} from 'react';
+import type { CSSProperties, RefCallback } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useResizeObserver } from '@elastic/eui';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';

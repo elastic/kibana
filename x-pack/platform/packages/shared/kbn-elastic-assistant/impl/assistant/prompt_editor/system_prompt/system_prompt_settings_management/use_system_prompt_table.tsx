@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiIcon, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';

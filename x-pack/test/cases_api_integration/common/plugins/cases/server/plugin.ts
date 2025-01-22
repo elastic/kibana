@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup, CoreStart, PluginInitializerContext, Logger } from '@kbn/core/server';
+import type {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  PluginInitializerContext,
+  Logger,
+} from '@kbn/core/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';

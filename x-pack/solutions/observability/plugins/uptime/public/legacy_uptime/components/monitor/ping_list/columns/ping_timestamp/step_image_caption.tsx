@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEvent} from 'react';
+import type { MouseEvent } from 'react';
 import React, { useEffect } from 'react';
 import {
   EuiButtonEmpty,

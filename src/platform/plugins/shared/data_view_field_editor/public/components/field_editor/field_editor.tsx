@@ -12,17 +12,14 @@ import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiCallOut } from '@elastic/eui';
 
-import type {
-  FormHook,
-  RuntimeType,
-  RuntimePrimitiveTypes} from '../../shared_imports';
+import type { FormHook, RuntimeType, RuntimePrimitiveTypes } from '../../shared_imports';
 import {
   Form,
   useForm,
   useFormData,
   useFormIsModified,
   UseField,
-  TextField
+  TextField,
 } from '../../shared_imports';
 import type { Field } from '../../types';
 import { useFieldEditorContext } from '../field_editor_context';

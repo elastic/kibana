@@ -13,7 +13,11 @@ import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/a
 import type { Logger } from '@kbn/core/server';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import axios from 'axios';
-import type { ConnectorTypeConfigType, ConnectorTypeSecretsType, WebhookConnectorType } from './types';
+import type {
+  ConnectorTypeConfigType,
+  ConnectorTypeSecretsType,
+  WebhookConnectorType,
+} from './types';
 
 import { getConnectorType } from '.';
 

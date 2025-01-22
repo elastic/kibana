@@ -14,7 +14,8 @@ import type {
   EuiTableFieldDataColumnType,
   EuiTableActionsColumnType,
   QueryType,
-  CriteriaWithPagination} from '@elastic/eui';
+  CriteriaWithPagination,
+} from '@elastic/eui';
 import {
   EuiSearchBar,
   EuiBasicTable,
@@ -27,7 +28,7 @@ import {
   EuiPopover,
   EuiSwitch,
   EuiFormRow,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';

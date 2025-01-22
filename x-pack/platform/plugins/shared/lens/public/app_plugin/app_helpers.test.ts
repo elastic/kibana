@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 import { faker } from '@faker-js/faker';
-import type { UseNavigateBackToAppProps} from './app_helpers';
+import type { UseNavigateBackToAppProps } from './app_helpers';
 import { useNavigateBackToApp } from './app_helpers';
 import { defaultDoc, makeDefaultServices } from '../mocks/services_mock';
 import { cloneDeep } from 'lodash';

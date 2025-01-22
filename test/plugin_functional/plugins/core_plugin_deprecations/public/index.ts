@@ -10,10 +10,9 @@
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
 import type {
   CorePluginDeprecationsPluginSetup,
-  CorePluginDeprecationsPluginStart} from './plugin';
-import {
-  CorePluginDeprecationsPlugin
+  CorePluginDeprecationsPluginStart,
 } from './plugin';
+import { CorePluginDeprecationsPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   CorePluginDeprecationsPluginSetup,

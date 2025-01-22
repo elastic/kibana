@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsServiceSetup} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers
-} from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsServiceSetup } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import { DYNAMIC_SETTINGS_DEFAULT_ATTRIBUTES } from '../../../constants/settings';
 import type { DynamicSettingsAttributes } from '../../../runtime_types/settings';

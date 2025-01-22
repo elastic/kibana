@@ -4,8 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  UseEuiTheme} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,
@@ -17,7 +16,7 @@ import {
 import { css } from '@emotion/css';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import type { ChatActionClickHandler} from '../chat/types';
+import type { ChatActionClickHandler } from '../chat/types';
 import { ChatActionClickType } from '../chat/types';
 
 const getCodeBlockClassName = (theme: UseEuiTheme) => css`

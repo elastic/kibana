@@ -20,7 +20,7 @@ import styled from 'styled-components';
 import { css } from '@emotion/react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
 import type { AIConnector } from '../../connectorland/connector_selector';
-import type { Conversation} from '../../..';
+import type { Conversation } from '../../..';
 import { useLoadConnectors } from '../../..';
 import * as i18n from './translations';
 import { useAssistantContext } from '../../assistant_context';

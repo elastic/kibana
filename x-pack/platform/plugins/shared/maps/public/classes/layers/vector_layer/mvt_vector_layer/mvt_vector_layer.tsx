@@ -21,12 +21,8 @@ import type { DynamicSizeProperty } from '../../../styles/vector/properties/dyna
 import type { StaticSizeProperty } from '../../../styles/vector/properties/static_size_property';
 import { getField } from '../../../../../common/elasticsearch_util';
 import { LAYER_TYPE, SOURCE_TYPES, VECTOR_STYLES } from '../../../../../common/constants';
-import type {
-  VectorLayerArguments} from '../vector_layer';
-import {
-  NO_RESULTS_ICON_AND_TOOLTIPCONTENT,
-  AbstractVectorLayer
-} from '../vector_layer';
+import type { VectorLayerArguments } from '../vector_layer';
+import { NO_RESULTS_ICON_AND_TOOLTIPCONTENT, AbstractVectorLayer } from '../vector_layer';
 import type { IMvtVectorSource } from '../../../sources/vector_source';
 import type { DataRequestContext } from '../../../../actions';
 import type {
@@ -38,7 +34,7 @@ import type { ESSearchSource } from '../../../sources/es_search_source';
 import { hasESSourceMethod, isESVectorTileSource } from '../../../sources/es_source';
 import type { InnerJoin } from '../../../joins/inner_join';
 import type { LayerIcon } from '../../layer';
-import type { MvtSourceData} from './mvt_source_data';
+import type { MvtSourceData } from './mvt_source_data';
 import { syncMvtSourceData } from './mvt_source_data';
 import type { PropertiesMap } from '../../../../../common/elasticsearch_util';
 import { pluckStyleMeta } from './pluck_style_meta';

@@ -12,7 +12,8 @@ import type {
   EsDataTypeGeoShape,
   EsDataTypeRangeTerm,
   EsDataTypeSingle,
-  EsDataTypeUnion} from '../../schemas/common/schemas';
+  EsDataTypeUnion,
+} from '../../schemas/common/schemas';
 import {
   esDataTypeGeoShape,
   esDataTypeRangeTerm,

@@ -15,13 +15,12 @@ import type {
 import type { DatasourceSuggestion } from '../../types';
 import { generateId } from '../../id_generator';
 import type { FormBasedPrivateState } from './types';
-import type {
-  IndexPatternSuggestion} from './form_based_suggestions';
+import type { IndexPatternSuggestion } from './form_based_suggestions';
 import {
   getDatasourceSuggestionsForField,
   getDatasourceSuggestionsFromCurrentState,
   getDatasourceSuggestionsForVisualizeField,
-  getDatasourceSuggestionsForVisualizeCharts
+  getDatasourceSuggestionsForVisualizeCharts,
 } from './form_based_suggestions';
 import { documentField } from './document_field';
 import { getFieldByNameFactory } from './pure_helpers';

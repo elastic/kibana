@@ -19,7 +19,8 @@ import type {
   LogViewReference,
   LogViewsStaticConfig,
   LogViewStatus,
-  ResolvedLogView} from '../../../common/log_views';
+  ResolvedLogView,
+} from '../../../common/log_views';
 import {
   FetchLogViewError,
   FetchLogViewStatusError,

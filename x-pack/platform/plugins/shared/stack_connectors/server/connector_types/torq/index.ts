@@ -15,12 +15,11 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import type { Logger } from '@kbn/core/server';
 import type { ActionType, ActionTypeExecutorOptions } from '@kbn/actions-plugin/server';
-import type {
-  ActionTypeExecutorResult} from '@kbn/actions-plugin/common';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import {
   AlertingConnectorFeatureId,
   UptimeConnectorFeatureId,
-  SecurityConnectorFeatureId
+  SecurityConnectorFeatureId,
 } from '@kbn/actions-plugin/common';
 import { renderMustacheObject } from '@kbn/actions-plugin/server/lib/mustache_renderer';
 import { request } from '@kbn/actions-plugin/server/lib/axios_utils';

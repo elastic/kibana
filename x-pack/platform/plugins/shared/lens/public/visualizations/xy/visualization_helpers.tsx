@@ -25,11 +25,9 @@ import type {
   XYReferenceLineLayerConfig,
   SeriesType,
   XYByReferenceAnnotationLayerConfig,
-  XYByValueAnnotationLayerConfig} from './types';
-import {
-  visualizationTypes,
-  visualizationSubtypes,
+  XYByValueAnnotationLayerConfig,
 } from './types';
+import { visualizationTypes, visualizationSubtypes } from './types';
 import { isHorizontalChart } from './state_helpers';
 import { layerTypes } from '../..';
 import type { ExtraAppendLayerArg } from './visualization';

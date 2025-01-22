@@ -23,12 +23,10 @@ import {
 } from '@elastic/eui';
 
 import { useServices } from '../../../../app_context';
-import type {
-  UpdateRetentionSettings,
-  ExecuteRetention} from '../../../../components';
+import type { UpdateRetentionSettings, ExecuteRetention } from '../../../../components';
 import {
   RetentionSettingsUpdateModalProvider,
-  RetentionExecuteModalProvider
+  RetentionExecuteModalProvider,
 } from '../../../../components';
 
 interface Props {

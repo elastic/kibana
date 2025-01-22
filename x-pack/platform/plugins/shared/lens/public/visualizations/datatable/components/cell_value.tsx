@@ -6,7 +6,7 @@
  */
 
 import React, { useContext, useEffect } from 'react';
-import type { EuiDataGridCellValueElementProps} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import classNames from 'classnames';
 import type { PaletteOutput } from '@kbn/coloring';

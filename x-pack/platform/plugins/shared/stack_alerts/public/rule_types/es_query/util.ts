@@ -7,7 +7,7 @@
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';
-import type { FieldOption} from '@kbn/triggers-actions-ui-plugin/public/common';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import { NORMALIZED_FIELD_TYPES } from '@kbn/triggers-actions-ui-plugin/public/common';
 import type { estypes } from '@elastic/elasticsearch';
 import type { EsQueryRuleParams, SearchType } from './types';

@@ -7,17 +7,14 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { ILicenseState} from '../../../../lib';
+import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { trackDeprecatedRouteUsage } from '../../../../lib/track_deprecated_route_usage';
-import type {
-  MuteAllRuleRequestParamsV1} from '../../../../../common/routes/rule/apis/mute_all';
-import {
-  muteAllRuleRequestParamsSchemaV1
-} from '../../../../../common/routes/rule/apis/mute_all';
+import type { MuteAllRuleRequestParamsV1 } from '../../../../../common/routes/rule/apis/mute_all';
+import { muteAllRuleRequestParamsSchemaV1 } from '../../../../../common/routes/rule/apis/mute_all';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 
 export const muteAllRuleRoute = (

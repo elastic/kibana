@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import {
   EuiExpression,

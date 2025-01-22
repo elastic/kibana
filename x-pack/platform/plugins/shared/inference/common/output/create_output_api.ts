@@ -10,7 +10,8 @@ import type {
   OutputAPI,
   OutputCompositeResponse,
   OutputOptions,
-  ToolSchema} from '@kbn/inference-common';
+  ToolSchema,
+} from '@kbn/inference-common';
 import {
   ChatCompletionEventType,
   MessageRole,

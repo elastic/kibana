@@ -8,7 +8,7 @@
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { hiddenTypes as filesSavedObjectTypes } from '@kbn/files-plugin/server/saved_objects';
 import { i18n } from '@kbn/i18n';
-import type { KibanaFeatureConfig} from '@kbn/features-plugin/common';
+import type { KibanaFeatureConfig } from '@kbn/features-plugin/common';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { CasesUiCapabilities, CasesApiTags } from '@kbn/cases-plugin/common';
 import { casesFeatureId, casesFeatureIdV2, observabilityFeatureId } from '../../common';

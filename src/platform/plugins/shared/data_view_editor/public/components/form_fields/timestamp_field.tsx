@@ -15,13 +15,8 @@ import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFormRow, EuiComboBox, EuiFormHelpText } from '@elastic/eui';
 import { matchedIndiciesDefault } from '../../data_view_editor_service';
 
-import type {
-  FieldConfig,
-  ValidationConfig} from '../../shared_imports';
-import {
-  UseField,
-  getFieldValidityAndErrorMessage,
-} from '../../shared_imports';
+import type { FieldConfig, ValidationConfig } from '../../shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../shared_imports';
 
 import type { TimestampOption, MatchedIndicesSet } from '../../types';
 import { schema } from '../form_schema';

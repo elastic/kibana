@@ -11,11 +11,9 @@ import type {
   QueryObserverOptions,
   QueryObserverResult,
   QueryClient,
-  QueryKey} from '@tanstack/react-query';
-import {
-  notifyManager,
-  QueryObserver
+  QueryKey,
 } from '@tanstack/react-query';
+import { notifyManager, QueryObserver } from '@tanstack/react-query';
 import { Observable } from 'rxjs';
 
 export const createQueryObservable = <

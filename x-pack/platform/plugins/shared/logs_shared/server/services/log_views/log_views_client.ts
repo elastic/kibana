@@ -6,21 +6,16 @@
  */
 
 import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import type {
-  Logger,
-  SavedObject,
-  SavedObjectsClientContract} from '@kbn/core/server';
-import {
-  SavedObjectsUtils,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { Logger, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
+import { SavedObjectsUtils, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import type {
   LogView,
   LogViewAttributes,
   LogViewReference,
   LogViewsStaticConfig,
-  ResolvedLogView} from '../../../common/log_views';
+  ResolvedLogView,
+} from '../../../common/log_views';
 import {
   defaultLogViewAttributes,
   defaultLogViewId,

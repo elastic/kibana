@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PaletteOutput} from '@kbn/coloring';
+import type { PaletteOutput } from '@kbn/coloring';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '@kbn/coloring';
 import { suggestions } from './suggestions';
 import type { DataType, SuggestionRequest } from '../../types';

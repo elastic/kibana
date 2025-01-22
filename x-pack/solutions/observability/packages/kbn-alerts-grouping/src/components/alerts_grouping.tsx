@@ -5,19 +5,10 @@
  * 2.0.
  */
 
-import type {
-  Dispatch,
-  SetStateAction} from 'react';
-import React, {
-  memo,
-  useCallback,
-  useEffect,
-  useMemo,
-  useRef,
-  useState,
-} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import type { Filter } from '@kbn/es-query';
-import type { GroupOption} from '@kbn/grouping';
+import type { GroupOption } from '@kbn/grouping';
 import { isNoneGroup, useGrouping } from '@kbn/grouping';
 import { isEqual } from 'lodash/fp';
 import { i18n } from '@kbn/i18n';

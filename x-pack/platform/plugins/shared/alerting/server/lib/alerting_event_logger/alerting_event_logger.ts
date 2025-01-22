@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  IEvent,
-  IEventLogger} from '@kbn/event-log-plugin/server';
-import {
-  millisToNanos,
-  SAVED_OBJECT_REL_PRIMARY,
-} from '@kbn/event-log-plugin/server';
+import type { IEvent, IEventLogger } from '@kbn/event-log-plugin/server';
+import { millisToNanos, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';

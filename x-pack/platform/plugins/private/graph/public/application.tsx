@@ -33,7 +33,10 @@ import './index.scss';
 import type { SpacesApi } from '@kbn/spaces-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
-import type { ContentClient, ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
+import type {
+  ContentClient,
+  ContentManagementPublicStart,
+} from '@kbn/content-management-plugin/public';
 import type { GraphSavePolicy } from './types';
 import { graphRouter } from './router';
 import { checkLicense } from '../common/check_license';

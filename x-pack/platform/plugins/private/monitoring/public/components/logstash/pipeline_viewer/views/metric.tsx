@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type { UseEuiTheme} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import { EuiFlexItem, EuiBadge, EuiText, logicalCSS } from '@elastic/eui';
 
 type Type = 'cpuTime' | 'events' | 'eventsEmitted' | 'eventMillis';

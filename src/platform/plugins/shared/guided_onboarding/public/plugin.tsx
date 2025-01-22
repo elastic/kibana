@@ -25,7 +25,7 @@ import type {
   GuidedOnboardingPluginStart,
 } from './types';
 import { GuidePanel } from './components';
-import type { ApiService} from './services/api.service';
+import type { ApiService } from './services/api.service';
 import { apiService } from './services/api.service';
 
 export class GuidedOnboardingPlugin

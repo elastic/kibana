@@ -8,7 +8,7 @@
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
-import type { PutSLOSettingsParams} from '@kbn/slo-schema';
+import type { PutSLOSettingsParams } from '@kbn/slo-schema';
 import { sloSettingsSchema } from '@kbn/slo-schema';
 import {
   DEFAULT_STALE_SLO_THRESHOLD_HOURS,

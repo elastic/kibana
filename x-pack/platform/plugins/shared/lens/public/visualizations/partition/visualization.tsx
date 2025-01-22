@@ -8,13 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  ColorMapping,
-  PaletteRegistry} from '@kbn/coloring';
-import {
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  getColorsFromMapping,
-} from '@kbn/coloring';
+import type { ColorMapping, PaletteRegistry } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, getColorsFromMapping } from '@kbn/coloring';
 import type { CoreTheme, ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { EuiSpacer } from '@elastic/eui';
@@ -55,7 +50,7 @@ import { checkTableForContainsSmallValues } from './render_helpers';
 import type { DatasourcePublicAPI } from '../..';
 import { nonNullable, getColorMappingDefaults } from '../../utils';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
-import type { PersistedPieVisualizationState} from './persistence';
+import type { PersistedPieVisualizationState } from './persistence';
 import { convertToRuntime } from './persistence';
 import {
   PIE_RENDER_ARRAY_VALUES,

@@ -7,8 +7,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiComboBox,
@@ -18,7 +17,7 @@ import {
   EuiSwitch,
   EuiFormLabel,
   EuiLink,
-  useEuiTheme
+  useEuiTheme,
 } from '@elastic/eui';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

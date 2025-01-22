@@ -8,7 +8,7 @@
  */
 
 import type { PluginInitializerContext, PluginConfigDescriptor } from '@kbn/core/server';
-import type { VisTypeTimeseriesConfig} from './config';
+import type { VisTypeTimeseriesConfig } from './config';
 import { config as configSchema } from './config';
 
 export type { VisTypeTimeseriesSetup } from './plugin';

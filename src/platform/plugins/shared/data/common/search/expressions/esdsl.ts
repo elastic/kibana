@@ -13,7 +13,7 @@ import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/commo
 
 import { lastValueFrom } from 'rxjs';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { RequestStatistics} from '@kbn/inspector-plugin/common';
+import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { EsRawResponse } from './es_raw_response';
 

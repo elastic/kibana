@@ -10,7 +10,13 @@ import type { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
 import { SPACES } from '../lib/spaces';
 import { expectResponses, getUrlPrefix, getTestTitle } from '../lib/saved_object_test_utils';
-import type { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
+import type {
+  ExpectResponseBody,
+  TestCase,
+  TestDefinition,
+  TestSuite,
+  TestUser,
+} from '../lib/types';
 import type { FtrProviderContext } from '../ftr_provider_context';
 
 export interface BulkDeleteTestDefinition extends TestDefinition {

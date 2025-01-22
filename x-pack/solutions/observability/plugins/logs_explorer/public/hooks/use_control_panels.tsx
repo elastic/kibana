@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ControlGroupRuntimeState, ControlGroupRendererApi } from '@kbn/controls-plugin/public';
+import type {
+  ControlGroupRuntimeState,
+  ControlGroupRendererApi,
+} from '@kbn/controls-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { TimeRange } from '@kbn/es-query';
 import { useQuerySubscriber } from '@kbn/unified-field-list';

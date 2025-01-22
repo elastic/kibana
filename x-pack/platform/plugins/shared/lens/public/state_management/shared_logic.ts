@@ -6,7 +6,7 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type { DataViewSpec} from '@kbn/data-views-plugin/common';
+import type { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { DataViewPersistableStateService } from '@kbn/data-views-plugin/common';
 import type { AggregateQuery, Query, Filter } from '@kbn/es-query';
 import type { FilterManager } from '@kbn/data-plugin/public';

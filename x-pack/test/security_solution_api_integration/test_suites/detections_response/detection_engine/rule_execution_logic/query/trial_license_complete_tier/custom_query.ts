@@ -28,8 +28,7 @@ import moment from 'moment';
 import { get, orderBy } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 
-import type {
-  QueryRuleCreateProps} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { QueryRuleCreateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   BulkActionTypeEnum,
   AlertSuppressionMissingFieldsStrategyEnum,

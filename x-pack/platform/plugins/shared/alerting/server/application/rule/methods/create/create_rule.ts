@@ -6,7 +6,7 @@
  */
 import Semver from 'semver';
 import Boom from '@hapi/boom';
-import type { SavedObject} from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import { validateAndAuthorizeSystemActions } from '../../../../lib/validate_authorize_system_actions';

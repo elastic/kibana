@@ -10,7 +10,7 @@ import type { Services } from '@kbn/actions-plugin/server/types';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { validateParams, validateSecrets } from '@kbn/actions-plugin/server/lib';
 import axios from 'axios';
-import type { TeamsConnectorType} from '.';
+import type { TeamsConnectorType } from '.';
 import { getConnectorType, ConnectorTypeId } from '.';
 import { actionsConfigMock } from '@kbn/actions-plugin/server/actions_config.mock';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';

@@ -7,12 +7,9 @@
 import type { IRouter } from '@kbn/core/server';
 import { transformRuleTagsBodyResponseV1 } from './transforms';
 import { transformRuleTagsQueryRequestV1 } from './transforms';
-import type {
-  RuleTagsRequestQueryV1} from '../../../../../common/routes/rule/apis/tags';
-import {
-  ruleTagsRequestQuerySchemaV1
-} from '../../../../../common/routes/rule/apis/tags';
-import type { AlertingRequestHandlerContext} from '../../../../types';
+import type { RuleTagsRequestQueryV1 } from '../../../../../common/routes/rule/apis/tags';
+import { ruleTagsRequestQuerySchemaV1 } from '../../../../../common/routes/rule/apis/tags';
+import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';

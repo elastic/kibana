@@ -13,12 +13,8 @@ import { useLocation } from 'react-router-dom';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { SearchBar } from '../search_bar';
-import type {
-  GraphState} from '../../state_management';
-import {
-  hasFieldsSelector,
-  workspaceInitializedSelector,
-} from '../../state_management';
+import type { GraphState } from '../../state_management';
+import { hasFieldsSelector, workspaceInitializedSelector } from '../../state_management';
 import { FieldManager } from '../field_manager';
 import type { ControlType, IndexPatternProvider, TermIntersect, WorkspaceNode } from '../../types';
 import { WorkspaceTopNavMenu } from './workspace_top_nav_menu';

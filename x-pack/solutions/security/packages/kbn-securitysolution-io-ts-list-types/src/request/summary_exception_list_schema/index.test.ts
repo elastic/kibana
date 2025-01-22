@@ -9,7 +9,7 @@ import { left } from 'fp-ts/lib/Either';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getSummaryExceptionListSchemaMock } from './index.mock';
-import type { SummaryExceptionListSchema} from '.';
+import type { SummaryExceptionListSchema } from '.';
 import { summaryExceptionListSchema } from '.';
 
 describe('summary_exception_list_schema', () => {

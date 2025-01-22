@@ -14,7 +14,8 @@ import useLocalStorage from 'react-use/lib/useLocalStorage';
 import type {
   EuiDataGridProps,
   EuiDataGridCellPopoverElementProps,
-  EuiSwitchEvent} from '@elastic/eui';
+  EuiSwitchEvent,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +26,7 @@ import {
   EuiText,
   EuiCallOut,
   useResizeObserver,
-  EuiSwitch
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
@@ -50,7 +51,7 @@ import {
   DEFAULT_MARGIN_BOTTOM,
   getTabContentAvailableHeight,
 } from '../doc_viewer_source/get_height';
-import type { TableFiltersProps} from './table_filters';
+import type { TableFiltersProps } from './table_filters';
 import { TableFilters, useTableFilters } from './table_filters';
 import { TableCell } from './table_cell';
 import { getPinColumnControl } from './get_pin_control';

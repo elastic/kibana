@@ -8,8 +8,7 @@
 /* eslint-disable @typescript-eslint/consistent-type-definitions */
 
 import React, { Component, Fragment } from 'react';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverFooter,

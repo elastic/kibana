@@ -11,7 +11,7 @@ import type { ReactNode, OptionHTMLAttributes } from 'react';
 import React from 'react';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 
-import type { FieldHook} from '../../hook_form_lib';
+import type { FieldHook } from '../../hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 export interface Props {

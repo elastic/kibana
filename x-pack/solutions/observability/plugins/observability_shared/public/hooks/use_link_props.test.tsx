@@ -14,7 +14,7 @@ import { encode } from '@kbn/rison';
 import { coreMock } from '@kbn/core/public/mocks';
 import { CoreScopedHistory } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type { LinkDescriptor} from './use_link_props';
+import type { LinkDescriptor } from './use_link_props';
 import { useLinkProps } from './use_link_props';
 
 const PREFIX = '/test-basepath/s/test-space/app/';

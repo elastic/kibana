@@ -13,10 +13,9 @@ import type {
   PaletteOutput,
   PaletteRegistry,
   DataBounds,
-  CustomPaletteParams} from '@kbn/coloring';
-import {
-  CustomizablePalette
+  CustomPaletteParams,
 } from '@kbn/coloring';
+import { CustomizablePalette } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { PalettePanelContainer } from './palette_panel_container';
 

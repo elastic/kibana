@@ -13,17 +13,14 @@ import type { DataRequest } from '../../../util/data_request';
 import type { IStyleProperty } from './style_property';
 import { AbstractStyleProperty } from './style_property';
 import { DEFAULT_SIGMA } from '../vector_style_defaults';
-import type {
-  VECTOR_STYLES,
-  RawValue,
-  FieldFormatter} from '../../../../../common/constants';
+import type { VECTOR_STYLES, RawValue, FieldFormatter } from '../../../../../common/constants';
 import {
   DEFAULT_PERCENTILES,
   FIELD_ORIGIN,
   MB_LOOKUP_FUNCTION,
   SOURCE_META_DATA_REQUEST_ID,
   DATA_MAPPING_FUNCTION,
-  STYLE_TYPE
+  STYLE_TYPE,
 } from '../../../../../common/constants';
 import {
   CategoricalDataMappingPopover,

@@ -10,11 +10,12 @@
 import type {
   HasSerializedChildState,
   HasSnapshottableState,
-  SerializedPanelState} from '@kbn/presentation-containers';
+  SerializedPanelState,
+} from '@kbn/presentation-containers';
 import {
   apiHasRuntimeChildState,
   apiIsPresentationContainer,
-  initializeUnsavedChanges
+  initializeUnsavedChanges,
 } from '@kbn/presentation-containers';
 import type { PresentationPanelProps } from '@kbn/presentation-panel-plugin/public';
 import { PresentationPanel } from '@kbn/presentation-panel-plugin/public';

@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  IRouter,
-  ISavedObjectsRepository,
-  ServiceStatus} from '@kbn/core/server';
-import {
-  type MetricsServiceSetup
-} from '@kbn/core/server';
+import type { IRouter, ISavedObjectsRepository, ServiceStatus } from '@kbn/core/server';
+import { type MetricsServiceSetup } from '@kbn/core/server';
 import type { Observable } from 'rxjs';
 import type { ICollectorSet } from '../collector';
 import { registerUiCountersRoute } from './ui_counters';

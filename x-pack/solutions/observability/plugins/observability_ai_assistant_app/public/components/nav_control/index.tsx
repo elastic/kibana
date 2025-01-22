@@ -12,13 +12,8 @@ import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart } from '@kbn/core-lifecycle-browser';
-import type {
-  AIAssistantAppService} from '@kbn/ai-assistant';
-import {
-  useAIAssistantAppService,
-  ChatFlyout,
-  FlyoutPositionMode,
-} from '@kbn/ai-assistant';
+import type { AIAssistantAppService } from '@kbn/ai-assistant';
+import { useAIAssistantAppService, ChatFlyout, FlyoutPositionMode } from '@kbn/ai-assistant';
 import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useKibana } from '../../hooks/use_kibana';
 import { useTheme } from '../../hooks/use_theme';

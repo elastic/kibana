@@ -13,8 +13,7 @@ import {
   useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
-import type {
-  EuiFieldTextProps} from '@elastic/eui';
+import type { EuiFieldTextProps } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiFormControlLayout,
@@ -35,7 +34,7 @@ import { SERVICE_PROVIDERS } from './providers/render_service_provider/service_p
 import type { ServiceProviderKeys } from '../constants';
 import { DEFAULT_TASK_TYPE } from '../constants';
 import { SelectableProvider } from './providers/selectable';
-import type { TaskTypeOption} from '../utils/helpers';
+import type { TaskTypeOption } from '../utils/helpers';
 import { generateInferenceEndpointId, getTaskTypeOptions } from '../utils/helpers';
 import { ConfigurationFormItems } from './configuration/configuration_form_items';
 import { AdditionalOptionsFields } from './additional_options_fields';

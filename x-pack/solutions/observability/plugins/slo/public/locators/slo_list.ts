@@ -10,8 +10,7 @@ import type { LocatorDefinition } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 import deepmerge from 'deepmerge';
 import { sloListLocatorID } from '@kbn/observability-plugin/common';
-import type {
-  SearchState} from '../pages/slos/hooks/use_url_search_state';
+import type { SearchState } from '../pages/slos/hooks/use_url_search_state';
 import {
   DEFAULT_STATE,
   SLO_LIST_SEARCH_URL_STORAGE_KEY,

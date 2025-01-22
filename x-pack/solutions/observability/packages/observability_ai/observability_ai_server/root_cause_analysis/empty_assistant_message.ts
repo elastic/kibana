@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AssistantMessage} from '@kbn/inference-common';
+import type { AssistantMessage } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 import type { RootCauseAnalysisEvent } from './types';
 

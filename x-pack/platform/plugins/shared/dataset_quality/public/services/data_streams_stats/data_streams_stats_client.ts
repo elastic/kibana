@@ -13,13 +13,14 @@ import type {
   DataStreamDegradedDocsResponse,
   DataStreamTotalDocsResponse,
   IntegrationsResponse,
-  NonAggregatableDatasets} from '../../../common/api_types';
+  NonAggregatableDatasets,
+} from '../../../common/api_types';
 import {
   getDataStreamDegradedDocsResponseRt,
   getDataStreamsStatsResponseRt,
   getDataStreamTotalDocsResponseRt,
   getIntegrationsResponseRt,
-  getNonAggregatableDatasetsRt
+  getNonAggregatableDatasetsRt,
 } from '../../../common/api_types';
 import type {
   DataStreamStatServiceResponse,

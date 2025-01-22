@@ -6,7 +6,7 @@
  */
 
 import React, { useState, useEffect, useRef, useMemo } from 'react';
-import type { ActionParamsProps} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { eventActionOptions } from './constants';

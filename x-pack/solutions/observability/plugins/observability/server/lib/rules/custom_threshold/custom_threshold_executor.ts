@@ -20,7 +20,7 @@ import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { getEcsGroups } from '@kbn/observability-alerting-rule-utils';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { getEsQueryConfig } from '../../../utils/get_es_query_config';
-import type { AlertsLocatorParams} from '../../../../common';
+import type { AlertsLocatorParams } from '../../../../common';
 import { getAlertDetailsUrl } from '../../../../common';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 import type { ObservabilityConfig } from '../../..';
@@ -33,10 +33,9 @@ import type {
   CustomThresholdAlertContext,
   CustomThresholdSpecificActionGroups,
   CustomThresholdActionGroup,
-  CustomThresholdAlert} from './types';
-import {
-  AlertStates
+  CustomThresholdAlert,
 } from './types';
+import { AlertStates } from './types';
 import { buildFiredAlertReason, buildNoDataAlertReason } from './messages';
 import {
   createScopedLogger,
@@ -48,7 +47,7 @@ import {
 } from './utils';
 
 import { formatAlertResult, getLabel } from './lib/format_alert_result';
-import type { EvaluatedRuleParams} from './lib/evaluate_rule';
+import type { EvaluatedRuleParams } from './lib/evaluate_rule';
 import { evaluateRule } from './lib/evaluate_rule';
 import type { MissingGroupsRecord } from './lib/check_missing_group';
 

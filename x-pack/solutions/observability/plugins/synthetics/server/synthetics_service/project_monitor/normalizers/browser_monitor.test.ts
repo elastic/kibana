@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type {
-  Locations,
-  ProjectMonitor} from '../../../../common/runtime_types';
+import type { Locations, ProjectMonitor } from '../../../../common/runtime_types';
 import {
   MonitorTypeEnum,
   ScreenshotOption,
-  LocationStatus
+  LocationStatus,
 } from '../../../../common/runtime_types';
 import {
   DEFAULT_FIELDS,

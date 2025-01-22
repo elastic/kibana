@@ -19,11 +19,8 @@ import type { EventAnnotationServiceType } from '@kbn/event-annotation-component
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
-import type {
-  EventAnnotationGroupConfig} from '@kbn/event-annotation-common';
-import {
-  EVENT_ANNOTATION_GROUP_TYPE,
-} from '@kbn/event-annotation-common';
+import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
+import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
 import { taggingApiMock } from '@kbn/saved-objects-tagging-oss-plugin/public/mocks';
 
 import { act } from 'react-dom/test-utils';

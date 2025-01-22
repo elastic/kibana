@@ -19,7 +19,7 @@ import {
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
-import type { IntervalSchedule} from '../../../../types';
+import type { IntervalSchedule } from '../../../../types';
 import { RuleNotifyWhen } from '../../../../types';
 import { RecoveredActionGroup } from '../../../../../common';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';

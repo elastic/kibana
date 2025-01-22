@@ -14,7 +14,7 @@ import { FIELD_TYPES, fieldValidators, UseField } from '../../../../../../shared
 import { XJsonEditor } from '../field_components';
 
 import { FieldNameField } from './common_fields/field_name_field';
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { to, EDITOR_PX_HEIGHT, from, isXJsonField } from './shared';
 
 const { emptyField } = fieldValidators;

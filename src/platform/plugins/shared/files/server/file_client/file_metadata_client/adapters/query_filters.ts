@@ -8,7 +8,7 @@
  */
 
 import { pipe, forEach } from 'lodash/fp';
-import type { KueryNode} from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, nodeTypes } from '@kbn/es-query';
 
 import { getFlattenedObject } from '@kbn/std';

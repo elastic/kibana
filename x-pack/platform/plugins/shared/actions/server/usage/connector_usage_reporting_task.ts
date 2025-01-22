@@ -6,15 +6,14 @@
  */
 
 import fs from 'fs';
-import type { Logger, CoreSetup} from '@kbn/core/server';
+import type { Logger, CoreSetup } from '@kbn/core/server';
 import { type ElasticsearchClient } from '@kbn/core/server';
 import type {
   IntervalSchedule,
   TaskManagerStartContract,
-  TaskManagerSetupContract} from '@kbn/task-manager-plugin/server';
-import {
-  type ConcreteTaskInstance
+  TaskManagerSetupContract,
 } from '@kbn/task-manager-plugin/server';
+import { type ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import type { AggregationsSumAggregate } from '@elastic/elasticsearch/lib/api/types';
 import axios from 'axios';
 import https from 'https';

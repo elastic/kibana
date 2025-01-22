@@ -11,7 +11,7 @@ import { css } from '@emotion/react';
 
 import { useEuiTheme, transparentize } from '@elastic/eui';
 
-import type { FieldValue} from './convert_results';
+import type { FieldValue } from './convert_results';
 import { isFieldValue } from './convert_results';
 
 export interface FieldValueCellProps {

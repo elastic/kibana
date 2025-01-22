@@ -7,8 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiButtonGroup,
@@ -18,7 +17,7 @@ import {
   EuiFlexGroup,
   EuiComboBox,
 } from '@elastic/eui';
-import type { VerticalAlignment, HorizontalAlignment} from '@elastic/charts';
+import type { VerticalAlignment, HorizontalAlignment } from '@elastic/charts';
 import { Position, LegendValue } from '@elastic/charts';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
 import { useDebouncedValue } from '@kbn/visualization-utils';

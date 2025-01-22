@@ -10,8 +10,7 @@
 import classNames from 'classnames';
 import React, { useMemo } from 'react';
 
-import type {
-  DraggableProvidedDragHandleProps} from '@elastic/eui';
+import type { DraggableProvidedDragHandleProps } from '@elastic/eui';
 import {
   EuiText,
   EuiIcon,
@@ -19,7 +18,7 @@ import {
   EuiToolTip,
   EuiFlexItem,
   EuiFlexGroup,
-  EuiButtonIcon
+  EuiButtonIcon,
 } from '@elastic/eui';
 
 import { LinkInfo } from './constants';

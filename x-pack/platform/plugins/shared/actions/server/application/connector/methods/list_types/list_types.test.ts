@@ -9,7 +9,7 @@ import { actionsConfigMock } from '../../../../actions_config.mock';
 import type { ActionTypeRegistryOpts } from '../../../../action_type_registry';
 import { ActionTypeRegistry } from '../../../../action_type_registry';
 import type { ActionsAuthorization } from '../../../../authorization/actions_authorization';
-import type { ILicenseState} from '../../../../lib';
+import type { ILicenseState } from '../../../../lib';
 import { ActionExecutor, TaskRunnerFactory } from '../../../../lib';
 import { actionExecutorMock } from '../../../../lib/action_executor.mock';
 import { connectorTokenClientMock } from '../../../../lib/connector_token_client.mock';

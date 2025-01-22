@@ -17,7 +17,7 @@ import type {
   APIEndpoint,
   ObservabilityOnboardingServerRouteRepository,
 } from '../../../server/routes';
-import type { CallApi} from './call_api';
+import type { CallApi } from './call_api';
 import { callApi } from './call_api';
 
 export type ObservabilityOnboardingClientOptions = Omit<

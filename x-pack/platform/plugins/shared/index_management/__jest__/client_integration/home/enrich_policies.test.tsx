@@ -11,7 +11,7 @@ import { notificationServiceMock } from '@kbn/core/public/mocks';
 
 import { setupEnvironment } from '../helpers';
 import { createTestEnrichPolicy } from '../helpers/fixtures';
-import type { EnrichPoliciesTestBed} from './enrich_policies.helpers';
+import type { EnrichPoliciesTestBed } from './enrich_policies.helpers';
 import { setup } from './enrich_policies.helpers';
 import { notificationService } from '../../../public/application/services/notification';
 

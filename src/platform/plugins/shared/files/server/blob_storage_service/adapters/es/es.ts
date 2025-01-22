@@ -15,7 +15,7 @@ import type { Readable, Transform } from 'stream';
 import { pipeline } from 'stream/promises';
 import { promisify } from 'util';
 import { lastValueFrom, defer, firstValueFrom } from 'rxjs';
-import type { PerformanceMetricEvent} from '@kbn/ebt-tools';
+import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { memoize } from 'lodash';
 import { FilesPlugin } from '../../../plugin';

@@ -6,7 +6,7 @@
  */
 
 import type { Capabilities, Logger } from '@kbn/core/server';
-import type { FieldName, FieldMetadata} from '../../../common';
+import type { FieldName, FieldMetadata } from '../../../common';
 import { FieldsMetadataDictionary } from '../../../common';
 import type { EcsFieldsRepository } from './repositories/ecs_fields_repository';
 import type { IntegrationFieldsRepository } from './repositories/integration_fields_repository';

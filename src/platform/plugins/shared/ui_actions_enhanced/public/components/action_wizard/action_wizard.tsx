@@ -35,7 +35,11 @@ import {
   txtTriggerPickerHelpTooltip,
 } from './i18n';
 import './action_wizard.scss';
-import type { ActionFactory, BaseActionConfig, BaseActionFactoryContext } from '../../dynamic_actions';
+import type {
+  ActionFactory,
+  BaseActionConfig,
+  BaseActionFactoryContext,
+} from '../../dynamic_actions';
 
 export interface ActionWizardProps<
   ActionFactoryContext extends BaseActionFactoryContext = BaseActionFactoryContext

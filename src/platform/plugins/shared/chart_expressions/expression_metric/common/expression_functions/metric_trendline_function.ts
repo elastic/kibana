@@ -9,12 +9,11 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  Dimension} from '@kbn/visualizations-plugin/common/utils';
+import type { Dimension } from '@kbn/visualizations-plugin/common/utils';
 import {
   validateAccessor,
   getColumnByAccessor,
-  prepareLogTable
+  prepareLogTable,
 } from '@kbn/visualizations-plugin/common/utils';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import type { MetricWTrend } from '@elastic/charts';

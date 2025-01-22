@@ -6,8 +6,7 @@
  */
 
 import type { Action } from 'redux-actions';
-import type {
-  MonitorDetailsState} from '../actions/monitor';
+import type { MonitorDetailsState } from '../actions/monitor';
 import {
   getMonitorDetailsAction,
   getMonitorLocationsAction,

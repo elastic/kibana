@@ -18,7 +18,8 @@ import type {
   EuiSwitchProps,
   EuiButtonGroupProps,
   EuiComboBoxProps,
-  EuiTextAreaProps} from '@elastic/eui';
+  EuiTextAreaProps,
+} from '@elastic/eui';
 import {
   EuiFieldText,
   EuiSelect,
@@ -28,50 +29,26 @@ import {
   EuiSwitch,
   EuiButtonGroup,
   EuiComboBox,
-  EuiTextArea
+  EuiTextArea,
 } from '@elastic/eui';
-import type {
-  ThrottlingConfigFieldProps} from '../fields/throttling/throttling_config_field';
-import {
-  ThrottlingConfigField
-} from '../fields/throttling/throttling_config_field';
+import type { ThrottlingConfigFieldProps } from '../fields/throttling/throttling_config_field';
+import { ThrottlingConfigField } from '../fields/throttling/throttling_config_field';
 import type { SourceFieldProps } from '../fields/source_field';
 import { SourceField } from '../fields/source_field';
-import type {
-  FormattedComboBoxProps as DefaultFormattedComboBoxProps} from '../fields/combo_box';
-import {
-  FormattedComboBox as DefaultFormattedComboBox
-} from '../fields/combo_box';
-import type {
-  CodeEditorProps as DefaultCodeEditorProps} from '../fields/code_editor';
-import {
-  JSONEditor as DefaultJSONEditor
-} from '../fields/code_editor';
-import type {
-  MonitorTypeRadioGroupProps} from '../fields/monitor_type_radio_group';
-import {
-  MonitorTypeRadioGroup as DefaultMonitorTypeRadioGroup
-} from '../fields/monitor_type_radio_group';
-import type {
-  HeaderFieldProps as DefaultHeaderFieldProps} from '../fields/header_field';
-import {
-  HeaderField as DefaultHeaderField
-} from '../fields/header_field';
-import type {
-  KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps} from '../fields/key_value_field';
-import {
-  KeyValuePairsField as DefaultKeyValuePairsField
-} from '../fields/key_value_field';
-import type {
-  RequestBodyFieldProps as DefaultRequestBodyFieldProps} from '../fields/request_body_field';
-import {
-  RequestBodyField as DefaultRequestBodyField
-} from '../fields/request_body_field';
-import type {
-  ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps} from '../fields/index_response_body_field';
-import {
-  ResponseBodyIndexField as DefaultResponseBodyIndexField
-} from '../fields/index_response_body_field';
+import type { FormattedComboBoxProps as DefaultFormattedComboBoxProps } from '../fields/combo_box';
+import { FormattedComboBox as DefaultFormattedComboBox } from '../fields/combo_box';
+import type { CodeEditorProps as DefaultCodeEditorProps } from '../fields/code_editor';
+import { JSONEditor as DefaultJSONEditor } from '../fields/code_editor';
+import type { MonitorTypeRadioGroupProps } from '../fields/monitor_type_radio_group';
+import { MonitorTypeRadioGroup as DefaultMonitorTypeRadioGroup } from '../fields/monitor_type_radio_group';
+import type { HeaderFieldProps as DefaultHeaderFieldProps } from '../fields/header_field';
+import { HeaderField as DefaultHeaderField } from '../fields/header_field';
+import type { KeyValuePairsFieldProps as DefaultKeyValuePairsFieldProps } from '../fields/key_value_field';
+import { KeyValuePairsField as DefaultKeyValuePairsField } from '../fields/key_value_field';
+import type { RequestBodyFieldProps as DefaultRequestBodyFieldProps } from '../fields/request_body_field';
+import { RequestBodyField as DefaultRequestBodyField } from '../fields/request_body_field';
+import type { ResponseBodyIndexFieldProps as DefaultResponseBodyIndexFieldProps } from '../fields/index_response_body_field';
+import { ResponseBodyIndexField as DefaultResponseBodyIndexField } from '../fields/index_response_body_field';
 
 // these props are automatically passed through to our controlled components
 // they do not have to be defined specifically on the 'props' field in the

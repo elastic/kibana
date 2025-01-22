@@ -23,11 +23,8 @@ import type {
 import type { Field, PluginStart, InternalFieldType } from '../types';
 import type { ApiService } from '../lib';
 import { getLinks } from '../lib';
-import type {
-  Props as FieldEditorFlyoutContentProps} from './field_editor_flyout_content';
-import {
-  FieldEditorFlyoutContent
-} from './field_editor_flyout_content';
+import type { Props as FieldEditorFlyoutContentProps } from './field_editor_flyout_content';
+import { FieldEditorFlyoutContent } from './field_editor_flyout_content';
 import { FieldEditorProvider } from './field_editor_context';
 import { FieldPreviewProvider } from './preview';
 import { PreviewController } from './preview/preview_controller';

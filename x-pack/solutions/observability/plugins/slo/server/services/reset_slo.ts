@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IBasePath,
+  IScopedClusterClient,
+  Logger,
+} from '@kbn/core/server';
 import { resetSLOResponseSchema } from '@kbn/slo-schema';
 import {
   SLO_DESTINATION_INDEX_PATTERN,

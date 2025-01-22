@@ -9,11 +9,8 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { AggregationsAutoDateHistogramAggregation } from '@elastic/elasticsearch/lib/api/types';
 import { createElasticsearchClient } from '../../clients/elasticsearch';
 import type { FunctionRegistrationParameters } from '..';
-import type {
-  ChangesFunctionResponse} from '../../../common/functions/changes';
-import {
-  changesFunctionParameters
-} from '../../../common/functions/changes';
+import type { ChangesFunctionResponse } from '../../../common/functions/changes';
+import { changesFunctionParameters } from '../../../common/functions/changes';
 import { getMetricChanges } from './get_metric_changes';
 import { getLogChanges } from './get_log_changes';
 

@@ -11,7 +11,7 @@ import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 
 import type { AggTypesRegistryStart } from '../agg_types_registry';
 import { AggTypesRegistry } from '../agg_types_registry';
-import type { AggTypesDependencies} from '../agg_types';
+import type { AggTypesDependencies } from '../agg_types';
 import { getAggTypes } from '../agg_types';
 import type { TimeBucketsConfig } from '../buckets/lib/time_buckets/time_buckets';
 

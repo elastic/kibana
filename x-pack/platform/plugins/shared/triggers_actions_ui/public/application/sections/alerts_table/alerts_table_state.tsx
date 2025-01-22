@@ -12,14 +12,9 @@ import type {
   EuiDataGridSorting,
   EuiDataGridProps,
   EuiDataGridToolBarVisibilityOptions,
-  EuiDataGridControlColumn} from '@elastic/eui';
-import {
-  EuiProgress,
-  EuiEmptyPrompt,
-  EuiButton,
-  EuiCode,
-  EuiCopy
+  EuiDataGridControlColumn,
 } from '@elastic/eui';
+import { EuiProgress, EuiEmptyPrompt, EuiButton, EuiCode, EuiCopy } from '@elastic/eui';
 import type { MappingRuntimeFields } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { RuleRegistrySearchRequestPagination } from '@kbn/rule-registry-plugin/common';

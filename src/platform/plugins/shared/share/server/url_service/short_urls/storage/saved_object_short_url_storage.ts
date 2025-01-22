@@ -8,7 +8,11 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { SavedObject, SavedObjectReference, SavedObjectsClientContract } from '@kbn/core/server';
+import type {
+  SavedObject,
+  SavedObjectReference,
+  SavedObjectsClientContract,
+} from '@kbn/core/server';
 import type { ShortUrlRecord } from '..';
 import { UrlServiceError } from '../..';
 import { LEGACY_SHORT_URL_LOCATOR_ID } from '../../../../common/url_service/locators/legacy_short_url_locator';

@@ -14,7 +14,12 @@ import type {
   RequestHandlerContext,
 } from '@kbn/core/server';
 
-import type { ILicense, LicenseType, LicenseCheckState, LicensingPluginStart } from './shared_imports';
+import type {
+  ILicense,
+  LicenseType,
+  LicenseCheckState,
+  LicensingPluginStart,
+} from './shared_imports';
 
 type LicenseLogger = Pick<Logger, 'warn'>;
 type LicenseDependency = Pick<LicensingPluginStart, 'license$'>;

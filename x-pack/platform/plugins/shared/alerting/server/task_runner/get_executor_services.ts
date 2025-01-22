@@ -14,16 +14,10 @@ import type {
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import { RULE_SAVED_OBJECT_TYPE } from '..';
 import { getEsRequestTimeout } from '../lib';
-import type {
-  WrappedScopedClusterClient} from '../lib/wrap_scoped_cluster_client';
-import {
-  createWrappedScopedClusterClientFactory
-} from '../lib/wrap_scoped_cluster_client';
-import type {
-  WrappedSearchSourceClient} from '../lib/wrap_search_source_client';
-import {
-  wrapSearchSourceClient,
-} from '../lib/wrap_search_source_client';
+import type { WrappedScopedClusterClient } from '../lib/wrap_scoped_cluster_client';
+import { createWrappedScopedClusterClientFactory } from '../lib/wrap_scoped_cluster_client';
+import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
+import { wrapSearchSourceClient } from '../lib/wrap_search_source_client';
 import type { RuleMonitoringService } from '../monitoring/rule_monitoring_service';
 import type { RuleResultService } from '../monitoring/rule_result_service';
 import type { PublicRuleMonitoringService, PublicRuleResultService } from '../types';

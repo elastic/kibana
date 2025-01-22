@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SearchHit, SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  SearchHit,
+  SearchResponse,
+  SearchTotalHits,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { Paginate } from '../types';
 
 const defaultResult = <T>(data: T[]) => ({

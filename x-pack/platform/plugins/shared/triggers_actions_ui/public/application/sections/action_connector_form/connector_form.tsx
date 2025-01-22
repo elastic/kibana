@@ -7,8 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { isEmpty } from 'lodash';
-import type {
-  FormHook} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormHook } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   Form,
   useForm,

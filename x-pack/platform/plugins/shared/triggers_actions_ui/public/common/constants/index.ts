@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Comparator} from '@kbn/alerting-comparators';
+import type { Comparator } from '@kbn/alerting-comparators';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { i18n } from '@kbn/i18n';
 

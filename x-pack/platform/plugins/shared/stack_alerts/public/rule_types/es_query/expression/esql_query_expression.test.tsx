@@ -15,7 +15,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EsqlQueryExpression } from './esql_query_expression';
-import type { EsQueryRuleParams} from '../types';
+import type { EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
 
 jest.mock('../validation', () => ({

@@ -6,7 +6,12 @@
  */
 import type { IngestPutPipelineRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { ElasticsearchClient, IBasePath, IScopedClusterClient, Logger } from '@kbn/core/server';
+import type {
+  ElasticsearchClient,
+  IBasePath,
+  IScopedClusterClient,
+  Logger,
+} from '@kbn/core/server';
 import type { CreateSLOParams, CreateSLOResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { asyncForEach } from '@kbn/std';

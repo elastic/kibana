@@ -12,7 +12,7 @@ import { getListResponseMock } from '../../../common/schemas/response/list_schem
 import { LIST_ID, LIST_INDEX } from '../../../common/constants.mock';
 import { getIndexESListMock } from '../../schemas/elastic_query/index_es_list_schema.mock';
 
-import type { CreateListOptions} from './create_list';
+import type { CreateListOptions } from './create_list';
 import { createList } from './create_list';
 import { getCreateListOptionsMock } from './create_list.mock';
 

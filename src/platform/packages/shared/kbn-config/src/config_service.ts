@@ -8,11 +8,11 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type { Type} from '@kbn/config-schema';
+import type { Type } from '@kbn/config-schema';
 import { SchemaTypeError, ValidationError } from '@kbn/config-schema';
 import { cloneDeep, isEqual, merge, unset } from 'lodash';
 import { set } from '@kbn/safer-lodash-set';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, firstValueFrom, identity } from 'rxjs';
 import { distinctUntilChanged, map, shareReplay, tap } from 'rxjs';
 import type { Logger, LoggerFactory } from '@kbn/logging';
@@ -28,11 +28,9 @@ import type {
   ConfigDeprecationContext,
   ConfigDeprecationProvider,
   DeprecatedConfigDetails,
-  ChangedDeprecatedPaths} from './deprecation';
-import {
-  applyDeprecations,
-  configDeprecationFactory
+  ChangedDeprecatedPaths,
 } from './deprecation';
+import { applyDeprecations, configDeprecationFactory } from './deprecation';
 import { ObjectToConfigAdapter } from './object_to_config_adapter';
 
 /** @internal */

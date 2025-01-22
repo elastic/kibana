@@ -8,7 +8,7 @@
  */
 
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import type { BucketColumns} from '../../common/types';
+import type { BucketColumns } from '../../common/types';
 import { ChartTypes, LegendDisplay } from '../../common/types';
 
 type GetLegendIsFlatFn = (splitChartDimension: DatatableColumn | undefined) => boolean;

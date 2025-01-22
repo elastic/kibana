@@ -7,7 +7,13 @@
 
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import type { CoreSetup, CoreStart, Plugin, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
 import type { Index } from '@kbn/index-management-plugin/server';

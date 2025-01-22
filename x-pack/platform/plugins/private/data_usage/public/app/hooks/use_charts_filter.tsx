@@ -13,7 +13,7 @@ import {
   METRIC_TYPE_API_VALUES_TO_UI_OPTIONS_MAP,
   isDefaultMetricType,
 } from '../../../common/rest_types';
-import type { FILTER_NAMES} from '../../translations';
+import type { FILTER_NAMES } from '../../translations';
 import { UX_LABELS } from '../../translations';
 import { useDataUsageMetricsUrlParams } from './use_charts_url_params';
 import { formatBytes } from '../../utils/format_bytes';

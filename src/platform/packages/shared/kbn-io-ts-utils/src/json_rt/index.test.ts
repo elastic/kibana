@@ -9,7 +9,7 @@
 
 import * as t from 'io-ts';
 import { jsonRt } from '.';
-import type { Either} from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
 import { isRight, isLeft, fold } from 'fp-ts/lib/Either';
 import type { Right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';

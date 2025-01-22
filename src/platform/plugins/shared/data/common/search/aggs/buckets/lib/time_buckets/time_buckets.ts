@@ -16,8 +16,7 @@ import type { Unit } from '@kbn/datemath';
 import { parseInterval, splitStringInterval } from '../../../utils';
 import type { TimeRangeBounds } from '../../../../../query';
 import { calcAutoIntervalLessThan, calcAutoIntervalNear } from './calc_auto_interval';
-import type {
-  EsInterval} from './calc_es_interval';
+import type { EsInterval } from './calc_es_interval';
 import {
   convertDurationToNormalizedEsInterval,
   convertIntervalToEsInterval,

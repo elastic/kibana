@@ -10,8 +10,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment } from 'react';
 
-import type {
-  EuiPanelProps} from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +18,7 @@ import {
   EuiText,
   EuiPanel,
   EuiTitle,
-  EuiLink
+  EuiLink,
 } from '@elastic/eui';
 import { LEARN_MORE_LABEL } from '../constants';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, SetStateAction} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiText, EuiFlexGroup, EuiFlexItem, EuiButtonEmpty, useEuiTheme } from '@elastic/eui';

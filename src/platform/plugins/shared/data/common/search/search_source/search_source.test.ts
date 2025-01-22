@@ -14,7 +14,7 @@ import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '@kbn/expressions-plugin/common';
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type { SearchFieldValue, SearchSourceDependencies} from '.';
+import type { SearchFieldValue, SearchSourceDependencies } from '.';
 import { SearchSource, SortDirection } from '.';
 import type { AggTypesRegistryStart } from '../..';
 import { AggConfigs } from '../..';

@@ -23,13 +23,8 @@ import type { Processor } from '../../../../common/types';
 
 import { getFormRow, getUseField, Field, JsonEditorField } from '../../../shared_imports';
 
-import type {
-  OnUpdateHandler,
-  OnDoneLoadJsonHandler} from '../pipeline_editor';
-import {
-  ProcessorsEditorContextProvider,
-  PipelineEditor,
-} from '../pipeline_editor';
+import type { OnUpdateHandler, OnDoneLoadJsonHandler } from '../pipeline_editor';
+import { ProcessorsEditorContextProvider, PipelineEditor } from '../pipeline_editor';
 
 interface Props {
   processors: Processor[];

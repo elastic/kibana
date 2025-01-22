@@ -18,7 +18,8 @@ import type {
   ReadStreamDefinition,
   StreamDefinition,
   WiredReadStreamDefinition,
-  WiredStreamDefinition} from '../models';
+  WiredStreamDefinition,
+} from '../models';
 import {
   conditionSchema,
   dissectProcessingDefinitionSchema,
@@ -34,7 +35,8 @@ import {
 import type {
   IngestStreamConfigDefinition,
   StreamConfigDefinition,
-  WiredStreamConfigDefinition} from '../models/stream_config';
+  WiredStreamConfigDefinition,
+} from '../models/stream_config';
 import {
   ingestStreamConfigDefinitonSchema,
   streamConfigDefinitionSchema,

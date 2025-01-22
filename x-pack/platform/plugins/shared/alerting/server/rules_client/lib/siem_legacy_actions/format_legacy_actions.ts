@@ -14,7 +14,7 @@ import type { RuleExecutorServices } from '../../..';
 import { injectReferencesIntoActions } from '../../common';
 import { transformToNotifyWhen } from './transform_to_notify_when';
 import { transformFromLegacyActions } from './transform_legacy_actions';
-import type { LegacyIRuleActionsAttributes} from './types';
+import type { LegacyIRuleActionsAttributes } from './types';
 import { legacyRuleActionsSavedObjectType } from './types';
 import { transformToAlertThrottle } from './transform_to_alert_throttle';
 

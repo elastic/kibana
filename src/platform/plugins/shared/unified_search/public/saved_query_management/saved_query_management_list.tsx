@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ShortDate,
-  EuiSelectableProps} from '@elastic/eui';
+import type { ShortDate, EuiSelectableProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -26,7 +24,7 @@ import {
   EuiText,
   EuiHorizontalRule,
   EuiProgress,
-  PrettyDuration
+  PrettyDuration,
 } from '@elastic/eui';
 import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
 import { i18n } from '@kbn/i18n';

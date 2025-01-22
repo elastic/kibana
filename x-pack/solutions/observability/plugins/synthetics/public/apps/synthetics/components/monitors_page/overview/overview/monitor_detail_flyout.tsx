@@ -34,7 +34,7 @@ import { useKibanaSpace } from '../../../../../../hooks/use_kibana_space';
 import type { ClientPluginsStart } from '../../../../../../plugin';
 import { useMonitorDetail } from '../../../../hooks/use_monitor_detail';
 import { useMonitorDetailLocator } from '../../../../hooks/use_monitor_detail_locator';
-import type { LocationsStatus} from '../../../../hooks/use_status_by_location';
+import type { LocationsStatus } from '../../../../hooks/use_status_by_location';
 import { useStatusByLocation } from '../../../../hooks/use_status_by_location';
 import {
   getMonitorAction,

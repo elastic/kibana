@@ -14,10 +14,9 @@ import type {
   BuildDependencies,
   LensAttributes,
   LensRegionMapConfig,
-  LensTagCloudConfig} from '../types';
-import {
-  DEFAULT_LAYER_ID
+  LensTagCloudConfig,
 } from '../types';
+import { DEFAULT_LAYER_ID } from '../types';
 import {
   addLayerColumn,
   buildDatasourceStates,

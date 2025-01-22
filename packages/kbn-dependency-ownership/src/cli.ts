@@ -13,7 +13,7 @@ import nodePath from 'path';
 
 import fs from 'fs';
 
-import type { DependenciesByOwner} from './dependency_ownership';
+import type { DependenciesByOwner } from './dependency_ownership';
 import { identifyDependencyOwnership } from './dependency_ownership';
 
 interface CLIArgs {

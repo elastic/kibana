@@ -10,9 +10,7 @@
 import { uniq } from 'lodash';
 import React, { useState, useCallback, useEffect, Fragment, useMemo, useRef } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
-import type {
-  EuiTabbedContentTab,
-  FilterChecked} from '@elastic/eui';
+import type { EuiTabbedContentTab, FilterChecked } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -32,10 +30,9 @@ import type {
   DataView,
   DataViewField,
   DataViewsPublicPluginStart,
-  RuntimeField} from '@kbn/data-views-plugin/public';
-import {
-  META_FIELDS
+  RuntimeField,
 } from '@kbn/data-views-plugin/public';
+import { META_FIELDS } from '@kbn/data-views-plugin/public';
 import type { AbstractDataView } from '@kbn/data-views-plugin/common';
 import type {
   SavedObjectRelation,

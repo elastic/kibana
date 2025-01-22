@@ -9,9 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import type {
-  EuiStepsHorizontalProps,
-  EuiStepStatus} from '@elastic/eui';
+import type { EuiStepsHorizontalProps, EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,

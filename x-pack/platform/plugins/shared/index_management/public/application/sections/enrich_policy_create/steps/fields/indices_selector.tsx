@@ -9,7 +9,7 @@ import React, { useState, useCallback, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { uniq, isEmpty } from 'lodash';
 import { EuiFormRow, EuiComboBox } from '@elastic/eui';
-import type { EuiComboBoxProps , EuiComboBoxOptionOption } from '@elastic/eui';
+import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import { getMatchingDataStreams, getMatchingIndices } from '../../../../services/api';
 import type { FieldHook } from '../../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../../shared_imports';

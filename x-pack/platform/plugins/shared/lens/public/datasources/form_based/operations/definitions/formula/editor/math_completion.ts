@@ -13,10 +13,9 @@ import type {
   TinymathAST,
   TinymathFunction,
   TinymathVariable,
-  TinymathNamedArgument} from '@kbn/tinymath';
-import {
-  parse
+  TinymathNamedArgument,
 } from '@kbn/tinymath';
+import { parse } from '@kbn/tinymath';
 import type {
   UnifiedSearchPublicPluginStart,
   QuerySuggestion,

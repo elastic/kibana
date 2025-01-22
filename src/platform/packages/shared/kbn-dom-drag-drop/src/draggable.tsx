@@ -15,12 +15,9 @@ import type {
   DragDropIdentifier,
   DropIdentifier,
   RegisteredDropTargets,
-  DragDropAction} from './providers';
-import {
-  nextValidDropTarget,
-  ReorderContext,
-  useDragDropContext,
+  DragDropAction,
 } from './providers';
+import { nextValidDropTarget, ReorderContext, useDragDropContext } from './providers';
 import { REORDER_ITEM_MARGIN } from './constants';
 import './sass/draggable.scss';
 

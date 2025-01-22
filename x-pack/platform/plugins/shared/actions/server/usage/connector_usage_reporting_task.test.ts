@@ -11,10 +11,9 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import type {
   TaskManagerSetupContract,
-  TaskManagerStartContract} from '@kbn/task-manager-plugin/server';
-import {
-  TaskStatus,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import {
   CONNECTOR_USAGE_REPORTING_SOURCE_ID,

@@ -9,7 +9,8 @@ import { toArray, map, firstValueFrom } from 'rxjs';
 import type {
   ChatCompleteResponse,
   ChatCompleteStreamResponse,
-  ToolOptions} from '@kbn/inference-common';
+  ToolOptions,
+} from '@kbn/inference-common';
 import {
   createInferenceInternalError,
   isChatCompletionMessageEvent,

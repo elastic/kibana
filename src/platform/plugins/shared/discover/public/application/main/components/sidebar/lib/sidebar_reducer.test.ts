@@ -11,8 +11,7 @@ import {
   stubDataViewWithoutTimeField,
   stubLogstashDataView as dataView,
 } from '@kbn/data-views-plugin/common/data_view.stub';
-import type {
-  DiscoverSidebarReducerState} from './sidebar_reducer';
+import type { DiscoverSidebarReducerState } from './sidebar_reducer';
 import {
   discoverSidebarReducer,
   DiscoverSidebarReducerActionType,

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { FormEvent} from 'react';
+import type { FormEvent } from 'react';
 import React, { useEffect, useState } from 'react';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiText,
   EuiButton,

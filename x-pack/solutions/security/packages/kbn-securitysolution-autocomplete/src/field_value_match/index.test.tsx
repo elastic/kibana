@@ -6,15 +6,10 @@
  */
 
 import React from 'react';
-import type { ReactWrapper} from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
-import {
-  EuiComboBox,
-  EuiFormHelpText,
-  EuiSuperSelect,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormHelpText, EuiSuperSelect } from '@elastic/eui';
 import { act, waitFor } from '@testing-library/react';
 import { AutocompleteFieldMatchComponent } from '.';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';

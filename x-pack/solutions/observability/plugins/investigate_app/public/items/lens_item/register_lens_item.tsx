@@ -15,12 +15,9 @@ import type {
   LensAttributes,
   XYLayerOptions,
   XYReferenceLinesLayer,
-  XYByValueAnnotationsLayer} from '@kbn/lens-embeddable-utils';
-import {
-  XYDataLayer,
-  LensAttributesBuilder,
-  XYChart,
+  XYByValueAnnotationsLayer,
 } from '@kbn/lens-embeddable-utils';
+import { XYDataLayer, LensAttributesBuilder, XYChart } from '@kbn/lens-embeddable-utils';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import type { Query, Filter } from '@kbn/es-query';

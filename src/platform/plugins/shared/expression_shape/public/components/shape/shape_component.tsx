@@ -10,14 +10,8 @@
 import type { RefCallback } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { useResizeObserver } from '@elastic/eui';
-import type {
-  ShapeRef,
-  ShapeAttributes,
-  ShapeContentAttributes,
-  SvgConfig} from '../reusable';
-import {
-  getDefaultShapeData,
-} from '../reusable';
+import type { ShapeRef, ShapeAttributes, ShapeContentAttributes, SvgConfig } from '../reusable';
+import { getDefaultShapeData } from '../reusable';
 import type { Dimensions, ShapeComponentProps } from './types';
 import { getViewBox } from '../../../common/lib';
 import { ShapeDrawerComponent } from '../..';

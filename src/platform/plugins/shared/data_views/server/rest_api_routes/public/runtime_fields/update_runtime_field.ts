@@ -19,8 +19,7 @@ import type {
   DataViewsServerPluginStart,
   DataViewsServerPluginStartDependencies,
 } from '../../../types';
-import type {
-  SERVICE_KEY_TYPE} from '../../../constants';
+import type { SERVICE_KEY_TYPE } from '../../../constants';
 import {
   SPECIFIC_RUNTIME_FIELD_PATH,
   SPECIFIC_RUNTIME_FIELD_PATH_LEGACY,

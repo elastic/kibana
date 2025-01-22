@@ -15,11 +15,12 @@ import type {
   PublishesDataLoading,
   PublishesDataViews,
   PublishesUnifiedSearch,
-  SerializedTitles} from '@kbn/presentation-publishing';
+  SerializedTitles,
+} from '@kbn/presentation-publishing';
 import {
   apiIsOfType,
   apiPublishesPanelTitle,
-  apiPublishesUnifiedSearch
+  apiPublishesUnifiedSearch,
 } from '@kbn/presentation-publishing';
 import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';

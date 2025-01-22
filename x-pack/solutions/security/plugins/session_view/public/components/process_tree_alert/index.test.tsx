@@ -11,9 +11,9 @@ import {
   mockFileAlert,
   mockNetworkAlert,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
-import type { ProcessTreeAlertDeps} from '.';
+import type { ProcessTreeAlertDeps } from '.';
 import { ProcessTreeAlert } from '.';
 
 const mockAlert = mockAlerts[0];

@@ -14,8 +14,7 @@ import type {
   RequestHandlerContext,
   KibanaRequest,
 } from '@kbn/core/server';
-import type {
-  ToolCall} from '@kbn/inference-common';
+import type { ToolCall } from '@kbn/inference-common';
 import {
   MessageRole,
   ToolChoiceType,

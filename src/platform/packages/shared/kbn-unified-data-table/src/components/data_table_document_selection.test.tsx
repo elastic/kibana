@@ -11,8 +11,7 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import type {
-  DataTableCompareToolbarBtn} from './data_table_document_selection';
+import type { DataTableCompareToolbarBtn } from './data_table_document_selection';
 import {
   DataTableDocumentToolbarBtn,
   SelectButton,

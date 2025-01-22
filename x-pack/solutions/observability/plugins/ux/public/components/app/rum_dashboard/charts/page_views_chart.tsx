@@ -9,7 +9,7 @@ import moment from 'moment';
 import React, { useCallback } from 'react';
 import { fromQuery, toQuery } from '@kbn/observability-plugin/public';
 import { useEuiTheme } from '@elastic/eui';
-import type { AllSeries} from '@kbn/exploratory-view-plugin/public';
+import type { AllSeries } from '@kbn/exploratory-view-plugin/public';
 import { RECORDS_FIELD } from '@kbn/exploratory-view-plugin/public';
 import { useHistory } from 'react-router-dom';
 

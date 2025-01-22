@@ -12,9 +12,7 @@ import type { FillStyle, SeriesType, TermsIndexPatternColumn } from '@kbn/lens-p
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useAsync from 'react-use/lib/useAsync';
-import type {
-  LensAttributes,
-  XYLayerOptions} from '@kbn/lens-embeddable-utils';
+import type { LensAttributes, XYLayerOptions } from '@kbn/lens-embeddable-utils';
 import {
   LensAttributesBuilder,
   XYChart,
@@ -33,7 +31,7 @@ import type { LEGACY_COMPARATORS } from '../../../common/utils/convert_legacy_ou
 import { EventsAsUnit } from '../../../common/constants';
 import type { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
-import type { AggMap} from './painless_tinymath_parser';
+import type { AggMap } from './painless_tinymath_parser';
 import { PainlessTinyMathParser } from './painless_tinymath_parser';
 import {
   lensFieldFormatter,

@@ -7,10 +7,9 @@
 import type SuperTest from 'supertest';
 import type {
   AnalyzeLogsRequestBody,
-  AnalyzeLogsResponse} from '@kbn/integration-assistant-plugin/common';
-import {
-  ANALYZE_LOGS_PATH
+  AnalyzeLogsResponse,
 } from '@kbn/integration-assistant-plugin/common';
+import { ANALYZE_LOGS_PATH } from '@kbn/integration-assistant-plugin/common';
 import { superUser } from '../authentication/users';
 import type { User } from '../authentication/types';
 

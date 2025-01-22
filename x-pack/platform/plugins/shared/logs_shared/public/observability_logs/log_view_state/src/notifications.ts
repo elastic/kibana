@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { LogViewReference, LogViewStatus, ResolvedLogView } from '../../../../common/log_views';
+import type {
+  LogViewReference,
+  LogViewStatus,
+  ResolvedLogView,
+} from '../../../../common/log_views';
 import { createNotificationChannel } from '../../xstate_helpers';
 import type { LogViewContext, LogViewEvent } from './types';
 

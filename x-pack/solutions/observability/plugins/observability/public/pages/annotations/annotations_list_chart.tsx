@@ -6,9 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type {
-  BrushEndListener,
-  XYChartElementEvent} from '@elastic/charts';
+import type { BrushEndListener, XYChartElementEvent } from '@elastic/charts';
 import {
   Axis,
   Chart,

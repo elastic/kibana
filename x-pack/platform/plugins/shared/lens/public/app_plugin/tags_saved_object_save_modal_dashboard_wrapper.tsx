@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useState, useMemo, useCallback } from 'react';
 import type { OnSaveProps } from '@kbn/saved-objects-plugin/public';
-import type {
-  SaveModalDashboardProps} from '@kbn/presentation-util-plugin/public';
+import type { SaveModalDashboardProps } from '@kbn/presentation-util-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,

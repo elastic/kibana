@@ -13,7 +13,7 @@ import { generateEsHits, additionalFieldGroups } from '@kbn/discover-utils/src/_
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
 import { render, screen, renderHook } from '@testing-library/react';
 import React from 'react';
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import { useState } from 'react';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { UseComparisonCellValueProps } from './use_comparison_cell_value';

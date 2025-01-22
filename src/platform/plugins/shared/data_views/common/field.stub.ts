@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FieldSpec} from '.';
+import type { FieldSpec } from '.';
 import { DataViewField } from '.';
 
 export const createIndexPatternFieldStub = ({ spec }: { spec: FieldSpec }): DataViewField => {

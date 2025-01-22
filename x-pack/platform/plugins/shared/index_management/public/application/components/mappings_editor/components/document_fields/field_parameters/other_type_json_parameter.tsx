@@ -8,14 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type {
-  ValidationFuncArg,
-  FieldConfig} from '../../../shared_imports';
-import {
-  UseField,
-  JsonEditorField,
-  fieldValidators
-} from '../../../shared_imports';
+import type { ValidationFuncArg, FieldConfig } from '../../../shared_imports';
+import { UseField, JsonEditorField, fieldValidators } from '../../../shared_imports';
 
 const { isJsonField } = fieldValidators;
 

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { FILTERS, isQueryStringFilter } from '@kbn/es-query';
 
 export const mapQueryString = (filter: Filter) => {

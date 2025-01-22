@@ -13,7 +13,10 @@ import type { DataView } from '@kbn/data-plugin/common';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { ISource } from '../source';
 import { type IVectorSource, hasVectorSourceMethod } from '../vector_source';
-import type { DynamicStylePropertyOptions, StyleMetaData } from '../../../../common/descriptor_types';
+import type {
+  DynamicStylePropertyOptions,
+  StyleMetaData,
+} from '../../../../common/descriptor_types';
 import type { IVectorStyle } from '../../styles/vector/vector_style';
 import type { IDynamicStyleProperty } from '../../styles/vector/properties/dynamic_style_property';
 

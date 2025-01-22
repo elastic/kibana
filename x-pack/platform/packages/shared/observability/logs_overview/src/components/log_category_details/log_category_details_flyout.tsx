@@ -23,11 +23,8 @@ import { css } from '@emotion/react';
 import { FilterStateStore, buildCustomFilter } from '@kbn/es-query';
 import type { LogCategory } from '../../types';
 import { LogCategoryPattern } from '../shared/log_category_pattern';
-import type {
-  LogCategoryDocumentExamplesTableDependencies} from './log_category_document_examples_table';
-import {
-  LogCategoryDocumentExamplesTable
-} from './log_category_document_examples_table';
+import type { LogCategoryDocumentExamplesTableDependencies } from './log_category_document_examples_table';
+import { LogCategoryDocumentExamplesTable } from './log_category_document_examples_table';
 import { type ResolvedIndexNameLogsSourceConfiguration } from '../../utils/logs_source';
 import type { DiscoverLinkDependencies } from '../discover_link';
 import { DiscoverLink } from '../discover_link';

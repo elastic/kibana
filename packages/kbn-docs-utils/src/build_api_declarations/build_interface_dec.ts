@@ -8,7 +8,7 @@
  */
 
 import type { InterfaceDeclaration } from 'ts-morph';
-import type { ApiDeclaration} from '../types';
+import type { ApiDeclaration } from '../types';
 import { TypeKind } from '../types';
 import { buildApiDeclaration } from './build_api_declaration';
 import { isInternal } from '../utils';

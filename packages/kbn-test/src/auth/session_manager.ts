@@ -11,13 +11,8 @@ import type { ToolingLog } from '@kbn/tooling-log';
 import Url from 'url';
 import { KbnClient } from '../kbn_client';
 import { readCloudUsersFromFile } from './helper';
-import type {
-  Session} from './saml_auth';
-import {
-  createCloudSAMLSession,
-  createLocalSAMLSession,
-  getSecurityProfile
-} from './saml_auth';
+import type { Session } from './saml_auth';
+import { createCloudSAMLSession, createLocalSAMLSession, getSecurityProfile } from './saml_auth';
 import type { GetSessionByRole, Role, User } from './types';
 
 export interface HostOptions {

@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
-import type { Message} from '@kbn/observability-ai-assistant-plugin/common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { CONTEXT_FUNCTION_NAME } from '@kbn/observability-ai-assistant-plugin/server/functions/context';
 import type { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types';
@@ -22,11 +22,8 @@ import {
   deleteKnowledgeBaseModel,
 } from './helpers';
 import { getConversationCreatedEvent } from '../helpers';
-import type {
-  LlmProxy} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import {
-  createLlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import type { LlmProxy } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 
 const sortById = (data: Array<Instruction & { public?: boolean }>) => sortBy(data, 'id');
 

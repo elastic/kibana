@@ -8,7 +8,7 @@
  */
 
 import { eachSeries } from 'async';
-import type { Duplex, Readable} from 'stream';
+import type { Duplex, Readable } from 'stream';
 import { Transform, PassThrough } from 'stream';
 
 /**

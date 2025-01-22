@@ -6,8 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import type {
-  IngestPipelineParams} from '@kbn/search-connectors';
+import type { IngestPipelineParams } from '@kbn/search-connectors';
 import {
   createConnector,
   deleteConnectorById,

@@ -14,7 +14,8 @@ import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/const
 import type {
   FilterOptions,
   InferenceEndpointUI,
-  QueryParams} from '../components/all_inference_endpoints/types';
+  QueryParams,
+} from '../components/all_inference_endpoints/types';
 import {
   INFERENCE_ENDPOINTS_TABLE_PER_PAGE_VALUES,
   SortOrder,

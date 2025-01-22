@@ -12,8 +12,7 @@ import {
   type ObservabilityAIAssistantChatService,
   type ObservabilityAIAssistantService,
 } from '..';
-import type {
-  FunctionDefinition} from '../../common';
+import type { FunctionDefinition } from '../../common';
 import {
   createInternalServerError,
   StreamingChatResponseEventType,

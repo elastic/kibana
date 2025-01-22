@@ -16,11 +16,9 @@ import {
 } from '@kbn/cases-plugin/common/constants';
 import type {
   UserCommentAttachmentAttributes,
-  CaseAttributes} from '@kbn/cases-plugin/common/types/domain';
-import {
-  CaseStatuses,
-  CaseSeverity,
+  CaseAttributes,
 } from '@kbn/cases-plugin/common/types/domain';
+import { CaseStatuses, CaseSeverity } from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePersistedSeverity,
   CasePersistedStatus,

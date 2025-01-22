@@ -19,11 +19,8 @@ import {
   EuiSpacer,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import type {
-  ComponentOpts as BulkOperationsComponentOpts} from '../../common/components/with_bulk_rule_api_operations';
-import {
-  withBulkRuleOperations
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleSnoozeScheduler } from './rule_snooze/scheduler';
 import type { RuleTableItem, SnoozeSchedule, BulkEditActions } from '../../../../types';
 import { useBulkEditResponse } from '../../../hooks/use_bulk_edit_response';

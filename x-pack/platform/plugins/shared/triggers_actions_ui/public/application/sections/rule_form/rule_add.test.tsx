@@ -26,10 +26,9 @@ import type {
   ValidationResult,
   RuleCreationValidConsumer,
   RuleType,
-  RuleTypeModel} from '../../../types';
-import {
-  RuleFlyoutCloseReason
+  RuleTypeModel,
 } from '../../../types';
+import { RuleFlyoutCloseReason } from '../../../types';
 import { ruleTypeRegistryMock } from '../../rule_type_registry.mock';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../common/lib/kibana';

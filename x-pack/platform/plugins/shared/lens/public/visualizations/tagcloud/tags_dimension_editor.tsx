@@ -6,18 +6,15 @@
  */
 
 import React from 'react';
-import type {
-  PaletteRegistry,
-  ColorMapping,
-  PaletteOutput} from '@kbn/coloring';
+import type { PaletteRegistry, ColorMapping, PaletteOutput } from '@kbn/coloring';
 import {
   CategoricalColorMapping,
   DEFAULT_COLOR_MAPPING_CONFIG,
-  SPECIAL_TOKENS_STRING_CONVERSION
+  SPECIAL_TOKENS_STRING_CONVERSION,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiSwitch, EuiFormRow, EuiText, EuiBadge } from '@elastic/eui';
-import type { MutableRefObject} from 'react';
+import type { MutableRefObject } from 'react';
 import { useState, useCallback } from 'react';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getColorCategories } from '@kbn/chart-expressions-common';

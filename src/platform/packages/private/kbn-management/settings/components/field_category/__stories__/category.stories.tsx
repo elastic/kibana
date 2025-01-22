@@ -17,7 +17,7 @@ import { categorizeFields } from '@kbn/management-settings-utilities';
 import { FieldRow } from '@kbn/management-settings-components-field-row';
 
 import { FieldCategory as Component, type FieldCategoryProps as ComponentProps } from '../category';
-import type { Params} from './use_category_story';
+import type { Params } from './use_category_story';
 import { useCategoryStory } from './use_category_story';
 import { FieldCategoryProvider } from '../services';
 

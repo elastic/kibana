@@ -5,14 +5,11 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { catchError, from, of, share, switchMap, toArray } from 'rxjs';
 import type { ServerSentEventBase } from '@kbn/sse-utils';
-import type {
-  RootCauseAnalysisEvent} from '@kbn/observability-ai-server/root_cause_analysis';
-import {
-  runRootCauseAnalysis,
-} from '@kbn/observability-ai-server/root_cause_analysis';
+import type { RootCauseAnalysisEvent } from '@kbn/observability-ai-server/root_cause_analysis';
+import { runRootCauseAnalysis } from '@kbn/observability-ai-server/root_cause_analysis';
 import { z } from '@kbn/zod';
 import datemath from '@elastic/datemath';
 import { OBSERVABILITY_LOGS_DATA_ACCESS_LOG_SOURCES_ID } from '@kbn/management-settings-ids';

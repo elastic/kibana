@@ -9,7 +9,7 @@
 
 import { schema } from '@kbn/config-schema';
 import { Subject } from 'rxjs';
-import type { Plugin, CoreSetup, ServiceStatus} from '@kbn/core/server';
+import type { Plugin, CoreSetup, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 
 export class StatusPluginAPlugin implements Plugin {

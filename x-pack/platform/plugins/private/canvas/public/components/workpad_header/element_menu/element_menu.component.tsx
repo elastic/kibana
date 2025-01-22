@@ -6,7 +6,7 @@
  */
 
 import { sortBy } from 'lodash';
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import PropTypes from 'prop-types';
 import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';

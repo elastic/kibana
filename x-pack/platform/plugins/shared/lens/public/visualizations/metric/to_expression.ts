@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  CustomPaletteParams,
-  PaletteRegistry,
-  PaletteOutput} from '@kbn/coloring';
-import {
-  CUSTOM_PALETTE,
-  getOverridePaletteStops,
-} from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteRegistry, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
 import type {
   TrendlineExpressionFunctionDefinition,
   MetricVisExpressionFunctionDefinition,

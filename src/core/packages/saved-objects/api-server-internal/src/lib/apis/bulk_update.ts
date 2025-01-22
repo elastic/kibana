@@ -14,11 +14,9 @@ import type {
   AuthorizeUpdateObject,
   SavedObjectsRawDoc,
   SavedObjectsRawDocSource,
-  SavedObjectSanitizedDoc} from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObject
+  SavedObjectSanitizedDoc,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, type SavedObject } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { encodeVersion } from '@kbn/core-saved-objects-base-server-internal';
 import type {

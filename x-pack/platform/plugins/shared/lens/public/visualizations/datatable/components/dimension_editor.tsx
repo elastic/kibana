@@ -8,15 +8,8 @@
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiSwitch, EuiButtonGroup, htmlIdGenerator } from '@elastic/eui';
-import type {
-  CustomPaletteParams,
-  PaletteOutput,
-  PaletteRegistry} from '@kbn/coloring';
-import {
-  CUSTOM_PALETTE,
-  applyPaletteParams,
-  getFallbackDataBounds,
-} from '@kbn/coloring';
+import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { CUSTOM_PALETTE, applyPaletteParams, getFallbackDataBounds } from '@kbn/coloring';
 import { getColorCategories } from '@kbn/chart-expressions-common';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 import { getOriginalId } from '@kbn/transpose-utils';

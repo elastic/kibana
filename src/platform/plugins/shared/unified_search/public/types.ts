@@ -13,7 +13,10 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { ScreenshotModePluginStart } from '@kbn/screenshot-mode-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
-import type { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 import type { CoreStart, DocLinksStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';

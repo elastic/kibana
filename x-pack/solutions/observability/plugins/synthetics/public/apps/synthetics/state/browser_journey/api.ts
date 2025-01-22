@@ -12,7 +12,8 @@ import type {
   ScreenshotImageBlob,
   ScreenshotRefImageData,
   SyntheticsJourneyApiResponse,
-  Ping} from '../../../../../common/runtime_types';
+  Ping,
+} from '../../../../../common/runtime_types';
 import {
   FailedStepsApiResponseType,
   SyntheticsJourneyApiResponseType,

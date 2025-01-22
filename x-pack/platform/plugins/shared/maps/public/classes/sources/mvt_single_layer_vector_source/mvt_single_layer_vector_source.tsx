@@ -33,7 +33,7 @@ import type {
 } from '../../../../common/descriptor_types';
 import { MVTField } from '../../fields/mvt_field';
 import { UpdateSourceEditor } from './update_source_editor';
-import type { ITooltipProperty} from '../../tooltips/tooltip_property';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { TooltipProperty } from '../../tooltips/tooltip_property';
 
 export const sourceTitle = i18n.translate(

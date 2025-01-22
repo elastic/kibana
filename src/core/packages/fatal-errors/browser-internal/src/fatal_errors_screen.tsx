@@ -18,7 +18,7 @@ import {
   EuiPageSection,
 } from '@elastic/eui';
 import React from 'react';
-import type { Observable, Subscription} from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { merge, tap, fromEvent } from 'rxjs';
 
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -12,7 +12,7 @@ jest.useFakeTimers({ legacyFakeTimers: true });
 import sinon from 'sinon';
 import moment from 'moment';
 import type { TimeRange } from '@kbn/es-query';
-import type { AutoRefreshDoneFn} from './timefilter';
+import type { AutoRefreshDoneFn } from './timefilter';
 import { Timefilter } from './timefilter';
 import type { Subscription } from 'rxjs';
 import type { RefreshInterval } from '../../../common';

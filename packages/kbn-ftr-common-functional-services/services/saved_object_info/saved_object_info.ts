@@ -9,7 +9,7 @@
 
 import { Client, HttpConnection } from '@elastic/elasticsearch';
 import url from 'url';
-import type { Either} from 'fp-ts/Either';
+import type { Either } from 'fp-ts/Either';
 import { fromNullable, chain, getOrElse, toError } from 'fp-ts/Either';
 import { flow, pipe } from 'fp-ts/function';
 import * as TE from 'fp-ts/lib/TaskEither';

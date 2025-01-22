@@ -7,8 +7,7 @@
 
 import React from 'react';
 
-import type {
-  EuiTabbedContentTab} from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiFlexGroup,

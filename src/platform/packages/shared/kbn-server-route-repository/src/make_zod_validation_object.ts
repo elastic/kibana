@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { z} from '@kbn/zod';
+import type { z } from '@kbn/zod';
 import { ZodObject } from '@kbn/zod';
 import type { ZodParamsObject } from '@kbn/server-route-repository-utils';
 import { noParamsValidationObject } from './validation_objects';

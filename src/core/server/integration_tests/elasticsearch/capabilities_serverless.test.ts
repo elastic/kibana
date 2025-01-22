@@ -7,11 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  TestServerlessESUtils} from '@kbn/core-test-helpers-kbn-server';
-import {
-  createTestServerlessInstances,
-} from '@kbn/core-test-helpers-kbn-server';
+import type { TestServerlessESUtils } from '@kbn/core-test-helpers-kbn-server';
+import { createTestServerlessInstances } from '@kbn/core-test-helpers-kbn-server';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import { getCapabilitiesFromClient } from '@kbn/core-elasticsearch-server-internal';
 

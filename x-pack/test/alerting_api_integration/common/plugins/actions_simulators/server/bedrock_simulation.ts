@@ -9,7 +9,7 @@ import type http from 'http';
 
 import { EventStreamCodec } from '@smithy/eventstream-codec';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
-import type { ProxyArgs} from './simulator';
+import type { ProxyArgs } from './simulator';
 import { Simulator } from './simulator';
 
 export class BedrockSimulator extends Simulator {

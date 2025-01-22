@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, MouseEventHandler} from 'react';
+import type { FC, MouseEventHandler } from 'react';
 import React, { useRef, useCallback, useEffect, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { CANVAS } from '../../../i18n';

@@ -10,7 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import type { Version } from '@kbn/object-versioning';
 import { versionSchema } from './constants';
-import type { GetResult} from './get';
+import type { GetResult } from './get';
 import { getResultSchema } from './get';
 
 import type { ProcedureSchemas } from './types';

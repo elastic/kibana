@@ -12,8 +12,7 @@ import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { ALERT_STATUS_ACTIVE, ALERT_STATUS_RECOVERED } from '@kbn/rule-data-utils';
 import type { SavedQuery, TimefilterContract } from '@kbn/data-plugin/public';
-import type {
-  IKbnUrlStateStorage} from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   createKbnUrlStateStorage,
   syncState,
@@ -23,13 +22,8 @@ import { datemathStringRT } from '../../../utils/datemath';
 import { ALERT_STATUS_ALL } from '../../../../common/constants';
 import { useTimefilterService } from '../../../hooks/use_timefilter_service';
 
-import type {
-  AlertSearchBarStateContainer,
-  AlertSearchBarContainerState} from './state_container';
-import {
-  useContainer,
-  DEFAULT_STATE
-} from './state_container';
+import type { AlertSearchBarStateContainer, AlertSearchBarContainerState } from './state_container';
+import { useContainer, DEFAULT_STATE } from './state_container';
 
 export const alertSearchBarState = t.partial({
   rangeFrom: datemathStringRT,

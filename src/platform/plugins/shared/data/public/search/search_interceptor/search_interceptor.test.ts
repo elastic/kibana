@@ -10,16 +10,12 @@
 import type { MockedKeys } from '@kbn/utility-types-jest';
 import type { CoreSetup, CoreStart, HttpFetchOptions, HttpHandler } from '@kbn/core/public';
 import { coreMock } from '@kbn/core/public/mocks';
-import type {
-  IEsSearchRequest,
-  IKibanaSearchRequest} from '@kbn/search-types';
-import {
-  type IKibanaSearchResponse,
-} from '@kbn/search-types';
+import type { IEsSearchRequest, IKibanaSearchRequest } from '@kbn/search-types';
+import { type IKibanaSearchResponse } from '@kbn/search-types';
 import { SearchInterceptor } from './search_interceptor';
 import { AbortError } from '@kbn/kibana-utils-plugin/public';
 import { EsError, type IEsError } from '@kbn/search-errors';
-import type { ISessionService} from '..';
+import type { ISessionService } from '..';
 import { SearchSessionState } from '..';
 
 import * as searchPhaseException from '../../../common/search/test_data/search_phase_execution_exception.json';

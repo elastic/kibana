@@ -6,9 +6,9 @@
  */
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
-import type { AlertingRequestHandlerContext} from '../types';
+import type { AlertingRequestHandlerContext } from '../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
-import type { RewriteRequestCase} from './lib';
+import type { RewriteRequestCase } from './lib';
 import { verifyAccessAndContext, rewriteNamespaces } from './lib';
 import type { GetGlobalExecutionKPIParams } from '../rules_client';
 import type { ILicenseState } from '../lib';

@@ -14,11 +14,8 @@ import {
   timestampAsDateSafeVersion,
 } from '@kbn/security-solution-plugin/common/endpoint/models/event';
 import type { ResolverPaginatedEvents } from '@kbn/security-solution-plugin/common/endpoint/types';
-import type {
-  Tree} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
-import {
-  RelatedEventCategory,
-} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import type { Tree } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { RelatedEventCategory } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import type TestAgent from 'supertest/lib/agent';
 import type {
   GeneratedTrees,

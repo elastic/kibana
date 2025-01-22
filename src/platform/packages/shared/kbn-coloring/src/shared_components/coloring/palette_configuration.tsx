@@ -18,10 +18,9 @@ import type {
   PaletteRegistry,
   DataBounds,
   CustomPaletteParams,
-  RequiredPaletteParamTypes} from '../../palettes';
-import {
-  getFallbackDataBounds
+  RequiredPaletteParamTypes,
 } from '../../palettes';
+import { getFallbackDataBounds } from '../../palettes';
 
 import { toColorRanges } from './utils';
 import { ColorRanges, ColorRangesContext } from './color_ranges';

@@ -17,15 +17,16 @@ import type {
   PublishesWritableUnifiedSearch,
   PublishesWritablePanelDescription,
   PublishesWritablePanelTitle,
-  PublishesUnifiedSearch} from '@kbn/presentation-publishing';
+  PublishesUnifiedSearch,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiPublishesDataViews,
   apiPublishesUnifiedSearch,
   apiPublishesPanelTitle,
-  getInheritedViewMode
+  getInheritedViewMode,
 } from '@kbn/presentation-publishing';
-import type { Action} from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { openCustomizePanelFlyout } from './open_customize_panel';
 import { ACTION_CUSTOMIZE_PANEL } from './constants';

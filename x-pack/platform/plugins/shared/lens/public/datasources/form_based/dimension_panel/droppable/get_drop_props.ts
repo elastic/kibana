@@ -10,10 +10,9 @@ import type {
   DragDropOperation,
   IndexPattern,
   IndexPatternMap,
-  IndexPatternField} from '../../../../types';
-import {
-  isOperation
+  IndexPatternField,
 } from '../../../../types';
+import { isOperation } from '../../../../types';
 import {
   getCurrentFieldsForOperation,
   getOperationDisplay,

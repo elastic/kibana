@@ -18,10 +18,9 @@ import type {
   AssetType,
   DashboardAsset,
   SloAsset,
-  RuleAsset} from '../../../../common/assets';
-import {
-  ASSET_TYPES
+  RuleAsset,
 } from '../../../../common/assets';
+import { ASSET_TYPES } from '../../../../common/assets';
 import { ASSET_ENTITY_ID, ASSET_ENTITY_TYPE, ASSET_TYPE } from './fields';
 import type { AssetStorageSettings } from './storage_settings';
 

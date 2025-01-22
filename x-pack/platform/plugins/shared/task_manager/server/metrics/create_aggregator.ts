@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, filter, interval, map, merge, startWith } from 'rxjs';
 import type { JsonValue } from '@kbn/utility-types';
 import type { Logger } from '@kbn/core/server';

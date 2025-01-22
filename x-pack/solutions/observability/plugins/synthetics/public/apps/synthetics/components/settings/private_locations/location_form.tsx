@@ -8,8 +8,7 @@
 import type { Ref } from 'react';
 import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiFieldTextProps} from '@elastic/eui';
+import type { EuiFieldTextProps } from '@elastic/eui';
 import {
   EuiFieldText,
   EuiForm,
@@ -17,7 +16,7 @@ import {
   EuiSpacer,
   EuiCallOut,
   EuiCode,
-  EuiLink
+  EuiLink,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';

@@ -8,14 +8,10 @@
 import type { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import type { ILicenseState } from '../lib';
-import type { RewriteResponseCase} from './lib';
+import type { RewriteResponseCase } from './lib';
 import { verifyAccessAndContext } from './lib';
-import type {
-  AlertingRequestHandlerContext,
-  RuleTaskState} from '../types';
-import {
-  INTERNAL_BASE_ALERTING_API_PATH
-} from '../types';
+import type { AlertingRequestHandlerContext, RuleTaskState } from '../types';
+import { INTERNAL_BASE_ALERTING_API_PATH } from '../types';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from './constants';
 
 const paramSchema = schema.object({

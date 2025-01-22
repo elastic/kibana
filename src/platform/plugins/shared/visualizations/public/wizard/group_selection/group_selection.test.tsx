@@ -9,7 +9,7 @@
 
 import React from 'react';
 import userEvent from '@testing-library/user-event';
-import type { TypesStart, BaseVisType} from '../../vis_types';
+import type { TypesStart, BaseVisType } from '../../vis_types';
 import { VisGroups } from '../../vis_types';
 import type { GroupSelectionProps } from './group_selection';
 import { GroupSelection } from './group_selection';

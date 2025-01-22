@@ -8,7 +8,7 @@
 import { actionTypeRegistryMock } from '@kbn/triggers-actions-ui-plugin/public/application/action_type_registry.mock';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
-import type { AssistantAvailability} from '@kbn/elastic-assistant';
+import type { AssistantAvailability } from '@kbn/elastic-assistant';
 import { AssistantProvider } from '@kbn/elastic-assistant';
 import React from 'react';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

@@ -6,18 +6,14 @@
  */
 
 import Boom from '@hapi/boom';
-import type {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObject} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   RulesSettings,
   RulesSettingsModificationMetadata,
   RulesSettingsQueryDelayProperties,
-  RulesSettingsQueryDelay} from '../../../common';
+  RulesSettingsQueryDelay,
+} from '../../../common';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_QUERY_DELAY_SAVED_OBJECT_ID,

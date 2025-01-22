@@ -10,10 +10,9 @@ import type {
   ExploratoryViewPublicPluginsStart,
   ExploratoryViewPublicPluginsSetup,
   ExploratoryViewPublicStart,
-  ExploratoryViewPublicSetup} from './plugin';
-import {
-  Plugin
+  ExploratoryViewPublicSetup,
 } from './plugin';
+import { Plugin } from './plugin';
 export type {
   ExploratoryViewPublicSetup,
   ExploratoryViewPublicStart,

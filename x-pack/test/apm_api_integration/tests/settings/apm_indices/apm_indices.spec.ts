@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  APMIndicesSavedObjectBody} from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
+import type { APMIndicesSavedObjectBody } from '@kbn/apm-data-access-plugin/server/saved_objects/apm_indices';
 import {
   APM_INDEX_SETTINGS_SAVED_OBJECT_ID,
   APM_INDEX_SETTINGS_SAVED_OBJECT_TYPE,

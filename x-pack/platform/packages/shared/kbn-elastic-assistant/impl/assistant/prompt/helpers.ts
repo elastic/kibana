@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Replacements} from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import { transformRawData } from '@kbn/elastic-assistant-common';
 import type { ClientMessage } from '../../assistant_context/types';
 import { getAnonymizedValue as defaultGetAnonymizedValue } from '../get_anonymized_value';

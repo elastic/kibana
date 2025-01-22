@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldDefinition, WiredStreamDefinition} from '@kbn/streams-schema';
+import type { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
 import { isWiredStream } from '@kbn/streams-schema';
 import { MalformedFields } from '../errors/malformed_fields';
 

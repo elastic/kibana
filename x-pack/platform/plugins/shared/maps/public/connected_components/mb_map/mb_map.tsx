@@ -32,8 +32,7 @@ import type {
   MapSettings,
   Timeslice,
 } from '../../../common/descriptor_types';
-import type {
-  RawValue} from '../../../common/constants';
+import type { RawValue } from '../../../common/constants';
 import {
   APP_ID,
   CUSTOM_ICON_SIZE,

@@ -11,7 +11,7 @@ import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
 import { createAssist as Assist } from '../utils/assist';
 import { ConversationalChain, contextLimitCheck } from './conversational_chain';
-import type { ChatMessage} from '../types';
+import type { ChatMessage } from '../types';
 import { MessageRole } from '../types';
 
 describe('conversational chain', () => {

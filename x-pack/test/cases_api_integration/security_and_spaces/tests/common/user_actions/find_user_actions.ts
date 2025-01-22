@@ -6,15 +6,11 @@
  */
 
 import expect from '@kbn/expect';
-import type { Case} from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
 import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import { MAX_USER_ACTIONS_PER_PAGE } from '@kbn/cases-plugin/common/constants';
-import type {
-  CommentUserAction} from '@kbn/cases-plugin/common/types/domain';
-import {
-  UserActionTypes,
-  ConnectorTypes,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { CommentUserAction } from '@kbn/cases-plugin/common/types/domain';
+import { UserActionTypes, ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import {
   globalRead,
   noKibanaPrivileges,

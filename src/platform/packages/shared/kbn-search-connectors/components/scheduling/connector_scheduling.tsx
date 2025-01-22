@@ -21,13 +21,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  Connector,
-  SchedulingConfiguraton} from '../../types/connectors';
-import {
-  ConnectorStatus,
-  SyncJobType,
-} from '../../types/connectors';
+import type { Connector, SchedulingConfiguraton } from '../../types/connectors';
+import { ConnectorStatus, SyncJobType } from '../../types/connectors';
 import { ConnectorError } from './connector_error';
 import { ConnectorUnconfigured } from './connector_unconfigured';
 import { ConnectorContentScheduling } from './full_content';

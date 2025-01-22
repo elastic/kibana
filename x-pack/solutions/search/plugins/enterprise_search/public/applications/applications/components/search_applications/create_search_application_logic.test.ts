@@ -7,7 +7,7 @@
 
 import { LogicMounter } from '../../../__mocks__/kea_logic';
 
-import type { HttpError} from '../../../../../common/types/api';
+import type { HttpError } from '../../../../../common/types/api';
 import { Status } from '../../../../../common/types/api';
 
 import { KibanaLogic } from '../../../shared/kibana';
@@ -15,11 +15,8 @@ import { CreateSearchApplicationApiLogic } from '../../api/search_applications/c
 
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
-import type {
-  CreateSearchApplicationLogicValues} from './create_search_application_logic';
-import {
-  CreateSearchApplicationLogic
-} from './create_search_application_logic';
+import type { CreateSearchApplicationLogicValues } from './create_search_application_logic';
+import { CreateSearchApplicationLogic } from './create_search_application_logic';
 
 const DEFAULT_VALUES: CreateSearchApplicationLogicValues = {
   createDisabled: true,

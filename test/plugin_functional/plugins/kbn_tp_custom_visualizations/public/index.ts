@@ -8,12 +8,8 @@
  */
 
 import type { PluginInitializer } from '@kbn/core/public';
-import type {
-  CustomVisualizationsSetup,
-  CustomVisualizationsStart} from './plugin';
-import {
-  CustomVisualizationsPublicPlugin
-} from './plugin';
+import type { CustomVisualizationsSetup, CustomVisualizationsStart } from './plugin';
+import { CustomVisualizationsPublicPlugin } from './plugin';
 
 export { CustomVisualizationsPublicPlugin as Plugin };
 

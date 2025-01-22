@@ -10,10 +10,9 @@ import type {
   CoreSetup,
   Plugin as PluginType,
   Logger,
-  SavedObjectsClientContract} from '@kbn/core/server';
-import {
-  SavedObjectsClient
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import { Dataset } from '@kbn/rule-registry-plugin/server';
 import type {

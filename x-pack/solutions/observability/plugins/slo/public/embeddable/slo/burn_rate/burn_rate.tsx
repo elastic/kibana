@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type {
-  UseEuiTheme} from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLink,
-  EuiLoadingChart
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiLink, EuiLoadingChart } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

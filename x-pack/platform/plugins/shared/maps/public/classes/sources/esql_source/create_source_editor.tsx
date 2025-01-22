@@ -10,15 +10,8 @@ import useDebounce from 'react-use/lib/useDebounce';
 import { i18n } from '@kbn/i18n';
 import type { ESQLColumn } from '@kbn/es-types';
 import { getESQLAdHocDataview } from '@kbn/esql-utils';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
-import {
-  EuiFormRow,
-  EuiPanel,
-  EuiSkeletonText,
-  EuiSpacer,
-  EuiSwitch
-} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFormRow, EuiPanel, EuiSkeletonText, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { ES_GEO_FIELD_TYPE } from '../../../../common/constants';
 import type { ESQLSourceDescriptor } from '../../../../common/descriptor_types';

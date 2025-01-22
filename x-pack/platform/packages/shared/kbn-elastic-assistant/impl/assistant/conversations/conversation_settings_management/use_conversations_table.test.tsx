@@ -6,12 +6,8 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type {
-  GetConversationsListParams,
-  ConversationTableItem} from './use_conversations_table';
-import {
-  useConversationsTable
-} from './use_conversations_table';
+import type { GetConversationsListParams, ConversationTableItem } from './use_conversations_table';
+import { useConversationsTable } from './use_conversations_table';
 import { alertConvo, welcomeConvo, customConvo } from '../../../mock/conversation';
 import { mockActionTypes, mockConnectors } from '../../../mock/connectors';
 import { mockSystemPrompts } from '../../../mock/system_prompt';

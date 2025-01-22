@@ -8,12 +8,8 @@
 import { pipe } from 'fp-ts/lib/pipeable';
 import { left } from 'fp-ts/lib/Either';
 import { getEndpointEntryMatchMock } from '../entry_match/index.mock';
-import type {
-  NonEmptyEndpointEntriesArray} from '.';
-import {
-  endpointEntriesArray,
-  nonEmptyEndpointEntriesArray
-} from '.';
+import type { NonEmptyEndpointEntriesArray } from '.';
+import { endpointEntriesArray, nonEmptyEndpointEntriesArray } from '.';
 import { foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 import { getEndpointEntryMatchAnyMock } from '../entry_match_any/index.mock';
 import { getEndpointEntryNestedMock } from '../entry_nested/index.mock';

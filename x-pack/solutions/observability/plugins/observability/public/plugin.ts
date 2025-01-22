@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import type { CasesPublicStart} from '@kbn/cases-plugin/public';
+import type { CasesPublicStart } from '@kbn/cases-plugin/public';
 import { CasesDeepLinkId, getCasesDeepLinks } from '@kbn/cases-plugin/public';
 import type { ChartsPluginStart } from '@kbn/charts-plugin/public';
 import type { CloudStart } from '@kbn/cloud-plugin/public';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type { IUiSettingsClient ,
+import type {
+  IUiSettingsClient,
   App,
   AppDeepLink,
   AppMountParameters,
@@ -19,10 +20,9 @@ import type { IUiSettingsClient ,
   CoreStart,
   Plugin as PluginClass,
   PluginInitializerContext,
-  ToastsStart} from '@kbn/core/public';
-import {
-  DEFAULT_APP_CATEGORIES
+  ToastsStart,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -84,11 +84,8 @@ import { registerDataHandler } from './context/has_data_context/data_handler';
 import { createUseRulesLink } from './hooks/create_use_rules_link';
 import { RuleDetailsLocatorDefinition } from './locators/rule_details';
 import { RulesLocatorDefinition } from './locators/rules';
-import type {
-  ObservabilityRuleTypeRegistry} from './rules/create_observability_rule_type_registry';
-import {
-  createObservabilityRuleTypeRegistry,
-} from './rules/create_observability_rule_type_registry';
+import type { ObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
+import { createObservabilityRuleTypeRegistry } from './rules/create_observability_rule_type_registry';
 import { registerObservabilityRuleTypes } from './rules/register_observability_rule_types';
 
 export interface ConfigSchema {

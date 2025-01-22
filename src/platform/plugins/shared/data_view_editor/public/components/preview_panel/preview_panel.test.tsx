@@ -13,7 +13,7 @@ import { EuiTable, EuiButtonGroup } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
 import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
-import type { Props as PreviewPanelProps} from './preview_panel';
+import type { Props as PreviewPanelProps } from './preview_panel';
 import { PreviewPanel } from './preview_panel';
 import { from } from 'rxjs';
 

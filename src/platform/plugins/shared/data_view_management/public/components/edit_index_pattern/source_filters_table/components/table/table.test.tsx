@@ -13,7 +13,7 @@ import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 
 import { TableWithoutPersist as Table } from './table';
-import type { EuiTableFieldDataColumnType} from '@elastic/eui';
+import type { EuiTableFieldDataColumnType } from '@elastic/eui';
 import { keys } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SourceFiltersTableFilter } from '../../types';

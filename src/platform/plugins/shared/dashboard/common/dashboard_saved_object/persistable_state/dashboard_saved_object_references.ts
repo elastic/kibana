@@ -14,7 +14,10 @@ import {
   convertPanelMapToPanelsArray,
   convertPanelsArrayToPanelMap,
 } from '../../lib/dashboard_panel_converters';
-import type { DashboardAttributesAndReferences, ParsedDashboardAttributesWithType } from '../../types';
+import type {
+  DashboardAttributesAndReferences,
+  ParsedDashboardAttributesWithType,
+} from '../../types';
 import type { DashboardAttributes } from '../../../server/content_management';
 import {
   createExtract,

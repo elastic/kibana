@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { WordcloudSpec} from '@elastic/charts';
+import type { WordcloudSpec } from '@elastic/charts';
 import { Wordcloud, Settings, Chart } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import type { Datatable } from '@kbn/expressions-plugin/public';

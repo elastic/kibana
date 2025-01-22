@@ -12,12 +12,8 @@ import type {
   ContentManagementPublicStart,
 } from '@kbn/content-management-plugin/public';
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type {
-  DashboardStart} from '@kbn/dashboard-plugin/public';
-import {
-  DASHBOARD_GRID_COLUMN_COUNT,
-  PanelPlacementStrategy,
-} from '@kbn/dashboard-plugin/public';
+import type { DashboardStart } from '@kbn/dashboard-plugin/public';
+import { DASHBOARD_GRID_COLUMN_COUNT, PanelPlacementStrategy } from '@kbn/dashboard-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';

@@ -6,7 +6,7 @@
  */
 
 import { act } from 'react-dom/test-utils';
-import type { SetupResult} from './processor.helpers';
+import type { SetupResult } from './processor.helpers';
 import { setup, setupEnvironment } from './processor.helpers';
 
 describe('Processor: Bytes', () => {

@@ -7,7 +7,7 @@
 
 import { test as base } from '@playwright/test';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { HostOptions} from '@kbn/test';
+import type { HostOptions } from '@kbn/test';
 import { SamlSessionManager } from '@kbn/test';
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';

@@ -9,15 +9,11 @@ import React from 'react';
 import type { ApplicationStart } from '@kbn/core/public';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { DiscoverAppLocator} from './open_in_discover_helpers';
+import type { DiscoverAppLocator } from './open_in_discover_helpers';
 import { getHref, isCompatible } from './open_in_discover_helpers';
 import type { Filter } from '@kbn/es-query';
-import type {
-  ActionFactoryContext,
-  CollectConfigProps} from './open_in_discover_drilldown';
-import {
-  OpenInDiscoverDrilldown,
-} from './open_in_discover_drilldown';
+import type { ActionFactoryContext, CollectConfigProps } from './open_in_discover_drilldown';
+import { OpenInDiscoverDrilldown } from './open_in_discover_drilldown';
 import type { DataViewsService } from '@kbn/data-views-plugin/public';
 import { getLensApiMock } from '../react_embeddable/mocks';
 

@@ -25,18 +25,17 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import type { IEventLogger } from '@kbn/event-log-plugin/server';
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import type { SharePluginStart } from '@kbn/share-plugin/server';
-import type { ConcreteTaskInstance} from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
 import { AdHocTaskRunner } from './ad_hoc_task_runner';
 import type { TaskRunnerContext } from './types';
 import { backfillClientMock } from '../backfill_client/backfill_client.mock';
 import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
-import type {
-  ContextOpts} from '../lib/alerting_event_logger/alerting_event_logger';
+import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
 import {
   AlertingEventLogger,
-  executionType
+  executionType,
 } from '../lib/alerting_event_logger/alerting_event_logger';
 import type { AdHocRunSchedule, AdHocRunSO } from '../data/ad_hoc_run/types';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE, RULE_SAVED_OBJECT_TYPE } from '../saved_objects';
@@ -54,10 +53,9 @@ import type {
   RuleAlertData,
   RuleExecutorOptions,
   RuleTypeParams,
-  RuleTypeState} from '../types';
-import {
-  DEFAULT_FLAPPING_SETTINGS
+  RuleTypeState,
 } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS } from '../types';
 import {
   TIMESTAMP,
   EVENT_ACTION,

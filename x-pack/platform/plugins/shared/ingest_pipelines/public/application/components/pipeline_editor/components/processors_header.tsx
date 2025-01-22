@@ -13,7 +13,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../../../../shared_imports';
 
-import type { OnDoneLoadJsonHandler} from '.';
+import type { OnDoneLoadJsonHandler } from '.';
 import { LoadFromJsonButton, TestPipelineActions } from '.';
 
 export interface Props {

@@ -12,10 +12,9 @@ import { EuiPanel } from '@elastic/eui';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import type {
   ChatActionClickHandler,
-  TelemetryEventTypeWithPayload} from '@kbn/observability-ai-assistant-plugin/public';
-import {
-  MessageText
+  TelemetryEventTypeWithPayload,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { MessageText } from '@kbn/observability-ai-assistant-plugin/public';
 import { PromptEditor } from '../prompt_editor/prompt_editor';
 
 interface Props {

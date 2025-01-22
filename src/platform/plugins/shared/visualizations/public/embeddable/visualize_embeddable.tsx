@@ -12,13 +12,9 @@ import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { EmbeddableEnhancedPluginStart } from '@kbn/embeddable-enhanced-plugin/public';
-import type {
-  EmbeddableStart,
-  ReactEmbeddableFactory} from '@kbn/embeddable-plugin/public';
-import {
-  SELECT_RANGE_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
-import type { ExpressionRendererParams} from '@kbn/expressions-plugin/public';
+import type { EmbeddableStart, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { SELECT_RANGE_TRIGGER } from '@kbn/embeddable-plugin/public';
+import type { ExpressionRendererParams } from '@kbn/expressions-plugin/public';
 import { useExpressionRenderer } from '@kbn/expressions-plugin/public';
 import { i18n } from '@kbn/i18n';
 import { dispatchRenderComplete } from '@kbn/kibana-utils-plugin/public';
@@ -55,10 +51,9 @@ import type {
   VisualizeApi,
   VisualizeOutputState,
   VisualizeRuntimeState,
-  VisualizeSerializedState} from './types';
-import {
-  isVisualizeSavedObjectState,
+  VisualizeSerializedState,
 } from './types';
+import { isVisualizeSavedObjectState } from './types';
 import { initializeEditApi } from './initialize_edit_api';
 
 export const getVisualizeEmbeddableFactory: (deps: {

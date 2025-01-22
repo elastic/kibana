@@ -7,7 +7,13 @@
 
 import { random } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import type { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { throwRetryableError } from '@kbn/task-manager-plugin/server/task_running';
 import { EventEmitter } from 'events';
 import { firstValueFrom, Subject } from 'rxjs';

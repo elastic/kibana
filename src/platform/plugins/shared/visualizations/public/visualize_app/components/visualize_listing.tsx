@@ -9,15 +9,8 @@
 
 import './visualize_listing.scss';
 
-import type {
-  MouseEvent,
-  MutableRefObject} from 'react';
-import React, {
-  useCallback,
-  useRef,
-  useMemo,
-  useEffect
-} from 'react';
+import type { MouseEvent, MutableRefObject } from 'react';
+import React, { useCallback, useRef, useMemo, useEffect } from 'react';
 import { EuiCallOut, EuiLink, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -11,7 +11,7 @@ import { schema } from '@kbn/config-schema';
 import type { ActionTypeRegistryOpts } from './action_type_registry';
 import { ActionTypeRegistry } from './action_type_registry';
 import type { ActionType, ExecutorType } from './types';
-import type { ILicenseState} from './lib';
+import type { ILicenseState } from './lib';
 import { ActionExecutionSourceType, ActionExecutor, TaskRunnerFactory } from './lib';
 import { actionsConfigMock } from './actions_config.mock';
 import { licenseStateMock } from './lib/license_state.mock';

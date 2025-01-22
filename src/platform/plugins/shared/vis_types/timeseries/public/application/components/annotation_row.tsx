@@ -10,8 +10,7 @@
 import type { ChangeEvent } from 'react';
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCode,
   EuiFieldText,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { KueryNode} from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 

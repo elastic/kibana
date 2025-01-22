@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FetchContext} from '@kbn/presentation-publishing';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import { fetch$ } from '@kbn/presentation-publishing';
 import type { Query } from '@kbn/es-query';
 import type { MapExtent } from '../../common/descriptor_types';

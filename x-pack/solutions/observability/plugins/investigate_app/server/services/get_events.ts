@@ -9,11 +9,9 @@ import datemath from '@elastic/datemath';
 import type {
   AlertEventResponse,
   AnnotationEventResponse,
-  GetEventsParams} from '@kbn/investigation-shared';
-import {
-  alertEventSchema,
-  annotationEventSchema,
+  GetEventsParams,
 } from '@kbn/investigation-shared';
+import { alertEventSchema, annotationEventSchema } from '@kbn/investigation-shared';
 import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import {
   ALERT_REASON,

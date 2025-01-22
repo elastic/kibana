@@ -7,12 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  AggsCommonSetupDependencies,
-  AggsCommonStartDependencies} from './aggs_service';
-import {
-  AggsCommonService
-} from './aggs_service';
+import type { AggsCommonSetupDependencies, AggsCommonStartDependencies } from './aggs_service';
+import { AggsCommonService } from './aggs_service';
 import { getAggTypes } from './agg_types';
 import type { BucketAggType } from './buckets/bucket_agg_type';
 import type { MetricAggType } from './metrics/metric_agg_type';

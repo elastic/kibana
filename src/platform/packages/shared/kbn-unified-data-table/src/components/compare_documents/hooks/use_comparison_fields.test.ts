@@ -9,12 +9,8 @@
 
 import { renderHook } from '@testing-library/react';
 import { buildDataTableRecord } from '@kbn/discover-utils';
-import type {
-  UseComparisonFieldsProps} from './use_comparison_fields';
-import {
-  MAX_COMPARISON_FIELDS,
-  useComparisonFields
-} from './use_comparison_fields';
+import type { UseComparisonFieldsProps } from './use_comparison_fields';
+import { MAX_COMPARISON_FIELDS, useComparisonFields } from './use_comparison_fields';
 import { buildDataViewMock, generateEsHits } from '@kbn/discover-utils/src/__mocks__';
 import { dataViewWithTimefieldMock } from '../../../../__mocks__/data_view_with_timefield';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';

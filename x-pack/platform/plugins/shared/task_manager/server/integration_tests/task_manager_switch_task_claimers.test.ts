@@ -7,7 +7,7 @@
 
 import { v4 as uuidV4 } from 'uuid';
 import { schema } from '@kbn/config-schema';
-import type { SerializedConcreteTaskInstance} from '../task';
+import type { SerializedConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 import type { TaskClaimingOpts } from '../queries/task_claiming';
 import { injectTask, setupTestServers, retry } from './lib';

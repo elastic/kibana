@@ -10,11 +10,8 @@ import type { TriggersAndActionsUIPublicPluginSetup } from '@kbn/triggers-action
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import { registerConnectorTypes } from './connector_types';
 import { ExperimentalFeaturesService } from './common/experimental_features_service';
-import type {
-  ExperimentalFeatures} from '../common/experimental_features';
-import {
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { StackConnectorsConfigType } from '../common/types';
 
 export type Setup = void;

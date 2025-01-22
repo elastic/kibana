@@ -14,7 +14,12 @@ import { saveAs } from '@elastic/filesaver';
 import type { CriteriaWithPagination } from '@elastic/eui';
 import { EuiSpacer, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { HttpStart, OverlayStart, NotificationsStart, ApplicationStart } from '@kbn/core/public';
+import type {
+  HttpStart,
+  OverlayStart,
+  NotificationsStart,
+  ApplicationStart,
+} from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
@@ -22,8 +27,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import type { Subscription } from 'rxjs';
 import type { SavedObjectManagementTypeInfo, FindQueryHTTP } from '../../../common/types/latest';
-import type {
-  SavedObjectsExportResultDetails} from '../../lib';
+import type { SavedObjectsExportResultDetails } from '../../lib';
 import {
   parseQuery,
   getSavedObjectCounts,

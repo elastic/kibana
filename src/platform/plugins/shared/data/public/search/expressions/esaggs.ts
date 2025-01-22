@@ -13,10 +13,9 @@ import { switchMap } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type {
   EsaggsExpressionFunctionDefinition,
-  EsaggsStartDependencies} from '../../../common/search/expressions';
-import {
-  getEsaggsMeta,
+  EsaggsStartDependencies,
 } from '../../../common/search/expressions';
+import { getEsaggsMeta } from '../../../common/search/expressions';
 import type { DataPublicPluginStart, DataStartDependencies } from '../../types';
 
 /**

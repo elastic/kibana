@@ -16,7 +16,7 @@ import { fileErrors } from '../../file';
 import { getDownloadHeadersForFile, getDownloadedFileName } from '../common';
 import { getById } from './helpers';
 import type { CreateHandler, FileKindRouter } from './types';
-import type { CreateRouteDefinition} from '../api_routes';
+import type { CreateRouteDefinition } from '../api_routes';
 import { FILES_API_ROUTES } from '../api_routes';
 
 export const method = 'get' as const;

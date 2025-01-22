@@ -17,7 +17,7 @@ import type { ServerlessPluginStart } from '@kbn/serverless/public';
 import type { AlertNavigationHandler } from './alert_navigation_registry';
 import { AlertNavigationRegistry } from './alert_navigation_registry';
 import { loadRule, loadRuleType } from './services/rule_api';
-import type { Rule} from '../common';
+import type { Rule } from '../common';
 import { ENABLE_MAINTENANCE_WINDOWS, MAINTENANCE_WINDOWS_APP_ID } from '../common';
 
 export interface PluginSetupContract {

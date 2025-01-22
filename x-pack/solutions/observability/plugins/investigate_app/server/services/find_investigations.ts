@@ -7,10 +7,9 @@
 
 import type {
   FindInvestigationsParams,
-  FindInvestigationsResponse} from '@kbn/investigation-shared';
-import {
-  findInvestigationsResponseSchema,
+  FindInvestigationsResponse,
 } from '@kbn/investigation-shared';
+import { findInvestigationsResponseSchema } from '@kbn/investigation-shared';
 import type { InvestigationRepository, Search } from './investigation_repository';
 import type { InvestigationStatus } from '../models/investigation';
 

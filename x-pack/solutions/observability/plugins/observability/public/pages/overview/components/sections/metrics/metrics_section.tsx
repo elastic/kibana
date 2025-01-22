@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Criteria,
-  Direction,
-  EuiBasicTableColumn,
-  EuiTableSortingType} from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiLoadingChart
-} from '@elastic/eui';
+import type { Criteria, Direction, EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
+import { EuiBasicTable, EuiLoadingChart } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useState, useCallback } from 'react';

@@ -6,14 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type {
-  EuiTabbedContentTab} from '@elastic/eui';
-import {
-  type EuiDataGridColumn,
-  EuiDescriptionList,
-  EuiPanel,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { type EuiDataGridColumn, EuiDescriptionList, EuiPanel, EuiTitle } from '@elastic/eui';
 import { ALERT_RULE_NAME } from '@kbn/rule-data-utils';
 import { get } from 'lodash';
 import { i18n } from '@kbn/i18n';

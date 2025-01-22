@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { render } from '@testing-library/react';
-import type { PreviewBanner} from './preview_section';
+import type { PreviewBanner } from './preview_section';
 import { PreviewSection } from './preview_section';
 import {
   PREVIEW_SECTION_BACK_BUTTON_TEST_ID,

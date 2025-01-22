@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { map } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { validateHours } from '../../routes/lib/validate_hours';
-import type { RawRule} from '../../types';
+import type { RawRule } from '../../types';
 import { RuleNotifyWhen } from '../../types';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import type { NormalizedAlertAction, NormalizedSystemAction } from '../types';

@@ -9,12 +9,8 @@ import { SPACES } from '../../common/lib/spaces';
 import { testCaseFailures, getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import type { TestUser } from '../../common/lib/types';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import type {
-  BulkUpdateTestDefinition} from '../../common/suites/bulk_update';
-import {
-  bulkUpdateTestSuiteFactory,
-  TEST_CASES as CASES
-} from '../../common/suites/bulk_update';
+import type { BulkUpdateTestDefinition } from '../../common/suites/bulk_update';
+import { bulkUpdateTestSuiteFactory, TEST_CASES as CASES } from '../../common/suites/bulk_update';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

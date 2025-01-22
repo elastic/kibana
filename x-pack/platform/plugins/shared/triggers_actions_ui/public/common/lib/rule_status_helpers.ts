@@ -4,12 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  RuleLastRunOutcomes,
-  RuleExecutionStatuses} from '@kbn/alerting-plugin/common';
-import {
-  RuleExecutionStatusErrorReasons,
-} from '@kbn/alerting-plugin/common';
+import type { RuleLastRunOutcomes, RuleExecutionStatuses } from '@kbn/alerting-plugin/common';
+import { RuleExecutionStatusErrorReasons } from '@kbn/alerting-plugin/common';
 import { type EuiThemeComputed } from '@elastic/eui';
 import { getIsExperimentalFeatureEnabled } from '../get_experimental_features';
 import type { Rule } from '../../types';

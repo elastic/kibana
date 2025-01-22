@@ -7,7 +7,7 @@
 
 import { EuiFormRow } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { Query, TimeRange} from '@kbn/es-query';
+import type { Query, TimeRange } from '@kbn/es-query';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { observabilityAppId } from '@kbn/observability-shared-plugin/common';
 import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';

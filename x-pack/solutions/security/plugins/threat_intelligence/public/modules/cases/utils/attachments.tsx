@@ -14,7 +14,7 @@ import { EuiAvatar } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CASE_ATTACHMENT_TYPE_ID } from '../../../../common/constants';
 import { EMPTY_VALUE } from '../../../constants/common';
-import type { Indicator} from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
 import { RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 

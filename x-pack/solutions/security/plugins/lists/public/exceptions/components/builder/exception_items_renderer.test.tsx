@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { ReactWrapper} from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { waitFor } from '@testing-library/react';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';

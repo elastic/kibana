@@ -8,15 +8,8 @@
 import React from 'react';
 import type { HistoricalSummaryResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { ALL_VALUE } from '@kbn/slo-schema';
-import type {
-  MetricDatum} from '@elastic/charts';
-import {
-  Chart,
-  isMetricElementEvent,
-  Metric,
-  MetricTrendShape,
-  Settings
-} from '@elastic/charts';
+import type { MetricDatum } from '@elastic/charts';
+import { Chart, isMetricElementEvent, Metric, MetricTrendShape, Settings } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLoadingSpinner } from '@elastic/eui';

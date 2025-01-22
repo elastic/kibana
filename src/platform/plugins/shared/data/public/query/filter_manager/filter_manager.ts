@@ -13,8 +13,7 @@ import { Subject } from 'rxjs';
 import type { IUiSettingsClient } from '@kbn/core/public';
 import { FilterStateStore } from '@kbn/es-query';
 
-import type {
-  Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import {
   isFilterPinned,
   onlyDisabledFiltersChanged,

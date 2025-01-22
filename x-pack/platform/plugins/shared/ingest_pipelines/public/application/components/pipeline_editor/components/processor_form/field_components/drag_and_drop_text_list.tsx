@@ -22,13 +22,8 @@ import {
   EuiText,
 } from '@elastic/eui';
 
-import type {
-  ArrayItem,
-  ValidationFunc} from '../../../../../../shared_imports';
-import {
-  UseField,
-  getFieldValidityAndErrorMessage,
-} from '../../../../../../shared_imports';
+import type { ArrayItem, ValidationFunc } from '../../../../../../shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../../../../../shared_imports';
 
 import './drag_and_drop_text_list.scss';
 

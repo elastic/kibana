@@ -8,11 +8,7 @@
 import type { Logger } from '@kbn/core/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import type { RuleResultService } from '../monitoring/rule_result_service';
-import type {
-  RuleExecutionStatus,
-  RawRuleExecutionStatus,
-  RawRule,
-  Rule} from '../types';
+import type { RuleExecutionStatus, RawRuleExecutionStatus, RawRule, Rule } from '../types';
 import {
   RuleExecutionStatusValues,
   RuleExecutionStatusWarningReasons,

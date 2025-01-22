@@ -7,10 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import type {
-  EuiLinkButtonProps,
-  EuiPopoverProps,
-  EuiWrappingPopoverProps} from '@elastic/eui';
+import type { EuiLinkButtonProps, EuiPopoverProps, EuiWrappingPopoverProps } from '@elastic/eui';
 import {
   EuiIcon,
   EuiLink,

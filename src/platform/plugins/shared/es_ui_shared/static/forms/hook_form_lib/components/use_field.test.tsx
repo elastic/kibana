@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useEffect, useState, useCallback } from 'react';
 import { act } from 'react-dom/test-utils';
 import { first } from 'rxjs';

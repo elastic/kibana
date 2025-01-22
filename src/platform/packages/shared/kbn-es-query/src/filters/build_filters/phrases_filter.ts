@@ -8,7 +8,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Filter, FilterMeta} from './types';
+import type { Filter, FilterMeta } from './types';
 import { FILTERS } from './types';
 import type { PhraseFilterValue } from './phrase_filter';
 import { getPhraseScript } from './phrase_filter';

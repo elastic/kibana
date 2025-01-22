@@ -7,8 +7,7 @@
 
 import type { ReactNode } from 'react';
 import React, { Component, Fragment } from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiConfirmModal,
   EuiFormRow,

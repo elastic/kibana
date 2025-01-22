@@ -19,7 +19,13 @@ import {
   isUserAuthorizedAtSpace,
   getRedactedNamespaces,
 } from '../lib/saved_object_test_utils';
-import type { ExpectResponseBody, TestCase, TestDefinition, TestSuite, TestUser } from '../lib/types';
+import type {
+  ExpectResponseBody,
+  TestCase,
+  TestDefinition,
+  TestSuite,
+  TestUser,
+} from '../lib/types';
 
 const {
   DEFAULT: { spaceId: DEFAULT_SPACE_ID },

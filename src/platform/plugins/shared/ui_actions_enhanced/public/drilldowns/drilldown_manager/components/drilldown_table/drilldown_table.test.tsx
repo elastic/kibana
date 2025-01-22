@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { fireEvent, render } from '@testing-library/react';
-import type { DrilldownTableItem} from './drilldown_table';
+import type { DrilldownTableItem } from './drilldown_table';
 import { DrilldownTable, TEST_SUBJ_DRILLDOWN_ITEM } from './drilldown_table';
 
 const drilldowns: DrilldownTableItem[] = [

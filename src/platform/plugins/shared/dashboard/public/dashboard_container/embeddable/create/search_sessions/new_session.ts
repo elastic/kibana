@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter, TimeRange} from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { COMPARE_ALL_OPTIONS, onlyDisabledFiltersChanged } from '@kbn/es-query';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, distinctUntilChanged, skip } from 'rxjs';
 import { apiPublishesSettings } from '@kbn/presentation-containers/interfaces/publishes_settings';
 import { apiPublishesReload, apiPublishesUnifiedSearch } from '@kbn/presentation-publishing';

@@ -15,7 +15,7 @@ jest.mock('../../../../lib/content_stream', () => ({
 
 import type { estypes } from '@elastic/elasticsearch';
 import { setupServer } from '@kbn/core-test-helpers-test-utils';
-import type { ElasticsearchClientMock} from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { INTERNAL_ROUTES } from '@kbn/reporting-common';
@@ -26,7 +26,7 @@ import type { IUsageCounter } from '@kbn/usage-collection-plugin/server/usage_co
 
 import type { ReportingCore } from '../../../..';
 import type { ReportingInternalSetup, ReportingInternalStart } from '../../../../core';
-import type { ContentStream} from '../../../../lib';
+import type { ContentStream } from '../../../../lib';
 import { getContentStream } from '../../../../lib';
 import { reportingMock } from '../../../../mocks';
 import {

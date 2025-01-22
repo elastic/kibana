@@ -11,7 +11,7 @@ import { UIM_APP_NAME } from '../../../../../../../common/constants/ui_metric';
 import { httpService } from '../../../../../services/http';
 import { notificationService } from '../../../../../services/notification';
 import { UiMetricService } from '../../../../../services/ui_metric';
-import type { AppDependencies} from '../../../../..';
+import type { AppDependencies } from '../../../../..';
 import { IndexManagementAppContext } from '../../../../..';
 import type { IndexMappingWithContextProps } from './index_mapping_with_context_types';
 import { DetailsPageMappings } from '../details_page_mappings';

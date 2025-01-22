@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { QuerySchema, FiltersSchema} from '@kbn/slo-schema';
+import type { QuerySchema, FiltersSchema } from '@kbn/slo-schema';
 import { kqlQuerySchema, kqlWithFiltersSchema } from '@kbn/slo-schema';
 
 export const formatAllFilters = (

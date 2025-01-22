@@ -16,15 +16,8 @@ jest.spyOn(lodash, 'debounce').mockImplementation((fn: any) => {
   fn.cancel = jest.fn();
   return fn;
 });
-import type {
-  EuiSearchBarProps} from '@elastic/eui';
-import {
-  EuiInMemoryTable,
-  EuiLink,
-  EuiText,
-  EuiButton,
-  Query,
-} from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiText, EuiButton, Query } from '@elastic/eui';
 import type { IconType } from '@elastic/eui';
 import { mount, shallow } from 'enzyme';
 import React from 'react';

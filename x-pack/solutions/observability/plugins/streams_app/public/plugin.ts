@@ -13,10 +13,9 @@ import type {
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/public';
-import {
-  DEFAULT_APP_CATEGORIES
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { STREAMS_APP_ID } from '@kbn/deeplinks-observability/constants';
 import type {

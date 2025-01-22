@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { MlTrainedModelConfig, MlTrainedModelStats } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  MlTrainedModelConfig,
+  MlTrainedModelStats,
+} from '@elastic/elasticsearch/lib/api/types';
 
 import type { Logger } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';

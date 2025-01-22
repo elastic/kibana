@@ -11,10 +11,10 @@ import React from 'react';
 
 import { shallow } from 'enzyme';
 
-import type { EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiText } from '@elastic/eui';
 
-import type { MlModel} from '../../../../../../../common/types/ml';
+import type { MlModel } from '../../../../../../../common/types/ml';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 import { TrainedModelHealth } from '../ml_model_health';
 

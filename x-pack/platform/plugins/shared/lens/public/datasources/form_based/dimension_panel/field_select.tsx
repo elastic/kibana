@@ -11,7 +11,7 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption, EuiComboBoxProps } from '@elastic/eui';
 import { useExistingFieldsReader } from '@kbn/unified-field-list/src/hooks/use_existing_fields';
-import type { FieldOption, FieldOptionValue} from '@kbn/visualization-ui-components';
+import type { FieldOption, FieldOptionValue } from '@kbn/visualization-ui-components';
 import { FieldPicker } from '@kbn/visualization-ui-components';
 import { getFieldIconType } from '@kbn/field-utils';
 import type { OperationType } from '../form_based';

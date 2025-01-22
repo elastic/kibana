@@ -32,7 +32,7 @@ import { createStdoutSocket } from './create_stdout_stream';
 import { preventParallelCalls } from './prevent_parallel_calls';
 
 import { Browsers } from './browsers';
-import type { NetworkProfile} from './network_profiles';
+import type { NetworkProfile } from './network_profiles';
 import { NETWORK_PROFILES } from './network_profiles';
 
 interface Configuration {

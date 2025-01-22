@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react';
 import React, { useState } from 'react';
 import { EuiFieldSearch } from '@elastic/eui';
 import styled from 'styled-components';

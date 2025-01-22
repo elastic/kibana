@@ -12,11 +12,8 @@ import type { SavedObjectsType } from '@kbn/core/server';
 
 import { dashboardAttributesSchema as dashboardAttributesSchemaV1 } from './schema/v1';
 import { dashboardAttributesSchema as dashboardAttributesSchemaV2 } from './schema/v2';
-import type {
-  DashboardSavedObjectTypeMigrationsDeps} from './migrations/dashboard_saved_object_migrations';
-import {
-  createDashboardSavedObjectTypeMigrations
-} from './migrations/dashboard_saved_object_migrations';
+import type { DashboardSavedObjectTypeMigrationsDeps } from './migrations/dashboard_saved_object_migrations';
+import { createDashboardSavedObjectTypeMigrations } from './migrations/dashboard_saved_object_migrations';
 
 export const DASHBOARD_SAVED_OBJECT_TYPE = 'dashboard';
 

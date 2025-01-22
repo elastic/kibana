@@ -30,13 +30,8 @@ import {
   RECURRENCE_END_OPTIONS,
 } from './constants';
 import { CustomRecurrenceScheduler } from './custom_recurrence_scheduler';
-import type {
-  CustomFrequencyState} from './helpers';
-import {
-  generateNthByweekday,
-  getWeekdayInfo,
-  recurrenceSummary,
-} from './helpers';
+import type { CustomFrequencyState } from './helpers';
+import { generateNthByweekday, getWeekdayInfo, recurrenceSummary } from './helpers';
 import { i18nNthWeekday } from './translations';
 
 import './recurrence_scheduler.scss';

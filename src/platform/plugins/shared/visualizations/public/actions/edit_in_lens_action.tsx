@@ -18,11 +18,12 @@ import type {
   HasUniqueId,
   PublishesUnifiedSearch,
   PublishesPanelDescription,
-  PublishesPanelTitle} from '@kbn/presentation-publishing';
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasUniqueId,
-  getInheritedViewMode
+  getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import React from 'react';
@@ -31,11 +32,8 @@ import {
   apiHasVisualizeConfig,
   type HasVisualizeConfig,
 } from '../embeddable/interfaces/has_visualize_config';
-import type {
-  HasExpressionVariables} from '../embeddable/interfaces/has_expression_variables';
-import {
-  apiHasExpressionVariables
-} from '../embeddable/interfaces/has_expression_variables';
+import type { HasExpressionVariables } from '../embeddable/interfaces/has_expression_variables';
+import { apiHasExpressionVariables } from '../embeddable/interfaces/has_expression_variables';
 import {
   getApplication,
   getCapabilities,

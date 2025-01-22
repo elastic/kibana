@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 import { EuiFieldText, EuiFormRow, EuiPanel } from '@elastic/eui';
 import type { RenderWizardArguments } from '../layer_wizard_registry';

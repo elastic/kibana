@@ -6,7 +6,7 @@
  */
 
 import { intersection } from 'lodash';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { from, of, concatMap, delay, map, toArray, forkJoin } from 'rxjs';
 import type {
   MappingPropertyBase,

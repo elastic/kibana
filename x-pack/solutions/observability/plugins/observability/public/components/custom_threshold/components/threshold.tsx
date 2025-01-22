@@ -8,7 +8,7 @@
 import React from 'react';
 import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
-import type { PartialTheme, Theme , ValueFormatter } from '@elastic/charts';
+import type { PartialTheme, Theme, ValueFormatter } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { COMPARATORS } from '@kbn/alerting-comparators';
 

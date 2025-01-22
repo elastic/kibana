@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchClient} from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { type Logger } from '@kbn/core/server';
 import type { IndexStatus } from '@kbn/cloud-security-posture-common';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';

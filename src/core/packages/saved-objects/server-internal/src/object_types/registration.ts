@@ -8,8 +8,7 @@
  */
 
 import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
-import type {
-  SavedObjectTypeRegistry} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import {
   LEGACY_URL_ALIAS_TYPE,
   type LegacyUrlAlias,

@@ -26,7 +26,7 @@ import type { CollapseExpressionFunction } from '../../../common/expressions';
 import type { Operation, DatasourcePublicAPI, DatasourceLayers } from '../../types';
 import { DEFAULT_PERCENT_DECIMALS } from './constants';
 import { getLegendStats } from './render_helpers';
-import type { PieLayerState, PieVisualizationState} from '../../../common/types';
+import type { PieLayerState, PieVisualizationState } from '../../../common/types';
 import { EmptySizeRatios } from '../../../common/types';
 import {
   CategoryDisplay,

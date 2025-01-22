@@ -11,7 +11,8 @@ import type {
   TransportRequestParams,
   TransportRequestOptions,
   TransportResult,
- Client} from '@elastic/elasticsearch';
+  Client,
+} from '@elastic/elasticsearch';
 
 import type { FtrProviderContext } from '../ftr_provider_context';
 

@@ -17,13 +17,9 @@ import type {
   MetricWTrend,
   MetricWNumber,
   SettingsProps,
-  MetricWText} from '@elastic/charts';
-import {
-  Chart,
-  Metric,
-  isMetricElementEvent,
-  Settings
+  MetricWText,
 } from '@elastic/charts';
+import { Chart, Metric, isMetricElementEvent, Settings } from '@elastic/charts';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type {

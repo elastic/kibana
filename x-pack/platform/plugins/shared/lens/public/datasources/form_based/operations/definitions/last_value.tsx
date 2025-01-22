@@ -7,15 +7,8 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
-import {
-  EuiFormRow,
-  EuiComboBox,
-  EuiSwitch,
-  EuiToolTip,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSwitch, EuiToolTip, EuiText } from '@elastic/eui';
 import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';

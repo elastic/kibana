@@ -10,13 +10,11 @@ import type {
   ChatCompletionMessageEvent,
   ChatCompletionTokenCountEvent,
   ToolOptions,
-  UnvalidatedToolCall} from '@kbn/inference-common';
-import {
-  ChatCompletionEventType,
-  withoutTokenCountEvents,
+  UnvalidatedToolCall,
 } from '@kbn/inference-common';
+import { ChatCompletionEventType, withoutTokenCountEvents } from '@kbn/inference-common';
 import type { Logger } from '@kbn/logging';
-import type { OperatorFunction} from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
 import { map, merge, share, toArray } from 'rxjs';
 import { validateToolCalls } from '../../util/validate_tool_calls';
 

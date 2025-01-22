@@ -7,11 +7,8 @@
 
 import type { IRouter } from '@kbn/core/server';
 import type { ConnectorTypesResponseV1 } from '../../../../common/routes/connector/response';
-import type {
-  ConnectorTypesRequestQueryV1} from '../../../../common/routes/connector/apis/connector_types';
-import {
-  connectorTypesQuerySchemaV1
-} from '../../../../common/routes/connector/apis/connector_types';
+import type { ConnectorTypesRequestQueryV1 } from '../../../../common/routes/connector/apis/connector_types';
+import { connectorTypesQuerySchemaV1 } from '../../../../common/routes/connector/apis/connector_types';
 import { transformListTypesResponseV1 } from './transforms';
 import type { ActionsRequestHandlerContext } from '../../../types';
 import { BASE_ACTION_API_PATH } from '../../../../common';

@@ -17,7 +17,8 @@ import type {
   OptimizerConfig,
   OptimizerEvent,
   OptimizerState,
-  OptimizerInitializedEvent} from './optimizer';
+  OptimizerInitializedEvent,
+} from './optimizer';
 import {
   getBundleCacheEvent$,
   getOptimizerCacheKey,

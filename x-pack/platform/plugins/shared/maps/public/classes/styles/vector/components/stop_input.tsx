@@ -6,9 +6,9 @@
  */
 
 import _ from 'lodash';
-import type { ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFieldText } from '@elastic/eui';
 import { SINGLE_SELECTION_AS_TEXT_PROPS } from '../../../../../common/constants';
 import type { IField } from '../../../fields/field';

@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type {
-  GetEntitiesResponse,
-  GetEventsResponse} from '@kbn/investigation-shared';
+import type { GetEntitiesResponse, GetEventsResponse } from '@kbn/investigation-shared';
 import {
   createInvestigationItemParamsSchema,
   createInvestigationNoteParamsSchema,
@@ -36,7 +34,7 @@ import { deleteInvestigation } from '../services/delete_investigation';
 import { deleteInvestigationItem } from '../services/delete_investigation_item';
 import { deleteInvestigationNote } from '../services/delete_investigation_note';
 import { findInvestigations } from '../services/find_investigations';
-import type { AlertsClient} from '../services/get_alerts_client';
+import type { AlertsClient } from '../services/get_alerts_client';
 import { getAlertsClient } from '../services/get_alerts_client';
 import { getAllInvestigationStats } from '../services/get_all_investigation_stats';
 import { getAllInvestigationTags } from '../services/get_all_investigation_tags';

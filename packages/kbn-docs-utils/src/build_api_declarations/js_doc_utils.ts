@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSDoc, JSDocTag} from 'ts-morph';
+import type { JSDoc, JSDocTag } from 'ts-morph';
 import { Node } from 'ts-morph';
 import type { TextWithLinks } from '../types';
 

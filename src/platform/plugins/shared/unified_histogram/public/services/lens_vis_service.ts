@@ -39,13 +39,8 @@ import type { XYConfiguration } from '@kbn/visualizations-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { fieldSupportsBreakdown } from '@kbn/field-utils';
-import type {
-  UnifiedHistogramSuggestionContext,
-  UnifiedHistogramVisContext} from '../types';
-import {
-  UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramSuggestionType
-} from '../types';
+import type { UnifiedHistogramSuggestionContext, UnifiedHistogramVisContext } from '../types';
+import { UnifiedHistogramExternalVisContextStatus, UnifiedHistogramSuggestionType } from '../types';
 import {
   isSuggestionShapeAndVisContextCompatible,
   deriveLensSuggestionFromLensAttributes,

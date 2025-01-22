@@ -5,25 +5,13 @@
  * 2.0.
  */
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
-import {
-  EuiAvatar,
-  EuiBadge,
-  EuiIcon,
-  EuiText,
-  EuiLoadingSpinner,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiAvatar, EuiBadge, EuiIcon, EuiText, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React, { useCallback, useMemo } from 'react';
 import { FormattedDate } from '@kbn/i18n-react';
-import type {
-  KnowledgeBaseEntryResponse} from '@kbn/elastic-assistant-common';
-import {
-  DocumentEntryType,
-  IndexEntryType
-} from '@kbn/elastic-assistant-common';
+import type { KnowledgeBaseEntryResponse } from '@kbn/elastic-assistant-common';
+import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
 
 import useAsync from 'react-use/lib/useAsync';
 import type { UserProfileAvatarData } from '@kbn/user-profile-components';

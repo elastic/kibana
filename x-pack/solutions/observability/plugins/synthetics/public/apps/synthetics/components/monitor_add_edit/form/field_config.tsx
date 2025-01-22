@@ -20,7 +20,8 @@ import type {
   EuiFieldPasswordProps,
   EuiCheckboxProps,
   EuiTextAreaProps,
-  EuiButtonGroupProps} from '@elastic/eui';
+  EuiButtonGroupProps,
+} from '@elastic/eui';
 import {
   EuiIcon,
   EuiCode,
@@ -32,18 +33,16 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { kibanaService } from '../../../../../utils/kibana_service';
-import type {
-  ThrottlingConfigFieldProps} from '../fields/throttling/throttling_config_field';
-import {
-  PROFILE_OPTIONS
-} from '../fields/throttling/throttling_config_field';
+import type { ThrottlingConfigFieldProps } from '../fields/throttling/throttling_config_field';
+import { PROFILE_OPTIONS } from '../fields/throttling/throttling_config_field';
 import type {
   FormattedComboBoxProps,
   JSONCodeEditorProps,
   HeaderFieldProps,
   RequestBodyFieldProps,
   ResponseBodyIndexFieldProps,
-  ControlledFieldProp} from './field_wrappers';
+  ControlledFieldProp,
+} from './field_wrappers';
 import {
   FieldText,
   FieldNumber,
@@ -71,7 +70,8 @@ import type {
   FormLocation,
   ResponseCheckJSON,
   ThrottlingConfig,
-  RequestBodyCheck} from '../types';
+  RequestBodyCheck,
+} from '../types';
 import {
   ConfigKey,
   MonitorTypeEnum,

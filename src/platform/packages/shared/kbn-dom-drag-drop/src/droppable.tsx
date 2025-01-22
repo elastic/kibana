@@ -17,11 +17,9 @@ import type {
   DropHandler,
   Ghost,
   DragDropAction,
-  DragContextState} from './providers';
-import {
-  ReorderContext,
-  useDragDropContext,
+  DragContextState,
 } from './providers';
+import { ReorderContext, useDragDropContext } from './providers';
 import type { DropType } from './types';
 import './sass/droppable.scss';
 

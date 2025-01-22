@@ -11,7 +11,7 @@
 
 import React, { Fragment, lazy } from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
-import type { ReactWrapper} from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { coreMock } from '@kbn/core/public/mocks';

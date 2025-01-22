@@ -22,7 +22,7 @@ import { alertingAuthorizationMock } from '../../../../authorization/alerting_au
 import type { AlertingAuthorization } from '../../../../authorization/alerting_authorization';
 import { alertsServiceMock } from '../../../../alerts_service/alerts_service.mock';
 import { ALERT_RULE_UUID, ALERT_UUID } from '@kbn/rule-data-utils';
-import type { ConcreteTaskInstance} from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';

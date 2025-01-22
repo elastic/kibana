@@ -17,7 +17,7 @@ import {
   historicalSummaryData,
   NO_DATA_TO_HEALTHY_ROLLING_SLO,
 } from '../../../data/slo/historical_summary_data';
-import type { Props} from './slo_sparkline';
+import type { Props } from './slo_sparkline';
 import { SloSparkline as Component } from './slo_sparkline';
 
 export default {

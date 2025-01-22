@@ -7,27 +7,16 @@
 
 import type { Logger } from '@kbn/logging';
 import type OpenAI from 'openai';
-import type {
-  Observable} from 'rxjs';
-import {
-  catchError,
-  concatMap,
-  endWith,
-  filter,
-  from,
-  ignoreElements,
-  map,
-  of,
-} from 'rxjs';
+import type { Observable } from 'rxjs';
+import { catchError, concatMap, endWith, filter, from, ignoreElements, map, of } from 'rxjs';
 import { PassThrough } from 'stream';
 import type {
   BufferFlushEvent,
   ChatCompletionChunkEvent,
   StreamingChatResponseEventWithoutError,
-  TokenCountEvent} from '../../../common/conversation_complete';
-import {
-  StreamingChatResponseEventType
+  TokenCountEvent,
 } from '../../../common/conversation_complete';
+import { StreamingChatResponseEventType } from '../../../common/conversation_complete';
 
 export function observableIntoOpenAIStream(
   source: Observable<StreamingChatResponseEventWithoutError | BufferFlushEvent | TokenCountEvent>,

@@ -18,10 +18,9 @@ import type {
   AssignableObject,
   UpdateTagAssignmentsOptions,
   FindAssignableObjectsOptions,
-  ObjectReference} from '../../../common/assignments';
-import {
-  getKey
+  ObjectReference,
 } from '../../../common/assignments';
+import { getKey } from '../../../common/assignments';
 import { updateTagReferences } from '../../../common/references';
 import { taggableTypes } from '../../../common/constants';
 import { getUpdatableSavedObjectTypes } from './get_updatable_types';

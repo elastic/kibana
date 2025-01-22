@@ -7,8 +7,7 @@
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type {
-  TimesliceMetricIndicator} from '@kbn/slo-schema';
+import type { TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
   timesliceMetricComparatorMapping,
   timesliceMetricIndicatorSchema,

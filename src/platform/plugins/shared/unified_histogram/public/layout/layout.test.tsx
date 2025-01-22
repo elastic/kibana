@@ -13,12 +13,8 @@ import type { ReactWrapper } from 'enzyme';
 import React from 'react';
 import { of } from 'rxjs';
 import { Chart } from '../chart';
-import type {
-  UnifiedHistogramChartContext,
-  UnifiedHistogramHitsContext} from '../types';
-import {
-  UnifiedHistogramFetchStatus
-} from '../types';
+import type { UnifiedHistogramChartContext, UnifiedHistogramHitsContext } from '../types';
+import { UnifiedHistogramFetchStatus } from '../types';
 import { dataViewWithTimefieldMock } from '../__mocks__/data_view_with_timefield';
 import { unifiedHistogramServicesMock } from '../__mocks__/services';
 import type { UnifiedHistogramLayoutProps } from './layout';

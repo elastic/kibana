@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PerformanceMetricEvent} from '@kbn/ebt-tools';
+import type { PerformanceMetricEvent } from '@kbn/ebt-tools';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import type { Optional } from 'utility-types';
 import { FilesPlugin } from '../plugin';

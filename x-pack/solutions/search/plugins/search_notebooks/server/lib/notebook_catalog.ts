@@ -15,10 +15,9 @@ import type { NotebookDefinition } from '@kbn/ipynb';
 import type {
   NotebookCatalog,
   NotebookCatalogResponse,
-  NotebookInformation} from '../../common/types';
-import {
-  NotebookSchema,
+  NotebookInformation,
 } from '../../common/types';
+import { NotebookSchema } from '../../common/types';
 
 import type { SearchNotebooksConfig } from '../config';
 import type { NotebooksCache, RemoteNotebookCatalog } from '../types';

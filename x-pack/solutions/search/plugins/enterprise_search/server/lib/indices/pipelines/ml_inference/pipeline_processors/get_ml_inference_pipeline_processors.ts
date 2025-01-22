@@ -14,7 +14,7 @@ import {
   parseModelStateFromStats,
   parseModelStateReasonFromStats,
 } from '../../../../../../common/ml_inference_pipeline';
-import type { InferencePipeline} from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { TrainedModelState } from '../../../../../../common/types/pipelines';
 import { getInferencePipelineNameFromIndexName } from '../../../../../utils/ml_inference_pipeline_utils';
 

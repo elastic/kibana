@@ -14,11 +14,9 @@ import type {
   AlertInstanceState,
   AlertInstanceContext,
   Rule,
-  RuleAlertData} from '../types';
-import {
-  DEFAULT_FLAPPING_SETTINGS,
-  DEFAULT_QUERY_DELAY_SETTINGS,
+  RuleAlertData,
 } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, DEFAULT_QUERY_DELAY_SETTINGS } from '../types';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import { TaskRunner } from './task_runner';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
@@ -40,11 +38,8 @@ import { ruleTypeRegistryMock } from '../rule_type_registry.mock';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
-import type {
-  ContextOpts} from '../lib/alerting_event_logger/alerting_event_logger';
-import {
-  AlertingEventLogger
-} from '../lib/alerting_event_logger/alerting_event_logger';
+import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import {
   mockTaskInstance,

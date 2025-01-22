@@ -15,7 +15,7 @@ import type { CoreStart, ToastsStart } from '@kbn/core/public';
 import type { DataView, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Rule } from '@kbn/alerting-plugin/common';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import type { ISearchSource, SerializedSearchSourceFields} from '@kbn/data-plugin/common';
+import type { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';
 import { getTime } from '@kbn/data-plugin/common';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { Markdown } from '@kbn/shared-ux-markdown';

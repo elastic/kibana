@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { TypesStart, BaseVisType} from '../../vis_types';
+import type { TypesStart, BaseVisType } from '../../vis_types';
 import { VisGroups } from '../../vis_types';
 import { AggBasedSelection } from './agg_based_selection';
 import type { VisParams } from '../../../common';

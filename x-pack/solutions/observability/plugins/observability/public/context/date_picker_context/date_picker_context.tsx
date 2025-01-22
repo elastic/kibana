@@ -10,7 +10,7 @@ import useMount from 'react-use/lib/useMount';
 import { useLocation, useHistory } from 'react-router-dom';
 import { parse } from 'query-string';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type { ObservabilityPublicPluginsStart} from '../..';
+import type { ObservabilityPublicPluginsStart } from '../..';
 import { fromQuery, toQuery } from '../..';
 import { getAbsoluteTime } from '../../utils/date';
 

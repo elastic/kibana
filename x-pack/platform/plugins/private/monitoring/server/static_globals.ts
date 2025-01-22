@@ -5,7 +5,12 @@
  * 2.0.
  */
 
-import type { CoreSetup, ElasticsearchClient, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { MonitoringConfig } from './config';
 import type { PluginsSetup } from './types';

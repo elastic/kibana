@@ -10,10 +10,9 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
 import type {
   CreateExceptionListSchema,
   CreateRuleExceptionListItemSchema,
-  ExceptionListItemSchema} from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ExceptionListTypeEnum,
+  ExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getCreateExceptionListMinimalSchemaMock } from '@kbn/lists-plugin/common/schemas/request/create_exception_list_schema.mock';
 import { fetchRule, getSimpleRule, createExceptionList } from '../../../../utils';
 import {

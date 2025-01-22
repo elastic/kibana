@@ -22,9 +22,7 @@ import treeKill from 'tree-kill';
 import { MOCK_IDP_REALM_NAME, ensureSAMLRoleMapping } from '@kbn/mock-idp-utils';
 import { downloadSnapshot, installSnapshot, installSource, installArchive } from './install';
 import { ES_BIN, ES_PLUGIN_BIN, ES_KEYSTORE_BIN } from './paths';
-import type {
-  DockerOptions,
-  ServerlessOptions} from './utils';
+import type { DockerOptions, ServerlessOptions } from './utils';
 import {
   extractConfigFiles,
   log as defaultLog,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiFormRowProps} from '@elastic/eui';
+import type { EuiFormRowProps } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiFormRow, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';

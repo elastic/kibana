@@ -14,9 +14,9 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { FIELD_ORIGIN } from '../../../common/constants';
 import { ESTooltipProperty } from '../tooltips/es_tooltip_property';
-import type { ITooltipProperty} from '../tooltips/tooltip_property';
+import type { ITooltipProperty } from '../tooltips/tooltip_property';
 import { TooltipProperty } from '../tooltips/tooltip_property';
-import type { IField} from './field';
+import type { IField } from './field';
 import { AbstractField } from './field';
 import type { IESSource } from '../sources/es_source';
 import type { IVectorSource } from '../sources/vector_source';

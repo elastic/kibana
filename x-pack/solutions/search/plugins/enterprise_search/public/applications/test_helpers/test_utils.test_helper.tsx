@@ -10,7 +10,7 @@ import React from 'react';
 
 import { render as testingLibraryRender } from '@testing-library/react';
 
-import type { LogicWrapper} from 'kea';
+import type { LogicWrapper } from 'kea';
 import { Provider, resetContext } from 'kea';
 
 import { of } from 'rxjs';

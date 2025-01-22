@@ -4,17 +4,16 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { buildQueryFromFilters } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import type { FindSLOGroupsResponse } from '@kbn/slo-schema';
 import type {
   QueryObserverResult,
   RefetchOptions,
-  RefetchQueryFilters} from '@tanstack/react-query';
-import {
-  useQuery,
+  RefetchQueryFilters,
 } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import { useMemo } from 'react';
 import {
   DEFAULT_SLO_GROUPS_PAGE_SIZE,

@@ -14,11 +14,9 @@ import type {
   EuiDataGridRowHeightsOptions,
   EuiDataGridSchemaDetector,
   EuiDataGridStyle,
-  EuiDataGridToolBarVisibilityOptions} from '@elastic/eui';
-import {
-  EuiDataGrid,
-  useGeneratedHtmlId,
+  EuiDataGridToolBarVisibilityOptions,
 } from '@elastic/eui';
+import { EuiDataGrid, useGeneratedHtmlId } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';

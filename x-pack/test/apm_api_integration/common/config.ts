@@ -7,16 +7,14 @@
 
 import { ApmUsername } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/authentication';
 import { createApmUsers } from '@kbn/apm-plugin/server/test_helpers/create_apm_users/create_apm_users';
-import type {
-  ApmSynthtraceEsClient,
-  ApmSynthtraceKibanaClient} from '@kbn/apm-synthtrace';
+import type { ApmSynthtraceEsClient, ApmSynthtraceKibanaClient } from '@kbn/apm-synthtrace';
 import {
   LogsSynthtraceEsClient,
   EntitiesSynthtraceEsClient,
   createLogger,
   LogLevel,
 } from '@kbn/apm-synthtrace';
-import type { FtrConfigProviderContext} from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { kbnTestConfig } from '@kbn/test';
 import supertest from 'supertest';
 import type { UrlObject } from 'url';

@@ -9,11 +9,8 @@ import type { PluginInitializerContext, Plugin, CoreSetup, Logger } from '@kbn/c
 import type { PluginSetupContract as ActionsPluginSetupContract } from '@kbn/actions-plugin/server';
 import { registerConnectorTypes } from './connector_types';
 import { validSlackApiChannelsRoute, getWellKnownEmailServiceRoute } from './routes';
-import type {
-  ExperimentalFeatures} from '../common/experimental_features';
-import {
-  parseExperimentalConfigValue,
-} from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
+import { parseExperimentalConfigValue } from '../common/experimental_features';
 import type { StackConnectorsConfigType } from '../common/types';
 export interface ConnectorsPluginsSetup {
   actions: ActionsPluginSetupContract;

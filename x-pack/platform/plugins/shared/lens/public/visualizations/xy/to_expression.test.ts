@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Ast} from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { fromExpression } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';

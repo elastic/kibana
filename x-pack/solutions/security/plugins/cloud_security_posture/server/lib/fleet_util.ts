@@ -26,8 +26,7 @@ import {
   CLOUD_SECURITY_POSTURE_PACKAGE_NAME,
 } from '../../common/constants';
 import { CSP_FLEET_PACKAGE_KUERY } from '../../common/utils/helpers';
-import type {
-  BenchmarksQueryParams} from '../../common/types/benchmarks/v1';
+import type { BenchmarksQueryParams } from '../../common/types/benchmarks/v1';
 import {
   BENCHMARK_PACKAGE_POLICY_PREFIX,
   DEFAULT_BENCHMARKS_PER_PAGE,

@@ -17,8 +17,7 @@ import {
   EuiToolTip,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  IngestPipelinesListParams} from '@kbn/ingest-pipelines-plugin/public';
+import type { IngestPipelinesListParams } from '@kbn/ingest-pipelines-plugin/public';
 import {
   INGEST_PIPELINES_APP_LOCATOR,
   INGEST_PIPELINES_PAGES,

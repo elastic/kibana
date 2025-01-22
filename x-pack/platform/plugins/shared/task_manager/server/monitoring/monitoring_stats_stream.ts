@@ -11,30 +11,17 @@ import { map, scan } from 'rxjs';
 import { set } from '@kbn/safer-lodash-set';
 import type { Logger } from '@kbn/core/server';
 import type { JsonObject } from '@kbn/utility-types';
-import type {
-  SummarizedWorkloadStat,
-  WorkloadStat} from './workload_statistics';
-import {
-  createWorkloadAggregator,
-  summarizeWorkloadStat
-} from './workload_statistics';
-import type {
-  TaskRunStat,
-  SummarizedTaskRunStat} from './task_run_statistics';
-import {
-  createTaskRunAggregator,
-  summarizeTaskRunStat
-} from './task_run_statistics';
-import type {
-  BackgroundTaskUtilizationStat} from './background_task_utilization_statistics';
-import {
-  createBackgroundTaskUtilizationAggregator,
-} from './background_task_utilization_statistics';
+import type { SummarizedWorkloadStat, WorkloadStat } from './workload_statistics';
+import { createWorkloadAggregator, summarizeWorkloadStat } from './workload_statistics';
+import type { TaskRunStat, SummarizedTaskRunStat } from './task_run_statistics';
+import { createTaskRunAggregator, summarizeTaskRunStat } from './task_run_statistics';
+import type { BackgroundTaskUtilizationStat } from './background_task_utilization_statistics';
+import { createBackgroundTaskUtilizationAggregator } from './background_task_utilization_statistics';
 
-import type { ConfigStat} from './configuration_statistics';
+import type { ConfigStat } from './configuration_statistics';
 import { createConfigurationAggregator } from './configuration_statistics';
 import type { TaskManagerConfig } from '../config';
-import type { CapacityEstimationStat} from './capacity_estimation';
+import type { CapacityEstimationStat } from './capacity_estimation';
 import { withCapacityEstimate } from './capacity_estimation';
 import type { AggregatedStatProvider } from '../lib/runtime_statistics_aggregator';
 import type { CreateMonitoringStatsOpts } from '.';

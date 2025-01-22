@@ -15,7 +15,7 @@ import {
   readRolesDescriptorsFromResource,
 } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
-import type { HostOptions} from '@kbn/test';
+import type { HostOptions } from '@kbn/test';
 import { SamlSessionManager } from '@kbn/test';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { ScoutTestConfig } from '../../types';

@@ -23,7 +23,7 @@ import type {
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
 import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
 import { FieldInputProvider } from '../services';
-import type { FieldInput as Component} from '../field_input';
+import type { FieldInput as Component } from '../field_input';
 import { FieldInput } from '../field_input';
 import type { InputProps } from '../types';
 

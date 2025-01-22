@@ -10,7 +10,7 @@
 import type { METRIC_TYPES } from '@kbn/data-plugin/public';
 import type { Operation, Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { MetricType } from '../../../../common/types';
-import type { TSVB_METRIC_TYPES} from '../../../../common/enums';
+import type { TSVB_METRIC_TYPES } from '../../../../common/enums';
 import { PANEL_TYPES, TIME_RANGE_DATA_MODES } from '../../../../common/enums';
 
 interface Agg {

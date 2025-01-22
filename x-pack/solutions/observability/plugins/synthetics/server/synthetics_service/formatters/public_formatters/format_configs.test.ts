@@ -17,7 +17,8 @@ import type {
   CodeEditorMode,
   MonitorFields,
   ResponseBodyIndexPolicy,
-  SyntheticsMonitor} from '../../../../common/runtime_types';
+  SyntheticsMonitor,
+} from '../../../../common/runtime_types';
 import {
   ConfigKey,
   MonitorTypeEnum,

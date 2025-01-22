@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import { CHART_TOGGLE_SHOW, CHART_TOGGLE_HIDE } from '../../../common/translations';
 import { ChartsToggle, TOGGLE_TEST_ID } from '.';

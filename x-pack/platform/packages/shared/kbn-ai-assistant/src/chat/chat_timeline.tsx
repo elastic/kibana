@@ -13,7 +13,8 @@ import { omit } from 'lodash';
 import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import type {
   ChatActionClickPayload,
-  ChatState} from '@kbn/observability-ai-assistant-plugin/public';
+  ChatState,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import {
   type Feedback,
   type ObservabilityAIAssistantChatService,

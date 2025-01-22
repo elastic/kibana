@@ -12,14 +12,8 @@ import { i18n } from '@kbn/i18n';
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 
-import type {
-  ElasticsearchClient,
-  IRouter,
-  ServiceStatus} from '@kbn/core/server';
-import {
-  type MetricsServiceSetup,
-  ServiceStatusLevels,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, IRouter, ServiceStatus } from '@kbn/core/server';
+import { type MetricsServiceSetup, ServiceStatusLevels } from '@kbn/core/server';
 import type { ICollectorSet } from '../../collector';
 import type { Stats } from '../../../common/types';
 const SNAPSHOT_REGEX = /-snapshot/i;

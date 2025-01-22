@@ -13,11 +13,9 @@ import type {
   WithTrackingId,
   WithDuration,
   DatasetEbtProps,
-  DatasetNavigatedEbtProps} from './types';
-import {
-  NavigationTarget,
-  NavigationSource
+  DatasetNavigatedEbtProps,
 } from './types';
+import { NavigationTarget, NavigationSource } from './types';
 
 // Mock uuidv4
 jest.mock('uuid', () => {

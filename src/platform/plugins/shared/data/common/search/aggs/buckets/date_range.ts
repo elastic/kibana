@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { inferTimeZone } from '../../..';
-import type { DateRange} from '../../expressions';
+import type { DateRange } from '../../expressions';
 import { dateRangeToAst } from '../../expressions';
 import { BUCKET_TYPES } from './bucket_agg_types';
 import type { IBucketAggConfig } from './bucket_agg_type';

@@ -6,13 +6,12 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  NetworkUsersStrategyResponse} from '@kbn/security-solution-plugin/common/search_strategy';
+import type { NetworkUsersStrategyResponse } from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   NetworkQueries,
   Direction,
   NetworkUsersFields,
-  FlowTarget
+  FlowTarget,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import type TestAgent from 'supertest/lib/agent';
 

@@ -12,7 +12,7 @@ import React from 'react';
 import type { TimeBounds } from '../../../pages/slo_details/types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { getDelayInSecondsFromSLO } from '../../../utils/slo/get_delay_in_seconds_from_slo';
-import type { AlertAnnotation, TimeRange} from './use_lens_definition';
+import type { AlertAnnotation, TimeRange } from './use_lens_definition';
 import { useLensDefinition } from './use_lens_definition';
 
 interface Props {

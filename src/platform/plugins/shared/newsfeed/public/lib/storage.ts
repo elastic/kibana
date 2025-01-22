@@ -8,7 +8,7 @@
  */
 
 import moment from 'moment';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 /**

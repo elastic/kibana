@@ -13,13 +13,8 @@ import React from 'react';
 import { paths } from '../../../../common/locators/paths';
 import { useFetchActiveAlerts } from '../../../hooks/use_fetch_active_alerts';
 import { useKibana } from '../../../hooks/use_kibana';
-import type {
-  SloTabId} from '../components/slo_details';
-import {
-  ALERTS_TAB_ID,
-  HISTORY_TAB_ID,
-  OVERVIEW_TAB_ID
-} from '../components/slo_details';
+import type { SloTabId } from '../components/slo_details';
+import { ALERTS_TAB_ID, HISTORY_TAB_ID, OVERVIEW_TAB_ID } from '../components/slo_details';
 
 export const useSloDetailsTabs = ({
   slo,

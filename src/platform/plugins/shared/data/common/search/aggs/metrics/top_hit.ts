@@ -11,7 +11,7 @@ import _ from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { aggTopHitFnName } from './top_hit_fn';
-import type { IMetricAggConfig} from './metric_agg_type';
+import type { IMetricAggConfig } from './metric_agg_type';
 import { MetricAggType } from './metric_agg_type';
 import { METRIC_TYPES } from './metric_agg_types';
 import { flattenHit, KBN_FIELD_TYPES } from '../../..';

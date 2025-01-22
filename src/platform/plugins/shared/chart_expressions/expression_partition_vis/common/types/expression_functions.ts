@@ -25,9 +25,7 @@ import type {
   WAFFLE_VIS_EXPRESSION_NAME,
   PARTITION_LABELS_FUNCTION,
 } from '../constants';
-import type {
-  LabelPositions,
-  ValueFormats} from './expression_renderers';
+import type { LabelPositions, ValueFormats } from './expression_renderers';
 import {
   type PartitionChartProps,
   type PieVisConfig,

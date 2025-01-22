@@ -21,10 +21,9 @@ import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocations,
-  SyntheticsMonitor} from '../../../../common/runtime_types';
-import {
-  MonitorTypeEnum
+  SyntheticsMonitor,
 } from '../../../../common/runtime_types';
+import { MonitorTypeEnum } from '../../../../common/runtime_types';
 import {
   getMaxAttempts,
   getMonitorLocations,

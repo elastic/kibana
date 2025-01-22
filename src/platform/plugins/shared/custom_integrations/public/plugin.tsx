@@ -16,8 +16,7 @@ import type {
   CustomIntegrationsStart,
   CustomIntegrationsStartDependencies,
 } from './types';
-import type {
-  CustomIntegration} from '../common';
+import type { CustomIntegration } from '../common';
 import {
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,

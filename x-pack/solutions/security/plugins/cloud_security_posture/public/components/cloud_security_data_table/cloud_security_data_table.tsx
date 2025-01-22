@@ -8,11 +8,9 @@ import React, { useState, useMemo } from 'react';
 import _ from 'lodash';
 import type {
   UnifiedDataTableSettings,
-  UnifiedDataTableSettingsColumn} from '@kbn/unified-data-table';
-import {
-  DataGridDensity,
-  useColumns,
+  UnifiedDataTableSettingsColumn,
 } from '@kbn/unified-data-table';
+import { DataGridDensity, useColumns } from '@kbn/unified-data-table';
 import { UnifiedDataTable, DataLoadingState } from '@kbn/unified-data-table';
 import { CellActionsProvider } from '@kbn/cell-actions';
 import type { HttpSetup } from '@kbn/core-http-browser';
@@ -21,10 +19,9 @@ import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridControlColumn,
-  EuiDataGridStyle} from '@elastic/eui';
-import {
-  EuiProgress,
+  EuiDataGridStyle,
 } from '@elastic/eui';
+import { EuiProgress } from '@elastic/eui';
 import type { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import { generateFilters } from '@kbn/data-plugin/public';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';

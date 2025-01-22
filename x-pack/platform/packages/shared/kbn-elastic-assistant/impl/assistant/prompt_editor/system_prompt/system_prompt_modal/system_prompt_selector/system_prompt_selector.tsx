@@ -6,8 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,

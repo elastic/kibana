@@ -10,11 +10,9 @@ import { omit } from 'lodash/fp';
 import expect from '@kbn/expect';
 import type {
   AlertAttachmentAttributes,
-  UserCommentAttachmentAttributes} from '@kbn/cases-plugin/common/types/domain';
-import {
-  AttachmentType,
-  CaseStatuses,
+  UserCommentAttachmentAttributes,
 } from '@kbn/cases-plugin/common/types/domain';
+import { AttachmentType, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 import {

@@ -7,17 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ReduxLikeStateContainer} from '@kbn/kibana-utils-plugin/common';
+import type { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import {
   createStateContainer,
-  createStateContainerReactHelpers
+  createStateContainerReactHelpers,
 } from '@kbn/kibana-utils-plugin/common';
-import type {
-  AggregateQuery,
-  Filter,
-  FilterCompareOptions,
-  Query} from '@kbn/es-query';
+import type { AggregateQuery, Filter, FilterCompareOptions, Query } from '@kbn/es-query';
 import {
   COMPARE_ALL_OPTIONS,
   compareFilters,
@@ -25,7 +20,7 @@ import {
   isOfAggregateQueryType,
 } from '@kbn/es-query';
 import type { SavedSearch, VIEW_MODE } from '@kbn/saved-search-plugin/public';
-import type { IKbnUrlStateStorage, ISyncStateRef} from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage, ISyncStateRef } from '@kbn/kibana-utils-plugin/public';
 import { syncState } from '@kbn/kibana-utils-plugin/public';
 import { isEqual, omit } from 'lodash';
 import { connectToQueryState, syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
@@ -36,8 +31,7 @@ import { addLog } from '../../../utils/add_log';
 import { cleanupUrlState } from './utils/cleanup_url_state';
 import { getStateDefaults } from './utils/get_state_defaults';
 import { handleSourceColumnState } from '../../../utils/state_helpers';
-import type {
-  DiscoverDataSource} from '../../../../common/data_sources';
+import type { DiscoverDataSource } from '../../../../common/data_sources';
 import {
   createDataViewDataSource,
   createEsqlDataSource,

@@ -19,7 +19,7 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import type { ReadStreamDefinition} from '@kbn/streams-schema';
+import type { ReadStreamDefinition } from '@kbn/streams-schema';
 import { isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';

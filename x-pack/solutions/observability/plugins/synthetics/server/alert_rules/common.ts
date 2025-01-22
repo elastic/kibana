@@ -29,11 +29,8 @@ import type {
 } from '@kbn/response-ops-rule-params/synthetics_monitor_status';
 import { syntheticsRuleFieldMap } from '../../common/rules/synthetics_rule_field_map';
 import { combineFiltersAndUserSearch, stringifyKueries } from '../../common/lib';
-import type {
-  MonitorStatusActionGroup} from '../../common/constants/synthetics_alerts';
-import {
-  SYNTHETICS_RULE_TYPES_ALERT_CONTEXT,
-} from '../../common/constants/synthetics_alerts';
+import type { MonitorStatusActionGroup } from '../../common/constants/synthetics_alerts';
+import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../common/constants/synthetics_alerts';
 import type { IndexPatternTitleAndFields } from '../queries/get_index_pattern';
 import { getUptimeIndexPattern } from '../queries/get_index_pattern';
 import type { OverviewPing, StatusCheckFilters } from '../../common/runtime_types';
@@ -42,10 +39,9 @@ import { getMonitorSummary } from './status_rule/message_utils';
 import type {
   AlertOverviewStatus,
   SyntheticsCommonState,
-  SyntheticsMonitorStatusAlertState} from '../../common/runtime_types/alert_rules/common';
-import {
-  SyntheticsCommonStateCodec
+  SyntheticsMonitorStatusAlertState,
 } from '../../common/runtime_types/alert_rules/common';
+import { SyntheticsCommonStateCodec } from '../../common/runtime_types/alert_rules/common';
 import { getSyntheticsErrorRouteFromMonitorId } from '../../common/utils/get_synthetics_monitor_url';
 import { ALERT_DETAILS_URL, RECOVERY_REASON } from './action_variables';
 import type { MonitorStatusAlertDocument, MonitorSummaryStatusRule } from './status_rule/types';

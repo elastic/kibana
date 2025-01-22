@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { of, ReplaySubject, take, map, switchMap } from 'rxjs';
 import type {
   PluginInitializerContext,

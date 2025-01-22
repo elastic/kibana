@@ -8,7 +8,7 @@
  */
 
 import type { SavedObjectsFieldMapping, SavedObjectsType } from '@kbn/core/server';
-import type { FileMetadata , BaseFileMetadata} from '../../common';
+import type { FileMetadata, BaseFileMetadata } from '../../common';
 import { FILE_SO_TYPE } from '../../common';
 
 type Properties = Record<

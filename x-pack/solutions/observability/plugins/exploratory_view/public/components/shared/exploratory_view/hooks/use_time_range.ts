@@ -6,13 +6,8 @@
  */
 
 import { useMemo } from 'react';
-import type {
-  AllSeries} from './use_series_storage';
-import {
-  allSeriesKey,
-  convertAllShortSeries,
-  useSeriesStorage,
-} from './use_series_storage';
+import type { AllSeries } from './use_series_storage';
+import { allSeriesKey, convertAllShortSeries, useSeriesStorage } from './use_series_storage';
 
 import type { ReportViewType, SeriesUrl } from '../types';
 import { ReportTypes } from '../configurations/constants';

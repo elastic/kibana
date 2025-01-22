@@ -8,7 +8,7 @@
 import React from 'react';
 import { mountWithIntl as mount } from '@kbn/test-jest-helpers';
 import { render, screen } from '@testing-library/react';
-import type { EuiButtonGroupProps} from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
 import { EuiButtonGroup } from '@elastic/eui';
 import { DataDimensionEditor } from './dimension_editor';
 import type { FramePublicAPI, DatasourcePublicAPI } from '../../../types';

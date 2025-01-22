@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiEmptyPrompt, EuiLink } from '@elastic/eui';
 import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import type { DataStreamStatus} from '../hooks/use_get_data_stream_statuses';
+import type { DataStreamStatus } from '../hooks/use_get_data_stream_statuses';
 import { useGetDataStreamStatuses } from '../hooks/use_get_data_stream_statuses';
 import { Unprivileged } from './unprivileged';
 import { useManagementLocator } from './use_management_locator';

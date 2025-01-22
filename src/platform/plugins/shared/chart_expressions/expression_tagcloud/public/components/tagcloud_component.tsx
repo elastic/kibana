@@ -16,22 +16,18 @@ import { IconChartTagcloud } from '@kbn/chart-icons';
 import type {
   RenderChangeListener,
   ElementClickListener,
-  WordCloudElementEvent} from '@elastic/charts';
-import {
-  Chart,
-  Settings,
-  Wordcloud,
-  LEGACY_LIGHT_THEME
+  WordCloudElementEvent,
 } from '@elastic/charts';
+import { Chart, Settings, Wordcloud, LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
-import type { PaletteRegistry, PaletteOutput} from '@kbn/coloring';
+import type { PaletteRegistry, PaletteOutput } from '@kbn/coloring';
 import { getColorFactory } from '@kbn/coloring';
 import type { IInterpreterRenderHandlers, DatatableRow } from '@kbn/expressions-plugin/public';
 import { getColorCategories, getOverridesFor } from '@kbn/chart-expressions-common';
 import type { AllowedSettingsOverrides, AllowedChartOverrides } from '@kbn/charts-plugin/common';
 import { getColumnByAccessor, getFormatByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { isMultiFieldKey } from '@kbn/data-plugin/common';
-import type { KbnPalettes} from '@kbn/palettes';
+import type { KbnPalettes } from '@kbn/palettes';
 import { useKbnPalettes } from '@kbn/palettes';
 import { getFormatService } from '../format_service';
 import type { TagcloudRendererConfig } from '../../common/types';

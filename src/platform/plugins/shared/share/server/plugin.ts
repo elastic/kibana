@@ -12,8 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/server';
 import { CSV_SEPARATOR_SETTING, CSV_QUOTE_VALUES_SETTING } from '../common/constants';
 import { UrlService } from '../common/url_service';
-import type {
-  ServerUrlService} from './url_service';
+import type { ServerUrlService } from './url_service';
 import {
   ServerShortUrlClientFactory,
   registerUrlServiceRoutes,

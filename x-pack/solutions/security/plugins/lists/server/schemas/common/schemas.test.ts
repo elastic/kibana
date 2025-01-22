@@ -15,7 +15,8 @@ import type {
   EsDataTypeRange,
   EsDataTypeRangeTerm,
   EsDataTypeSingle,
-  EsDataTypeUnion} from './schemas';
+  EsDataTypeUnion,
+} from './schemas';
 import {
   esDataTypeGeoPoint,
   esDataTypeGeoPointRange,

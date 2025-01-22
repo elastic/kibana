@@ -13,8 +13,7 @@ import { checkParam } from '../error_missing_required';
 import { metrics } from '../metrics';
 import { createQuery } from '../create_query';
 import { formatTimestampToDuration } from '../../../common';
-import type {
-  INDEX_PATTERN_TYPES} from '../../../common/constants';
+import type { INDEX_PATTERN_TYPES } from '../../../common/constants';
 import {
   NORMALIZED_DERIVATIVE_UNIT,
   CALCULATE_DURATION_UNTIL,

@@ -8,7 +8,7 @@
  */
 
 import { SavedObjectsManagement } from './management';
-import type { SavedObjectsType} from '@kbn/core/server';
+import type { SavedObjectsType } from '@kbn/core/server';
 import { SavedObjectTypeRegistry } from '@kbn/core/server';
 
 describe('SavedObjectsManagement', () => {

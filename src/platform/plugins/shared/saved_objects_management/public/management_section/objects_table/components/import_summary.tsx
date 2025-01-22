@@ -8,7 +8,7 @@
  */
 
 import _ from 'lodash';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { Fragment, useMemo } from 'react';
 import {
   EuiText,

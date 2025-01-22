@@ -10,7 +10,7 @@
 import moment from 'moment-timezone';
 import { merge } from '@kbn/std';
 import { schema } from '@kbn/config-schema';
-import type { Ecs} from '@elastic/ecs';
+import type { Ecs } from '@elastic/ecs';
 import { EcsVersion } from '@elastic/ecs';
 import type { LogRecord, Layout } from '@kbn/logging';
 

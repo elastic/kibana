@@ -6,16 +6,9 @@
  */
 
 import React from 'react';
-import type {
-  UseFormRegisterReturn,
-  FieldError,
-  FieldErrorsImpl} from 'react-hook-form';
-import {
-  useFormContext,
-  useFieldArray
-} from 'react-hook-form';
-import type {
-  DragDropContextProps} from '@elastic/eui';
+import type { UseFormRegisterReturn, FieldError, FieldErrorsImpl } from 'react-hook-form';
+import { useFormContext, useFieldArray } from 'react-hook-form';
+import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiPanel,

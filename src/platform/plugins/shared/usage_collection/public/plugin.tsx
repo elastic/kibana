@@ -8,7 +8,7 @@
  */
 
 import { ApplicationUsageTracker } from '@kbn/analytics';
-import type { UiCounterMetricType , Reporter} from '@kbn/analytics';
+import type { UiCounterMetricType, Reporter } from '@kbn/analytics';
 import type { Subscription } from 'rxjs';
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';

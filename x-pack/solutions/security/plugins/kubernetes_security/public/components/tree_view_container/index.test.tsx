@@ -8,7 +8,7 @@
 import React from 'react';
 import { TreeViewContainer } from '.';
 import { DEFAULT_FILTER_QUERY } from '../../../common/constants';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import * as context from './contexts';
 

@@ -15,16 +15,10 @@ import { Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 
 import { GenerateApiKeyLogic } from '../../api/generate_api_key/generate_api_key_logic';
-import type {
-  CachedFetchIndexApiLogicActions} from '../../api/index/cached_fetch_index_api_logic';
-import {
-  CachedFetchIndexApiLogic
-} from '../../api/index/cached_fetch_index_api_logic';
-import type {
-  FetchIndexPipelineParametersApiLogicActions} from '../../api/pipelines/fetch_index_pipeline_parameters';
-import {
-  FetchIndexPipelineParametersApiLogic
-} from '../../api/pipelines/fetch_index_pipeline_parameters';
+import type { CachedFetchIndexApiLogicActions } from '../../api/index/cached_fetch_index_api_logic';
+import { CachedFetchIndexApiLogic } from '../../api/index/cached_fetch_index_api_logic';
+import type { FetchIndexPipelineParametersApiLogicActions } from '../../api/pipelines/fetch_index_pipeline_parameters';
+import { FetchIndexPipelineParametersApiLogic } from '../../api/pipelines/fetch_index_pipeline_parameters';
 
 import { SEARCH_INDICES_PATH } from '../../routes';
 

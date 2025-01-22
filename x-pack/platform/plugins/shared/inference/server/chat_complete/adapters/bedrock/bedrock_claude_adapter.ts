@@ -7,9 +7,7 @@
 
 import { filter, from, map, switchMap, tap } from 'rxjs';
 import type { Readable } from 'stream';
-import type {
-  Message,
-  ToolSchemaType} from '@kbn/inference-common';
+import type { Message, ToolSchemaType } from '@kbn/inference-common';
 import {
   MessageRole,
   createInferenceInternalError,
@@ -19,11 +17,8 @@ import {
 import { parseSerdeChunkMessage } from './serde_utils';
 import type { InferenceConnectorAdapter } from '../../types';
 import type { BedRockImagePart, BedRockMessage, BedRockTextPart, BedrockToolChoice } from './types';
-import type {
-  BedrockChunkMember} from './serde_eventstream_into_observable';
-import {
-  serdeEventstreamIntoObservable,
-} from './serde_eventstream_into_observable';
+import type { BedrockChunkMember } from './serde_eventstream_into_observable';
+import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
 import { processCompletionChunks } from './process_completion_chunks';
 import { addNoToolUsageDirective } from './prompts';
 

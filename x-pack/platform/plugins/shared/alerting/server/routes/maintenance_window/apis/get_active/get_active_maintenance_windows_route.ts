@@ -8,11 +8,8 @@
 import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type {
-  AlertingRequestHandlerContext} from '../../../../types';
-import {
-  INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_API_GET_ACTIVE_MAINTENANCE_WINDOWS_PATH } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 
 import type { MaintenanceWindow } from '../../../../application/maintenance_window/types';

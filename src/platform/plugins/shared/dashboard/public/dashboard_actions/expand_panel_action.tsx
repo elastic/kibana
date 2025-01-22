@@ -9,15 +9,9 @@
 
 import type { CanExpandPanels } from '@kbn/presentation-containers';
 import { apiCanExpandPanels } from '@kbn/presentation-containers';
-import type {
-  EmbeddableApiContext,
-  HasParentApi,
-  HasUniqueId} from '@kbn/presentation-publishing';
-import {
-  apiHasParentApi,
-  apiHasUniqueId
-} from '@kbn/presentation-publishing';
-import type { Action} from '@kbn/ui-actions-plugin/public';
+import type { EmbeddableApiContext, HasParentApi, HasUniqueId } from '@kbn/presentation-publishing';
+import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { skip } from 'rxjs';
 

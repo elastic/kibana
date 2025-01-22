@@ -26,7 +26,7 @@ import {
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import type { Repository } from '../../../../../common/types';
-import type { Frequency} from '../../../../shared_imports';
+import type { Frequency } from '../../../../shared_imports';
 import { CronEditor, SectionError } from '../../../../shared_imports';
 import { useCore, useServices } from '../../../app_context';
 import { DEFAULT_POLICY_SCHEDULE, DEFAULT_POLICY_FREQUENCY } from '../../../constants';

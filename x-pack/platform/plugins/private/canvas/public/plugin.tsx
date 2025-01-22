@@ -16,11 +16,9 @@ import type {
   Plugin,
   AppMountParameters,
   AppUpdater,
-  PluginInitializerContext} from '@kbn/core/public';
-import {
-  DEFAULT_APP_CATEGORIES,
-  AppStatus,
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
 import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';

@@ -6,12 +6,8 @@
  */
 import type { AggregateRulesResponseBody } from '@kbn/alerting-plugin/common/routes/rule/apis/aggregate';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../constants';
-import type {
-  AggregateRulesResponse,
-  LoadRuleAggregationsProps} from './aggregate_helpers';
-import {
-  rewriteBodyRes,
-} from './aggregate_helpers';
+import type { AggregateRulesResponse, LoadRuleAggregationsProps } from './aggregate_helpers';
+import { rewriteBodyRes } from './aggregate_helpers';
 import { mapFiltersToKueryNode } from './map_filters_to_kuery_node';
 
 export async function loadRuleAggregationsWithKueryFilter({

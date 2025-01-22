@@ -13,16 +13,10 @@ import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { ActionsClientMock } from '@kbn/actions-plugin/server/mocks';
 import type { RulesClientMock } from '../rules_client.mock';
 import { rulesClientMock } from '../rules_client.mock';
-import type {
-  RulesSettingsClientMock} from '../rules_settings/rules_settings_client.mock';
-import {
-  rulesSettingsClientMock
-} from '../rules_settings/rules_settings_client.mock';
-import type {
-  MaintenanceWindowClientMock} from '../maintenance_window_client.mock';
-import {
-  maintenanceWindowClientMock
-} from '../maintenance_window_client.mock';
+import type { RulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';
+import { rulesSettingsClientMock } from '../rules_settings/rules_settings_client.mock';
+import type { MaintenanceWindowClientMock } from '../maintenance_window_client.mock';
+import { maintenanceWindowClientMock } from '../maintenance_window_client.mock';
 import type { AlertsHealth, RuleType } from '../../common';
 import type { AlertingRequestHandlerContext } from '../types';
 

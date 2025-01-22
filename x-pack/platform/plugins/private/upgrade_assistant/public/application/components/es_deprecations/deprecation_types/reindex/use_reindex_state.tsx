@@ -7,13 +7,8 @@
 
 import { useRef, useCallback, useState, useEffect } from 'react';
 
-import type {
-  ReindexStatusResponse,
-  ReindexWarning} from '../../../../../../common/types';
-import {
-  ReindexStatus,
-  ReindexStep
-} from '../../../../../../common/types';
+import type { ReindexStatusResponse, ReindexWarning } from '../../../../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../../../../common/types';
 import { CancelLoadingState, LoadingState } from '../../../types';
 import type { ApiService } from '../../../../lib/api';
 

@@ -7,13 +7,12 @@
 
 import React from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { UnifiedSearchPublicPluginStart, QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import type {
-  KibanaReactContextValue,
-  KibanaServices} from '@kbn/kibana-react-plugin/public';
-import {
-  withKibana
-} from '@kbn/kibana-react-plugin/public';
+  UnifiedSearchPublicPluginStart,
+  QuerySuggestion,
+} from '@kbn/unified-search-plugin/public';
+import type { KibanaReactContextValue, KibanaServices } from '@kbn/kibana-react-plugin/public';
+import { withKibana } from '@kbn/kibana-react-plugin/public';
 import type { RendererFunction } from '../../lib/typed_react';
 
 interface WithKueryAutocompletionLifecycleProps {

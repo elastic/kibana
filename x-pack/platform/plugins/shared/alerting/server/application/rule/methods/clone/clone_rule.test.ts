@@ -23,7 +23,7 @@ import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connect
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 import { getBeforeSetup } from '../../../../rules_client/tests/lib';
 import type { RuleDomain } from '../../types';
-import type { ConstructorOptions} from '../../../../rules_client/rules_client';
+import type { ConstructorOptions } from '../../../../rules_client/rules_client';
 import { RulesClient } from '../../../../rules_client/rules_client';
 import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
 

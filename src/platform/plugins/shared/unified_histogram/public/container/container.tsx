@@ -22,10 +22,9 @@ import type {
 } from '../types';
 import type {
   UnifiedHistogramStateOptions,
-  UnifiedHistogramStateService} from './services/state_service';
-import {
-  createStateService
+  UnifiedHistogramStateService,
 } from './services/state_service';
+import { createStateService } from './services/state_service';
 import { useStateProps } from './hooks/use_state_props';
 import { useStateSelector } from './utils/use_state_selector';
 import { topPanelHeightSelector } from './utils/state_selectors';

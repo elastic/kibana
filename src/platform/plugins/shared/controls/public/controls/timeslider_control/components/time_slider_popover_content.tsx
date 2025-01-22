@@ -10,7 +10,7 @@
 import React from 'react';
 import { useMemo, useEffect, useState } from 'react';
 import { debounce } from 'lodash';
-import type { EuiRangeTick} from '@elastic/eui';
+import type { EuiRangeTick } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 
 import { TimeSliderStrings } from './time_slider_strings';

@@ -12,10 +12,9 @@ import type {
   ChatCompletionEvent,
   ChatCompletionChunkEvent,
   ChatCompletionMessageEvent,
-  ChatCompletionTokenCountEvent} from './events';
-import {
-  ChatCompletionEventType
+  ChatCompletionTokenCountEvent,
 } from './events';
+import { ChatCompletionEventType } from './events';
 import type { ToolOptions } from './tools';
 
 /**

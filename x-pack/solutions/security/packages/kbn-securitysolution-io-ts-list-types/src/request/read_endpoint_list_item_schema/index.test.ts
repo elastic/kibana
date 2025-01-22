@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getReadEndpointListItemSchemaMock } from './index.mock';
-import type { ReadEndpointListItemSchema} from '.';
+import type { ReadEndpointListItemSchema } from '.';
 import { readEndpointListItemSchema } from '.';
 
 describe('read_endpoint_list_item_schema', () => {

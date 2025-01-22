@@ -6,7 +6,7 @@
  */
 
 import axios from 'axios';
-import type { D3SecurityConnectorType} from '.';
+import type { D3SecurityConnectorType } from '.';
 import { getConnectorType } from '.';
 
 jest.mock('axios');

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RuleExecutorServicesMock} from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { searchSourceCommonMock } from '@kbn/data-plugin/common/search/search_source/mocks';
 import type { ISearchSource } from '@kbn/data-plugin/common';
@@ -17,10 +17,9 @@ import { DEFAULT_FLAPPING_SETTINGS } from '@kbn/alerting-plugin/common';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import type {
   CustomMetricExpressionParams,
-  CustomThresholdExpressionMetric} from '../../../../common/custom_threshold_rule/types';
-import {
-  Aggregators
+  CustomThresholdExpressionMetric,
 } from '../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../common/custom_threshold_rule/types';
 import { getViewInAppUrl } from '../../../../common/custom_threshold_rule/get_view_in_app_url';
 
 jest.mock('./lib/evaluate_rule', () => ({ evaluateRule: jest.fn() }));

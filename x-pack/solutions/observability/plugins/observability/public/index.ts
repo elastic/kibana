@@ -13,10 +13,9 @@ import type {
   ObservabilityPublicPluginsStart,
   ObservabilityPublicPluginsSetup,
   ObservabilityPublicStart,
-  ObservabilityPublicSetup} from './plugin';
-import {
-  Plugin
+  ObservabilityPublicSetup,
 } from './plugin';
+import { Plugin } from './plugin';
 export type {
   ObservabilityPublicSetup,
   ObservabilityPublicStart,

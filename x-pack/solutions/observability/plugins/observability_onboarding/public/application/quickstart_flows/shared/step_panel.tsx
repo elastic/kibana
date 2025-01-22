@@ -7,14 +7,8 @@
 
 import type { ReactNode } from 'react';
 import React from 'react';
-import type {
-  EuiPanelProps} from '@elastic/eui';
-import {
-  EuiModalHeader,
-  EuiModalHeaderTitle,
-  EuiModalBody,
-  EuiModalFooter,
-} from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
+import { EuiModalHeader, EuiModalHeaderTitle, EuiModalBody, EuiModalFooter } from '@elastic/eui';
 
 interface StepModalProps {
   title?: string;

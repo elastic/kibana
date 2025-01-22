@@ -15,10 +15,11 @@ import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
 import type {
   ExecuteConnectorRequestBodyV1,
-  ExecuteConnectorRequestParamsV1} from '../../../../common/routes/connector/apis/execute';
+  ExecuteConnectorRequestParamsV1,
+} from '../../../../common/routes/connector/apis/execute';
 import {
   executeConnectorRequestBodySchemaV1,
-  executeConnectorRequestParamsSchemaV1
+  executeConnectorRequestParamsSchemaV1,
 } from '../../../../common/routes/connector/apis/execute';
 import { transformExecuteConnectorResponseV1 } from './transforms';
 import { DEFAULT_ACTION_ROUTE_SECURITY } from '../../constants';

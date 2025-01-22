@@ -8,12 +8,8 @@
 import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
-import type {
-  KibanaRequest,
-  SavedObjectsClientContract} from '@kbn/core/server';
-import {
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/server';
+import type { KibanaRequest, SavedObjectsClientContract } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import {
   ALERT_EVALUATION_VALUE,
   ALERT_EVALUATION_THRESHOLD,
@@ -23,13 +19,8 @@ import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import type { MlAnomaliesTableRecord } from '@kbn/ml-anomaly-utils';
 import { getSeverityType } from '@kbn/ml-anomaly-utils';
 import { uptimeDurationAnomalyRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_duration_anomaly';
-import type {
-  AlertsLocatorParams} from '@kbn/observability-plugin/common';
-import {
-  alertsLocatorID,
-  getAlertUrl,
-  observabilityPaths,
-} from '@kbn/observability-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { alertsLocatorID, getAlertUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
 import { UptimeEsClient } from '../lib';

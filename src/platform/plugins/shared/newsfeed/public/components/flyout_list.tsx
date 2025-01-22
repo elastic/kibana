@@ -8,8 +8,7 @@
  */
 
 import React, { useCallback, useContext } from 'react';
-import type {
-  EuiFlyoutProps} from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlyout,
   EuiFlyoutBody,

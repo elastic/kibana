@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { memo, useCallback, useEffect, useRef, useState } from 'react';
 import {
   EuiFlyout,
@@ -17,19 +17,18 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type { ActionTypeExecutorResult} from '@kbn/actions-plugin/common';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { isActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type { Option} from 'fp-ts/lib/Option';
+import type { Option } from 'fp-ts/lib/Option';
 import { none, some } from 'fp-ts/lib/Option';
 import { ReadOnlyConnectorMessage } from './read_only';
 import type {
   ActionConnector,
   ActionTypeModel,
   ActionTypeRegistryContract,
-  UserConfiguredActionConnector} from '../../../../types';
-import {
-  EditConnectorTabs
+  UserConfiguredActionConnector,
 } from '../../../../types';
+import { EditConnectorTabs } from '../../../../types';
 import type { ConnectorFormState } from '../connector_form';
 import { ConnectorForm } from '../connector_form';
 import type { ConnectorFormSchema } from '../types';

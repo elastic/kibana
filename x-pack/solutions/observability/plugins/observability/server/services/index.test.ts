@@ -7,10 +7,9 @@
 
 import type {
   AlertDetailsContextualInsightsHandlerQuery,
-  AlertDetailsContextualInsightsRequestContext} from '.';
-import {
-  AlertDetailsContextualInsightsService,
+  AlertDetailsContextualInsightsRequestContext,
 } from '.';
+import { AlertDetailsContextualInsightsService } from '.';
 
 describe('AlertDetailsContextualInsightsService', () => {
   it('concatenates context from registered handlers', async () => {

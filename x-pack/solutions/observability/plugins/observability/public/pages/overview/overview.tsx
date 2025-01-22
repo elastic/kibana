@@ -36,12 +36,8 @@ import { EmptySections } from './components/sections/empty/empty_sections';
 import { SectionContainer } from './components/sections/section_container';
 import { calculateBucketSize } from './helpers/calculate_bucket_size';
 import { useKibana } from '../../utils/kibana_react';
-import type {
-  DataContextApps,
-  HasDataMap} from '../../context/has_data_context/has_data_context';
-import {
-  appLabels,
-} from '../../context/has_data_context/has_data_context';
+import type { DataContextApps, HasDataMap } from '../../context/has_data_context/has_data_context';
+import { appLabels } from '../../context/has_data_context/has_data_context';
 
 const ALERTS_PER_PAGE = 10;
 const ALERTS_TABLE_ID = 'xpack.observability.overview.alert.table';

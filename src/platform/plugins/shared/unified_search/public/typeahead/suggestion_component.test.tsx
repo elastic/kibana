@@ -9,7 +9,7 @@
 
 import { mount, shallow } from 'enzyme';
 import React from 'react';
-import type { QuerySuggestion} from '../autocomplete';
+import type { QuerySuggestion } from '../autocomplete';
 import { QuerySuggestionTypes } from '../autocomplete';
 import { SuggestionComponent } from './suggestion_component';
 

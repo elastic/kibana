@@ -17,7 +17,7 @@ import {
   isProperNode,
 } from '../ast/helpers';
 import type { ESQLAstBaseItem, ESQLAstCommand, ESQLAstQueryExpression } from '../types';
-import type { ESQLAstExpressionNode} from '../visitor';
+import type { ESQLAstExpressionNode } from '../visitor';
 import { Visitor } from '../visitor';
 import { resolveItem } from '../visitor/utils';
 import { commandOptionsWithEqualsSeparator, commandsWithNoCommaArgSeparator } from './constants';

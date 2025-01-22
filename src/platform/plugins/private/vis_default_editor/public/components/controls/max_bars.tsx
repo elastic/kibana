@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback, useEffect } from 'react';
-import type { EuiFieldNumberProps} from '@elastic/eui';
+import type { EuiFieldNumberProps } from '@elastic/eui';
 import { EuiFormRow, EuiFieldNumber, EuiIconTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';

@@ -23,10 +23,9 @@ import type {
   EncryptedSyntheticsMonitorAttributes,
   SyntheticsMonitorWithSecretsAttributes,
   SyntheticsMonitor,
-  MonitorLocations} from '../../../common/runtime_types';
-import {
-  ConfigKey
+  MonitorLocations,
 } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { MonitorValidationError, normalizeAPIConfig, validateMonitor } from './monitor_validation';
 import { getMonitorNotFoundResponse } from '../synthetics_service/service_errors';

@@ -9,8 +9,7 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import type {
-  EuiSuperDatePickerCommonRange} from '@elastic/eui';
+import type { EuiSuperDatePickerCommonRange } from '@elastic/eui';
 import {
   EuiButton,
   EuiContextMenuItem,
@@ -19,7 +18,7 @@ import {
   EuiFlexItem,
   EuiPopover,
   EuiPopoverFooter,
-  EuiSuperDatePicker
+  EuiSuperDatePicker,
 } from '@elastic/eui';
 import type { OnTimeChangeProps } from '@elastic/eui/src/components/date_picker/super_date_picker/super_date_picker';
 

@@ -16,7 +16,7 @@ import type { IVectorSource } from '../../sources/vector_source';
 import type { FIELD_ORIGIN } from '../../../../common/constants';
 import { AGG_TYPE } from '../../../../common/constants';
 import type { AggDescriptor, TileMetaFeature } from '../../../../common/descriptor_types';
-import type { ITooltipProperty} from '../../tooltips/tooltip_property';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { TooltipProperty } from '../../tooltips/tooltip_property';
 import { ESAggTooltipProperty } from '../../tooltips/es_agg_tooltip_property';
 import type { IESAggField, CountAggFieldParams } from './agg_field_types';

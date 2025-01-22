@@ -6,8 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiBetaBadge,
   EuiButtonIcon,

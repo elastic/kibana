@@ -13,7 +13,7 @@ import type { LicenseType } from '@kbn/licensing-plugin/server';
 import { legacyExperimentalFieldMap } from '@kbn/alerts-as-data-utils';
 import type { IBasePath } from '@kbn/core/server';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
-import type { AlertsLocatorParams} from '@kbn/observability-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { sloFeatureId } from '@kbn/observability-plugin/common';

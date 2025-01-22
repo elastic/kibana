@@ -7,15 +7,8 @@
 
 import React from 'react';
 import { css } from '@emotion/react';
-import type {
-  UseEuiTheme} from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiBadge,
-  logicalCSS,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiBadge, logicalCSS } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

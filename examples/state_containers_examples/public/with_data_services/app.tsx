@@ -24,23 +24,16 @@ import { FilterStateStore } from '@kbn/es-query';
 import type { CoreStart } from '@kbn/core/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 
-import type {
-  DataPublicPluginStart,
-  QueryState} from '@kbn/data-plugin/public';
-import {
-  connectToQueryState,
-  syncQueryStateWithUrl,
-} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
+import { connectToQueryState, syncQueryStateWithUrl } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type {
-  BaseStateContainer,
-  IKbnUrlStateStorage} from '@kbn/kibana-utils-plugin/public';
+import type { BaseStateContainer, IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
   syncState,
   useContainerState,
 } from '@kbn/kibana-utils-plugin/public';
-import type { ExampleLink} from '../common/example_page';
+import type { ExampleLink } from '../common/example_page';
 import { StateContainersExamplesPage } from '../common/example_page';
 
 interface StateDemoAppDeps {

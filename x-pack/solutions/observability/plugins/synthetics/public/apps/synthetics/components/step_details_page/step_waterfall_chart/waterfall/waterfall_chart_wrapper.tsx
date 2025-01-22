@@ -16,7 +16,7 @@ import type { RenderItem, WaterfallDataEntry } from '../../common/network_data/t
 import { useFlyout } from './waterfall_flyout/use_flyout';
 import { WaterfallFlyout } from './waterfall_flyout/waterfall_flyout';
 import { WaterfallSidebarItem } from './waterfall_sidebar_item';
-import type { MarkerItems} from './context/waterfall_context';
+import type { MarkerItems } from './context/waterfall_context';
 import { WaterfallProvider } from './context/waterfall_context';
 import { WaterfallChart } from './waterfall_chart';
 

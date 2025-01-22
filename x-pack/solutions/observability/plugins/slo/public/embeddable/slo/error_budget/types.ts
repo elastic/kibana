@@ -11,13 +11,8 @@ import type {
 } from '@kbn/presentation-publishing';
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
 import type { Subject } from 'rxjs';
-import type {
-  IUiSettingsClient,
-  ApplicationStart,
-  NotificationsStart} from '@kbn/core/public';
-import {
-  type CoreStart
-} from '@kbn/core/public';
+import type { IUiSettingsClient, ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import { type CoreStart } from '@kbn/core/public';
 
 export interface EmbeddableSloProps {
   sloId: string | undefined;

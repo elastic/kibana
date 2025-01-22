@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { Ast} from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { fromExpression, toExpression } from '@kbn/interpreter';
 import type { Serializable } from '@kbn/utility-types';
 import type { SavedObjectMigrationFn, SavedObjectUnsanitizedDoc } from '@kbn/core/server';

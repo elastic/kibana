@@ -8,7 +8,11 @@
  */
 
 import type { ITagsClient } from '../common';
-import type { SavedObjectsTaggingApiUi, SavedObjectsTaggingApiUiComponent, ITagsCache } from './api';
+import type {
+  SavedObjectsTaggingApiUi,
+  SavedObjectsTaggingApiUiComponent,
+  ITagsCache,
+} from './api';
 
 const createClientMock = () => {
   const mock: jest.Mocked<ITagsClient> = {

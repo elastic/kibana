@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { OperatorFunction} from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
 import { Observable, from, lastValueFrom, mergeMap, reduce } from 'rxjs';
 import deepmerge from 'deepmerge';
 

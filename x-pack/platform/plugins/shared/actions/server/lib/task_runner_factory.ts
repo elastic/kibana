@@ -8,8 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import { pick } from 'lodash';
 import { addSpaceIdToPath } from '@kbn/spaces-plugin/server';
-import type {
-  RunContext} from '@kbn/task-manager-plugin/server';
+import type { RunContext } from '@kbn/task-manager-plugin/server';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -36,13 +35,9 @@ import type {
   SpaceIdToNamespaceFunction,
 } from '../types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '../constants/saved_objects';
-import type {
-  ActionExecutionSourceType} from './action_execution_source';
-import {
-  asEmptySource,
-  asSavedObjectExecutionSource,
-} from './action_execution_source';
-import type { RelatedSavedObjects} from './related_saved_objects';
+import type { ActionExecutionSourceType } from './action_execution_source';
+import { asEmptySource, asSavedObjectExecutionSource } from './action_execution_source';
+import type { RelatedSavedObjects } from './related_saved_objects';
 import { validatedRelatedSavedObjects } from './related_saved_objects';
 import { injectSavedObjectReferences } from './action_task_params_utils';
 import type { InMemoryMetrics } from '../monitoring';

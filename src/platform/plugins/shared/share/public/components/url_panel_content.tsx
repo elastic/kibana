@@ -8,8 +8,7 @@
  */
 
 import React, { Component } from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
   EuiCopy,
@@ -21,7 +20,7 @@ import {
   EuiIconTip,
   EuiLoadingSpinner,
   EuiRadioGroup,
-  EuiSwitch
+  EuiSwitch,
 } from '@elastic/eui';
 
 import { format as formatUrl, parse as parseUrl } from 'url';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  TooltipTableColumn} from '@elastic/charts';
+import type { TooltipTableColumn } from '@elastic/charts';
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -18,7 +17,7 @@ import {
   ScaleType,
   Settings,
   Tooltip,
-  TooltipTable
+  TooltipTable,
 } from '@elastic/charts';
 import {
   EuiCallOut,

@@ -7,10 +7,9 @@
 import type SuperTest from 'supertest';
 import type {
   CategorizationRequestBody,
-  CategorizationResponse} from '@kbn/integration-assistant-plugin/common';
-import {
-  CATEGORIZATION_GRAPH_PATH
+  CategorizationResponse,
 } from '@kbn/integration-assistant-plugin/common';
+import { CATEGORIZATION_GRAPH_PATH } from '@kbn/integration-assistant-plugin/common';
 import { superUser } from '../authentication/users';
 import type { User } from '../authentication/types';
 import { BadRequestError } from '../error/error';

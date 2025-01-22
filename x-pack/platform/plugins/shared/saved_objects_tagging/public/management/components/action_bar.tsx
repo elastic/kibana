@@ -7,8 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState, useCallback, useMemo } from 'react';
-import type {
-  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiPopover,
   EuiFlexItem,

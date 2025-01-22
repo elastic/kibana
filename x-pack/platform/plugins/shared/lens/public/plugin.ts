@@ -24,12 +24,10 @@ import type {
   ExpressionsSetup,
   ExpressionsStart,
 } from '@kbn/expressions-plugin/public';
-import type {
-  VisualizationsSetup,
-  VisualizationsStart} from '@kbn/visualizations-plugin/public';
+import type { VisualizationsSetup, VisualizationsStart } from '@kbn/visualizations-plugin/public';
 import {
   ACTION_CONVERT_DASHBOARD_PANEL_TO_LENS,
-  DASHBOARD_VISUALIZATION_PANEL_TRIGGER
+  DASHBOARD_VISUALIZATION_PANEL_TRIGGER,
 } from '@kbn/visualizations-plugin/public';
 import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { UrlForwardingSetup } from '@kbn/url-forwarding-plugin/public';
@@ -44,9 +42,7 @@ import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
 import type { DataViewEditorStart } from '@kbn/data-view-editor-plugin/public';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
-import type {
-  UiActionsStart,
-  VisualizeFieldContext} from '@kbn/ui-actions-plugin/public';
+import type { UiActionsStart, VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   ACTION_VISUALIZE_FIELD,
   VISUALIZE_FIELD_TRIGGER,
@@ -142,12 +138,8 @@ import type { ChartInfoApi } from './chart_info_api';
 import { type LensAppLocator, LensAppLocatorDefinition } from '../common/locator/locator';
 import { downloadCsvShareProvider } from './app_plugin/csv_download_provider/csv_download_provider';
 import type { LensDocument } from './persistence/saved_object_store';
-import type {
-  LensSavedObjectAttributes} from '../common/content_management';
-import {
-  CONTENT_ID,
-  LATEST_VERSION
-} from '../common/content_management';
+import type { LensSavedObjectAttributes } from '../common/content_management';
+import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import type { EditLensConfigurationProps } from './app_plugin/shared/edit_on_the_fly/get_edit_lens_configuration';
 import { convertToLensActionFactory } from './trigger_actions/convert_to_lens_action';
 import { LensRenderer } from './react_embeddable/renderer/lens_custom_renderer_component';

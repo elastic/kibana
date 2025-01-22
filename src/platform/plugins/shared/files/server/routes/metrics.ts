@@ -11,7 +11,7 @@ import { FILES_MANAGE_PRIVILEGE } from '../../common/constants';
 import type { FilesRouter } from './types';
 import type { FilesMetrics } from '../../common';
 import type { FilesClient } from '../../common/files_client';
-import type { CreateRouteDefinition} from './api_routes';
+import type { CreateRouteDefinition } from './api_routes';
 import { FILES_API_ROUTES } from './api_routes';
 import type { FilesRequestHandler } from './types';
 

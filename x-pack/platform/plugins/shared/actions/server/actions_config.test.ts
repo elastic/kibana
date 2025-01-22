@@ -6,7 +6,7 @@
  */
 
 import { ByteSizeValue } from '@kbn/config-schema';
-import type { ActionsConfig} from './config';
+import type { ActionsConfig } from './config';
 import { DEFAULT_USAGE_API_URL } from './config';
 import {
   DEFAULT_MICROSOFT_EXCHANGE_URL,

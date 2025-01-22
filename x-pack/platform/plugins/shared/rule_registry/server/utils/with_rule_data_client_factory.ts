@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { AlertInstanceContext, RuleTypeParams, RuleTypeState } from '@kbn/alerting-plugin/common';
+import type {
+  AlertInstanceContext,
+  RuleTypeParams,
+  RuleTypeState,
+} from '@kbn/alerting-plugin/common';
 import type { IRuleDataClient } from '../rule_data_client';
 import type { AlertTypeWithExecutor } from '../types';
 

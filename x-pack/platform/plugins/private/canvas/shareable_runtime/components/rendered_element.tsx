@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { PureComponent } from 'react';
 import { css as emotionCss } from '@emotion/css';
 import type { AnyExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';

@@ -9,7 +9,7 @@ import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { encode } from '@kbn/rison';
 import type { FindSLOResponse, UpdateSLOInput, UpdateSLOResponse } from '@kbn/slo-schema';
-import type { QueryKey} from '@tanstack/react-query';
+import type { QueryKey } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { paths } from '../../common/locators/paths';
 import { useKibana } from './use_kibana';

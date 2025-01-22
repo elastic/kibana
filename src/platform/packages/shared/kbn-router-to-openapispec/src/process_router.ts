@@ -12,8 +12,7 @@ import { getResponseValidation } from '@kbn/core-http-server';
 import { BASE_PUBLIC_VERSION as SERVERLESS_VERSION_2023_10_31 } from '@kbn/core-http-router-server-internal';
 import type { OpenAPIV3 } from 'openapi-types';
 import type { OasConverter } from './oas_converter';
-import type {
-  GetOpId} from './util';
+import type { GetOpId } from './util';
 import {
   getXsrfHeaderForMethod,
   assignToPaths,
@@ -24,7 +23,7 @@ import {
   getVersionedContentTypeString,
   mergeResponseContent,
   prepareRoutes,
-  setXState
+  setXState,
 } from './util';
 import type { GenerateOpenApiDocumentOptionsFilters } from './generate_oas';
 import type { CustomOperationObject, InternalRouterRoute } from './type';

@@ -11,7 +11,7 @@ import type {
   AggregationsStringTermsBucketKeys,
   AggregationsTermsAggregateBase,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { TaskStore } from '../task_store';
 import {

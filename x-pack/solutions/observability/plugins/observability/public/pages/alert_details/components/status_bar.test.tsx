@@ -6,13 +6,12 @@
  */
 
 import React from 'react';
-import type {
-  AlertStatus} from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_RULE_NAME,
   ALERT_STATUS,
   ALERT_STATUS_RECOVERED,
-  ALERT_STATUS_UNTRACKED
+  ALERT_STATUS_UNTRACKED,
 } from '@kbn/rule-data-utils';
 import { render } from '../../../utils/test_helper';
 import { alertWithGroupsAndTags } from '../mock/alert';

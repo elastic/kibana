@@ -16,7 +16,7 @@ import {
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import type { AnalyticsCollection } from '../../../../../common/types/analytics';
-import type { HttpError} from '../../../../../common/types/api';
+import type { HttpError } from '../../../../../common/types/api';
 import { Status } from '../../../../../common/types/api';
 
 import { AddAnalyticsCollectionLogic } from './add_analytics_collection_logic';

@@ -13,17 +13,10 @@ import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin
 import type { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
-import type {
-  ElasticAgentPlatform} from '../shared/get_elastic_agent_setup_command';
-import {
-  getElasticAgentSetupCommand,
-} from '../shared/get_elastic_agent_setup_command';
-import type {
-  ProgressStepId,
-  EuiStepStatus} from '../shared/install_elastic_agent_steps';
-import {
-  InstallElasticAgentSteps
-} from '../shared/install_elastic_agent_steps';
+import type { ElasticAgentPlatform } from '../shared/get_elastic_agent_setup_command';
+import { getElasticAgentSetupCommand } from '../shared/get_elastic_agent_setup_command';
+import type { ProgressStepId, EuiStepStatus } from '../shared/install_elastic_agent_steps';
+import { InstallElasticAgentSteps } from '../shared/install_elastic_agent_steps';
 import { StepModal } from '../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { WindowsInstallStep } from '../shared/windows_install_step';

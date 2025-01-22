@@ -12,11 +12,10 @@ import { MONITOR_ROUTE } from '../../../../../../common/constants';
 import { mockState } from '../../../utils/testing/__mocks__/synthetics_store.mock';
 import { WrappedHelper } from '../../../utils/testing';
 import type { SyntheticsAppState } from '../../../state/root_reducer';
-import type {
-  MonitorFilterState} from '../../../state';
+import type { MonitorFilterState } from '../../../state';
 import {
   selectEncryptedSyntheticsSavedMonitors,
-  updateManagementPageStateAction
+  updateManagementPageStateAction,
 } from '../../../state';
 
 import { useMonitorList } from './use_monitor_list';

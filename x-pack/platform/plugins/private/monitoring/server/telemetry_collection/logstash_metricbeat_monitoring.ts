@@ -22,11 +22,9 @@ import type {
   LogstashProcessOptions,
   LogstashState,
   LogstashStats,
-  LogstashStatsByClusterUuid} from './logstash_monitoring';
-import {
-  HITS_SIZE,
-  getLogstashBaseStats
+  LogstashStatsByClusterUuid,
 } from './logstash_monitoring';
+import { HITS_SIZE, getLogstashBaseStats } from './logstash_monitoring';
 
 export class LogstashMetricbeatMonitoring implements LogstashMonitoring {
   private indexPattern: { [key: string]: string } = {

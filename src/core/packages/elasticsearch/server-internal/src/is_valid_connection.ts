@@ -9,7 +9,7 @@
 
 import { filter } from 'rxjs';
 import { errors } from '@elastic/elasticsearch';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 

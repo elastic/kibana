@@ -14,10 +14,9 @@ import type {
   Render,
   SeriesStyle,
   Style,
-  ExpressionFunctionDefinition} from '../../types';
-import {
-  Legend
+  ExpressionFunctionDefinition,
 } from '../../types';
+import { Legend } from '../../types';
 
 interface PieSeriesOptions {
   show: boolean;

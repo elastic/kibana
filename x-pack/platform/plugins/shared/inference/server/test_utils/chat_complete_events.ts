@@ -10,10 +10,9 @@ import type {
   ChatCompletionTokenCountEvent,
   ChatCompletionMessageEvent,
   ChatCompletionTokenCount,
-  ToolCall} from '@kbn/inference-common';
-import {
-  ChatCompletionEventType
+  ToolCall,
 } from '@kbn/inference-common';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 
 export const chunkEvent = (content: string = 'chunk'): ChatCompletionChunkEvent => ({
   type: ChatCompletionEventType.ChatCompletionChunk,

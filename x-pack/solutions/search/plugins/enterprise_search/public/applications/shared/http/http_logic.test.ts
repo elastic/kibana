@@ -9,7 +9,7 @@ import { resetContext } from 'kea';
 
 import { httpServiceMock } from '@kbn/core/public/mocks';
 
-import type { HttpValues} from './http_logic';
+import type { HttpValues } from './http_logic';
 import { HttpLogic, mountHttpLogic } from './http_logic';
 
 describe('HttpLogic', () => {

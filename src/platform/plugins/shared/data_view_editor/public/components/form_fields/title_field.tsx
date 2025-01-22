@@ -7,20 +7,15 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import type { Observable } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';
-import type {
-  ValidationConfig,
-  FieldConfig} from '../../shared_imports';
-import {
-  UseField,
-  getFieldValidityAndErrorMessage
-} from '../../shared_imports';
+import type { ValidationConfig, FieldConfig } from '../../shared_imports';
+import { UseField, getFieldValidityAndErrorMessage } from '../../shared_imports';
 import { canAppendWildcard } from '../../lib';
 import { schema } from '../form_schema';
 import type { RollupIndicesCapsResponse, IndexPatternConfig, MatchedIndicesSet } from '../../types';

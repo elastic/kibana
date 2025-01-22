@@ -8,10 +8,7 @@
 import React, { useCallback, useEffect, useState, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiDataGridSorting,
-  OnTimeChangeProps,
-  EuiDataGridColumn} from '@elastic/eui';
+import type { EuiDataGridSorting, OnTimeChangeProps, EuiDataGridColumn } from '@elastic/eui';
 import {
   EuiFieldSearch,
   EuiFlexItem,
@@ -47,11 +44,8 @@ import { RulesListDocLink } from '../../rules_list/components/rules_list_doc_lin
 import type { LoadExecutionLogAggregationsProps } from '../../../lib/rule_api';
 import { RuleEventLogListKPIWithApi as RuleEventLogListKPI } from './rule_event_log_list_kpi';
 import { useMultipleSpaces } from '../../../hooks/use_multiple_spaces';
-import type {
-  UseLoadRuleEventLogsProps} from '../../../hooks/use_load_rule_event_logs';
-import {
-  useLoadRuleEventLogs
-} from '../../../hooks/use_load_rule_event_logs';
+import type { UseLoadRuleEventLogsProps } from '../../../hooks/use_load_rule_event_logs';
+import { useLoadRuleEventLogs } from '../../../hooks/use_load_rule_event_logs';
 import { RulesSettingsLink } from '../../../components/rules_setting/rules_settings_link';
 import type { RefreshToken } from './types';
 

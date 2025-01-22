@@ -10,7 +10,7 @@
 import { externals } from '@kbn/ui-shared-deps-src';
 import { stringifyRequest } from 'loader-utils';
 import { resolve } from 'path';
-import type { Configuration} from 'webpack';
+import type { Configuration } from 'webpack';
 import type webpack from 'webpack';
 import { Stats } from 'webpack';
 import webpackMerge from 'webpack-merge';

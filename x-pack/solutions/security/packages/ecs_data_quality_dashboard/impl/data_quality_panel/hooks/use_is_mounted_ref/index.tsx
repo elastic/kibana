@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MutableRefObject} from 'react';
+import type { MutableRefObject } from 'react';
 import { useEffect, useRef } from 'react';
 
 /**

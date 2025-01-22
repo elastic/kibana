@@ -30,7 +30,7 @@ import { GenericEndpointInlineEditableTable } from '../../../../../shared/tables
 
 import type { InlineEditableTableColumn } from '../../../../../shared/tables/inline_editable_table/types';
 import type { ItemWithAnID } from '../../../../../shared/tables/types';
-import type { CrawlRule} from '../../../../api/crawler/types';
+import type { CrawlRule } from '../../../../api/crawler/types';
 import { CrawlerPolicies, CrawlerRules } from '../../../../api/crawler/types';
 
 import { CrawlerDomainDetailLogic } from './crawler_domain_detail_logic';

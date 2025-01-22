@@ -6,15 +6,8 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type {
-  EuiButtonGroup,
-  EuiButtonGroupProps} from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiSpacer,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonGroup, EuiButtonGroupProps } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiSpacer, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 import type { CheckFieldsTab, CheckFieldsTabId } from './types';

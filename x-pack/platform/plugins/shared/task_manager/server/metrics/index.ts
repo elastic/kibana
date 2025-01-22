@@ -8,7 +8,7 @@
 import type { Observable } from 'rxjs';
 import type { Logger } from '@kbn/core/server';
 import type { TaskManagerConfig } from '../config';
-import type { Metrics} from './metrics_stream';
+import type { Metrics } from './metrics_stream';
 import { createMetricsAggregators, createMetricsStream } from './metrics_stream';
 import type { TaskPollingLifecycle } from '../polling_lifecycle';
 import type { TaskManagerMetricsCollector } from './task_metrics_collector';

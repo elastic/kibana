@@ -14,7 +14,7 @@ import type {
   Logger,
 } from '@kbn/core/server';
 import type { IClusterClient } from '@kbn/core/server';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { throttleTime, tap, map } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
@@ -22,10 +22,9 @@ import type { MonitoringStats } from '../monitoring';
 import type { TaskManagerConfig } from '../config';
 import type {
   BackgroundTaskUtilizationStat,
-  PublicBackgroundTaskUtilizationStat} from '../monitoring/background_task_utilization_statistics';
-import {
-  summarizeUtilizationStats,
+  PublicBackgroundTaskUtilizationStat,
 } from '../monitoring/background_task_utilization_statistics';
+import { summarizeUtilizationStats } from '../monitoring/background_task_utilization_statistics';
 import type { MonitoredStat } from '../monitoring/monitoring_stats_stream';
 
 export interface MonitoredUtilization {

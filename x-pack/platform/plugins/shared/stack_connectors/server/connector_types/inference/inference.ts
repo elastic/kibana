@@ -6,7 +6,7 @@
  */
 
 import { text as streamToString } from 'node:stream/consumers';
-import type { ServiceParams} from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { Stream } from 'openai/streaming';
 import type { Readable } from 'stream';
@@ -17,7 +17,7 @@ import type {
   InferenceInferenceResponse,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/usage';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, from, identity, map, mergeMap, tap } from 'rxjs';
 import type OpenAI from 'openai';
 import type { ChatCompletionChunk } from 'openai/resources';

@@ -13,7 +13,10 @@ import { LayerTypes } from '@kbn/expression-xy-plugin/public';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { DatasourceDimensionTriggerProps, DatasourceDimensionEditorProps } from '../../../types';
+import type {
+  DatasourceDimensionTriggerProps,
+  DatasourceDimensionEditorProps,
+} from '../../../types';
 import type { GenericIndexPatternColumn } from '../form_based';
 import type { FormBasedPrivateState } from '../types';
 import { DimensionEditor } from './dimension_editor';

@@ -10,7 +10,10 @@
 import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
 import type { DeveloperExamplesSetup } from '@kbn/developer-examples-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type { Setup as InspectorSetup, Start as InspectorStart } from '@kbn/inspector-plugin/public';
+import type {
+  Setup as InspectorSetup,
+  Start as InspectorStart,
+} from '@kbn/inspector-plugin/public';
 import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { getExpressionsInspectorViewDescription } from './inspector';
 import { NAVIGATE_TRIGGER_ID, navigateTrigger } from './actions/navigate_trigger';

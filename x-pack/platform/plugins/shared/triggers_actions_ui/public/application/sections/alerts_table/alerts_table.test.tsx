@@ -25,11 +25,10 @@ import type {
   FetchAlertData,
   RowSelectionState,
   UseCellActions,
-  Alerts} from '../../../types';
-import {
-  AlertsField
+  Alerts,
 } from '../../../types';
-import type { EuiDataGridColumnCellAction} from '@elastic/eui';
+import { AlertsField } from '../../../types';
+import type { EuiDataGridColumnCellAction } from '@elastic/eui';
 import { EuiButton, EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import { bulkActionsReducer } from './bulk_actions/reducer';
 import type { BrowserFields } from '@kbn/alerting-types';

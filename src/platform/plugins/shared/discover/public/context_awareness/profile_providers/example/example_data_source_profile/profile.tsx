@@ -8,13 +8,8 @@
  */
 
 import { EuiBadge, EuiLink, EuiFlyout, EuiPanel } from '@elastic/eui';
-import type {
-  RowControlColumn} from '@kbn/discover-utils';
-import {
-  AppMenuActionId,
-  AppMenuActionType,
-  getFieldValue
-} from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
+import { AppMenuActionId, AppMenuActionType, getFieldValue } from '@kbn/discover-utils';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { getIndexPatternFromESQLQuery } from '@kbn/esql-utils';
 import { capitalize } from 'lodash';

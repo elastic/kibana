@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 import type { EuiSelectOption } from '@elastic/eui';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';

@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, ReplaySubject } from 'rxjs';
 import { last, map, startWith, switchMap } from 'rxjs';
 import { subtractMillisecondsFromDate } from '../../../../common/utils';

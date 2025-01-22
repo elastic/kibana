@@ -10,10 +10,9 @@ import React from 'react';
 import type {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
-  SecretsFieldSchema} from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  SimpleConnectorForm,
+  SecretsFieldSchema,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { SimpleConnectorForm } from '@kbn/triggers-actions-ui-plugin/public';
 import * as translations from './translations';
 
 const configFormSchema: ConfigFieldSchema[] = [

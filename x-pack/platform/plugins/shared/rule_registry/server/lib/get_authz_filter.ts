@@ -8,7 +8,8 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type {
   ReadOperations,
   WriteOperations,
-  AlertingAuthorization} from '@kbn/alerting-plugin/server';
+  AlertingAuthorization,
+} from '@kbn/alerting-plugin/server';
 import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,

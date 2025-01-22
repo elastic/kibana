@@ -22,7 +22,7 @@ import type { PartitionLegendValue } from '@kbn/visualizations-plugin/common/con
 import { LegendValue } from '@elastic/charts';
 import { EmptySizeRatios } from '../../../common/types';
 import { CategoryDisplay, NumberDisplay } from '../../../common/constants';
-import type { PieChartType , SharedPieLayerState} from '../../../common/types';
+import type { PieChartType, SharedPieLayerState } from '../../../common/types';
 
 interface PartitionChartMeta {
   id: string;

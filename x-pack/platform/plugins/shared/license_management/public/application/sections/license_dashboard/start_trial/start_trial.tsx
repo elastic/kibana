@@ -27,7 +27,7 @@ import { TelemetryOptIn } from '../../../components/telemetry_opt_in';
 import { EXTERNAL_LINKS } from '../../../../../common/constants';
 import type { AppDependencies } from '../../../app_context';
 import { AppContextConsumer } from '../../../app_context';
-import type { TelemetryPluginStart} from '../../../lib/telemetry';
+import type { TelemetryPluginStart } from '../../../lib/telemetry';
 import { shouldShowTelemetryOptIn } from '../../../lib/telemetry';
 
 export interface Props {

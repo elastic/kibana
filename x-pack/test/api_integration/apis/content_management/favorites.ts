@@ -13,13 +13,8 @@ import {
 } from '@kbn/core-http-common';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
-import type {
-  LoginAsInteractiveUserResponse} from './helpers';
-import {
-  cleanupInteractiveUser,
-  loginAsInteractiveUser,
-  setupInteractiveUser,
-} from './helpers';
+import type { LoginAsInteractiveUserResponse } from './helpers';
+import { cleanupInteractiveUser, loginAsInteractiveUser, setupInteractiveUser } from './helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   describe('favorites', function () {

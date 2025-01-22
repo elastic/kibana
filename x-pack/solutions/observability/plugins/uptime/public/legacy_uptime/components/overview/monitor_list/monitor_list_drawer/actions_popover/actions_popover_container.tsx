@@ -8,7 +8,7 @@
 import { connect } from 'react-redux';
 import type { AppState } from '../../../../../state';
 import { isIntegrationsPopupOpen } from '../../../../../state/selectors';
-import type { PopoverState} from '../../../../../state/actions';
+import type { PopoverState } from '../../../../../state/actions';
 import { toggleIntegrationsPopover } from '../../../../../state/actions';
 import { ActionsPopoverComponent } from '..';
 

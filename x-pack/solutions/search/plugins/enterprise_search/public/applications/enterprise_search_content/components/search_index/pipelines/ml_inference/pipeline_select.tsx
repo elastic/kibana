@@ -11,7 +11,7 @@ import { useActions, useValues } from 'kea';
 
 import { EuiSelectable, useEuiTheme, useIsWithinMaxBreakpoint } from '@elastic/eui';
 
-import type { MLInferencePipelineOption} from './pipeline_select_logic';
+import type { MLInferencePipelineOption } from './pipeline_select_logic';
 import { PipelineSelectLogic } from './pipeline_select_logic';
 import type { PipelineSelectOptionProps } from './pipeline_select_option';
 import { PipelineSelectOption } from './pipeline_select_option';

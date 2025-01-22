@@ -6,7 +6,7 @@
  */
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
-import type { AlertInstanceContext} from '../types';
+import type { AlertInstanceContext } from '../types';
 import { MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
 import { LegacyAlertsClient } from './legacy_alerts_client';
 import { createAlertFactory, getPublicAlertFactory } from '../alert/create_alert_factory';

@@ -9,9 +9,7 @@ import React, { useState, useEffect } from 'react';
 
 import { useValues, useActions } from 'kea';
 
-import type {
-  EuiComboBoxProps,
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxProps, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiComboBox,
   EuiFlexGroup,

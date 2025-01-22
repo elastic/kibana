@@ -10,7 +10,8 @@ import { INITIAL_REST_VERSION, SYNTHETICS_API_URLS } from '../../../../../common
 import type {
   DeleteParamsResponse,
   SyntheticsParamRequest,
-  SyntheticsParams} from '../../../../../common/runtime_types';
+  SyntheticsParams,
+} from '../../../../../common/runtime_types';
 import {
   SyntheticsParamsCodec,
   SyntheticsParamsReadonlyCodec,

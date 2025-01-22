@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AlertStatus} from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import { ALERT_FLAPPING, ALERT_STATUS } from '@kbn/rule-data-utils';
 import React, { memo } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiToolTip, useEuiTheme } from '@elastic/eui';

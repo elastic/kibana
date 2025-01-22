@@ -11,10 +11,9 @@ import pMap from 'p-map';
 import type {
   AuthorizeUpdateObject,
   ISavedObjectTypeRegistry,
-  SavedObjectsRawDoc} from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers
+  SavedObjectsRawDoc,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { ALL_NAMESPACES_STRING, SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import type {
   SavedObjectsBulkDeleteObject,

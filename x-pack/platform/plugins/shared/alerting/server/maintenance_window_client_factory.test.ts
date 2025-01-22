@@ -5,11 +5,8 @@
  * 2.0.
  */
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import type {
-  MaintenanceWindowClientFactoryOpts} from './maintenance_window_client_factory';
-import {
-  MaintenanceWindowClientFactory
-} from './maintenance_window_client_factory';
+import type { MaintenanceWindowClientFactoryOpts } from './maintenance_window_client_factory';
+import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
 import {
   savedObjectsClientMock,
   savedObjectsServiceMock,

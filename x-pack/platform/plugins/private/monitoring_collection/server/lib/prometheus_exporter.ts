@@ -6,8 +6,7 @@
  */
 
 import { AggregationTemporality, MetricReader } from '@opentelemetry/sdk-metrics-base';
-import type {
-  ExporterConfig} from '@opentelemetry/exporter-prometheus';
+import type { ExporterConfig } from '@opentelemetry/exporter-prometheus';
 import {
   PrometheusExporter as OpenTelemetryPrometheusExporter,
   PrometheusSerializer,

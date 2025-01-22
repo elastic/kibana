@@ -8,14 +8,8 @@
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { actionsConfigMock } from '../actions_config.mock';
 import { actionTypeRegistryMock } from '../action_type_registry.mock';
-import type {
-  TestConfig,
-  TestSecrets} from './mocks';
-import {
-  TestSecretsSchema,
-  TestConfigSchema,
-  TestSubActionConnector,
-} from './mocks';
+import type { TestConfig, TestSecrets } from './mocks';
+import { TestSecretsSchema, TestConfigSchema, TestSubActionConnector } from './mocks';
 import { register } from './register';
 import type { ServiceParams } from './types';
 

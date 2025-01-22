@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import type { ChromeProjectNavigationNode } from '@kbn/core-chrome-browser';
 import { EuiListGroupItem, transparentize, useEuiTheme } from '@elastic/eui';

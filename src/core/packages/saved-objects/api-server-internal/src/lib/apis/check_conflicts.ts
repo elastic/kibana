@@ -9,19 +9,14 @@
 
 import type { Payload } from '@hapi/boom';
 import { isNotFoundFromUnsupportedServer } from '@kbn/core-elasticsearch-server-internal';
-import type {
-  SavedObjectsRawDocSource,
-  SavedObjectsRawDoc} from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers
-} from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDocSource, SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type {
   SavedObjectsCheckConflictsObject,
   SavedObjectsBaseOptions,
   SavedObjectsCheckConflictsResponse,
 } from '@kbn/core-saved-objects-api-server';
-import type {
-  Either} from './utils';
+import type { Either } from './utils';
 import {
   errorContent,
   left,

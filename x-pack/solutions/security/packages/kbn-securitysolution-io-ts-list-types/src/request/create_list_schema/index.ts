@@ -6,11 +6,8 @@
  */
 
 import * as t from 'io-ts';
-import type {
-  DefaultVersionNumberDecoded} from '@kbn/securitysolution-io-ts-types';
-import {
-  DefaultVersionNumber
-} from '@kbn/securitysolution-io-ts-types';
+import type { DefaultVersionNumberDecoded } from '@kbn/securitysolution-io-ts-types';
+import { DefaultVersionNumber } from '@kbn/securitysolution-io-ts-types';
 
 import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
 import { name } from '../../common/name';

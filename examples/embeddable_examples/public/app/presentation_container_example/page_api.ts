@@ -10,8 +10,7 @@
 import { BehaviorSubject, Subject, combineLatest, map, merge } from 'rxjs';
 import { v4 as generateId } from 'uuid';
 import type { TimeRange } from '@kbn/es-query';
-import type {
-  PanelPackage} from '@kbn/presentation-containers';
+import type { PanelPackage } from '@kbn/presentation-containers';
 import {
   apiHasSerializableState,
   childrenUnsavedChanges$,
@@ -21,11 +20,9 @@ import { isEqual, omit } from 'lodash';
 import type {
   PublishesDataLoading,
   PublishingSubject,
-  ViewMode} from '@kbn/presentation-publishing';
-import {
-  apiPublishesDataLoading,
-  apiPublishesUnsavedChanges,
+  ViewMode,
 } from '@kbn/presentation-publishing';
+import { apiPublishesDataLoading, apiPublishesUnsavedChanges } from '@kbn/presentation-publishing';
 import { DEFAULT_STATE, lastSavedStateSessionStorage } from './session_storage/last_saved_state';
 import { unsavedChangesSessionStorage } from './session_storage/unsaved_changes';
 import type { LastSavedState, PageApi, UnsavedChanges } from './types';

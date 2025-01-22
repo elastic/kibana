@@ -11,10 +11,9 @@ import type {
   CreateExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
-  NamespaceType} from '@kbn/securitysolution-io-ts-list-types';
-import {
-  ExceptionListTypeEnum
+  NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 
 import { findExceptionListsItemPointInTimeFinder } from './find_exception_list_items_point_in_time_finder';

@@ -12,14 +12,8 @@ import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/e
 
 import { breadcrumbService, IndexManagementBreadcrumb } from '../../../../services/breadcrumbs';
 import { useComponentTemplatesContext } from '../../component_templates_context';
-import type {
-  ComponentTemplateDeserialized,
-  Error} from '../../shared_imports';
-import {
-  PageLoading,
-  PageError,
-  attemptToURIDecode
-} from '../../shared_imports';
+import type { ComponentTemplateDeserialized, Error } from '../../shared_imports';
+import { PageLoading, PageError, attemptToURIDecode } from '../../shared_imports';
 import { ComponentTemplateForm } from '../component_template_form';
 import { useRedirectPath } from '../../../../hooks/redirect_path';
 

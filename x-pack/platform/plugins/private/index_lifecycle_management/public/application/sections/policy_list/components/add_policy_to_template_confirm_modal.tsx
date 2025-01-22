@@ -8,8 +8,7 @@
 import React, { Fragment, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiCallOut,
   EuiComboBox,
@@ -20,7 +19,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiSwitch,
-  EuiButton
+  EuiButton,
 } from '@elastic/eui';
 
 import type { PolicyFromES } from '../../../../../common/types';

@@ -8,7 +8,7 @@ import { i18n } from '@kbn/i18n';
 
 import type { DeleteConnectorResponse } from '../../../../../common/types/connectors';
 
-import type { Actions} from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 

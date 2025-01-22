@@ -24,12 +24,13 @@ import {
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import type {
   LanguageDefinition,
-  LanguageDefinitionSnippetArguments} from '@kbn/search-api-panels';
+  LanguageDefinitionSnippetArguments,
+} from '@kbn/search-api-panels';
 import {
   CodeBox,
   getConsoleRequest,
   getLanguageDefinitionCodeSnippet,
-  IngestPipelinePanel
+  IngestPipelinePanel,
 } from '@kbn/search-api-panels';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';

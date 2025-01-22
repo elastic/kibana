@@ -6,14 +6,13 @@
  */
 
 import type OpenAI from 'openai';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { filter, from, map, mergeMap, tap } from 'rxjs';
 import type {
   ChatCompletionChunkEvent,
-  ChatCompletionTokenCountEvent} from '@kbn/inference-common';
-import {
-  createInferenceInternalError,
+  ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
+import { createInferenceInternalError } from '@kbn/inference-common';
 import { createTokenLimitReachedError } from '../../errors';
 import { tokenCountFromOpenAI, chunkFromOpenAI } from './from_openai';
 

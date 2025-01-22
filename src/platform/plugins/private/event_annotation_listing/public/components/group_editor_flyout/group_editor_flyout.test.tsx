@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EuiButton} from '@elastic/eui';
+import type { EuiButton } from '@elastic/eui';
 import { EuiFlyout } from '@elastic/eui';
 import { getDefaultManualAnnotation } from '@kbn/event-annotation-common';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';

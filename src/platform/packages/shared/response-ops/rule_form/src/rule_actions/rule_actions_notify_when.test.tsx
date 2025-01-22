@@ -12,7 +12,7 @@ import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import type { EuiSuperSelectProps } from '@elastic/eui';
 import { act } from 'react-dom/test-utils';
 import { RuleActionsNotifyWhen } from './rule_actions_notify_when';
-import type { RuleAction} from '@kbn/alerting-types';
+import type { RuleAction } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { DEFAULT_FREQUENCY } from '../constants';
 

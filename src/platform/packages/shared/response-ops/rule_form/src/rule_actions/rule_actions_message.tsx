@@ -17,7 +17,7 @@ import {
   EuiSwitch,
 } from '@elastic/eui';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-types';
-import type { ActionConnector} from '@kbn/alerts-ui-shared';
+import type { ActionConnector } from '@kbn/alerts-ui-shared';
 import { ActionConnectorMode } from '@kbn/alerts-ui-shared';
 import { useRuleFormState } from '../hooks';
 import type { RuleAction, RuleUiAction } from '../common';

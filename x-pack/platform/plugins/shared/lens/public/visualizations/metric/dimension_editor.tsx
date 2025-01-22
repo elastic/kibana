@@ -19,8 +19,7 @@ import {
 import type { LayoutDirection } from '@elastic/charts';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  PaletteRegistry} from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
 import {
   CustomizablePalette,
   DEFAULT_MAX_STOP,

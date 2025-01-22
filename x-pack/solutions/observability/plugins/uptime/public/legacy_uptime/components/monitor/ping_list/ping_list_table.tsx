@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEvent} from 'react';
+import type { MouseEvent } from 'react';
 import React, { useCallback, useEffect, useState } from 'react';
 import { EuiBasicTable } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

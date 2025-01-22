@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  PaletteOutput,
-  PaletteRegistry,
-  CustomPaletteParams,
-  ColorStop} from '@kbn/coloring';
+import type { PaletteOutput, PaletteRegistry, CustomPaletteParams, ColorStop } from '@kbn/coloring';
 import {
   getPaletteStops,
   reversePalette,

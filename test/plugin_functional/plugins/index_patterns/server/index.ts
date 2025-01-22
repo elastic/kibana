@@ -8,12 +8,8 @@
  */
 
 import type { PluginInitializer } from '@kbn/core/server';
-import type {
-  IndexPatternsTestPluginSetup,
-  IndexPatternsTestPluginStart} from './plugin';
-import {
-  IndexPatternsTestPlugin
-} from './plugin';
+import type { IndexPatternsTestPluginSetup, IndexPatternsTestPluginStart } from './plugin';
+import { IndexPatternsTestPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   IndexPatternsTestPluginSetup,

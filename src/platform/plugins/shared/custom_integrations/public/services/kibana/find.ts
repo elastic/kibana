@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  CustomIntegration} from '../../../common';
+import type { CustomIntegration } from '../../../common';
 import {
   ROUTES_APPEND_CUSTOM_INTEGRATIONS,
   ROUTES_REPLACEMENT_CUSTOM_INTEGRATIONS,
@@ -16,7 +15,7 @@ import {
 import type { KibanaPluginServiceFactory } from '../types';
 
 import type { CustomIntegrationsStartDependencies } from '../../types';
-import type { CustomIntegrationsFindService} from '../find';
+import type { CustomIntegrationsFindService } from '../find';
 import { filterCustomIntegrations } from '../find';
 
 /**

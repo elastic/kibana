@@ -7,14 +7,8 @@
 
 import type { VFC } from 'react';
 import React, { useState } from 'react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 import moment from 'moment';
 import { CopyToClipboardContextMenu } from '../common/copy_to_clipboard';
 import { FilterInContextMenu } from '../../../query_bar/components/filter_in';

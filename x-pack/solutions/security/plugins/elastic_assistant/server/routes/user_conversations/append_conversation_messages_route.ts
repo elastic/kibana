@@ -7,8 +7,7 @@
 
 import type { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
-import type {
-  ConversationResponse} from '@kbn/elastic-assistant-common';
+import type { ConversationResponse } from '@kbn/elastic-assistant-common';
 import {
   AppendConversationMessageRequestBody,
   AppendConversationMessageRequestParams,

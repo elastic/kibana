@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { TypeOf} from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { schema, offeringBasedSchema } from '@kbn/config-schema';
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
 import { DEFAULT_THEME_NAME } from '@kbn/core-ui-settings-common';

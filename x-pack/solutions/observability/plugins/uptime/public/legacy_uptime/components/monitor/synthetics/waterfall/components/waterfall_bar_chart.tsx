@@ -10,7 +10,8 @@ import type {
   BarStyleAccessor,
   DomainRange,
   TickFormatter,
-  CustomTooltip as CustomChartTooltip} from '@elastic/charts';
+  CustomTooltip as CustomChartTooltip,
+} from '@elastic/charts';
 import {
   Axis,
   BarSeries,

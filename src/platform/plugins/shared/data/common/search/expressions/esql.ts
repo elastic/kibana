@@ -19,7 +19,7 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import { getIndexPatternFromESQLQuery, getStartEndParams } from '@kbn/esql-utils';
 import { zipObject } from 'lodash';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { catchError, defer, map, switchMap, tap, throwError } from 'rxjs';
 import { buildEsQuery, type Filter } from '@kbn/es-query';
 import type { ESQLSearchParams, ESQLSearchResponse } from '@kbn/es-types';

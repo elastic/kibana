@@ -35,7 +35,7 @@ import type {
   VectorSourceRequestMeta,
 } from '../../../../common/descriptor_types';
 import { isValidStringConfig } from '../../util/valid_string_config';
-import type { BoundsRequestMeta, GeoJsonWithMeta} from '../vector_source';
+import type { BoundsRequestMeta, GeoJsonWithMeta } from '../vector_source';
 import { getLayerFeaturesRequestName } from '../vector_source';
 
 const MAX_GEOTILE_LEVEL = 29;

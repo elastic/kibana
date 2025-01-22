@@ -16,10 +16,9 @@ import type { ControlGroupApi } from '../..';
 import type {
   ControlGroupChainingSystem,
   ControlLabelPosition,
-  ParentIgnoreSettings} from '../../../common';
-import {
-  DEFAULT_CONTROL_LABEL_POSITION
+  ParentIgnoreSettings,
 } from '../../../common';
+import { DEFAULT_CONTROL_LABEL_POSITION } from '../../../common';
 import type { DefaultControlApi } from '../../controls/types';
 import { ControlGroupEditor } from './control_group_editor';
 

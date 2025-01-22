@@ -30,13 +30,9 @@ import type {
   DraggedField,
   DragDropOperation,
   UserMessage,
-  TriggerEvent} from './types';
-import {
-  isOperation,
-  isLensBrushEvent,
-  isLensMultiFilterEvent,
-  isLensFilterEvent,
+  TriggerEvent,
 } from './types';
+import { isOperation, isLensBrushEvent, isLensMultiFilterEvent, isLensFilterEvent } from './types';
 import type { DatasourceStates, VisualizationState } from './state_management';
 import type { IndexPatternServiceAPI } from './data_views_service/service';
 import { COLOR_MAPPING_OFF_BY_DEFAULT } from '../common/constants';

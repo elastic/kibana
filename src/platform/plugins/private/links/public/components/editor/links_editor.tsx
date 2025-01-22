@@ -10,9 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 
-import type {
-  DropResult,
-  EuiButtonGroupOptionProps} from '@elastic/eui';
+import type { DropResult, EuiButtonGroupOptionProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -32,12 +30,8 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type {
-  LinksLayoutType} from '../../../common/content_management';
-import {
-  LINKS_HORIZONTAL_LAYOUT,
-  LINKS_VERTICAL_LAYOUT,
-} from '../../../common/content_management';
+import type { LinksLayoutType } from '../../../common/content_management';
+import { LINKS_HORIZONTAL_LAYOUT, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
 import { coreServices } from '../../services/kibana_services';

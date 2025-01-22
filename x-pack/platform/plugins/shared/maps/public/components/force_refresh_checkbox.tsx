@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

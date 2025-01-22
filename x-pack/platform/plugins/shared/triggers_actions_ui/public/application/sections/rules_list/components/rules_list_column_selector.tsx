@@ -9,10 +9,9 @@ import type {
   EuiDataGridColumn,
   EuiTableActionsColumnType,
   EuiTableComputedColumnType,
-  EuiTableFieldDataColumnType} from '@elastic/eui';
-import {
-  useDataGridColumnSelector,
+  EuiTableFieldDataColumnType,
 } from '@elastic/eui';
+import { useDataGridColumnSelector } from '@elastic/eui';
 import type React from 'react';
 import { useCallback, useMemo, useState } from 'react';
 import { useKibana } from '../../../../common/lib/kibana';

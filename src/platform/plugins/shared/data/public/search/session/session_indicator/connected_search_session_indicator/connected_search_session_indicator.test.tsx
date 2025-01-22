@@ -20,10 +20,9 @@ import type {
   ISessionService,
   RefreshInterval,
   SearchUsageCollector,
-  TimefilterContract} from '../../../..';
-import {
-  SearchSessionState
+  TimefilterContract,
 } from '../../../..';
+import { SearchSessionState } from '../../../..';
 import { coreMock } from '@kbn/core/public/mocks';
 import { TOUR_RESTORE_STEP_KEY, TOUR_TAKING_TOO_LONG_STEP_KEY } from './search_session_tour';
 import userEvent from '@testing-library/user-event';

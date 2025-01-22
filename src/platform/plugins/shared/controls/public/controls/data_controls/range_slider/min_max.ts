@@ -12,7 +12,7 @@ import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesDataViews, PublishingSubject } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, of, startWith, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
 import type { ControlFetchContext } from '../../../control_group/control_fetch';

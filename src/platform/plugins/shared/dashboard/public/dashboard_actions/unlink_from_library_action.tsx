@@ -16,7 +16,8 @@ import type {
   HasParentApi,
   HasType,
   HasUniqueId,
-  PublishesPanelTitle} from '@kbn/presentation-publishing';
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasInPlaceLibraryTransforms,
@@ -27,7 +28,7 @@ import {
   getInheritedViewMode,
   getPanelTitle,
 } from '@kbn/presentation-publishing';
-import type { Action} from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';

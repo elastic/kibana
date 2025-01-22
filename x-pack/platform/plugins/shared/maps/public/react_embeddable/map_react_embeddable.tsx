@@ -9,7 +9,7 @@ import React, { useEffect } from 'react';
 import { Provider } from 'react-redux';
 import { EuiEmptyPrompt } from '@elastic/eui';
 import { APPLY_FILTER_TRIGGER } from '@kbn/data-plugin/public';
-import type { ReactEmbeddableFactory} from '@kbn/embeddable-plugin/public';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
 import {

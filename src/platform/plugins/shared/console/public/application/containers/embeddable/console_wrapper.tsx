@@ -24,17 +24,8 @@ import type { ObjectStorageClient } from '../../../../common/types';
 
 import * as localStorageObjectClient from '../../../lib/local_storage_object_client';
 import { loadActiveApi } from '../../../lib/kb';
-import type {
-  AutocompleteInfo,
-  History,
-  Settings,
-  Storage} from '../../../services';
-import {
-  getAutocompleteInfo,
-  createHistory,
-  createSettings,
-  getStorage,
-} from '../../../services';
+import type { AutocompleteInfo, History, Settings, Storage } from '../../../services';
+import { getAutocompleteInfo, createHistory, createSettings, getStorage } from '../../../services';
 import { createUsageTracker } from '../../../services/tracker';
 import type {
   MetricsTracker,

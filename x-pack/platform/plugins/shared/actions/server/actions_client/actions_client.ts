@@ -34,7 +34,7 @@ import type {
   IExecutionLogResult,
 } from '../../common';
 import type { ActionTypeRegistry } from '../action_type_registry';
-import type { ActionExecutorContract} from '../lib';
+import type { ActionExecutorContract } from '../lib';
 import { parseDate } from '../lib';
 import type {
   ActionResult,
@@ -58,18 +58,13 @@ import type {
   OAuthJwtParams,
   OAuthParams,
 } from '../routes/get_oauth_access_token';
-import type {
-  GetOAuthJwtConfig,
-  GetOAuthJwtSecrets} from '../lib/get_oauth_jwt_access_token';
-import {
-  getOAuthJwtAccessToken
-} from '../lib/get_oauth_jwt_access_token';
+import type { GetOAuthJwtConfig, GetOAuthJwtSecrets } from '../lib/get_oauth_jwt_access_token';
+import { getOAuthJwtAccessToken } from '../lib/get_oauth_jwt_access_token';
 import type {
   GetOAuthClientCredentialsConfig,
-  GetOAuthClientCredentialsSecrets} from '../lib/get_oauth_client_credentials_access_token';
-import {
-  getOAuthClientCredentialsAccessToken
+  GetOAuthClientCredentialsSecrets,
 } from '../lib/get_oauth_client_credentials_access_token';
+import { getOAuthClientCredentialsAccessToken } from '../lib/get_oauth_client_credentials_access_token';
 import {
   ACTION_FILTER,
   formatExecutionKPIResult,

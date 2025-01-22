@@ -8,7 +8,7 @@
  */
 
 import { handleAnnotationResponse } from './response_processors/annotations';
-import type { AnnotationServices} from './annotations/get_request_params';
+import type { AnnotationServices } from './annotations/get_request_params';
 import { getAnnotationRequestParams } from './annotations/get_request_params';
 import { getLastSeriesTimestamp } from './helpers/timestamp';
 import type { VisTypeTimeseriesVisDataRequest } from '../../types';

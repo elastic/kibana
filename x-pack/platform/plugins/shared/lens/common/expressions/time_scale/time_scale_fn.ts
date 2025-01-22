@@ -13,11 +13,9 @@ import { buildResultColumns } from '@kbn/expressions-plugin/common';
 import type {
   DatatableUtilitiesService,
   TimeRangeBounds,
-  TimeRange} from '@kbn/data-plugin/common';
-import {
-  calculateBounds,
-  parseInterval
+  TimeRange,
 } from '@kbn/data-plugin/common';
+import { calculateBounds, parseInterval } from '@kbn/data-plugin/common';
 import type { TimeScaleExpressionFunction, TimeScaleUnit, TimeScaleArgs } from './types';
 
 const unitInMs: Record<TimeScaleUnit, number> = {

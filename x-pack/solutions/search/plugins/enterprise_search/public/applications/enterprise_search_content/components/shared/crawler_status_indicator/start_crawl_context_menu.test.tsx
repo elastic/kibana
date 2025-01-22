@@ -9,7 +9,7 @@ import { setMockActions } from '../../../../__mocks__/kea_logic';
 
 import React from 'react';
 
-import type { ReactWrapper} from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 
 import {

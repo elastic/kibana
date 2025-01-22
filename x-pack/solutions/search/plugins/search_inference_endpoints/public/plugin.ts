@@ -13,10 +13,9 @@ import type {
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/public';
-import {
-  AppStatus
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import { AppStatus } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { docLinks } from '../common/doc_links';

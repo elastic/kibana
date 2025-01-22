@@ -8,8 +8,7 @@
 import { errors } from '@elastic/elasticsearch';
 import { failedDependency, forbidden } from '@hapi/boom';
 import type { KibanaRequest } from '@kbn/core-http-server';
-import type {
-  PutSLOSettingsParams} from '@kbn/slo-schema';
+import type { PutSLOSettingsParams } from '@kbn/slo-schema';
 import {
   createSLOParamsSchema,
   deleteSLOInstancesParamsSchema,

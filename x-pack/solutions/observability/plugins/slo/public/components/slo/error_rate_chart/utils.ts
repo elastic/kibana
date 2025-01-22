@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SLOWithSummaryResponse} from '@kbn/slo-schema';
+import type { SLOWithSummaryResponse } from '@kbn/slo-schema';
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import moment from 'moment';
 import type { TimeRange } from './use_lens_definition';

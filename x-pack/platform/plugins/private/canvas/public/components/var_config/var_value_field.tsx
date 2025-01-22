@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useCallback } from 'react';
 import { EuiFieldText, EuiFieldNumber, EuiButtonGroup } from '@elastic/eui';
 import { htmlIdGenerator } from '@elastic/eui';

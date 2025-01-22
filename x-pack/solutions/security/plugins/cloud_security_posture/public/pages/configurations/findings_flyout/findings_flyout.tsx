@@ -5,9 +5,7 @@
  * 2.0.
  */
 import React, { useState } from 'react';
-import type {
-  PropsOf,
-  EuiDescriptionListProps} from '@elastic/eui';
+import type { PropsOf, EuiDescriptionListProps } from '@elastic/eui';
 import {
   useEuiTheme,
   EuiFlexItem,

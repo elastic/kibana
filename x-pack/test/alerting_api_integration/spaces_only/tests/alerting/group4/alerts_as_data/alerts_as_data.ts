@@ -41,13 +41,12 @@ import {
 } from '@kbn/rule-data-utils';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
-import type {
-  TaskManagerDoc} from '../../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../../common/lib';
 import {
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
-  ObjectRemover
+  ObjectRemover,
 } from '../../../../../common/lib';
 import { TEST_CACHE_EXPIRATION_TIME } from '../../create_test_data';
 

@@ -9,14 +9,8 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  PluginInitializerContext,
-  CoreSetup,
-  CoreStart,
-  Plugin} from '@kbn/core/server';
-import {
-  DEFAULT_APP_CATEGORIES,
-} from '@kbn/core/server';
+import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 import type { AIAssistantManagementSelectionConfig } from './config';

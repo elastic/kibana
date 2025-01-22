@@ -6,7 +6,7 @@
  */
 
 import './table_basic.scss';
-import type { ColorMappingInputData, PaletteOutput} from '@kbn/coloring';
+import type { ColorMappingInputData, PaletteOutput } from '@kbn/coloring';
 import { getFallbackDataBounds } from '@kbn/coloring';
 import React, {
   useLayoutEffect,
@@ -24,12 +24,10 @@ import type {
   EuiDataGridControlColumn,
   EuiDataGridColumn,
   EuiDataGridSorting,
-  EuiDataGridStyle} from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiDataGrid
+  EuiDataGridStyle,
 } from '@elastic/eui';
-import type { CustomPaletteState} from '@kbn/charts-plugin/public';
+import { EuiButtonIcon, EuiDataGrid } from '@elastic/eui';
+import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import type { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
@@ -68,7 +66,7 @@ import {
   getFieldMetaFromDatatable,
   isNumericField,
 } from '../../../../common/expressions/datatable/utils';
-import type { CellColorFn} from '../../../shared_components/coloring/get_cell_color_fn';
+import type { CellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getCellColorFn } from '../../../shared_components/coloring/get_cell_color_fn';
 import { getColumnAlignment } from '../utils';
 

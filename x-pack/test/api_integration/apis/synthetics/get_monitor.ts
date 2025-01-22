@@ -9,10 +9,9 @@ import { omit } from 'lodash';
 import moment from 'moment';
 import type {
   EncryptedSyntheticsSavedMonitor,
-  MonitorFields} from '@kbn/synthetics-plugin/common/runtime_types';
-import {
-  ConfigKey
+  MonitorFields,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';
 import { secretKeys } from '@kbn/synthetics-plugin/common/constants/monitor_management';

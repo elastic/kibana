@@ -14,12 +14,12 @@ import {
 import type {
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
-
   AttackDiscoveryPostRequestBody,
   ConversationCreateProps,
   ConversationUpdateProps,
   PerformKnowledgeBaseEntryBulkActionRequestBody,
-  PostEvaluateRequestBodyInput} from '@kbn/elastic-assistant-common';
+  PostEvaluateRequestBodyInput,
+} from '@kbn/elastic-assistant-common';
 import {
   DEFEND_INSIGHTS,
   DEFEND_INSIGHTS_BY_ID,
@@ -37,7 +37,7 @@ import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
   ELASTIC_AI_ASSISTANT_PROMPTS_URL_BULK_ACTION,
-  ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND
+  ELASTIC_AI_ASSISTANT_PROMPTS_URL_FIND,
 } from '@kbn/elastic-assistant-common';
 import {
   getAppendConversationMessagesSchemaMock,

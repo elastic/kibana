@@ -10,8 +10,7 @@ import { useLocation, useParams } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiComboBox,
@@ -28,7 +27,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type { Connector} from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 import { MANAGED_CONNECTOR_INDEX_PREFIX } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../common/types/api';

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -23,7 +22,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import React, { useMemo, useState } from 'react';
-import type { RouteComponentProps} from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { useLocation, withRouter } from 'react-router-dom';
 import useObservable from 'react-use/lib/useObservable';
 

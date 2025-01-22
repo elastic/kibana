@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiSearchBarProps} from '@elastic/eui';
+import type { EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiConfirmModal,
@@ -25,11 +24,9 @@ import type {
   DocumentEntry,
   IndexEntry,
   KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryResponse} from '@kbn/elastic-assistant-common';
-import {
-  DocumentEntryType,
-  IndexEntryType
+  KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
+import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
 import { css } from '@emotion/react';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
 import useAsync from 'react-use/lib/useAsync';

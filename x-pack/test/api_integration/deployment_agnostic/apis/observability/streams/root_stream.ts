@@ -9,11 +9,8 @@ import expect from '@kbn/expect';
 import type { WiredStreamConfigDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import { disableStreams, enableStreams, putStream } from './helpers/requests';
-import type {
-  StreamsSupertestRepositoryClient} from './helpers/repository_client';
-import {
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',

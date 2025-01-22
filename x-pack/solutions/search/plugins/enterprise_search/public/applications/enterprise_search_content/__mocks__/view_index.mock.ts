@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ConnectorViewIndex} from '@kbn/search-connectors';
+import type { ConnectorViewIndex } from '@kbn/search-connectors';
 import {
   ConnectorStatus,
   DisplayType,

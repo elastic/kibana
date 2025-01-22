@@ -10,13 +10,8 @@
 import { isNumber, keys, values, find, each, cloneDeep, flatten } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  Filter} from '@kbn/es-query';
-import {
-  buildExistsFilter,
-  buildPhrasesFilter,
-  buildQueryFromFilters
-} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
+import { buildExistsFilter, buildPhrasesFilter, buildQueryFromFilters } from '@kbn/es-query';
 import { lastValueFrom } from 'rxjs';
 import { AggGroupNames } from '../agg_groups';
 import type { IAggConfigs } from '../agg_configs';

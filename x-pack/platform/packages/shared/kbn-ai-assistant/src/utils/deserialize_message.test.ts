@@ -6,7 +6,7 @@
  */
 
 import { cloneDeep } from 'lodash';
-import type { Message} from '@kbn/observability-ai-assistant-plugin/common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { deserializeMessage } from './deserialize_message';
 import { safeJsonParse } from './safe_json_parse';

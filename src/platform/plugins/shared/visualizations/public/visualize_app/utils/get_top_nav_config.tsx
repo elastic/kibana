@@ -16,13 +16,8 @@ import { parse } from 'query-string';
 
 import type { Capabilities } from '@kbn/core/public';
 import type { TopNavMenuData } from '@kbn/navigation-plugin/public';
-import type {
-  SavedObjectSaveOpts,
-  OnSaveProps} from '@kbn/saved-objects-plugin/public';
-import {
-  showSaveModal,
-  SavedObjectSaveModalOrigin
-} from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectSaveOpts, OnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { showSaveModal, SavedObjectSaveModalOrigin } from '@kbn/saved-objects-plugin/public';
 import {
   LazySavedObjectSaveModalDashboard,
   withSuspense,

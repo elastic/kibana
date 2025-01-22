@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { CoreSetup, Logger } from '@kbn/core/server';
-import type { ServerRoute} from '@kbn/server-route-repository';
+import type { ServerRoute } from '@kbn/server-route-repository';
 import { registerRoutes } from '@kbn/server-route-repository';
 import type { SLORequestHandlerContext, SLORoutesDependencies } from './types';
 

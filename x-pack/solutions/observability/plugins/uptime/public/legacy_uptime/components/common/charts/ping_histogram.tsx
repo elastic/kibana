@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  BrushEndListener,
-  XYChartElementEvent,
-  ElementClickListener} from '@elastic/charts';
+import type { BrushEndListener, XYChartElementEvent, ElementClickListener } from '@elastic/charts';
 import {
   Axis,
   BarSeries,

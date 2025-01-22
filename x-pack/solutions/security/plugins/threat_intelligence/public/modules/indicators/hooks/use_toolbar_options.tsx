@@ -6,7 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type { EuiDataGridColumn} from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import { EuiButtonIcon, EuiText } from '@elastic/eui';
 import type { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { useInspector } from '../../../hooks/use_inspector';

@@ -7,14 +7,14 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import { calculateAuto } from '@kbn/calculate-auto';
-import type { AssistantMessage, ToolMessage} from '@kbn/inference-common';
+import type { AssistantMessage, ToolMessage } from '@kbn/inference-common';
 import { MessageRole, ToolChoiceType } from '@kbn/inference-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
 import type { Logger } from '@kbn/logging';
 import type { AlertsClient } from '@kbn/rule-registry-plugin/server';
 import { findLast, pick } from 'lodash';
 import moment from 'moment';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { catchError, filter, from, map, mergeMap, of, switchMap } from 'rxjs';
 import type { ObservabilityAIAssistantClient } from '@kbn/observability-ai-assistant-plugin/server';
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';

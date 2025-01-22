@@ -8,12 +8,12 @@
 import React, { Fragment, Component } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { indexPatterns } from '@kbn/data-plugin/public';
 import { getDataViewNotFoundMessage } from '../../../../common/i18n_getters';
-import type { GRID_RESOLUTION} from '../../../../common/constants';
+import type { GRID_RESOLUTION } from '../../../../common/constants';
 import { AGG_TYPE, LAYER_TYPE, RENDER_AS } from '../../../../common/constants';
 import { MetricsEditor } from '../../../components/metrics_editor';
 import { getIndexPatternService } from '../../../kibana_services';

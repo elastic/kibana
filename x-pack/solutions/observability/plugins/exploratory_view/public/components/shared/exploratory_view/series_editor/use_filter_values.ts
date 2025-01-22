@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ExistsFilter} from '@kbn/es-query';
+import type { ExistsFilter } from '@kbn/es-query';
 import { isExistsFilter } from '@kbn/es-query';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESFilter } from '@kbn/es-types';

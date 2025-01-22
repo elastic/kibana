@@ -6,7 +6,7 @@
  */
 
 import { asyncForEach } from '@kbn/std';
-import type { ESTestIndexTool} from '@kbn/alerting-api-integration-helpers';
+import type { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import type { Client } from '@elastic/elasticsearch';
 import moment from 'moment';
@@ -14,7 +14,7 @@ import type { FtrProviderContext, RetryService } from '@kbn/ftr-common-functiona
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server/saved_objects';
 import { ALERT_ORIGINAL_TIME } from '@kbn/security-solution-plugin/common/field_maps/field_names';
 import type { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { TaskManagerDoc} from '../../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../../common/lib';
 import { getEventLog } from '../../../../../common/lib';
 import {
   DOCUMENT_REFERENCE,

@@ -11,24 +11,14 @@ import url from 'url';
 import { curry } from 'lodash';
 import { pipe } from 'fp-ts/lib/pipeable';
 
-import type {
-  ActionsConfig,
-  CustomHostSettings} from './config';
-import {
-  AllowedHosts,
-  EnabledActionTypes,
-  DEFAULT_QUEUED_MAX,
-} from './config';
+import type { ActionsConfig, CustomHostSettings } from './config';
+import { AllowedHosts, EnabledActionTypes, DEFAULT_QUEUED_MAX } from './config';
 import { getCanonicalCustomHostUrl } from './lib/custom_host_settings';
 import { ActionTypeDisabledError } from './lib';
 import type { ProxySettings, ResponseSettings, SSLSettings } from './types';
 import { getSSLSettingsFromConfig } from './lib/get_node_ssl_options';
-import type {
-  ValidateEmailAddressesOptions} from '../common';
-import {
-  validateEmailAddresses,
-  invalidEmailsAsMessage,
-} from '../common';
+import type { ValidateEmailAddressesOptions } from '../common';
+import { validateEmailAddresses, invalidEmailsAsMessage } from '../common';
 export { AllowedHosts, EnabledActionTypes } from './config';
 
 enum AllowListingField {

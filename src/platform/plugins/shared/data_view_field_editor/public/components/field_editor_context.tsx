@@ -7,14 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FunctionComponent,
-  PropsWithChildren} from 'react';
-import React, {
-  createContext,
-  useContext,
-  useMemo
-} from 'react';
+import type { FunctionComponent, PropsWithChildren } from 'react';
+import React, { createContext, useContext, useMemo } from 'react';
 import type { NotificationsStart, CoreStart } from '@kbn/core/public';
 import type { BehaviorSubject } from 'rxjs';
 import type {

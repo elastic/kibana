@@ -10,10 +10,9 @@
 import { useState } from 'react';
 import type {
   DiscoverStateContainer,
-  DiscoverStateContainerParams} from '../state_management/discover_state';
-import {
-  getDiscoverStateContainer
+  DiscoverStateContainerParams,
 } from '../state_management/discover_state';
+import { getDiscoverStateContainer } from '../state_management/discover_state';
 
 /**
  * Creates a state container using the initial params and allows to reset it.

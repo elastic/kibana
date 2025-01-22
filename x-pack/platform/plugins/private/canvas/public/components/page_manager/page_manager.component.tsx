@@ -7,8 +7,7 @@
 
 import React, { Fragment, Component } from 'react';
 import PropTypes from 'prop-types';
-import type {
-  DragDropContextProps} from '@elastic/eui';
+import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiIcon,
   EuiFlexGroup,
@@ -17,7 +16,7 @@ import {
   EuiToolTip,
   EuiDragDropContext,
   EuiDraggable,
-  EuiDroppable
+  EuiDroppable,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

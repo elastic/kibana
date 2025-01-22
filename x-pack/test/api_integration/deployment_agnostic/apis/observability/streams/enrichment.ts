@@ -17,11 +17,8 @@ import {
   putStream,
 } from './helpers/requests';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
-import type {
-  StreamsSupertestRepositoryClient} from './helpers/repository_client';
-import {
-  createStreamsRepositoryAdminClient,
-} from './helpers/repository_client';
+import type { StreamsSupertestRepositoryClient } from './helpers/repository_client';
+import { createStreamsRepositoryAdminClient } from './helpers/repository_client';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');

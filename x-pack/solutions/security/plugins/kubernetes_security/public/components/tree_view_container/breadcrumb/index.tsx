@@ -18,10 +18,9 @@ import { useEuiTheme } from '../../../hooks';
 import type {
   KubernetesCollectionMap,
   KubernetesCollection,
-  TreeViewIconProps} from '../../../types';
-import {
-  KubernetesTreeViewLevels,
+  TreeViewIconProps,
 } from '../../../types';
+import { KubernetesTreeViewLevels } from '../../../types';
 import { useStyles } from './styles';
 import { KUBERNETES_COLLECTION_ICONS_PROPS } from '../helpers';
 import { showBreadcrumbDisplayText } from './helper';

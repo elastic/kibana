@@ -9,7 +9,7 @@ import type { Ast } from '@kbn/interpreter';
 import { buildExpression } from '@kbn/expressions-plugin/public';
 import type { DatasourceMock } from '../../mocks';
 import { createMockDatasource, createMockFramePublicAPI } from '../../mocks';
-import type { DatatableVisualizationState} from './visualization';
+import type { DatatableVisualizationState } from './visualization';
 import { getDatatableVisualization } from './visualization';
 import type {
   Operation,

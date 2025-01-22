@@ -17,7 +17,8 @@ import type {
   Condition,
   IngestStreamDefinition,
   StreamDefinition,
-  WiredStreamDefinition} from '@kbn/streams-schema';
+  WiredStreamDefinition,
+} from '@kbn/streams-schema';
 import {
   assertsSchema,
   getAncestors,

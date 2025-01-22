@@ -15,15 +15,8 @@ import * as Rx from 'rxjs';
 import { mergeMap, map, mapTo, takeUntil } from 'rxjs';
 import { isFailureStats, failedStatsToErrorMessage } from '@kbn/optimizer-webpack-helpers';
 
-import type {
-  CompilerMsg,
-  Bundle,
-  WorkerConfig,
-  BundleRemotes} from '../common';
-import {
-  CompilerMsgs,
-  maybeMap
-} from '../common';
+import type { CompilerMsg, Bundle, WorkerConfig, BundleRemotes } from '../common';
+import { CompilerMsgs, maybeMap } from '../common';
 import { getWebpackConfig } from './webpack.config';
 
 const PLUGIN_NAME = '@kbn/optimizer';

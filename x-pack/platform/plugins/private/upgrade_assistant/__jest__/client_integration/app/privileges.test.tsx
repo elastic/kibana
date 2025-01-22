@@ -9,7 +9,7 @@ import { act } from 'react-dom/test-utils';
 
 import type { AppDependencies } from '../../../public/types';
 import { setupEnvironment, kibanaVersion, getAppContextMock } from '../helpers';
-import type { AppTestBed} from './app.helpers';
+import type { AppTestBed } from './app.helpers';
 import { setupAppPage } from './app.helpers';
 
 describe('Privileges', () => {

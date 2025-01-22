@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KbnFieldTypeOptions, ES_FIELD_TYPES} from './types';
+import type { KbnFieldTypeOptions, ES_FIELD_TYPES } from './types';
 import { KBN_FIELD_TYPES } from './types';
 
 export class KbnFieldType {

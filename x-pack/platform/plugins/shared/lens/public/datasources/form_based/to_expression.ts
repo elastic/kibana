@@ -11,25 +11,25 @@ import seedrandom from 'seedrandom';
 import type {
   AggFunctionsMapping,
   EsaggsExpressionFunctionDefinition,
-  IndexPatternLoadExpressionFunctionDefinition} from '@kbn/data-plugin/public';
-import {
-  UI_SETTINGS,
+  IndexPatternLoadExpressionFunctionDefinition,
 } from '@kbn/data-plugin/public';
+import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { queryToAst } from '@kbn/data-plugin/common';
 import type {
   ExpressionAstExpression,
   ExpressionAstExpressionBuilder,
-  ExpressionAstFunction} from '@kbn/expressions-plugin/public';
-import {
-  buildExpression,
-  buildExpressionFunction
+  ExpressionAstFunction,
 } from '@kbn/expressions-plugin/public';
+import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { convertToAbsoluteDateRange } from '../../utils';
 import type { DateRange } from '../../../common/types';
 import type { GenericIndexPatternColumn } from './form_based';
 import { operationDefinitionMap } from './operations';
 import type { FormBasedPrivateState, FormBasedLayer } from './types';
-import type { DateHistogramIndexPatternColumn, RangeIndexPatternColumn } from './operations/definitions';
+import type {
+  DateHistogramIndexPatternColumn,
+  RangeIndexPatternColumn,
+} from './operations/definitions';
 import type { FormattedIndexPatternColumn } from './operations/definitions/column_types';
 import { isColumnFormatted, isColumnOfType } from './operations/definitions/helpers';
 import type { IndexPattern, IndexPatternMap } from '../../types';

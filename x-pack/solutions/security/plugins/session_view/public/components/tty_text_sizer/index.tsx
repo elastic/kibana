@@ -5,14 +5,8 @@
  * 2.0.
  */
 import React, { useCallback, useEffect, useState } from 'react';
-import type {
-  EuiButtonIconProps} from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import type { Teletype } from '../../../common';
 import { DEFAULT_TTY_FONT_SIZE } from '../../../common/constants';
 import { ZOOM_IN, ZOOM_FIT, ZOOM_OUT } from './translations';

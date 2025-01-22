@@ -12,10 +12,9 @@ import type {
   Column,
   XYConfiguration,
   XYDataLayerConfig,
-  XYReferenceLineLayerConfig} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import {
-  SeriesTypes
+  XYReferenceLineLayerConfig,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { SeriesTypes } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { Layer } from '..';
 import type { ChartType } from '../../../common';
@@ -25,12 +24,9 @@ import type {
   Scale,
   SeriesParam,
   ValueAxis,
-  VisParams} from '../../types';
-import {
-  InterpolationMode,
-  ScaleType,
-  ThresholdLineStyle
+  VisParams,
 } from '../../types';
+import { InterpolationMode, ScaleType, ThresholdLineStyle } from '../../types';
 import { getCurveType, getMode, getYAxisPosition } from '../../utils/common';
 
 function getYScaleType(scale?: Scale): XYConfiguration['yLeftScale'] | undefined {

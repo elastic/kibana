@@ -8,7 +8,7 @@
 import type { ICMPFields } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
 import { secondsToCronFormatter } from '../formatting_utils';
-import type { Formatter} from './common';
+import type { Formatter } from './common';
 import { commonFormatters } from './common';
 
 export type ICMPFormatMap = Record<keyof ICMPFields, Formatter>;

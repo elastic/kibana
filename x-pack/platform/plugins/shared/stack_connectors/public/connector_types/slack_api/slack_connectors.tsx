@@ -9,12 +9,10 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import type {
   ActionConnectorFieldsProps,
   ConfigFieldSchema,
-  SecretsFieldSchema} from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  SimpleConnectorForm,
-  useKibana,
+  SecretsFieldSchema,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import { SimpleConnectorForm, useKibana } from '@kbn/triggers-actions-ui-plugin/public';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DocLinksStart } from '@kbn/core/public';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
 import { EuiFlyoutFooter, EuiFlyoutHeader, EuiFlexItem, Query } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

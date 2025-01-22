@@ -9,7 +9,7 @@
 
 import type { Storage } from '../../services';
 import type { ObjectStorageClient } from '../../../common/types';
-import type { TextObject} from '../../../common/text_object';
+import type { TextObject } from '../../../common/text_object';
 import { textObjectTypeName } from '../../../common/text_object';
 import { LocalObjectStorage } from './local_storage_object_client';
 

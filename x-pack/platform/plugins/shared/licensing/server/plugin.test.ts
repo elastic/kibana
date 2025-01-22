@@ -8,21 +8,15 @@
 import moment from 'moment';
 import { BehaviorSubject, firstValueFrom, take, toArray } from 'rxjs';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type {
-  ClusterClientMock} from '@kbn/core/server/mocks';
+import type { ClusterClientMock } from '@kbn/core/server/mocks';
 import {
   coreMock,
   elasticsearchServiceMock,
   loggingSystemMock,
   statusServiceMock,
 } from '@kbn/core/server/mocks';
-import type {
-  CoreStatus,
-  IClusterClient,
-  ServiceStatusLevel} from '@kbn/core/server';
-import {
-  ServiceStatusLevels,
-} from '@kbn/core/server';
+import type { CoreStatus, IClusterClient, ServiceStatusLevel } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import type { LicenseType } from '../common/types';
 import type { ElasticsearchError } from './types';
 import { LicensingPlugin } from './plugin';

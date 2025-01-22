@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { concatMap, firstValueFrom, from, of, throwError } from 'rxjs';
 import { pick } from 'lodash';
 import moment from 'moment';
@@ -51,8 +51,7 @@ import { usageProvider } from './collectors/search/usage';
 import { registerUsageCollector as registerSearchUsageCollector } from './collectors/search/register';
 import { registerUsageCollector as registerSearchSessionUsageCollector } from './collectors/search_session/register';
 import { searchTelemetry } from '../saved_objects';
-import type {
-  SearchSourceDependencies} from '../../common/search';
+import type { SearchSourceDependencies } from '../../common/search';
 import {
   cidrFunction,
   dateRangeFunction,

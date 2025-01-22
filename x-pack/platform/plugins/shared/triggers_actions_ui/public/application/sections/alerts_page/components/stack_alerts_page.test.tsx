@@ -10,7 +10,7 @@ import { waitFor } from '@testing-library/react';
 
 import { StackAlertsPage } from './stack_alerts_page';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
-import type { AppMockRenderer} from '../../test_utils';
+import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { ruleTypesIndex } from '../../../mock/rule_types_index';
 

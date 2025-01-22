@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ColorMode, ColorSchemas } from '@kbn/charts-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
-import type { VisTypeDefinition} from '@kbn/visualizations-plugin/public';
+import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 
 import type { GaugeTypeProps } from '../types';

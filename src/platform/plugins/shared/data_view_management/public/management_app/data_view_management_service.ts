@@ -8,7 +8,7 @@
  */
 
 import type { IUiSettingsClient, ApplicationStart } from '@kbn/core/public';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, map, distinctUntilChanged } from 'rxjs';
 
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';

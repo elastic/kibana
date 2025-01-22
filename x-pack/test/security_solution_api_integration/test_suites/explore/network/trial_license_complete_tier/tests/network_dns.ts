@@ -8,11 +8,12 @@
 import expect from '@kbn/expect';
 import type {
   NetworkDnsEdges,
-  NetworkDnsStrategyResponse} from '@kbn/security-solution-plugin/common/search_strategy';
+  NetworkDnsStrategyResponse,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   NetworkQueries,
   Direction,
-  NetworkDnsFields
+  NetworkDnsFields,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import type TestAgent from 'supertest/lib/agent';
 import type { SearchService } from '@kbn/ftr-common-functional-services';

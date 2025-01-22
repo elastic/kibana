@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  CollectorFetchContext,
+  UsageCollectionSetup,
+} from '@kbn/usage-collection-plugin/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { CspServerPluginStart, CspServerPluginStartDeps } from '../../../types';
 import { getIndicesStats } from './indices_stats_collector';
 import { getResourcesStats } from './resources_stats_collector';
 import { cspmUsageSchema } from './schema';
-import type { CspmUsage} from './types';
+import type { CspmUsage } from './types';
 import { type CloudSecurityUsageCollectorType } from './types';
 import { getAccountsStats } from './accounts_stats_collector';
 import { getRulesStats } from './rules_stats_collector';

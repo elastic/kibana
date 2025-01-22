@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import type { Locations} from '../../../../common/runtime_types';
+import type { Locations } from '../../../../common/runtime_types';
 import { MonitorTypeEnum, LocationStatus } from '../../../../common/runtime_types';
 import { DEFAULT_FIELDS } from '../../../../common/constants/monitor_defaults';
 import { normalizeProjectMonitors } from '.';

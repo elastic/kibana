@@ -7,7 +7,8 @@
 import expect from 'expect';
 import type {
   AllFieldsDiff,
-  RuleUpdateProps} from '@kbn/security-solution-plugin/common/api/detection_engine';
+  RuleUpdateProps,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   DataSourceType,
   ThreeWayDiffConflict,

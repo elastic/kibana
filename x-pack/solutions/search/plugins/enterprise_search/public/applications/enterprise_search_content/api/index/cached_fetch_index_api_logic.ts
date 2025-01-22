@@ -16,12 +16,8 @@ import type { ElasticsearchIndexWithIngestion } from '../../../../../common/type
 import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import { IndexNameLogic } from '../../components/search_index/index_name_logic';
 
-import type {
-  FetchIndexApiParams,
-  FetchIndexApiResponse} from './fetch_index_api_logic';
-import {
-  FetchIndexApiLogic
-} from './fetch_index_api_logic';
+import type { FetchIndexApiParams, FetchIndexApiResponse } from './fetch_index_api_logic';
+import { FetchIndexApiLogic } from './fetch_index_api_logic';
 
 const FETCH_INDEX_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_INDEX_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds

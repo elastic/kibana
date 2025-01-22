@@ -8,11 +8,8 @@
  */
 
 import * as React from 'react';
-import type {
-  KibanaConnectionDetailsProviderProps} from './kibana_connection_details_provider';
-import {
-  KibanaConnectionDetailsProvider
-} from './kibana_connection_details_provider';
+import type { KibanaConnectionDetailsProviderProps } from './kibana_connection_details_provider';
+import { KibanaConnectionDetailsProvider } from './kibana_connection_details_provider';
 import { getGlobalDependencies } from './global';
 
 export type KibanaWiredConnectionDetailsProviderProps = Omit<

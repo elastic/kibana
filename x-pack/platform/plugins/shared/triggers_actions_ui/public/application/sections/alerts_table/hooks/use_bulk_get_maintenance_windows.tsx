@@ -6,18 +6,15 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { QueryClientProviderProps} from '@tanstack/react-query';
+import type { QueryClientProviderProps } from '@tanstack/react-query';
 import { useQuery } from '@tanstack/react-query';
 import type { MaintenanceWindow } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { ServerError } from '../types';
 import { useLicense } from '../../../hooks/use_license';
 import { triggersActionsUiQueriesKeys } from '../../../hooks/constants';
-import type {
-  BulkGetMaintenanceWindowsResult} from './apis/bulk_get_maintenance_windows';
-import {
-  bulkGetMaintenanceWindows
-} from './apis/bulk_get_maintenance_windows';
+import type { BulkGetMaintenanceWindowsResult } from './apis/bulk_get_maintenance_windows';
+import { bulkGetMaintenanceWindows } from './apis/bulk_get_maintenance_windows';
 
 const ERROR_TITLE = i18n.translate(
   'xpack.triggersActionsUI.alertsTable.api.bulkGetMaintenanceWindow.errorTitle',

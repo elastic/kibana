@@ -6,7 +6,10 @@
  */
 
 import React, { createContext, useContext, useState, useEffect, useCallback } from 'react';
-import type { IKbnUrlStateStorage, ISessionStorageStateStorage } from '@kbn/kibana-utils-plugin/public';
+import type {
+  IKbnUrlStateStorage,
+  ISessionStorageStateStorage,
+} from '@kbn/kibana-utils-plugin/public';
 import type { OperationType, SeriesType } from '@kbn/lens-plugin/public';
 import { useUiTracker } from '@kbn/observability-shared-plugin/public';
 import type { ChartTimeRange } from '../header/last_updated';

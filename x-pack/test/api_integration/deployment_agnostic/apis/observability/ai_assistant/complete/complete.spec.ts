@@ -14,17 +14,17 @@ import type {
   ConversationCreateEvent,
   ConversationUpdateEvent,
   MessageAddEvent,
-  StreamingChatResponseEvent} from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
-import {
-  StreamingChatResponseEventType,
+  StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
+import { StreamingChatResponseEventType } from '@kbn/observability-ai-assistant-plugin/common/conversation_complete';
 import type { ObservabilityAIAssistantScreenContextRequest } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type {
   LlmProxy,
-  LlmResponseSimulator} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+  LlmResponseSimulator,
+} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import {
   createLlmProxy,
-  isFunctionTitleRequest
+  isFunctionTitleRequest,
 } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { createOpenAiChunk } from '../../../../../../observability_ai_assistant_api_integration/common/create_openai_chunk';
 import { decodeEvents, getConversationCreatedEvent, getConversationUpdatedEvent } from '../helpers';

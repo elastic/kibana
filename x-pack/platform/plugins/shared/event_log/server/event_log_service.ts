@@ -12,7 +12,10 @@ import type { Plugin } from './plugin';
 import type { EsContext } from './es';
 import type { IEvent, IEventLogger, IEventLogService, IEventLogConfig } from './types';
 import { EventLogger } from './event_logger';
-import type { SavedObjectProvider, SavedObjectProviderRegistry } from './saved_object_provider_registry';
+import type {
+  SavedObjectProvider,
+  SavedObjectProviderRegistry,
+} from './saved_object_provider_registry';
 export type PluginClusterClient = Pick<IClusterClient, 'asInternalUser'>;
 export type AdminClusterClient$ = Observable<PluginClusterClient>;
 

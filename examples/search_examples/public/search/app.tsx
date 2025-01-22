@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiTabbedContentTab} from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCheckbox,
@@ -28,7 +27,7 @@ import {
 } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import type { IInspectorInfo } from '@kbn/data-plugin/common';
-import type { DataPublicPluginStart} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';

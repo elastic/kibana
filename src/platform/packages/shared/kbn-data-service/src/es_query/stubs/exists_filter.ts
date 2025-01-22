@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ExistsFilter} from '@kbn/es-query';
+import type { ExistsFilter } from '@kbn/es-query';
 import { FilterStateStore } from '@kbn/es-query';
 
 export const existsFilter: ExistsFilter = {

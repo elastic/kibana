@@ -6,14 +6,20 @@
  */
 
 import crypto from 'crypto';
-import type { ServiceParams} from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { isEmpty } from 'lodash';
 import type { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { OpsgenieSubActions } from '../../../common';
 import { CreateAlertParamsSchema, CloseAlertParamsSchema, Response } from './schema';
-import type { CloseAlertParams, Config, CreateAlertParams, FailureResponseType, Secrets } from './types';
+import type {
+  CloseAlertParams,
+  Config,
+  CreateAlertParams,
+  FailureResponseType,
+  Secrets,
+} from './types';
 import * as i18n from './translations';
 
 export class OpsgenieConnector extends SubActionConnector<Config, Secrets> {

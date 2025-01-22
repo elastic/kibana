@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useEffect, useState } from 'react';
 import {
   EuiPanel,
@@ -24,8 +24,7 @@ import { connect } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { IUnifiedSearchPluginServices } from '@kbn/unified-search-plugin/public/types';
 import type { ContentManagementPublicStart } from '@kbn/content-management-plugin/public';
-import type {
-  GraphState} from '../../state_management';
+import type { GraphState } from '../../state_management';
 import {
   hasDatasourceSelector,
   hasFieldsSelector,

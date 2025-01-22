@@ -6,21 +6,13 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import type {
-  ActionParamsProps} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextAreaWithMessageVariables,
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type {
-  RecursivePartial} from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiText
-} from '@elastic/eui';
+import type { RecursivePartial } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import type {
   OpsgenieActionParams,
   OpsgenieCloseAlertParams,

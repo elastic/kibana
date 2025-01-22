@@ -11,7 +11,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import type { PublishesDataViews } from '@kbn/presentation-publishing';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 import { dataService } from '../../../services/kibana_services';
 import type { ControlFetchContext } from '../../../control_group/control_fetch';

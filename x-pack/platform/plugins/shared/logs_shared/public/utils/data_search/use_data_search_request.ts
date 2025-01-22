@@ -6,7 +6,7 @@
  */
 
 import { useCallback } from 'react';
-import type { OperatorFunction} from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
 import { ReplaySubject } from 'rxjs';
 import { share, tap } from 'rxjs';
 import type {

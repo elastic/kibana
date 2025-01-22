@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ComponentType,
-  ReactNode} from 'react';
-import React, {
-  createContext,
-  useContext,
-  useState,
-  useRef,
-  useEffect,
-} from 'react';
+import type { ComponentType, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useRef, useEffect } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { NavEvent } from './nav_events';
 import { generateNavEvents } from './nav_events';

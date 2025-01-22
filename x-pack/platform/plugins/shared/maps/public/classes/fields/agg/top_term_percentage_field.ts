@@ -7,7 +7,7 @@
 
 import type { IESAggField } from './agg_field_types';
 import type { IVectorSource } from '../../sources/vector_source';
-import type { ITooltipProperty} from '../../tooltips/tooltip_property';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { TooltipProperty } from '../../tooltips/tooltip_property';
 import type { FIELD_ORIGIN } from '../../../../common/constants';
 import { TOP_TERM_PERCENTAGE_SUFFIX } from '../../../../common/constants';

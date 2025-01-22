@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AGG_TYPE} from '../../../../common/constants';
+import type { AGG_TYPE } from '../../../../common/constants';
 import { FIELD_ORIGIN } from '../../../../common/constants';
 import type { IESAggSource } from '../../sources/es_agg_source';
 import type { DataView } from '@kbn/data-views-plugin/public';

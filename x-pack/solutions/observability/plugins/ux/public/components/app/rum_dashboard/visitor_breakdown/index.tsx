@@ -9,7 +9,7 @@ import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiSpacer } from '@elastic/eui';
 import { EuiLoadingChart } from '@elastic/eui';
 import styled from '@emotion/styled';
-import type { UxLocalUIFilterName} from '../../../../../common/ux_ui_filter';
+import type { UxLocalUIFilterName } from '../../../../../common/ux_ui_filter';
 import { uxLocalUIFilterNames } from '../../../../../common/ux_ui_filter';
 import { VisitorBreakdownChart, VisitorBreakdownMetric } from '../charts/visitor_breakdown_chart';
 import { I18LABELS, VisitorBreakdownLabel } from '../translations';

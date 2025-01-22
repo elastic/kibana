@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { CommonFields} from '../../../../common/runtime_types';
+import type { CommonFields } from '../../../../common/runtime_types';
 import { ConfigKey, SourceType } from '../../../../common/runtime_types';
-import type {
-  FormatterFn} from './formatting_utils';
+import type { FormatterFn } from './formatting_utils';
 import {
   arrayToJsonFormatter,
   stringToJsonFormatter,

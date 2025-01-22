@@ -12,11 +12,9 @@ import type {
   UseRequestResponse,
   SendRequestConfig,
   SendRequestResponse,
-  Error} from '../shared_imports';
-import {
-  sendRequest as _sendRequest,
-  useRequest as _useRequest
+  Error,
 } from '../shared_imports';
+import { sendRequest as _sendRequest, useRequest as _useRequest } from '../shared_imports';
 
 export type UseRequestHook = <T = any, E = Error>(
   config: UseRequestConfig

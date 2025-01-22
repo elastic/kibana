@@ -15,7 +15,7 @@ import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import moment from 'moment';
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { SearchUsageCollector} from '../../../..';
+import type { SearchUsageCollector } from '../../../..';
 import { SessionsClient } from '../../../..';
 import { SearchSessionStatus } from '../../../../../../common';
 import { SearchSessionsMgmtAPI } from '../../lib/api';

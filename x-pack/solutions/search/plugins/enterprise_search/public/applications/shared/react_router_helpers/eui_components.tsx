@@ -14,7 +14,8 @@ import type {
   EuiLinkAnchorProps,
   EuiListGroupItemProps,
   EuiCardProps,
-  EuiBadgeProps} from '@elastic/eui';
+  EuiBadgeProps,
+} from '@elastic/eui';
 import {
   EuiLink,
   EuiButton,
@@ -23,7 +24,7 @@ import {
   EuiListGroupItem,
   EuiPanel,
   EuiCard,
-  EuiBadge
+  EuiBadge,
 } from '@elastic/eui';
 import type { EuiPanelProps } from '@elastic/eui/src/components/panel/panel';
 

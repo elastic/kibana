@@ -8,13 +8,8 @@
 import React, { useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type {
-  EuiContextMenuPanelDescriptor} from '@elastic/eui';
-import {
-  EuiContextMenu,
-  EuiHeaderLink,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiContextMenu, EuiHeaderLink, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RuleNameWithLoading } from './rule_name_with_loading';
 import {

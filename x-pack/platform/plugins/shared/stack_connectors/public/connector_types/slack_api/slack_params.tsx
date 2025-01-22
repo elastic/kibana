@@ -11,8 +11,7 @@ import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TextAreaWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiSpacer,
   EuiFormRow,

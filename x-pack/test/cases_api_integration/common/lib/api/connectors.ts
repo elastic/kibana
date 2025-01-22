@@ -24,7 +24,10 @@ import type {
   Configuration,
   ConnectorTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import type { CasePostRequest, GetCaseConnectorsResponse } from '@kbn/cases-plugin/common/types/api';
+import type {
+  CasePostRequest,
+  GetCaseConnectorsResponse,
+} from '@kbn/cases-plugin/common/types/api';
 import { camelCase, mapKeys } from 'lodash';
 import type { User } from '../authentication/types';
 import { superUser } from '../authentication/users';

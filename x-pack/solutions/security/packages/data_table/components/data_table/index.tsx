@@ -35,11 +35,8 @@ import type {
   DeprecatedRowRenderer,
   TimelineItem,
 } from '@kbn/timelines-plugin/common';
-import type {
-  UseDataGridColumnsCellActionsProps} from '@kbn/cell-actions';
-import {
-  useDataGridColumnsCellActions
-} from '@kbn/cell-actions';
+import type { UseDataGridColumnsCellActionsProps } from '@kbn/cell-actions';
+import { useDataGridColumnsCellActions } from '@kbn/cell-actions';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import type { DataTableModel, DataTableState } from '../../store/data_table/types';
 

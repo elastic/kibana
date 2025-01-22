@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { coreMock } from '@kbn/core/public/mocks';
-import type { ExpressionsSetup, ExpressionsStart} from '.';
+import type { ExpressionsSetup, ExpressionsStart } from '.';
 import { plugin as pluginInitializer } from '.';
 
 export type Setup = jest.Mocked<ExpressionsSetup>;

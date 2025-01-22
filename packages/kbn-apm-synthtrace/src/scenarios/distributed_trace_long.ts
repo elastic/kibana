@@ -9,7 +9,7 @@
 
 /* eslint-disable @typescript-eslint/no-shadow */
 
-import type { ApmFields} from '@kbn/apm-synthtrace-client';
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
 import { apm, DistributedTrace } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';
 import type { RunOptions } from '../cli/utils/parse_run_cli_flags';

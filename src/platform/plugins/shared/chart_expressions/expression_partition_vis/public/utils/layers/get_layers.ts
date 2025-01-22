@@ -8,7 +8,7 @@
  */
 
 import type { Datum, PartitionLayer } from '@elastic/charts';
-import type { PaletteRegistry} from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { getColorFactory } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';

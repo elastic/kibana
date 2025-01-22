@@ -12,11 +12,8 @@ import type { Connector } from '@kbn/search-connectors';
 
 import type { Status } from '../../../../../../../common/types/api';
 
-import type {
-  UpdateHtmlExtractionActions} from '../../../../api/crawler/update_html_extraction_api_logic';
-import {
-  UpdateHtmlExtractionApiLogic,
-} from '../../../../api/crawler/update_html_extraction_api_logic';
+import type { UpdateHtmlExtractionActions } from '../../../../api/crawler/update_html_extraction_api_logic';
+import { UpdateHtmlExtractionApiLogic } from '../../../../api/crawler/update_html_extraction_api_logic';
 import type { CachedFetchIndexApiLogicActions } from '../../../../api/index/cached_fetch_index_api_logic';
 import { isCrawlerIndex } from '../../../../utils/indices';
 import { IndexViewLogic } from '../../index_view_logic';

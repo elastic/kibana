@@ -8,8 +8,7 @@ import { sha256 } from 'js-sha256';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { SavedObject } from '@kbn/core/server';
-import type {
-  SyntheticsMonitor} from '../../../common/runtime_types/monitor_management';
+import type { SyntheticsMonitor } from '../../../common/runtime_types/monitor_management';
 import {
   ConfigKey,
   MonitorTypeEnum,

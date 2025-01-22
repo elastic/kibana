@@ -5,19 +5,11 @@
  * 2.0.
  */
 
-import type {
-  EuiSelectableOption,
-  EuiSelectableProps} from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSelectable
-} from '@elastic/eui';
+import type { EuiSelectableOption, EuiSelectableProps } from '@elastic/eui';
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiSelectable } from '@elastic/eui';
 import React, { useCallback, useMemo } from 'react';
 
-import type {
-  ProviderSolution} from './render_service_provider/service_provider';
+import type { ProviderSolution } from './render_service_provider/service_provider';
 import {
   SERVICE_PROVIDERS,
   ServiceProviderIcon,

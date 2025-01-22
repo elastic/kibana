@@ -7,10 +7,9 @@
 import type SuperTest from 'supertest';
 import type {
   EcsMappingRequestBody,
-  EcsMappingResponse} from '@kbn/integration-assistant-plugin/common';
-import {
-  ECS_GRAPH_PATH
+  EcsMappingResponse,
 } from '@kbn/integration-assistant-plugin/common';
+import { ECS_GRAPH_PATH } from '@kbn/integration-assistant-plugin/common';
 import { superUser } from '../authentication/users';
 import type { User } from '../authentication/types';
 import { BadRequestError } from '../error/error';

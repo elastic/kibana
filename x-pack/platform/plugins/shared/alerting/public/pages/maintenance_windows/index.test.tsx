@@ -7,7 +7,7 @@
 import React from 'react';
 import { licensingMock } from '@kbn/licensing-plugin/public/mocks';
 import type { Capabilities } from '@kbn/core-capabilities-common';
-import type { AppMockRenderer} from '../../lib/test_utils';
+import type { AppMockRenderer } from '../../lib/test_utils';
 import { createAppMockRenderer } from '../../lib/test_utils';
 import { useFindMaintenanceWindows } from '../../hooks/use_find_maintenance_windows';
 import { MaintenanceWindowsPage } from '.';

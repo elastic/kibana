@@ -9,13 +9,8 @@
 
 import { BehaviorSubject } from 'rxjs';
 
-import type {
-  RequestHandlerContext,
-  ServiceStatus} from '@kbn/core/server';
-import {
-  type MetricsServiceSetup,
-  ServiceStatusLevels,
-} from '@kbn/core/server';
+import type { RequestHandlerContext, ServiceStatus } from '@kbn/core/server';
+import { type MetricsServiceSetup, ServiceStatusLevels } from '@kbn/core/server';
 import {
   contextServiceMock,
   loggingSystemMock,

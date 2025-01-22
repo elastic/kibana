@@ -58,14 +58,8 @@ import type { ILayer } from '../classes/layers/layer';
 import { hasVectorLayerMethod } from '../classes/layers/vector_layer';
 import type { OnSourceChangeArgs } from '../classes/sources/source';
 import { isESVectorTileSource } from '../classes/sources/es_source';
-import type {
-  LAYER_TYPE} from '../../common/constants';
-import {
-  DRAW_MODE,
-  LAYER_STYLE_TYPE,
-  SCALING_TYPES,
-  STYLE_TYPE,
-} from '../../common/constants';
+import type { LAYER_TYPE } from '../../common/constants';
+import { DRAW_MODE, LAYER_STYLE_TYPE, SCALING_TYPES, STYLE_TYPE } from '../../common/constants';
 import type { IVectorStyle } from '../classes/styles/vector/vector_style';
 import { notifyLicensedFeatureUsage } from '../licensed_features';
 import type { IESAggField } from '../classes/fields/agg';

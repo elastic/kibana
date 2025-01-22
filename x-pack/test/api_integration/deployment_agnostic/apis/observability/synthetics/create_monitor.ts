@@ -10,13 +10,8 @@ import epct from 'expect';
 import moment from 'moment/moment';
 import { v4 as uuidv4 } from 'uuid';
 import { omit, omitBy } from 'lodash';
-import type {
-  HTTPFields,
-  PrivateLocation} from '@kbn/synthetics-plugin/common/runtime_types';
-import {
-  ConfigKey,
-  MonitorTypeEnum
-} from '@kbn/synthetics-plugin/common/runtime_types';
+import type { HTTPFields, PrivateLocation } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, MonitorTypeEnum } from '@kbn/synthetics-plugin/common/runtime_types';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { DEFAULT_FIELDS } from '@kbn/synthetics-plugin/common/constants/monitor_defaults';

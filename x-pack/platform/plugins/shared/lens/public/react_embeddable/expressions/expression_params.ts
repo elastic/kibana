@@ -12,12 +12,8 @@ import type { ExpressionRendererEvent } from '@kbn/expressions-plugin/public';
 import { toExpression } from '@kbn/interpreter';
 import { noop } from 'lodash';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import type {
-  CellValueContext} from '@kbn/embeddable-plugin/public';
-import {
-  cellValueTrigger,
-  CELL_VALUE_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
+import type { CellValueContext } from '@kbn/embeddable-plugin/public';
+import { cellValueTrigger, CELL_VALUE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { DocumentToExpressionReturnType } from '../../async_services';
 import type { LensDocument } from '../../persistence';
 import type {
@@ -25,7 +21,8 @@ import type {
   IndexPatternMap,
   IndexPatternRef,
   UserMessage,
-  VisualizationDisplayOptions} from '../../types';
+  VisualizationDisplayOptions,
+} from '../../types';
 import {
   isLensFilterEvent,
   isLensMultiFilterEvent,

@@ -13,7 +13,8 @@ import type {
   ConversationCreateEvent,
   FunctionDefinition,
   MessageAddEvent,
-  StreamingChatResponseEvent} from '@kbn/observability-ai-assistant-plugin/common';
+  StreamingChatResponseEvent,
+} from '@kbn/observability-ai-assistant-plugin/common';
 import {
   ChatCompletionErrorCode,
   concatenateChatCompletionChunks,
@@ -23,7 +24,7 @@ import {
 import type { ObservabilityAIAssistantScreenContext } from '@kbn/observability-ai-assistant-plugin/common/types';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import { throwSerializedChatCompletionErrors } from '@kbn/observability-ai-assistant-plugin/common/utils/throw_serialized_chat_completion_errors';
-import type { Message} from '@kbn/observability-ai-assistant-plugin/common';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import { streamIntoObservable } from '@kbn/observability-ai-assistant-plugin/server';
 import type { ToolingLog } from '@kbn/tooling-log';
@@ -31,9 +32,7 @@ import type { AxiosInstance, AxiosResponse, AxiosRequestConfig } from 'axios';
 import axios, { isAxiosError } from 'axios';
 import { omit, pick, remove } from 'lodash';
 import pRetry from 'p-retry';
-import type {
-  OperatorFunction,
-  Observable} from 'rxjs';
+import type { OperatorFunction, Observable } from 'rxjs';
 import {
   concatMap,
   defer,

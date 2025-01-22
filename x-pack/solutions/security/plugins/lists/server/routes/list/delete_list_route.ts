@@ -12,10 +12,9 @@ import type {
   ExceptionListItemSchema,
   ExceptionListSchema,
   FoundExceptionListItemSchema,
-  FoundExceptionListSchema} from '@kbn/securitysolution-io-ts-list-types';
-import {
-  exceptionListItemSchema,
+  FoundExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
+import { exceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
 import { LIST_URL } from '@kbn/securitysolution-list-constants';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';

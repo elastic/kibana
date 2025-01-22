@@ -7,8 +7,7 @@
 
 import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
-import type {
-  ExecutionUuidAggResult} from './get_execution_log_aggregation';
+import type { ExecutionUuidAggResult } from './get_execution_log_aggregation';
 import {
   getExecutionLogAggregation,
   formatExecutionLogResult,

@@ -8,7 +8,7 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type { KueryNode} from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder, toElasticsearchQuery } from '@kbn/es-query';
 import type { EsClient, EsEventStreamEventDto } from './types';
 import type {

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Context} from 'react';
+import type { Context } from 'react';
 import { useContext } from 'react';
 
 export const createUseContext = <T>(Ctx: Context<T>, name: string) => {

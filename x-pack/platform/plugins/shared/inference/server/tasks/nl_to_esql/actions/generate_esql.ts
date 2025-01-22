@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { map, merge, of, switchMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type {
@@ -13,12 +13,13 @@ import type {
   ToolOptions,
   Message,
   OutputCompleteEvent,
-  FunctionCallingMode} from '@kbn/inference-common';
+  FunctionCallingMode,
+} from '@kbn/inference-common';
 import {
   withoutTokenCountEvents,
   isChatCompletionMessageEvent,
   MessageRole,
-  OutputEventType
+  OutputEventType,
 } from '@kbn/inference-common';
 import { correctCommonEsqlMistakes, generateFakeToolCallId } from '../../../../common';
 import type { InferenceClient } from '../../..';

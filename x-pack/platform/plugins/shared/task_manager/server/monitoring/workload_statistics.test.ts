@@ -10,13 +10,14 @@ import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mo
 import type {
   TaskTypeAggregation,
   WorkloadAggregationResponse,
-  ScheduleDensityHistogram} from './workload_statistics';
+  ScheduleDensityHistogram,
+} from './workload_statistics';
 import {
   createWorkloadAggregator,
   padBuckets,
   estimateRecurringTaskScheduling,
 } from './workload_statistics';
-import type { ConcreteTaskInstance} from '../task';
+import type { ConcreteTaskInstance } from '../task';
 import { TaskCost } from '../task';
 
 import { times } from 'lodash';

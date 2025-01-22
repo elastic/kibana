@@ -5,18 +5,10 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  ISavedObjectsRepository} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import type {
-  PartiallyUpdateableRuleAttributes} from './partially_update_rule';
-import {
-  partiallyUpdateRule,
-  partiallyUpdateRuleWithEs,
-} from './partially_update_rule';
+import type { SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { PartiallyUpdateableRuleAttributes } from './partially_update_rule';
+import { partiallyUpdateRule, partiallyUpdateRuleWithEs } from './partially_update_rule';
 import { elasticsearchServiceMock, savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { RULE_SAVED_OBJECT_TYPE } from '.';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';

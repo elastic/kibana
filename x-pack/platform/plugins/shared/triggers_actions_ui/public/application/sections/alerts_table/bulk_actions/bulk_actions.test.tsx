@@ -17,10 +17,9 @@ import type {
   BulkActionsState,
   FetchAlertData,
   InspectQuery,
-  RowSelectionState} from '../../../../types';
-import {
-  AlertsField
+  RowSelectionState,
 } from '../../../../types';
+import { AlertsField } from '../../../../types';
 import { bulkActionsReducer } from './reducer';
 import { createAppMockRenderer } from '../../test_utils';
 import { getCasesMockMap } from '../cases/index.mock';

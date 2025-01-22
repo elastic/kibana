@@ -9,13 +9,9 @@ import { of } from 'rxjs';
 import type { ReactElement } from 'react';
 import React from 'react';
 import { stringify } from 'query-string';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import type {
-  RenderOptions,
-  MatcherFunction} from '@testing-library/react';
-import {
-  render as reactTestLibRender
-} from '@testing-library/react';
+
+import type { RenderOptions, MatcherFunction } from '@testing-library/react';
+import { render as reactTestLibRender } from '@testing-library/react';
 import { Router, Route } from '@kbn/shared-ux-router';
 import type { History } from 'history';
 import { createMemoryHistory } from 'history';
@@ -38,15 +34,10 @@ import * as useValuesListHook from '@kbn/observability-shared-plugin/public/hook
 import { rumFieldFormats } from './configurations/rum/field_formats';
 import type { ExploratoryViewPublicPluginsStart } from '../../../plugin';
 import * as useAppDataViewHook from './hooks/use_app_data_view';
-import type { DataViewContext} from './hooks/use_app_data_view';
+import type { DataViewContext } from './hooks/use_app_data_view';
 import { DataViewContextProvider } from './hooks/use_app_data_view';
-import type {
-  AllSeries,
-  SeriesContextValue} from './hooks/use_series_storage';
-import {
-  reportTypeKey,
-  UrlStorageContext,
-} from './hooks/use_series_storage';
+import type { AllSeries, SeriesContextValue } from './hooks/use_series_storage';
+import { reportTypeKey, UrlStorageContext } from './hooks/use_series_storage';
 
 import * as useSeriesFilterHook from './hooks/use_series_filters';
 

@@ -22,7 +22,7 @@ import { createObservabilityOnboardingServerRoute } from '../create_observabilit
 import { getHasLogs } from './get_has_logs';
 import { getKibanaUrl } from '../../lib/get_fallback_urls';
 import { getAgentVersionInfo } from '../../lib/get_agent_version';
-import type { ElasticAgentStepPayload, InstalledIntegration} from '../types';
+import type { ElasticAgentStepPayload, InstalledIntegration } from '../types';
 import { StepProgressPayloadRT } from '../types';
 import { createShipperApiKey } from '../../lib/api_key/create_shipper_api_key';
 import { createInstallApiKey } from '../../lib/api_key/create_install_api_key';

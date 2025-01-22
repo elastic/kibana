@@ -11,7 +11,7 @@ import type { PartialTheme, Theme } from '@elastic/charts';
 import React, { useCallback, useMemo, useState } from 'react';
 
 import type { IToasts } from '@kbn/core-notifications-browser';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
 import { DataQualityProvider } from './data_quality_context';
 import type { ReportDataQualityCheckAllCompleted, ReportDataQualityIndexChecked } from './types';

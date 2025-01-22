@@ -10,8 +10,7 @@ import { omit } from 'lodash';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import { v4 as uuidv4 } from 'uuid';
 import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
-import type {
-  ConcreteTaskInstance} from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   createTaskRunError,
   TaskErrorSource,
@@ -29,7 +28,7 @@ import type {
   TaskRunnerContext,
 } from './types';
 import { getExecutorServices } from './get_executor_services';
-import type { ElasticsearchError} from '../lib';
+import type { ElasticsearchError } from '../lib';
 import { getNextRun, isRuleSnoozed, ruleExecutionStatusToRaw } from '../lib';
 import type {
   IntervalSchedule,
@@ -38,10 +37,9 @@ import type {
   RawRuleMonitoring,
   RuleExecutionStatus,
   RuleTaskState,
-  RuleTypeRegistry} from '../types';
-import {
-  RuleExecutionStatusErrorReasons
+  RuleTypeRegistry,
 } from '../types';
+import { RuleExecutionStatusErrorReasons } from '../types';
 import type { Result } from '../lib/result_type';
 import { asErr, asOk, isErr, isOk, map, resolveErr } from '../lib/result_type';
 import { taskInstanceToAlertTaskInstance } from './alert_task_instance';
@@ -53,11 +51,9 @@ import type {
   RawAlertInstance,
   RuleAlertData,
   RuleTypeParams,
-  RuleTypeState} from '../../common';
-import {
-  parseDuration,
-  RuleLastRunOutcomeOrderMap
+  RuleTypeState,
 } from '../../common';
+import { parseDuration, RuleLastRunOutcomeOrderMap } from '../../common';
 import type { NormalizedRuleType, UntypedNormalizedRuleType } from '../rule_type_registry';
 import { getEsErrorMessage } from '../lib/errors';
 import type { InMemoryMetrics } from '../monitoring';

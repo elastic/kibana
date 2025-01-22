@@ -8,13 +8,16 @@
 import React from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { Props} from '../style_prop_editor';
+import type { Props } from '../style_prop_editor';
 import { StylePropEditor } from '../style_prop_editor';
 import { DynamicColorForm } from './dynamic_color_form';
 import { StaticColorForm } from './static_color_form';
 import type { DynamicColorProperty } from '../../properties/dynamic_color_property';
 import type { StaticColorProperty } from '../../properties/static_color_property';
-import type { ColorDynamicOptions, ColorStaticOptions } from '../../../../../../common/descriptor_types';
+import type {
+  ColorDynamicOptions,
+  ColorStaticOptions,
+} from '../../../../../../common/descriptor_types';
 
 type ColorEditorProps = Omit<Props<ColorStaticOptions, ColorDynamicOptions>, 'children'> & {
   swatches: string[];

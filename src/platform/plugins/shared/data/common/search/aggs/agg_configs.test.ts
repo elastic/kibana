@@ -9,7 +9,7 @@
 
 import { keyBy } from 'lodash';
 import type { IEsSearchResponse } from '@kbn/search-types';
-import type { ExpressionAstExpression} from '@kbn/expressions-plugin/common';
+import type { ExpressionAstExpression } from '@kbn/expressions-plugin/common';
 import { buildExpression } from '@kbn/expressions-plugin/common';
 import { AggConfig } from './agg_config';
 import { AggConfigs } from './agg_configs';

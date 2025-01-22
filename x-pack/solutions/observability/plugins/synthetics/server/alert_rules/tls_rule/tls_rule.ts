@@ -10,10 +10,9 @@ import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import type {
   GetViewInAppRelativeUrlFnOpts,
   AlertInstanceContext as AlertContext,
-  RuleExecutorOptions} from '@kbn/alerting-plugin/server';
-import {
-  AlertsClientError,
+  RuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
+import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { asyncForEach } from '@kbn/std';
 import { SYNTHETICS_ALERT_RULE_TYPES } from '@kbn/rule-data-utils';
 import {

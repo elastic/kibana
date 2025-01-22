@@ -23,7 +23,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import type { SavedSearchAttributes} from '@kbn/saved-search-plugin/common';
+import type { SavedSearchAttributes } from '@kbn/saved-search-plugin/common';
 import { SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
@@ -32,22 +32,12 @@ import type { UrlTracker } from './build_services';
 import { buildServices } from './build_services';
 import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
-import type {
-  DiscoverContextAppLocator} from './application/context/services/locator';
-import {
-  DiscoverContextAppLocatorDefinition,
-} from './application/context/services/locator';
-import type {
-  DiscoverSingleDocLocator} from './application/doc/locator';
-import {
-  DiscoverSingleDocLocatorDefinition,
-} from './application/doc/locator';
-import type {
-  DiscoverAppLocator} from '../common';
-import {
-  DiscoverAppLocatorDefinition,
-  DiscoverESQLLocatorDefinition,
-} from '../common';
+import type { DiscoverContextAppLocator } from './application/context/services/locator';
+import { DiscoverContextAppLocatorDefinition } from './application/context/services/locator';
+import type { DiscoverSingleDocLocator } from './application/doc/locator';
+import { DiscoverSingleDocLocatorDefinition } from './application/doc/locator';
+import type { DiscoverAppLocator } from '../common';
+import { DiscoverAppLocatorDefinition, DiscoverESQLLocatorDefinition } from '../common';
 import type { DiscoverCustomizationContext } from './customizations';
 import { defaultCustomizationContext } from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
@@ -58,7 +48,12 @@ import {
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
-import type { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
+import type {
+  DiscoverSetup,
+  DiscoverSetupPlugins,
+  DiscoverStart,
+  DiscoverStartPlugins,
+} from './types';
 import { deserializeState } from './embeddable/utils/serialization_utils';
 import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import { RootProfileService } from './context_awareness/profiles/root_profile';

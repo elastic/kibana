@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Option} from 'fp-ts/lib/Option';
+import type { Option } from 'fp-ts/lib/Option';
 import { fromNullable, map, filter } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 

@@ -7,12 +7,8 @@
 
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type {
-  HistogramIndicator} from '@kbn/slo-schema';
-import {
-  histogramIndicatorSchema,
-  timeslicesBudgetingMethodSchema,
-} from '@kbn/slo-schema';
+import type { HistogramIndicator } from '@kbn/slo-schema';
+import { histogramIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
   SLO_DESTINATION_INDEX_NAME,

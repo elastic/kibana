@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { NumberInputOptionProps } from '@kbn/vis-default-editor-plugin/public';
 import { NumberInputOption } from '@kbn/vis-default-editor-plugin/public';
 
-import type { Scale} from '../../../../types';
+import type { Scale } from '../../../../types';
 import { ScaleType } from '../../../../types';
 import type { SetScale } from './value_axis_options';
 

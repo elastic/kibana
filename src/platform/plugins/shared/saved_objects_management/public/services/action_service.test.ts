@@ -12,11 +12,8 @@ import {
   CopyToSpaceSavedObjectsManagementAction,
   ShareToSpaceSavedObjectsManagementAction,
 } from './actions';
-import type {
-  SavedObjectsManagementActionServiceSetup} from './action_service';
-import {
-  SavedObjectsManagementActionService
-} from './action_service';
+import type { SavedObjectsManagementActionServiceSetup } from './action_service';
+import { SavedObjectsManagementActionService } from './action_service';
 import { SavedObjectsManagementAction } from './types';
 
 class DummyAction extends SavedObjectsManagementAction {

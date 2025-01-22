@@ -16,10 +16,9 @@ import type {
   KQLCustomIndicator,
   MetricCustomIndicator,
   TimesliceMetricIndicator,
-  TimeWindowType} from '@kbn/slo-schema';
-import {
-  ALL_VALUE
+  TimeWindowType,
 } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   BUDGETING_METHOD_OCCURRENCES,
   BUDGETING_METHOD_TIMESLICES,

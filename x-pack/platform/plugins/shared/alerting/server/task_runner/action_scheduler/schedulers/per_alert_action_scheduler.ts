@@ -9,7 +9,7 @@ import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-sta
 import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
 import { RuleNotifyWhen } from '@kbn/alerting-types';
 import { compact } from 'lodash';
-import type { RuleTypeState, RuleAlertData} from '../../../../common';
+import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import { parseDuration } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import type { AlertHit } from '../../../types';
@@ -34,7 +34,7 @@ import type {
   IsExecutableActiveAlertOpts,
   IsExecutableAlertOpts,
 } from '../types';
-import type { TransformActionParamsOptions} from '../../transform_action_params';
+import type { TransformActionParamsOptions } from '../../transform_action_params';
 import { transformActionParams } from '../../transform_action_params';
 import { injectActionParams } from '../../inject_action_params';
 

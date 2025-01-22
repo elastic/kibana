@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
-import type { ConfigType} from '@kbn/screenshotting-server';
+import type { ConfigType } from '@kbn/screenshotting-server';
 import { args } from '@kbn/screenshotting-server';
 import { getDataPath } from '@kbn/utils';
 import { spawn } from 'child_process';

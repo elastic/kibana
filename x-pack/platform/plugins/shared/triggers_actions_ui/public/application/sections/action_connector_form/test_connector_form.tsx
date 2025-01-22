@@ -18,19 +18,14 @@ import {
   EuiSpacer,
   EuiErrorBoundary,
 } from '@elastic/eui';
-import type { Option} from 'fp-ts/lib/Option';
+import type { Option } from 'fp-ts/lib/Option';
 import { map, getOrElse } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
-import type {
-  ActionConnector,
-  ActionTypeRegistryContract,
-  IErrorObject} from '../../../types';
-import {
-  ActionConnectorMode
-} from '../../../types';
+import type { ActionConnector, ActionTypeRegistryContract, IErrorObject } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 
 export interface TestConnectorFormProps {
   connector: ActionConnector;

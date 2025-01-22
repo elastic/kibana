@@ -6,8 +6,7 @@
  */
 
 import type { RuleTypeModel } from '../../types';
-import type {
-  RuleTypeGroup} from './rule_type_compare';
+import type { RuleTypeGroup } from './rule_type_compare';
 import {
   ruleTypeGroupCompare,
   ruleTypeCompare,

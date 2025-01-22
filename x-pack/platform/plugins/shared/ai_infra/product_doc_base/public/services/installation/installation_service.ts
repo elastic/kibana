@@ -9,11 +9,12 @@ import type { HttpSetup } from '@kbn/core-http-browser';
 import type {
   InstallationStatusResponse,
   PerformInstallResponse,
-  UninstallResponse} from '../../../common/http_api/installation';
+  UninstallResponse,
+} from '../../../common/http_api/installation';
 import {
   INSTALLATION_STATUS_API_PATH,
   INSTALL_ALL_API_PATH,
-  UNINSTALL_ALL_API_PATH
+  UNINSTALL_ALL_API_PATH,
 } from '../../../common/http_api/installation';
 
 export class InstallationService {

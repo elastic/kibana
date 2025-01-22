@@ -5,13 +5,11 @@
  * 2.0.
  */
 
-import type {
-  ElasticsearchClientMock,
-  ScopedClusterClientMock} from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock, ScopedClusterClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   httpServiceMock,
-  loggingSystemMock
+  loggingSystemMock,
 } from '@kbn/core/server/mocks';
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { CreateSLO } from './create_slo';

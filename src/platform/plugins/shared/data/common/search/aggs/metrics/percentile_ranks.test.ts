@@ -9,10 +9,9 @@
 
 import type {
   IPercentileRanksAggConfig,
-  PercentileRanksMetricAggDependencies} from './percentile_ranks';
-import {
-  getPercentileRanksMetricAgg
+  PercentileRanksMetricAggDependencies,
 } from './percentile_ranks';
+import { getPercentileRanksMetricAgg } from './percentile_ranks';
 import type { IAggConfigs } from '../agg_configs';
 import { AggConfigs } from '../agg_configs';
 import { mockAggTypesRegistry, mockGetFieldFormatsStart } from '../test_helpers';

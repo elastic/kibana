@@ -8,11 +8,10 @@
  */
 
 import type { SavedObjectAttribute, SavedObjectReference } from '@kbn/core/public';
-import type {
-  SerializedSearchSourceFields} from '@kbn/data-plugin/public';
+import type { SerializedSearchSourceFields } from '@kbn/data-plugin/public';
 import {
   extractSearchSourceReferences,
-  injectSearchSourceReferences
+  injectSearchSourceReferences,
 } from '@kbn/data-plugin/public';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import { isObject } from 'lodash';

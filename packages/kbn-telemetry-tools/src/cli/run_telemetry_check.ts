@@ -12,8 +12,7 @@ import chalk from 'chalk';
 import { createFailError } from '@kbn/dev-cli-errors';
 import { run } from '@kbn/dev-cli-runner';
 
-import type {
-  TaskContext} from '../tools/tasks';
+import type { TaskContext } from '../tools/tasks';
 import {
   createTaskContext,
   ErrorReporter,
@@ -22,7 +21,7 @@ import {
   checkMatchingSchemasTask,
   generateSchemasTask,
   checkCompatibleTypesTask,
-  writeToFileTask
+  writeToFileTask,
 } from '../tools/tasks';
 
 export function runTelemetryCheck() {

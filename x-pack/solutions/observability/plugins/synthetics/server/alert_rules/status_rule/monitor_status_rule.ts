@@ -7,7 +7,7 @@
 
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
-import type { GetViewInAppRelativeUrlFnOpts} from '@kbn/alerting-plugin/server';
+import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import { observabilityPaths } from '@kbn/observability-plugin/common';
 import apm from 'elastic-apm-node';

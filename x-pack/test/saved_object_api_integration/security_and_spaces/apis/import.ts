@@ -9,13 +9,12 @@ import { SPACES } from '../../common/lib/spaces';
 import { getTestScenarios } from '../../common/lib/saved_object_test_utils';
 import type { TestUser } from '../../common/lib/types';
 import type { FtrProviderContext } from '../../common/ftr_provider_context';
-import type {
-  ImportTestDefinition} from '../../common/suites/import';
+import type { ImportTestDefinition } from '../../common/suites/import';
 import {
   importTestSuiteFactory,
   importTestCaseFailures,
   TEST_CASES as CASES,
-  SPECIAL_TEST_CASES
+  SPECIAL_TEST_CASES,
 } from '../../common/suites/import';
 
 const {

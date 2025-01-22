@@ -13,7 +13,10 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type { AlwaysShowPattern, ElasticsearchIndexWithPrivileges } from '../../../common/types/indices';
+import type {
+  AlwaysShowPattern,
+  ElasticsearchIndexWithPrivileges,
+} from '../../../common/types/indices';
 import { isNotNullish } from '../../../common/utils/is_not_nullish';
 
 import { fetchIndexCounts } from './fetch_index_counts';

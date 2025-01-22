@@ -6,7 +6,7 @@
  */
 
 import { useEsSearch } from '@kbn/observability-shared-plugin/public';
-import type { FieldPath} from 'react-hook-form';
+import type { FieldPath } from 'react-hook-form';
 import { useFormContext } from 'react-hook-form';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import type { TimeRange } from '@kbn/es-query';

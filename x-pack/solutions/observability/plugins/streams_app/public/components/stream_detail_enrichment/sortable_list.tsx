@@ -6,14 +6,8 @@
  */
 
 import React from 'react';
-import type {
-  DragDropContextProps,
-  EuiDroppableProps} from '@elastic/eui';
-import {
-  EuiDragDropContext,
-  EuiDroppable,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { DragDropContextProps, EuiDroppableProps } from '@elastic/eui';
+import { EuiDragDropContext, EuiDroppable, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
 interface SortableListProps {

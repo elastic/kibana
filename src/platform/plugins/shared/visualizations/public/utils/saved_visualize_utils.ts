@@ -10,12 +10,11 @@
 import _ from 'lodash';
 import type { SavedObjectAttributes, SavedObjectReference } from '@kbn/core/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
-import type {
-  DataPublicPluginStart} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import {
   extractSearchSourceReferences,
   injectSearchSourceReferences,
-  parseSearchSourceJSON
+  parseSearchSourceJSON,
 } from '@kbn/data-plugin/public';
 import type { SavedObjectsTaggingApi } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';

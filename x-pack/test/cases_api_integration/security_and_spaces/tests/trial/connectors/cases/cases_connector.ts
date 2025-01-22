@@ -15,10 +15,7 @@ import type {
 } from '@kbn/cases-plugin/server/connectors/cases/types';
 import type { CasePostRequest } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
-import type {
-  AlertAttachment,
-  Attachments,
-  Case} from '@kbn/cases-plugin/common/types/domain';
+import type { AlertAttachment, Attachments, Case } from '@kbn/cases-plugin/common/types/domain';
 import {
   CaseStatuses,
   CaseSeverity,

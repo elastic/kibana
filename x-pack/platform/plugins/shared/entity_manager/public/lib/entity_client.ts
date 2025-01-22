@@ -8,11 +8,9 @@
 import type { CoreSetup, CoreStart } from '@kbn/core/public';
 import type {
   ClientRequestParamsOf,
-  RouteRepositoryClient} from '@kbn/server-route-repository-client';
-import {
-  createRepositoryClient,
-  isHttpFetchError,
+  RouteRepositoryClient,
 } from '@kbn/server-route-repository-client';
+import { createRepositoryClient, isHttpFetchError } from '@kbn/server-route-repository-client';
 import { type KueryNode, nodeTypes, toKqlExpression } from '@kbn/es-query';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { EntityDefinitionWithState } from '../../server/lib/entities/types';

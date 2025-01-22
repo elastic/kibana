@@ -6,13 +6,8 @@
  */
 
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
-import type {
-  RequestHandlerContext,
-  RouteValidatorConfig} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers,
-  kibanaResponseFactory,
-} from '@kbn/core/server';
+import type { RequestHandlerContext, RouteValidatorConfig } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers, kibanaResponseFactory } from '@kbn/core/server';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';
 import { CLOUD_DATA_SAVED_OBJECT_ID } from './constants';
 import { setPostCloudSolutionDataRoute } from './set_cloud_data_route';

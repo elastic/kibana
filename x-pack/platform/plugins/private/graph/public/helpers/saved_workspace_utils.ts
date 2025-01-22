@@ -9,7 +9,7 @@ import { cloneDeep, assign, defaults, forOwn } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { CoreStart, IBasePath, SavedObjectAttributes } from '@kbn/core/public';
 
-import type { SavedObjectSaveOpts} from '@kbn/saved-objects-plugin/public';
+import type { SavedObjectSaveOpts } from '@kbn/saved-objects-plugin/public';
 import { isErrorNonFatal } from '@kbn/saved-objects-plugin/public';
 import { SavedObjectNotFound } from '@kbn/kibana-utils-plugin/public';
 import type { ContentClient } from '@kbn/content-management-plugin/public';
@@ -24,10 +24,9 @@ import type {
   GraphCreateOut,
   GraphSavedObjectAttributes,
   GraphUpdateOut,
-  GraphUpdateIn} from '../../common/content_management';
-import {
-  CONTENT_ID,
+  GraphUpdateIn,
 } from '../../common/content_management';
+import { CONTENT_ID } from '../../common/content_management';
 import {
   injectReferences,
   extractReferences,

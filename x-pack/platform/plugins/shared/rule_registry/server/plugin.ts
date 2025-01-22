@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { type Subject, ReplaySubject, map, distinctUntilChanged } from 'rxjs';
 import type {
   PluginInitializerContext,
@@ -15,10 +15,9 @@ import type {
   KibanaRequest,
   CoreStart,
   IContextProvider,
-  CoreStatus} from '@kbn/core/server';
-import {
-  ServiceStatusLevels,
+  CoreStatus,
 } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server';
 import type { SecurityPluginSetup } from '@kbn/security-plugin/server';

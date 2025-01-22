@@ -16,7 +16,7 @@ import {
   fieldValidators,
 } from '../../../../../../shared_imports';
 
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { to } from './shared';
 
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';

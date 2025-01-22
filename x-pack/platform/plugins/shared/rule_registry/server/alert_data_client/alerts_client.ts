@@ -11,8 +11,7 @@ import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { Filter, EsQueryConfig } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 import { decodeVersion, encodeHitVersion } from '@kbn/securitysolution-es-utils';
-import type {
-  STATUS_VALUES} from '@kbn/rule-data-utils';
+import type { STATUS_VALUES } from '@kbn/rule-data-utils';
 import {
   ALERT_TIME_RANGE,
   ALERT_STATUS,
@@ -33,8 +32,11 @@ import type {
   QueryDslQueryContainer,
   SortCombinations,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { RuleTypeParams, AlertingServerStart ,
-  AlertingAuthorization} from '@kbn/alerting-plugin/server';
+import type {
+  RuleTypeParams,
+  AlertingServerStart,
+  AlertingAuthorization,
+} from '@kbn/alerting-plugin/server';
 import {
   ReadOperations,
   WriteOperations,
@@ -42,7 +44,7 @@ import {
 } from '@kbn/alerting-plugin/server';
 import type { Logger, ElasticsearchClient, EcsEvent } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
-import type { FieldDescriptor} from '@kbn/data-plugin/server';
+import type { FieldDescriptor } from '@kbn/data-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import { isEmpty } from 'lodash';
 import type { RuleTypeRegistry } from '@kbn/alerting-plugin/server/types';

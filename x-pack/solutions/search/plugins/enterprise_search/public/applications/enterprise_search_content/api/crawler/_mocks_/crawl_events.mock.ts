@@ -15,11 +15,9 @@ import type {
   CrawlRequestStats,
   CrawlRequestStatsFromServer,
   CrawlRequestWithDetails,
-  CrawlRequestWithDetailsFromServer} from '../types';
-import {
-  CrawlerStatus,
-  CrawlType,
+  CrawlRequestWithDetailsFromServer,
 } from '../types';
+import { CrawlerStatus, CrawlType } from '../types';
 
 // Server
 

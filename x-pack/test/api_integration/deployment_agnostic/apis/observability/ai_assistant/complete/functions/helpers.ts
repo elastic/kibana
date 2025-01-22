@@ -8,10 +8,9 @@ import expect from '@kbn/expect';
 import type {
   Message,
   MessageAddEvent,
-  StreamingChatResponseEvent} from '@kbn/observability-ai-assistant-plugin/common';
-import {
-  MessageRole
+  StreamingChatResponseEvent,
 } from '@kbn/observability-ai-assistant-plugin/common';
+import { MessageRole } from '@kbn/observability-ai-assistant-plugin/common';
 import type { Readable } from 'stream';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { ObservabilityAIAssistantApiClient } from '../../../../../services/observability_ai_assistant_api';

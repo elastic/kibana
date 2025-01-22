@@ -12,11 +12,8 @@ import type { TestBed } from '@kbn/test-jest-helpers';
 import { registerTestBed } from '@kbn/test-jest-helpers';
 
 import type { Context } from '../../public/components/field_editor_context';
-import type {
-  Props} from '../../public/components/field_editor_flyout_content';
-import {
-  FieldEditorFlyoutContent
-} from '../../public/components/field_editor_flyout_content';
+import type { Props } from '../../public/components/field_editor_flyout_content';
+import { FieldEditorFlyoutContent } from '../../public/components/field_editor_flyout_content';
 import { WithFieldEditorDependencies, getCommonActions } from './helpers';
 
 export { waitForUpdates, waitForDocumentsAndPreviewUpdate } from './helpers';

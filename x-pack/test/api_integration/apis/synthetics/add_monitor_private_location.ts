@@ -10,10 +10,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type {
   HTTPFields,
   PrivateLocation,
-  ServiceLocation} from '@kbn/synthetics-plugin/common/runtime_types';
-import {
-  ConfigKey
+  ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { omit } from 'lodash';

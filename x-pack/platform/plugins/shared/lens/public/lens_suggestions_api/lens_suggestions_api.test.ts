@@ -7,7 +7,7 @@
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 import { ChartType } from '@kbn/visualization-utils';
-import type { DatasourceMock} from '../mocks';
+import type { DatasourceMock } from '../mocks';
 import { createMockVisualization, createMockDatasource } from '../mocks';
 import type { DatasourceSuggestion } from '../types';
 import { suggestionsApi } from '.';

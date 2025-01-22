@@ -8,7 +8,10 @@
  */
 
 import { isEmpty } from 'lodash';
-import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common/expression_types/specs';
+import type {
+  Datatable,
+  DatatableColumn,
+} from '@kbn/expressions-plugin/common/expression_types/specs';
 import type { IAggConfigs } from '../aggs';
 import { tabifyGetColumns } from './get_columns';
 

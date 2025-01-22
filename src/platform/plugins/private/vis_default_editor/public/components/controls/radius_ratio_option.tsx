@@ -8,7 +8,7 @@
  */
 
 import React, { useCallback } from 'react';
-import type { EuiRangeProps} from '@elastic/eui';
+import type { EuiRangeProps } from '@elastic/eui';
 import { EuiFormRow, EuiIconTip, EuiRange, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

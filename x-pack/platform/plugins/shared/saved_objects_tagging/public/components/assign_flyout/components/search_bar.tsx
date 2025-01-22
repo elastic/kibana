@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import type { SearchFilterConfig } from '@elastic/eui';
 import { EuiSearchBar } from '@elastic/eui';

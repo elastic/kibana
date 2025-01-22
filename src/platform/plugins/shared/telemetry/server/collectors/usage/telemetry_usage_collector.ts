@@ -10,7 +10,7 @@
 import { accessSync, constants, readFileSync, statSync } from 'fs';
 import { load } from 'js-yaml';
 import { dirname, join } from 'path';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
 import { ensureDeepObject } from '@kbn/std';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';

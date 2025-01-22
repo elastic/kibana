@@ -17,7 +17,7 @@ import React from 'react';
 
 // import { act } from 'react-dom/test-utils';
 import { App } from './app';
-import type { WorkpadNames} from '../test';
+import type { WorkpadNames } from '../test';
 import { sharedWorkpads, tick } from '../test';
 import {
   getScrubber as scrubber,

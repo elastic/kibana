@@ -8,8 +8,7 @@
 import { mockedQueryService, mockedSearchService } from '../../../mocks/test_providers';
 import { BehaviorSubject, throwError } from 'rxjs';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
-import type {
-  Aggregation} from './fetch_aggregated_indicators';
+import type { Aggregation } from './fetch_aggregated_indicators';
 import {
   convertAggregationToChartSeries,
   createFetchAggregatedIndicators,

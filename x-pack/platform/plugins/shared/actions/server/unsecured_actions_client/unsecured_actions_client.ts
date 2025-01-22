@@ -13,7 +13,7 @@ import type {
   ExecutionResponse,
 } from '../create_unsecured_execute_function';
 import { asNotificationExecutionSource } from '../lib';
-import type { RelatedSavedObjects , ActionExecutorContract} from '../lib';
+import type { RelatedSavedObjects, ActionExecutorContract } from '../lib';
 import type { ActionTypeExecutorResult, InMemoryConnector } from '../types';
 import { asBackgroundTaskExecutionSource } from '../lib/action_execution_source';
 import type { ConnectorWithExtraFindData } from '../application/connector/types';

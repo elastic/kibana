@@ -11,7 +11,10 @@ import { registerActionsUsageCollector } from './actions_usage_collector';
 import type { ActionsConfig } from '../config';
 import { configSchema } from '../config';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { ConcreteTaskInstance, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import type {
+  ConcreteTaskInstance,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 
 const mockTaskManagerStart = taskManagerMock.createStart();
 

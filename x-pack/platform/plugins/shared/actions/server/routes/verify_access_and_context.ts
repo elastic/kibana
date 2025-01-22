@@ -6,7 +6,7 @@
  */
 
 import type { RequestHandler } from '@kbn/core/server';
-import type { ILicenseState} from '../lib';
+import type { ILicenseState } from '../lib';
 import { isErrorThatHandlesItsOwnResponse, verifyApiAccess } from '../lib';
 import type { ActionsRequestHandlerContext } from '../types';
 

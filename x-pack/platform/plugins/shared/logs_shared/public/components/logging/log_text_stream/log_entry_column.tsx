@@ -10,8 +10,7 @@ import { useMemo } from 'react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import moment from 'moment';
 import type { TextScale } from '../../../../common/log_text_scale';
-import type {
-  LogColumnRenderConfiguration} from '../../../utils/log_column_render_configuration';
+import type { LogColumnRenderConfiguration } from '../../../utils/log_column_render_configuration';
 import {
   isTimestampColumnRenderConfiguration,
   isMessageColumnRenderConfiguration,

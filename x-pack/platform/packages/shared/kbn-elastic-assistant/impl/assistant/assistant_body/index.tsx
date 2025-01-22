@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Dispatch,
-  FunctionComponent,
-  SetStateAction} from 'react';
-import React, {
-  useEffect,
-  useMemo,
-  useRef,
-} from 'react';
+import type { Dispatch, FunctionComponent, SetStateAction } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,

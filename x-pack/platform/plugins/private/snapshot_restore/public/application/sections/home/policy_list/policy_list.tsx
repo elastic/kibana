@@ -13,8 +13,7 @@ import { EuiButton, EuiCallOut, EuiSpacer, EuiPageTemplate, EuiLink } from '@ela
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import { i18n } from '@kbn/i18n';
-import type {
-  Error} from '../../../../shared_imports';
+import type { Error } from '../../../../shared_imports';
 import {
   PageLoading,
   PageError,

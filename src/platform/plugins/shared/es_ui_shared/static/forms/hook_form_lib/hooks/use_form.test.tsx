@@ -21,10 +21,9 @@ import type {
   FormHook,
   FieldHook,
   ValidationFunc,
-  FieldConfig} from '..';
-import {
-  VALIDATION_TYPES,
+  FieldConfig,
 } from '..';
+import { VALIDATION_TYPES } from '..';
 import { useForm } from './use_form';
 
 interface MyForm {

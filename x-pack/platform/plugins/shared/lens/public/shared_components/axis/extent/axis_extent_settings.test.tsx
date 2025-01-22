@@ -7,7 +7,7 @@
 
 import type { ComponentProps } from 'react';
 import React from 'react';
-import type { DataBoundsObject} from './axis_extent_settings';
+import type { DataBoundsObject } from './axis_extent_settings';
 import { AxisBoundsControl, getBounds } from './axis_extent_settings';
 import type { AxisExtentMode, YScaleType, XScaleType } from '@kbn/expression-xy-plugin/common';
 import type { UnifiedAxisExtentConfig } from './types';

@@ -12,7 +12,7 @@ import {
   useEditMaintenanceWindowsNavigation,
   useMaintenanceWindowsNavigation,
 } from './use_navigation';
-import type { AppMockRenderer} from '../lib/test_utils';
+import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { MANAGEMENT_APP_ID, MAINTENANCE_WINDOWS_APP_ID } from '../../common';
 

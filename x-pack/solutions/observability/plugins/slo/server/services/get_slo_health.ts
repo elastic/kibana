@@ -7,13 +7,9 @@
 
 import type { TransformGetTransformStatsTransformStats } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
-import type {
-  FetchSLOHealthParams,
-  FetchSLOHealthResponse} from '@kbn/slo-schema';
-import {
-  fetchSLOHealthResponseSchema,
-} from '@kbn/slo-schema';
-import type { Dictionary} from 'lodash';
+import type { FetchSLOHealthParams, FetchSLOHealthResponse } from '@kbn/slo-schema';
+import { fetchSLOHealthResponseSchema } from '@kbn/slo-schema';
+import type { Dictionary } from 'lodash';
 import { groupBy, keyBy } from 'lodash';
 import moment from 'moment';
 import {

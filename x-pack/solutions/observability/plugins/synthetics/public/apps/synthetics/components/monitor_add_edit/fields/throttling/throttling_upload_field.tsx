@@ -11,11 +11,12 @@ import { i18n } from '@kbn/i18n';
 import type { Validation } from '../../../../../../../common/types';
 import type {
   ThrottlingConfig,
-  ThrottlingConfigValue} from '../../../../../../../common/runtime_types';
+  ThrottlingConfigValue,
+} from '../../../../../../../common/runtime_types';
 import {
   BandwidthLimitKey,
   ConfigKey,
-  DEFAULT_BANDWIDTH_LIMIT
+  DEFAULT_BANDWIDTH_LIMIT,
 } from '../../../../../../../common/runtime_types';
 import { ThrottlingExceededMessage } from './throttling_exceeded_callout';
 import { OptionalLabel } from '../optional_label';

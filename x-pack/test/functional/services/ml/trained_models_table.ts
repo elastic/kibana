@@ -12,7 +12,12 @@ import { upperFirst } from 'lodash';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonUI } from './common_ui';
-import type { MappedInputParams, MappedOutput, ModelType, TrainedModelsActions } from './trained_models';
+import type {
+  MappedInputParams,
+  MappedOutput,
+  ModelType,
+  TrainedModelsActions,
+} from './trained_models';
 
 export interface TrainedModelRowData {
   id: string;

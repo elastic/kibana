@@ -8,13 +8,8 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 import PropTypes from 'prop-types';
-import type {
-  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiIcon
-} from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ClosePopoverFn } from '../../popover';
 import { Popover } from '../../popover';

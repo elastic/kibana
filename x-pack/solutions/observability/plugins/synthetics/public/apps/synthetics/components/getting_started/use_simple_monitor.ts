@@ -18,16 +18,11 @@ import { DEFAULT_FIELDS } from '../../../../../common/constants/monitor_defaults
 import { ConfigKey } from '../../../../../common/constants/monitor_management';
 import type {
   EncryptedSyntheticsSavedMonitor,
-  ServiceLocationErrors} from '../../../../../common/runtime_types';
-import {
-  MonitorTypeEnum
+  ServiceLocationErrors,
 } from '../../../../../common/runtime_types';
-import type {
-  SimpleFormData} from './simple_monitor_form';
-import {
-  MONITOR_SUCCESS_LABEL,
-  MONITOR_FAILURE_LABEL
-} from './simple_monitor_form';
+import { MonitorTypeEnum } from '../../../../../common/runtime_types';
+import type { SimpleFormData } from './simple_monitor_form';
+import { MONITOR_SUCCESS_LABEL, MONITOR_FAILURE_LABEL } from './simple_monitor_form';
 import { kibanaService } from '../../../../utils/kibana_service';
 
 export const useSimpleMonitor = ({ monitorData }: { monitorData?: SimpleFormData }) => {

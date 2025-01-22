@@ -22,7 +22,10 @@ import {
   SOURCE_TYPES,
   VECTOR_STYLES,
 } from '../../../../common/constants';
-import type { ESTermSourceDescriptor, VectorStyleDescriptor } from '../../../../common/descriptor_types';
+import type {
+  ESTermSourceDescriptor,
+  VectorStyleDescriptor,
+} from '../../../../common/descriptor_types';
 import { getDefaultDynamicProperties } from '../../styles/vector/vector_style_defaults';
 import type { IVectorSource } from '../../sources/vector_source';
 import { mockVectorLayer } from '../__fixtures__/mock_vector_layer';

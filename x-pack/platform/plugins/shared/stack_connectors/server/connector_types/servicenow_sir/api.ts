@@ -13,10 +13,9 @@ import type {
   ExternalServiceSIR,
   PushToServiceApiHandlerArgs,
   PushToServiceApiParamsSIR,
-  PushToServiceResponse} from '../lib/servicenow/types';
-import {
-  ObservableTypes
+  PushToServiceResponse,
 } from '../lib/servicenow/types';
+import { ObservableTypes } from '../lib/servicenow/types';
 
 const SPLIT_REGEX = /[ ,|\r\n\t]+/;
 

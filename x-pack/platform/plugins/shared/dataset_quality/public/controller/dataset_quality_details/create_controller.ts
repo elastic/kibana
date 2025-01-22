@@ -15,7 +15,10 @@ import type { DataStreamsStatsServiceStart } from '../../services/data_streams_s
 import type { DataStreamDetailsServiceStart } from '../../services/data_stream_details';
 import type { DatasetQualityStartDeps } from '../../types';
 import { getContextFromPublicState, getPublicStateFromContext } from './public_state';
-import type { DatasetQualityDetailsController, DatasetQualityDetailsPublicStateUpdate } from './types';
+import type {
+  DatasetQualityDetailsController,
+  DatasetQualityDetailsPublicStateUpdate,
+} from './types';
 
 interface Dependencies {
   core: CoreStart;

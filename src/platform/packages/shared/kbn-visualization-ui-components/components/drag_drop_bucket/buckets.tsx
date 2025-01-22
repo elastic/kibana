@@ -9,9 +9,7 @@
 
 import React, { useCallback, useState } from 'react';
 import type { Assign } from '@kbn/utility-types';
-import type {
-  EuiPanelProps,
-  DragDropContextProps} from '@elastic/eui';
+import type { EuiPanelProps, DragDropContextProps } from '@elastic/eui';
 import {
   EuiPanel,
   EuiDraggable,

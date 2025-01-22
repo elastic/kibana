@@ -8,8 +8,7 @@ import React, { useState } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import type {
-  EuiContextMenuProps} from '@elastic/eui';
+import type { EuiContextMenuProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,

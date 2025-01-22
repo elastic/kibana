@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup } from '@kbn/core-http-browser';
@@ -23,11 +23,8 @@ import {
 import { notificationService } from '../../../../services/notification';
 import { httpService } from '../../../../services/http';
 
-import type {
-  IndexActionsContextMenuProps} from '../index_actions_context_menu/index_actions_context_menu';
-import {
-  IndexActionsContextMenu
-} from '../index_actions_context_menu/index_actions_context_menu';
+import type { IndexActionsContextMenuProps } from '../index_actions_context_menu/index_actions_context_menu';
+import { IndexActionsContextMenu } from '../index_actions_context_menu/index_actions_context_menu';
 
 const getIndexStatusByName = (
   indexNames: string[],

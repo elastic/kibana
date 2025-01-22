@@ -5,17 +5,8 @@
  * 2.0.
  */
 
-import type {
-  TickFormatter,
-  XYBrushEvent} from '@elastic/charts';
-import {
-  Axis,
-  BarSeries,
-  niceTimeFormatter,
-  Position,
-  ScaleType,
-  Settings
-} from '@elastic/charts';
+import type { TickFormatter, XYBrushEvent } from '@elastic/charts';
+import { Axis, BarSeries, niceTimeFormatter, Position, ScaleType, Settings } from '@elastic/charts';
 import { timeFormatter } from '@elastic/charts/dist/utils/data/formatters';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import numeral from '@elastic/numeral';

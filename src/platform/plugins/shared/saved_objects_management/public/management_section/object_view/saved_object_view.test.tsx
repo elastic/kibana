@@ -25,12 +25,8 @@ import {
 } from '@kbn/core/public/mocks';
 
 import type { SavedObjectWithMetadata } from '../../types';
-import type {
-  SavedObjectEditionProps,
-  SavedObjectEditionState} from './saved_object_view';
-import {
-  SavedObjectEdition
-} from './saved_object_view';
+import type { SavedObjectEditionProps, SavedObjectEditionState } from './saved_object_view';
+import { SavedObjectEdition } from './saved_object_view';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 
 const resolvePromises = () => new Promise((resolve) => process.nextTick(resolve));

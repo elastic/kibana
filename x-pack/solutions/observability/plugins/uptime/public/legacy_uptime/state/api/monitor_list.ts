@@ -9,10 +9,9 @@ import { API_URLS } from '../../../../common/constants';
 import { apiService } from './utils';
 import type {
   FetchMonitorStatesQueryArgs,
-  MonitorSummariesResult} from '../../../../common/runtime_types';
-import {
-  MonitorSummariesResultType,
+  MonitorSummariesResult,
 } from '../../../../common/runtime_types';
+import { MonitorSummariesResultType } from '../../../../common/runtime_types';
 
 export const fetchMonitorList = async (
   params: FetchMonitorStatesQueryArgs

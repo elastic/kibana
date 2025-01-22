@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { SavedTimeline} from '@kbn/security-solution-plugin/common/api/timeline';
+import type { SavedTimeline } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
 import { TIMELINE_URL, TIMELINES_URL } from '@kbn/security-solution-plugin/common/constants';
 import type TestAgent from 'supertest/lib/agent';

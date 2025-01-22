@@ -12,7 +12,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiInMemoryTable, EuiButton, EuiLink } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
-import type { UseRequestResponse} from '../../../../../../shared_imports';
+import type { UseRequestResponse } from '../../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../../shared_imports';
 import type { TemplateListItem } from '../../../../../../../common';
 import { UIM_TEMPLATE_SHOW_DETAILS_CLICK } from '../../../../../../../common/constants';

@@ -10,12 +10,8 @@
 import { map } from 'rxjs';
 import type { History } from 'history';
 
-import type {
-  IKbnUrlStateStorage} from '@kbn/kibana-utils-plugin/public';
-import {
-  getQueryParams,
-  createQueryParamObservable,
-} from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { getQueryParams, createQueryParamObservable } from '@kbn/kibana-utils-plugin/public';
 import { replaceUrlHashQuery } from '@kbn/kibana-utils-plugin/common';
 import type { Query } from '@kbn/es-query';
 import type { SearchSessionInfoProvider } from '@kbn/data-plugin/public';

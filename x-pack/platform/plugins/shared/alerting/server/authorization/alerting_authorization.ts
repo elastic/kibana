@@ -14,12 +14,8 @@ import type { FeaturesPluginStart } from '@kbn/features-plugin/server';
 import type { Space } from '@kbn/spaces-plugin/server';
 import type { RegistryRuleType } from '../rule_type_registry';
 import type { RuleTypeRegistry } from '../types';
-import type {
-  AlertingAuthorizationFilterOpts} from './alerting_authorization_kuery';
-import {
-  asFiltersByRuleTypeAndConsumer,
-  asFiltersBySpaceId
-} from './alerting_authorization_kuery';
+import type { AlertingAuthorizationFilterOpts } from './alerting_authorization_kuery';
+import { asFiltersByRuleTypeAndConsumer, asFiltersBySpaceId } from './alerting_authorization_kuery';
 import type { AlertingAuthorizationEntity } from './types';
 import { ReadOperations, WriteOperations } from './types';
 

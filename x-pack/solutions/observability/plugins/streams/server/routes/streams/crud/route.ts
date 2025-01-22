@@ -12,11 +12,9 @@ import type {
   ListStreamsResponse,
   FieldDefinitionConfig,
   ReadStreamDefinition,
-  WiredReadStreamDefinition} from '@kbn/streams-schema';
-import {
-  streamConfigDefinitionSchema,
-  isWiredStream,
+  WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
+import { streamConfigDefinitionSchema, isWiredStream } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
 import { MalformedStreamId } from '../../../lib/streams/errors/malformed_stream_id';
 import {

@@ -7,11 +7,8 @@
 
 import type { SavedObjectReference } from '@kbn/core/server';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
-import type {
-  SavedObjectAttributesWithReferences} from '../../references';
-import {
-  SavedObjectReferenceResolutionError,
-} from '../../references';
+import type { SavedObjectAttributesWithReferences } from '../../references';
+import { SavedObjectReferenceResolutionError } from '../../references';
 import type { LogViewSavedObjectAttributes } from '../types';
 
 export const logIndicesDataViewReferenceName = 'log-indices-data-view-0';

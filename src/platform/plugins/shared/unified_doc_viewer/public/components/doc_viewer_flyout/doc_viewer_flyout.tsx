@@ -11,8 +11,7 @@ import React, { useMemo, useCallback, type ComponentType } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type {
-  EuiFlyoutProps} from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -27,7 +26,7 @@ import {
   keys,
   EuiButtonEmpty,
   useEuiTheme,
-  useIsWithinMinBreakpoint
+  useIsWithinMinBreakpoint,
 } from '@elastic/eui';
 import type { DataTableRecord, DataTableColumnsMeta } from '@kbn/discover-utils/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';

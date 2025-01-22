@@ -7,11 +7,11 @@
 
 import type { PropsWithChildren, ReactElement } from 'react';
 import React from 'react';
-import type { ReactWrapper} from 'enzyme';
+import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import { Provider } from 'react-redux';
 import type { PreloadedState } from '@reduxjs/toolkit';
-import type { RenderOptions} from '@testing-library/react';
+import type { RenderOptions } from '@testing-library/react';
 import { render } from '@testing-library/react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { LensAppServices } from '../app_plugin/types';

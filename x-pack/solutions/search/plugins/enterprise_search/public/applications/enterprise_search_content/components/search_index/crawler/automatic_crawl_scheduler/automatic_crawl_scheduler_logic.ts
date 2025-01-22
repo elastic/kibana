@@ -15,12 +15,9 @@ import type { Actions } from '../../../../../shared/api_logic/create_api_logic';
 
 import { flashAPIErrors } from '../../../../../shared/flash_messages';
 import { HttpLogic } from '../../../../../shared/http';
-import type {
-  UpdateConnectorSchedulingArgs} from '../../../../api/connector/update_connector_scheduling_api_logic';
-import {
-  UpdateConnectorSchedulingApiLogic
-} from '../../../../api/connector/update_connector_scheduling_api_logic';
-import type { CrawlSchedule, CrawlScheduleFromServer} from '../../../../api/crawler/types';
+import type { UpdateConnectorSchedulingArgs } from '../../../../api/connector/update_connector_scheduling_api_logic';
+import { UpdateConnectorSchedulingApiLogic } from '../../../../api/connector/update_connector_scheduling_api_logic';
+import type { CrawlSchedule, CrawlScheduleFromServer } from '../../../../api/crawler/types';
 import { CrawlUnits } from '../../../../api/crawler/types';
 import { crawlScheduleServerToClient } from '../../../../api/crawler/utils';
 import { IndexNameLogic } from '../../index_name_logic';

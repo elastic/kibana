@@ -8,7 +8,7 @@
  */
 
 import { AggConfigs } from '../agg_configs';
-import type { FieldFormatsGetConfigFn} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { NumberFormat } from '@kbn/field-formats-plugin/common';
 import { getShardDelayBucketAgg, SHARD_DELAY_AGG_NAME } from './shard_delay';
 

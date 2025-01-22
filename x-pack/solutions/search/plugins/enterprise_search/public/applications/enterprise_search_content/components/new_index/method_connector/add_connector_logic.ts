@@ -15,10 +15,9 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import type {
   AddConnectorApiLogicArgs,
-  AddConnectorApiLogicResponse} from '../../../api/connector/add_connector_api_logic';
-import {
-  AddConnectorApiLogic
+  AddConnectorApiLogicResponse,
 } from '../../../api/connector/add_connector_api_logic';
+import { AddConnectorApiLogic } from '../../../api/connector/add_connector_api_logic';
 import { CONNECTOR_DETAIL_TAB_PATH } from '../../../routes';
 import { SearchIndexTabId } from '../../search_index/search_index';
 

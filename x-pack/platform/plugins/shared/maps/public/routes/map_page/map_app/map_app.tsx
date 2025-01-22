@@ -24,16 +24,11 @@ import type {
   GlobalQueryStateFromUrl,
   QueryState,
   QueryStateChange,
-  SavedQuery} from '@kbn/data-plugin/public';
-import {
-  syncGlobalQueryStateWithUrl,
+  SavedQuery,
 } from '@kbn/data-plugin/public';
-import type {
-  IKbnUrlStateStorage} from '@kbn/kibana-utils-plugin/public';
-import {
-  createKbnUrlStateStorage,
-  withNotifyOnErrors
-} from '@kbn/kibana-utils-plugin/public';
+import { syncGlobalQueryStateWithUrl } from '@kbn/data-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import {
   getData,
@@ -56,8 +51,7 @@ import {
   APP_ID,
   MAP_EMBEDDABLE_NAME,
 } from '../../../../common/constants';
-import type {
-  SavedMap} from '../saved_map';
+import type { SavedMap } from '../saved_map';
 import {
   getInitialQuery,
   getInitialRefreshConfig,

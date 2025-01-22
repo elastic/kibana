@@ -26,11 +26,8 @@ import {
 
 import { i18n } from '@kbn/i18n';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type {
-  CustomizePanelActionApi} from '../../panel_actions/customize_panel_action';
-import {
-  isApiCompatibleWithCustomizePanelAction,
-} from '../../panel_actions/customize_panel_action';
+import type { CustomizePanelActionApi } from '../../panel_actions/customize_panel_action';
+import { isApiCompatibleWithCustomizePanelAction } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
 
 export const placeholderTitle = i18n.translate('presentationPanel.placeholderTitle', {

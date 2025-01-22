@@ -8,14 +8,8 @@
  */
 
 import { Position } from '@elastic/charts';
-import type {
-  PartitionChartProps,
-  PartitionVisParams} from '../../../common/types';
-import {
-  LabelPositions,
-  LegendDisplay,
-  ValueFormats,
-} from '../../../common/types';
+import type { PartitionChartProps, PartitionVisParams } from '../../../common/types';
+import { LabelPositions, LegendDisplay, ValueFormats } from '../../../common/types';
 
 export const config: PartitionChartProps['visConfig'] = {
   addTooltip: true,

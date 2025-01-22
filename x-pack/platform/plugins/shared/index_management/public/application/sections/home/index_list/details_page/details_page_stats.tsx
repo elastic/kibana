@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState, useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import {

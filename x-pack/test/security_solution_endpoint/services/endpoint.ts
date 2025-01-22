@@ -7,7 +7,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { Client} from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import {
@@ -22,7 +22,8 @@ import {
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import type {
   DeleteIndexedHostsAndAlertsResponse,
-  IndexedHostsAndAlertsResponse} from '@kbn/security-solution-plugin/common/endpoint/index_data';
+  IndexedHostsAndAlertsResponse,
+} from '@kbn/security-solution-plugin/common/endpoint/index_data';
 import {
   deleteIndexedHostsAndAlerts,
   indexHostsAndAlerts,

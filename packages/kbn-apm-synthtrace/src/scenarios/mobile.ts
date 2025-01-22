@@ -13,7 +13,9 @@ import type {
   GeoInfo,
   NetworkConnectionInfo,
   OSInfo,
- MobileDevice, ApmFields } from '@kbn/apm-synthtrace-client';
+  MobileDevice,
+  ApmFields,
+} from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';
 import { getSynthtraceEnvironment } from '../lib/utils/get_synthtrace_environment';
 import { withClient } from '../lib/utils/with_client';

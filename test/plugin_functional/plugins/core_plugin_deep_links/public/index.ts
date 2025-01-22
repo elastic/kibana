@@ -8,12 +8,8 @@
  */
 
 import type { PluginInitializer } from '@kbn/core/public';
-import type {
-  CorePluginDeepLinksPluginSetup,
-  CorePluginDeepLinksPluginStart} from './plugin';
-import {
-  CorePluginDeepLinksPlugin
-} from './plugin';
+import type { CorePluginDeepLinksPluginSetup, CorePluginDeepLinksPluginStart } from './plugin';
+import { CorePluginDeepLinksPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   CorePluginDeepLinksPluginSetup,

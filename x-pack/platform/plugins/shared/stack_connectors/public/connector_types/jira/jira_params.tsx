@@ -8,8 +8,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiSelectOption} from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiComboBox,

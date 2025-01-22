@@ -8,19 +8,15 @@
 import type { IRouter } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type {
-  AlertingRequestHandlerContext} from '../../../../types';
-import {
-  INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_API_MAINTENANCE_WINDOW_PATH } from '../../../../types';
 import { MAINTENANCE_WINDOW_API_PRIVILEGES } from '../../../../../common';
 import type { BulkGetMaintenanceWindowsResult } from '../../../../application/maintenance_window/methods/bulk_get/types';
 import type {
   BulkGetMaintenanceWindowsRequestBodyV1,
-  BulkGetMaintenanceWindowsResponseV1} from '../../../../../common/routes/maintenance_window/apis/bulk_get';
-import {
-  bulkGetBodySchemaV1
+  BulkGetMaintenanceWindowsResponseV1,
 } from '../../../../../common/routes/maintenance_window/apis/bulk_get';
+import { bulkGetBodySchemaV1 } from '../../../../../common/routes/maintenance_window/apis/bulk_get';
 import { transformBulkGetResultToResponseV1 } from './transforms';
 
 export const bulkGetMaintenanceWindowRoute = (

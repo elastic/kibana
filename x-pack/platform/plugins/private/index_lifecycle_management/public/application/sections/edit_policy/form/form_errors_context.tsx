@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { createContext, useContext, useState, useCallback } from 'react';
 
 import type { Phases as _Phases } from '../../../../../common/types';

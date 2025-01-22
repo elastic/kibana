@@ -6,7 +6,7 @@
  */
 
 import type { EnterpriseSearchApplication } from '../../../../../common/types/search_applications';
-import type { Actions} from '../../../shared/api_logic/create_api_logic';
+import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import { createApiLogic } from '../../../shared/api_logic/create_api_logic';
 import { HttpLogic } from '../../../shared/http';
 

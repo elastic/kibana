@@ -19,12 +19,9 @@ import type {
   ESQLCommandOption,
   ESQLFunction,
   ESQLMessage,
-  ESQLSource} from '@kbn/esql-ast';
-import {
-  walk,
-  isBinaryExpression,
-  isIdentifier,
+  ESQLSource,
 } from '@kbn/esql-ast';
+import { walk, isBinaryExpression, isIdentifier } from '@kbn/esql-ast';
 import type {
   ESQLAstField,
   ESQLAstJoinCommand,

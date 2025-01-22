@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  EuiContextMenuPanelDescriptor} from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiContextMenu,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';

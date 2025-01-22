@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiTabbedContentTab} from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiPageTemplate,
   EuiFlexItem,

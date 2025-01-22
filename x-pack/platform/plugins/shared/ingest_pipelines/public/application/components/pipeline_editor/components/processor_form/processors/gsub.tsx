@@ -14,7 +14,7 @@ import { FIELD_TYPES, fieldValidators, UseField, Field } from '../../../../../..
 
 import { TextEditor } from '../field_components';
 
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { EDITOR_PX_HEIGHT, from, to, isJSONStringValidator } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';

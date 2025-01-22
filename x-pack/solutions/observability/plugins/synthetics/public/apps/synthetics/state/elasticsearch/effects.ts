@@ -9,7 +9,7 @@ import { call, put, takeEvery } from 'redux-saga/effects';
 
 import type { Action } from 'redux-actions';
 import { serializeHttpFetchError } from '../utils/http_error';
-import type { EsActionPayload, EsActionResponse} from './actions';
+import type { EsActionPayload, EsActionResponse } from './actions';
 import { executeEsQueryAction } from './actions';
 import { executeEsQueryAPI } from './api';
 

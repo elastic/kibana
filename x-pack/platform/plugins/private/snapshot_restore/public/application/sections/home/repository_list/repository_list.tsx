@@ -13,7 +13,7 @@ import { EuiButton, EuiPageTemplate } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 
 import type { Repository } from '../../../../../common/types';
-import type { Error} from '../../../../shared_imports';
+import type { Error } from '../../../../shared_imports';
 import { PageLoading, PageError, useExecutionContext } from '../../../../shared_imports';
 import { useDecodedParams } from '../../../lib';
 import { BASE_PATH, UIM_REPOSITORY_LIST_LOAD } from '../../../constants';

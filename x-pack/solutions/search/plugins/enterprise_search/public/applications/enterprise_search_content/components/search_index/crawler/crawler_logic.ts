@@ -26,11 +26,8 @@ import type {
   CrawlRequest,
 } from '../../../api/crawler/types';
 
-import type {
-  CachedFetchIndexApiLogicActions} from '../../../api/index/cached_fetch_index_api_logic';
-import {
-  CachedFetchIndexApiLogic
-} from '../../../api/index/cached_fetch_index_api_logic';
+import type { CachedFetchIndexApiLogicActions } from '../../../api/index/cached_fetch_index_api_logic';
+import { CachedFetchIndexApiLogic } from '../../../api/index/cached_fetch_index_api_logic';
 
 import { isCrawlerIndex } from '../../../utils/indices';
 import { IndexNameLogic } from '../index_name_logic';

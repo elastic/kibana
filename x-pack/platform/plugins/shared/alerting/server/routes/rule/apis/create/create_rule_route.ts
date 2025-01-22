@@ -15,7 +15,7 @@ import {
   createBodySchemaV1,
   createParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/create';
-import type { RuleParamsV1} from '../../../../../common/routes/rule/response';
+import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import type { Rule } from '../../../../application/rule/types';
 import { RuleTypeDisabledError } from '../../../../lib';

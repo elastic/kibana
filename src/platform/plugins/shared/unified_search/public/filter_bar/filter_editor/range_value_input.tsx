@@ -9,11 +9,11 @@
 
 import moment from 'moment';
 import { EuiFormControlLayoutDelimited } from '@elastic/eui';
-import type { InjectedIntl} from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import { get } from 'lodash';
 import React from 'react';
-import type { KibanaReactContextValue} from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { CoreStart } from '@kbn/core/public';

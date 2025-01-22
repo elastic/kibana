@@ -9,8 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCheckbox, EuiFormRow, EuiIconTip, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  IErrorObject} from '@kbn/triggers-actions-ui-plugin/public';
+import type { IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   builtInAggregationTypes,
   ForLastExpression,

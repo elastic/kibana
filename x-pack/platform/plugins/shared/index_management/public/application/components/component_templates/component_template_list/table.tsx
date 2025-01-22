@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiInMemoryTableProps,
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiInMemoryTableProps, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiButton,
@@ -23,12 +21,12 @@ import {
   EuiPopover,
   EuiFilterGroup,
   EuiSelectable,
-  EuiFilterButton
+  EuiFilterButton,
 } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 
 import { useEuiTablePersist } from '@kbn/shared-ux-table-persist';
-import type { ComponentTemplateListItem} from '../shared_imports';
+import type { ComponentTemplateListItem } from '../shared_imports';
 import { reactRouterNavigate } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_DETAILS } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';

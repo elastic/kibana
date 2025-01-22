@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import type {
-  ValueClickTriggerEventScope} from './event_variables';
-import {
-  getEventScopeValues,
-  getEventVariableList
-} from './event_variables';
-import type { RowClickContext} from '@kbn/ui-actions-plugin/public';
+import type { ValueClickTriggerEventScope } from './event_variables';
+import { getEventScopeValues, getEventVariableList } from './event_variables';
+import type { RowClickContext } from '@kbn/ui-actions-plugin/public';
 import { ROW_CLICK_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import { createPoint, rowClickData } from '../test/data';
 

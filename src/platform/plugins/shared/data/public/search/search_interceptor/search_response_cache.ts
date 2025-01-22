@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subscription } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
 import type { SearchAbortController } from './search_abort_controller';

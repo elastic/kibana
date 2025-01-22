@@ -10,18 +10,12 @@ import { kea } from 'kea';
 
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import type {
-  RecreateCrawlerConnectorActions} from '../../../api/crawler/recreate_crawler_connector_api_logic';
-import {
-  RecreateCrawlerConnectorApiLogic,
-} from '../../../api/crawler/recreate_crawler_connector_api_logic';
-import type {
-  DeleteIndexApiActions} from '../../../api/index/delete_index_api_logic';
-import {
-  DeleteIndexApiLogic,
-} from '../../../api/index/delete_index_api_logic';
+import type { RecreateCrawlerConnectorActions } from '../../../api/crawler/recreate_crawler_connector_api_logic';
+import { RecreateCrawlerConnectorApiLogic } from '../../../api/crawler/recreate_crawler_connector_api_logic';
+import type { DeleteIndexApiActions } from '../../../api/index/delete_index_api_logic';
+import { DeleteIndexApiLogic } from '../../../api/index/delete_index_api_logic';
 import { SEARCH_INDICES_PATH } from '../../../routes';
-import type { IndexViewActions} from '../index_view_logic';
+import type { IndexViewActions } from '../index_view_logic';
 import { IndexViewLogic } from '../index_view_logic';
 
 type NoConnectorRecordActions = RecreateCrawlerConnectorActions['apiSuccess'] & {

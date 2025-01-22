@@ -11,23 +11,14 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import _ from 'lodash';
 import { first } from 'rxjs';
 
-import type {
-  TaskInstance,
-  SerializedConcreteTaskInstance} from './task';
-import {
-  TaskStatus,
-  TaskLifecycleResult
-} from './task';
-import type {
-  ElasticsearchClientMock} from '@kbn/core/server/mocks';
-import {
-  elasticsearchServiceMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
-import type { SearchOpts, AggregationOpts} from './task_store';
+import type { TaskInstance, SerializedConcreteTaskInstance } from './task';
+import { TaskStatus, TaskLifecycleResult } from './task';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
+import type { SearchOpts, AggregationOpts } from './task_store';
 import { TaskStore, taskInstanceToAttributes } from './task_store';
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
-import type { SavedObjectAttributes} from '@kbn/core/server';
+import type { SavedObjectAttributes } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { TaskTypeDictionary } from './task_type_dictionary';
 import { mockLogger } from './test_utils';

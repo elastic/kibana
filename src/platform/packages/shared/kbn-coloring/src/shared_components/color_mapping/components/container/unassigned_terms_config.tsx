@@ -9,14 +9,8 @@
 
 import React from 'react';
 
-import type {
-  EuiButtonGroupOptionProps} from '@elastic/eui';
-import {
-  EuiButtonGroup,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-} from '@elastic/eui';
+import type { EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFlexGroup, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDispatch, useSelector } from 'react-redux';
 import { css } from '@emotion/react';

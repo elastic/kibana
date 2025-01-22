@@ -62,7 +62,7 @@ import { EnterpriseSearchApplicationsPageTemplate } from '../../layout/page_temp
 import { SearchApplicationIndicesLogic } from '../search_application_indices_logic';
 import { SearchApplicationViewLogic } from '../search_application_view_logic';
 
-import type { APICallData} from './api_call_flyout';
+import type { APICallData } from './api_call_flyout';
 import { APICallFlyout } from './api_call_flyout';
 
 import { SearchApplicationDocsExplorerLogic } from './docs_explorer_logic';

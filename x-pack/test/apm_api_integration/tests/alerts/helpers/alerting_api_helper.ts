@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Client} from '@elastic/elasticsearch';
+import type { Client } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type { ParsedTechnicalFields } from '@kbn/rule-registry-plugin/common';
 import type { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';

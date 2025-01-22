@@ -5,16 +5,19 @@
  * 2.0.
  */
 
-import type {
-  MetricCustomIndicator,
-  TimesliceMetricIndicator} from '@kbn/slo-schema';
+import type { MetricCustomIndicator, TimesliceMetricIndicator } from '@kbn/slo-schema';
 import {
   metricCustomBasicMetric,
   metricCustomDocCountMetric,
   timesliceMetricBasicMetricWithField,
   timesliceMetricPercentileMetric,
 } from '@kbn/slo-schema';
-import type { FormState, UseFormGetFieldState, UseFormGetValues, UseFormWatch } from 'react-hook-form';
+import type {
+  FormState,
+  UseFormGetFieldState,
+  UseFormGetValues,
+  UseFormWatch,
+} from 'react-hook-form';
 import { isObject } from 'lodash';
 import type { CreateSLOForm } from '../types';
 

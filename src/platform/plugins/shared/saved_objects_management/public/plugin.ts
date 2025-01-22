@@ -17,10 +17,11 @@ import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type {
   SavedObjectsManagementActionServiceStart,
-  SavedObjectsManagementColumnServiceStart} from './services';
+  SavedObjectsManagementColumnServiceStart,
+} from './services';
 import {
   SavedObjectsManagementActionService,
-  SavedObjectsManagementColumnService
+  SavedObjectsManagementColumnService,
 } from './services';
 
 import type { v1 } from '../common';

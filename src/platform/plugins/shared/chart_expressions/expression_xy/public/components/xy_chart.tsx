@@ -19,7 +19,8 @@ import type {
   AxisStyle,
   XYChartElementEvent,
   XYChartSeriesIdentifier,
-  SettingsProps} from '@elastic/charts';
+  SettingsProps,
+} from '@elastic/charts';
 import {
   Chart,
   Settings,
@@ -45,7 +46,7 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { EmptyPlaceholder, LegendToggle } from '@kbn/charts-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import type { PointEventAnnotationRow } from '@kbn/event-annotation-plugin/common';
-import type { ChartsPluginSetup, ChartsPluginStart} from '@kbn/charts-plugin/public';
+import type { ChartsPluginSetup, ChartsPluginStart } from '@kbn/charts-plugin/public';
 import { useActiveCursor } from '@kbn/charts-plugin/public';
 import { MULTILAYER_TIME_AXIS_STYLE } from '@kbn/charts-plugin/common';
 import {
@@ -75,10 +76,7 @@ import type {
   XYChartProps,
   AxisExtentConfigResult,
 } from '../../common/types';
-import type {
-  AxisConfiguration,
-  GroupsConfiguration,
-  Series} from '../helpers';
+import type { AxisConfiguration, GroupsConfiguration, Series } from '../helpers';
 import {
   isHorizontalChart,
   getDataLayers,

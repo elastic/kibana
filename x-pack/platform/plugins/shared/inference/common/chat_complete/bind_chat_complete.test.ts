@@ -8,10 +8,9 @@
 import type {
   BoundChatCompleteOptions,
   ChatCompleteAPI,
-  UnboundChatCompleteOptions} from '@kbn/inference-common';
-import {
-  MessageRole
+  UnboundChatCompleteOptions,
 } from '@kbn/inference-common';
+import { MessageRole } from '@kbn/inference-common';
 import { bindChatComplete } from './bind_chat_complete';
 
 describe('bindChatComplete', () => {

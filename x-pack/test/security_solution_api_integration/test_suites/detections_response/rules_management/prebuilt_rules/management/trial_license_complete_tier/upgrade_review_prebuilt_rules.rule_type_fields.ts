@@ -5,8 +5,7 @@
  * 2.0.
  */
 import expect from 'expect';
-import type {
-  RuleUpdateProps} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { RuleUpdateProps } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ThreeWayDiffConflict,
   ThreeWayDiffOutcome,

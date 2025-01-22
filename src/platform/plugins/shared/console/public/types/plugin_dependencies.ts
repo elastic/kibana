@@ -16,7 +16,10 @@ import type {
 } from '@kbn/core/public';
 import type { HomePublicPluginSetup, HomePublicPluginStart } from '@kbn/home-plugin/public';
 import type { DevToolsSetup } from '@kbn/dev-tools-plugin/public';
-import type { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/public';
 import type { SharePluginSetup, SharePluginStart, LocatorPublic } from '@kbn/share-plugin/public';
 
 import type { ConsoleUILocatorParams } from './locator';

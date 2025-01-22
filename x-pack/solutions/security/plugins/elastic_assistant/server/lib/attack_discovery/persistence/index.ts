@@ -16,11 +16,8 @@ import { findAttackDiscoveryByConnectorId } from './find_attack_discovery_by_con
 import { updateAttackDiscovery } from './update_attack_discovery/update_attack_discovery';
 import { createAttackDiscovery } from './create_attack_discovery/create_attack_discovery';
 import { getAttackDiscovery } from './get_attack_discovery/get_attack_discovery';
-import type {
-  AIAssistantDataClientParams} from '../../../ai_assistant_data_clients';
-import {
-  AIAssistantDataClient
-} from '../../../ai_assistant_data_clients';
+import type { AIAssistantDataClientParams } from '../../../ai_assistant_data_clients';
+import { AIAssistantDataClient } from '../../../ai_assistant_data_clients';
 
 type AttackDiscoveryDataClientParams = AIAssistantDataClientParams;
 

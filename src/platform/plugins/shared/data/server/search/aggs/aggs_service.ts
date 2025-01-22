@@ -18,13 +18,8 @@ import type {
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
-import type {
-  TimeRange} from '../../../common';
-import {
-  calculateBounds,
-  AggsCommonService,
-  aggsRequiredUiSettings
-} from '../../../common';
+import type { TimeRange } from '../../../common';
+import { calculateBounds, AggsCommonService, aggsRequiredUiSettings } from '../../../common';
 import type { AggsSetup, AggsStart } from './types';
 
 /** @internal */

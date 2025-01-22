@@ -8,7 +8,11 @@
  */
 
 import type { SerializableRecord } from '@kbn/utility-types';
-import type { ControlGroupRuntimeState, ControlPanelState, SerializedControlState } from '../../common';
+import type {
+  ControlGroupRuntimeState,
+  ControlPanelState,
+  SerializedControlState,
+} from '../../common';
 
 // using SerializableRecord to force type to be read as serializable
 export type SerializableControlGroupState = SerializableRecord &

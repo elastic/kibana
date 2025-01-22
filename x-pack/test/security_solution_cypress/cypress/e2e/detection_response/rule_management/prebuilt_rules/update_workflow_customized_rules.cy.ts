@@ -20,8 +20,7 @@ import {
 } from '../../../../screens/alerts_detection_rules';
 import { selectRulesByName } from '../../../../tasks/alerts_detection_rules';
 import { deleteAlertsAndRules } from '../../../../tasks/api_calls/common';
-import type {
-  SAMPLE_PREBUILT_RULE} from '../../../../tasks/api_calls/prebuilt_rules';
+import type { SAMPLE_PREBUILT_RULE } from '../../../../tasks/api_calls/prebuilt_rules';
 import {
   createAndInstallMockedPrebuiltRules,
   installPrebuiltRuleAssets,

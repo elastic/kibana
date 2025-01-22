@@ -6,10 +6,13 @@
  */
 import { omit } from 'lodash/fp';
 
-import type { EnrichedFieldMetadata, PartitionedFieldMetadata, UnallowedValueCount } from '../types';
-import { mockMappingsProperties } from '../mock/mappings_properties/mock_mappings_properties';
 import type {
-  FieldType} from './metadata';
+  EnrichedFieldMetadata,
+  PartitionedFieldMetadata,
+  UnallowedValueCount,
+} from '../types';
+import { mockMappingsProperties } from '../mock/mappings_properties/mock_mappings_properties';
+import type { FieldType } from './metadata';
 import {
   getEnrichedFieldMetadata,
   getFieldTypes,

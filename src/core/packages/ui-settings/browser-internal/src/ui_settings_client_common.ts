@@ -8,7 +8,7 @@
  */
 
 import { cloneDeep, defaultsDeep } from 'lodash';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject, concat, defer, of } from 'rxjs';
 import { filter, map } from 'rxjs';
 

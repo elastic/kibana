@@ -10,10 +10,9 @@ import type {
   AnalyticsServiceSetup,
   AuthenticatedUser,
   ElasticsearchClient,
-  Logger} from '@kbn/core/server';
-import {
-  type AuditLogger
+  Logger,
 } from '@kbn/core/server';
+import { type AuditLogger } from '@kbn/core/server';
 
 import type {
   KnowledgeBaseEntryCreateProps,

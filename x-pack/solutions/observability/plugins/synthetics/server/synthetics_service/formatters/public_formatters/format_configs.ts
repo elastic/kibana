@@ -14,10 +14,9 @@ import type {
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
-  TLSFields} from '../../../../common/runtime_types';
-import {
-  ConfigKey
+  TLSFields,
 } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { publicFormatters } from '.';
 
 const UI_KEYS_TO_SKIP = [

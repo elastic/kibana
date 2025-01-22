@@ -8,9 +8,7 @@
  */
 
 import type { ActionVariable } from '@kbn/alerting-types';
-import type {
-  ActionVariables,
-  OmitMessageVariablesType} from '@kbn/triggers-actions-ui-types';
+import type { ActionVariables, OmitMessageVariablesType } from '@kbn/triggers-actions-ui-types';
 import {
   REQUIRED_ACTION_VARIABLES,
   CONTEXT_ACTION_VARIABLES,

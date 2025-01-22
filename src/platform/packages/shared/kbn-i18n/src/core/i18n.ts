@@ -8,7 +8,7 @@
  */
 
 import { createIntl, createIntlCache } from '@formatjs/intl';
-import type { MessageDescriptor , IntlConfig, IntlShape } from '@formatjs/intl';
+import type { MessageDescriptor, IntlConfig, IntlShape } from '@formatjs/intl';
 import { handleIntlError } from './error_handler';
 
 import type { Translation, TranslationInput } from '../translation';

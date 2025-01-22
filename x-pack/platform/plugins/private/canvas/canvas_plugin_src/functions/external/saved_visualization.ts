@@ -9,12 +9,8 @@ import { omit } from 'lodash';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { VisualizeInput } from '@kbn/visualizations-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/types';
-import type {
-  EmbeddableExpression} from '../../expression_types';
-import {
-  EmbeddableTypes,
-  EmbeddableExpressionType
-} from '../../expression_types';
+import type { EmbeddableExpression } from '../../expression_types';
+import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';
 import { getQueryFilters } from '../../../common/lib/build_embeddable_filters';
 import type { ExpressionValueFilter, TimeRange as TimeRangeArg, SeriesStyle } from '../../../types';
 import { getFunctionHelp } from '../../../i18n';

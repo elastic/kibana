@@ -14,10 +14,9 @@ import type {
   StackFrame,
   StackFrameID,
   StackTrace,
-  StackTraceID} from './profiling';
-import {
-  isErrorFrame
+  StackTraceID,
 } from './profiling';
+import { isErrorFrame } from './profiling';
 import { convertTonsToKgs } from './utils';
 
 /** Profiling status response */

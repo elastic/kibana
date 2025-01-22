@@ -17,7 +17,7 @@ import type {
   SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
 import { modelVersionToVirtualVersion } from '@kbn/core-saved-objects-base-server-internal';
-import type { Transform} from './types';
+import type { Transform } from './types';
 import { TransformType } from './types';
 import {
   getModelVersionTransforms,

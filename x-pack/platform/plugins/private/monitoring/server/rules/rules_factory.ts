@@ -7,8 +7,7 @@
 
 import type { RulesClient } from '@kbn/alerting-plugin/server';
 import type { Rule } from '@kbn/alerting-plugin/common';
-import type {
-  BaseRule} from '.';
+import type { BaseRule } from '.';
 import {
   LargeShardSizeRule,
   CCRReadExceptionsRule,
@@ -23,7 +22,7 @@ import {
   LicenseExpirationRule,
   LogstashVersionMismatchRule,
   KibanaVersionMismatchRule,
-  ElasticsearchVersionMismatchRule
+  ElasticsearchVersionMismatchRule,
 } from '.';
 import {
   RULE_CLUSTER_HEALTH,

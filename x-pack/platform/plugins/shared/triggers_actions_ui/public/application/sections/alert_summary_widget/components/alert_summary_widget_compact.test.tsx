@@ -7,11 +7,8 @@
 
 import React from 'react';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type {
-  AlertSummaryWidgetCompactProps} from './alert_summary_widget_compact';
-import {
-  AlertSummaryWidgetCompact
-} from './alert_summary_widget_compact';
+import type { AlertSummaryWidgetCompactProps } from './alert_summary_widget_compact';
+import { AlertSummaryWidgetCompact } from './alert_summary_widget_compact';
 import { render } from '@testing-library/react';
 import { mockedAlertSummaryResponse, mockedChartProps } from '../../../mock/alert_summary_widget';
 import { ACTIVE_ALERT_COUNT_DATA_TEST_SUBJ, TOTAL_ALERT_COUNT_DATA_TEST_SUBJ } from './constants';

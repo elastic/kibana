@@ -9,7 +9,7 @@
 
 import type { MouseEventHandler, MouseEvent } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type { AggregateQuery, Query, TimeRange, Filter} from '@kbn/es-query';
+import type { AggregateQuery, Query, TimeRange, Filter } from '@kbn/es-query';
 import { disableFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useHistory } from 'react-router-dom';

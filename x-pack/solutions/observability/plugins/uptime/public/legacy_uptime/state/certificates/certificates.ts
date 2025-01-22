@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Action} from 'redux-actions';
+import type { Action } from 'redux-actions';
 import { createAction, handleActions } from 'redux-actions';
 import type { AppState } from '..';
 

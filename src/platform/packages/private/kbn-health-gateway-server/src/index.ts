@@ -8,12 +8,8 @@
  */
 
 import type { ServiceConfigDescriptor } from '@kbn/core-base-server-internal';
-import type {
-  LoggingConfigType} from '@kbn/core-logging-server-internal';
-import {
-  config as loggingConfig,
-  LoggingSystem
-} from '@kbn/core-logging-server-internal';
+import type { LoggingConfigType } from '@kbn/core-logging-server-internal';
+import { config as loggingConfig, LoggingSystem } from '@kbn/core-logging-server-internal';
 import { getConfigService } from './config';
 import { config as kibanaConfig, KibanaService } from './kibana';
 import type { ServerStart } from './server';

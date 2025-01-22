@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent, FocusEvent, FunctionComponent} from 'react';
+import type { ChangeEvent, FocusEvent, FunctionComponent } from 'react';
 import React, { useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import type { EuiSelectOption } from '@elastic/eui';

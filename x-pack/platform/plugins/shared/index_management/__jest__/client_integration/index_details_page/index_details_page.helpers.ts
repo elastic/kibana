@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  AsyncTestBedConfig,
-  reactRouterMock,
-  TestBed} from '@kbn/test-jest-helpers';
-import {
-  registerTestBed
-} from '@kbn/test-jest-helpers';
+import type { AsyncTestBedConfig, reactRouterMock, TestBed } from '@kbn/test-jest-helpers';
+import { registerTestBed } from '@kbn/test-jest-helpers';
 import type { HttpSetup } from '@kbn/core/public';
 import { act } from 'react-dom/test-utils';
 import { keys } from '@elastic/eui';

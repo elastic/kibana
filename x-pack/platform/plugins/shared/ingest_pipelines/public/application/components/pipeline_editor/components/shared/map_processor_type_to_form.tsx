@@ -14,8 +14,7 @@ import { EuiCode, EuiLink } from '@elastic/eui';
 import { stringifyValueDescription } from './stringify_value_description';
 import type { LicenseType } from '../../../../../types';
 
-import type {
-  FormFieldsComponent} from '../processor_form/processors';
+import type { FormFieldsComponent } from '../processor_form/processors';
 import {
   Append,
   Attachment,

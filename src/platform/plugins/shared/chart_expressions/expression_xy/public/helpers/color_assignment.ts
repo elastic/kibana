@@ -20,12 +20,8 @@ import type {
   LayersAccessorsTitles,
   LayersFieldFormats,
 } from './layers';
-import type {
-  DatatablesWithFormatInfo,
-  DatatableWithFormatInfo} from './data_layers';
-import {
-  hasMultipleLayersWithSplits,
-} from './data_layers';
+import type { DatatablesWithFormatInfo, DatatableWithFormatInfo } from './data_layers';
+import { hasMultipleLayersWithSplits } from './data_layers';
 
 export const defaultReferenceLineColor = euiLightVars.euiColorDarkShade;
 

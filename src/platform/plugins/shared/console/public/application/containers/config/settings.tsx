@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import type { AutocompleteOptions} from '../../components/settings';
+import type { AutocompleteOptions } from '../../components/settings';
 import { SettingsEditor } from '../../components/settings';
 
 import { useServicesContext, useEditorActionContext } from '../../contexts';

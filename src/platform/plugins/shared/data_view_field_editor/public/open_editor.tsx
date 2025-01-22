@@ -21,7 +21,8 @@ import type {
   DataViewsPublicPluginStart,
   FieldFormatsStart,
   DataViewField,
- DataView} from './shared_imports';
+  DataView,
+} from './shared_imports';
 import { DataViewLazy } from './shared_imports';
 import { createKibanaReactContext } from './shared_imports';
 import type { CloseEditor, Field, InternalFieldType, PluginStart } from './types';

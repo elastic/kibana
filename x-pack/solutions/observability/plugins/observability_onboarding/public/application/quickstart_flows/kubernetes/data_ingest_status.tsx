@@ -12,11 +12,8 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
-import type {
-  StepsProgress} from '../../../hooks/use_flow_progress_telemetry';
-import {
-  useFlowProgressTelemetry,
-} from '../../../hooks/use_flow_progress_telemetry';
+import type { StepsProgress } from '../../../hooks/use_flow_progress_telemetry';
+import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { ProgressIndicator } from '../shared/progress_indicator';
 import { GetStartedPanel } from '../shared/get_started_panel';

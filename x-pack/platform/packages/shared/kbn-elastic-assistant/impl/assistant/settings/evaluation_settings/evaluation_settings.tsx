@@ -6,9 +6,7 @@
  */
 
 import React, { useCallback, useMemo, useState } from 'react';
-import type {
-  EuiComboBoxOptionOption,
-  EuiComboBoxSingleSelectionShape} from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxSingleSelectionShape } from '@elastic/eui';
 import {
   EuiAccordion,
   euiPaletteComplementary,

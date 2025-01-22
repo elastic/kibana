@@ -8,7 +8,7 @@
  */
 
 import { resolveLinkInfo } from './resolve_links';
-import type { Link} from '../../common/content_management';
+import type { Link } from '../../common/content_management';
 import { DASHBOARD_LINK_TYPE } from '../../common/content_management';
 
 jest.mock('../components/dashboard_link/dashboard_link_tools', () => ({

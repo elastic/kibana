@@ -8,7 +8,7 @@
 import * as api from '../../../../lib/rule_api/unmute_alert';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type { AppMockRenderer} from '../../../test_utils';
+import type { AppMockRenderer } from '../../../test_utils';
 import { createAppMockRenderer } from '../../../test_utils';
 import { useUnmuteAlert } from './use_unmute_alert';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';

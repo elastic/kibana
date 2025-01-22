@@ -10,7 +10,7 @@ import { type LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/pub
 import React from 'react';
 import useAsync from 'react-use/lib/useAsync';
 import type { DataViewsContract } from '@kbn/data-views-plugin/public';
-import type { LogsSourceConfiguration} from '../../utils/logs_source';
+import type { LogsSourceConfiguration } from '../../utils/logs_source';
 import { normalizeLogsSource } from '../../utils/logs_source';
 import type { LogCategoriesDependencies } from '../log_categories';
 import { LogCategories } from '../log_categories';

@@ -9,7 +9,7 @@ import type { CSSProperties, ReactElement } from 'react';
 import React from 'react';
 import type { FeatureIdentifier, Map as MbMap } from '@kbn/mapbox-gl';
 import type { FeatureCollection } from 'geojson';
-import type { StyleProperties} from './components/vector_style_editor';
+import type { StyleProperties } from './components/vector_style_editor';
 import { VectorStyleEditor } from './components/vector_style_editor';
 import {
   getDefaultStaticProperties,

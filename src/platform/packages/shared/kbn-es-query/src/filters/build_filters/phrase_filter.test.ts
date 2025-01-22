@@ -8,8 +8,7 @@
  */
 
 import { set } from '@kbn/safer-lodash-set';
-import type {
-  PhraseFilter} from './phrase_filter';
+import type { PhraseFilter } from './phrase_filter';
 import {
   buildInlineScriptForPhraseFilter,
   buildPhraseFilter,

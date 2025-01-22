@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionTypeNode} from 'ts-morph';
+import type { FunctionTypeNode } from 'ts-morph';
 import { Node } from 'ts-morph';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { buildClassDec } from './build_class_dec';

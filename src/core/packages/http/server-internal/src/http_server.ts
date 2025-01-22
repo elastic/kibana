@@ -13,7 +13,7 @@ import url from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { createServer, getServerOptions, setTlsConfig, getRequestId } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
-import type { Observable, Subscription} from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import { firstValueFrom, pairwise, take } from 'rxjs';
 import apm from 'elastic-apm-node';
 import Brok from 'brok';

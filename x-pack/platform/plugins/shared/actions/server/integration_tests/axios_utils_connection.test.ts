@@ -20,9 +20,9 @@ import { ByteSizeValue } from '@kbn/config-schema';
 import type { Logger } from '@kbn/core/server';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { createReadySignal } from '@kbn/event-log-plugin/server/lib/ready_signal';
-import type { ActionsConfig} from '../config';
+import type { ActionsConfig } from '../config';
 import { DEFAULT_USAGE_API_URL } from '../config';
-import type { ActionsConfigurationUtilities} from '../actions_config';
+import type { ActionsConfigurationUtilities } from '../actions_config';
 import { getActionsConfigurationUtilities } from '../actions_config';
 import { resolveCustomHosts } from '../lib/custom_host_settings';
 import {

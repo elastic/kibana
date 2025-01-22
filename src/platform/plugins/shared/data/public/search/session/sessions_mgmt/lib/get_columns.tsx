@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -25,7 +24,7 @@ import { capitalize } from 'lodash';
 import React from 'react';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { SearchSessionStatus } from '../../../../../common';
-import type { OnActionComplete} from '../components';
+import type { OnActionComplete } from '../components';
 import { PopoverActionsMenu, TableText } from '../components';
 import { StatusIndicator } from '../components/status';
 import { dateString } from './date_string';

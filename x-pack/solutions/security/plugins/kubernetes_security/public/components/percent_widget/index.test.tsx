@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { ENTRY_LEADER_INTERACTIVE } from '../../../common/constants';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import type { GlobalFilter } from '../../types';
 import { PercentWidget, LOADING_TEST_ID, PERCENT_DATA_TEST_ID } from '.';

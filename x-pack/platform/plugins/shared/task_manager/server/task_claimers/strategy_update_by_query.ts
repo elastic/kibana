@@ -14,17 +14,12 @@ import { groupBy, pick } from 'lodash';
 
 import { asOk } from '../lib/result_type';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import type {
-  TaskClaimerOpts,
-  ClaimOwnershipResult} from '.';
-import {
-  getEmptyClaimOwnershipResult,
-  isTaskTypeExcluded,
-} from '.';
+import type { TaskClaimerOpts, ClaimOwnershipResult } from '.';
+import { getEmptyClaimOwnershipResult, isTaskTypeExcluded } from '.';
 import type { ConcreteTaskInstance } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { isLimited, TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
-import type { TaskClaim} from '../task_events';
+import type { TaskClaim } from '../task_events';
 import { asTaskClaimEvent, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
 
@@ -39,13 +34,8 @@ import {
   EnabledTask,
 } from '../queries/mark_available_tasks_as_claimed';
 
-import type {
-  TaskStore,
-  UpdateByQueryResult,
-  SearchOpts} from '../task_store';
-import {
-  correctVersionConflictsForContinuation
-} from '../task_store';
+import type { TaskStore, UpdateByQueryResult, SearchOpts } from '../task_store';
+import { correctVersionConflictsForContinuation } from '../task_store';
 
 interface OwnershipClaimingOpts {
   claimOwnershipUntil: Date;

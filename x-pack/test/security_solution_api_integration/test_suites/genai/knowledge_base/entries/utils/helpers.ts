@@ -8,10 +8,11 @@
 import type { Client } from '@elastic/elasticsearch';
 import type {
   CreateKnowledgeBaseResponse,
-  GetKnowledgeBaseIndicesResponse} from '@kbn/elastic-assistant-common';
+  GetKnowledgeBaseIndicesResponse,
+} from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
 } from '@kbn/elastic-assistant-common';
 
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';

@@ -46,11 +46,8 @@ import type {
   ActionConnector,
   TriggersActionsUiConfig,
 } from '../../../../types';
-import type {
-  ComponentOpts as BulkOperationsComponentOpts} from '../../common/components/with_bulk_rule_api_operations';
-import {
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { ComponentOpts as BulkOperationsComponentOpts } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleRouteWithApi } from './rule_route';
 import { ViewInApp } from './view_in_app';
 import { RuleEdit } from '../../rule_form';

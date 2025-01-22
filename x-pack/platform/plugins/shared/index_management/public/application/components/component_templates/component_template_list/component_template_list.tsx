@@ -20,15 +20,14 @@ import {
   PageError,
   attemptToURIDecode,
 } from '../../../../shared_imports';
-import type { ComponentTemplateDeserialized} from '../shared_imports';
+import type { ComponentTemplateDeserialized } from '../shared_imports';
 import { GlobalFlyout } from '../shared_imports';
 import { UIM_COMPONENT_TEMPLATE_LIST_LOAD } from '../constants';
 import { useComponentTemplatesContext } from '../component_templates_context';
-import type {
-  ComponentTemplateDetailsProps} from '../component_template_details';
+import type { ComponentTemplateDetailsProps } from '../component_template_details';
 import {
   ComponentTemplateDetailsFlyoutContent,
-  defaultFlyoutProps
+  defaultFlyoutProps,
 } from '../component_template_details';
 import { EmptyPrompt } from './empty_prompt';
 import { ComponentTable } from './table';

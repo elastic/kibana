@@ -6,7 +6,7 @@
  */
 
 import { DynamicSizeProperty } from './dynamic_size_property';
-import type { RawValue} from '../../../../../../common/constants';
+import type { RawValue } from '../../../../../../common/constants';
 import { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../../common/constants';
 import type { IField } from '../../../../fields/field';
 import type { IVectorLayer } from '../../../../layers/vector_layer';

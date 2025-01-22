@@ -9,11 +9,8 @@
 
 import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
-import type {
-  LegacyAddPanelToLibraryActionApi} from './legacy_add_to_library_action';
-import {
-  LegacyAddToLibraryAction
-} from './legacy_add_to_library_action';
+import type { LegacyAddPanelToLibraryActionApi } from './legacy_add_to_library_action';
+import { LegacyAddToLibraryAction } from './legacy_add_to_library_action';
 import { coreServices } from '../services/kibana_services';
 
 describe('Add to library action', () => {

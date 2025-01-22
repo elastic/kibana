@@ -18,8 +18,7 @@ import { CodeEditor } from '@kbn/code-editor';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { getFields } from '@kbn/triggers-actions-ui-plugin/public';
 import { parseDuration } from '@kbn/alerting-plugin/common';
-import type {
-  FieldOption} from '@kbn/triggers-actions-ui-plugin/public/common';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import {
   buildAggregation,
   parseAggregationResults,

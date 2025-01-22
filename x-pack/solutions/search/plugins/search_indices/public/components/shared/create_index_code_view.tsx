@@ -9,7 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elasti
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
-import type { AvailableLanguages} from '../../code_examples';
+import type { AvailableLanguages } from '../../code_examples';
 import { Languages, LanguageOptions } from '../../code_examples';
 
 import { useUsageTracker } from '../../hooks/use_usage_tracker';

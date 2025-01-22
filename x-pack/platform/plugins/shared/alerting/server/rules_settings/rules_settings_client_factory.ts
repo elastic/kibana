@@ -9,10 +9,9 @@ import type {
   KibanaRequest,
   Logger,
   SavedObjectsServiceStart,
-  SecurityServiceStart} from '@kbn/core/server';
-import {
-  SECURITY_EXTENSION_ID
+  SecurityServiceStart,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { RulesSettingsClient } from './rules_settings_client';
 import { RULES_SETTINGS_SAVED_OBJECT_TYPE } from '../../common';
 

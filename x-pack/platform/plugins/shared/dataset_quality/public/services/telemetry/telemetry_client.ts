@@ -12,10 +12,9 @@ import type {
   DatasetDetailsEbtProps,
   DatasetDetailsNavigatedEbtProps,
   DatasetDetailsTrackingState,
-  DatasetNavigatedEbtProps} from './types';
-import {
-  DatasetQualityTelemetryEventTypes
+  DatasetNavigatedEbtProps,
 } from './types';
+import { DatasetQualityTelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
   private datasetDetailsTrackingId = '';

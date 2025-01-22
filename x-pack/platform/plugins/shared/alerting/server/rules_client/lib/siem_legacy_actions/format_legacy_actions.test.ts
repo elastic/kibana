@@ -12,12 +12,8 @@ import { loggingSystemMock, savedObjectsClientMock } from '@kbn/core/server/mock
 
 import type { Rule } from '../../../types';
 
-import type {
-  LegacyActionsObj} from './format_legacy_actions';
-import {
-  legacyGetBulkRuleActionsSavedObject,
-  formatLegacyActions,
-} from './format_legacy_actions';
+import type { LegacyActionsObj } from './format_legacy_actions';
+import { legacyGetBulkRuleActionsSavedObject, formatLegacyActions } from './format_legacy_actions';
 import { legacyRuleActionsSavedObjectType } from './types';
 
 describe('legacyGetBulkRuleActionsSavedObject', () => {

@@ -19,11 +19,9 @@ import type {
   ArtifactBodyType,
   ArtifactActionsType,
   AgentPolicyResponseType,
-  MultipleArtifactActionsType} from './mocks';
-import {
-  getArtifactsListTestsData,
-  getCreateMultipleData
+  MultipleArtifactActionsType,
 } from './mocks';
+import { getArtifactsListTestsData, getCreateMultipleData } from './mocks';
 import type { PolicyTestResourceInfo } from '../../services/endpoint_policy';
 import { targetTags } from '../../target_tags';
 

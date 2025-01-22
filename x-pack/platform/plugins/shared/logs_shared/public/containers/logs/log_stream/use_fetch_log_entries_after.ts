@@ -15,14 +15,14 @@ import type { LogViewColumnConfiguration, LogViewReference } from '../../../../c
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import type {
   LogEntriesSearchRequestQuery,
-  LogEntriesSearchResponsePayload} from '../../../../common/search_strategies/log_entries/log_entries';
+  LogEntriesSearchResponsePayload,
+} from '../../../../common/search_strategies/log_entries/log_entries';
 import {
   logEntriesSearchRequestParamsRT,
   logEntriesSearchResponsePayloadRT,
   LOG_ENTRIES_SEARCH_STRATEGY,
 } from '../../../../common/search_strategies/log_entries/log_entries';
-import type {
-  ParsedDataSearchRequestDescriptor} from '../../../utils/data_search';
+import type { ParsedDataSearchRequestDescriptor } from '../../../utils/data_search';
 import {
   flattenDataSearchResponseDescriptor,
   normalizeDataSearchResponses,

@@ -6,7 +6,10 @@
  */
 
 import type { AuthenticatedUser } from '@kbn/core-security-common';
-import type { UpdateInvestigationParams, UpdateInvestigationResponse } from '@kbn/investigation-shared';
+import type {
+  UpdateInvestigationParams,
+  UpdateInvestigationResponse,
+} from '@kbn/investigation-shared';
 import { isEqual, omit } from 'lodash';
 import type { InvestigationRepository } from './investigation_repository';
 import type { Investigation } from '../models/investigation';

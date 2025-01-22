@@ -8,8 +8,7 @@
 import React, { useState, useMemo, useCallback, useEffect } from 'react';
 import getCaretCoordinates from 'textarea-caret';
 import type { Properties } from 'csstype';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiTextArea,
   EuiFormRow,

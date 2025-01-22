@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { NumericalRange} from '../../expressions';
+import type { NumericalRange } from '../../expressions';
 import { numericalRangeToAst } from '../../expressions';
 import { KBN_FIELD_TYPES } from '../../..';
 import type { AggTypesDependencies } from '../agg_types';

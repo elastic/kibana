@@ -4,18 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useState } from 'react';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFlexItem, EuiFormRow } from '@elastic/eui';
 import { debounce } from 'lodash';
-import type { FieldPath} from 'react-hook-form';
+import type { FieldPath } from 'react-hook-form';
 import { Controller, useFormContext } from 'react-hook-form';
-import type {
-  Suggestion} from '../hooks/use_fetch_synthetics_suggestions';
-import {
-  useFetchSyntheticsSuggestions,
-} from '../hooks/use_fetch_synthetics_suggestions';
+import type { Suggestion } from '../hooks/use_fetch_synthetics_suggestions';
+import { useFetchSyntheticsSuggestions } from '../hooks/use_fetch_synthetics_suggestions';
 import { OptionalText } from './optional_text';
 import type { MonitorFilters } from '../monitors_overview/types';
 

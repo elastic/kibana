@@ -10,7 +10,7 @@ import { act } from 'react-dom/test-utils';
 import type { ReindexStatusResponse } from '../../../common/types';
 import { ReindexStatus, ReindexStep } from '../../../common/types';
 import { setupEnvironment } from '../helpers';
-import type { ElasticsearchTestBed} from './es_deprecations.helpers';
+import type { ElasticsearchTestBed } from './es_deprecations.helpers';
 import { setupElasticsearchPage } from './es_deprecations.helpers';
 import {
   esDeprecationsMockResponse,

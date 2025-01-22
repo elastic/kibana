@@ -20,12 +20,8 @@ import {
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 
 import { ComparatorFns } from '../../../common';
-import type {
-  EsQueryRuleActionContext} from './action_context';
-import {
-  addMessages,
-  getContextConditionsDescription,
-} from './action_context';
+import type { EsQueryRuleActionContext } from './action_context';
+import { addMessages, getContextConditionsDescription } from './action_context';
 import type {
   ExecutorOptions,
   OnlyEsQueryRuleParams,

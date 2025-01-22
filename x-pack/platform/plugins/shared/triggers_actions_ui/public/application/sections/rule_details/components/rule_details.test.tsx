@@ -13,8 +13,7 @@ import { RuleDetails } from './rule_details';
 import type { Rule, ActionType, RuleTypeModel, RuleType } from '../../../../types';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiBadge, EuiButtonEmpty } from '@elastic/eui';
-import type {
-  ActionGroup} from '@kbn/alerting-plugin/common';
+import type { ActionGroup } from '@kbn/alerting-plugin/common';
 import {
   RuleExecutionStatusErrorReasons,
   RuleExecutionStatusWarningReasons,

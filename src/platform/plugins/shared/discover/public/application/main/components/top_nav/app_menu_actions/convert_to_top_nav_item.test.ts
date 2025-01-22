@@ -10,10 +10,9 @@
 import type {
   AppMenuActionPrimary,
   AppMenuActionSecondary,
-  AppMenuActionSubmenuCustom} from '@kbn/discover-utils';
-import {
-  AppMenuActionType,
+  AppMenuActionSubmenuCustom,
 } from '@kbn/discover-utils';
+import { AppMenuActionType } from '@kbn/discover-utils';
 import { convertAppMenuItemToTopNavItem } from './convert_to_top_nav_item';
 import { discoverServiceMock } from '../../../../../__mocks__/services';
 

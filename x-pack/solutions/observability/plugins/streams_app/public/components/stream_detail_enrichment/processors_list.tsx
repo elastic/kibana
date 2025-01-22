@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import type {
-  EuiPanelProps} from '@elastic/eui';
+import type { EuiPanelProps } from '@elastic/eui';
 import {
   EuiDraggable,
   EuiPanel,
@@ -18,13 +17,8 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  ReadStreamDefinition} from '@kbn/streams-schema';
-import {
-  getProcessorType,
-  isDissectProcessor,
-  isGrokProcessor,
-} from '@kbn/streams-schema';
+import type { ReadStreamDefinition } from '@kbn/streams-schema';
+import { getProcessorType, isDissectProcessor, isGrokProcessor } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
 import type { EditProcessorFlyoutProps } from './flyout';

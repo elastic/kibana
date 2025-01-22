@@ -9,11 +9,8 @@
 
 import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
-import type {
-  ElasticsearchClientMock} from '@kbn/core-elasticsearch-client-server-mocks';
-import {
-  elasticsearchClientMock
-} from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { SavedObjectTypeRegistry } from '@kbn/core-saved-objects-base-server-internal';
 import { serializerMock } from '@kbn/core-saved-objects-base-server-mocks';
 import type { ApiExecutionContext } from '../lib/apis/types';

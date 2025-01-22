@@ -7,11 +7,8 @@
 
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { KbnClient } from '@kbn/test';
-import type {
-  StartedFleetServer} from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_server/fleet_server_services';
-import {
-  startFleetServer,
-} from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_server/fleet_server_services';
+import type { StartedFleetServer } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_server/fleet_server_services';
+import { startFleetServer } from '@kbn/security-solution-plugin/scripts/endpoint/common/fleet_server/fleet_server_services';
 import { Manager } from './resource_manager';
 import { getLatestAvailableAgentVersion } from './utils';
 

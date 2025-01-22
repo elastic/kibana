@@ -10,7 +10,7 @@ import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/serv
 import type { MockWorkpadRouteContext } from '../../mocks';
 import { workpadRouteContextMock } from '../../mocks';
 import { initializeCreateWorkpadRoute } from './create';
-import type { RequestHandler} from '@kbn/core/server';
+import type { RequestHandler } from '@kbn/core/server';
 import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { getMockedRouterDeps } from '../test_helpers';
 

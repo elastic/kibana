@@ -20,10 +20,9 @@ import type {
   AnonymizationFieldsBulkCrudActionResponse,
   AnonymizationFieldsBulkCrudActionResults,
   BulkCrudActionSummary,
-  PerformAnonymizationFieldsBulkActionResponse} from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
-import {
-  PerformAnonymizationFieldsBulkActionRequestBody
+  PerformAnonymizationFieldsBulkActionResponse,
 } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
+import { PerformAnonymizationFieldsBulkActionRequestBody } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { ANONYMIZATION_FIELDS_TABLE_MAX_PAGE_SIZE } from '../../../common/constants';
 import type { ElasticAssistantPluginRouter } from '../../types';

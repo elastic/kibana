@@ -7,12 +7,8 @@
 
 import { render, renderHook } from '@testing-library/react';
 import React from 'react';
-import type {
-  RulesListColumns,
-  RulesListVisibleColumns} from './rules_list_column_selector';
-import {
-  useRulesListColumnSelector,
-} from './rules_list_column_selector';
+import type { RulesListColumns, RulesListVisibleColumns } from './rules_list_column_selector';
+import { useRulesListColumnSelector } from './rules_list_column_selector';
 
 const allRuleColumns: RulesListColumns[] = [
   {

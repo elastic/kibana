@@ -8,9 +8,7 @@
 import React, { memo, useMemo, useState, useCallback, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiSelectableProps,
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableProps, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiFilterButton,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { JSDocTag} from 'ts-morph';
+import type { JSDocTag } from 'ts-morph';
 import { Node, TypeFormatFlags } from 'ts-morph';
 import type { ApiDeclaration } from '../types';
 import { maybeCollectReferences } from './get_references';

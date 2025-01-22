@@ -6,13 +6,8 @@
  */
 
 import Boom from '@hapi/boom';
-import type {
-  Logger,
-  SavedObjectsClientContract,
-  SavedObject} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract, SavedObject } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import {
   MAX_LOOK_BACK_WINDOW,
   MAX_STATUS_CHANGE_THRESHOLD,
@@ -23,7 +18,8 @@ import type {
   RulesSettings,
   RulesSettingsFlapping,
   RulesSettingsFlappingProperties,
-  RulesSettingsModificationMetadata} from '../../../common';
+  RulesSettingsModificationMetadata,
+} from '../../../common';
 import {
   RULES_SETTINGS_SAVED_OBJECT_TYPE,
   RULES_SETTINGS_FLAPPING_SAVED_OBJECT_ID,

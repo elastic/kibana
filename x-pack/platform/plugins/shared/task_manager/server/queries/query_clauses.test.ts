@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MustCondition} from './query_clauses';
+import type { MustCondition } from './query_clauses';
 import { shouldBeOneOf, mustBeAllOf, matchesClauses } from './query_clauses';
 
 describe('matchesClauses', () => {

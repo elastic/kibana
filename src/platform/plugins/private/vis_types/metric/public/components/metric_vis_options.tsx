@@ -8,22 +8,16 @@
  */
 
 import React, { useCallback } from 'react';
-import type {
-  EuiButtonGroupProps} from '@elastic/eui';
-import {
-  EuiButtonGroup,
-  EuiFormRow,
-  EuiPanel,
-  EuiSpacer,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiButtonGroupProps } from '@elastic/eui';
+import { EuiButtonGroup, EuiFormRow, EuiPanel, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type {
   SetColorRangeValue,
-  SetColorSchemaOptionsValue} from '@kbn/vis-default-editor-plugin/public';
+  SetColorSchemaOptionsValue,
+} from '@kbn/vis-default-editor-plugin/public';
 import {
   ColorRanges,
   SwitchOption,

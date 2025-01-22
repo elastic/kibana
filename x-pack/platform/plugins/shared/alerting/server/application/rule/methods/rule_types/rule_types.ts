@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  RegistryAlertTypeWithAuth} from '../../../../authorization';
+import type { RegistryAlertTypeWithAuth } from '../../../../authorization';
 import {
   AlertingAuthorizationEntity,
   ReadOperations,

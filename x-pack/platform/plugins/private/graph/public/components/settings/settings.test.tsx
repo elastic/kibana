@@ -14,14 +14,8 @@ import { Settings } from './settings';
 import { act } from '@testing-library/react';
 import type { ReactWrapper } from 'enzyme';
 import { UrlTemplateForm } from './url_template_form';
-import type {
-  GraphStore} from '../../state_management';
-import {
-  updateSettings,
-  loadFields,
-  saveTemplate,
-  removeTemplate,
-} from '../../state_management';
+import type { GraphStore } from '../../state_management';
+import { updateSettings, loadFields, saveTemplate, removeTemplate } from '../../state_management';
 import { createMockGraphStore } from '../../state_management/mocks';
 import { Provider } from 'react-redux';
 import type { UrlTemplate } from '../../types';

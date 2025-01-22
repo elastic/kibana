@@ -6,16 +6,8 @@
  */
 
 import React from 'react';
-import type {
-  EuiDataGridToolBarAdditionalControlsOptions} from '@elastic/eui';
-import {
-  EuiPanel,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiImage,
-  EuiText,
-  EuiTitle
-} from '@elastic/eui';
+import type { EuiDataGridToolBarAdditionalControlsOptions } from '@elastic/eui';
+import { EuiPanel, EuiFlexGroup, EuiFlexItem, EuiImage, EuiText, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EsQuerySnapshot } from '@kbn/alerts-ui-shared';
 import icon from './assets/illustration_product_no_results_magnifying_glass.svg';

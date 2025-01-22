@@ -14,7 +14,7 @@ import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { ReferenceLineConfig } from '../../../common/types';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
 import type { AxesMap, GroupsConfiguration } from '../../helpers';
-import type { FormattersMap} from './utils';
+import type { FormattersMap } from './utils';
 import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineProps {

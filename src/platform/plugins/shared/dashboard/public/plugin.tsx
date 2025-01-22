@@ -20,7 +20,8 @@ import type {
   AppUpdater,
   Plugin,
   PluginInitializerContext,
-  ScopedHistory} from '@kbn/core/public';
+  ScopedHistory,
+} from '@kbn/core/public';
 import {
   APP_WRAPPER_CLASS,
   DEFAULT_APP_CATEGORIES,
@@ -74,11 +75,8 @@ import {
   LEGACY_DASHBOARD_APP_ID,
   SEARCH_SESSION_ID,
 } from './plugin_constants';
-import type {
-  GetPanelPlacementSettings} from './dashboard_container/panel_placement';
-import {
-  registerDashboardPanelPlacementSetting,
-} from './dashboard_container/panel_placement';
+import type { GetPanelPlacementSettings } from './dashboard_container/panel_placement';
+import { registerDashboardPanelPlacementSetting } from './dashboard_container/panel_placement';
 import type { FindDashboardsService } from './services/dashboard_content_management_service/types';
 import { setKibanaServices, untilPluginStartServicesReady } from './services/kibana_services';
 import { registerActions } from './dashboard_actions/register_actions';

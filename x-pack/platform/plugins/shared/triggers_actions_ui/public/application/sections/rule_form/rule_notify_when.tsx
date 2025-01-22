@@ -8,8 +8,7 @@
 import React, { useState, useEffect, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiSuperSelectOption} from '@elastic/eui';
+import type { EuiSuperSelectOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +18,7 @@ import {
   EuiSelect,
   EuiText,
   EuiSpacer,
-  EuiSuperSelect
+  EuiSuperSelect,
 } from '@elastic/eui';
 import { some, filter, map } from 'fp-ts/lib/Option';
 import { pipe } from 'fp-ts/lib/pipeable';

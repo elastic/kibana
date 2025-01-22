@@ -7,8 +7,7 @@
 
 import React, { useState } from 'react';
 
-import type {
-  EuiInMemoryTableProps} from '@elastic/eui';
+import type { EuiInMemoryTableProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,

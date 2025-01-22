@@ -15,14 +15,14 @@ import type {
   AlertInstanceContext,
   Rule,
   RuleAction,
-  RuleAlertData} from '../types';
+  RuleAlertData,
+} from '../types';
 import {
   RuleExecutionStatusWarningReasons,
   DEFAULT_FLAPPING_SETTINGS,
   DEFAULT_QUERY_DELAY_SETTINGS,
 } from '../types';
-import type {
-  ConcreteTaskInstance} from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
 import {
   createTaskRunError,
   isUnrecoverableError,
@@ -76,11 +76,8 @@ import { EVENT_LOG_ACTIONS } from '../plugin';
 import { IN_MEMORY_METRICS } from '../monitoring';
 import { translations } from '../constants/translations';
 import { dataPluginMock } from '@kbn/data-plugin/server/mocks';
-import type {
-  ContextOpts} from '../lib/alerting_event_logger/alerting_event_logger';
-import {
-  AlertingEventLogger
-} from '../lib/alerting_event_logger/alerting_event_logger';
+import type { ContextOpts } from '../lib/alerting_event_logger/alerting_event_logger';
+import { AlertingEventLogger } from '../lib/alerting_event_logger/alerting_event_logger';
 import { getAlertFromRaw } from '../rules_client/lib/get_alert_from_raw';
 import { alertingEventLoggerMock } from '../lib/alerting_event_logger/alerting_event_logger.mock';
 import type { SharePluginStart } from '@kbn/share-plugin/server';

@@ -12,12 +12,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { CoreStart } from '@kbn/core/public';
 import type { Dispatch } from '@reduxjs/toolkit';
 import { partition } from 'lodash';
-import type {
-  DatasourceState} from '../state_management';
+import type { DatasourceState } from '../state_management';
 import {
   updateDatasourceState,
   type DataViewsState,
-  type VisualizationState
+  type VisualizationState,
 } from '../state_management';
 import type {
   AddUserMessages,

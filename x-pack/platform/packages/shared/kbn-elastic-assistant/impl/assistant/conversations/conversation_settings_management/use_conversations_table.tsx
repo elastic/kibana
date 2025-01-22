@@ -8,7 +8,7 @@
 import React, { useCallback } from 'react';
 
 import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin/public';
-import type { EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiLink } from '@elastic/eui';
 
 import { FormattedDate } from '@kbn/i18n-react';

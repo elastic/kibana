@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CustomIntegrationOptions} from '../../types';
+import type { CustomIntegrationOptions } from '../../types';
 import { IntegrationError } from '../../types';
 import type { CreateCustomIntegrationContext, CreateCustomIntegrationEvent } from './types';
 

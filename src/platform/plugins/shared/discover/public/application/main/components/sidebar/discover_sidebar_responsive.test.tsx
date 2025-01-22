@@ -15,11 +15,8 @@ import { getDataTableRecords, realHits } from '../../../../__fixtures__/real_hit
 import { act } from 'react-dom/test-utils';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import React from 'react';
-import type {
-  DiscoverSidebarResponsiveProps} from './discover_sidebar_responsive';
-import {
-  DiscoverSidebarResponsive
-} from './discover_sidebar_responsive';
+import type { DiscoverSidebarResponsiveProps } from './discover_sidebar_responsive';
+import { DiscoverSidebarResponsive } from './discover_sidebar_responsive';
 import type { DiscoverServices } from '../../../../build_services';
 import type { SidebarToggleState } from '../../../types';
 import { FetchStatus } from '../../../types';

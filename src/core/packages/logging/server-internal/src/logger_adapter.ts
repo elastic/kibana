@@ -8,7 +8,7 @@
  */
 
 import type { LogRecord, Logger, LogMeta, LogLevelId } from '@kbn/logging';
-import type { GlobalContext} from './global_context';
+import type { GlobalContext } from './global_context';
 import { mergeGlobalContext } from './global_context';
 
 /** @internal */

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ISessionService} from './session_service';
+import type { ISessionService } from './session_service';
 import { SessionService } from './session_service';
 import { coreMock } from '@kbn/core/public/mocks';
 import { first, take, toArray } from 'rxjs';

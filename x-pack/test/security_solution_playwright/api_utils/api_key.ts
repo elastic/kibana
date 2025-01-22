@@ -9,7 +9,7 @@ import axios from 'axios';
 import fs from 'fs';
 import yaml from 'js-yaml';
 import { ToolingLog } from '@kbn/tooling-log';
-import type { HostOptions} from '@kbn/test';
+import type { HostOptions } from '@kbn/test';
 import { SamlSessionManager } from '@kbn/test';
 import { resolve } from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';

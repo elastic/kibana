@@ -6,7 +6,7 @@
  */
 
 import type { PluginConfigDescriptor, PluginInitializerContext } from '@kbn/core/server';
-import type { SLOConfig} from '../common/config';
+import type { SLOConfig } from '../common/config';
 import { configSchema } from '../common/config';
 
 //  This exports static code and TypeScript types,

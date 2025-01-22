@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { LinkIcon } from './link_icon';
-import type { AppMockRenderer} from '../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 
 describe('LinkIcon', () => {

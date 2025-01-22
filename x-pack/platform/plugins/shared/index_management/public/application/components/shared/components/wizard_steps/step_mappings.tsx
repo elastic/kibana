@@ -19,13 +19,8 @@ import {
 import type { IndexMode } from '../../../../../../common/types/data_streams';
 import type { Forms } from '../../../../../shared_imports';
 import { useAppContext } from '../../../../app_context';
-import type {
-  OnUpdateHandler,
-  IndexSettings} from '../../../mappings_editor';
-import {
-  MappingsEditor,
-  LoadMappingsFromJsonButton
-} from '../../../mappings_editor';
+import type { OnUpdateHandler, IndexSettings } from '../../../mappings_editor';
+import { MappingsEditor, LoadMappingsFromJsonButton } from '../../../mappings_editor';
 
 import { documentationService } from '../../../mappings_editor/shared_imports';
 

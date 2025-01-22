@@ -9,14 +9,8 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import type {
-  CriteriaWithPagination,
-  EuiBasicTableColumn} from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiIcon,
-  EuiText,
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiIcon, EuiText } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 

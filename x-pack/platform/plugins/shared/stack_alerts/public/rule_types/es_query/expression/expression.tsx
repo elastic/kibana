@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
 import React, { memo, useCallback } from 'react';
 import deepEqual from 'fast-deep-equal';
 import { EuiCallOut, EuiHorizontalRule, EuiSpacer } from '@elastic/eui';

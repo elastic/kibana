@@ -23,10 +23,9 @@ import type { MlModel } from '../types/ml';
 import type {
   MlInferencePipeline,
   CreateMLInferencePipeline,
-  InferencePipelineInferenceConfig} from '../types/pipelines';
-import {
-  TrainedModelState
+  InferencePipelineInferenceConfig,
 } from '../types/pipelines';
+import { TrainedModelState } from '../types/pipelines';
 
 export const TEXT_EXPANSION_TYPE = SUPPORTED_PYTORCH_TASKS.TEXT_EXPANSION;
 export const TEXT_EXPANSION_FRIENDLY_TYPE = 'ELSER';

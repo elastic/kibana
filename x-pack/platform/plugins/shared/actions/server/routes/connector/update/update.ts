@@ -13,7 +13,8 @@ import { verifyAccessAndContext } from '../../verify_access_and_context';
 import { connectorResponseSchemaV1 } from '../../../../common/routes/connector/response';
 import type {
   UpdateConnectorBodyV1,
-  UpdateConnectorParamsV1} from '../../../../common/routes/connector/apis/update';
+  UpdateConnectorParamsV1,
+} from '../../../../common/routes/connector/apis/update';
 import {
   updateConnectorBodySchemaV1,
   updateConnectorParamsSchemaV1,

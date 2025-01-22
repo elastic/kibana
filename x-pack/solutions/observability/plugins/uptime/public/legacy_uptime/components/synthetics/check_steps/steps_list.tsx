@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonIcon,
@@ -16,7 +15,7 @@ import {
   RIGHT_ALIGNMENT,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { MouseEvent} from 'react';
+import type { MouseEvent } from 'react';
 import React, { useState } from 'react';
 import type { JourneyStep } from '../../../../../common/runtime_types';
 import { STATUS_LABEL } from '../../monitor/ping_list/translations';

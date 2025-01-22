@@ -8,11 +8,8 @@
 import { apm, timerange } from '@kbn/apm-synthtrace-client';
 import expect from '@kbn/expect';
 import moment from 'moment';
-import type {
-  LlmProxy} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import {
-  createLlmProxy
-} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import type { LlmProxy } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import { deleteConnectors, createConnector } from '../../common/connectors';
 

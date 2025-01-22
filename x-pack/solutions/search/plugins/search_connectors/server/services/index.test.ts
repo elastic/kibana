@@ -6,21 +6,12 @@
  */
 
 import type { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
-import type {
-  ElasticsearchClientMock} from '@kbn/core-elasticsearch-client-server-mocks';
-import {
-  elasticsearchClientMock,
-} from '@kbn/core-elasticsearch-client-server-mocks';
-import type {
-  ConnectorMetadata,
-  PackagePolicyMetadata} from '.';
-import {
-  AgentlessConnectorsInfraService,
-  getConnectorsToDeploy,
-  getPoliciesToDelete,
-} from '.';
+import type { ElasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
+import type { ConnectorMetadata, PackagePolicyMetadata } from '.';
+import { AgentlessConnectorsInfraService, getConnectorsToDeploy, getPoliciesToDelete } from '.';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import type { MockedLogger} from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import {
   createPackagePolicyServiceMock,

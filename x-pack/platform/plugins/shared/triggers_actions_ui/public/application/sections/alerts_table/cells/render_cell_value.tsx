@@ -16,12 +16,8 @@ import {
   ALERT_RULE_CONSUMER,
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
-import type {
-  FieldFormatParams,
-  FieldFormatsRegistry} from '@kbn/field-formats-plugin/common';
-import {
-  FIELD_FORMAT_IDS
-} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatParams, FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import type { RenderCellValue } from '@elastic/eui';
 import { EuiBadge, EuiLink } from '@elastic/eui';
 import { alertProducersData, observabilityFeatureIds } from '../constants';

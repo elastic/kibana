@@ -13,12 +13,11 @@ import { EuiLink } from '@elastic/eui';
 import { InvalidEmailReason } from '@kbn/actions-plugin/common';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
-import type {
-  FieldConfig} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   UseField,
   useFormContext,
-  useFormData
+  useFormData,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   NumericField,

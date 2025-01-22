@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiComboBox,
-  EuiCopy,
-  EuiFlexItem,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiButtonIcon, EuiComboBox, EuiCopy, EuiFlexItem } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import type { SLOWithSummaryResponse } from '@kbn/slo-schema';

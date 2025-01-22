@@ -9,10 +9,9 @@
 
 import type {
   EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
-import {
-  useEuiTheme,
+  EuiContextMenuPanelItemDescriptor,
 } from '@elastic/eui';
+import { useEuiTheme } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import type { FieldSpec } from '@kbn/data-views-plugin/common';

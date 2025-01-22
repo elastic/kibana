@@ -17,10 +17,14 @@ import {
   renderWithReduxStore,
 } from '../../../../mocks';
 
-import type { DatasourcePublicAPI, SuggestionRequest, DatasourceSuggestion } from '../../../../types';
+import type {
+  DatasourcePublicAPI,
+  SuggestionRequest,
+  DatasourceSuggestion,
+} from '../../../../types';
 import type { ChartSwitchProps } from './chart_switch';
 import { ChartSwitchPopover } from './chart_switch_popover';
-import type { LensAppState} from '../../../../state_management';
+import type { LensAppState } from '../../../../state_management';
 import { applyChanges } from '../../../../state_management';
 import { faker } from '@faker-js/faker';
 

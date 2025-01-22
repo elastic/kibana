@@ -7,19 +7,14 @@
 
 import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type {
-  EmbeddableApiContext,
-  StateComparators} from '@kbn/presentation-publishing';
-import {
-  apiHasUniqueId
-} from '@kbn/presentation-publishing';
+import type { EmbeddableApiContext, StateComparators } from '@kbn/presentation-publishing';
+import { apiHasUniqueId } from '@kbn/presentation-publishing';
 import type {
   AdvancedUiActionsSetup,
   AdvancedUiActionsStart,
-  DynamicActionsState} from '@kbn/ui-actions-enhanced-plugin/public';
-import {
-  UiActionsEnhancedDynamicActionManager as DynamicActionManager,
+  DynamicActionsState,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import { UiActionsEnhancedDynamicActionManager as DynamicActionManager } from '@kbn/ui-actions-enhanced-plugin/public';
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject } from 'rxjs';
 import {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactChild} from 'react';
+import type { ReactChild } from 'react';
 import React, { createContext, useContext, useState } from 'react';
 import type { PolicyFromES } from '../../../../common/types';
 

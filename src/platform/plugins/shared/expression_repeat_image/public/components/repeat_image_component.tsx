@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement} from 'react';
+import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
 import { times } from 'lodash';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';

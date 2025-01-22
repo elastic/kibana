@@ -8,7 +8,7 @@
  */
 
 import type { CoreStart, HttpStart } from '@kbn/core/public';
-import type { IHttpFetchError, ResponseErrorBody} from '@kbn/core-http-browser';
+import type { IHttpFetchError, ResponseErrorBody } from '@kbn/core-http-browser';
 import { isHttpFetchError } from '@kbn/core-http-browser';
 import { isObject } from 'lodash';
 import { i18n } from '@kbn/i18n';

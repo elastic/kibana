@@ -15,7 +15,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import { FilesContext } from '@kbn/shared-ux-file-context';
 
 import type { ImageConfig } from '../../image_embeddable/types';
-import type { FileImageMetadata} from '../../imports';
+import type { FileImageMetadata } from '../../imports';
 import { imageEmbeddableFileKind } from '../../imports';
 import { coreServices, filesService } from '../../services/kibana_services';
 import { createValidateUrl } from '../../utils/validate_url';

@@ -8,7 +8,7 @@
  */
 
 import * as React from 'react';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import { lazy, Suspense } from 'react';
 import { PanelSpinner } from './panel_spinner';
 import type { Props } from './reporting_panel_content';

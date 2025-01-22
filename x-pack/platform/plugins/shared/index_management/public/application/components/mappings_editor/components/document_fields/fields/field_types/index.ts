@@ -8,7 +8,13 @@
 import type { ComponentType } from 'react';
 import type SemVer from 'semver/classes/semver';
 
-import type { MainType, SubType, DataType, NormalizedField, NormalizedFields } from '../../../../types';
+import type {
+  MainType,
+  SubType,
+  DataType,
+  NormalizedField,
+  NormalizedFields,
+} from '../../../../types';
 
 import { AliasType } from './alias_type';
 import { KeywordType } from './keyword_type';

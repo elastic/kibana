@@ -17,12 +17,8 @@ import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from 
 import type { SanitizedRuleAction } from '@kbn/alerting-types';
 import { ALERT_UUID } from '@kbn/rule-data-utils';
 import { Alert } from '../../../alert';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState} from '@kbn/alerting-state-types';
-import {
-  ActionsCompletion
-} from '@kbn/alerting-state-types';
+import type { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-state-types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { TaskPriority } from '@kbn/task-manager-plugin/server';
 
 const alertingEventLogger = alertingEventLoggerMock.create();

@@ -8,7 +8,7 @@
  */
 
 import { gaugeFunction } from './gauge_function';
-import type { GaugeArguments} from '..';
+import type { GaugeArguments } from '..';
 import { GaugeShapes } from '..';
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';

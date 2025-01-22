@@ -26,7 +26,7 @@ import type { CliArgs } from '@kbn/config';
 import { CiStatsReporter } from '@kbn/ci-stats-reporter';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import type { Log} from './log';
+import type { Log } from './log';
 import { CliLog } from './log';
 import { Optimizer } from './optimizer';
 import { DevServer } from './dev_server';

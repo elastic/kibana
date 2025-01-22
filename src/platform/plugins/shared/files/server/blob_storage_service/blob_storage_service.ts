@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
-import type { BlobStorageSettings} from '../../common';
+import type { BlobStorageSettings } from '../../common';
 import { ES_FIXED_SIZE_INDEX_BLOB_STORE } from '../../common';
 import type { BlobStorageClient } from './types';
 import { ElasticsearchBlobStorageClient, MAX_BLOB_STORE_SIZE_BYTES } from './adapters';

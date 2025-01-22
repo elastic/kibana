@@ -9,8 +9,7 @@ import React, { useEffect } from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import type {
-  EuiTabbedContentTab} from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -21,7 +20,7 @@ import {
   EuiLink,
   EuiPanel,
   EuiSpacer,
-  EuiTabbedContent
+  EuiTabbedContent,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

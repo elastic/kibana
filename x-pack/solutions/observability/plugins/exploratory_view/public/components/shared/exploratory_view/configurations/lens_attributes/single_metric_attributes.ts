@@ -15,13 +15,8 @@ import { getColorPalette } from '../synthetics/single_metric_config';
 import { FORMULA_COLUMN, RECORDS_FIELD } from '../constants';
 import type { ColumnFilter, MetricOption } from '../../types';
 import type { SeriesConfig } from '../../../../..';
-import type {
-  LayerConfig} from '../lens_attributes';
-import {
-  buildNumberColumn,
-  LensAttributes,
-  parseCustomFieldName,
-} from '../lens_attributes';
+import type { LayerConfig } from '../lens_attributes';
+import { buildNumberColumn, LensAttributes, parseCustomFieldName } from '../lens_attributes';
 
 export class SingleMetricLensAttributes extends LensAttributes {
   columnId: string;

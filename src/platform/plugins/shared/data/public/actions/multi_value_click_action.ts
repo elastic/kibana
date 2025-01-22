@@ -9,7 +9,7 @@
 
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
-import type { BooleanRelation} from '@kbn/es-query';
+import type { BooleanRelation } from '@kbn/es-query';
 import { extractTimeFilter, convertRangeFilterToTimeRange } from '@kbn/es-query';
 import type { QueryStart } from '../query';
 import { createFiltersFromMultiValueClickAction } from './filters/create_filters_from_multi_value_click';

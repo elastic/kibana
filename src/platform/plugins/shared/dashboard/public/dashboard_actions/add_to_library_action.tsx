@@ -19,7 +19,8 @@ import type {
   HasType,
   HasTypeDisplayName,
   HasUniqueId,
-  PublishesPanelTitle} from '@kbn/presentation-publishing';
+  PublishesPanelTitle,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasInPlaceLibraryTransforms,
@@ -30,14 +31,9 @@ import {
   getInheritedViewMode,
   getPanelTitle,
 } from '@kbn/presentation-publishing';
-import type {
-  OnSaveProps,
-  SaveResult} from '@kbn/saved-objects-plugin/public';
-import {
-  SavedObjectSaveModal,
-  showSaveModal,
-} from '@kbn/saved-objects-plugin/public';
-import type { Action} from '@kbn/ui-actions-plugin/public';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { coreServices } from '../services/kibana_services';

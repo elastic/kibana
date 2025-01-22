@@ -9,6 +9,7 @@ import { schema } from '@kbn/config-schema';
 import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 
 import { i18n } from '@kbn/i18n';
+import type { ConnectorStatus, FilteringRule } from '@kbn/search-connectors';
 import {
   CONNECTORS_INDEX,
   cancelSync,
@@ -27,7 +28,6 @@ import {
   updateFilteringDraft,
 } from '@kbn/search-connectors';
 
-import type { ConnectorStatus, FilteringRule} from '@kbn/search-connectors';
 import { SyncJobType } from '@kbn/search-connectors';
 import { cancelSyncs } from '@kbn/search-connectors/lib/cancel_syncs';
 import {

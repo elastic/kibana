@@ -13,7 +13,7 @@ import * as Rx from 'rxjs';
 import { mergeAll } from 'rxjs';
 import { dllManifestPath } from '@kbn/ui-shared-deps-npm';
 
-import type { Bundle} from '../common';
+import type { Bundle } from '../common';
 import { BundleRemotes, Hashes, parseDllManifest } from '../common';
 
 import type { OptimizerConfig } from './optimizer_config';

@@ -8,7 +8,7 @@
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AxiosRequestConfig } from 'axios';
 import axios from 'axios';
-import type { ChildProcess} from 'child_process';
+import type { ChildProcess } from 'child_process';
 import { spawn } from 'child_process';
 import { getLatestVersion } from './artifact_manager';
 import { Manager } from './resource_manager';

@@ -9,11 +9,9 @@ import type {
   GroupingAggregation,
   GroupPanelRenderer,
   GetGroupStats,
-  NamedAggregation} from '@kbn/grouping/src';
-import {
-  isNoneGroup,
-  parseGroupingQuery,
+  NamedAggregation,
 } from '@kbn/grouping/src';
+import { isNoneGroup, parseGroupingQuery } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import type { Filter } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
@@ -31,10 +29,9 @@ import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import type { Evaluation } from '../../../../common/types_old';
 import type {
   FindingsGroupingAggregation,
-  FindingsRootGroupingAggregation} from './use_grouped_findings';
-import {
-  useGroupedFindings,
+  FindingsRootGroupingAggregation,
 } from './use_grouped_findings';
+import { useGroupedFindings } from './use_grouped_findings';
 import {
   FINDINGS_UNIT,
   groupingTitle,

@@ -15,15 +15,9 @@ import type {
   Pagination,
   Direction,
   EuiTableActionsColumnType,
-  CriteriaWithPagination} from '@elastic/eui';
-import {
-  EuiButton,
-  EuiCallOut,
-  EuiEmptyPrompt,
-  EuiSpacer,
-  Query,
-  Ast,
+  CriteriaWithPagination,
 } from '@elastic/eui';
+import { EuiButton, EuiCallOut, EuiEmptyPrompt, EuiSpacer, Query, Ast } from '@elastic/eui';
 import { keyBy, uniq, get } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

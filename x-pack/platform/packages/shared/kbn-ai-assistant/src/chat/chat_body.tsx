@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  UseEuiTheme} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
 import {
   EuiCallOut,
   euiCanAnimate,
@@ -16,7 +15,7 @@ import {
   EuiPanel,
   euiScrollBarStyles,
   EuiSpacer,
-  useEuiTheme
+  useEuiTheme,
 } from '@elastic/eui';
 import { css, keyframes } from '@emotion/css';
 import { i18n } from '@kbn/i18n';

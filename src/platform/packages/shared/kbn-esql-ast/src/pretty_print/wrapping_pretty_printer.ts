@@ -14,11 +14,9 @@ import type {
   CommandOptionVisitorContext,
   ExpressionVisitorContext,
   FunctionCallExpressionVisitorContext,
-  ListLiteralExpressionVisitorContext} from '../visitor';
-import {
-  CommandVisitorContext,
-  Visitor,
+  ListLiteralExpressionVisitorContext,
 } from '../visitor';
+import { CommandVisitorContext, Visitor } from '../visitor';
 import { children, singleItems } from '../visitor/utils';
 import type { BasicPrettyPrinterOptions } from './basic_pretty_printer';
 import { BasicPrettyPrinter } from './basic_pretty_printer';

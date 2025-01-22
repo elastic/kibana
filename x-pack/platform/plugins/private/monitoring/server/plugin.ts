@@ -41,7 +41,7 @@ import { initBulkUploader } from './kibana_monitoring';
 import { registerCollectors } from './kibana_monitoring/collectors';
 import { LicenseService } from './license_service';
 import { requireUIRoutes } from './routes';
-import type { EndpointTypes} from './static_globals';
+import type { EndpointTypes } from './static_globals';
 import { Globals } from './static_globals';
 import { registerMonitoringTelemetryCollection } from './telemetry_collection';
 import type {

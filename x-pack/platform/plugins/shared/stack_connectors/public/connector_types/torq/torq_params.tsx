@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ActionParamsProps} from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  JsonEditorWithMessageVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';
 import type { TorqActionParams } from '../types';
 import * as i18n from './translations';

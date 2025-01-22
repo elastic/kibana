@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type { FormSchema} from '../../shared_imports';
+import type { FormSchema } from '../../shared_imports';
 import { fieldValidators } from '../../shared_imports';
 
 const { isJsonField } = fieldValidators;

@@ -16,10 +16,9 @@ import { createKibanaReactContext } from '@kbn/kibana-react-plugin/public';
 import { DataViewDescriptor } from '../../../common/data_views/models/data_view_descriptor';
 import type {
   DataSourceSelectionChangeHandler,
-  DataSourceSelection} from '../../../common/data_source_selection';
-import {
-  AllDatasetSelection
+  DataSourceSelection,
 } from '../../../common/data_source_selection';
+import { AllDatasetSelection } from '../../../common/data_source_selection';
 import { Dataset, Integration } from '../../../common/datasets';
 import { DataSourceSelector } from './data_source_selector';
 import type { DataSourceSelectorProps, DataSourceSelectorSearchParams } from './types';

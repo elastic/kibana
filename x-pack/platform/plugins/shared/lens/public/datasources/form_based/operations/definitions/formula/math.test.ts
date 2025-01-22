@@ -8,7 +8,7 @@
 import type { TinymathAST } from '@kbn/tinymath';
 import type { IndexPattern } from '../../../../../types';
 import type { FormBasedLayer } from '../../../types';
-import type { MathIndexPatternColumn} from './math';
+import type { MathIndexPatternColumn } from './math';
 import { mathOperation } from './math';
 
 function createLayerWithMathColumn(tinymathAst: string | TinymathAST): FormBasedLayer {

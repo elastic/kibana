@@ -18,7 +18,8 @@ import type {
   ImportExceptionListItemSchema,
   ImportExceptionListItemSchemaDecoded,
   ImportExceptionListSchemaDecoded,
-  ImportExceptionsListSchema} from '@kbn/securitysolution-io-ts-list-types';
+  ImportExceptionsListSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   importExceptionListItemSchema,
   importExceptionsListSchema,

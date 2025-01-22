@@ -11,13 +11,8 @@ import { uniqWith } from 'lodash';
 import deepEqual from 'react-fast-compare';
 import type { Layer, TermsColumn } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { Operations } from '@kbn/visualizations-plugin/common/convert_to_lens';
-import type {
-  Layer as ExtendedLayer,
-  ColumnsWithoutMeta,
-  Column} from './lib/convert';
-import {
-  excludeMetaFromColumn
-} from './lib/convert';
+import type { Layer as ExtendedLayer, ColumnsWithoutMeta, Column } from './lib/convert';
+import { excludeMetaFromColumn } from './lib/convert';
 import { getSeriesAgg } from './lib/series';
 import type { Metric, Series } from '../../common/types';
 

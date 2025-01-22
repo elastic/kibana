@@ -14,15 +14,8 @@ import type { Plugin } from './plugin';
 import type { EsContext } from './es';
 import type { EventLogService } from './event_log_service';
 import { millisToNanos } from '../common';
-import type {
-  IEvent,
-  IValidatedEvent,
-  IEventLogger,
-  IEventLogService} from './types';
-import {
-  ECS_VERSION,
-  EventSchema,
-} from './types';
+import type { IEvent, IValidatedEvent, IEventLogger, IEventLogService } from './types';
+import { ECS_VERSION, EventSchema } from './types';
 import { SAVED_OBJECT_REL_PRIMARY } from './types';
 import type { Doc } from './es/cluster_client_adapter';
 

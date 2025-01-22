@@ -15,7 +15,7 @@ import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/s
 import type { Logger } from '@kbn/core/server';
 import type { ActionsClientMock } from './actions_client/actions_client.mock';
 import { actionsClientMock } from './actions_client/actions_client.mock';
-import type { PluginSetupContract, PluginStartContract} from './plugin';
+import type { PluginSetupContract, PluginStartContract } from './plugin';
 import { renderActionParameterTemplates } from './plugin';
 import type { Services, UnsecuredServices } from './types';
 import { actionsAuthorizationMock } from './authorization/actions_authorization.mock';

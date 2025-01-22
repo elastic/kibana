@@ -26,11 +26,10 @@ import type {
   ReindexStatusResponse,
 } from '../../../../../../../common/types';
 import { useAppContext } from '../../../../../app_context';
-import type {
-  WarningCheckboxProps} from './warning_step_checkbox';
+import type { WarningCheckboxProps } from './warning_step_checkbox';
 import {
   DeprecatedSettingWarningCheckbox,
-  ReplaceIndexWithAliasWarningCheckbox
+  ReplaceIndexWithAliasWarningCheckbox,
 } from './warning_step_checkbox';
 
 interface CheckedIds {

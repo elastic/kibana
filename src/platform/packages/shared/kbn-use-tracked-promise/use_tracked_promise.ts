@@ -9,7 +9,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { DependencyList} from 'react';
+import type { DependencyList } from 'react';
 import { useEffect, useMemo, useRef, useState, useCallback } from 'react';
 import useMountedState from 'react-use/lib/useMountedState';
 

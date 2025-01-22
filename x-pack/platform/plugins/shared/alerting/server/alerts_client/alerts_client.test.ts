@@ -8,14 +8,8 @@
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { UpdateByQueryRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
-import type {
-  AlertsFilter,
-  RuleAlertData} from '../types';
-import {
-  DEFAULT_FLAPPING_SETTINGS,
-  MaintenanceWindowStatus,
-  RecoveredActionGroup
-} from '../types';
+import type { AlertsFilter, RuleAlertData } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, MaintenanceWindowStatus, RecoveredActionGroup } from '../types';
 import {
   ALERT_ACTION_GROUP,
   ALERT_CONSECUTIVE_MATCHES,

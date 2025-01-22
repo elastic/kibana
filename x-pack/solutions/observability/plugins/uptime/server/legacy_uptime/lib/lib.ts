@@ -9,10 +9,9 @@ import type {
   ElasticsearchClient,
   SavedObjectsClientContract,
   KibanaRequest,
-  CoreRequestHandlerContext} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers,
+  CoreRequestHandlerContext,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import chalk from 'chalk';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ESSearchResponse } from '@kbn/es-types';

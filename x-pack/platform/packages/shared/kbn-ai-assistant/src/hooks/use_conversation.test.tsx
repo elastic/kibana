@@ -10,11 +10,10 @@ import { merge } from 'lodash';
 import type { PropsWithChildren } from 'react';
 import React from 'react';
 import { BehaviorSubject, Observable, of, Subject } from 'rxjs';
-import type {
-  StreamingChatResponseEventWithoutError} from '@kbn/observability-ai-assistant-plugin/common';
+import type { StreamingChatResponseEventWithoutError } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   MessageRole,
-  StreamingChatResponseEventType
+  StreamingChatResponseEventType,
 } from '@kbn/observability-ai-assistant-plugin/common';
 import { EMPTY_CONVERSATION_TITLE } from '../i18n';
 import type { AIAssistantAppService } from '../service/create_app_service';

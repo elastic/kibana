@@ -16,12 +16,8 @@ import {
 import { getClusterStats } from '../../../../lib/cluster/get_cluster_stats';
 import { getIndexPatterns } from '../../../../../common/get_index_patterns';
 import { createValidationFunction } from '../../../../lib/create_route_validation_function';
-import type {
-  MetricDescriptor,
-  NamedMetricDescriptor} from '../../../../lib/details/get_metrics';
-import {
-  getMetrics
-} from '../../../../lib/details/get_metrics';
+import type { MetricDescriptor, NamedMetricDescriptor } from '../../../../lib/details/get_metrics';
+import { getMetrics } from '../../../../lib/details/get_metrics';
 import { getNodeSummary } from '../../../../lib/elasticsearch/nodes';
 import { getShardAllocation, getShardStats } from '../../../../lib/elasticsearch/shards';
 import { handleError } from '../../../../lib/errors/handle_error';

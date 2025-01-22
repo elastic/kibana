@@ -8,15 +8,8 @@
  */
 
 import React from 'react';
-import type {
-  EuiThemeComputed} from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiPanel,
-  EuiPortal,
-  EuiOverlayMask,
-  EuiFocusTrap
-} from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiButtonEmpty, EuiPanel, EuiPortal, EuiOverlayMask, EuiFocusTrap } from '@elastic/eui';
 import type { GuideConfig, GuideStep as GuideStepType, StepConfig } from '@kbn/guided-onboarding';
 import { i18n } from '@kbn/i18n';
 import { GuidePanelFlyoutHeader } from './guide_panel_flyout_header';

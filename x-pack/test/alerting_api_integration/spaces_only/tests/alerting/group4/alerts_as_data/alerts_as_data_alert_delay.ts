@@ -37,13 +37,12 @@ import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { Spaces } from '../../../../scenarios';
-import type {
-  TaskManagerDoc} from '../../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../../common/lib';
 import {
   getEventLog,
   getTestRuleData,
   getUrlPrefix,
-  ObjectRemover
+  ObjectRemover,
 } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export

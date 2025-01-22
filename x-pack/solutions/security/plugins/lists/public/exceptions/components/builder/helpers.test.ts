@@ -10,7 +10,8 @@ import type {
   EntryList,
   EntryMatch,
   EntryMatchAny,
-  EntryNested} from '@kbn/securitysolution-io-ts-list-types';
+  EntryNested,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
@@ -21,7 +22,8 @@ import type {
   ExceptionsBuilderExceptionItem,
   ExceptionsBuilderReturnExceptionItem,
   FormattedBuilderEntry,
-  OperatorOption} from '@kbn/securitysolution-list-utils';
+  OperatorOption,
+} from '@kbn/securitysolution-list-utils';
 import {
   ALL_OPERATORS,
   DETECTION_ENGINE_EXCEPTION_OPERATORS,

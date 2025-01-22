@@ -7,9 +7,7 @@
 
 import React, { Fragment, useState, useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiSwitchEvent,
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiSwitchEvent, EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiDescribedFormGroup,
@@ -24,7 +22,7 @@ import {
   EuiSwitch,
   EuiTitle,
   EuiCallOut,
-  EuiComboBox
+  EuiComboBox,
 } from '@elastic/eui';
 import type { EuiSelectableOption } from '@elastic/eui';
 

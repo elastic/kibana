@@ -12,7 +12,12 @@ import type { Plugin, CoreSetup, PluginInitializerContext } from '@kbn/core/publ
 import { apiService } from './application/lib/api';
 import { breadcrumbService } from './application/lib/breadcrumbs';
 import { uiMetricService } from './application/lib/ui_metric';
-import type { SetupDependencies, StartDependencies, AppDependencies, ClientConfigType } from './types';
+import type {
+  SetupDependencies,
+  StartDependencies,
+  AppDependencies,
+  ClientConfigType,
+} from './types';
 
 export class UpgradeAssistantUIPlugin
   implements Plugin<void, void, SetupDependencies, StartDependencies>

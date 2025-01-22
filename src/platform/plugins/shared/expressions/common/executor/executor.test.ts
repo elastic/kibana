@@ -12,7 +12,7 @@ import * as expressionTypes from '../expression_types';
 import * as expressionFunctions from '../expression_functions';
 import type { FunctionCacheItem } from '../execution';
 import { Execution } from '../execution';
-import type { ExpressionAstFunction} from '../ast';
+import type { ExpressionAstFunction } from '../ast';
 import { parseExpression, formatExpression } from '../ast';
 import type { MigrateFunction } from '@kbn/kibana-utils-plugin/common/persistable_state';
 import type { SavedObjectReference } from '@kbn/core/types';

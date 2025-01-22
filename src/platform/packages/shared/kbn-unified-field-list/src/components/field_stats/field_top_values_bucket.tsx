@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import type {
-  EuiThemeComputed} from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,

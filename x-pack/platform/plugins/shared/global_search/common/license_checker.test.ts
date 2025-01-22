@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { of, BehaviorSubject } from 'rxjs';
 import { licenseMock } from '@kbn/licensing-plugin/common/licensing.mock';
 import type { ILicense, LicenseCheck } from '@kbn/licensing-plugin/common/types';

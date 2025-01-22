@@ -17,13 +17,8 @@ import type { KibanaRequest, RequestHandler } from '@kbn/core/server';
 // for forwarding.
 import { ensureRawRequest } from '@kbn/core-http-router-server-internal';
 import type { ESConfigForProxy } from '../../../../types';
-import type {
-  ProxyConfigCollection} from '../../../../lib';
-import {
-  getElasticsearchProxyConfig,
-  proxyRequest,
-  setHeaders,
-} from '../../../../lib';
+import type { ProxyConfigCollection } from '../../../../lib';
+import { getElasticsearchProxyConfig, proxyRequest, setHeaders } from '../../../../lib';
 
 import type { RouteDependencies } from '../../..';
 

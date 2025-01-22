@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useReducer, useCallback, useState, useRef } from 'react';
-import type { DragDropContextProps} from '@elastic/eui';
+import type { DragDropContextProps } from '@elastic/eui';
 import { EuiDragDropContext, useEuiPaddingSize } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { type Filter, BooleanRelation, compareFilters } from '@kbn/es-query';

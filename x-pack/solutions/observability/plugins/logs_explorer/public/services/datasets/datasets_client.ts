@@ -14,7 +14,8 @@ import type {
   FindDatasetsRequestQuery,
   FindDatasetValue,
   FindIntegrationsRequestQuery,
-  FindIntegrationsValue} from '../../../common/latest';
+  FindIntegrationsValue,
+} from '../../../common/latest';
 import {
   DATASETS_URL,
   findDatasetsRequestQueryRT,

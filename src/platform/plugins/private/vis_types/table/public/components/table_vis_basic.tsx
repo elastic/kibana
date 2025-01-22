@@ -8,14 +8,8 @@
  */
 
 import React, { memo, useCallback, useMemo, useRef } from 'react';
-import type {
-  EuiDataGridProps,
-  EuiDataGridRefProps,
-  EuiDataGridSorting} from '@elastic/eui';
-import {
-  EuiDataGrid,
-  EuiTitle,
-} from '@elastic/eui';
+import type { EuiDataGridProps, EuiDataGridRefProps, EuiDataGridSorting } from '@elastic/eui';
+import { EuiDataGrid, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { IInterpreterRenderHandlers } from '@kbn/expressions-plugin/common';
 import { createTableVisCell } from './table_vis_cell';

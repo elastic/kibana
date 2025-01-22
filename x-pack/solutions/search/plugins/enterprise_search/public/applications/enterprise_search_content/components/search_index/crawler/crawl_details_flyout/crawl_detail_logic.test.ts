@@ -11,12 +11,8 @@ import '../../_mocks_/index_name_logic.mock';
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import { itShowsServerErrorAsFlashMessage } from '../../../../../test_helpers';
-import type {
-  CrawlRequestWithDetailsFromServer} from '../../../../api/crawler/types';
-import {
-  CrawlerStatus,
-  CrawlType,
-} from '../../../../api/crawler/types';
+import type { CrawlRequestWithDetailsFromServer } from '../../../../api/crawler/types';
+import { CrawlerStatus, CrawlType } from '../../../../api/crawler/types';
 import { crawlRequestWithDetailsServerToClient } from '../../../../api/crawler/utils';
 
 import type { CrawlDetailValues } from './crawl_detail_logic';

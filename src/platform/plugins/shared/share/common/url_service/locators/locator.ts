@@ -19,14 +19,8 @@ import type {
   LocatorNavigationParams,
   LocatorGetUrlParams,
 } from './types';
-import type {
-  FormatSearchParamsOptions,
-  RedirectOptions,
-  GetRedirectUrlOptions} from './redirect';
-import {
-  formatSearchParams,
-  addSpaceIdToPath,
-} from './redirect';
+import type { FormatSearchParamsOptions, RedirectOptions, GetRedirectUrlOptions } from './redirect';
+import { formatSearchParams, addSpaceIdToPath } from './redirect';
 
 export interface LocatorDependencies {
   /**

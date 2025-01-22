@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsServiceSetup} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers
-} from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsServiceSetup } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-objects-plugin/server';
 
 import { fromSettingsAttribute } from '../routes/settings/dynamic_settings';

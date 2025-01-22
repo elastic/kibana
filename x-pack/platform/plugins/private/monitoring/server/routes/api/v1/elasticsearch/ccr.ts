@@ -15,11 +15,12 @@ import type {
   CcrBucket,
   CcrFullStats,
   CcrShard,
-  CcrShardBucket} from '../../../../../common/http_api/elasticsearch';
+  CcrShardBucket,
+} from '../../../../../common/http_api/elasticsearch';
 import {
   postElasticsearchCcrRequestParamsRT,
   postElasticsearchCcrRequestPayloadRT,
-  postElasticsearchCcrResponsePayloadRT
+  postElasticsearchCcrResponsePayloadRT,
 } from '../../../../../common/http_api/elasticsearch';
 import type { TimeRange } from '../../../../../common/http_api/shared';
 import type {

@@ -13,7 +13,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { OBSERVABILITY_LOGS_EXPLORER_ALLOWED_DATA_VIEWS_ID } from '@kbn/management-settings-ids';
 import type { DataViewDescriptor } from '../../common/data_views/models/data_view_descriptor';
 import type { SortOrder } from '../../common/latest';
-import type { DataViewsFilterParams} from '../state_machines/data_views';
+import type { DataViewsFilterParams } from '../state_machines/data_views';
 import { createDataViewsStateMachine } from '../state_machines/data_views';
 import type { LogsExplorerCustomizations } from '../controller';
 

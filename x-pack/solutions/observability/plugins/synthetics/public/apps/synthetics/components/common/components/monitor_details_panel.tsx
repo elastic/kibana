@@ -28,10 +28,9 @@ import type {
   EncryptedSyntheticsSavedMonitor,
   MonitorFields,
   Ping,
-  SyntheticsMonitorWithId} from '../../../../../../common/runtime_types';
-import {
-  ConfigKey
+  SyntheticsMonitorWithId,
 } from '../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../common/runtime_types';
 import { MonitorTypeBadge } from './monitor_type_badge';
 import { useDateFormat } from '../../../../../hooks/use_date_format';
 import { useGetUrlParams } from '../../../hooks';

@@ -9,15 +9,16 @@
 
 import moment from 'moment';
 
-import {
-  getVisSchemas
-} from '@kbn/visualizations-plugin/public';
+import { getVisSchemas } from '@kbn/visualizations-plugin/public';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import type { Dimensions } from '@kbn/vis-type-xy-plugin/public';
-import type { DateHistogramParams, HistogramParams ,
+import type {
+  DateHistogramParams,
+  HistogramParams,
   Vis,
   VisToExpressionAstParams,
-  VisParams} from '@kbn/visualizations-plugin/public';
+  VisParams,
+} from '@kbn/visualizations-plugin/public';
 
 import { BUCKET_TYPES } from '@kbn/data-plugin/public';
 

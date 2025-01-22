@@ -28,7 +28,10 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useRef } from 'react';
 import { selectErrorPopoverState, toggleErrorPopoverOpen } from '../../../../state';
 import { useErrorDetailsLink } from '../../../common/links/error_details_link';
-import type { OverviewPing, OverviewStatusMetaData } from '../../../../../../../common/runtime_types';
+import type {
+  OverviewPing,
+  OverviewStatusMetaData,
+} from '../../../../../../../common/runtime_types';
 import { isTestRunning, manualTestRunSelector } from '../../../../state/manual_test_runs';
 import { useDateFormat } from '../../../../../../hooks/use_date_format';
 

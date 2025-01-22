@@ -11,9 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { filter, map } from 'rxjs';
 import { createHashHistory } from 'history';
 import { BehaviorSubject } from 'rxjs';
-import {
-  DEFAULT_APP_CATEGORIES
-} from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import {
   createKbnUrlStateStorage,
@@ -33,11 +31,11 @@ import type {
   Plugin,
   ApplicationStart,
   SavedObjectsClientContract,
-
   AppMountParameters,
   AppUpdater,
-  ScopedHistory} from '@kbn/core/public';
-import type { UiActionsStart, UiActionsSetup} from '@kbn/ui-actions-plugin/public';
+  ScopedHistory,
+} from '@kbn/core/public';
+import type { UiActionsStart, UiActionsSetup } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type {
@@ -48,12 +46,8 @@ import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { ExpressionsSetup, ExpressionsStart } from '@kbn/expressions-plugin/public';
-import type {
-  EmbeddableSetup,
-  EmbeddableStart} from '@kbn/embeddable-plugin/public';
-import {
-  CONTEXT_MENU_TRIGGER
-} from '@kbn/embeddable-plugin/public';
+import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
+import { CONTEXT_MENU_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { SavedObjectTaggingOssPluginStart } from '@kbn/saved-objects-tagging-oss-plugin/public';
 import type { NavigationPublicPluginStart as NavigationStart } from '@kbn/navigation-plugin/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
@@ -124,12 +118,8 @@ import {
 import { VisualizeConstants, VISUALIZE_EMBEDDABLE_TYPE } from '../common/constants';
 import { EditInLensAction } from './actions/edit_in_lens_action';
 import type { ListingViewRegistry } from './types';
-import type {
-  VisualizationSavedObjectAttributes} from '../common/content_management';
-import {
-  LATEST_VERSION,
-  CONTENT_ID
-} from '../common/content_management';
+import type { VisualizationSavedObjectAttributes } from '../common/content_management';
+import { LATEST_VERSION, CONTENT_ID } from '../common/content_management';
 import { AddAggVisualizationPanelAction } from './actions/add_agg_vis_action';
 import type { VisualizeSerializedState } from './embeddable/types';
 import { getVisualizeEmbeddableFactoryLazy } from './embeddable';

@@ -18,8 +18,7 @@ import { isEqual } from 'lodash';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
 import type { TypedLensSerializedState } from '../../../react_embeddable/types';
 import type { LensPluginStartDependencies } from '../../../plugin';
-import type {
-  LensRootStore} from '../../../state_management';
+import type { LensRootStore } from '../../../state_management';
 import {
   makeConfigureStore,
   loadInitial,

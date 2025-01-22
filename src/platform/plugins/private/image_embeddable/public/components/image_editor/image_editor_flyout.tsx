@@ -36,7 +36,7 @@ import { FilePicker } from '@kbn/shared-ux-file-picker';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';
-import type { FileImageMetadata} from '../../imports';
+import type { FileImageMetadata } from '../../imports';
 import { imageEmbeddableFileKind } from '../../imports';
 import type { ImageConfig } from '../../types';
 import { ImageViewer } from '../image_viewer/image_viewer'; // use eager version to avoid flickering

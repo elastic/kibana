@@ -8,7 +8,7 @@
 import * as api from '../apis/get_rules_muted_alerts';
 import { waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../../common/lib/kibana';
-import type { AppMockRenderer} from '../../../test_utils';
+import type { AppMockRenderer } from '../../../test_utils';
 import { createAppMockRenderer } from '../../../test_utils';
 import { useGetMutedAlerts } from './use_get_muted_alerts';
 import { AlertsQueryContext } from '@kbn/alerts-ui-shared/src/common/contexts/alerts_query_context';

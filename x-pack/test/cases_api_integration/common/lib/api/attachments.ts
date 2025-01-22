@@ -11,7 +11,7 @@ import {
   getCaseFindAttachmentsUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
-import type { Case} from '@kbn/cases-plugin/common';
+import type { Case } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type {
   BulkGetAttachmentsResponse,

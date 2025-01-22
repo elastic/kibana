@@ -16,14 +16,13 @@ import { asyncInitState, handleAsyncAction } from '../reducers/utils';
 import type { AppState } from '..';
 import type { AsyncInitState } from '../reducers/types';
 import { fetchEffectFactory } from '../effects/fetch_effect';
-import type {
-  NewAlertParams} from '../api/alerts';
+import type { NewAlertParams } from '../api/alerts';
 import {
   createAlert,
   disableAlertById,
   fetchAnomalyAlertRecords,
   fetchConnectors,
-  fetchMonitorAlertRecords
+  fetchMonitorAlertRecords,
 } from '../api/alerts';
 import { kibanaService } from '../kibana_service';
 import { monitorIdSelector } from '../selectors';

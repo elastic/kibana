@@ -13,7 +13,7 @@ import { promises as fs, writeFile, readFileSync, mkdir } from 'fs';
 import path from 'path';
 import type { PngDescriptor } from '../lib/compare_pngs';
 import { comparePngs } from '../lib/compare_pngs';
-import type { FtrProviderContext} from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FtrService } from '../../ftr_provider_context';
 
 const mkdirAsync = promisify(mkdir);

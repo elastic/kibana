@@ -9,8 +9,7 @@ import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import type { PluginInitializerContext } from '@kbn/core/server';
 
-import type {
-  ExperimentalFeatures} from '../common/experimental_features';
+import type { ExperimentalFeatures } from '../common/experimental_features';
 import {
   getExperimentalAllowedValues,
   isValidExperimentalValue,

@@ -23,12 +23,10 @@ import type {
   FieldBasedIndexPatternColumn,
   RequiredReference,
   IncompleteColumn,
-  GenericOperationDefinition} from '../operations';
-import {
-  getOperationDisplay,
-  isOperationAllowedAsReference
+  GenericOperationDefinition,
 } from '../operations';
-import type { FieldChoiceWithOperationType} from './field_select';
+import { getOperationDisplay, isOperationAllowedAsReference } from '../operations';
+import type { FieldChoiceWithOperationType } from './field_select';
 import { FieldSelect } from './field_select';
 import { hasField } from '../pure_utils';
 import type { FormBasedLayer } from '../types';

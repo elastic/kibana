@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC, PropsWithChildren} from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useContext } from 'react';
 
 import {
@@ -22,7 +22,10 @@ import { normalizeSettings } from '@kbn/management-settings-utilities';
 import type { Subscription } from 'rxjs';
 import type { ApplicationStart, ScopedHistory } from '@kbn/core-application-browser';
 import type { UiSettingsScope } from '@kbn/core-ui-settings-common';
-import type { RegistryEntry, SectionRegistryStart } from '@kbn/management-settings-section-registry';
+import type {
+  RegistryEntry,
+  SectionRegistryStart,
+} from '@kbn/management-settings-section-registry';
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { ChromeBadge, ChromeStart } from '@kbn/core-chrome-browser';
 

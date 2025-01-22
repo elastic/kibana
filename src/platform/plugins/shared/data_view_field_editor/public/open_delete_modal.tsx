@@ -14,10 +14,9 @@ import type {
   DataViewsPublicPluginStart,
   DataView,
   DataViewLazy,
-  UsageCollectionStart} from './shared_imports';
-import {
-  toMountPoint
+  UsageCollectionStart,
 } from './shared_imports';
+import { toMountPoint } from './shared_imports';
 
 import type { CloseEditor } from './types';
 

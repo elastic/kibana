@@ -10,10 +10,10 @@
 import Path from 'path';
 import Os from 'os';
 import { getPackages, getPluginPackagesFilter, type PluginSelector } from '@kbn/repo-packages';
-import type { ThemeTag, ThemeTags} from '@kbn/core-ui-settings-common';
+import type { ThemeTag, ThemeTags } from '@kbn/core-ui-settings-common';
 import { parseThemeTags } from '@kbn/core-ui-settings-common';
 
-import type { WorkerConfig, CacheableWorkerConfig} from '../common';
+import type { WorkerConfig, CacheableWorkerConfig } from '../common';
 import { Bundle, omit } from '../common';
 
 import type { KibanaPlatformPlugin } from './kibana_platform_plugins';

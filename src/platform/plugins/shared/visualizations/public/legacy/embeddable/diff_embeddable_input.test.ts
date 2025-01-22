@@ -8,7 +8,7 @@
  */
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
-import type { EmbeddableInput} from '@kbn/embeddable-plugin/common';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import { omitGenericEmbeddableInput, genericEmbeddableInputIsEqual } from './diff_embeddable_input';
 

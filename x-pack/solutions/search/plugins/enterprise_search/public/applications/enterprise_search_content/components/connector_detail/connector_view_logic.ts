@@ -14,22 +14,15 @@ import { Status } from '../../../../../common/types/api';
 
 import type {
   CachedFetchConnectorByIdApiLogicActions,
-  CachedFetchConnectorByIdApiLogicValues} from '../../api/connector/cached_fetch_connector_by_id_api_logic';
-import {
-  CachedFetchConnectorByIdApiLogic
+  CachedFetchConnectorByIdApiLogicValues,
 } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
+import { CachedFetchConnectorByIdApiLogic } from '../../api/connector/cached_fetch_connector_by_id_api_logic';
 
-import type {
-  GenerateConnectorApiKeyApiLogicActions} from '../../api/connector/generate_connector_api_key_api_logic';
-import {
-  GenerateConnectorApiKeyApiLogic,
-} from '../../api/connector/generate_connector_api_key_api_logic';
-import type {
-  PostConnectorConfigurationActions} from '../../api/connector/update_connector_configuration_api_logic';
-import {
-  ConnectorConfigurationApiLogic
-} from '../../api/connector/update_connector_configuration_api_logic';
-import type { FetchIndexActions} from '../../api/index/fetch_index_api_logic';
+import type { GenerateConnectorApiKeyApiLogicActions } from '../../api/connector/generate_connector_api_key_api_logic';
+import { GenerateConnectorApiKeyApiLogic } from '../../api/connector/generate_connector_api_key_api_logic';
+import type { PostConnectorConfigurationActions } from '../../api/connector/update_connector_configuration_api_logic';
+import { ConnectorConfigurationApiLogic } from '../../api/connector/update_connector_configuration_api_logic';
+import type { FetchIndexActions } from '../../api/index/fetch_index_api_logic';
 import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
 import type { ElasticsearchViewIndex } from '../../types';
 
@@ -45,11 +38,8 @@ import {
   isLastSeenOld,
 } from '../../utils/connector_status_helpers';
 
-import type {
-  ConnectorNameAndDescriptionActions} from './connector_name_and_description_logic';
-import {
-  ConnectorNameAndDescriptionLogic,
-} from './connector_name_and_description_logic';
+import type { ConnectorNameAndDescriptionActions } from './connector_name_and_description_logic';
+import { ConnectorNameAndDescriptionLogic } from './connector_name_and_description_logic';
 import type { DeploymentLogicActions } from './deployment_logic';
 import { DeploymentLogic } from './deployment_logic';
 

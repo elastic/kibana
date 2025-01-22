@@ -9,13 +9,13 @@ import type { HttpStart } from '@kbn/core/public';
 import { HashedCache } from '../../../common/hashed_cache';
 import type {
   FindFieldsMetadataRequestQuery,
-  FindFieldsMetadataResponsePayload} from '../../../common/latest';
+  FindFieldsMetadataResponsePayload,
+} from '../../../common/latest';
 import {
   findFieldsMetadataRequestQueryRT,
   findFieldsMetadataResponsePayloadRT,
 } from '../../../common/latest';
-import type {
-  FieldName} from '../../../common/fields_metadata';
+import type { FieldName } from '../../../common/fields_metadata';
 import {
   DecodeFieldsMetadataError,
   FetchFieldsMetadataError,

@@ -8,11 +8,8 @@
 import expect from '@kbn/expect';
 import { MessageRole, type Message } from '@kbn/observability-ai-assistant-plugin/common';
 import { PassThrough } from 'stream';
-import type {
-  LlmProxy} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
-import {
-  createLlmProxy,
-} from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import type { LlmProxy } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import { createLlmProxy } from '../../../../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import type { SupertestWithRoleScope } from '../../../../services/role_scoped_supertest';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 

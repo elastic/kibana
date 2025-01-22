@@ -9,7 +9,7 @@
 
 import { EuiButtonIcon, EuiFlexItem } from '@elastic/eui';
 import type { ViewMode } from '@kbn/presentation-publishing';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import type { Observable, Subscription } from 'rxjs';
 import { first } from 'rxjs';

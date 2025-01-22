@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType, ReactWrapper} from 'enzyme';
+import type { ComponentType, ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
 import { act } from 'react-dom/test-utils';
@@ -16,11 +16,8 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { coreServices } from '../services/kibana_services';
 import { confirmDiscardUnsavedChanges } from './confirm_overlays';
-import type {
-  DashboardListingEmptyPromptProps} from './dashboard_listing_empty_prompt';
-import {
-  DashboardListingEmptyPrompt
-} from './dashboard_listing_empty_prompt';
+import type { DashboardListingEmptyPromptProps } from './dashboard_listing_empty_prompt';
+import { DashboardListingEmptyPrompt } from './dashboard_listing_empty_prompt';
 
 jest.mock('./confirm_overlays', () => {
   const originalModule = jest.requireActual('./confirm_overlays');

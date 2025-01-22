@@ -14,7 +14,7 @@ import {
   createFiltersFromValueClickAction,
   appendFilterToESQLQueryFromValueClickAction,
 } from './create_filters_from_value_click';
-import type { FieldFormatsGetConfigFn} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
 import { BytesFormat } from '@kbn/field-formats-plugin/common';
 import type { RangeFilter } from '@kbn/es-query';
 

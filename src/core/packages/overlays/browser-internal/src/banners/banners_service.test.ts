@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { InternalOverlayBannersStart} from './banners_service';
+import type { InternalOverlayBannersStart } from './banners_service';
 import { OverlayBannersService } from './banners_service';
 import { take } from 'rxjs';
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';

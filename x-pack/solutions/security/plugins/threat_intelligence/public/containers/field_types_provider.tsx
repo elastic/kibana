@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC, PropsWithChildren} from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { createContext, useMemo } from 'react';
 import { useSourcererDataView } from '../modules/indicators/hooks/use_sourcerer_data_view';
 

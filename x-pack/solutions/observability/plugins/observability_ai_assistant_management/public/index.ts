@@ -11,10 +11,9 @@ import type {
   AiAssistantManagementObservabilityPluginStart,
   ConfigSchema,
   SetupDependencies,
-  StartDependencies} from './plugin';
-import {
-  AiAssistantManagementObservabilityPlugin
+  StartDependencies,
 } from './plugin';
+import { AiAssistantManagementObservabilityPlugin } from './plugin';
 
 export type {
   AiAssistantManagementObservabilityPluginSetup,

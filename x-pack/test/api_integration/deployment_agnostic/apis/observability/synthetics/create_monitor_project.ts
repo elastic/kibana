@@ -11,10 +11,9 @@ import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type {
   ProjectMonitorsRequest,
   PrivateLocation,
-  ServiceLocation} from '@kbn/synthetics-plugin/common/runtime_types';
-import {
-  ConfigKey
+  ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters';
 import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/add_monitor_project';

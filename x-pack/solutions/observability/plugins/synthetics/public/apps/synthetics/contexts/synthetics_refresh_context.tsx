@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import type {
-  FC} from 'react';
-import React, {
-  createContext,
-  useCallback,
-  useContext,
-  useEffect,
-  useMemo,
-  useState
-} from 'react';
+import type { FC } from 'react';
+import React, { createContext, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useEvent from 'react-use/lib/useEvent';
 import moment from 'moment';

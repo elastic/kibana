@@ -18,10 +18,9 @@ import { Status } from '../../../../../../../common/types/api';
 import type { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import type {
   ConvertConnectorApiLogicArgs,
-  ConvertConnectorApiLogicResponse} from '../../../../api/connector/convert_connector_api_logic';
-import {
-  ConvertConnectorApiLogic
+  ConvertConnectorApiLogicResponse,
 } from '../../../../api/connector/convert_connector_api_logic';
+import { ConvertConnectorApiLogic } from '../../../../api/connector/convert_connector_api_logic';
 import { ConnectorViewLogic } from '../../../connector_detail/connector_view_logic';
 import type { IndexViewLogic } from '../../index_view_logic';
 

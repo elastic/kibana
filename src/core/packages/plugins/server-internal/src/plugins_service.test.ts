@@ -14,7 +14,7 @@ import { BehaviorSubject, from } from 'rxjs';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
-import type { ConfigPath} from '@kbn/config';
+import type { ConfigPath } from '@kbn/config';
 import { ConfigService, Env } from '@kbn/config';
 
 import { rawConfigServiceMock, getEnvOptions } from '@kbn/config-mocks';
@@ -30,7 +30,7 @@ import type { PluginsConfigType } from './plugins_config';
 import { config } from './plugins_config';
 import { take } from 'rxjs';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
-import type { DiscoveredPlugin} from '@kbn/core-base-common';
+import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { PluginType } from '@kbn/core-base-common';
 
 const MockPluginsSystem: jest.Mock<PluginsSystem<PluginType>> = PluginsSystem as any;

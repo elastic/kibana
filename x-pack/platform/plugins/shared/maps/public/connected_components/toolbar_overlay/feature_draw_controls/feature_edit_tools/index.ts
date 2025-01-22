@@ -8,13 +8,8 @@
 import type { AnyAction } from 'redux';
 import type { ThunkDispatch } from 'redux-thunk';
 import { connect } from 'react-redux';
-import type {
-  ReduxDispatchProps,
-  ReduxStateProps,
-  OwnProps} from './feature_edit_tools';
-import {
-  FeatureEditTools
-} from './feature_edit_tools';
+import type { ReduxDispatchProps, ReduxStateProps, OwnProps } from './feature_edit_tools';
+import { FeatureEditTools } from './feature_edit_tools';
 import { updateEditShape } from '../../../../actions';
 import type { MapStoreState } from '../../../../reducers/store';
 import type { DRAW_SHAPE } from '../../../../../common/constants';

@@ -21,12 +21,9 @@ import type { NewPackagePolicyInput, PackageInfo } from '@kbn/fleet-plugin/commo
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import type {
-  AwsCredentialsTypeOptions} from './get_aws_credentials_form_options';
-import {
-  getAwsCredentialsFormManualOptions,
-} from './get_aws_credentials_form_options';
-import type { CspRadioOption} from '../csp_boxed_radio_group';
+import type { AwsCredentialsTypeOptions } from './get_aws_credentials_form_options';
+import { getAwsCredentialsFormManualOptions } from './get_aws_credentials_form_options';
+import type { CspRadioOption } from '../csp_boxed_radio_group';
 import { RadioGroup } from '../csp_boxed_radio_group';
 import type { NewPackagePolicyPostureInput } from '../utils';
 import { getPosturePolicy } from '../utils';

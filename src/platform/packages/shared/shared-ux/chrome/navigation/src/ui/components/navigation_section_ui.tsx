@@ -32,7 +32,7 @@ import {
   DEFAULT_SPACE_BETWEEN_LEVEL_1_GROUPS,
 } from '../constants';
 import type { EuiCollapsibleNavSubItemPropsEnhanced } from '../types';
-import type { PanelContext} from './panel';
+import type { PanelContext } from './panel';
 import { usePanel } from './panel';
 import { NavigationItemOpenPanel } from './navigation_item_open_panel';
 

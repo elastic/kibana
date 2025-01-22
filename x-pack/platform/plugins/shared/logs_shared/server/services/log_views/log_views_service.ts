@@ -12,14 +12,8 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
-import type {
-  LogView,
-  LogViewAttributes,
-  LogViewsStaticConfig} from '../../../common/log_views';
-import {
-  defaultLogViewAttributes,
-  defaultLogViewsStaticConfig
-} from '../../../common/log_views';
+import type { LogView, LogViewAttributes, LogViewsStaticConfig } from '../../../common/log_views';
+import { defaultLogViewAttributes, defaultLogViewsStaticConfig } from '../../../common/log_views';
 import { LogViewsClient } from './log_views_client';
 import type {
   LogViewFallbackHandler,

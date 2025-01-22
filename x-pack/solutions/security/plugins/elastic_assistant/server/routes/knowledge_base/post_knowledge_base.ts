@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  CreateKnowledgeBaseResponse} from '@kbn/elastic-assistant-common';
+import type { CreateKnowledgeBaseResponse } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_INTERNAL_API_VERSION,
   CreateKnowledgeBaseRequestParams,

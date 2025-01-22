@@ -7,7 +7,7 @@
 
 import type http from 'http';
 
-import type { ProxyArgs} from './simulator';
+import type { ProxyArgs } from './simulator';
 import { Simulator } from './simulator';
 
 export class OpenAISimulator extends Simulator {

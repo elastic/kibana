@@ -9,9 +9,7 @@ import React from 'react';
 
 import classNames from 'classnames';
 
-import type {
-  EuiIconProps,
-  EuiTitleProps} from '@elastic/eui';
+import type { EuiIconProps, EuiTitleProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -19,7 +17,7 @@ import {
   EuiSplitPanel,
   EuiSpacer,
   EuiText,
-  EuiTitle
+  EuiTitle,
 } from '@elastic/eui';
 import type { _EuiPanelDivlike } from '@elastic/eui/src/components/panel/panel';
 

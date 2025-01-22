@@ -10,7 +10,7 @@
 import React, { useMemo, useState } from 'react';
 import { afterFrame } from '@elastic/apm-rum-core';
 import { useLocation } from 'react-router-dom';
-import type { PerformanceApi} from './use_performance_context';
+import type { PerformanceApi } from './use_performance_context';
 import { PerformanceContext } from './use_performance_context';
 import type { PerformanceMetricEvent } from '../../performance_metric_events';
 import { measureInteraction } from './measure_interaction';

@@ -18,10 +18,9 @@ import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import type {
   DashboardContainerInput,
   DashboardPanelMap,
-  SharedDashboardState} from '../../../common';
-import {
-  convertPanelsArrayToPanelMap,
+  SharedDashboardState,
 } from '../../../common';
+import { convertPanelsArrayToPanelMap } from '../../../common';
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
 import type { DashboardApi } from '../../dashboard_api/types';

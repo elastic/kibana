@@ -6,10 +6,10 @@
  */
 
 import type { StatsGetter } from '@kbn/telemetry-collection-manager-plugin/server';
-import type { TelemetryLocalStats} from '@kbn/telemetry-plugin/server';
+import type { TelemetryLocalStats } from '@kbn/telemetry-plugin/server';
 import { getLocalStats } from '@kbn/telemetry-plugin/server';
 import { getXPackUsage } from './get_xpack';
-import type { ESLicense} from './get_license';
+import type { ESLicense } from './get_license';
 import { getLicenseFromLocalOrMaster } from './get_license';
 import { isClusterOptedIn } from './is_cluster_opted_in';
 

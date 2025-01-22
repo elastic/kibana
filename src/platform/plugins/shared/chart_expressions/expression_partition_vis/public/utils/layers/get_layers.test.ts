@@ -9,7 +9,7 @@
 
 import type { ArrayEntry, ArrayNode } from '@elastic/charts';
 import { fieldFormatsMock } from '@kbn/field-formats-plugin/common/mocks';
-import type { BucketColumns} from '../../../common/types';
+import type { BucketColumns } from '../../../common/types';
 import { ChartTypes } from '../../../common/types';
 import { createMockPieParams, createMockVisData } from '../../mocks';
 import { getPaletteRegistry } from '../../__mocks__/palettes';

@@ -15,7 +15,7 @@ import React from 'react';
 
 // @ts-ignore
 import { DynamicTextProperty } from './dynamic_text_property';
-import type { RawValue} from '../../../../../common/constants';
+import type { RawValue } from '../../../../../common/constants';
 import { VECTOR_STYLES } from '../../../../../common/constants';
 import type { IField } from '../../../fields/field';
 import type { Map as MbMap } from '@kbn/mapbox-gl';

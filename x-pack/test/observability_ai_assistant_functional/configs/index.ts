@@ -6,11 +6,8 @@
  */
 
 import { mapValues } from 'lodash';
-import type {
-  ObservabilityAIAssistantFtrConfigName} from '../../observability_ai_assistant_api_integration/configs';
-import {
-  observabilityAIAssistantFtrConfigs,
-} from '../../observability_ai_assistant_api_integration/configs';
+import type { ObservabilityAIAssistantFtrConfigName } from '../../observability_ai_assistant_api_integration/configs';
+import { observabilityAIAssistantFtrConfigs } from '../../observability_ai_assistant_api_integration/configs';
 import type { CreateTestConfig } from '../common/config';
 import { createTestConfig } from '../common/config';
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { ignoreElements, last, merge, shareReplay, tap } from 'rxjs';
 import type { FunctionDefinition } from '../../../../common';
 import { createFunctionNotFoundError } from '../../../../common';

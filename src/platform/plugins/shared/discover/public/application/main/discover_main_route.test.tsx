@@ -18,11 +18,8 @@ import { DiscoverMainRoute } from './discover_main_route';
 import { MemoryRouter } from 'react-router-dom';
 import { DiscoverMainApp } from './discover_main_app';
 import { findTestSubject } from '@elastic/eui/lib/test';
-import type {
-  DiscoverCustomizationService} from '../../customizations/customization_service';
-import {
-  createCustomizationService
-} from '../../customizations/customization_service';
+import type { DiscoverCustomizationService } from '../../customizations/customization_service';
+import { createCustomizationService } from '../../customizations/customization_service';
 import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
 

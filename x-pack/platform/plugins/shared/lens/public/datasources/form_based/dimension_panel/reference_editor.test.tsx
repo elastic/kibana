@@ -22,13 +22,8 @@ import type { OperationMetadata } from '../../../types';
 import { createMockedIndexPattern, createMockedIndexPatternWithoutType } from '../mocks';
 import type { ReferenceEditorProps } from './reference_editor';
 import { ReferenceEditor } from './reference_editor';
-import type {
-  LastValueIndexPatternColumn,
-  TermsIndexPatternColumn} from '../operations';
-import {
-  insertOrReplaceColumn,
-  operationDefinitionMap
-} from '../operations';
+import type { LastValueIndexPatternColumn, TermsIndexPatternColumn } from '../operations';
+import { insertOrReplaceColumn, operationDefinitionMap } from '../operations';
 import { FieldSelect } from './field_select';
 import type { FormBasedLayer } from '../types';
 

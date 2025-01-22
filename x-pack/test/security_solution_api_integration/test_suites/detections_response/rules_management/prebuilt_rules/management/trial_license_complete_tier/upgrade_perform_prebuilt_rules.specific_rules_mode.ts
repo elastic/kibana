@@ -16,7 +16,8 @@ import type {
   RuleResponse,
   PickVersionValues,
   RuleEqlQuery,
-  EqlRule} from '@kbn/security-solution-plugin/common/api/detection_engine';
+  EqlRule,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   ModeEnum,
   FIELDS_TO_UPGRADE_TO_CURRENT_VERSION,

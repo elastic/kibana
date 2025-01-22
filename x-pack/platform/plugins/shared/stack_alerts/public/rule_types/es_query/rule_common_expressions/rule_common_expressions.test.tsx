@@ -9,12 +9,11 @@ import React from 'react';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
 import { RuleCommonExpressions } from './rule_common_expressions';
-import type {
-  TIME_UNITS} from '@kbn/triggers-actions-ui-plugin/public';
+import type { TIME_UNITS } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   builtInAggregationTypes,
   builtInComparators,
-  getTimeUnitLabel
+  getTimeUnitLabel,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { DEFAULT_VALUES } from '../constants';
 import type { CommonEsQueryRuleParams } from '../types';

@@ -8,14 +8,8 @@
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
-import type {
-  EuiButtonIconProps} from '@elastic/eui';
-import {
-  EuiAccordion,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
+import { EuiAccordion, EuiToolTip, EuiButtonIcon, EuiSpacer } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { TimeRange } from '@kbn/es-query';

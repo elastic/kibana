@@ -11,11 +11,11 @@ import { get } from 'lodash';
 import React, { useState, useCallback } from 'react';
 import useMount from 'react-use/lib/useMount';
 
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { IAggConfig, IFieldParamType} from '@kbn/data-plugin/public';
+import type { IAggConfig, IFieldParamType } from '@kbn/data-plugin/public';
 import { KBN_FIELD_TYPES } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { formatListAsProse, parseCommaSeparatedList, useValidation } from './utils';

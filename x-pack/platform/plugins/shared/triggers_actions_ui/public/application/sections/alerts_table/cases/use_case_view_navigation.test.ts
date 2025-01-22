@@ -8,7 +8,7 @@
 import { BehaviorSubject } from 'rxjs';
 import { act, waitFor, renderHook } from '@testing-library/react';
 import { useKibana } from '../../../../common/lib/kibana';
-import type { AppMockRenderer} from '../../test_utils';
+import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { useCaseViewNavigation } from './use_case_view_navigation';
 

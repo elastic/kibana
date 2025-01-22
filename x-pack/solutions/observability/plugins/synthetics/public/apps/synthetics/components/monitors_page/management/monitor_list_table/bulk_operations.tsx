@@ -8,11 +8,8 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty } from '@elastic/eui';
-import type {
-  EncryptedSyntheticsSavedMonitor} from '../../../../../../../common/runtime_types';
-import {
-  ConfigKey
-} from '../../../../../../../common/runtime_types';
+import type { EncryptedSyntheticsSavedMonitor } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 export const BulkOperations = ({
   selectedItems,

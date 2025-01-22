@@ -9,17 +9,8 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import { memoize, once } from 'lodash';
-import type {
-  Observable,
-  Subscription} from 'rxjs';
-import {
-  BehaviorSubject,
-  EMPTY,
-  from,
-  fromEvent,
-  of,
-  throwError,
-} from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
+import { BehaviorSubject, EMPTY, from, fromEvent, of, throwError } from 'rxjs';
 import {
   catchError,
   filter,
@@ -66,8 +57,7 @@ import type {
   ErrorResponseBase,
   SqlGetAsyncResponse,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  IAsyncSearchOptions} from '../../../common';
+import type { IAsyncSearchOptions } from '../../../common';
 import {
   ENHANCED_ES_SEARCH_STRATEGY,
   ESQL_ASYNC_SEARCH_STRATEGY,
@@ -81,7 +71,7 @@ import type { SearchUsageCollector } from '../collectors';
 import { SearchTimeoutError, TimeoutErrorMode } from './timeout_error';
 import { SearchSessionIncompleteWarning } from './search_session_incomplete_warning';
 import { toPartialResponseAfterTimeout } from './to_partial_response';
-import type { ISessionService} from '../session';
+import type { ISessionService } from '../session';
 import { SearchSessionState } from '../session';
 import { SearchResponseCache } from './search_response_cache';
 import { SearchAbortController } from './search_abort_controller';

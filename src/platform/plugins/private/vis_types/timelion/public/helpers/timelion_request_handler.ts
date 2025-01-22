@@ -12,7 +12,7 @@ import type { KibanaExecutionContext } from '@kbn/core/public';
 import type { DataView } from '@kbn/data-plugin/common';
 import type { Filter, TimeRange, Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
-import type { KibanaContext} from '@kbn/data-plugin/public';
+import type { KibanaContext } from '@kbn/data-plugin/public';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import { getTimeZone } from '@kbn/visualization-utils';
 import type { TimelionVisDependencies } from '../plugin';

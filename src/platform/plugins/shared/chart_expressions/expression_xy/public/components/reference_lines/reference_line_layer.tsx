@@ -15,7 +15,7 @@ import type { Position } from '@elastic/charts';
 import type { ReferenceLineLayerConfig } from '../../../common/types';
 import { ReferenceLineAnnotations } from './reference_line_annotations';
 import type { LayerAccessorsTitles, GroupsConfiguration, AxesMap } from '../../helpers';
-import type { FormattersMap} from './utils';
+import type { FormattersMap } from './utils';
 import { getAxisGroupForReferenceLine } from './utils';
 
 interface ReferenceLineLayerProps {

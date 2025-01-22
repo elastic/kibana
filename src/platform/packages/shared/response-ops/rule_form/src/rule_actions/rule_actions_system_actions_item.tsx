@@ -23,13 +23,10 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { RuleActionParam, RuleSystemAction } from '@kbn/alerting-types';
-import type {
-  IsDisabledResult,
-  IsEnabledResult,
-  ActionConnector} from '@kbn/alerts-ui-shared';
+import type { IsDisabledResult, IsEnabledResult, ActionConnector } from '@kbn/alerts-ui-shared';
 import {
   getAvailableActionVariables,
-  checkActionFormActionTypeEnabled
+  checkActionFormActionTypeEnabled,
 } from '@kbn/alerts-ui-shared';
 import type { SavedObjectAttribute } from '@kbn/core/types';
 import { i18n } from '@kbn/i18n';

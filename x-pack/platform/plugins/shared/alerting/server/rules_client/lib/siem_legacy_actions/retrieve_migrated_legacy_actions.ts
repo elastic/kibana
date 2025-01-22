@@ -11,7 +11,7 @@ import type { RulesClientContext } from '../..';
 import type { RawRuleAction } from '../../../types';
 import { findRules } from '../../../application/rule/methods/find/find_rules';
 import { deleteRule } from '../../../application/rule/methods/delete/delete_rule';
-import type { LegacyIRuleActionsAttributes} from './types';
+import type { LegacyIRuleActionsAttributes } from './types';
 import { legacyRuleActionsSavedObjectType } from './types';
 import { transformFromLegacyActions } from './transform_legacy_actions';
 

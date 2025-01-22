@@ -17,11 +17,8 @@ import {
   editor,
   viewer,
 } from '../../observability_ai_assistant_api_integration/common/users/users';
-import type {
-  ObservabilityAIAssistantFtrConfig} from '../../observability_ai_assistant_api_integration/common/config';
-import {
-  createObservabilityAIAssistantAPIConfig,
-} from '../../observability_ai_assistant_api_integration/common/config';
+import type { ObservabilityAIAssistantFtrConfig } from '../../observability_ai_assistant_api_integration/common/config';
+import { createObservabilityAIAssistantAPIConfig } from '../../observability_ai_assistant_api_integration/common/config';
 import { getScopedApiClient } from '../../observability_ai_assistant_api_integration/common/observability_ai_assistant_api_client';
 import type { InheritedFtrProviderContext, InheritedServices } from '../ftr_provider_context';
 import { ObservabilityAIAssistantUIProvider } from './ui';

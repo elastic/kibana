@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { IpPrefix} from '../../expressions';
+import type { IpPrefix } from '../../expressions';
 import { ipPrefixToAst } from '../../expressions';
 
 import { BucketAggType } from './bucket_agg_type';

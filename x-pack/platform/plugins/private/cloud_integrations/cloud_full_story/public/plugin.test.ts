@@ -8,7 +8,7 @@
 import { coreMock } from '@kbn/core/public/mocks';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { duration } from 'moment';
-import type { CloudFullStoryConfig} from './plugin';
+import type { CloudFullStoryConfig } from './plugin';
 import { CloudFullStoryPlugin } from './plugin';
 
 describe('Cloud Plugin', () => {

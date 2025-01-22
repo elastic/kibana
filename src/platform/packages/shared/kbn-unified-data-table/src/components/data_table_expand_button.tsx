@@ -8,7 +8,7 @@
  */
 
 import React, { useContext, useEffect, useRef, useState } from 'react';
-import type { EuiDataGridCellValueElementProps} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UnifiedDataTableContext } from '../table_context';

@@ -13,7 +13,12 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { INDEX_META_DATA_CREATED_BY } from '../common/constants';
-import type { ImportResponse, ImportFailure, InputData, IngestPipelineWrapper } from '../common/types';
+import type {
+  ImportResponse,
+  ImportFailure,
+  InputData,
+  IngestPipelineWrapper,
+} from '../common/types';
 
 export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
   async function importData(

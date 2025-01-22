@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Dispatch} from 'react';
+import type { Dispatch } from 'react';
 import React, { createContext, useReducer } from 'react';
 import * as editor from '../../stores/editor';
 import type { DevToolsSettings } from '../../../services';

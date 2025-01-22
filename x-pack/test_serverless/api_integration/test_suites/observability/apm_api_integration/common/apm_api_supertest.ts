@@ -11,7 +11,7 @@ import type {
   APIReturnType,
   APIClientRequestParamsOf,
 } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
-import type { Config} from '@kbn/test';
+import type { Config } from '@kbn/test';
 import { kbnTestConfig, kibanaTestSuperuserServerless } from '@kbn/test';
 import type { APIEndpoint } from '@kbn/apm-plugin/server';
 import { formatRequest } from '@kbn/server-route-repository';

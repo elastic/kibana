@@ -13,10 +13,9 @@ import sinon from 'sinon';
 import { take, tap, bufferCount, skip, map } from 'rxjs';
 import { mockLogger } from '../test_utils';
 
-import type { ConcreteTaskInstance} from '../task';
+import type { ConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
-import type {
-  TaskTiming} from '../task_events';
+import type { TaskTiming } from '../task_events';
 import {
   asTaskRunEvent,
   asTaskPollingCycleEvent,
@@ -27,13 +26,8 @@ import {
 import { asOk } from '../lib/result_type';
 import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import { TaskRunResult } from '../task_running';
-import type {
-  TaskRunStat,
-  SummarizedTaskRunStat} from './task_run_statistics';
-import {
-  createTaskRunAggregator,
-  summarizeTaskRunStat
-} from './task_run_statistics';
+import type { TaskRunStat, SummarizedTaskRunStat } from './task_run_statistics';
+import { createTaskRunAggregator, summarizeTaskRunStat } from './task_run_statistics';
 import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import { FillPoolResult } from '../lib/fill_pool';
 import { taskPollingLifecycleMock } from '../polling_lifecycle.mock';

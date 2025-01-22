@@ -9,7 +9,7 @@
 
 import type { ComponentType } from 'react';
 import React from 'react';
-import type { FieldHook} from '../hook_form_lib';
+import type { FieldHook } from '../hook_form_lib';
 import { FIELD_TYPES } from '../hook_form_lib';
 
 interface Props {

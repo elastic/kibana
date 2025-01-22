@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { BulkActionsReducerAction, BulkActionsState} from '../../../../types';
+import type { BulkActionsReducerAction, BulkActionsState } from '../../../../types';
 import { BulkActionsVerbs } from '../../../../types';
 
 const getAllRowsInPage = (rowCount: number) =>

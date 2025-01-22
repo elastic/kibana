@@ -10,14 +10,8 @@
 import type { ReactNode } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiComboBoxOptionOption,
-  EuiComboBoxProps,
-  DragDropContextProps} from '@elastic/eui';
-import {
-  EuiFormRow,
-  htmlIdGenerator
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiComboBoxProps, DragDropContextProps } from '@elastic/eui';
+import { EuiFormRow, htmlIdGenerator } from '@elastic/eui';
 
 import { FieldSelectItem } from './field_select_item';
 import type { IndexPatternValue, SanitizedFieldType } from '../../../../../common/types';

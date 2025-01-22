@@ -13,7 +13,8 @@ import { apiService } from '../../../../utils/api_service';
 import type {
   DynamicSettings,
   DynamicSettingsSaveResponse,
-  LocationMonitorsResponse} from '../../../../../common/runtime_types';
+  LocationMonitorsResponse,
+} from '../../../../../common/runtime_types';
 import {
   DynamicSettingsCodec,
   DynamicSettingsSaveCodec,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FindSLOParams, FindSLOResponse} from '@kbn/slo-schema';
+import type { FindSLOParams, FindSLOResponse } from '@kbn/slo-schema';
 import { findSLOResponseSchema } from '@kbn/slo-schema';
 import { keyBy } from 'lodash';
 import type { SLODefinition } from '../domain/models';

@@ -8,11 +8,8 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  UsageCountersSavedObject} from '@kbn/usage-collection-plugin/server/usage_counters';
-import {
-  serializeCounterKey,
-} from '@kbn/usage-collection-plugin/server/usage_counters';
+import type { UsageCountersSavedObject } from '@kbn/usage-collection-plugin/server/usage_counters';
+import { serializeCounterKey } from '@kbn/usage-collection-plugin/server/usage_counters';
 import type { PluginFunctionalProviderContext } from '../../services';
 
 export default function ({ getService, getPageObjects }: PluginFunctionalProviderContext) {

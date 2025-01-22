@@ -9,7 +9,7 @@ import _ from 'lodash';
 import type { ReactElement } from 'react';
 import React from 'react';
 import { calculateBounds } from '@kbn/data-plugin/common';
-import type { FieldFormatter} from '@kbn/maps-plugin/common';
+import type { FieldFormatter } from '@kbn/maps-plugin/common';
 import { MIN_ZOOM, MAX_ZOOM } from '@kbn/maps-plugin/common';
 import type {
   AbstractSourceDescriptor,

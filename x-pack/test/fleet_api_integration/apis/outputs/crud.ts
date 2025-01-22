@@ -6,7 +6,10 @@
  */
 
 import expect from '@kbn/expect';
-import type { CreateAgentPolicyResponse, GetOneAgentPolicyResponse } from '@kbn/fleet-plugin/common';
+import type {
+  CreateAgentPolicyResponse,
+  GetOneAgentPolicyResponse,
+} from '@kbn/fleet-plugin/common';
 import {
   GLOBAL_SETTINGS_SAVED_OBJECT_TYPE,
   OUTPUT_HEALTH_DATA_STREAM,

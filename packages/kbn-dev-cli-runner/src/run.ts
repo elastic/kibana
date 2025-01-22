@@ -9,15 +9,15 @@
 
 import type { LogLevel } from '@kbn/tooling-log';
 import { pickLevelFromFlags, ToolingLog } from '@kbn/tooling-log';
-import type { ProcRunner} from '@kbn/dev-proc-runner';
+import type { ProcRunner } from '@kbn/dev-proc-runner';
 import { withProcRunner } from '@kbn/dev-proc-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 
-import type { Flags, FlagOptions} from './flags';
+import type { Flags, FlagOptions } from './flags';
 import { getFlags, DEFAULT_FLAG_ALIASES } from './flags';
 import { FlagsReader } from './flags_reader';
 import { getHelp } from './help';
-import type { CleanupTask} from './cleanup';
+import type { CleanupTask } from './cleanup';
 import { Cleanup } from './cleanup';
 import type { MetricsMeta } from './metrics';
 import { Metrics } from './metrics';

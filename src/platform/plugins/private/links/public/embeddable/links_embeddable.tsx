@@ -22,8 +22,7 @@ import {
 
 import type { SerializedPanelState } from '@kbn/presentation-containers';
 
-import type {
-  LinksLayoutType} from '../../common/content_management';
+import type { LinksLayoutType } from '../../common/content_management';
 import {
   CONTENT_ID,
   DASHBOARD_LINK_TYPE,

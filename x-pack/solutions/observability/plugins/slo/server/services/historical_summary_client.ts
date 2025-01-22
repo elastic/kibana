@@ -11,7 +11,8 @@ import type {
   BudgetingMethod,
   DurationUnit,
   FetchHistoricalSummaryParams,
-  fetchHistoricalSummaryResponseSchema} from '@kbn/slo-schema';
+  fetchHistoricalSummaryResponseSchema,
+} from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   calendarAlignedTimeWindowSchema,
@@ -30,10 +31,9 @@ import type {
   HistoricalSummary,
   Objective,
   SLOId,
-  TimeWindow} from '../domain/models';
-import {
-  toCalendarAlignedTimeWindowMomentUnit,
+  TimeWindow,
 } from '../domain/models';
+import { toCalendarAlignedTimeWindowMomentUnit } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 

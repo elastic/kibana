@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { uniq } from 'lodash';
 import { ListOperatorTypeEnum as OperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
@@ -18,11 +18,8 @@ import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 type AutocompleteStart = any;
 
 import * as i18n from '../translations';
-import type {
-  GetGenericComboBoxPropsReturn} from '../get_generic_combo_box_props';
-import {
-  getGenericComboBoxProps
-} from '../get_generic_combo_box_props';
+import type { GetGenericComboBoxPropsReturn } from '../get_generic_combo_box_props';
+import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 import { useFieldValueAutocomplete } from '../hooks/use_field_value_autocomplete';
 import { paramIsValid } from '../param_is_valid';
 import { paramContainsSpace } from '../param_contains_space';

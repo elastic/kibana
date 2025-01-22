@@ -9,8 +9,7 @@
 
 import React, { useState } from 'react';
 
-import type {
-  EuiFilterButtonProps} from '@elastic/eui';
+import type { EuiFilterButtonProps } from '@elastic/eui';
 import {
   EuiContextMenuItem,
   EuiContextMenuPanel,

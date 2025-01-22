@@ -8,8 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  DragDropContextProps} from '@elastic/eui';
+import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiDragDropContext,
   EuiDroppable,

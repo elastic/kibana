@@ -30,8 +30,7 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { Start as InspectorStartContract } from '@kbn/inspector-plugin/public';
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type {
-  SearchSourceDependencies} from '../../common/search';
+import type { SearchSourceDependencies } from '../../common/search';
 import {
   cidrFunction,
   dateRangeFunction,
@@ -71,9 +70,9 @@ import type { SearchUsageCollector } from './collectors';
 import { createUsageCollector } from './collectors';
 import { getEql, getEsaggs, getEsdsl, getEssql, getEsql } from './expressions';
 
-import type { ISearchInterceptor} from './search_interceptor';
+import type { ISearchInterceptor } from './search_interceptor';
 import { SearchInterceptor } from './search_interceptor';
-import type { ISessionsClient, ISessionService} from './session';
+import type { ISessionsClient, ISessionService } from './session';
 import { SessionsClient, SessionService } from './session';
 import { registerSearchSessionsMgmt } from './session/sessions_mgmt';
 import { createConnectedSearchSessionIndicator } from './session/session_indicator';

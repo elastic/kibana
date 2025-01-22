@@ -10,9 +10,7 @@ import { render, unmountComponentAtNode } from 'react-dom';
 import type { ScopedHistory, ApplicationStart, UnmountCallback, CoreStart } from '@kbn/core/public';
 import type { DocLinksStart, ExecutionContextStart } from '@kbn/core/public';
 
-import type {
-  CloudSetup,
-  ILicense} from '../shared_imports';
+import type { CloudSetup, ILicense } from '../shared_imports';
 import {
   KibanaContextProvider,
   APP_WRAPPER_CLASS,

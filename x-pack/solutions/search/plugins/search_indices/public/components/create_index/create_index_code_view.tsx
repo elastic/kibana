@@ -8,11 +8,8 @@
 import React from 'react';
 
 import type { IndicesStatusResponse } from '../../../common';
-import type {
-  CreateIndexCodeViewProps as SharedCreateIndexCodeViewProps} from '../shared/create_index_code_view';
-import {
-  CreateIndexCodeView as SharedCreateIndexCodeView
-} from '../shared/create_index_code_view';
+import type { CreateIndexCodeViewProps as SharedCreateIndexCodeViewProps } from '../shared/create_index_code_view';
+import { CreateIndexCodeView as SharedCreateIndexCodeView } from '../shared/create_index_code_view';
 
 import { useIndicesRedirect } from './hooks/use_indices_redirect';
 

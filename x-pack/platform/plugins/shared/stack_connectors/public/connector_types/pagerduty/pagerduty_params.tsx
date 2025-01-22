@@ -17,11 +17,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isUndefined } from 'lodash';
-import type {
-  ActionParamsProps} from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  JsonEditorWithMessageVariables,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
+import { JsonEditorWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { TextFieldWithMessageVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import type { PagerDutyActionParams } from '../types';
 import { LinksList } from './links_list';

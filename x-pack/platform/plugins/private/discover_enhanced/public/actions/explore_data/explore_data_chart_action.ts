@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  HasParentApi,
-  PublishesUnifiedSearch} from '@kbn/presentation-publishing';
-import {
-  apiIsOfType,
-  apiPublishesPartialUnifiedSearch
-} from '@kbn/presentation-publishing';
+import type { HasParentApi, PublishesUnifiedSearch } from '@kbn/presentation-publishing';
+import { apiIsOfType, apiPublishesPartialUnifiedSearch } from '@kbn/presentation-publishing';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 import type { Action } from '@kbn/ui-actions-plugin/public';
 import type { ApplyGlobalFilterActionContext } from '@kbn/unified-search-plugin/public';

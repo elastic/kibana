@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Datatable, DatatableRow} from '@kbn/expressions-plugin/common';
+import type { Datatable, DatatableRow } from '@kbn/expressions-plugin/common';
 import { getBucketIdentifier } from '@kbn/expressions-plugin/common';
 import type { CollapseExpressionFunction } from './types';
 

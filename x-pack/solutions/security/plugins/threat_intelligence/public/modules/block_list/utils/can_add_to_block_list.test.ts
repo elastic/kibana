@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Indicator} from '../../../../common/types/indicator';
-import {
-  generateMockFileIndicator,
-  RawIndicatorFieldId,
-} from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
+import { generateMockFileIndicator, RawIndicatorFieldId } from '../../../../common/types/indicator';
 import { canAddToBlockList } from './can_add_to_block_list';
 import { getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 

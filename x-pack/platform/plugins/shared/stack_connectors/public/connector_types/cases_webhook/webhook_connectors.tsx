@@ -8,15 +8,14 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { useFormContext } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import type {
-  EuiStepStatus} from '@elastic/eui';
+import type { EuiStepStatus } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
   EuiLink,
   EuiSpacer,
-  EuiStepsHorizontal
+  EuiStepsHorizontal,
 } from '@elastic/eui';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import { useKibana } from '@kbn/triggers-actions-ui-plugin/public';

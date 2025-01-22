@@ -11,13 +11,11 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiSpacer, EuiButtonEmpty, EuiText, EuiLink } from '@elastic/eui';
 
 import { useMappingsState, useDispatch } from '../../mappings_state_context';
-import type {
-  RuntimeField,
-  RuntimeFieldEditorFlyoutContentProps} from '../../shared_imports';
+import type { RuntimeField, RuntimeFieldEditorFlyoutContentProps } from '../../shared_imports';
 import {
   documentationService,
   GlobalFlyout,
-  RuntimeFieldEditorFlyoutContent
+  RuntimeFieldEditorFlyoutContent,
 } from '../../shared_imports';
 import { useConfig } from '../../config_context';
 import { EmptyPrompt } from './empty_prompt';

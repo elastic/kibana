@@ -11,10 +11,9 @@ import type {
   Method,
   AxiosResponse,
   AxiosRequestConfig,
-  AxiosHeaderValue} from 'axios';
-import {
-  AxiosHeaders
+  AxiosHeaderValue,
 } from 'axios';
+import { AxiosHeaders } from 'axios';
 import type { Logger } from '@kbn/core/server';
 import { getCustomAgents } from './get_custom_agents';
 import type { ActionsConfigurationUtilities } from '../actions_config';

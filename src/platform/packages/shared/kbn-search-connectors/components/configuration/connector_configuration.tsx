@@ -24,14 +24,8 @@ import { i18n } from '@kbn/i18n';
 
 import { isDeepEqual } from 'react-use/lib/util';
 import { sortAndFilterConnectorConfiguration } from '../../utils/connector_configuration_utils';
-import type {
-  Connector,
-  ConnectorConfigProperties,
-  ConnectorConfiguration} from '../..';
-import {
-  ConnectorStatus,
-  FeatureName,
-} from '../..';
+import type { Connector, ConnectorConfigProperties, ConnectorConfiguration } from '../..';
+import { ConnectorStatus, FeatureName } from '../..';
 
 import { ConnectorConfigurationForm } from './connector_configuration_form';
 

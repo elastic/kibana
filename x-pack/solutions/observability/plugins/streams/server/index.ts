@@ -7,7 +7,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 import type { StreamsConfig } from '../common/config';
-import type { StreamsPluginSetup, StreamsPluginStart} from './plugin';
+import type { StreamsPluginSetup, StreamsPluginStart } from './plugin';
 import { config } from './plugin';
 import type { StreamsRouteRepository } from './routes';
 

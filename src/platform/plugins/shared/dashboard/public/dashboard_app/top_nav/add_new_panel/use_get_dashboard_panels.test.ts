@@ -11,13 +11,8 @@ import { ADD_PANEL_ANNOTATION_GROUP, ADD_PANEL_LEGACY_GROUP } from '@kbn/embedda
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import type { Action, UiActionsService } from '@kbn/ui-actions-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
-import type {
-  VisTypeAlias,
-  VisualizationsStart} from '@kbn/visualizations-plugin/public';
-import {
-  VisGroups,
-  type BaseVisType,
-} from '@kbn/visualizations-plugin/public';
+import type { VisTypeAlias, VisualizationsStart } from '@kbn/visualizations-plugin/public';
+import { VisGroups, type BaseVisType } from '@kbn/visualizations-plugin/public';
 import { renderHook } from '@testing-library/react';
 
 import { uiActionsService, visualizationsService } from '../../../services/kibana_services';

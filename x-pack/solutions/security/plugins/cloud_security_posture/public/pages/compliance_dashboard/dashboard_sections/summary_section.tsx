@@ -6,14 +6,8 @@
  */
 
 import React, { useMemo } from 'react';
-import type {
-  EuiFlexItemProps} from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiFlexItemProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { CSPM_POLICY_TEMPLATE, KSPM_POLICY_TEMPLATE } from '@kbn/cloud-security-posture-common';

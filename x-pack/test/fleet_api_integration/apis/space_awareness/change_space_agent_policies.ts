@@ -8,7 +8,10 @@
 import expect from '@kbn/expect';
 import { v4 as uuidV4 } from 'uuid';
 import type { Client } from '@elastic/elasticsearch';
-import type { CreateAgentPolicyResponse, GetOnePackagePolicyResponse } from '@kbn/fleet-plugin/common';
+import type {
+  CreateAgentPolicyResponse,
+  GetOnePackagePolicyResponse,
+} from '@kbn/fleet-plugin/common';
 import type { FleetServerAgentAction } from '@kbn/fleet-plugin/common/types';
 import type { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';

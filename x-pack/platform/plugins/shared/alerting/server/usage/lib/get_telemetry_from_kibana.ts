@@ -13,11 +13,8 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { ElasticsearchClient, Logger, ISavedObjectsRepository } from '@kbn/core/server';
 
-import type {
-  ConnectorsByConsumersBucket} from './group_connectors_by_consumers';
-import {
-  groupConnectorsByConsumers,
-} from './group_connectors_by_consumers';
+import type { ConnectorsByConsumersBucket } from './group_connectors_by_consumers';
+import { groupConnectorsByConsumers } from './group_connectors_by_consumers';
 import { groupRulesByNotifyWhen } from './group_rules_by_notify_when';
 import { groupRulesByStatus } from './group_rules_by_status';
 import type { AlertingUsage } from '../types';

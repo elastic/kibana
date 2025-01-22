@@ -7,7 +7,7 @@
 
 import type { ChromeBreadcrumb } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { MouseEvent} from 'react';
+import type { MouseEvent } from 'react';
 import { useEffect } from 'react';
 import type { EuiBreadcrumb } from '@elastic/eui';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

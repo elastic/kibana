@@ -13,7 +13,7 @@ import type { Query } from '@kbn/es-query';
 import { buildEsQuery } from '@kbn/es-query';
 
 import moment from 'moment';
-import type { GeoBoundingBox, QueryFilter} from '../../expressions';
+import type { GeoBoundingBox, QueryFilter } from '../../expressions';
 import { geoBoundingBoxToAst, queryToAst } from '../../expressions';
 import { BucketAggType } from './bucket_agg_type';
 import { BUCKET_TYPES } from './bucket_agg_types';

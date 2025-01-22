@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { FILTERS, fromCombinedFilter } from '@kbn/es-query';
 import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { ExpressionFunctionKibanaFilter } from './kibana_filter';

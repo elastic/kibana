@@ -12,9 +12,18 @@ import type {
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
 import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
-import type { UsageCollectionSetup, UsageCollectionStart } from '@kbn/usage-collection-plugin/server';
+import type {
+  UsageCollectionSetup,
+  UsageCollectionStart,
+} from '@kbn/usage-collection-plugin/server';
 import type { ContentManagementServerSetup } from '@kbn/content-management-plugin/server';
-import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin, Logger } from '@kbn/core/server';
+import type {
+  PluginInitializerContext,
+  CoreSetup,
+  CoreStart,
+  Plugin,
+  Logger,
+} from '@kbn/core/server';
 import { registerContentInsights } from '@kbn/content-management-content-insights-server';
 
 import {

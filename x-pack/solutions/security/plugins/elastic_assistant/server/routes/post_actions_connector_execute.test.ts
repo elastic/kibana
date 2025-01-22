@@ -18,11 +18,8 @@ import { PassThrough } from 'stream';
 import { getConversationResponseMock } from '../ai_assistant_data_clients/conversations/update_conversation.test';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { getFindAnonymizationFieldsResultWithSingleHit } from '../__mocks__/response';
-import type {
-  ExecuteConnectorRequestBody} from '@kbn/elastic-assistant-common';
-import {
-  defaultAssistantFeatures
-} from '@kbn/elastic-assistant-common';
+import type { ExecuteConnectorRequestBody } from '@kbn/elastic-assistant-common';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { appendAssistantMessageToConversation, langChainExecute } from './helpers';
 

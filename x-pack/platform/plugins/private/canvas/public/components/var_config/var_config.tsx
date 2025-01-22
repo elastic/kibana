@@ -7,9 +7,7 @@
 
 import type { FC } from 'react';
 import React, { useState } from 'react';
-import type {
-  EuiBasicTableColumn,
-  EuiTableActionsColumnType} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableActionsColumnType } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonIcon,

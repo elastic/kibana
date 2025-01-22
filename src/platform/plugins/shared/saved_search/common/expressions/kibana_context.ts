@@ -10,9 +10,9 @@
 import { isEqual, uniqBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
-import type { Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { fromCombinedFilter } from '@kbn/es-query';
-import type { Query} from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { uniqFilters } from '@kbn/es-query';
 import { unboxExpressionValue } from '@kbn/expressions-plugin/common';
 import type { SavedObjectReference } from '@kbn/core/server';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useContext, useCallback } from 'react';
 
 import { useDispatch, useSelector } from 'react-redux';

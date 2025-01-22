@@ -28,8 +28,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  PartialTheme} from '@elastic/charts';
+import type { PartialTheme } from '@elastic/charts';
 import {
   Axis,
   Chart,
@@ -39,7 +38,7 @@ import {
   ScaleType,
   Settings,
   TooltipType,
-  Tooltip
+  Tooltip,
 } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import type { Query, Filter, AggregateQuery } from '@kbn/es-query';

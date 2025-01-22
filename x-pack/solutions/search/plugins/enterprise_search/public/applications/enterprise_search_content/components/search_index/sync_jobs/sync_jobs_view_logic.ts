@@ -12,24 +12,20 @@ import { isEqual } from 'lodash';
 import moment from 'moment';
 
 import type { Pagination } from '@elastic/eui';
-import type { ConnectorSyncJob} from '@kbn/search-connectors';
+import type { ConnectorSyncJob } from '@kbn/search-connectors';
 import { pageToPagination } from '@kbn/search-connectors';
 
 import { Status } from '../../../../../../common/types/api';
 
 import type { Paginate } from '../../../../../../common/types/pagination';
 import type { Actions } from '../../../../shared/api_logic/create_api_logic';
-import type {
-  CancelSyncApiActions} from '../../../api/connector/cancel_sync_api_logic';
-import {
-  CancelSyncApiLogic,
-} from '../../../api/connector/cancel_sync_api_logic';
+import type { CancelSyncApiActions } from '../../../api/connector/cancel_sync_api_logic';
+import { CancelSyncApiLogic } from '../../../api/connector/cancel_sync_api_logic';
 import type {
   FetchSyncJobsArgs,
-  FetchSyncJobsResponse} from '../../../api/connector/fetch_sync_jobs_api_logic';
-import {
-  FetchSyncJobsApiLogic
+  FetchSyncJobsResponse,
 } from '../../../api/connector/fetch_sync_jobs_api_logic';
+import { FetchSyncJobsApiLogic } from '../../../api/connector/fetch_sync_jobs_api_logic';
 
 import type { SyncsLogicActions } from '../../shared/header_actions/syncs_logic';
 import { SyncsLogic } from '../../shared/header_actions/syncs_logic';

@@ -6,14 +6,10 @@
  */
 
 import type { GenericFtrProviderContext } from '@kbn/test';
-import type { ApmApiClient} from './apm_api_supertest';
+import type { ApmApiClient } from './apm_api_supertest';
 import { getApmApiClientService } from './apm_api_supertest';
-import type {
-  InheritedServices,
-  InheritedFtrProviderContext} from '../../../../services';
-import {
-  services as inheritedServices,
-} from '../../../../services';
+import type { InheritedServices, InheritedFtrProviderContext } from '../../../../services';
+import { services as inheritedServices } from '../../../../services';
 
 export type APMServices = InheritedServices & {
   apmApiClient: (context: InheritedFtrProviderContext) => Promise<ApmApiClient>;

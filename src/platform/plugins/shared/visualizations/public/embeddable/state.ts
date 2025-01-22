@@ -35,11 +35,9 @@ import type {
   VisualizeSerializedState,
   VisualizeRuntimeState,
   VisualizeSavedVisInputState,
-  ExtraSavedObjectProperties} from './types';
-import {
-  isVisualizeSavedObjectState,
-  isVisualizeRuntimeState,
+  ExtraSavedObjectProperties,
 } from './types';
+import { isVisualizeSavedObjectState, isVisualizeRuntimeState } from './types';
 
 export const deserializeState = async (
   state: SerializedPanelState<VisualizeSerializedState> | { rawState: undefined }

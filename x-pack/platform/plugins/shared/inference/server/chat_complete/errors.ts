@@ -10,10 +10,9 @@ import { i18n } from '@kbn/i18n';
 import type {
   ChatCompletionTokenLimitReachedError,
   ChatCompletionToolNotFoundError,
-  ChatCompletionToolValidationError} from '@kbn/inference-common/src/chat_complete/errors';
-import {
-  ChatCompletionErrorCode
+  ChatCompletionToolValidationError,
 } from '@kbn/inference-common/src/chat_complete/errors';
+import { ChatCompletionErrorCode } from '@kbn/inference-common/src/chat_complete/errors';
 
 export function createTokenLimitReachedError(
   tokenLimit?: number,

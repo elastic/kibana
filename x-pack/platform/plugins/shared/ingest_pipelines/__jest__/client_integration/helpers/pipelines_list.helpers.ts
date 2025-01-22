@@ -8,13 +8,8 @@
 import { act } from 'react-dom/test-utils';
 import type { HttpSetup } from '@kbn/core/public';
 
-import type {
-  TestBed,
-  AsyncTestBedConfig} from '@kbn/test-jest-helpers';
-import {
-  registerTestBed,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 import { PipelinesList } from '../../../public/application/sections/pipelines_list';
 import { WithAppDependencies } from './setup_environment';
 import { getListPath, ROUTES } from '../../../public/application/services/navigation';

@@ -8,14 +8,8 @@
  */
 
 import React from 'react';
-import type {
-  HorizontalAlignment,
-  EuiTableDataType} from '@elastic/eui';
-import {
-  EuiInMemoryTable,
-  EuiText,
-  EuiLink
-} from '@elastic/eui';
+import type { HorizontalAlignment, EuiTableDataType } from '@elastic/eui';
+import { EuiInMemoryTable, EuiText, EuiLink } from '@elastic/eui';
 import type { CoreStart } from '@kbn/core/public';
 import { get } from 'lodash';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';

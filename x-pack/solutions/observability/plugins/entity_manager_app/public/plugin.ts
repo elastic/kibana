@@ -11,11 +11,9 @@ import type {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
-  PluginInitializerContext} from '@kbn/core/public';
-import {
-  AppStatus,
-  DEFAULT_APP_CATEGORIES
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import type { Logger } from '@kbn/logging';
 import { EntityClient } from '@kbn/entityManager-plugin/public';
 

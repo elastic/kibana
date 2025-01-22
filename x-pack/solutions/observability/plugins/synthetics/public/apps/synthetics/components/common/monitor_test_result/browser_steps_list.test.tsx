@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Matcher, SelectorMatcherOptions} from '@testing-library/react';
+import type { Matcher, SelectorMatcherOptions } from '@testing-library/react';
 import { within } from '@testing-library/react';
 import React from 'react';
 import { render, WrappedHelper } from '../../../utils/testing';

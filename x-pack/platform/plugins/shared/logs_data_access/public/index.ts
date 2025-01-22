@@ -6,12 +6,8 @@
  */
 
 import type { PluginInitializer } from '@kbn/core/public';
-import type {
-  LogsDataAccessPluginSetup,
-  LogsDataAccessPluginStart} from './plugin';
-import {
-  LogsDataAccessPlugin
-} from './plugin';
+import type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart } from './plugin';
+import { LogsDataAccessPlugin } from './plugin';
 
 export type { LogsDataAccessPluginSetup, LogsDataAccessPluginStart };
 

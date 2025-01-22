@@ -16,10 +16,9 @@ import type {
   KQL_FUNCTION_IS,
   KQL_FUNCTION_NOT,
   KQL_FUNCTION_OR,
-  KQL_FUNCTION_RANGE} from '../functions';
-import {
-  functions
+  KQL_FUNCTION_RANGE,
 } from '../functions';
+import { functions } from '../functions';
 import type { DataViewBase, KueryNode, KueryQueryOptions } from '../../..';
 import type { KqlContext } from '../types';
 

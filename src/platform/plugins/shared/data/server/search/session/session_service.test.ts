@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import type { ElasticsearchClientMock} from '@kbn/core/server/mocks';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { nodeBuilder } from '@kbn/es-query';
 import { SearchSessionService } from './session_service';
@@ -18,9 +16,7 @@ import { createRequestHash } from './utils';
 import moment from 'moment';
 import { coreMock } from '@kbn/core/server/mocks';
 import type { ConfigSchema } from '../../config';
-import type { AuthenticatedUser ,
-  SavedObject,
-  SavedObjectsClientContract} from '@kbn/core/server';
+import type { AuthenticatedUser, SavedObject, SavedObjectsClientContract } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus } from '../../../common';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 

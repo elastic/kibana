@@ -22,7 +22,7 @@ import {
 import { useKibana } from '../../../../../../shared_imports';
 import { FieldNameField } from './common_fields/field_name_field';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { from, to } from './shared';
 import { TargetField } from './common_fields/target_field';
 import { PropertiesField } from './common_fields/properties_field';

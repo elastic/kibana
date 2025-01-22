@@ -12,9 +12,9 @@ import {
   deepNullMockData,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import type { Process } from '../../../common';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
-import type { ProcessTreeDeps} from '.';
+import type { ProcessTreeDeps } from '.';
 import { ProcessTree } from '.';
 import { useDateFormat } from '../../hooks';
 

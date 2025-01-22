@@ -20,12 +20,8 @@ import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { verifyAccessAndContext } from '../lib';
 import type { ILicenseState } from '../../lib';
 import type { AlertingRequestHandlerContext } from '../../types';
-import type {
-  AlertingAuthorizationFilterOpts} from '../../authorization';
-import {
-  AlertingAuthorizationEntity,
-  AlertingAuthorizationFilterType,
-} from '../../authorization';
+import type { AlertingAuthorizationFilterOpts } from '../../authorization';
+import { AlertingAuthorizationEntity, AlertingAuthorizationFilterType } from '../../authorization';
 import { RuleAuditAction, ruleAuditEvent } from '../../rules_client/common/audit_events';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../constants';
 

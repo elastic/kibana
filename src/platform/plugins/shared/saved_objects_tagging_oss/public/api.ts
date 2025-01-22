@@ -8,7 +8,11 @@
  */
 
 import type { Observable } from 'rxjs';
-import type { SearchFilterConfig, EuiTableFieldDataColumnType, EuiComboBoxProps } from '@elastic/eui';
+import type {
+  SearchFilterConfig,
+  EuiTableFieldDataColumnType,
+  EuiComboBoxProps,
+} from '@elastic/eui';
 import type { FunctionComponent } from 'react';
 import type { SavedObject, SavedObjectReference } from '@kbn/core/types';
 import type { SavedObjectsFindOptionsReference } from '@kbn/core/public';

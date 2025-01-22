@@ -5,33 +5,30 @@
  * 2.0.
  */
 
-import type { AlertInstanceContext, AlertInstanceState, RuleTaskState } from '@kbn/alerting-state-types';
+import type {
+  AlertInstanceContext,
+  AlertInstanceState,
+  RuleTaskState,
+} from '@kbn/alerting-state-types';
 import { DEFAULT_NAMESPACE_STRING } from '@kbn/core-saved-objects-utils-server';
 import type { Logger } from '@kbn/core/server';
-import type {
-  ConcreteTaskInstance} from '@kbn/task-manager-plugin/server';
-import {
-  createTaskRunError,
-  TaskErrorSource,
-} from '@kbn/task-manager-plugin/server';
+import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
 import { getErrorSource } from '@kbn/task-manager-plugin/server/task_running';
 import type { IAlertsClient } from '../alerts_client/types';
 import { ErrorWithReason } from '../lib';
 import { getTimeRange } from '../lib/get_time_range';
 import type { NormalizedRuleType } from '../rule_type_registry';
-import type {
-  RuleAlertData,
-  RuleTypeParams,
-  RuleTypeState,
-  SanitizedRule} from '../types';
-import {
-  DEFAULT_FLAPPING_SETTINGS,
-  RuleExecutionStatusErrorReasons
-} from '../types';
+import type { RuleAlertData, RuleTypeParams, RuleTypeState, SanitizedRule } from '../types';
+import { DEFAULT_FLAPPING_SETTINGS, RuleExecutionStatusErrorReasons } from '../types';
 import type { ExecutorServices } from './get_executor_services';
-import type { TaskRunnerTimer} from './task_runner_timer';
+import type { TaskRunnerTimer } from './task_runner_timer';
 import { TaskRunnerTimerSpan } from './task_runner_timer';
-import type { RuleRunnerErrorStackTraceLog, RuleTypeRunnerContext, TaskRunnerContext } from './types';
+import type {
+  RuleRunnerErrorStackTraceLog,
+  RuleTypeRunnerContext,
+  TaskRunnerContext,
+} from './types';
 import { withAlertingSpan } from './lib';
 import type { WrappedSearchSourceClient } from '../lib/wrap_search_source_client';
 

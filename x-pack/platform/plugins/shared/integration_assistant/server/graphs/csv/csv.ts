@@ -8,7 +8,7 @@ import type { LogFormatDetectionState } from '../../types';
 import type { LogDetectionNodeParams } from '../log_type_detection/types';
 import { createJSONInput } from '../../util';
 import { createCSVProcessor, createDropProcessor } from '../../util/processors';
-import type { CSVParseError} from '../../lib/errors/unparseable_csv_error';
+import type { CSVParseError } from '../../lib/errors/unparseable_csv_error';
 import { UnparseableCSVFormatError } from '../../lib/errors/unparseable_csv_error';
 import {
   generateColumnNames,

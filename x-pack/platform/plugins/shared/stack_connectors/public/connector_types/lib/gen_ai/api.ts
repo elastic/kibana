@@ -6,10 +6,10 @@
  */
 
 import type { HttpSetup } from '@kbn/core-http-browser';
-import type { ActionTypeExecutorResult} from '@kbn/actions-plugin/common';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
 import { BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { SUB_ACTION } from '../../../../common/openai/constants';
-import type { ConnectorExecutorResult} from '../rewrite_response_body';
+import type { ConnectorExecutorResult } from '../rewrite_response_body';
 import { rewriteResponseToCamelCase } from '../rewrite_response_body';
 
 export async function getDashboard({

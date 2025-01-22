@@ -12,12 +12,8 @@ import type { LegendColorPickerProps } from '@elastic/charts';
 import { EuiPopover } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { ReactWrapper } from 'enzyme';
-import type {
-  LegendColorPickerWrapperContextType} from './get_color_picker';
-import {
-  LegendColorPickerWrapper,
-  LegendColorPickerWrapperContext
-} from './get_color_picker';
+import type { LegendColorPickerWrapperContextType } from './get_color_picker';
+import { LegendColorPickerWrapper, LegendColorPickerWrapperContext } from './get_color_picker';
 import { ColorPicker } from '@kbn/charts-plugin/public';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import { createMockBucketColumns, createMockVisData } from '../mocks';

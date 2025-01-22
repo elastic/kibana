@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  FC,
-  PropsWithChildren} from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, {
   createContext,
   useContext,
@@ -17,7 +15,7 @@ import React, {
   useCallback,
   useMemo,
   useEffect,
-  useRef
+  useRef,
 } from 'react';
 import { EuiFlyout } from '@elastic/eui';
 

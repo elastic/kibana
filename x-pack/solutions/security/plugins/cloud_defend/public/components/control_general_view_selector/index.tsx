@@ -6,8 +6,7 @@
  */
 import type { FormEvent } from 'react';
 import React, { useState, useMemo, useCallback } from 'react';
-import type {
-  EuiCheckboxProps} from '@elastic/eui';
+import type { EuiCheckboxProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiIcon,
@@ -26,15 +25,11 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiCheckbox
+  EuiCheckbox,
 } from '@elastic/eui';
 import { useStyles } from './styles';
-import type {
-  ControlGeneralViewSelectorDeps,
-  ControlFormErrorMap} from '../../types';
-import {
-  SelectorConditionsMap,
-} from '../../types';
+import type { ControlGeneralViewSelectorDeps, ControlFormErrorMap } from '../../types';
+import { SelectorConditionsMap } from '../../types';
 import type { Selector, SelectorCondition } from '../../../common';
 import {
   getSelectorConditions,

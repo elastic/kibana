@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  BulkInstallPackageInfo,
-  BulkInstallPackagesResponse} from '@kbn/fleet-plugin/common';
-import {
-  epmRouteService,
-} from '@kbn/fleet-plugin/common';
+import type { BulkInstallPackageInfo, BulkInstallPackagesResponse } from '@kbn/fleet-plugin/common';
+import { epmRouteService } from '@kbn/fleet-plugin/common';
 import type { Client } from '@elastic/elasticsearch';
 import type { InstallPackageResponse } from '@kbn/fleet-plugin/common/types';
 import type SuperTest from 'supertest';

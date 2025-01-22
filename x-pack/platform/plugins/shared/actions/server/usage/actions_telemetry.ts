@@ -8,11 +8,8 @@
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AggregationsTermsAggregateBase } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  AvgActionRunOutcomeByConnectorTypeBucket} from './lib/parse_connector_type_bucket';
-import {
-  parseActionRunOutcomeByConnectorTypesBucket,
-} from './lib/parse_connector_type_bucket';
+import type { AvgActionRunOutcomeByConnectorTypeBucket } from './lib/parse_connector_type_bucket';
+import { parseActionRunOutcomeByConnectorTypesBucket } from './lib/parse_connector_type_bucket';
 import { AlertHistoryEsIndexConnectorId } from '../../common';
 import type { ActionResult, InMemoryConnector } from '../types';
 import {

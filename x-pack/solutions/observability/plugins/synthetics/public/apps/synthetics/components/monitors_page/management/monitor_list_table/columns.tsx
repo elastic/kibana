@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -31,10 +31,9 @@ import type {
   EncryptedSyntheticsSavedMonitor,
   OverviewStatusState,
   ServiceLocations,
-  SyntheticsMonitorSchedule} from '../../../../../../../common/runtime_types';
-import {
-  ConfigKey
+  SyntheticsMonitorSchedule,
 } from '../../../../../../../common/runtime_types';
+import { ConfigKey } from '../../../../../../../common/runtime_types';
 
 import { MonitorTypeBadge } from '../../../common/components/monitor_type_badge';
 import { getFrequencyLabel } from './labels';

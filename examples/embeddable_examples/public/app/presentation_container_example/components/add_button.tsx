@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement} from 'react';
+import type { ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiContextMenuItem, EuiContextMenuPanel, EuiPopover } from '@elastic/eui';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';

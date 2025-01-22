@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApmFields, Instance} from '@kbn/apm-synthtrace-client';
+import type { ApmFields, Instance } from '@kbn/apm-synthtrace-client';
 import { apm } from '@kbn/apm-synthtrace-client';
 import { random } from 'lodash';
 import type { Scenario } from '../cli/scenario';

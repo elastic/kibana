@@ -9,10 +9,9 @@ import type {
   ExpressionValueFilter,
   CanvasTimeFilter,
   CanvasLuceneFilter,
-  CanvasExactlyFilter} from '../../../types';
-import {
-  FilterType
+  CanvasExactlyFilter,
 } from '../../../types';
+import { FilterType } from '../../../types';
 
 /*
  TODO: This could be pluggable

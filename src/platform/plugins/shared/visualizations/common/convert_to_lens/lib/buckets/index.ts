@@ -12,8 +12,7 @@ import { BUCKET_TYPES } from '@kbn/data-plugin/common';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { convertToSchemaConfig } from '../../../vis_schemas';
 import type { AggBasedColumn, SchemaConfig } from '../../..';
-import type {
-  CommonBucketConverterArgs} from '../convert';
+import type { CommonBucketConverterArgs } from '../convert';
 import {
   convertToDateHistogramColumn,
   convertToFiltersColumn,

@@ -14,9 +14,9 @@ import {
   childProcessMock,
   sessionViewAlertProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
-import type { ProcessDeps} from '.';
+import type { ProcessDeps } from '.';
 import { ProcessTreeNode } from '.';
 import { DEBOUNCE_TIMEOUT } from '../../../common/constants';
 import { useDateFormat } from '../../hooks';

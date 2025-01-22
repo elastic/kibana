@@ -6,15 +6,8 @@
  */
 
 import type { PublicMethodsOf } from '@kbn/utility-types';
-import type {
-  Subject,
-  Observable} from 'rxjs';
-import {
-  BehaviorSubject,
-  ReplaySubject,
-  map,
-  distinctUntilChanged,
-} from 'rxjs';
+import type { Subject, Observable } from 'rxjs';
+import { BehaviorSubject, ReplaySubject, map, distinctUntilChanged } from 'rxjs';
 import { pick } from 'lodash';
 import type { UsageCollectionSetup, UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
@@ -40,16 +33,11 @@ import type {
   StatusServiceSetup,
   ServiceStatus,
   SavedObjectsBulkGetObject,
-  CoreStatus} from '@kbn/core/server';
-import {
-  ServiceStatusLevels
+  CoreStatus,
 } from '@kbn/core/server';
-import type {
-  LicensingPluginSetup,
-  LicensingPluginStart} from '@kbn/licensing-plugin/server';
-import {
-  LICENSE_TYPE
-} from '@kbn/licensing-plugin/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
+import type { LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { LICENSE_TYPE } from '@kbn/licensing-plugin/server';
 import type {
   PluginSetupContract as ActionsPluginSetupContract,
   PluginStartContract as ActionsPluginStartContract,
@@ -74,7 +62,7 @@ import {
   getRulesSettingsFeature,
 } from './rules_settings';
 import { MaintenanceWindowClientFactory } from './maintenance_window_client_factory';
-import type { ILicenseState} from './lib/license_state';
+import type { ILicenseState } from './lib/license_state';
 import { LicenseState } from './lib/license_state';
 import type { AlertingRequestHandlerContext, RuleAlertData } from './types';
 import { ALERTING_FEATURE_ID } from './types';
@@ -118,7 +106,7 @@ import {
 import { maintenanceWindowFeature } from './maintenance_window_feature';
 import { ConnectorAdapterRegistry } from './connector_adapters/connector_adapter_registry';
 import type { ConnectorAdapter, ConnectorAdapterParams } from './connector_adapters/types';
-import type { DataStreamAdapter} from './alerts_service/lib/data_stream_adapter';
+import type { DataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import { getDataStreamAdapter } from './alerts_service/lib/data_stream_adapter';
 import type { GetAlertIndicesAlias } from './lib';
 import { createGetAlertIndicesAliasFn } from './lib';

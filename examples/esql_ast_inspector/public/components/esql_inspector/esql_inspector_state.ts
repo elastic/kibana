@@ -8,7 +8,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import type { ESQLCommand} from '@kbn/esql-ast';
+import type { ESQLCommand } from '@kbn/esql-ast';
 import { EsqlQuery, Walker } from '@kbn/esql-ast';
 import type { ESQLProperNode } from '@kbn/esql-ast/src/types';
 import type { Annotation } from '../annotations';

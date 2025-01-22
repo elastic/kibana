@@ -10,10 +10,9 @@ import type { SyntheticsMonitor880 } from '../../saved_objects/migrations/monito
 import { secretKeys } from '../../../common/constants/monitor_management';
 import type {
   SyntheticsMonitor,
-  SyntheticsMonitorWithSecretsAttributes} from '../../../common/runtime_types/monitor_management';
-import {
-  ConfigKey
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../common/runtime_types/monitor_management';
+import { ConfigKey } from '../../../common/runtime_types/monitor_management';
 import { DEFAULT_FIELDS } from '../../../common/constants/monitor_defaults';
 
 export function formatSecrets(monitor: SyntheticsMonitor): SyntheticsMonitorWithSecretsAttributes {

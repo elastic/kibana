@@ -14,7 +14,7 @@ import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { flatten, isEqual } from 'lodash';
 import type { DataViewsPublicPluginStart, DataView } from '@kbn/data-views-plugin/public';
 import type { IndexPatternFieldEditorStart } from '@kbn/data-view-field-editor-plugin/public';
-import type { DataPublicPluginStart} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
@@ -77,12 +77,13 @@ import { LayerPanel } from './layerpanel';
 import type {
   DateHistogramIndexPatternColumn,
   GenericIndexPatternColumn,
-  TermsIndexPatternColumn} from './operations';
+  TermsIndexPatternColumn,
+} from './operations';
 import {
   getCurrentFieldsForOperation,
   getErrorMessages,
   insertNewColumn,
-  operationDefinitionMap
+  operationDefinitionMap,
 } from './operations';
 import {
   copyColumn,
@@ -90,7 +91,11 @@ import {
   getReferenceRoot,
   reorderByGroups,
 } from './operations/layer_helpers';
-import type { FormBasedPrivateState, FormBasedPersistedState, DataViewDragDropOperation } from './types';
+import type {
+  FormBasedPrivateState,
+  FormBasedPersistedState,
+  DataViewDragDropOperation,
+} from './types';
 import { mergeLayer, mergeLayers } from './state_helpers';
 import type { Datasource, VisualizeEditorContext } from '../../types';
 import { deleteColumn, isReferenced } from './operations';

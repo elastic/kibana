@@ -11,7 +11,8 @@ import { loggingSystemMock } from '@kbn/core/server/mocks';
 import type { IRuleTypeAlerts } from '../types';
 import type {
   InitializationPromise,
-  ResourceInstallationHelper} from './create_resource_installation_helper';
+  ResourceInstallationHelper,
+} from './create_resource_installation_helper';
 import {
   createResourceInstallationHelper,
   errorResult,

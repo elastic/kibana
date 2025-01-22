@@ -16,13 +16,8 @@ import {
   MAX_REPORTERS_FILTER_LENGTH,
   MAX_TAGS_FILTER_LENGTH,
 } from '@kbn/cases-plugin/common/constants';
-import type {
-  Case} from '@kbn/cases-plugin/common/types/domain';
-import {
-  CaseSeverity,
-  CaseStatuses,
-  AttachmentType,
-} from '@kbn/cases-plugin/common/types/domain';
+import type { Case } from '@kbn/cases-plugin/common/types/domain';
+import { CaseSeverity, CaseStatuses, AttachmentType } from '@kbn/cases-plugin/common/types/domain';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

@@ -9,10 +9,7 @@
 
 import React, { useCallback, useMemo, useState } from 'react';
 
-import type {
-  Direction,
-  EuiButtonGroupOptionProps,
-  EuiSelectableOption} from '@elastic/eui';
+import type { Direction, EuiButtonGroupOptionProps, EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonGroup,
   EuiButtonIcon,
@@ -25,8 +22,7 @@ import {
 } from '@elastic/eui';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
-import type {
-  OptionsListSortBy} from '../../../../../common/options_list/suggestions_sorting';
+import type { OptionsListSortBy } from '../../../../../common/options_list/suggestions_sorting';
 import {
   getCompatibleSortingTypes,
   OPTIONS_LIST_DEFAULT_SORT,

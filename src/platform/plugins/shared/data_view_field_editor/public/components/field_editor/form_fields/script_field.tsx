@@ -13,11 +13,10 @@ import type { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFormRow, EuiLink, EuiCode } from '@elastic/eui';
-import type { PainlessContext} from '@kbn/monaco';
+import type { PainlessContext } from '@kbn/monaco';
 import { PainlessLang, monaco } from '@kbn/monaco';
 
-import type {
-  RuntimeType} from '../../../shared_imports';
+import type { RuntimeType } from '../../../shared_imports';
 import {
   UseField,
   useFormData,

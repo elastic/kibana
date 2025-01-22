@@ -6,15 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiText,
-  EuiFlexItem,
-  EuiTextColor,
-  EuiSwitch
-} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiText, EuiFlexItem, EuiTextColor, EuiSwitch } from '@elastic/eui';
 
 import * as i18n from '../translations';
 

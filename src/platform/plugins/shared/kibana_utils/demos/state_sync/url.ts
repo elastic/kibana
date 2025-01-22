@@ -9,13 +9,12 @@
 
 import type { TodoActions, TodoState } from '../state_containers/todomvc';
 import { defaultState, pureTransitions } from '../state_containers/todomvc';
-import type { BaseState, BaseStateContainer} from '../../common/state_containers';
+import type { BaseState, BaseStateContainer } from '../../common/state_containers';
 import { createStateContainer } from '../../common/state_containers';
-import type {
-  INullableBaseStateContainer} from '../../public/state_sync';
+import type { INullableBaseStateContainer } from '../../public/state_sync';
 import {
   createKbnUrlStateStorage,
-  syncState
+  syncState,
   // eslint-disable-next-line @kbn/imports/no_boundary_crossing
 } from '../../public/state_sync';
 

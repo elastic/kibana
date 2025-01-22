@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CapacityEstimationParams} from './capacity_estimation';
+import type { CapacityEstimationParams } from './capacity_estimation';
 import { estimateCapacity } from './capacity_estimation';
 import type { RawMonitoringStats } from './monitoring_stats_stream';
 import { HealthStatus } from './monitoring_stats_stream';

@@ -7,7 +7,7 @@
 
 import type { Logger } from '@kbn/logging';
 import { formatErrors } from '@kbn/securitysolution-io-ts-utils';
-import type { Indicator} from '@kbn/slo-schema';
+import type { Indicator } from '@kbn/slo-schema';
 import { indicatorSchema, sloDefinitionSchema } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { isLeft } from 'fp-ts/lib/Either';

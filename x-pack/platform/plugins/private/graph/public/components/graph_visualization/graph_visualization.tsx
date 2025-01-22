@@ -9,7 +9,13 @@ import React, { useRef } from 'react';
 import classNames from 'classnames';
 import type { ZoomEvent } from 'd3';
 import d3 from 'd3';
-import type { Workspace, WorkspaceNode, TermIntersect, ControlType, WorkspaceEdge } from '../../types';
+import type {
+  Workspace,
+  WorkspaceNode,
+  TermIntersect,
+  ControlType,
+  WorkspaceEdge,
+} from '../../types';
 import { makeNodeId } from '../../services/persistence';
 import { getIconOffset, IconRenderer } from '../icon_renderer';
 

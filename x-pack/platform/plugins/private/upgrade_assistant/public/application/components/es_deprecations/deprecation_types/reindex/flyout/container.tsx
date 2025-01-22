@@ -10,7 +10,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiFlyoutHeader, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 
-import type { EnrichedDeprecationInfo} from '../../../../../../../common/types';
+import type { EnrichedDeprecationInfo } from '../../../../../../../common/types';
 import { ReindexStatus } from '../../../../../../../common/types';
 
 import type { ReindexStateContext } from '../context';

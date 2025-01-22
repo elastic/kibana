@@ -9,13 +9,13 @@
 
 import React, { useEffect, useState } from 'react';
 
-import type { PublishingSubject} from '@kbn/presentation-publishing';
+import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import { BehaviorSubject } from 'rxjs';
 import { imageClickTrigger } from '../actions';
 import type { ImageEmbeddableApi } from '../image_embeddable/types';
-import type { FileImageMetadata, FilesClient} from '../imports';
+import type { FileImageMetadata, FilesClient } from '../imports';
 import { imageEmbeddableFileKind } from '../imports';
 import { coreServices, screenshotModeService, uiActionsService } from '../services/kibana_services';
 import type { ImageConfig } from '../types';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ValidatedEmail} from './types';
+import type { ValidatedEmail } from './types';
 import { InvalidEmailReason } from './types';
 import {
   validateEmailAddressesAsAlwaysValid,

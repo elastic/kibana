@@ -17,8 +17,7 @@ import type {
   PartitionLegendValue,
 } from '@kbn/visualizations-plugin/common';
 import type { LegendSize } from '@kbn/visualizations-plugin/public';
-import type {
-  ChartTypes} from './expression_functions';
+import type { ChartTypes } from './expression_functions';
 import {
   type AllowedPartitionOverrides,
   type ExpressionValuePartitionLabels,

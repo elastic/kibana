@@ -8,7 +8,10 @@
  */
 
 import type { SearchQuery } from '@kbn/content-management-plugin/common';
-import type { SerializableAttributes, VisualizationClient } from '@kbn/visualizations-plugin/public';
+import type {
+  SerializableAttributes,
+  VisualizationClient,
+} from '@kbn/visualizations-plugin/public';
 import type { CONTENT_ID } from '../../common';
 import { CONTENT_ID as contentTypeId } from '../../common';
 import type { LinksCrudTypes } from '../../common/content_management';

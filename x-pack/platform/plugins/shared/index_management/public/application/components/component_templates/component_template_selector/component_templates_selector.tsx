@@ -13,11 +13,10 @@ import { i18n } from '@kbn/i18n';
 
 import type { ComponentTemplateListItem } from '../../../../../common';
 import { SectionError, SectionLoading, GlobalFlyout } from '../shared_imports';
-import type {
-  ComponentTemplateDetailsProps} from '../component_template_details';
+import type { ComponentTemplateDetailsProps } from '../component_template_details';
 import {
   ComponentTemplateDetailsFlyoutContent,
-  defaultFlyoutProps
+  defaultFlyoutProps,
 } from '../component_template_details';
 import { CreateButtonPopOver } from './components';
 import { ComponentTemplates } from './component_templates';

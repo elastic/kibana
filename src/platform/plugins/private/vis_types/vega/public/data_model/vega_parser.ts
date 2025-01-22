@@ -17,7 +17,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
 
 import { logger, Warn, None, version as vegaVersion } from 'vega';
-import type { TopLevelSpec} from 'vega-lite';
+import type { TopLevelSpec } from 'vega-lite';
 import { compile, version as vegaLiteVersion } from 'vega-lite';
 
 import { EsQueryParser } from './es_query_parser';

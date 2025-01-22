@@ -25,9 +25,9 @@ import {
   ORCHESTRATOR_RESOURCE_ID_FIELD,
   SERVICE_NAME_FIELD,
 } from '@kbn/discover-utils';
-import type { DataTableRecord} from '@kbn/discover-utils';
+import type { DataTableRecord } from '@kbn/discover-utils';
 import { getFieldValue } from '@kbn/discover-utils';
-import type { LogDocument, ResourceFields} from '@kbn/discover-utils/src';
+import type { LogDocument, ResourceFields } from '@kbn/discover-utils/src';
 import { getAvailableResourceFields } from '@kbn/discover-utils/src';
 import { useEuiTheme } from '@elastic/eui';
 import type { FieldBadgeWithActionsProps } from '../cell_actions_popover';

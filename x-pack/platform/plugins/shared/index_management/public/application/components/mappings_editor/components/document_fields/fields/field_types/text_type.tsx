@@ -12,14 +12,8 @@ import type SemVer from 'semver/classes/semver';
 
 import { documentationService } from '../../../../../../services/documentation';
 import type { NormalizedField, Field as FieldType } from '../../../../types';
-import type {
-  FieldHook} from '../../../../shared_imports';
-import {
-  UseField,
-  UseMultiFields,
-  FormDataProvider,
-  RangeField,
-} from '../../../../shared_imports';
+import type { FieldHook } from '../../../../shared_imports';
+import { UseField, UseMultiFields, FormDataProvider, RangeField } from '../../../../shared_imports';
 import { getFieldConfig } from '../../../../lib';
 import {
   StoreParameter,

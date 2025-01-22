@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useCallback, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import type { EuiSwitchEvent } from '@elastic/eui';

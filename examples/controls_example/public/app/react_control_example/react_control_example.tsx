@@ -10,8 +10,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import { BehaviorSubject, combineLatest, Subject } from 'rxjs';
 import useMountedState from 'react-use/lib/useMountedState';
-import type {
-  OnTimeChangeProps} from '@elastic/eui';
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiBadge,
   EuiButton,
@@ -23,7 +22,7 @@ import {
   EuiFlexItem,
   EuiSpacer,
   EuiSuperDatePicker,
-  EuiToolTip
+  EuiToolTip,
 } from '@elastic/eui';
 import { CONTROL_GROUP_TYPE } from '@kbn/controls-plugin/common';
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
@@ -35,10 +34,11 @@ import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 import type {
   HasUniqueId,
   PublishesDataLoading,
-  ViewMode as ViewModeType} from '@kbn/presentation-publishing';
+  ViewMode as ViewModeType,
+} from '@kbn/presentation-publishing';
 import {
   apiPublishesDataLoading,
-  useBatchedPublishingSubjects
+  useBatchedPublishingSubjects,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 

@@ -8,13 +8,8 @@
  */
 
 import { functionWrapper } from '@kbn/expressions-plugin/common/expression_functions/specs/tests/utils';
-import type {
-  MosaicVisConfig} from '../types/expression_renderers';
-import {
-  LabelPositions,
-  ValueFormats,
-  LegendDisplay,
-} from '../types/expression_renderers';
+import type { MosaicVisConfig } from '../types/expression_renderers';
+import { LabelPositions, ValueFormats, LegendDisplay } from '../types/expression_renderers';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/common/expression_types/specs';
 import { mosaicVisFunction } from './mosaic_vis_function';

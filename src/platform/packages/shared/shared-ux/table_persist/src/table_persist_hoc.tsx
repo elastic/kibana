@@ -8,7 +8,7 @@
  */
 import React from 'react';
 import { type CriteriaWithPagination } from '@elastic/eui';
-import type { EuiTablePersistProps} from './use_table_persist';
+import type { EuiTablePersistProps } from './use_table_persist';
 import { useEuiTablePersist } from './use_table_persist';
 import type { PropertySort } from './types';
 

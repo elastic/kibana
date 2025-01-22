@@ -12,8 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import type {
-  AzureCredentialsFormProps} from './azure_credentials_form';
+import type { AzureCredentialsFormProps } from './azure_credentials_form';
 import {
   AzureSetupInfoContent,
   AzureInputVarFields,

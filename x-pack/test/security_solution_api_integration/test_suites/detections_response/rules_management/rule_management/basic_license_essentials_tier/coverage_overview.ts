@@ -7,12 +7,11 @@
 
 import expect from '@kbn/expect';
 
-import type {
-  ThreatArray} from '@kbn/security-solution-plugin/common/api/detection_engine';
+import type { ThreatArray } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   CoverageOverviewRuleActivity,
   CoverageOverviewRuleSource,
-  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL
+  RULE_MANAGEMENT_COVERAGE_OVERVIEW_URL,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 import {

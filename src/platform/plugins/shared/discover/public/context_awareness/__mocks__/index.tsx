@@ -13,7 +13,8 @@ import { dataViewWithTimefieldMock } from '../../__mocks__/data_view_with_timefi
 import type {
   DataSourceProfileProvider,
   DocumentProfileProvider,
-  RootProfileProvider} from '../profiles';
+  RootProfileProvider,
+} from '../profiles';
 import {
   DataSourceCategory,
   DataSourceProfileService,

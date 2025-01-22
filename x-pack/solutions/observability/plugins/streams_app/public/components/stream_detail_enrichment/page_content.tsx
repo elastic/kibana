@@ -6,17 +6,10 @@
  */
 
 import React, { useEffect } from 'react';
-import type {
-  DragDropContextProps} from '@elastic/eui';
-import {
-  EuiPanel,
-  EuiSpacer,
-  EuiText,
-  EuiTitle,
-  euiDragDropReorder,
-} from '@elastic/eui';
+import type { DragDropContextProps } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, EuiText, EuiTitle, euiDragDropReorder } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { ReadStreamDefinition} from '@kbn/streams-schema';
+import type { ReadStreamDefinition } from '@kbn/streams-schema';
 import { isRootStream } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';

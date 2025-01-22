@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { interval, of, throwError } from 'rxjs';
 import { shareReplay, switchMap, take } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';

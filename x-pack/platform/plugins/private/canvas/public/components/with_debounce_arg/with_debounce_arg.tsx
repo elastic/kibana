@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import deepEqual from 'react-fast-compare';

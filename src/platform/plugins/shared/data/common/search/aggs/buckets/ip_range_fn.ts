@@ -11,7 +11,7 @@ import { groupBy, isEmpty, isNil, map, mapValues, omit, omitBy } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import type { Assign } from '@kbn/utility-types';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
-import type { AggExpressionType, AggExpressionFunctionArgs} from '..';
+import type { AggExpressionType, AggExpressionFunctionArgs } from '..';
 import { BUCKET_TYPES } from '..';
 import type { CidrOutput, IpRangeOutput } from '../../expressions';
 

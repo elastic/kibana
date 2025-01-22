@@ -7,7 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
-import type { EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import { EuiIcon, EuiSelectable, EuiText } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { AssignableObject } from '../../../../common/assignments';

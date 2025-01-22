@@ -13,8 +13,7 @@ import { useValues } from 'kea';
 import { SEARCH_APPS_BREADCRUMB } from '../../../../common/constants';
 import { KibanaLogic } from '../kibana';
 
-import type {
-  BreadcrumbTrail} from './generate_breadcrumbs';
+import type { BreadcrumbTrail } from './generate_breadcrumbs';
 import {
   useGenerateBreadcrumbs,
   useSearchBreadcrumbs,

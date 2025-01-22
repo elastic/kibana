@@ -19,10 +19,9 @@ import type {
   FieldFormatMetaParams,
   SerializedFieldFormat,
   FormatFactory,
-  FieldFormatParams} from './types';
-import {
-  FIELD_FORMAT_IDS
+  FieldFormatParams,
 } from './types';
+import { FIELD_FORMAT_IDS } from './types';
 import { baseFormatters } from './constants/base_formatters';
 import { FieldFormat } from './field_format';
 import { FORMATS_UI_SETTINGS } from './constants/ui_settings';

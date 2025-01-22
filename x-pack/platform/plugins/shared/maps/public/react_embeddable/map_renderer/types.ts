@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { HasType} from '@kbn/presentation-publishing';
+import type { HasType } from '@kbn/presentation-publishing';
 import { apiIsOfType } from '@kbn/presentation-publishing';
 import type { RenderToolTipContent } from '../../classes/tooltips/tooltip_property';
 

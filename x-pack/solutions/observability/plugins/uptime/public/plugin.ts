@@ -35,10 +35,9 @@ import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type {
   FetchDataParams,
   ObservabilityPublicSetup,
-  ObservabilityPublicStart} from '@kbn/observability-plugin/public';
-import {
-  enableLegacyUptimeApp
+  ObservabilityPublicStart,
 } from '@kbn/observability-plugin/public';
+import { enableLegacyUptimeApp } from '@kbn/observability-plugin/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
 import type { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';

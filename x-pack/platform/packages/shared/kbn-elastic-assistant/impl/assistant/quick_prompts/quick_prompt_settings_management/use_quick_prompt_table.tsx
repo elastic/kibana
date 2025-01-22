@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBadge, EuiLink } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';

@@ -13,16 +13,11 @@ import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/commo
 
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { lastValueFrom } from 'rxjs';
-import type { RequestStatistics} from '@kbn/inspector-plugin/common';
+import type { RequestStatistics } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { ISearchGeneric } from '@kbn/search-types';
-import type {
-  KibanaContext,
-  EqlSearchStrategyResponse,
-  EqlSearchStrategyRequest} from '..';
-import {
-  EQL_SEARCH_STRATEGY
-} from '..';
+import type { KibanaContext, EqlSearchStrategyResponse, EqlSearchStrategyRequest } from '..';
+import { EQL_SEARCH_STRATEGY } from '..';
 import { getEsQueryConfig } from '../../es_query';
 import type { DataViewsContract, UiSettingsCommon } from '../..';
 import type { EqlRawResponse } from './eql_raw_response';

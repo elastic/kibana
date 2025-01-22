@@ -10,13 +10,8 @@
 import { each } from 'lodash';
 import type { DataViewBase, DataViewFieldBase } from '../../es_query';
 import { fields, getField } from '../stubs';
-import type {
-  RangeFilter,
-  ScriptedRangeFilter} from './range_filter';
-import {
-  buildRangeFilter,
-  getRangeFilterField
-} from './range_filter';
+import type { RangeFilter, ScriptedRangeFilter } from './range_filter';
+import { buildRangeFilter, getRangeFilterField } from './range_filter';
 
 describe('Range filter builder', () => {
   let indexPattern: DataViewBase;

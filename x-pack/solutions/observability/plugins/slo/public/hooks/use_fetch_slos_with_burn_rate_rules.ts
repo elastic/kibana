@@ -8,10 +8,9 @@
 import type {
   QueryObserverResult,
   RefetchOptions,
-  RefetchQueryFilters} from '@tanstack/react-query';
-import {
-  useQuery,
+  RefetchQueryFilters,
 } from '@tanstack/react-query';
+import { useQuery } from '@tanstack/react-query';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';
 import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '@kbn/alerting-plugin/common';
 import type { HttpSetup } from '@kbn/core/public';

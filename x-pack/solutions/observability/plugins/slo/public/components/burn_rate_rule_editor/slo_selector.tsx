@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { SLODefinitionResponse } from '@kbn/slo-schema';

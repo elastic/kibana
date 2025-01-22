@@ -12,7 +12,7 @@ import {
   PromptTemplate,
   SystemMessagePromptTemplate,
 } from '@langchain/core/prompts';
-import type { Runnable} from '@langchain/core/runnables';
+import type { Runnable } from '@langchain/core/runnables';
 import { RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
 import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createDataStream, LangChainAdapter } from 'ai';

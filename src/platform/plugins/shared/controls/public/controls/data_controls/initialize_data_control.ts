@@ -10,12 +10,8 @@
 import { isEqual } from 'lodash';
 import { BehaviorSubject, combineLatest, debounceTime, first, skip, switchMap, tap } from 'rxjs';
 
-import type {
-  DataView,
-  DataViewField} from '@kbn/data-views-plugin/common';
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE
-} from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/common';
 import type { Filter } from '@kbn/es-query';
 import type { SerializedPanelState } from '@kbn/presentation-containers';
 import type { StateComparators } from '@kbn/presentation-publishing';

@@ -7,8 +7,7 @@
 
 import React from 'react';
 import type { Visualization } from '../../../types';
-import type {
-  FrameMock} from '../../../mocks';
+import type { FrameMock } from '../../../mocks';
 import {
   createMockVisualization,
   createMockFramePublicAPI,

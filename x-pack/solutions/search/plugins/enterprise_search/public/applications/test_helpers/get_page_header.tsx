@@ -10,7 +10,7 @@ import React, { Fragment } from 'react';
 import type { ShallowWrapper } from 'enzyme';
 import { shallow } from 'enzyme';
 
-import type { EuiPageHeaderProps} from '@elastic/eui';
+import type { EuiPageHeaderProps } from '@elastic/eui';
 import { EuiTab } from '@elastic/eui';
 
 /*

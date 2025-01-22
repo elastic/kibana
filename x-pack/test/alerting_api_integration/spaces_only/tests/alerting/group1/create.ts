@@ -7,14 +7,13 @@
 
 import expect from '@kbn/expect';
 import type { SavedObject } from '@kbn/core/server';
-import type { RawRule} from '@kbn/alerting-plugin/server/types';
+import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/server/types';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import { omit } from 'lodash';
 import { RULE_SAVED_OBJECT_TYPE } from '@kbn/alerting-plugin/server';
 import { Spaces } from '../../../scenarios';
-import type {
-  TaskManagerDoc} from '../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   checkAAD,
   getUrlPrefix,

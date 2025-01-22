@@ -18,7 +18,8 @@ import { getLogEntryCursorFromHit } from '../../../common/log_entry';
 import { decodeOrThrow } from '../../../common/runtime_types';
 import type {
   LogEntrySearchRequestParams,
-  LogEntrySearchResponsePayload} from '../../../common/search_strategies/log_entries/log_entry';
+  LogEntrySearchResponsePayload,
+} from '../../../common/search_strategies/log_entries/log_entry';
 import {
   logEntrySearchRequestParamsRT,
   logEntrySearchResponsePayloadRT,

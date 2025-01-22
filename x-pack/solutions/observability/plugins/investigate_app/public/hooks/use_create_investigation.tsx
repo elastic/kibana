@@ -11,7 +11,7 @@ import type {
   CreateInvestigationResponse,
   FindInvestigationsResponse,
 } from '@kbn/investigation-shared';
-import type { QueryKey} from '@tanstack/react-query';
+import type { QueryKey } from '@tanstack/react-query';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { i18n } from '@kbn/i18n';
 import { useKibana } from './use_kibana';

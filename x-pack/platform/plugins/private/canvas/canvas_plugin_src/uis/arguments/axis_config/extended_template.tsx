@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react';
 import React, { Fragment, PureComponent } from 'react';
 import PropTypes from 'prop-types';
 import { EuiSelect, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';

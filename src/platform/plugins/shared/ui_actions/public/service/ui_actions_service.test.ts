@@ -8,7 +8,7 @@
  */
 
 import { UiActionsService } from './ui_actions_service';
-import type { ActionDefinition} from '../actions';
+import type { ActionDefinition } from '../actions';
 import { ActionInternal } from '../actions';
 import { createHelloWorldAction } from '../tests/test_samples';
 import type { TriggerRegistry, ActionRegistry } from '../types';

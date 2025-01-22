@@ -6,8 +6,7 @@
  */
 
 import tinycolor from 'tinycolor2';
-import type {
-  EuiColorPalettePickerPaletteProps} from '@elastic/eui';
+import type { EuiColorPalettePickerPaletteProps } from '@elastic/eui';
 import {
   colorPalette as colorPaletteGenerator,
   euiPaletteForStatus,
@@ -17,7 +16,7 @@ import {
   euiPaletteRed,
   euiPaletteGreen,
   euiPaletteGray,
-  euiPaletteColorBlind
+  euiPaletteColorBlind,
 } from '@elastic/eui';
 import type { PercentilesFieldMeta } from '../../../common/descriptor_types';
 

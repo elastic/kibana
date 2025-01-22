@@ -9,18 +9,17 @@ import { errors } from '@elastic/elasticsearch';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import type { InferencePipeline} from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { TrainedModelState } from '../../../../../../common/types/pipelines';
 
-import type {
-  InferencePipelineData} from './get_ml_inference_pipeline_processors';
+import type { InferencePipelineData } from './get_ml_inference_pipeline_processors';
 import {
   fetchAndAddTrainedModelData,
   getMlModelConfigsForModelIds,
   getMlInferencePipelineProcessorNamesFromPipelines,
   fetchMlInferencePipelines,
   fetchMlInferencePipelineProcessors,
-  fetchPipelineProcessorInferenceData
+  fetchPipelineProcessorInferenceData,
 } from './get_ml_inference_pipeline_processors';
 
 const mockGetPipeline = {

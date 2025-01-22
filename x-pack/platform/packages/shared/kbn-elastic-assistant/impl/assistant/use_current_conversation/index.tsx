@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Dispatch, SetStateAction} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import type { QueryObserverResult } from '@tanstack/react-query';
 import type { PromptResponse } from '@kbn/elastic-assistant-common';
@@ -17,7 +17,7 @@ import { NEW_CHAT } from '../conversations/conversation_sidepanel/translations';
 import { getDefaultNewSystemPrompt, getDefaultSystemPrompt } from '../use_conversation/helpers';
 import { useConversation } from '../use_conversation';
 import { sleep } from '../helpers';
-import type { Conversation} from '../../..';
+import type { Conversation } from '../../..';
 import { WELCOME_CONVERSATION_TITLE } from '../../..';
 
 export interface Props {

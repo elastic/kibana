@@ -23,7 +23,12 @@ import type {
   CustomMetricExpressionParams,
   SearchConfigurationWithExtractedReferenceType,
 } from '../../../../common/custom_threshold_rule/types';
-import type { FIRED_ACTIONS_ID, NO_DATA_ACTIONS_ID, FIRED_ACTION, NO_DATA_ACTION } from './constants';
+import type {
+  FIRED_ACTIONS_ID,
+  NO_DATA_ACTIONS_ID,
+  FIRED_ACTION,
+  NO_DATA_ACTION,
+} from './constants';
 import type { MissingGroupsRecord } from './lib/check_missing_group';
 
 export enum AlertStates {

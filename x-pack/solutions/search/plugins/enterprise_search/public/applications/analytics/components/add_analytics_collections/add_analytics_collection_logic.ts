@@ -10,7 +10,7 @@ import { kea } from 'kea';
 
 import { i18n } from '@kbn/i18n';
 
-import type { HttpError} from '../../../../../common/types/api';
+import type { HttpError } from '../../../../../common/types/api';
 import { Status } from '../../../../../common/types/api';
 
 import type { Actions } from '../../../shared/api_logic/create_api_logic';
@@ -23,10 +23,9 @@ import {
 import { KibanaLogic } from '../../../shared/kibana';
 import type {
   AddAnalyticsCollectionApiLogicArgs,
-  AddAnalyticsCollectionApiLogicResponse} from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
-import {
-  AddAnalyticsCollectionsAPILogic
+  AddAnalyticsCollectionApiLogicResponse,
 } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
+import { AddAnalyticsCollectionsAPILogic } from '../../api/add_analytics_collection/add_analytics_collection_api_logic';
 import { COLLECTION_OVERVIEW_PATH } from '../../routes';
 
 const SERVER_ERROR_CODE = 500;

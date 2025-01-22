@@ -14,7 +14,7 @@ import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_postu
 import type { RoleCredentials } from '../../../../../shared/services';
 import { getMockFindings } from './mock_data';
 import type { FtrProviderContext } from '../../../../ftr_provider_context';
-import type { UsageRecord} from './mock_usage_server';
+import type { UsageRecord } from './mock_usage_server';
 import { getInterceptedRequestPayload, setupMockServer } from './mock_usage_server';
 
 export default function (providerContext: FtrProviderContext) {

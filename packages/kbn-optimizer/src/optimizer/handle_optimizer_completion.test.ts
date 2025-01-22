@@ -10,7 +10,7 @@
 import * as Rx from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 
-import type { Update} from '../common';
+import type { Update } from '../common';
 import { allValuesFrom } from '../common';
 
 import type { OptimizerState } from './optimizer_state';

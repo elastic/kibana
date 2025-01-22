@@ -12,7 +12,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { Cluster } from '../../../public';
 import { RemoteClusterEdit } from '../../../public/application/sections';
 import { createRemoteClustersStore } from '../../../public/application/store';
-import type { AppRouter} from '../../../public/application/services';
+import type { AppRouter } from '../../../public/application/services';
 import { registerRouter } from '../../../public/application/services';
 import { createRemoteClustersActions, WithAppDependencies } from '../helpers';
 

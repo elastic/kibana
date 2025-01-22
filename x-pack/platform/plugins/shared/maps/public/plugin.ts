@@ -62,13 +62,8 @@ import { MapsAppRegionMapLocatorDefinition } from './locators/region_map_locator
 import { registerLicensedFeatures, setLicensingPluginStart } from './licensed_features';
 import { registerSource } from './classes/sources/source_registry';
 import { registerLayerWizardExternal } from './classes/layers/wizards/layer_wizard_registry';
-import type {
-  MapsSetupApi,
-  MapsStartApi} from './api';
-import {
-  createLayerDescriptors,
-  suggestEMSTermJoinConfig,
-} from './api';
+import type { MapsSetupApi, MapsStartApi } from './api';
+import { createLayerDescriptors, suggestEMSTermJoinConfig } from './api';
 import type { MapsXPackConfig, MapsConfigType } from '../server/config';
 import { filterByMapExtentAction } from './trigger_actions/filter_by_map_extent/action';
 import { synchronizeMovementAction } from './trigger_actions/synchronize_movement/action';

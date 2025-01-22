@@ -40,10 +40,9 @@ import type {
   RuleTypeMetaData,
   RuleTypeParams,
   RuleUiAction,
-  TriggersActionsUiConfig} from '../../../types';
-import {
-  RuleFlyoutCloseReason
+  TriggersActionsUiConfig,
 } from '../../../types';
+import { RuleFlyoutCloseReason } from '../../../types';
 import { HealthCheck } from '../../components/health_check';
 import { ToastWithCircuitBreakerContent } from '../../components/toast_with_circuit_breaker_content';
 import { HealthContextProvider } from '../../context/health_context';

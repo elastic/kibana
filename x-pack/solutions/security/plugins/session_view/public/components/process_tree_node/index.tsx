@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import type {
-  MouseEvent,
-  RefObject,
-  ReactElement} from 'react';
-import React, {
-  useState,
-  useEffect,
-  useCallback,
-  useMemo
-} from 'react';
+import type { MouseEvent, RefObject, ReactElement } from 'react';
+import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { EuiButton, EuiIcon, EuiToolTip, formatDate, EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

@@ -11,8 +11,7 @@ import { useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { type SavedQuery } from '@kbn/data-plugin/public';
-import type {
-  IKbnUrlStateStorage} from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   createKbnUrlStateStorage,
   syncState,

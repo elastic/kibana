@@ -8,8 +8,7 @@
 import ipaddr from 'ipaddr.js';
 import { defaultsDeep, sum } from 'lodash';
 import moment from 'moment';
-import type {
-  Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -44,15 +43,13 @@ import type {
   PdfScreenshotOptions,
   PdfScreenshotResult,
   PngScreenshotOptions,
-  PngScreenshotResult} from '../formats';
-import {
-  toPdf,
-  toPng,
+  PngScreenshotResult,
 } from '../formats';
-import type { Layout} from '../layouts';
+import { toPdf, toPng } from '../formats';
+import type { Layout } from '../layouts';
 import { createLayout } from '../layouts';
 import { EventLogger, Transactions } from './event_logger';
-import type { ScreenshotObservableOptions , UrlOrUrlWithContext } from './observable';
+import type { ScreenshotObservableOptions, UrlOrUrlWithContext } from './observable';
 import { ScreenshotObservableHandler } from './observable';
 
 const DEFAULT_SETUP_RESULT = {

@@ -18,7 +18,7 @@ import {
   EuiRadio,
   EuiSpacer,
 } from '@elastic/eui';
-import type { EmbeddablePackageState} from '@kbn/embeddable-plugin/public';
+import type { EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';

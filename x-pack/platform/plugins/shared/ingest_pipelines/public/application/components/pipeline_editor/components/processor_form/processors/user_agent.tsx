@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { FIELD_TYPES, ToggleField, UseField, Field } from '../../../../../../shared_imports';
 
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { from, to } from './shared';
 import { IgnoreMissingField } from './common_fields/ignore_missing_field';
 import { FieldNameField } from './common_fields/field_name_field';

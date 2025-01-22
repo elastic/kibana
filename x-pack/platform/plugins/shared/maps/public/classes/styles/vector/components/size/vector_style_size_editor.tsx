@@ -7,11 +7,14 @@
 
 import React from 'react';
 
-import type { Props} from '../style_prop_editor';
+import type { Props } from '../style_prop_editor';
 import { StylePropEditor } from '../style_prop_editor';
 import { DynamicSizeForm } from './dynamic_size_form';
 import { StaticSizeForm } from './static_size_form';
-import type { SizeDynamicOptions, SizeStaticOptions } from '../../../../../../common/descriptor_types';
+import type {
+  SizeDynamicOptions,
+  SizeStaticOptions,
+} from '../../../../../../common/descriptor_types';
 import type { DynamicSizeProperty } from '../../properties/dynamic_size_property';
 import type { StaticSizeProperty } from '../../properties/static_size_property';
 

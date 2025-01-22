@@ -10,10 +10,9 @@
 import type { StartServicesAccessor } from '@kbn/core/public';
 import type {
   IndexPatternLoadExpressionFunctionDefinition,
-  IndexPatternLoadStartDependencies} from '../../common/expressions';
-import {
-  getIndexPatternLoadMeta
+  IndexPatternLoadStartDependencies,
 } from '../../common/expressions';
+import { getIndexPatternLoadMeta } from '../../common/expressions';
 import type { DataViewsPublicPluginStart, DataViewsPublicStartDependencies } from '../types';
 
 /**

@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ColorMappingInputData,
-  PaletteOutput,
-  PaletteRegistry} from '@kbn/coloring';
-import {
-  getSpecialString,
-} from '@kbn/coloring';
+import type { ColorMappingInputData, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
+import { getSpecialString } from '@kbn/coloring';
 import type { CustomPaletteState } from '@kbn/charts-plugin/common';
 import type { KbnPalettes } from '@kbn/palettes';
 import { getColorAccessorFn } from './color_mapping_accessor';

@@ -14,11 +14,9 @@ import { i18n } from '@kbn/i18n';
 import type { KibanaRequest, StartServicesAccessor } from '@kbn/core/server';
 import type {
   EsaggsExpressionFunctionDefinition,
-  EsaggsStartDependencies} from '../../../common/search/expressions';
-import {
-  getEsaggsMeta,
-  handleEsaggsRequest,
+  EsaggsStartDependencies,
 } from '../../../common/search/expressions';
+import { getEsaggsMeta, handleEsaggsRequest } from '../../../common/search/expressions';
 import type { DataPluginStartDependencies, DataPluginStart } from '../../plugin';
 
 /**

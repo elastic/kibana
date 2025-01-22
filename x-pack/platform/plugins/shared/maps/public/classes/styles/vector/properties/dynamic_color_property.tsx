@@ -16,16 +16,11 @@ import {
   getPercentilesMbColorRampStops,
   getColorPalette,
 } from '../../color_palettes';
-import type {
-  FieldFormatter,
-  VECTOR_STYLES} from '../../../../../common/constants';
-import {
-  COLOR_MAP_TYPE,
-  DATA_MAPPING_FUNCTION
-} from '../../../../../common/constants';
+import type { FieldFormatter, VECTOR_STYLES } from '../../../../../common/constants';
+import { COLOR_MAP_TYPE, DATA_MAPPING_FUNCTION } from '../../../../../common/constants';
 import { isCategoricalStopsInvalid } from '../components/color/color_stops_utils';
 import { OTHER_CATEGORY_LABEL, OTHER_CATEGORY_DEFAULT_COLOR } from '../style_util';
-import type { Break} from '../components/legend/breaked_legend';
+import type { Break } from '../components/legend/breaked_legend';
 import { BreakedLegend } from '../components/legend/breaked_legend';
 import type { ColorDynamicOptions, OrdinalColorStop } from '../../../../../common/descriptor_types';
 import type { LegendProps } from './style_property';

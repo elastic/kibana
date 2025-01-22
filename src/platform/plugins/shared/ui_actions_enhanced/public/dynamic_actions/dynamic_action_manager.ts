@@ -15,7 +15,7 @@ import type { Subscription } from 'rxjs';
 import { v4 as uuidv4 } from 'uuid';
 import type { StartContract } from '../plugin';
 import { dynamicActionGrouping } from './dynamic_action_grouping';
-import type { State} from './dynamic_action_manager_state';
+import type { State } from './dynamic_action_manager_state';
 import { defaultState, selectors, transitions } from './dynamic_action_manager_state';
 import type { ActionStorage } from './dynamic_action_storage';
 import type { SerializedAction, SerializedEvent } from './types';

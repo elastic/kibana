@@ -26,7 +26,7 @@ import {
   useKibana,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Choice, Fields } from '../lib/servicenow/types';
-import type { ServiceNowITSMActionParams} from './types';
+import type { ServiceNowITSMActionParams } from './types';
 import { EventAction } from './types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import {

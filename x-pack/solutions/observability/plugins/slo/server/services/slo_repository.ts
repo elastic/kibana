@@ -7,7 +7,7 @@
 
 import type { SavedObject, SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/core/server';
-import type { Paginated, Pagination} from '@kbn/slo-schema';
+import type { Paginated, Pagination } from '@kbn/slo-schema';
 import { ALL_VALUE, sloDefinitionSchema } from '@kbn/slo-schema';
 import { isLeft } from 'fp-ts/lib/Either';
 import { merge } from 'lodash';

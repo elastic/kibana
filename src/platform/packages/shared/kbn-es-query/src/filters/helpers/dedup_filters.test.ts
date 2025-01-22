@@ -8,7 +8,7 @@
  */
 
 import type { DataViewBase, DataViewFieldBase } from '../../es_query';
-import type { Filter} from '../build_filters';
+import type { Filter } from '../build_filters';
 import { buildQueryFilter, buildRangeFilter, FilterStateStore } from '../build_filters';
 import { dedupFilters } from './dedup_filters';
 

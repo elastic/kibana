@@ -10,7 +10,7 @@
 import type { AxisTypeId, PosType } from './_mocks';
 import { computeInputCombinations } from './_mocks';
 import { computeChartMargins, getLineAnnotationProps } from './utils';
-import type { AxesMap, AxisConfiguration} from '../../helpers';
+import type { AxesMap, AxisConfiguration } from '../../helpers';
 import { Marker, MarkerBody } from '../../helpers';
 import type { ReferenceLineAnnotationConfig } from './reference_line_annotations';
 import { Position } from '@elastic/charts';

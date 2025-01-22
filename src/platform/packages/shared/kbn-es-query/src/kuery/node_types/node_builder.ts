@@ -8,7 +8,7 @@
  */
 
 import type { RangeFilterParams } from '../../filters';
-import type { KueryNode} from '../types';
+import type { KueryNode } from '../types';
 import { nodeTypes } from '../types';
 
 export const nodeBuilder = {

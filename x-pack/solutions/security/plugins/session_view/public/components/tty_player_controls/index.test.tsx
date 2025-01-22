@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import type { ProcessEvent } from '../../../common';
 import type { TTYPlayerControlsDeps } from '.';

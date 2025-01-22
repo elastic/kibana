@@ -7,8 +7,7 @@
 
 import type { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type {
-  Replacements} from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
 import {
   getAnonymizedValue,
   getOpenAndAcknowledgedAlertsQuery,

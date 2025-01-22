@@ -11,15 +11,14 @@ import type {
   ExpressionFunctionDefinition,
   ExpressionValueFilter,
 } from '@kbn/expressions-plugin/common';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { catchError, from, map, switchMap, throwError } from 'rxjs';
 import type {
   SqlRequestParams,
   SqlSearchStrategyRequest,
-  SqlSearchStrategyResponse} from '@kbn/data-plugin/common';
-import {
-  SQL_SEARCH_STRATEGY,
+  SqlSearchStrategyResponse,
 } from '@kbn/data-plugin/common';
+import { SQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 
 import { searchService } from '../../../public/services';
 import { getFunctionHelp } from '../../../i18n';

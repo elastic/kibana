@@ -8,9 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiTabbedContentProps,
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiTabbedContentProps, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiTabbedContent,

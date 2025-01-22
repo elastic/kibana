@@ -23,14 +23,12 @@ import type {
   RenderCellValue,
 } from '@elastic/eui';
 import type { EuiDataGridColumn, EuiDataGridControlColumn, EuiDataGridSorting } from '@elastic/eui';
-import type {
-  ActionType,
-  AsApiContract} from '@kbn/actions-plugin/common';
+import type { ActionType, AsApiContract } from '@kbn/actions-plugin/common';
 import {
   ALERT_HISTORY_PREFIX,
   AlertHistoryDefaultIndexName,
   AlertHistoryDocumentTemplate,
-  AlertHistoryEsIndexConnectorId
+  AlertHistoryEsIndexConnectorId,
 } from '@kbn/actions-plugin/common';
 import type { ActionsPublicPluginSetup } from '@kbn/actions-plugin/public';
 import type {

@@ -10,14 +10,15 @@ import type {
   IClusterClientAdapter,
   FindEventsOptionsBySavedObjectFilter,
   AggregateEventsOptionsBySavedObjectFilter,
-  AggregateEventsWithAuthFilter} from './cluster_client_adapter';
+  AggregateEventsWithAuthFilter,
+} from './cluster_client_adapter';
 import {
   ClusterClientAdapter,
   EVENT_BUFFER_LENGTH,
   getQueryBody,
   getQueryBodyWithAuthFilter,
 } from './cluster_client_adapter';
-import type { AggregateOptionsType} from '../event_log_client';
+import type { AggregateOptionsType } from '../event_log_client';
 import { queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';

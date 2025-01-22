@@ -13,10 +13,9 @@ import type {
   ReadStreamDefinition,
   ProcessingDefinition,
   FieldDefinition,
-  WiredReadStreamDefinition} from '@kbn/streams-schema';
-import {
-  isWiredReadStream
+  WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
+import { isWiredReadStream } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
 import { isEqual } from 'lodash';
 import type { DetectedField, ProcessorDefinition } from '../types';

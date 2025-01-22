@@ -10,11 +10,9 @@ import type {
   HasSupportedTriggers,
   PublishesDisabledActionIds,
   PublishesViewMode,
-  ViewMode} from '@kbn/presentation-publishing';
-import {
-  apiHasAppContext,
-  apiPublishesDisabledActionIds,
+  ViewMode,
 } from '@kbn/presentation-publishing';
+import { apiHasAppContext, apiPublishesDisabledActionIds } from '@kbn/presentation-publishing';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { noop } from 'lodash';
 import { EmbeddableStateTransfer } from '@kbn/embeddable-plugin/public';

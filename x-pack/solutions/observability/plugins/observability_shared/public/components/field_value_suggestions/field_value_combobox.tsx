@@ -7,13 +7,8 @@
 
 import React, { useEffect, useState } from 'react';
 import { union, isEmpty } from 'lodash';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
-import {
-  EuiComboBox,
-  EuiFormControlLayout,
-  EuiFormRow,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiComboBox, EuiFormControlLayout, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from 'styled-components';
 import type { FieldValueSelectionProps } from './types';

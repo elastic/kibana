@@ -8,9 +8,7 @@
  */
 
 import React, { useMemo } from 'react';
-import type {
-  RouteComponentProps,
-  RouteProps} from 'react-router-dom';
+import type { RouteComponentProps, RouteProps } from 'react-router-dom';
 import {
   // eslint-disable-next-line no-restricted-imports
   Route as ReactRouterRoute,

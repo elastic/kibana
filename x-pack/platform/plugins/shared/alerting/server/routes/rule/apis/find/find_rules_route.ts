@@ -12,10 +12,10 @@ import type {
   FindRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/find';
 import { findRulesRequestQuerySchemaV1 } from '../../../../../common/routes/rule/apis/find';
-import type { RuleParamsV1} from '../../../../../common/routes/rule/response';
+import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import type { ILicenseState } from '../../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';

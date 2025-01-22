@@ -18,11 +18,12 @@ import type {
   KnowledgeBaseEntryBulkCrudActionResults,
   KnowledgeBaseEntryBulkCrudActionResponse,
   KnowledgeBaseEntryBulkCrudActionSummary,
-  PerformKnowledgeBaseEntryBulkActionResponse} from '@kbn/elastic-assistant-common';
+  PerformKnowledgeBaseEntryBulkActionResponse,
+} from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BULK_ACTION,
   PerformKnowledgeBaseEntryBulkActionRequestBody,
-  API_VERSIONS
+  API_VERSIONS,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 

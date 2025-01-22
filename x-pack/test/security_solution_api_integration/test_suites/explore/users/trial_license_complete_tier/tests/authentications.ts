@@ -6,8 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  UserAuthenticationsStrategyResponse} from '@kbn/security-solution-plugin/common/search_strategy';
+import type { UserAuthenticationsStrategyResponse } from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   AuthStackByField,
   Direction,

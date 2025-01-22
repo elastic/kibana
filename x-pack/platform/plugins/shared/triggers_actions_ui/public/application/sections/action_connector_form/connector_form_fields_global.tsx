@@ -7,7 +7,7 @@
 
 import React, { memo } from 'react';
 
-import type { FieldConfig} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import { Field, HiddenField } from '@kbn/es-ui-shared-plugin/static/forms/components';

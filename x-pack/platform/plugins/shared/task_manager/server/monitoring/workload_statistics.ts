@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, timer } from 'rxjs';
 import { mergeMap, map, filter, switchMap, catchError } from 'rxjs';
 import type { Logger } from '@kbn/core/server';

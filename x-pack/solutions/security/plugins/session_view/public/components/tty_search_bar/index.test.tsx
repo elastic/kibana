@@ -7,7 +7,7 @@
 import React from 'react';
 import { renderHook } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
 import { useIOLines } from '../tty_player/hooks';

@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { catchError, mergeMap, of, tap, from } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { ChatCompleteResponse } from '@kbn/inference-common';
 import type { ObservabilityAIAssistantClient } from '..';
-import type { Message} from '../../../../common';
+import type { Message } from '../../../../common';
 import { MessageRole, StreamingChatResponseEventType } from '../../../../common';
 import type { TokenCountEvent } from '../../../../common/conversation_complete';
 import type { LangTracer } from '../instrumentation/lang_tracer';

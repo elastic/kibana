@@ -7,13 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  IAggConfig} from '@kbn/data-plugin/common';
-import {
-  BUCKET_TYPES,
-  METRIC_TYPES,
-  SHARD_DELAY_AGG_NAME,
-} from '@kbn/data-plugin/common';
+import type { IAggConfig } from '@kbn/data-plugin/common';
+import { BUCKET_TYPES, METRIC_TYPES, SHARD_DELAY_AGG_NAME } from '@kbn/data-plugin/common';
 import { search } from '@kbn/data-plugin/public';
 import type { Vis, VisToExpressionAstParams } from './types';
 import type { SchemaConfig, VisParams } from '../common/types';

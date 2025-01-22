@@ -14,11 +14,10 @@ import { actionTypeRegistryMock } from '../../action_type_registry.mock';
 import type { ValidationResult, GenericValidationResult, RuleUiAction } from '../../../types';
 import ActionForm from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
-import type {
-  SanitizedRuleAction} from '@kbn/alerting-plugin/common';
+import type { SanitizedRuleAction } from '@kbn/alerting-plugin/common';
 import {
   RecoveredActionGroup,
-  isActionGroupDisabledForActionTypeId
+  isActionGroupDisabledForActionTypeId,
 } from '@kbn/alerting-plugin/common';
 
 jest.mock('../../../common/lib/kibana');

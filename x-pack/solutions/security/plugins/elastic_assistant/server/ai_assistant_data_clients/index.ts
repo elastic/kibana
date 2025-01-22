@@ -13,7 +13,7 @@ import type { estypes } from '@elastic/elasticsearch';
 import type { IIndexPatternString } from '../types';
 import { getIndexTemplateAndPattern } from '../lib/data_stream/helpers';
 import { DocumentsDataWriter } from '../lib/data_stream/documents_data_writer';
-import type { FindResponse} from './find';
+import type { FindResponse } from './find';
 import { findDocuments } from './find';
 
 export interface AIAssistantDataClientParams {

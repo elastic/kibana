@@ -12,13 +12,9 @@ import type {
   GeometryValue,
   XYChartSeriesIdentifier,
   TooltipAction,
-  TooltipValue} from '@elastic/charts';
-import {
-  Settings,
-  TooltipType,
-  Heatmap,
-  Tooltip
+  TooltipValue,
 } from '@elastic/charts';
+import { Settings, TooltipType, Heatmap, Tooltip } from '@elastic/charts';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { EmptyPlaceholder } from '@kbn/charts-plugin/public';
 import { createDatatableUtilitiesMock } from '@kbn/data-plugin/common/mocks';

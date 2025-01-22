@@ -11,7 +11,7 @@ import { indexPatterns as indexPatternsUtils } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { flatten } from 'lodash';
 import { sortPrefixFirst } from './sort_prefix_first';
-import type { QuerySuggestionField} from '../query_suggestion_provider';
+import type { QuerySuggestionField } from '../query_suggestion_provider';
 import { QuerySuggestionTypes } from '../query_suggestion_provider';
 import type { KqlQuerySuggestionProvider } from './types';
 

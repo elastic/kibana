@@ -6,8 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import type {
-  EuiFieldSearchProps} from '@elastic/eui';
+import type { EuiFieldSearchProps } from '@elastic/eui';
 import {
   EuiButton,
   EuiFieldSearch,

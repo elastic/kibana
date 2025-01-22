@@ -9,18 +9,11 @@ import type { JsonObject } from '@kbn/utility-types';
 import { merge } from 'lodash';
 import type { Logger } from '@kbn/core/server';
 import { isUserError } from '../task_running';
-import type { Ok} from '../lib/result_type';
+import type { Ok } from '../lib/result_type';
 import { isOk, unwrap } from '../lib/result_type';
 import type { TaskLifecycleEvent } from '../polling_lifecycle';
-import type {
-  ErroredTask,
-  RanTask,
-  TaskManagerStat,
-  TaskRun} from '../task_events';
-import {
-  isTaskManagerStatEvent,
-  isTaskRunEvent
-} from '../task_events';
+import type { ErroredTask, RanTask, TaskManagerStat, TaskRun } from '../task_events';
+import { isTaskManagerStatEvent, isTaskRunEvent } from '../task_events';
 import type { SerializedHistogram } from './lib';
 import { getTaskTypeGroup, MetricCounterService, SimpleHistogram } from './lib';
 import type { ITaskMetricsAggregator } from './types';

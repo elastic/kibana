@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup} from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { loggerMock } from '@kbn/logging-mocks';
 import { z } from '@kbn/zod';

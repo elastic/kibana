@@ -11,14 +11,13 @@ import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { RawRule } from '@kbn/alerting-plugin/server/types';
 import { Spaces, UserAtSpaceScenarios } from '../../../scenarios';
-import type {
-  TaskManagerDoc} from '../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   checkAAD,
   getTestRuleData,
   getUnauthorizedErrorMessage,
   getUrlPrefix,
-  ObjectRemover
+  ObjectRemover,
 } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

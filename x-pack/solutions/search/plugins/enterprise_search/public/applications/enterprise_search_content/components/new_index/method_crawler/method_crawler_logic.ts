@@ -14,10 +14,9 @@ import { generateEncodedPath } from '../../../../shared/encode_path_params';
 import { KibanaLogic } from '../../../../shared/kibana';
 import type {
   CreateCrawlerIndexArgs,
-  CreateCrawlerIndexResponse} from '../../../api/crawler/create_crawler_index_api_logic';
-import {
-  CreateCrawlerIndexApiLogic
+  CreateCrawlerIndexResponse,
 } from '../../../api/crawler/create_crawler_index_api_logic';
+import { CreateCrawlerIndexApiLogic } from '../../../api/crawler/create_crawler_index_api_logic';
 import { SEARCH_INDEX_TAB_PATH } from '../../../routes';
 import { SearchIndexTabId } from '../../search_index/search_index';
 

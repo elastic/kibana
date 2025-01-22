@@ -12,13 +12,8 @@ import type { Logger } from '@kbn/core/server';
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import type { ScopedClusterClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 
-import type {
-  ReindexOperation,
-  ReindexSavedObject} from '../../../common/types';
-import {
-  ReindexStatus,
-  ReindexStep,
-} from '../../../common/types';
+import type { ReindexOperation, ReindexSavedObject } from '../../../common/types';
+import { ReindexStatus, ReindexStep } from '../../../common/types';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 
@@ -26,7 +21,7 @@ import { getMockVersionInfo } from '../__fixtures__/version';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 import { versionService } from '../version';
 
-import type { ReindexService} from './reindex_service';
+import type { ReindexService } from './reindex_service';
 import { reindexServiceFactory } from './reindex_service';
 
 const asApiResponse = <T>(body: T): TransportResult<T> =>

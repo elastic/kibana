@@ -18,7 +18,7 @@ import { getMetricsColumns, getBucketsColumns } from '../lib/series';
 import { getConfigurationForTopN as getConfiguration, getLayers } from '../lib/configurations/xy';
 import { getReducedTimeRange, isValidMetrics } from '../lib/metrics';
 import type { ConvertTsvbToLensVisualization } from '../types';
-import type { Layer as ExtendedLayer} from '../lib/convert';
+import type { Layer as ExtendedLayer } from '../lib/convert';
 import { excludeMetaFromColumn } from '../lib/convert';
 
 const excludeMetaFromLayers = (layers: Record<string, ExtendedLayer>): Record<string, Layer> => {

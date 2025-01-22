@@ -16,7 +16,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { switchMap } from 'rxjs';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
-import type { InjectedIntl} from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import type {
   VisualizeServices,

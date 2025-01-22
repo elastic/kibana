@@ -11,10 +11,9 @@ import type {
   EventAnnotationConfig,
   XYAnnotationsLayerConfig,
   XYLayerConfig,
-  YAxisMode} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import {
-  FillTypes
+  YAxisMode,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { FillTypes } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import type { PaletteOutput } from '@kbn/coloring';
 import { v4 } from 'uuid';
 import { transparentize } from '@elastic/eui';
@@ -27,14 +26,8 @@ import { ICON_TYPES_MAP } from '../../../../application/visualizations/constants
 import { SUPPORTED_METRICS } from '../../metrics';
 import type { Annotation, Metric, Panel, Series } from '../../../../../common/types';
 import { getSeriesAgg } from '../../series';
-import type {
-  Column,
-  Layer,
-  AnyColumnWithReferences} from '../../convert';
-import {
-  isPercentileRanksColumnWithMeta,
-  isPercentileColumnWithMeta
-} from '../../convert';
+import type { Column, Layer, AnyColumnWithReferences } from '../../convert';
+import { isPercentileRanksColumnWithMeta, isPercentileColumnWithMeta } from '../../convert';
 import { getChartType } from './chart_type';
 import { extractOrGenerateDatasourceInfo } from '../../datasource';
 

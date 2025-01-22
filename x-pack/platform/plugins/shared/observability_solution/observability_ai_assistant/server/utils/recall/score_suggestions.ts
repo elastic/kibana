@@ -10,7 +10,7 @@ import dedent from 'dedent';
 import { lastValueFrom } from 'rxjs';
 import { decodeOrThrow, jsonRt } from '@kbn/io-ts-utils';
 import { omit } from 'lodash';
-import type { Message} from '../../../common';
+import type { Message } from '../../../common';
 import { concatenateChatCompletionChunks, MessageRole } from '../../../common';
 import type { FunctionCallChatFunction } from '../../service/types';
 import { parseSuggestionScores } from './parse_suggestion_scores';

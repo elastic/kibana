@@ -7,18 +7,9 @@
 
 import React, { useState, useEffect } from 'react';
 import { debounce } from 'lodash';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
-import {
-  EuiFormRow,
-  EuiSpacer,
-  EuiComboBox,
-  EuiTitle,
-  EuiIconTip,
-  EuiLink,
-} from '@elastic/eui';
-import type {
-  FieldConfig} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiFormRow, EuiSpacer, EuiComboBox, EuiTitle, EuiIconTip, EuiLink } from '@elastic/eui';
+import type { FieldConfig } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   getFieldValidityAndErrorMessage,
   UseField,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type { AggregationsAggregationContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { DateRangeInfo} from './date_range_info';
+import type { DateRangeInfo } from './date_range_info';
 import { getDateRangeInfo } from './date_range_info';
 
 export interface BuildAggregationOpts {

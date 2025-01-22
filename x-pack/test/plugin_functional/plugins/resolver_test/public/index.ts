@@ -8,10 +8,9 @@
 import type { PluginInitializer } from '@kbn/core/public';
 import type {
   ResolverTestPluginSetupDependencies,
-  ResolverTestPluginStartDependencies} from './plugin';
-import {
-  ResolverTestPlugin
+  ResolverTestPluginStartDependencies,
 } from './plugin';
+import { ResolverTestPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   void,

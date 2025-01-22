@@ -11,10 +11,9 @@ import { composeScreenshotRef } from '../lib/helper/compose_screenshot_images';
 import type {
   ScreenshotRefImageData,
   ScreenshotBlockCache,
-  StoreScreenshotBlock} from '../../../common/runtime_types';
-import {
-  isPendingBlock,
+  StoreScreenshotBlock,
 } from '../../../common/runtime_types';
+import { isPendingBlock } from '../../../common/runtime_types';
 import { fetchBlocksAction } from '../state/reducers/synthetics';
 import { syntheticsSelector } from '../state/selectors';
 

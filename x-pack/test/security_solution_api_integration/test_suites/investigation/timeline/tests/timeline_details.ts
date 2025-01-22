@@ -9,10 +9,9 @@ import expect from '@kbn/expect';
 import { sortBy } from 'lodash';
 import type {
   TimelineEventsDetailsStrategyResponse,
-  TimelineKpiStrategyResponse} from '@kbn/security-solution-plugin/common/search_strategy';
-import {
-  TimelineEventsQueries
+  TimelineKpiStrategyResponse,
 } from '@kbn/security-solution-plugin/common/search_strategy';
+import { TimelineEventsQueries } from '@kbn/security-solution-plugin/common/search_strategy';
 import type TestAgent from 'supertest/lib/agent';
 import type { SearchService } from '@kbn/ftr-common-functional-services';
 import type { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';

@@ -10,7 +10,7 @@ import {
   mockAlerts,
   sessionViewBasicProcessMock,
 } from '../../../common/mocks/constants/session_view_process.mock';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import { SessionViewDetailPanel } from '.';
 import { useDateFormat } from '../../hooks';

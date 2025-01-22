@@ -11,14 +11,8 @@ import type { FtrProviderContext } from '../../../../ftr_provider_context';
 
 import type { HistogramCharts } from '../../../../services/transform/wizard';
 
-import type {
-  GroupByEntry,
-  LatestTransformTestData,
-  PivotTransformTestData} from '../../helpers';
-import {
-  isLatestTransformTestData,
-  isPivotTransformTestData
-} from '../../helpers';
+import type { GroupByEntry, LatestTransformTestData, PivotTransformTestData } from '../../helpers';
+import { isLatestTransformTestData, isPivotTransformTestData } from '../../helpers';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');

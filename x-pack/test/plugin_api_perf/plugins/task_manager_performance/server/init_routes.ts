@@ -15,7 +15,10 @@ import type {
   CoreSetup,
 } from '@kbn/core/server';
 import { range, chunk } from 'lodash';
-import type { TaskManagerStartContract, ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';
+import type {
+  TaskManagerStartContract,
+  ConcreteTaskInstance,
+} from '@kbn/task-manager-plugin/server';
 import type { PerfApi, PerfResult } from './types';
 
 const scope = 'perf-testing';

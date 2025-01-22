@@ -14,7 +14,7 @@ import React from 'react';
 import { SearchSessionStatus } from '../../../../../common';
 import { dateString } from '../lib/date_string';
 import type { UISession } from '../types';
-import type { StatusDef as StatusAttributes} from '.';
+import type { StatusDef as StatusAttributes } from '.';
 import { TableText } from '.';
 
 // Shared helper function

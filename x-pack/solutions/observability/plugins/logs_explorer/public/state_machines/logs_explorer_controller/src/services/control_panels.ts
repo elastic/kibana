@@ -10,12 +10,11 @@ import type { DiscoverStateContainer } from '@kbn/discover-plugin/public';
 import deepEqual from 'fast-deep-equal';
 import { mapValues, pick } from 'lodash';
 import type { InvokeCreator } from 'xstate';
-import type {
-  ControlPanels} from '../../../../../common';
+import type { ControlPanels } from '../../../../../common';
 import {
   availableControlPanelFields,
   controlPanelConfigs,
-  ControlPanelRT
+  ControlPanelRT,
 } from '../../../../../common';
 import type { LogsExplorerControllerContext, LogsExplorerControllerEvent } from '../types';
 

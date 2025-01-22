@@ -8,7 +8,7 @@
 import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { fromKueryExpression } from '@kbn/es-query';
-import type { MaintenanceWindowClientContext} from '../../../../../common';
+import type { MaintenanceWindowClientContext } from '../../../../../common';
 import { MaintenanceWindowStatus } from '../../../../../common';
 import { transformMaintenanceWindowAttributesToMaintenanceWindow } from '../../transforms';
 import { findMaintenanceWindowSo } from '../../../../data/maintenance_window';

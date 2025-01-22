@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import type { MappingsEditorTestBed} from '../helpers';
+import type { MappingsEditorTestBed } from '../helpers';
 import { componentHelpers, kibanaVersion } from '../helpers';
 import { getFieldConfig } from '../../../lib';
 

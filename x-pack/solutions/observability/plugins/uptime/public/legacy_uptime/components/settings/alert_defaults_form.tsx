@@ -7,15 +7,14 @@
 
 import React, { useEffect, useState, useRef, useCallback } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiDescribedFormGroup,
   EuiFormRow,
   EuiTitle,
   EuiSpacer,
   EuiComboBox,
-  EuiIcon
+  EuiIcon,
 } from '@elastic/eui';
 import { useSelector } from 'react-redux';
 import styled from 'styled-components';

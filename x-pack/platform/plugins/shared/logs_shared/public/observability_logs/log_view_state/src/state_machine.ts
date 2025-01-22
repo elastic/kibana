@@ -9,7 +9,7 @@ import { catchError, from, map, of, throwError } from 'rxjs';
 import { createMachine, actions, assign } from 'xstate';
 import type { ILogViewsClient } from '../../../services/log_views';
 import type { NotificationChannel } from '../../xstate_helpers';
-import type { LogViewNotificationEvent} from './notifications';
+import type { LogViewNotificationEvent } from './notifications';
 import { logViewNotificationEventSelectors } from './notifications';
 import type {
   LogViewContext,

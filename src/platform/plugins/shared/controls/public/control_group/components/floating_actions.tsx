@@ -8,7 +8,7 @@
  */
 
 import classNames from 'classnames';
-import type { FC, ReactElement} from 'react';
+import type { FC, ReactElement } from 'react';
 import React, { useEffect, useState } from 'react';
 import { v4 } from 'uuid';
 import { Subscription } from 'rxjs';

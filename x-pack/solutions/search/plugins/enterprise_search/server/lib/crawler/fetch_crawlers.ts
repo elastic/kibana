@@ -7,7 +7,7 @@
 
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import type { IScopedClusterClient } from '@kbn/core/server';
-import type { Connector} from '@kbn/search-connectors';
+import type { Connector } from '@kbn/search-connectors';
 import { CONNECTORS_INDEX } from '@kbn/search-connectors';
 
 import type { Crawler, CrawlRequest } from '../../../common/types/crawler';

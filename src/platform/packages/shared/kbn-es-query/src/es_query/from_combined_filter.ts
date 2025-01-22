@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter} from '../filters';
+import type { Filter } from '../filters';
 import { isCombinedFilter } from '../filters';
 import type { DataViewBase } from './types';
 import type { EsQueryFiltersConfig } from './from_filters';

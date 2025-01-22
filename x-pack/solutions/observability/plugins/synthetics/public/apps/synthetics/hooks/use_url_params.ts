@@ -8,7 +8,7 @@
 import { useCallback } from 'react';
 import { parse, stringify } from 'query-string';
 import { useLocation, useHistory } from 'react-router-dom';
-import type { SyntheticsUrlParams} from '../utils/url_params';
+import type { SyntheticsUrlParams } from '../utils/url_params';
 import { getSupportedUrlParams } from '../utils/url_params';
 
 function getParsedParams(search: string) {

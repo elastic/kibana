@@ -7,7 +7,7 @@
 
 import type { TCPFields } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
-import type { Formatter} from './common';
+import type { Formatter } from './common';
 import { commonFormatters } from './common';
 import { tlsFormatters } from './tls';
 

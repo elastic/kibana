@@ -10,12 +10,8 @@ import { observabilityPaths } from '@kbn/observability-plugin/common';
 import moment from 'moment';
 import { schema } from '@kbn/config-schema';
 import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import type {
-  GetViewInAppRelativeUrlFnOpts} from '@kbn/alerting-plugin/server';
-import {
-  AlertsClientError,
-  DEFAULT_AAD_CONFIG
-} from '@kbn/alerting-plugin/server';
+import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server';
+import { AlertsClientError, DEFAULT_AAD_CONFIG } from '@kbn/alerting-plugin/server';
 import type { LegacyUptimeRuleTypeFactory } from './types';
 import { updateState } from './common';
 import { CLIENT_ALERT_TYPES, TLS_LEGACY } from '../../../../common/constants/uptime_alerts';

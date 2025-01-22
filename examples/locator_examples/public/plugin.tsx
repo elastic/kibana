@@ -9,7 +9,7 @@
 
 import type { SharePluginStart, SharePluginSetup } from '@kbn/share-plugin/public';
 import type { Plugin, CoreSetup, AppMountParameters } from '@kbn/core/public';
-import type { HelloLocator} from './locator';
+import type { HelloLocator } from './locator';
 import { HelloLocatorDefinition } from './locator';
 
 interface SetupDeps {

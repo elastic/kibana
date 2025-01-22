@@ -14,10 +14,11 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 import type {
   PieVisExpressionFunctionDefinition,
   PartitionVisParams,
-  LabelsParams} from '@kbn/expression-partition-vis-plugin/common';
+  LabelsParams,
+} from '@kbn/expression-partition-vis-plugin/common';
 import {
   PIE_VIS_EXPRESSION_NAME,
-  PARTITION_LABELS_FUNCTION
+  PARTITION_LABELS_FUNCTION,
 } from '@kbn/expression-partition-vis-plugin/common';
 
 const prepareDimension = (params: SchemaConfig) => {

@@ -22,7 +22,7 @@ import {
   getSelectorsAndResponsesFromYaml,
 } from '../../../common/utils/helpers';
 import * as i18n from './translations';
-import type { ViewDeps} from '../../types';
+import type { ViewDeps } from '../../types';
 import { SelectorConditionsMap } from '../../types';
 import type { SelectorCondition } from '../../../common';
 

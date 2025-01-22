@@ -22,13 +22,8 @@ import type { TaskClaim } from '../task_events';
 import type { TaskTypeDictionary } from '../task_type_dictionary';
 import type { TaskStore, UpdateByQueryResult } from '../task_store';
 import { FillPoolResult } from '../lib/fill_pool';
-import type {
-  TaskClaimerOpts,
-  TaskClaimerFn,
-  ClaimOwnershipResult} from '../task_claimers';
-import {
-  getTaskClaimer,
-} from '../task_claimers';
+import type { TaskClaimerOpts, TaskClaimerFn, ClaimOwnershipResult } from '../task_claimers';
+import { getTaskClaimer } from '../task_claimers';
 import type { TaskPartitioner } from '../lib/task_partitioner';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 

@@ -12,15 +12,8 @@ import type {
   SavedObjectsClientContract,
   ElasticsearchClient,
 } from '@kbn/core/server';
-import type {
-  ReindexOperation,
-  ReindexOptions,
-  ReindexSavedObject} from '../../../common/types';
-import {
-  REINDEX_OP_TYPE,
-  ReindexStatus,
-  ReindexStep,
-} from '../../../common/types';
+import type { ReindexOperation, ReindexOptions, ReindexSavedObject } from '../../../common/types';
+import { REINDEX_OP_TYPE, ReindexStatus, ReindexStep } from '../../../common/types';
 import { generateNewIndexName } from './index_settings';
 import type { FlatSettings } from './types';
 

@@ -6,7 +6,7 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useRequestErrorHandler } from './use_request_error_handler';
-import type { EnableAlertResponse} from '../../alerts/lib/alerts_toast';
+import type { EnableAlertResponse } from '../../alerts/lib/alerts_toast';
 import { showAlertsToast } from '../../alerts/lib/alerts_toast';
 import type { MonitoringStartServices } from '../../types';
 

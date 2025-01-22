@@ -14,11 +14,8 @@ import { ALERT_TABLE_GENERIC_CONFIG_ID } from '../../../constants';
 import type { AlertTableConfigRegistry } from '../../../alert_table_config_registry';
 import { useKibana } from '../../../../common/lib/kibana';
 import type { Rule, RuleSummary, AlertStatus, RuleType } from '../../../../types';
-import type {
-  ComponentOpts as RuleApis} from '../../common/components/with_bulk_rule_api_operations';
-import {
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import './rule.scss';
 import type { RuleEventLogListProps } from './rule_event_log_list';
 import type { AlertListItem, RefreshToken } from './types';

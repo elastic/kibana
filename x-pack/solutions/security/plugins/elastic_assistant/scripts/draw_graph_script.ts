@@ -11,10 +11,9 @@ import fs from 'fs/promises';
 import path from 'path';
 import type {
   ActionsClientChatOpenAI,
-  ActionsClientSimpleChatModel} from '@kbn/langchain/server/language_models';
-import {
-  type ActionsClientLlm
+  ActionsClientSimpleChatModel,
 } from '@kbn/langchain/server/language_models';
+import { type ActionsClientLlm } from '@kbn/langchain/server/language_models';
 import type { Logger } from '@kbn/logging';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { FakeLLM } from '@langchain/core/utils/testing';

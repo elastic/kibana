@@ -20,15 +20,8 @@ import {
   getModulePath,
 } from '@kbn/optimizer-webpack-helpers';
 
-import type {
-  Bundle,
-  WorkerConfig,
-  ParsedDllManifest} from '../common';
-import {
-  ascending,
-  parseFilePath,
-  Hashes
-} from '../common';
+import type { Bundle, WorkerConfig, ParsedDllManifest } from '../common';
+import { ascending, parseFilePath, Hashes } from '../common';
 import { BundleRemoteModule } from './bundle_remote_module';
 
 /**

@@ -32,9 +32,7 @@ import { DiscoverError } from '../../components/common/error_alert';
 import { useDiscoverServices } from '../../hooks/use_discover_services';
 import { useAlertResultsToast } from './hooks/use_alert_results_toast';
 import { DiscoverMainProvider } from './state_management/discover_state_provider';
-import type {
-  CustomizationCallback,
-  DiscoverCustomizationContext} from '../../customizations';
+import type { CustomizationCallback, DiscoverCustomizationContext } from '../../customizations';
 import {
   DiscoverCustomizationProvider,
   useDiscoverCustomizationService,

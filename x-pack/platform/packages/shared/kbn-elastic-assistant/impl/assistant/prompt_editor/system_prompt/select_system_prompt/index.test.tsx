@@ -9,7 +9,7 @@ import React from 'react';
 import { render } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import type { Props} from '.';
+import type { Props } from '.';
 import { SelectSystemPrompt } from '.';
 import { TEST_IDS } from '../../../constants';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';

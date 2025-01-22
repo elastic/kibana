@@ -19,7 +19,7 @@ import { TestScheduler } from 'rxjs/testing';
 import { merge, tap, of, NEVER } from 'rxjs';
 import type { FileJSON } from '@kbn/shared-ux-file-types';
 import { createMockFilesClient } from '@kbn/shared-ux-file-mocks';
-import type { FilePickerState} from './file_picker_state';
+import type { FilePickerState } from './file_picker_state';
 import { createFilePickerState } from './file_picker_state';
 
 const getTestScheduler = () =>

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { LayerConfig} from './lens_attributes';
+import type { LayerConfig } from './lens_attributes';
 import { LensAttributes } from './lens_attributes';
 import { mockAppDataView, mockDataView } from '../rtl_helpers';
 import { getDefaultConfigs } from './default_configs';

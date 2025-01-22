@@ -11,7 +11,8 @@ import type {
   DataViewBase,
   TimeRange,
   EsQueryConfig,
-  AggregateQuery} from '@kbn/es-query';
+  AggregateQuery,
+} from '@kbn/es-query';
 import {
   buildCustomFilter,
   buildEsQuery,

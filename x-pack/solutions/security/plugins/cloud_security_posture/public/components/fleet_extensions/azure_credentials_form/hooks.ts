@@ -10,12 +10,8 @@ import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import type { SetupFormat } from './azure_credentials_form';
 import { AZURE_CREDENTIALS_TYPE, AZURE_SETUP_FORMAT } from './azure_credentials_form';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import type {
-  NewPackagePolicyPostureInput} from '../utils';
-import {
-  getArmTemplateUrlFromCspmPackage,
-  getPosturePolicy
-} from '../utils';
+import type { NewPackagePolicyPostureInput } from '../utils';
+import { getArmTemplateUrlFromCspmPackage, getPosturePolicy } from '../utils';
 import {
   getAzureCredentialsFormOptions,
   getInputVarsFields,

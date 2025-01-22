@@ -12,7 +12,7 @@ import { coreMock } from '@kbn/core/server/mocks';
 import type { TaskManagerConfig } from './config';
 import { Subject } from 'rxjs';
 import { bufferCount, take } from 'rxjs';
-import type { CoreStatus} from '@kbn/core/server';
+import type { CoreStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 import { taskPollingLifecycleMock } from './polling_lifecycle.mock';

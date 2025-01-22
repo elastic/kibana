@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import type { EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiCode } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

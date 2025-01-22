@@ -7,14 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseSyntheticEvent, KeyboardEvent} from 'react';
+import type { BaseSyntheticEvent, KeyboardEvent } from 'react';
 import React, { PureComponent } from 'react';
 import classNames from 'classnames';
 import { compact, uniqBy, map, every, isUndefined } from 'lodash';
 
 import { i18n } from '@kbn/i18n';
 import { asyncForEach } from '@kbn/std';
-import type { EuiPopoverProps} from '@elastic/eui';
+import type { EuiPopoverProps } from '@elastic/eui';
 import { EuiIcon, keys, htmlIdGenerator } from '@elastic/eui';
 
 import type { PersistedState } from '@kbn/visualizations-plugin/public';

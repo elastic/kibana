@@ -4,14 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ElasticsearchClient,
-  ISavedObjectsRepository,
-  SavedObject} from '@kbn/core/server';
-import {
-  type KibanaRequest,
-  type Logger,
-} from '@kbn/core/server';
+import type { ElasticsearchClient, ISavedObjectsRepository, SavedObject } from '@kbn/core/server';
+import { type KibanaRequest, type Logger } from '@kbn/core/server';
 import type { DataViewAttributes } from '@kbn/data-views-plugin/common';
 import type { SpacesServiceStart } from '@kbn/spaces-plugin/server';
 import type { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';

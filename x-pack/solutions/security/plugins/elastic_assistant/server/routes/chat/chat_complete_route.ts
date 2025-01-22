@@ -7,16 +7,13 @@
 
 import { transformError } from '@kbn/securitysolution-es-utils';
 import type { Logger } from '@kbn/core/server';
-import type {
-  Message,
-  Replacements,
-  ConversationResponse} from '@kbn/elastic-assistant-common';
+import type { Message, Replacements, ConversationResponse } from '@kbn/elastic-assistant-common';
 import {
   ELASTIC_AI_ASSISTANT_CHAT_COMPLETE_URL,
   ChatCompleteProps,
   API_VERSIONS,
   transformRawData,
-  getAnonymizedValue
+  getAnonymizedValue,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';

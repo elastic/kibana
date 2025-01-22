@@ -16,7 +16,7 @@ import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { MountWithReduxProvider } from './helper_with_redux';
 import type { AppState } from '../../state';
 import { mockState } from '../__mocks__/uptime_store.mock';
-import type { KibanaProviderOptions} from './rtl_helpers';
+import type { KibanaProviderOptions } from './rtl_helpers';
 import { mockCore, MockRouter } from './rtl_helpers';
 
 interface RenderRouterOptions<ExtraCore> extends KibanaProviderOptions<ExtraCore> {

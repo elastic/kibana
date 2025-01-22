@@ -10,8 +10,7 @@
 import type { monaco } from '../../../monaco_imports';
 import { getHoverItem } from './hover';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
-import type {
-  ESQLRealField} from '@kbn/esql-validation-autocomplete';
+import type { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import {
   ENRICH_MODES,
   getFunctionDefinition,

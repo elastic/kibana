@@ -10,8 +10,7 @@
 import React, { useMemo, useState } from 'react';
 
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
-import type {
-  OnTimeChangeProps} from '@elastic/eui';
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiFlexGroup,
@@ -19,7 +18,7 @@ import {
   EuiSpacer,
   EuiSuperDatePicker,
   EuiSwitch,
-  EuiText
+  EuiText,
 } from '@elastic/eui';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { TimeRange } from '@kbn/es-query';

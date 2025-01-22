@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiButtonEmpty, EuiCode, EuiSwitch, EuiText } from '@elastic/eui';
 import React from 'react';
 
@@ -13,7 +13,7 @@ import styled from 'styled-components';
 
 import { BulkActions } from '../bulk_actions';
 import * as i18n from '../translations';
-import type { BatchUpdateListItem, ContextEditorRow} from '../types';
+import type { BatchUpdateListItem, ContextEditorRow } from '../types';
 import { FIELDS } from '../types';
 
 const AnonymizedButton = styled(EuiButtonEmpty)`

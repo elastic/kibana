@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { from, takeUntil } from 'rxjs';
 import type { TagWithRelations } from '../../../common/types';
 import { getAssignFlyoutOpener } from '../../components/assign_flyout';

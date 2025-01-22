@@ -12,9 +12,9 @@ import {
   TEST_SESSION_START_TIME,
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewIOEventsMock } from '../../../common/mocks/responses/session_view_io_events.mock';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
-import type { TTYPlayerDeps} from '.';
+import type { TTYPlayerDeps } from '.';
 import { TTYPlayer } from '.';
 import userEvent from '@testing-library/user-event';
 

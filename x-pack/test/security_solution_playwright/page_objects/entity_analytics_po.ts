@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Locator, Page} from '@playwright/test';
+import type { Locator, Page } from '@playwright/test';
 import { expect } from '@playwright/test';
 import type { EntityAnalyticsManagementPage } from './entity_analytics_management_po';
 import { PageFactory } from './page_factory';

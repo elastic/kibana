@@ -30,8 +30,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  ExtractionRuleFieldRule} from '../../../../../../../../common/types/extraction_rules';
+import type { ExtractionRuleFieldRule } from '../../../../../../../../common/types/extraction_rules';
 import {
   ContentFrom,
   FieldType,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactElement} from 'react';
+import type { ReactElement } from 'react';
 import React, { memo, useCallback, useEffect, useMemo, useState } from 'react';
 import { Subject } from 'rxjs';
 import useObservable from 'react-use/lib/useObservable';
@@ -41,10 +41,9 @@ import type {
   UnifiedHistogramInputMessage,
   UnifiedHistogramRequestContext,
   UnifiedHistogramServices,
-  UnifiedHistogramBucketInterval} from '../types';
-import {
-  UnifiedHistogramFetchStatus
+  UnifiedHistogramBucketInterval,
 } from '../types';
+import { UnifiedHistogramFetchStatus } from '../types';
 import { UnifiedHistogramSuggestionType } from '../types';
 import { BreakdownFieldSelector } from './breakdown_field_selector';
 import { TimeIntervalSelector } from './time_interval_selector';

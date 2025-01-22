@@ -5,8 +5,7 @@
  * 2.0.
  */
 import { omit } from 'lodash';
-import type {
-  FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, {
   createContext,
   useCallback,
@@ -37,13 +36,8 @@ import { serialize } from '../serialize';
 
 import type { OnActionHandler } from '../components/processors_tree';
 
-import type {
-  OnSubmitHandler} from '../components';
-import {
-  ProcessorRemoveModal,
-  PipelineProcessorsItemTooltip,
-  ProcessorForm
-} from '../components';
+import type { OnSubmitHandler } from '../components';
+import { ProcessorRemoveModal, PipelineProcessorsItemTooltip, ProcessorForm } from '../components';
 
 import { getValue } from '../utils';
 

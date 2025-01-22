@@ -6,7 +6,7 @@
  */
 
 import type { FIELD_ORIGIN } from '../../../common/constants';
-import type { IField} from './field';
+import type { IField } from './field';
 import { AbstractField } from './field';
 import type { IVectorSource } from '../sources/vector_source';
 import type { IEmsFileSource } from '../sources/ems_file_source';

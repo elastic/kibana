@@ -35,10 +35,9 @@ import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { useDebounceWithOptions } from '../../../../../../shared_components';
 import type { ParamEditorProps } from '../..';
 import { getManagedColumnsFrom } from '../../../layer_helpers';
-import type { ErrorWrapper} from '../validation';
+import type { ErrorWrapper } from '../validation';
 import { runASTValidation, tryToParse } from '../validation';
-import type {
-  LensMathSuggestions} from './math_completion';
+import type { LensMathSuggestions } from './math_completion';
 import {
   SUGGESTION_TYPE,
   suggest,

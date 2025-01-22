@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SavedObjectsBulkResponse, SavedObjectsClientContract, Logger } from '@kbn/core/server';
+import type {
+  SavedObjectsBulkResponse,
+  SavedObjectsClientContract,
+  Logger,
+} from '@kbn/core/server';
 import type { TaskPriority, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { RawAction, ActionTypeRegistryContract, InMemoryConnector } from './types';
 import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from './constants/saved_objects';

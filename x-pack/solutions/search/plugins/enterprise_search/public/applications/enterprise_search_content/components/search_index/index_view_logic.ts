@@ -14,39 +14,25 @@ import type {
   Connector,
   IngestPipelineParams,
   IngestionStatus,
-  IngestionMethod} from '@kbn/search-connectors';
-import {
-  FeatureName,
-  SyncStatus
+  IngestionMethod,
 } from '@kbn/search-connectors';
+import { FeatureName, SyncStatus } from '@kbn/search-connectors';
 
 import type { Status } from '../../../../../common/types/api';
 import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import { flashSuccessToast } from '../../../shared/flash_messages';
 import { KibanaLogic } from '../../../shared/kibana';
 
-import type {
-  StartAccessControlSyncArgs} from '../../api/connector/start_access_control_sync_api_logic';
-import {
-  StartAccessControlSyncApiLogic
-} from '../../api/connector/start_access_control_sync_api_logic';
-import type {
-  StartIncrementalSyncArgs} from '../../api/connector/start_incremental_sync_api_logic';
-import {
-  StartIncrementalSyncApiLogic
-} from '../../api/connector/start_incremental_sync_api_logic';
+import type { StartAccessControlSyncArgs } from '../../api/connector/start_access_control_sync_api_logic';
+import { StartAccessControlSyncApiLogic } from '../../api/connector/start_access_control_sync_api_logic';
+import type { StartIncrementalSyncArgs } from '../../api/connector/start_incremental_sync_api_logic';
+import { StartIncrementalSyncApiLogic } from '../../api/connector/start_incremental_sync_api_logic';
 import type { StartSyncArgs } from '../../api/connector/start_sync_api_logic';
 import { StartSyncApiLogic } from '../../api/connector/start_sync_api_logic';
-import type {
-  PostConnectorConfigurationActions} from '../../api/connector/update_connector_configuration_api_logic';
-import {
-  ConnectorConfigurationApiLogic
-} from '../../api/connector/update_connector_configuration_api_logic';
-import type {
-  CachedFetchIndexApiLogicActions} from '../../api/index/cached_fetch_index_api_logic';
-import {
-  CachedFetchIndexApiLogic
-} from '../../api/index/cached_fetch_index_api_logic';
+import type { PostConnectorConfigurationActions } from '../../api/connector/update_connector_configuration_api_logic';
+import { ConnectorConfigurationApiLogic } from '../../api/connector/update_connector_configuration_api_logic';
+import type { CachedFetchIndexApiLogicActions } from '../../api/index/cached_fetch_index_api_logic';
+import { CachedFetchIndexApiLogic } from '../../api/index/cached_fetch_index_api_logic';
 
 import type { FetchIndexApiResponse } from '../../api/index/fetch_index_api_logic';
 import type { ElasticsearchViewIndex } from '../../types';

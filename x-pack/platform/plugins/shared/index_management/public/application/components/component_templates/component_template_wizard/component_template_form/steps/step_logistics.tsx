@@ -17,8 +17,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type {
-  Forms} from '../../../shared_imports';
+import type { Forms } from '../../../shared_imports';
 import {
   useForm,
   Form,

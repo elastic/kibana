@@ -5,7 +5,7 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type { elasticsearchServiceMock} from '@kbn/core/server/mocks';
+import type { elasticsearchServiceMock } from '@kbn/core/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { JOB_STATUS } from '@kbn/reporting-common';
 import type { ReportDocument } from '@kbn/reporting-common/types';

@@ -8,7 +8,7 @@
 import React from 'react';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import { i18n } from '@kbn/i18n';
-import type { EuiDataGridCellValueElementProps} from '@elastic/eui';
+import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import type { HttpSetup } from '@kbn/core-http-browser';

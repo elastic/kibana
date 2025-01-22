@@ -8,7 +8,7 @@
 import { useCallback, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { HttpSetup, MountPoint } from '@kbn/core/public';
-import type { CaseUI} from '@kbn/cases-plugin/common';
+import type { CaseUI } from '@kbn/cases-plugin/common';
 import { AttachmentType } from '@kbn/cases-plugin/common';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { CasesDeepLinkId, DRAFT_COMMENT_STORAGE_ID } from '@kbn/cases-plugin/public';

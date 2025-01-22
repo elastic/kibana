@@ -15,7 +15,7 @@ import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 import type { Filter, Query } from '@kbn/es-query';
-import type { EsqlTable} from '../../../../common';
+import type { EsqlTable } from '../../../../common';
 import { toEsQueryHits } from '../../../../common';
 import type { OnlyEsqlQueryRuleParams } from '../types';
 

@@ -12,7 +12,7 @@ import type {
   CreateInvestigationResponse,
   FindInvestigationsResponse,
 } from '@kbn/investigation-shared';
-import type { QueryKey} from '@tanstack/react-query';
+import type { QueryKey } from '@tanstack/react-query';
 import { useMutation } from '@tanstack/react-query';
 import { useKibana } from '../../../utils/kibana_react';
 

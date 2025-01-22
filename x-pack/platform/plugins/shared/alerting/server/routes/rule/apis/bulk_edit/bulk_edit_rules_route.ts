@@ -7,18 +7,17 @@
 
 import type { IRouter } from '@kbn/core/server';
 
-import type { ILicenseState} from '../../../../lib';
+import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { handleDisabledApiKeysError, verifyAccessAndContext } from '../../../lib';
 
 import type {
   BulkEditRulesRequestBodyV1,
-  BulkEditRulesResponseV1} from '../../../../../common/routes/rule/apis/bulk_edit';
-import {
-  bulkEditRulesRequestBodySchemaV1
+  BulkEditRulesResponseV1,
 } from '../../../../../common/routes/rule/apis/bulk_edit';
+import { bulkEditRulesRequestBodySchemaV1 } from '../../../../../common/routes/rule/apis/bulk_edit';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import type { Rule } from '../../../../application/rule/types';
 

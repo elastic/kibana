@@ -23,10 +23,9 @@ import type {
   TodoGetOut,
   TodoUpdateIn,
   TodoSearchIn,
-  TodoCreateIn} from '../../../common/examples/todos';
-import {
-  TODO_CONTENT_ID
+  TodoCreateIn,
 } from '../../../common/examples/todos';
+import { TODO_CONTENT_ID } from '../../../common/examples/todos';
 
 export const registerTodoContentType = ({
   contentManagement,

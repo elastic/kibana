@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { memo, useRef, useEffect } from 'react';
 import { EuiFlexGroup, EuiFlexItem, keys } from '@elastic/eui';
 import type List from 'react-virtualized/dist/commonjs/List';

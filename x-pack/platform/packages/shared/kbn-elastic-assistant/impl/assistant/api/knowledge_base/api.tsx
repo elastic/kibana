@@ -10,11 +10,12 @@ import type {
   CreateKnowledgeBaseResponse,
   GetKnowledgeBaseIndicesResponse,
   ReadKnowledgeBaseRequestParams,
-  ReadKnowledgeBaseResponse} from '@kbn/elastic-assistant-common';
+  ReadKnowledgeBaseResponse,
+} from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_INDICES_URL,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_URL,
 } from '@kbn/elastic-assistant-common';
 import type { HttpSetup, IHttpFetchError } from '@kbn/core-http-browser';
 

@@ -6,11 +6,8 @@
  */
 
 import type { Headers, Logger } from '@kbn/core/server';
-import type {
-  ScreenshotModePluginSetup} from '@kbn/screenshot-mode-plugin/server';
-import {
-  KBN_SCREENSHOT_MODE_HEADER
-} from '@kbn/screenshot-mode-plugin/server';
+import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import { KBN_SCREENSHOT_MODE_HEADER } from '@kbn/screenshot-mode-plugin/server';
 import type { ConfigType } from '@kbn/screenshotting-server';
 import { truncate } from 'lodash';
 import type { ElementHandle, EvaluateFunc, HTTPResponse, Page } from 'puppeteer';

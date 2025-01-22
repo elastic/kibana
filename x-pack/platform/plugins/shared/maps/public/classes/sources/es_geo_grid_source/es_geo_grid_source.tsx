@@ -47,13 +47,8 @@ import { DataRequestAbortError } from '../../util/data_request';
 import { LICENSED_FEATURES } from '../../../licensed_features';
 
 import { getHttp } from '../../../kibana_services';
-import type {
-  GetFeatureActionsArgs,
-  GeoJsonWithMeta,
-  IMvtVectorSource} from '../vector_source';
-import {
-  getLayerFeaturesRequestName,
-} from '../vector_source';
+import type { GetFeatureActionsArgs, GeoJsonWithMeta, IMvtVectorSource } from '../vector_source';
+import { getLayerFeaturesRequestName } from '../vector_source';
 import type {
   DataFilters,
   ESGeoGridSourceDescriptor,

@@ -12,13 +12,14 @@ import type {
   EmbeddableApiContext,
   HasParentApi,
   HasUniqueId,
-  PublishesViewMode} from '@kbn/presentation-publishing';
+  PublishesViewMode,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasUniqueId,
-  getInheritedViewMode
+  getInheritedViewMode,
 } from '@kbn/presentation-publishing';
-import type { Action} from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import type { PresentationContainer } from '@kbn/presentation-containers';
 import { getContainerParentFromAPI } from '@kbn/presentation-containers';

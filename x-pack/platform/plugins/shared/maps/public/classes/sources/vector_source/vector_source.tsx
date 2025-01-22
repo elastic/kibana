@@ -26,7 +26,7 @@ import type { ActionExecutionContext, Action } from '@kbn/ui-actions-plugin/publ
 import type { IVectorStyle } from '../../styles/vector/vector_style';
 import { GEO_JSON_TYPE, VECTOR_SHAPE_TYPE } from '../../../../common/constants';
 import type { TooltipFeatureAction } from '../../../../common/descriptor_types';
-import type { ITooltipProperty} from '../../tooltips/tooltip_property';
+import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import { TooltipProperty } from '../../tooltips/tooltip_property';
 import type { ISource } from '../source';
 import { AbstractSource } from '../source';

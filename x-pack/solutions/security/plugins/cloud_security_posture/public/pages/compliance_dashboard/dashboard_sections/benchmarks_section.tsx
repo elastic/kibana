@@ -7,7 +7,7 @@
 
 import React, { useMemo } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
-import type { EuiIconProps} from '@elastic/eui';
+import type { EuiIconProps } from '@elastic/eui';
 import { EuiPanel } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiTitle, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';

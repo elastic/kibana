@@ -8,12 +8,8 @@
  */
 
 import type { PluginInitializer } from '@kbn/core/public';
-import type {
-  ManagementTestPluginSetup,
-  ManagementTestPluginStart} from './plugin';
-import {
-  ManagementTestPlugin
-} from './plugin';
+import type { ManagementTestPluginSetup, ManagementTestPluginStart } from './plugin';
+import { ManagementTestPlugin } from './plugin';
 
 export const plugin: PluginInitializer<ManagementTestPluginSetup, ManagementTestPluginStart> = () =>
   new ManagementTestPlugin();

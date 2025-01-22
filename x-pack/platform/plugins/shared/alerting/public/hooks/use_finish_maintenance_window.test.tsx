@@ -7,7 +7,7 @@
 
 import { waitFor, renderHook, act } from '@testing-library/react';
 
-import type { AppMockRenderer} from '../lib/test_utils';
+import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { useFinishMaintenanceWindow } from './use_finish_maintenance_window';
 

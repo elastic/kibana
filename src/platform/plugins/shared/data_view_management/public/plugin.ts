@@ -7,7 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, Plugin, PluginInitializerContext, IUiSettingsClient } from '@kbn/core/public';
+import type {
+  CoreSetup,
+  Plugin,
+  PluginInitializerContext,
+  IUiSettingsClient,
+} from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import { i18n } from '@kbn/i18n';

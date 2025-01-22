@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { EntityFields} from '@kbn/apm-synthtrace-client';
+import type { EntityFields } from '@kbn/apm-synthtrace-client';
 import { entities, generateShortId } from '@kbn/apm-synthtrace-client';
 import type { Schema } from '@kbn/apm-synthtrace-client/src/lib/entities';
 import type { Scenario } from '../cli/scenario';

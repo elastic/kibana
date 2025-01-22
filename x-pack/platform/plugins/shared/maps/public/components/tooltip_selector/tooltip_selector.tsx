@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps} from 'react';
+import type { ComponentProps } from 'react';
 import React, { Component, Fragment } from 'react';
 import classNames from 'classnames';
 import {

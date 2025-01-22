@@ -10,7 +10,7 @@ import { mountWithIntl } from '@kbn/test-jest-helpers';
 import { act, render, waitFor, screen } from '@testing-library/react';
 import { merge } from 'lodash';
 
-import type { ActionConnector} from '@kbn/triggers-actions-ui-plugin/public/types';
+import type { ActionConnector } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public/types';
 import { useGetChoices } from '../lib/servicenow/use_get_choices';
 import ServiceNowITSMParamsFields from './servicenow_itsm_params';

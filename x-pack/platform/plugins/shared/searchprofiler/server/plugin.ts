@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
-import type { LicenseStatus} from '../common';
+import type { LicenseStatus } from '../common';
 import { PLUGIN } from '../common';
 import type { AppServerPluginDependencies } from './types';
 import * as profileRoute from './routes/profile';

@@ -6,7 +6,7 @@
  */
 
 import pMap from 'p-map';
-import type { SavedObject} from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import { validatePermissions } from '../edit_monitor';
 import type {
@@ -14,10 +14,9 @@ import type {
   MonitorFields,
   SyntheticsMonitor,
   SyntheticsMonitorWithId,
-  SyntheticsMonitorWithSecretsAttributes} from '../../../../common/runtime_types';
-import {
-  ConfigKey
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
+import { ConfigKey } from '../../../../common/runtime_types';
 import { syntheticsMonitorType } from '../../../../common/types/saved_objects';
 import { normalizeSecrets } from '../../../synthetics_service/utils';
 import {

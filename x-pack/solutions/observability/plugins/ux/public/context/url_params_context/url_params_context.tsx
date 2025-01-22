@@ -9,7 +9,7 @@ import { mapValues } from 'lodash';
 import React, { createContext, useCallback, useMemo, useRef, useState } from 'react';
 import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
-import type { UxLocalUIFilterName} from '../../../common/ux_ui_filter';
+import type { UxLocalUIFilterName } from '../../../common/ux_ui_filter';
 import { uxLocalUIFilterNames } from '../../../common/ux_ui_filter';
 import { pickKeys } from '../../../common/utils/pick_keys';
 import type { UxUIFilters } from '../../../typings/ui_filters';

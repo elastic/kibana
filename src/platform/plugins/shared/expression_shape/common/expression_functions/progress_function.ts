@@ -9,10 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { get } from 'lodash';
-import type { Style} from '@kbn/expressions-plugin/common';
+import type { Style } from '@kbn/expressions-plugin/common';
 import { openSans } from '@kbn/expressions-plugin/common';
 import { CSS, FONT_FAMILY, FONT_WEIGHT, BOOLEAN_TRUE, BOOLEAN_FALSE } from '../constants';
-import type { ExpressionProgressFunction} from '../types';
+import type { ExpressionProgressFunction } from '../types';
 import { Progress } from '../types';
 
 export const strings = {

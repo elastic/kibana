@@ -6,14 +6,11 @@
  */
 
 import type { IRouter } from '@kbn/core/server';
-import type {
-  UpdateApiKeyParamsV1} from '../../../../../common/routes/rule/apis/update_api_key';
-import {
-  updateApiKeyParamsSchemaV1,
-} from '../../../../../common/routes/rule/apis/update_api_key';
-import type { ILicenseState} from '../../../../lib';
+import type { UpdateApiKeyParamsV1 } from '../../../../../common/routes/rule/apis/update_api_key';
+import { updateApiKeyParamsSchemaV1 } from '../../../../../common/routes/rule/apis/update_api_key';
+import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';

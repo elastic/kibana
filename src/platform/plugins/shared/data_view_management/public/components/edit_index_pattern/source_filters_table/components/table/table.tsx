@@ -9,15 +9,8 @@
 
 import React, { Component } from 'react';
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
-import {
-  keys,
-  EuiInMemoryTable,
-  EuiFieldText,
-  EuiButtonIcon,
-  RIGHT_ALIGNMENT,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { keys, EuiInMemoryTable, EuiFieldText, EuiButtonIcon, RIGHT_ALIGNMENT } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

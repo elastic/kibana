@@ -8,15 +8,11 @@
 import type { IRouter, RouteConfigOptions, RouteMethod } from '@kbn/core/server';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { RuleParamsV1} from '../../../../../common/routes/rule/response';
+import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import { ruleResponseSchemaV1 } from '../../../../../common/routes/rule/response';
 import type { Rule } from '../../../../application/rule/types';
-import type {
-  AlertingRequestHandlerContext} from '../../../../types';
-import {
-  BASE_ALERTING_API_PATH,
-  INTERNAL_BASE_ALERTING_API_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { BASE_ALERTING_API_PATH, INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformRuleToRuleResponseV1 } from '../../transforms';
 
 import type {

@@ -26,7 +26,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
 import type { Vis } from '@kbn/visualizations-plugin/public';
-import type { SavedSearch} from '@kbn/saved-search-plugin/public';
+import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { getSavedSearchUrl } from '@kbn/saved-search-plugin/public';
 import type { ApplicationStart } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';

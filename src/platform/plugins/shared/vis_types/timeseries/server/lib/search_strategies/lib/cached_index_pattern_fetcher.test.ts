@@ -9,11 +9,8 @@
 
 import type { DataView, DataViewsService } from '@kbn/data-views-plugin/common';
 import { fetchIndexPattern } from '../../../../common/index_patterns_utils';
-import type {
-  CachedIndexPatternFetcher} from './cached_index_pattern_fetcher';
-import {
-  getCachedIndexPatternFetcher
-} from './cached_index_pattern_fetcher';
+import type { CachedIndexPatternFetcher } from './cached_index_pattern_fetcher';
+import { getCachedIndexPatternFetcher } from './cached_index_pattern_fetcher';
 
 jest.mock('../../../../common/index_patterns_utils');
 

@@ -6,11 +6,8 @@
  */
 
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
-import type {
-  ObservabilityOnboardingLocatorParams} from '@kbn/deeplinks-observability';
-import {
-  OBSERVABILITY_ONBOARDING_LOCATOR,
-} from '@kbn/deeplinks-observability';
+import type { ObservabilityOnboardingLocatorParams } from '@kbn/deeplinks-observability';
+import { OBSERVABILITY_ONBOARDING_LOCATOR } from '@kbn/deeplinks-observability';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { usePluginContext } from '../../../../hooks/use_plugin_context';

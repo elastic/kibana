@@ -13,12 +13,8 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 import type { ExpressionsServiceSetup } from '@kbn/expressions-plugin/common';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
-import type {
-  AggsCommonStartDependencies} from '../../../common/search/aggs';
-import {
-  aggsRequiredUiSettings,
-  AggsCommonService,
-} from '../../../common/search/aggs';
+import type { AggsCommonStartDependencies } from '../../../common/search/aggs';
+import { aggsRequiredUiSettings, AggsCommonService } from '../../../common/search/aggs';
 import type { TimeRange } from '../../../common';
 import { calculateBounds } from '../../../common';
 import type { AggsSetup, AggsStart } from './types';

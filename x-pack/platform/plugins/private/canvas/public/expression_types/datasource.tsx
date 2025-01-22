@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactPortal} from 'react';
+import type { ReactPortal } from 'react';
 import React, { useEffect, useRef, useCallback, useState, memo } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import usePrevious from 'react-use/lib/usePrevious';

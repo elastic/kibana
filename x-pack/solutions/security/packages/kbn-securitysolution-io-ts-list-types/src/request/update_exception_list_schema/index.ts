@@ -8,10 +8,10 @@
 import * as t from 'io-ts';
 
 import { version } from '@kbn/securitysolution-io-ts-types';
-import type { OsTypeArray} from '../../common/os_type';
+import type { OsTypeArray } from '../../common/os_type';
 import { osTypeArrayOrUndefined } from '../../common/os_type';
 import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import type { Tags} from '../../common/tags';
+import type { Tags } from '../../common/tags';
 import { tags } from '../../common/tags';
 import type { NamespaceType } from '../../common/default_namespace';
 import { description } from '../../common/description';

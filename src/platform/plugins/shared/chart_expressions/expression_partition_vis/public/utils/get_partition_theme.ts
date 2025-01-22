@@ -8,13 +8,8 @@
  */
 
 import type { PartialTheme } from '@elastic/charts';
-import type {
-  PartitionVisParams,
-  PieContainerDimensions} from '../../common/types';
-import {
-  ChartTypes,
-  LabelPositions
-} from '../../common/types';
+import type { PartitionVisParams, PieContainerDimensions } from '../../common/types';
+import { ChartTypes, LabelPositions } from '../../common/types';
 
 const MAX_SIZE = 1000;
 

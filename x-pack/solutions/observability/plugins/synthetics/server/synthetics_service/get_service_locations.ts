@@ -12,11 +12,9 @@ import type {
   ManifestLocation,
   PublicLocation,
   PublicLocations,
-  ThrottlingOptions} from '../../common/runtime_types';
-import {
-  BandwidthLimitKey,
-  LocationStatus,
+  ThrottlingOptions,
 } from '../../common/runtime_types';
+import { BandwidthLimitKey, LocationStatus } from '../../common/runtime_types';
 
 export const getDevLocation = (devUrl: string): PublicLocation[] => [
   {

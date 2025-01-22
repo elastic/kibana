@@ -12,11 +12,9 @@ import type {
   BrowserFields,
   MonitorFields,
   SyntheticsMonitorWithSecretsAttributes,
-  ThrottlingConfig} from '../../../../common/runtime_types';
-import {
-  ConfigKey,
-  ScheduleUnit
+  ThrottlingConfig,
 } from '../../../../common/runtime_types';
+import { ConfigKey, ScheduleUnit } from '../../../../common/runtime_types';
 import {
   ALLOWED_SCHEDULES_IN_MINUTES,
   CUSTOM_LABEL,

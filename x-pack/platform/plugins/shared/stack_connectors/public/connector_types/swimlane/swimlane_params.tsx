@@ -13,7 +13,7 @@ import {
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import * as i18n from './translations';
-import type { SwimlaneActionConnector, SwimlaneActionParams} from './types';
+import type { SwimlaneActionConnector, SwimlaneActionParams } from './types';
 import { SwimlaneConnectorType } from './types';
 
 const SwimlaneParamsFields: React.FunctionComponent<ActionParamsProps<SwimlaneActionParams>> = ({

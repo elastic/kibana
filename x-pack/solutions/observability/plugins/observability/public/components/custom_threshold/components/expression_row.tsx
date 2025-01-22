@@ -17,12 +17,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import type { ReactElement } from 'react';
 import React, { useCallback, useMemo, useState } from 'react';
-import type {
-  AggregationType,
-  IErrorObject} from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  ThresholdExpression,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { AggregationType, IErrorObject } from '@kbn/triggers-actions-ui-plugin/public';
+import { ThresholdExpression } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import { debounce } from 'lodash';
 import { COMPARATORS } from '@kbn/alerting-comparators';

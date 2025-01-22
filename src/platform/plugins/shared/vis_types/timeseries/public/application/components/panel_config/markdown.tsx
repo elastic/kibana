@@ -35,7 +35,7 @@ import { MarkdownEditor } from '../markdown_editor';
 import { QueryBarWrapper } from '../query_bar_wrapper';
 import { getDefaultQueryLanguage } from '../lib/get_default_query_language';
 import { VisDataContext } from '../../contexts/vis_data_context';
-import type { PanelConfigProps} from './types';
+import type { PanelConfigProps } from './types';
 import { PANEL_CONFIG_TABS } from './types';
 
 export class MarkdownPanelConfig extends Component<

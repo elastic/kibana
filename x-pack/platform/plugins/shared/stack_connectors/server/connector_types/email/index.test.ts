@@ -28,10 +28,9 @@ import type {
   EmailConnectorType,
   EmailConnectorTypeExecutorOptions,
   ConnectorTypeConfigType,
-  ConnectorTypeSecretsType} from '.';
-import {
-  getConnectorType
+  ConnectorTypeSecretsType,
 } from '.';
+import { getConnectorType } from '.';
 import type { ValidateEmailAddressesOptions } from '@kbn/actions-plugin/common';
 import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
 

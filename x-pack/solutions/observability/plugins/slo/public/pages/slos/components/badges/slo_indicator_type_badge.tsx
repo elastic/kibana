@@ -5,15 +5,13 @@
  * 2.0.
  */
 
-import type { EuiBadgeProps} from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 import { EuiBadge, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type {
-  SLODefinitionResponse,
-  SLOWithSummaryResponse} from '@kbn/slo-schema';
+import type { SLODefinitionResponse, SLOWithSummaryResponse } from '@kbn/slo-schema';
 import {
   apmTransactionDurationIndicatorSchema,
-  apmTransactionErrorRateIndicatorSchema
+  apmTransactionErrorRateIndicatorSchema,
 } from '@kbn/slo-schema';
 import { euiLightVars } from '@kbn/ui-theme';
 import type { MouseEvent } from 'react';

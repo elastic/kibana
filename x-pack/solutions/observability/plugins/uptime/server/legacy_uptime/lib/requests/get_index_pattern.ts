@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FieldDescriptor} from '@kbn/data-plugin/server';
+import type { FieldDescriptor } from '@kbn/data-plugin/server';
 import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 import type { UptimeEsClient } from '../lib';
 import { savedObjectsAdapter } from '../saved_objects/saved_objects';

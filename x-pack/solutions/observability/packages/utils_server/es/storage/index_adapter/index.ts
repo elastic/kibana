@@ -17,7 +17,7 @@ import type {
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import { last, mapValues, padStart } from 'lodash';
-import type { DiagnosticResult} from '@elastic/elasticsearch';
+import type { DiagnosticResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type {
   IndexStorageSettings,

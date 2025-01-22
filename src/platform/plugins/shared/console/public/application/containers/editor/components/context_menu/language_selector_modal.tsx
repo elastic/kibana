@@ -8,8 +8,7 @@
  */
 
 import React, { useState, useMemo } from 'react';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiModal,

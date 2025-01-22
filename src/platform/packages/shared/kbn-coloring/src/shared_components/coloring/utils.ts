@@ -11,7 +11,8 @@ import type {
   DataBounds,
   PaletteOutput,
   PaletteRegistry,
-  CustomPaletteParams} from '../../palettes';
+  CustomPaletteParams,
+} from '../../palettes';
 import {
   checkIsMinContinuity,
   reversePalette,

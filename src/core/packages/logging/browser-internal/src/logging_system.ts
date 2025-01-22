@@ -9,13 +9,11 @@
 
 import type { Logger, LoggerFactory, DisposableAppender } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
-import type {
-  BrowserLoggingConfig,
-  BrowserLoggerConfig} from '@kbn/core-logging-common-internal';
+import type { BrowserLoggingConfig, BrowserLoggerConfig } from '@kbn/core-logging-common-internal';
 import {
   ROOT_CONTEXT_NAME,
   getLoggerContext,
-  getParentLoggerContext
+  getParentLoggerContext,
 } from '@kbn/core-logging-common-internal';
 import type { LoggerConfigType } from './types';
 import { BaseLogger } from './logger';

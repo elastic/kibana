@@ -18,10 +18,9 @@ import { Status } from '../../../../../../../common/types/api';
 import type { Actions } from '../../../../../shared/api_logic/create_api_logic';
 import type {
   DeleteCrawlerDomainResponse,
-  DeleteCrawlerDomainArgs} from '../../../../api/crawler/delete_crawler_domain_api_logic';
-import {
-  DeleteCrawlerDomainApiLogic
+  DeleteCrawlerDomainArgs,
 } from '../../../../api/crawler/delete_crawler_domain_api_logic';
+import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import type { CrawlerDomain } from '../../../../api/crawler/types';
 import { IndexNameLogic } from '../../index_name_logic';
 import { CrawlerLogic } from '../crawler_logic';

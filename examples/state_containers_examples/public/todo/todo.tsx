@@ -28,7 +28,8 @@ import type {
   BaseState,
   BaseStateContainer,
   INullableBaseStateContainer,
-  StateContainer} from '@kbn/kibana-utils-plugin/public';
+  StateContainer,
+} from '@kbn/kibana-utils-plugin/public';
 import {
   createKbnUrlStateStorage,
   createStateContainer,
@@ -38,10 +39,11 @@ import {
 } from '@kbn/kibana-utils-plugin/public';
 import type {
   TodoActions,
-  TodoState} from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
+  TodoState,
+} from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 import {
   defaultState,
-  pureTransitions
+  pureTransitions,
 } from '@kbn/kibana-utils-plugin/demos/state_containers/todomvc';
 
 interface TodoAppProps {

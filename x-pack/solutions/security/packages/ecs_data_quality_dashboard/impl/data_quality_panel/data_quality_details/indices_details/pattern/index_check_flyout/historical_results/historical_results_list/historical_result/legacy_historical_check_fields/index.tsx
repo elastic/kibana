@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { memo, useMemo } from 'react';
 import { EuiButtonGroup, EuiMarkdownFormat, EuiSpacer } from '@elastic/eui';
 

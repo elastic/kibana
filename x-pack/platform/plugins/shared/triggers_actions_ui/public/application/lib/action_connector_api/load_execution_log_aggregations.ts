@@ -14,10 +14,9 @@ import type {
   ExecutionLogSortFields,
   IExecutionLogResult,
   AsApiContract,
-  RewriteRequestCase} from '@kbn/actions-plugin/common';
-import {
-  INTERNAL_BASE_ACTION_API_PATH
+  RewriteRequestCase,
 } from '@kbn/actions-plugin/common';
+import { INTERNAL_BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { getFilter } from '../rule_api/get_filter';
 
 const getRenamedLog = (data: IExecutionLog) => {

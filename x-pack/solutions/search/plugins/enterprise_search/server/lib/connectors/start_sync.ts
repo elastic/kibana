@@ -7,8 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type {
-  ConnectorConfiguration} from '@kbn/search-connectors';
+import type { ConnectorConfiguration } from '@kbn/search-connectors';
 import {
   SyncJobType,
   CONNECTORS_INDEX,

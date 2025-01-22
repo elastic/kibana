@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MockedLogger} from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import { httpServerMock } from '@kbn/core/server/mocks';
 

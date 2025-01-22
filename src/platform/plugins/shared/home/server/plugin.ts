@@ -14,11 +14,9 @@ import type {
   TutorialsRegistrySetup,
   TutorialsRegistryStart,
   SampleDataRegistrySetup,
-  SampleDataRegistryStart} from './services';
-import {
-  TutorialsRegistry,
-  SampleDataRegistry
+  SampleDataRegistryStart,
 } from './services';
+import { TutorialsRegistry, SampleDataRegistry } from './services';
 import { capabilitiesProvider } from './capabilities_provider';
 import { sampleDataTelemetry } from './saved_objects';
 import { registerRoutes } from './routes';

@@ -8,7 +8,7 @@
 import React, { useMemo } from 'react';
 import { EuiPanel, EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import { FIXED_AXIS_HEIGHT, SIDEBAR_GROW_SIZE } from './constants';
-import type { IWaterfallContext} from './context/waterfall_context';
+import type { IWaterfallContext } from './context/waterfall_context';
 import { useWaterfallContext } from './context/waterfall_context';
 import { WaterfallChartSidebarWrapper } from './styles';
 import type { WaterfallChartProps } from './waterfall_chart';

@@ -38,11 +38,9 @@ import type {
   TaskLifecycle,
   SerializedConcreteTaskInstance,
   PartialConcreteTaskInstance,
-  PartialSerializedConcreteTaskInstance} from './task';
-import {
-  TaskStatus,
-  TaskLifecycleResult
+  PartialSerializedConcreteTaskInstance,
 } from './task';
+import { TaskStatus, TaskLifecycleResult } from './task';
 
 import type { TaskTypeDictionary } from './task_type_dictionary';
 import type { AdHocTaskCounter } from './lib/adhoc_task_counter';

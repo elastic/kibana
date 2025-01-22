@@ -11,10 +11,9 @@ import type {
   SavedObjectMigrationContext,
   SavedObjectMigrationFn,
   SavedObjectMigrationMap,
-  SavedObjectUnsanitizedDoc} from '@kbn/core/server';
-import {
-  SavedObjectsUtils
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core/server';
+import { SavedObjectsUtils } from '@kbn/core/server';
 import type {
   RuleTaskState,
   MutableRuleTaskState,
@@ -23,7 +22,7 @@ import type {
 } from '@kbn/alerting-state-types';
 
 import { REMOVED_TYPES } from '../task_type_dictionary';
-import type { SerializedConcreteTaskInstance} from '../task';
+import type { SerializedConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 
 interface TaskInstanceLogMeta extends LogMeta {

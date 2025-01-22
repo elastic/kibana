@@ -15,7 +15,7 @@ import { tap } from 'rxjs';
 
 import type { OptimizerConfig } from './optimizer';
 import type { OptimizerUpdate$ } from './run_optimizer';
-import type { CompilerMsg} from './common';
+import type { CompilerMsg } from './common';
 import { pipeClosure } from './common';
 
 export function logOptimizerState(log: ToolingLog, config: OptimizerConfig) {

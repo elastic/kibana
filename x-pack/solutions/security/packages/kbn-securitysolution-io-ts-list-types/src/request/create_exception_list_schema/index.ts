@@ -6,18 +6,14 @@
  */
 
 import * as t from 'io-ts';
-import type {
-  DefaultVersionNumberDecoded} from '@kbn/securitysolution-io-ts-types';
-import {
-  DefaultUuid,
-  DefaultVersionNumber
-} from '@kbn/securitysolution-io-ts-types';
+import type { DefaultVersionNumberDecoded } from '@kbn/securitysolution-io-ts-types';
+import { DefaultUuid, DefaultVersionNumber } from '@kbn/securitysolution-io-ts-types';
 
 import { exceptionListType } from '../../common/exception_list';
-import type { OsTypeArray} from '../../common/os_type';
+import type { OsTypeArray } from '../../common/os_type';
 import { osTypeArrayOrUndefined } from '../../common/os_type';
 import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import type { Tags} from '../../common/tags';
+import type { Tags } from '../../common/tags';
 import { tags } from '../../common/tags';
 import type { ListId } from '../../common/list_id';
 import type { NamespaceType } from '../../common/default_namespace';

@@ -10,10 +10,9 @@ import type {
   PingsResponse,
   GetPingsParams,
   GetPingHistogramParams,
-  HistogramResult} from '../../../../common/runtime_types';
-import {
-  PingsResponseType
+  HistogramResult,
 } from '../../../../common/runtime_types';
+import { PingsResponseType } from '../../../../common/runtime_types';
 import { apiService } from './utils';
 import { API_URLS } from '../../../../common/constants';
 

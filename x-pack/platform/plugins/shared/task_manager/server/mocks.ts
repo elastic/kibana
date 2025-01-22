@@ -7,7 +7,7 @@
 
 import { v4 as uuidv4 } from 'uuid';
 import type { TaskManagerSetupContract, TaskManagerStartContract } from './plugin';
-import type { ConcreteTaskInstance} from './task';
+import type { ConcreteTaskInstance } from './task';
 import { TaskStatus } from './task';
 
 const createSetupMock = () => {

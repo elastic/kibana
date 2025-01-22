@@ -8,7 +8,7 @@
  */
 
 import type { Optional } from 'utility-types';
-import type { KbnBasePaletteConfig} from './palette';
+import type { KbnBasePaletteConfig } from './palette';
 import { KbnBasePalette } from './palette';
 import type { IKbnPalette, KbnPaletteType } from './types';
 

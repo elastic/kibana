@@ -13,7 +13,7 @@ import {
 } from '../../../common/mocks/constants/session_view_process.mock';
 import { sessionViewProcessEventsMock } from '../../../common/mocks/responses/session_view_process_events.mock';
 import { sessionViewProcessEventsMergedMock } from '../../../common/mocks/responses/session_view_process_events_merged.mock';
-import type { AppContextTestRender} from '../../test';
+import type { AppContextTestRender } from '../../test';
 import { createAppRootMockRenderer } from '../../test';
 import { SessionView } from '.';
 import userEvent from '@testing-library/user-event';

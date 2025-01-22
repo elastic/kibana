@@ -7,7 +7,12 @@
 import type { RouteMethod } from '@kbn/core/server';
 import fs from 'fs';
 import type { MonitoringConfig } from './config';
-import type { LegacyRequest, MonitoringCore, MonitoringRouteConfig, RouteDependencies } from './types';
+import type {
+  LegacyRequest,
+  MonitoringCore,
+  MonitoringRouteConfig,
+  RouteDependencies,
+} from './types';
 
 export function decorateDebugServer(
   server: MonitoringCore,

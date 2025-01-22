@@ -9,7 +9,7 @@ import { useCallback, useEffect, useMemo } from 'react';
 import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { getDateISORange } from '@kbn/timerange';
 import { useDatasetQualityDetailsState } from './use_dataset_quality_details_state';
-import type { DatasetDetailsEbtProps} from '../services/telemetry';
+import type { DatasetDetailsEbtProps } from '../services/telemetry';
 import { NavigationSource, NavigationTarget } from '../services/telemetry';
 import type { BasicDataStream, TimeRangeConfig } from '../../common/types';
 import type { DataStreamDetails } from '../../common/api_types';

@@ -20,17 +20,11 @@ import { omit, pick } from 'lodash';
 import type {
   ActionGroupWithCondition,
   RuleTypeModel,
-  RuleTypeParamsExpressionProps} from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  AlertConditions,
-  AlertConditionsGroup
+  RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
-import type {
-  AlwaysFiringParams,
-  AlwaysFiringActionGroupIds} from '../../common/constants';
-import {
-  DEFAULT_INSTANCES_TO_GENERATE,
-} from '../../common/constants';
+import { AlertConditions, AlertConditionsGroup } from '@kbn/triggers-actions-ui-plugin/public';
+import type { AlwaysFiringParams, AlwaysFiringActionGroupIds } from '../../common/constants';
+import { DEFAULT_INSTANCES_TO_GENERATE } from '../../common/constants';
 
 export function getAlertType(): RuleTypeModel {
   return {

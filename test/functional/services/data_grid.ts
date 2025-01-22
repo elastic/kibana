@@ -9,7 +9,10 @@
 
 import { chunk } from 'lodash';
 import { Key } from 'selenium-webdriver';
-import type { WebElementWrapper, CustomCheerioStatic } from '@kbn/ftr-common-functional-ui-services';
+import type {
+  WebElementWrapper,
+  CustomCheerioStatic,
+} from '@kbn/ftr-common-functional-ui-services';
 import { FtrService } from '../ftr_provider_context';
 
 export interface TabbedGridData {

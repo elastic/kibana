@@ -42,13 +42,8 @@ import {
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist';
 import type { SavedObjectManagementTypeInfo } from '../../../../common/types';
-import type {
-  ProcessedImportResponse} from '../../../lib';
-import {
-  importFile,
-  resolveImportErrors,
-  processImportResponse
-} from '../../../lib';
+import type { ProcessedImportResponse } from '../../../lib';
+import { importFile, resolveImportErrors, processImportResponse } from '../../../lib';
 import type { FailedImportConflict, RetryDecision } from '../../../lib/resolve_import_errors';
 import { OverwriteModal } from './overwrite_modal';
 import type { ImportMode } from './import_mode_control';

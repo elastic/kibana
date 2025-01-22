@@ -6,12 +6,8 @@
  */
 
 import { getColorMappingTelemetryEvents } from './color_telemetry_helpers';
-import type {
-  ColorMapping} from '@kbn/coloring';
-import {
-  DEFAULT_COLOR_MAPPING_CONFIG,
-  DEFAULT_OTHER_ASSIGNMENT_INDEX,
-} from '@kbn/coloring';
+import type { ColorMapping } from '@kbn/coloring';
+import { DEFAULT_COLOR_MAPPING_CONFIG, DEFAULT_OTHER_ASSIGNMENT_INDEX } from '@kbn/coloring';
 import { KbnPalette } from '@kbn/palettes';
 import { faker } from '@faker-js/faker';
 

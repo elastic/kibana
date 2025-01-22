@@ -13,7 +13,7 @@ import type {
   NamespaceType,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { getSavedObjectType } from '@kbn/securitysolution-list-utils';
-import type { SavedObjectsClientContract} from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 
 import type { ExceptionListSoSchema } from '../../schemas/saved_objects';

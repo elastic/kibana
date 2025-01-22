@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getCreateExceptionListItemSchemaMock } from './index.mock';
-import type { CreateExceptionListItemSchema} from '.';
+import type { CreateExceptionListItemSchema } from '.';
 import { createExceptionListItemSchema } from '.';
 import { getCreateCommentsArrayMock } from '../../common/create_comment/index.mock';
 import { getCommentsMock } from '../../common/comment/index.mock';

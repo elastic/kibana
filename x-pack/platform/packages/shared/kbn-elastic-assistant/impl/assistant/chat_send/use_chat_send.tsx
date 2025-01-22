@@ -18,7 +18,7 @@ import type { SelectedPromptContext } from '../prompt_context/types';
 import { useSendMessage } from '../use_send_message';
 import { useConversation } from '../use_conversation';
 import { getCombinedMessage } from '../prompt/helpers';
-import type { Conversation} from '../../..';
+import type { Conversation } from '../../..';
 import { useAssistantContext } from '../../..';
 import { getMessageFromRawResponse } from '../helpers';
 

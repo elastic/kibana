@@ -8,8 +8,7 @@
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 
-import type {
-  IconType} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiFlexGroup,

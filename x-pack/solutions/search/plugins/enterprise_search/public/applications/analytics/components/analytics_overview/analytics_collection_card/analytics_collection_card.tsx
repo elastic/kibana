@@ -46,7 +46,7 @@ import { KibanaLogic } from '../../../../shared/kibana';
 import { withLensData } from '../../../hoc/with_lens_data';
 import { COLLECTION_OVERVIEW_PATH } from '../../../routes';
 
-import type { FilterBy} from '../../../utils/get_formula_by_filter';
+import type { FilterBy } from '../../../utils/get_formula_by_filter';
 import { getFormulaByFilter } from '../../../utils/get_formula_by_filter';
 
 import { AnalyticsCollectionCardStyles } from './analytics_collection_card.styles';

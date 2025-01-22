@@ -9,7 +9,7 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 
 import { nextTick } from '@kbn/test-jest-helpers';
 
-import type { HttpError} from '../../../../../common/types/api';
+import type { HttpError } from '../../../../../common/types/api';
 import { Status } from '../../../../../common/types/api';
 import type { EnterpriseSearchApplication } from '../../../../../common/types/search_applications';
 

@@ -8,7 +8,10 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { AuthenticatedUser, ElasticsearchClient, Logger } from '@kbn/core/server';
 
-import type { AttackDiscoveryCreateProps, AttackDiscoveryResponse } from '@kbn/elastic-assistant-common';
+import type {
+  AttackDiscoveryCreateProps,
+  AttackDiscoveryResponse,
+} from '@kbn/elastic-assistant-common';
 import { getAttackDiscovery } from '../get_attack_discovery/get_attack_discovery';
 import type { CreateAttackDiscoverySchema } from '../types';
 

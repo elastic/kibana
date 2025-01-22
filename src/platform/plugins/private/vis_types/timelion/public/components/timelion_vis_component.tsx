@@ -9,9 +9,7 @@
 
 import React, { useCallback, useMemo, useRef } from 'react';
 import { compact, last, map } from 'lodash';
-import type {
-  LegendPositionConfig,
-  BrushEndListener} from '@elastic/charts';
+import type { LegendPositionConfig, BrushEndListener } from '@elastic/charts';
 import {
   Chart,
   Settings,
@@ -21,7 +19,7 @@ import {
   LayoutDirection,
   Placement,
   Tooltip,
-  LegendValue
+  LegendValue,
 } from '@elastic/charts';
 import { EuiTitle } from '@elastic/eui';
 import type { RangeFilterParams } from '@kbn/es-query';

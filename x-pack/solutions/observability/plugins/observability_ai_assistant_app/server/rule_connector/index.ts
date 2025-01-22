@@ -27,8 +27,7 @@ import {
   WebhookParamsSchema,
 } from '@kbn/stack-connectors-plugin/server';
 import type { ObservabilityAIAssistantRouteHandlerResources } from '@kbn/observability-ai-assistant-plugin/server/routes/types';
-import type {
-  ChatCompletionChunkEvent} from '@kbn/observability-ai-assistant-plugin/common';
+import type { ChatCompletionChunkEvent } from '@kbn/observability-ai-assistant-plugin/common';
 import {
   MessageRole,
   StreamingChatResponseEventType,

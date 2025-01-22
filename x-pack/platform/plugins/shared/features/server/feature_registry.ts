@@ -12,12 +12,9 @@ import type {
   KibanaFeatureConfig,
   FeatureKibanaPrivileges,
   ElasticsearchFeatureConfig,
-  SubFeaturePrivilegeConfig} from '../common';
-import {
-  KibanaFeature,
-  ElasticsearchFeature,
-  KibanaFeatureScope,
+  SubFeaturePrivilegeConfig,
 } from '../common';
+import { KibanaFeature, ElasticsearchFeature, KibanaFeatureScope } from '../common';
 import { validateKibanaFeature, validateElasticsearchFeature } from './feature_schema';
 import type { ConfigOverridesType } from './config';
 

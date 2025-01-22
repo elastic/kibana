@@ -7,7 +7,7 @@
 
 import pMap from 'p-map';
 import Boom from '@hapi/boom';
-import type { KueryNode} from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { nodeBuilder } from '@kbn/es-query';
 import type {
   SavedObjectsBulkCreateObject,
@@ -16,7 +16,7 @@ import type {
 } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import type { Logger } from '@kbn/core/server';
-import type { TaskManagerStartContract} from '@kbn/task-manager-plugin/server';
+import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { TaskInstanceWithDeprecatedFields } from '@kbn/task-manager-plugin/server/task';
 import { bulkCreateRulesSo } from '../../../../data/rule';

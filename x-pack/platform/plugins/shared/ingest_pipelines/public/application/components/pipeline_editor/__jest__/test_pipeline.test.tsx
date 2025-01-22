@@ -9,7 +9,7 @@ import type { Pipeline } from '../../../../../common/types';
 import { API_BASE_PATH } from '../../../../../common/constants';
 
 import type { VerboseTestOutput, Document } from '../types';
-import type { SetupResult} from './test_pipeline.helpers';
+import type { SetupResult } from './test_pipeline.helpers';
 import { setup, setupEnvironment } from './test_pipeline.helpers';
 import { DOCUMENTS, SIMULATE_RESPONSE, PROCESSORS } from './constants';
 

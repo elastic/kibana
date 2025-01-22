@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RefObject} from 'react';
+import type { RefObject } from 'react';
 import React, { useMemo, useCallback, useState } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiBadge } from '@elastic/eui';
 import type { WaterfallNetworkItem } from '../../common/network_data/types';

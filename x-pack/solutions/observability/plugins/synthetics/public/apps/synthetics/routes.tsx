@@ -6,7 +6,7 @@
  */
 
 import type { EuiThemeComputed } from '@elastic/eui/src/services/theme/types';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { EuiButtonEmpty, useEuiTheme } from '@elastic/eui';
 import { Routes, Route } from '@kbn/shared-ux-router';

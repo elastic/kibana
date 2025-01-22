@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import type { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { UserProfilesSelectable } from '@kbn/user-profile-components';

@@ -8,7 +8,7 @@
  */
 
 import path from 'path';
-import type { FtrConfigProviderContext} from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { findTestPluginPaths } from '@kbn/test';
 
 /*

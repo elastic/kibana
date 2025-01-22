@@ -9,7 +9,7 @@ import type { ObjectType, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
 import { isErr, tryAsResult } from './lib/result_type';
-import type { Interval} from './lib/intervals';
+import type { Interval } from './lib/intervals';
 import { isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import type { DecoratedError } from './task_running';
 

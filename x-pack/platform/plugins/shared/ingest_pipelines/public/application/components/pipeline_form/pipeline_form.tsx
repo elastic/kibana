@@ -12,7 +12,7 @@ import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiSpacer } from 
 
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import type { Pipeline, Processor } from '../../../../common/types';
-import type { FormConfig} from '../../../shared_imports';
+import type { FormConfig } from '../../../shared_imports';
 import { useForm, Form, useFormIsModified } from '../../../shared_imports';
 
 import { useKibana } from '../../../shared_imports';

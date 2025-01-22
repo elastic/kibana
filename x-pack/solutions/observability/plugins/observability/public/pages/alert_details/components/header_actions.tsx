@@ -20,8 +20,7 @@ import {
   EuiPopover,
   EuiText,
 } from '@elastic/eui';
-import type {
-  AlertStatus} from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_RULE_UUID,
   ALERT_STATUS_ACTIVE,

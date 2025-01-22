@@ -16,7 +16,7 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useMemo, useReducer } from 'react';
 import { useDataQualityContext } from '../../../../../data_quality_context';
 import { useHistoricalResultsContext } from '../../contexts/historical_results_context';

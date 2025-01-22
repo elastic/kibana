@@ -8,11 +8,8 @@
 import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { Logger } from '@kbn/logging';
-import type {
-  SyntheticsPrivateLocationsAttributes} from '../../../runtime_types/private_locations';
-import {
-  type PrivateLocationAttributes
-} from '../../../runtime_types/private_locations';
+import type { SyntheticsPrivateLocationsAttributes } from '../../../runtime_types/private_locations';
+import { type PrivateLocationAttributes } from '../../../runtime_types/private_locations';
 import {
   legacyPrivateLocationsSavedObjectId,
   legacyPrivateLocationsSavedObjectName,

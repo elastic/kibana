@@ -11,12 +11,13 @@ import { find } from 'lodash';
 
 import type {
   DocumentEntry,
-  FindKnowledgeBaseEntriesResponse} from '@kbn/elastic-assistant-common';
+  FindKnowledgeBaseEntriesResponse,
+} from '@kbn/elastic-assistant-common';
 import {
   API_VERSIONS,
   DocumentEntryType,
   ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_FIND,
-  FindKnowledgeBaseEntriesRequestQuery
+  FindKnowledgeBaseEntriesRequestQuery,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import type { estypes } from '@elastic/elasticsearch';

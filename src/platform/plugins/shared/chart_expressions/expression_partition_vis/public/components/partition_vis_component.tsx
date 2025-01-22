@@ -15,15 +15,9 @@ import type {
   SeriesIdentifier,
   PartitionElementEvent,
   SettingsProps,
-  TooltipValue} from '@elastic/charts';
-import {
-  Chart,
-  Partition,
-  Position,
-  Settings,
-  TooltipType,
-  Tooltip
+  TooltipValue,
 } from '@elastic/charts';
+import { Chart, Partition, Position, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { useEuiTheme } from '@elastic/eui';

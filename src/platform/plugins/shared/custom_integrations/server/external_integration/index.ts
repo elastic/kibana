@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { CoreSetup } from '@kbn/core/server';
 import type { CustomIntegrationRegistry } from '../custom_integration_registry';
-import type { CustomIntegrationIcon, IntegrationCategory} from '../../common';
+import type { CustomIntegrationIcon, IntegrationCategory } from '../../common';
 import { PLUGIN_ID } from '../../common';
 
 interface ExternalIntegration {

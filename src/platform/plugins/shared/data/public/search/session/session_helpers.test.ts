@@ -8,7 +8,7 @@
  */
 
 import { waitUntilNextSessionCompletes$ } from './session_helpers';
-import type { ISessionService} from './session_service';
+import type { ISessionService } from './session_service';
 import { SessionService } from './session_service';
 import { BehaviorSubject } from 'rxjs';
 import { fakeSchedulers } from 'rxjs-marbles/jest';

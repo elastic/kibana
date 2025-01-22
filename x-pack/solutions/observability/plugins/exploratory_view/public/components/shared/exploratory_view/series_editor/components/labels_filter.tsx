@@ -6,14 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiPopoverTitle,
   EuiFilterButton,
   EuiPopover,
   EuiIcon,
-  EuiButtonEmpty
+  EuiButtonEmpty,
 } from '@elastic/eui';
 
 import { EuiSelectable } from '@elastic/eui';

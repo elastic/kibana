@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MachineImplementationsFrom} from 'xstate5';
+import type { MachineImplementationsFrom } from 'xstate5';
 import { assign, setup } from 'xstate5';
 import type { LogCategory } from '../../types';
 import type { CategoryDetailsServiceDependencies, LogCategoryDetailsParams } from './types';

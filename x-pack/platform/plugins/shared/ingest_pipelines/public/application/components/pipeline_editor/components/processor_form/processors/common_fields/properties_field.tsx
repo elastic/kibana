@@ -12,7 +12,7 @@ import { i18n } from '@kbn/i18n';
 
 import { ComboBoxField, FIELD_TYPES, UseField } from '../../../../../../../shared_imports';
 
-import type { FieldsConfig} from '../shared';
+import type { FieldsConfig } from '../shared';
 import { to } from '../shared';
 
 const fieldsConfig: FieldsConfig = {

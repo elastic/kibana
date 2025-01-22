@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CustomIntegrationsFindService} from '../find';
+import type { CustomIntegrationsFindService } from '../find';
 import { filterCustomIntegrations } from '../find';
 import type { PluginServiceFactory } from '../types';
 import type { CustomIntegrationsStartDependencies } from '../../types';

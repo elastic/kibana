@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { shallow } from 'enzyme';
-import type { SinonSpy} from 'sinon';
+import type { SinonSpy } from 'sinon';
 import { spy, assert } from 'sinon';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 

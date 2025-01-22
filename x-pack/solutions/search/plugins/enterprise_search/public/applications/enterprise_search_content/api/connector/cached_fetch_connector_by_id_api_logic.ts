@@ -18,10 +18,9 @@ import type { Actions } from '../../../shared/api_logic/create_api_logic';
 
 import type {
   FetchConnectorByIdApiLogicArgs,
-  FetchConnectorByIdApiLogicResponse} from './fetch_connector_by_id_logic';
-import {
-  FetchConnectorByIdApiLogic
+  FetchConnectorByIdApiLogicResponse,
 } from './fetch_connector_by_id_logic';
+import { FetchConnectorByIdApiLogic } from './fetch_connector_by_id_logic';
 
 const FETCH_CONNECTOR_POLLING_DURATION = 5000; // 5 seconds
 const FETCH_CONNECTOR_POLLING_DURATION_ON_FAILURE = 30000; // 30 seconds

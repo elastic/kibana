@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { DoneInvokeEvent, InterpreterFrom} from 'xstate';
+import type { DoneInvokeEvent, InterpreterFrom } from 'xstate';
 import { assign, createMachine, raise } from 'xstate';
 import { getDateISORange } from '@kbn/timerange';
 import type { IToasts } from '@kbn/core-notifications-browser';

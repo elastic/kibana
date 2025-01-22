@@ -8,8 +8,7 @@
 import expect from '@kbn/expect';
 import type { ProvidedType } from '@kbn/test';
 import type { WebElementWrapper } from '@kbn/ftr-common-functional-ui-services';
-import type {
-  TimeRangeType} from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
+import type { TimeRangeType } from '@kbn/ml-plugin/public/application/components/custom_urls/custom_url_editor/constants';
 import {
   TIME_RANGE_TYPE,
   URL_TYPE,

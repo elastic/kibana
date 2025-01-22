@@ -12,15 +12,8 @@ import { inspect } from 'util';
 import * as Rx from 'rxjs';
 import { take, mergeMap } from 'rxjs';
 
-import type {
-  WorkerMsg} from '../common';
-import {
-  parseBundles,
-  parseWorkerConfig,
-  isWorkerMsg,
-  WorkerMsgs,
-  BundleRemotes,
-} from '../common';
+import type { WorkerMsg } from '../common';
+import { parseBundles, parseWorkerConfig, isWorkerMsg, WorkerMsgs, BundleRemotes } from '../common';
 
 import { runCompilers } from './run_compilers';
 

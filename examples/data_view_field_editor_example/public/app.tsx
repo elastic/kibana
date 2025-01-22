@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  DefaultItemAction} from '@elastic/eui';
+import type { DefaultItemAction } from '@elastic/eui';
 import {
   EuiProvider,
   EuiButton,

@@ -24,7 +24,7 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { asyncForEach } from '@kbn/std';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
-import type { ConstructorOptions} from '../../../../rules_client';
+import type { ConstructorOptions } from '../../../../rules_client';
 import { RulesClient } from '../../../../rules_client';
 import type { ScheduleBackfillParam } from './types';
 import { adHocRunStatus } from '../../../../../common/constants';

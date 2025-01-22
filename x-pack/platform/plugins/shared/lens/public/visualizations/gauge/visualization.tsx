@@ -11,15 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Ast } from '@kbn/interpreter';
 import type { DatatableRow } from '@kbn/expressions-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
-import type {
-  PaletteRegistry,
-  CustomPaletteParams,
-  PaletteOutput} from '@kbn/coloring';
-import {
-  CUSTOM_PALETTE,
-  applyPaletteParams,
-  getOverridePaletteStops
-} from '@kbn/coloring';
+import type { PaletteRegistry, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE, applyPaletteParams, getOverridePaletteStops } from '@kbn/coloring';
 import type {
   GaugeExpressionFunctionDefinition,
   GaugeShape,

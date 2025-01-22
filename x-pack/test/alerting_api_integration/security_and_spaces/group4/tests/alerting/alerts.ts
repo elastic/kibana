@@ -9,7 +9,7 @@ import expect from '@kbn/expect';
 import { expect as expectExpect } from 'expect';
 import { omit, padStart } from 'lodash';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { IValidatedEvent} from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import type { TaskRunning, TaskRunningStage } from '@kbn/task-manager-plugin/server/task_running';
 import type { ConcreteTaskInstance } from '@kbn/task-manager-plugin/server';

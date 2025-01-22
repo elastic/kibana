@@ -12,14 +12,8 @@ import { PainlessLang } from '@kbn/monaco';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
-import type {
-  FieldConfig} from '../../../../../../../shared_imports';
-import {
-  UseField,
-  FIELD_TYPES,
-  Field,
-  ToggleField,
-} from '../../../../../../../shared_imports';
+import type { FieldConfig } from '../../../../../../../shared_imports';
+import { UseField, FIELD_TYPES, Field, ToggleField } from '../../../../../../../shared_imports';
 
 import { TextEditor } from '../../field_components';
 import { to, from, EDITOR_PX_HEIGHT } from '../shared';

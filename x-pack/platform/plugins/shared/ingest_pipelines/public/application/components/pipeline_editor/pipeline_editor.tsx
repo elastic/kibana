@@ -9,13 +9,8 @@ import React from 'react';
 import { EuiSpacer, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { usePipelineProcessorsContext } from './context';
-import type {
-  OnDoneLoadJsonHandler} from './components';
-import {
-  ProcessorsEmptyPrompt,
-  OnFailureProcessorsTitle,
-  ProcessorsHeader
-} from './components';
+import type { OnDoneLoadJsonHandler } from './components';
+import { ProcessorsEmptyPrompt, OnFailureProcessorsTitle, ProcessorsHeader } from './components';
 import { ProcessorsEditor, GlobalOnFailureProcessorsEditor } from './editors';
 
 import './pipeline_editor.scss';

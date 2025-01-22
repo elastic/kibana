@@ -24,7 +24,7 @@ import type {
   EventAnnotationGroupConfig,
   EventAnnotationGroupContent,
 } from '@kbn/event-annotation-common';
-import type { ISessionService} from '@kbn/data-plugin/public';
+import type { ISessionService } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-components';
 import { css } from '@emotion/react';

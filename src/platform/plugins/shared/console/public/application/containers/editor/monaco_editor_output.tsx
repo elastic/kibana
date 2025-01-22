@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  CSSProperties,
-  FunctionComponent} from 'react';
-import React, {
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from 'react';
+import type { CSSProperties, FunctionComponent } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { CodeEditor } from '@kbn/code-editor';
 import { css } from '@emotion/react';
 import { VectorTile } from '@mapbox/vector-tile';

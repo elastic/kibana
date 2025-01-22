@@ -18,10 +18,9 @@ import type {
   AlertsTableFlyoutBaseProps,
   AlertsTableProps,
   FetchAlertData,
-  RenderCustomActionsRowArgs} from '../../../types';
-import {
-  AlertsField
+  RenderCustomActionsRowArgs,
 } from '../../../types';
+import { AlertsField } from '../../../types';
 import { PLUGIN_ID } from '../../../common/constants';
 import type { AlertsTableStateProps } from './alerts_table_state';
 import AlertsTableState from './alerts_table_state';

@@ -19,11 +19,9 @@ import type { MonitorErrorEvent } from '../../telemetry/types';
 import type {
   MonitorFields,
   EncryptedSyntheticsMonitorAttributes,
-  ServiceLocationErrors} from '../../../common/runtime_types';
-import {
-  ConfigKey,
-  SourceType,
+  ServiceLocationErrors,
 } from '../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../common/runtime_types';
 import { scheduleToMilli } from '../../../common/lib/schedule_to_time';
 
 export function sendTelemetryEvents(

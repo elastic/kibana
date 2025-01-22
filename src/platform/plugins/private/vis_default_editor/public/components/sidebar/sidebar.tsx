@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  KeyboardEventHandler} from 'react';
-import React, {
-  memo,
-  useMemo,
-  useState,
-  useCallback,
-  useEffect,
-} from 'react';
+import type { KeyboardEventHandler } from 'react';
+import React, { memo, useMemo, useState, useCallback, useEffect } from 'react';
 import { isEqual } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { keys, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';

@@ -7,8 +7,7 @@
 
 import type { PaletteOutput } from '@kbn/coloring';
 import { getSuggestions, getTopSuggestionForField } from './suggestion_helpers';
-import type {
-  DatasourceMock} from '../../mocks';
+import type { DatasourceMock } from '../../mocks';
 import {
   createMockVisualization,
   createMockDatasource,

@@ -11,7 +11,7 @@ import type { Duration } from 'moment';
 import type { Stream } from 'stream';
 
 import type { ByteSizeValue } from './src/byte_size_value';
-import type { Reference} from './src/references';
+import type { Reference } from './src/references';
 import { ContextReference, SiblingReference } from './src/references';
 import type {
   ArrayOptions,
@@ -32,7 +32,8 @@ import type {
   TypeOf,
   TypeOptions,
   URIOptions,
-  UnionTypeOptions} from './src/types';
+  UnionTypeOptions,
+} from './src/types';
 import {
   AnyType,
   ArrayType,

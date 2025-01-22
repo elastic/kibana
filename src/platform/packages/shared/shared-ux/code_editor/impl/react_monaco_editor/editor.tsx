@@ -27,7 +27,7 @@
  * THE SOFTWARE.
  */
 
-import type { monaco as monacoEditor} from '@kbn/monaco';
+import type { monaco as monacoEditor } from '@kbn/monaco';
 import { monaco, defaultThemesResolvers } from '@kbn/monaco';
 import { useEuiTheme } from '@elastic/eui';
 import * as React from 'react';

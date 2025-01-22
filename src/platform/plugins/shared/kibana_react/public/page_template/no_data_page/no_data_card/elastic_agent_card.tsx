@@ -14,7 +14,7 @@ import type { CoreStart } from '@kbn/core/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import { EuiButton, EuiCard, EuiTextColor, EuiScreenReaderOnly, EuiImage } from '@elastic/eui';
 import { useKibana } from '../../../context';
-import type { NoDataPageActions} from '../no_data_page';
+import type { NoDataPageActions } from '../no_data_page';
 import { NO_DATA_RECOMMENDED } from '../no_data_page';
 
 export type ElasticAgentCardProps = NoDataPageActions & {

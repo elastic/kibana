@@ -11,11 +11,8 @@ import { kea } from 'kea';
 import { Status } from '../../../../../common/types/api';
 import { KibanaLogic } from '../../../shared/kibana';
 
-import type {
-  CreateSearchApplicationApiLogicActions} from '../../api/search_applications/create_search_application_api_logic';
-import {
-  CreateSearchApplicationApiLogic
-} from '../../api/search_applications/create_search_application_api_logic';
+import type { CreateSearchApplicationApiLogicActions } from '../../api/search_applications/create_search_application_api_logic';
+import { CreateSearchApplicationApiLogic } from '../../api/search_applications/create_search_application_api_logic';
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 
 import { SearchApplicationsListLogic } from './search_applications_list_logic';

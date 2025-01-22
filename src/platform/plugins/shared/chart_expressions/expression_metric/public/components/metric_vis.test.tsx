@@ -17,11 +17,9 @@ import type {
   MetricElementEvent,
   MetricWNumber,
   MetricWProgress,
-  MetricWTrend} from '@elastic/charts';
-import {
-  Metric,
-  Settings,
+  MetricWTrend,
 } from '@elastic/charts';
+import { Metric, Settings } from '@elastic/charts';
 import type { SerializedFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { IUiSettingsClient } from '@kbn/core/public';

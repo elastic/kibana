@@ -6,7 +6,13 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
 import { fileUploadRoutes } from './routes';
 import { initFileUploadTelemetry } from './telemetry';

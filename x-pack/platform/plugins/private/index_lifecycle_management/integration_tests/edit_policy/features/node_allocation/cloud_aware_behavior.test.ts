@@ -7,11 +7,8 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../../helpers';
-import type {
-  CloudNodeAllocationTestBed} from './cloud_aware_behavior.helpers';
-import {
-  setupCloudNodeAllocation,
-} from './cloud_aware_behavior.helpers';
+import type { CloudNodeAllocationTestBed } from './cloud_aware_behavior.helpers';
+import { setupCloudNodeAllocation } from './cloud_aware_behavior.helpers';
 import { cloudMock } from '@kbn/cloud-plugin/public/mocks';
 
 describe('<EditPolicy /> node allocation cloud-aware behavior', () => {

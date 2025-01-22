@@ -18,10 +18,11 @@ import type { Message } from '@kbn/observability-ai-assistant-plugin/common';
 import type {
   ChatActionClickHandler,
   Feedback,
-  TelemetryEventTypeWithPayload} from '@kbn/observability-ai-assistant-plugin/public';
+  TelemetryEventTypeWithPayload,
+} from '@kbn/observability-ai-assistant-plugin/public';
 import {
   ChatItemControls,
-  FailedToLoadResponse
+  FailedToLoadResponse,
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { getRoleTranslation } from '../utils/get_role_translation';
 import { ChatItemActions } from './chat_item_actions';

@@ -27,7 +27,7 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import type { InjectedIntl} from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
 import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { BaseParams } from '@kbn/reporting-common/types';

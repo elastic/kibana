@@ -28,10 +28,9 @@ import type {
   getNewSavedSearch,
   SavedSearchUnwrapResult,
   saveSavedSearch,
-  SaveSavedSearchOptions} from './services/saved_searches';
-import {
-  byValueToSavedSearch,
+  SaveSavedSearchOptions,
 } from './services/saved_searches';
+import { byValueToSavedSearch } from './services/saved_searches';
 import { checkForDuplicateTitle } from './services/saved_searches/check_for_duplicate_title';
 import { SavedSearchesService } from './services/saved_searches/saved_searches_service';
 

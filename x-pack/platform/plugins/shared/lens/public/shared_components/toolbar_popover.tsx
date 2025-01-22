@@ -6,7 +6,7 @@
  */
 
 import './toolbar_popover.scss';
-import type { PropsWithChildren} from 'react';
+import type { PropsWithChildren } from 'react';
 import React, { useState } from 'react';
 import type { EuiPopoverProps, IconType } from '@elastic/eui';
 import { EuiFlexItem, EuiPopover, EuiPopoverTitle } from '@elastic/eui';

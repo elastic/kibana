@@ -20,7 +20,8 @@ import type {
   ExceptionListType,
   ListSchema,
   NamespaceType,
-  CreateRuleExceptionListItemSchema} from '@kbn/securitysolution-io-ts-list-types';
+  CreateRuleExceptionListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   ListOperatorEnum as OperatorEnum,
   ListOperatorTypeEnum as OperatorTypeEnum,
@@ -32,13 +33,8 @@ import {
   nestedEntryItem,
   createRuleExceptionListItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
-import type {
-  DataViewBase,
-  DataViewFieldBase} from '@kbn/es-query';
-import {
-  getDataViewFieldSubtypeNested,
-  isDataViewFieldSubtypeNested,
-} from '@kbn/es-query';
+import type { DataViewBase, DataViewFieldBase } from '@kbn/es-query';
+import { getDataViewFieldSubtypeNested, isDataViewFieldSubtypeNested } from '@kbn/es-query';
 import { castEsToKbnFieldTypeName, KBN_FIELD_TYPES } from '@kbn/field-types';
 
 import {

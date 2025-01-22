@@ -27,11 +27,9 @@ import type {
   LensDispatch,
   DatasourceStates,
   VisualizationState,
-  DataViewsState} from '../../state_management';
-import {
-  switchVisualization,
-  applyChanges
+  DataViewsState,
 } from '../../state_management';
+import { switchVisualization, applyChanges } from '../../state_management';
 
 /**
  * This function takes a list of available data tables and a list of visualization

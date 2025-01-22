@@ -11,19 +11,17 @@ import type {
   SavedObjectReference,
   SavedObjectsBulkCreateObject,
   SavedObjectsClientContract,
-  SavedObjectsFindResult} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers
+  SavedObjectsFindResult,
 } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin/server';
 import type {
   RunContext,
   TaskInstance,
   TaskManagerSetupContract,
-  TaskManagerStartContract} from '@kbn/task-manager-plugin/server';
-import {
-  TaskPriority,
+  TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
+import { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { isNumber } from 'lodash';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type {

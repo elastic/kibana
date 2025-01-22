@@ -9,8 +9,7 @@ import React from 'react';
 
 import { useValues } from 'kea';
 
-import type {
-  EuiCodeBlockProps} from '@elastic/eui';
+import type { EuiCodeBlockProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCodeBlock,

@@ -11,11 +11,9 @@ import type {
   KibanaRequest,
   Logger,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/server';
-import {
-  DEFAULT_APP_CATEGORIES,
-  SavedObjectsClient,
+  PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES, SavedObjectsClient } from '@kbn/core/server';
 import { AlertsLocatorDefinition, sloFeatureId } from '@kbn/observability-plugin/common';
 import { SLO_BURN_RATE_RULE_TYPE_ID } from '@kbn/rule-data-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';

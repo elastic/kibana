@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useEffect, useState } from 'react';
 import { EuiButton, EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';
 import { css } from '@emotion/react';

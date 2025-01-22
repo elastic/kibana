@@ -8,7 +8,7 @@
  */
 
 import { v4 as uuidv4 } from 'uuid';
-import type { DataView} from '@kbn/data-plugin/common';
+import type { DataView } from '@kbn/data-plugin/common';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import { getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES } from '../../../common/enums';

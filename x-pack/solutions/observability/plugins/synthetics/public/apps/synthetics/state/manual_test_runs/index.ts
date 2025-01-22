@@ -13,8 +13,7 @@ import type { IHttpFetchError } from '@kbn/core-http-browser';
 
 import type { ActionPayload } from '../utils/actions';
 import type { TestNowResponse } from '../../../../../common/types';
-import type {
-  TestNowPayload} from './actions';
+import type { TestNowPayload } from './actions';
 import {
   clearTestNowMonitorAction,
   hideTestNowFlyoutAction,
@@ -25,10 +24,9 @@ import {
 import type {
   MonitorFields,
   ServiceLocationErrors,
-  SyntheticsMonitorSchedule} from '../../../../../common/runtime_types';
-import {
-  ScheduleUnit
+  SyntheticsMonitorSchedule,
 } from '../../../../../common/runtime_types';
+import { ScheduleUnit } from '../../../../../common/runtime_types';
 
 export enum TestRunStatus {
   LOADING = 'loading',

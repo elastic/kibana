@@ -19,7 +19,7 @@ import {
   ToggleField,
 } from '../../../../../../shared_imports';
 
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { from, to, isEmptyString } from './shared';
 import { FieldNameField } from './common_fields/field_name_field';
 import { TargetField } from './common_fields/target_field';

@@ -5,13 +5,8 @@
  * 2.0.
  */
 import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import type {
-  IUiSettingsClient,
-  ApplicationStart,
-  NotificationsStart} from '@kbn/core/public';
-import {
-  type CoreStart
-} from '@kbn/core/public';
+import type { IUiSettingsClient, ApplicationStart, NotificationsStart } from '@kbn/core/public';
+import { type CoreStart } from '@kbn/core/public';
 import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CasesPublicStart } from '@kbn/cases-plugin/public';

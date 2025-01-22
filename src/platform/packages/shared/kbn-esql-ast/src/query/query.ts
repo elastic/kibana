@@ -8,14 +8,11 @@
  */
 
 import type { Token } from 'antlr4';
-import type { ParseOptions} from '../parser';
+import type { ParseOptions } from '../parser';
 import { parse } from '../parser';
 import type { ESQLAstQueryExpression, EditorError } from '../types';
-import type {
-  WrappingPrettyPrinterOptions} from '../pretty_print/wrapping_pretty_printer';
-import {
-  WrappingPrettyPrinter
-} from '../pretty_print/wrapping_pretty_printer';
+import type { WrappingPrettyPrinterOptions } from '../pretty_print/wrapping_pretty_printer';
+import { WrappingPrettyPrinter } from '../pretty_print/wrapping_pretty_printer';
 
 /**
  * Represents a parsed or programmatically created ES|QL query. Keeps track of

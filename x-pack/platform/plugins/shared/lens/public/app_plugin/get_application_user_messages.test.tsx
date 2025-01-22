@@ -11,8 +11,7 @@ import type { CoreStart } from '@kbn/core/public';
 import type { Visualization } from '..';
 import type { DataViewsState } from '../state_management';
 import type { Datasource, UserMessage } from '../types';
-import type {
-  UserMessageGetterProps} from './get_application_user_messages';
+import type { UserMessageGetterProps } from './get_application_user_messages';
 import {
   filterAndSortUserMessages,
   getApplicationUserMessages,

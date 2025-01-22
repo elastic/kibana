@@ -13,7 +13,7 @@ import type {
 import type { TileMetaFeature } from '../../../common/descriptor_types';
 import { FIELD_ORIGIN } from '../../../common/constants';
 import type { IVectorSource } from '../sources/vector_source';
-import type { ITooltipProperty} from '../tooltips/tooltip_property';
+import type { ITooltipProperty } from '../tooltips/tooltip_property';
 import { TooltipProperty } from '../tooltips/tooltip_property';
 
 export interface IField {

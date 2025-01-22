@@ -22,7 +22,11 @@ import type { ISavedObjectsRepository, Logger } from '@kbn/core/server';
 import { getMutedRulesFilterQuery } from '../routes/benchmark_rules/get_states/v1';
 import { getSafePostureTypeRuntimeMapping } from '../../common/runtime_mappings/get_safe_posture_type_runtime_mapping';
 import { getIdentifierRuntimeMapping } from '../../common/runtime_mappings/get_identifier_runtime_mapping';
-import type { FindingsStatsTaskResult, ScoreByPolicyTemplateBucket, VulnSeverityAggs } from './types';
+import type {
+  FindingsStatsTaskResult,
+  ScoreByPolicyTemplateBucket,
+  VulnSeverityAggs,
+} from './types';
 import {
   BENCHMARK_SCORE_INDEX_DEFAULT_NS,
   CSPM_FINDINGS_STATS_INTERVAL,

@@ -7,7 +7,7 @@
 
 import type { AxiosError, AxiosRequestConfig, AxiosResponse } from 'axios';
 import axios from 'axios';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { concat, forkJoin, from as rxjsFrom, of } from 'rxjs';
 import { catchError, tap } from 'rxjs';
 import * as https from 'https';
@@ -15,11 +15,8 @@ import { SslConfig } from '@kbn/server-http-tools';
 import type { Logger } from '@kbn/core/server';
 import type { LicenseGetLicenseInformation } from '@elastic/elasticsearch/lib/api/types';
 import type { SyntheticsServerSetup } from '../types';
-import type {
-  DataStreamConfig} from './formatters/public_formatters/convert_to_data_stream';
-import {
-  convertToDataStreamFormat
-} from './formatters/public_formatters/convert_to_data_stream';
+import type { DataStreamConfig } from './formatters/public_formatters/convert_to_data_stream';
+import { convertToDataStreamFormat } from './formatters/public_formatters/convert_to_data_stream';
 import { sendErrorTelemetryEvents } from '../routes/telemetry/monitor_upgrade_sender';
 import type {
   MonitorFields,

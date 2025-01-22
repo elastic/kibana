@@ -25,14 +25,13 @@ import {
   getLayerList,
   getEditState,
 } from '../selectors/map_selectors';
-import type {
-  ResultMeta} from '../reducers/non_serializable_instances';
+import type { ResultMeta } from '../reducers/non_serializable_instances';
 import {
   cancelRequest,
   registerCancelCallback,
   unregisterCancelCallback,
   getEventHandlers,
-  getInspectorAdapters
+  getInspectorAdapters,
 } from '../reducers/non_serializable_instances';
 import {
   LAYER_DATA_LOAD_ENDED,

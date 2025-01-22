@@ -8,15 +8,8 @@
 import React, { useCallback, useMemo, useState, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
-import type {
-  DragDropIdentifier,
-  DropType,
-  DroppableProps} from '@kbn/dom-drag-drop';
-import {
-  useDragDropContext,
-  DropTargetSwapDuplicateCombine,
-  Droppable
-} from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier, DropType, DroppableProps } from '@kbn/dom-drag-drop';
+import { useDragDropContext, DropTargetSwapDuplicateCombine, Droppable } from '@kbn/dom-drag-drop';
 import { EmptyDimensionButton as EmptyDimensionButtonInner } from '@kbn/visualization-ui-components';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
@@ -29,10 +22,9 @@ import type {
   DatasourceLayers,
   IndexPatternMap,
   DragDropOperation,
-  Visualization} from '../../../../types';
-import {
-  isOperation
+  Visualization,
 } from '../../../../types';
+import { isOperation } from '../../../../types';
 
 interface EmptyButtonProps {
   columnId: string;

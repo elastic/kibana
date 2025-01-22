@@ -12,8 +12,7 @@ import { Spaces } from '../../../../../scenarios';
 import type { FtrProviderContext } from '../../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover } from '../../../../../../common/lib';
 import { createDataStream, deleteDataStream } from '../../../create_test_data';
-import type {
-  CreateRuleParams} from './common';
+import type { CreateRuleParams } from './common';
 import {
   createConnector,
   ES_GROUPS_TO_WRITE,

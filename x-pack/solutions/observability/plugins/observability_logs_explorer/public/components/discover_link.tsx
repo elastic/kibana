@@ -18,11 +18,8 @@ import type { MatchedStateFromActor } from '@kbn/xstate-utils';
 import { useActor } from '@xstate/react';
 import React, { useMemo } from 'react';
 import { discoverLinkTitle } from '../../common/translations';
-import type {
-  ObservabilityLogsExplorerService} from '../state_machines/observability_logs_explorer/src';
-import {
-  useObservabilityLogsExplorerPageStateContext,
-} from '../state_machines/observability_logs_explorer/src';
+import type { ObservabilityLogsExplorerService } from '../state_machines/observability_logs_explorer/src';
+import { useObservabilityLogsExplorerPageStateContext } from '../state_machines/observability_logs_explorer/src';
 import { useKibanaContextForPlugin } from '../utils/use_kibana';
 
 export const ConnectedDiscoverLink = React.memo(() => {

@@ -6,11 +6,10 @@
  */
 
 import React, { useState, useMemo, useCallback } from 'react';
-import type {
-  ActionParamsProps} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   TextFieldWithMessageVariables,
-  TextAreaWithMessageVariables
+  TextAreaWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect, EuiComboBox } from '@elastic/eui';
 import type { ExecutorParams, ExecutorSubActionPushParams } from '../../../common/thehive/types';

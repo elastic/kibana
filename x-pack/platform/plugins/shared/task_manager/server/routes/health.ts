@@ -13,20 +13,15 @@ import type {
   KibanaResponseFactory,
 } from '@kbn/core/server';
 import type { IClusterClient, DocLinksServiceSetup } from '@kbn/core/server';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import { tap, map, filter } from 'rxjs';
 import { throttleTime } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
-import type { Logger, ServiceStatus} from '@kbn/core/server';
+import type { Logger, ServiceStatus } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
-import type {
-  MonitoringStats,
-  RawMonitoringStats} from '../monitoring';
-import {
-  summarizeMonitoringStats,
-  HealthStatus
-} from '../monitoring';
+import type { MonitoringStats, RawMonitoringStats } from '../monitoring';
+import { summarizeMonitoringStats, HealthStatus } from '../monitoring';
 import type { TaskManagerConfig } from '../config';
 import { logHealthMetrics } from '../lib/log_health_metrics';
 import { calculateHealthStatus } from '../lib/calculate_health_status';

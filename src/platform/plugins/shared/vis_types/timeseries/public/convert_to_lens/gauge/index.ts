@@ -11,10 +11,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { parseTimeShift } from '@kbn/data-plugin/common';
 import type {
   FormulaColumn,
-  StaticValueColumn} from '@kbn/visualizations-plugin/common/convert_to_lens';
-import {
-  getIndexPatternIds
+  StaticValueColumn,
 } from '@kbn/visualizations-plugin/common/convert_to_lens';
+import { getIndexPatternIds } from '@kbn/visualizations-plugin/common/convert_to_lens';
 import { PANEL_TYPES, TSVB_METRIC_TYPES } from '../../../common/enums';
 import type { Metric } from '../../../common/types';
 import { getDataViewsStart } from '../../services';
@@ -28,13 +27,8 @@ import {
   SUPPORTED_METRICS,
 } from '../lib/metrics';
 import type { ConvertTsvbToLensVisualization } from '../types';
-import type {
-  Column,
-  Layer as ExtendedLayer} from '../lib/convert';
-import {
-  createFormulaColumnWithoutMeta,
-  createStaticValueColumn
-} from '../lib/convert';
+import type { Column, Layer as ExtendedLayer } from '../lib/convert';
+import { createFormulaColumnWithoutMeta, createStaticValueColumn } from '../lib/convert';
 import { excludeMetaFromLayers, findMetricColumn, getMetricWithCollapseFn } from '../utils';
 
 const getMaxFormula = (metric: Metric, column?: Column) => {

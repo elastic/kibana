@@ -14,10 +14,9 @@ import type {
   HistogramIndicator,
   KQLCustomIndicator,
   MetricCustomIndicator,
-  TimesliceMetricIndicator} from '@kbn/slo-schema';
-import {
-  ALL_VALUE
+  TimesliceMetricIndicator,
 } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import moment from 'moment';
 import type { ElasticsearchClient } from '@kbn/core/server';

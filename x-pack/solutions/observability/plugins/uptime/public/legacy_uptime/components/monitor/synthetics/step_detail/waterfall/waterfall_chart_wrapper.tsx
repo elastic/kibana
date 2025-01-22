@@ -10,7 +10,7 @@ import { EuiHealth } from '@elastic/eui';
 import { useTrackMetric, METRIC_TYPE } from '@kbn/observability-shared-plugin/public';
 import { getSeriesAndDomain, getSidebarItems, getLegendItems } from './data_formatting';
 import type { SidebarItem, LegendItem, NetworkItems } from './types';
-import type { RenderItem} from '../../waterfall';
+import type { RenderItem } from '../../waterfall';
 import { WaterfallProvider, WaterfallChart, useFlyout } from '../../waterfall';
 import { WaterfallFilter } from './waterfall_filter';
 import { WaterfallFlyout } from './waterfall_flyout';

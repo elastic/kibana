@@ -10,8 +10,7 @@ import React from 'react';
 
 import { useActions, useValues } from 'kea';
 
-import type {
-  EuiStatProps} from '@elastic/eui';
+import type { EuiStatProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiFlexGroup,

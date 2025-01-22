@@ -6,7 +6,7 @@
  */
 
 import { mean } from 'lodash';
-import type { IEvent} from '@kbn/event-log-plugin/server';
+import type { IEvent } from '@kbn/event-log-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import type { SanitizedRule, AlertSummary, AlertStatus } from '../types';
 import { EVENT_LOG_ACTIONS, EVENT_LOG_PROVIDER, LEGACY_EVENT_LOG_ACTIONS } from '../plugin';

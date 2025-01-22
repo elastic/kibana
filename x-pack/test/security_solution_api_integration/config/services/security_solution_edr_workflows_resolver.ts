@@ -8,10 +8,9 @@
 import type {
   TreeOptions,
   Tree,
-  Event} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
-import {
-  EndpointDocGenerator
+  Event,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import { firstNonNullValue } from '@kbn/security-solution-plugin/common/endpoint/models/ecs_safety_helpers';
 import type { FtrProviderContext } from '../../ftr_provider_context_edr_workflows';
 

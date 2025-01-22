@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { Duration} from '../models';
+import type { Duration } from '../models';
 import { toMomentUnitOfTime } from '../models';
 export function getLookbackDateRange(
   startedAt: Date,

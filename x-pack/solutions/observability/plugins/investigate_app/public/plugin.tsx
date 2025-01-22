@@ -9,11 +9,9 @@ import type {
   CoreSetup,
   CoreStart,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/public';
-import {
-  AppStatus,
-  DEFAULT_APP_CATEGORIES
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { INVESTIGATE_APP_ID } from '@kbn/deeplinks-observability/constants';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';

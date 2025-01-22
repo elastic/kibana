@@ -14,38 +14,20 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { parseRuleCircuitBreakerErrorMessage } from '@kbn/alerting-plugin/common';
 import { RuleTypeModal } from '@kbn/response-ops-rule-form';
-import type {
-  ReactNode} from 'react';
-import React, {
-  lazy,
-  useEffect,
-  useState,
-  useCallback,
-  useMemo,
-  useRef,
-  Suspense,
-} from 'react';
-import type {
-  EuiTableSortingType,
-  EuiSelectableOption} from '@elastic/eui';
-import {
-  EuiSpacer,
-  EuiPageTemplate,
-  EuiButtonIcon,
-  EuiDescriptionList,
-} from '@elastic/eui';
+import type { ReactNode } from 'react';
+import React, { lazy, useEffect, useState, useCallback, useMemo, useRef, Suspense } from 'react';
+import type { EuiTableSortingType, EuiSelectableOption } from '@elastic/eui';
+import { EuiSpacer, EuiPageTemplate, EuiButtonIcon, EuiDescriptionList } from '@elastic/eui';
 import type { EuiSelectableOptionCheckedType } from '@elastic/eui/src/components/selectable/selectable_option';
 import { useHistory } from 'react-router-dom';
 
-import type {
-  RuleExecutionStatus} from '@kbn/alerting-plugin/common';
+import type { RuleExecutionStatus } from '@kbn/alerting-plugin/common';
 import {
   ALERTING_FEATURE_ID,
   RuleExecutionStatusErrorReasons,
   RuleLastRunOutcomeValues,
 } from '@kbn/alerting-plugin/common';
-import type {
-  RuleCreationValidConsumer} from '@kbn/rule-data-utils';
+import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import {
   ruleDetailsRoute as commonRuleDetailsRoute,
   STACK_ALERTS_FEATURE_ID,
@@ -62,10 +44,9 @@ import type {
   SnoozeSchedule,
   UpdateFiltersProps,
   BulkEditActions,
-  UpdateRulesToBulkEditProps} from '../../../../types';
-import {
-  Percentiles
+  UpdateRulesToBulkEditProps,
 } from '../../../../types';
+import { Percentiles } from '../../../../types';
 import { BulkOperationPopover } from '../../common/components/bulk_operation_popover';
 import { RuleQuickEditButtonsWithApi as RuleQuickEditButtons } from '../../common/components/rule_quick_edit_buttons';
 import { CollapsedItemActionsWithApi as CollapsedItemActions } from './collapsed_item_actions';

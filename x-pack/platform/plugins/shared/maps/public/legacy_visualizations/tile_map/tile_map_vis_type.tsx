@@ -11,7 +11,7 @@ import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { toExpressionAst } from './to_ast';
-import type { TileMapVisParams} from './types';
+import type { TileMapVisParams } from './types';
 import { MapTypes, TILE_MAP_VIS_TYPE } from './types';
 
 export const title = i18n.translate('xpack.maps.tileMap.vis.title', {

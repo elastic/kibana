@@ -14,10 +14,9 @@ import type {
   FieldFormatInstanceType,
   FieldFormatsContentType,
   IFieldFormat,
-  SerializedFieldFormat} from '@kbn/field-formats-plugin/common';
-import {
-  FieldFormat
+  SerializedFieldFormat,
 } from '@kbn/field-formats-plugin/common';
+import { FieldFormat } from '@kbn/field-formats-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
 import type { DateRange } from '../../expressions';
 import { convertDateRangeToString } from '../buckets/lib/date_range';

@@ -19,12 +19,8 @@ import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/publi
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { savedObjectsManagementPluginMock } from '@kbn/saved-objects-management-plugin/public/mocks';
-import type {
-  IndexPatternManagementSetup,
-  IndexPatternManagementStart} from './plugin';
-import {
-  IndexPatternManagementPlugin,
-} from './plugin';
+import type { IndexPatternManagementSetup, IndexPatternManagementStart } from './plugin';
+import { IndexPatternManagementPlugin } from './plugin';
 import type { IndexPatternManagmentContext } from './types';
 
 const coreSetup = coreMock.createSetup();

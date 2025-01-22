@@ -8,15 +8,8 @@
 import type { Dispatch, MiddlewareAPI, PayloadAction } from '@reduxjs/toolkit';
 import moment from 'moment';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
-  LensDispatch,
-  LensStoreDeps} from '..';
-import {
-  setExecutionContext,
-  navigateAway,
-  applyChanges,
-  selectAutoApplyEnabled,
-} from '..';
+import type { LensDispatch, LensStoreDeps } from '..';
+import { setExecutionContext, navigateAway, applyChanges, selectAutoApplyEnabled } from '..';
 import type { LensAppState, LensState } from '../types';
 import { getResolvedDateRange, containsDynamicMath } from '../../utils';
 import { subscribeToExternalContext } from './subscribe_to_external_context';

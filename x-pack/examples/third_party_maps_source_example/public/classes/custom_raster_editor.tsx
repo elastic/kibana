@@ -8,7 +8,7 @@
 import React, { Component } from 'react';
 import { EuiCallOut, EuiPanel, htmlIdGenerator } from '@elastic/eui';
 import type { RenderWizardArguments } from '@kbn/maps-plugin/public';
-import type { LayerDescriptor} from '@kbn/maps-plugin/common';
+import type { LayerDescriptor } from '@kbn/maps-plugin/common';
 import { LAYER_TYPE } from '@kbn/maps-plugin/common';
 import { CustomRasterSource } from './custom_raster_source';
 

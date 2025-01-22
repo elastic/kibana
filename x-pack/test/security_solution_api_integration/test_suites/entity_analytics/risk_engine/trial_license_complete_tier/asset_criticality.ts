@@ -10,11 +10,8 @@ import { omit } from 'lodash';
 import type { AssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
 import _ from 'lodash';
 import type { CreateAssetCriticalityRecord } from '@kbn/security-solution-plugin/common/api/entity_analytics';
-import type {
-  CriticalityValues} from '@kbn/security-solution-plugin/server/lib/entity_analytics/asset_criticality/constants';
-import {
-  CRITICALITY_VALUES
-} from '@kbn/security-solution-plugin/server/lib/entity_analytics/asset_criticality/constants';
+import type { CriticalityValues } from '@kbn/security-solution-plugin/server/lib/entity_analytics/asset_criticality/constants';
+import { CRITICALITY_VALUES } from '@kbn/security-solution-plugin/server/lib/entity_analytics/asset_criticality/constants';
 import {
   cleanAssetCriticality,
   assetCriticalityRouteHelpersFactory,

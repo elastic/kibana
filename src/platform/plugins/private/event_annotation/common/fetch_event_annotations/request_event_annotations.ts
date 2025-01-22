@@ -14,14 +14,13 @@ import type {
   DataView,
   DataViewSpec,
   ExpressionValueSearchContext,
-  AggConfigs} from '@kbn/data-plugin/common';
-import {
-  parseEsInterval
+  AggConfigs,
 } from '@kbn/data-plugin/common';
+import { parseEsInterval } from '@kbn/data-plugin/common';
 
 import type { ExecutionContext } from '@kbn/expressions-plugin/common';
 import moment from 'moment';
-import type { ESCalendarInterval, ESFixedInterval} from '@elastic/charts';
+import type { ESCalendarInterval, ESFixedInterval } from '@elastic/charts';
 import { roundDateToESInterval } from '@elastic/charts';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';

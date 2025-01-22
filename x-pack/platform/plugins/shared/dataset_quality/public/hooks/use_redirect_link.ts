@@ -6,9 +6,9 @@
  */
 
 import { useMemo } from 'react';
-import type { DiscoverAppLocatorParams} from '@kbn/discover-plugin/common';
+import type { DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import { DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import type { Query, AggregateQuery} from '@kbn/es-query';
+import type { Query, AggregateQuery } from '@kbn/es-query';
 import { buildPhraseFilter } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import type { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';

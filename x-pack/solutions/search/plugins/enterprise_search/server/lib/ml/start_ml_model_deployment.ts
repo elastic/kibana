@@ -9,7 +9,7 @@ import type { MlStartTrainedModelDeploymentRequest } from '@elastic/elasticsearc
 
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import type { MlModelDeploymentStatus} from '../../../common/types/ml';
+import type { MlModelDeploymentStatus } from '../../../common/types/ml';
 import { MlModelDeploymentState } from '../../../common/types/ml';
 
 import { getMlModelDeploymentStatus } from './get_ml_model_deployment_status';

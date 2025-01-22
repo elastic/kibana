@@ -12,7 +12,7 @@ import type { ComponentMeta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 
 import type { SampleDataSet } from '@kbn/home-sample-data-types';
-import type { Params} from '../mocks';
+import type { Params } from '../mocks';
 import { getStoryArgTypes, getStoryServices, mockDataSet } from '../mocks';
 import { SampleDataCardProvider } from '../services';
 import { Footer as Component } from '.';

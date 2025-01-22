@@ -7,8 +7,7 @@
 
 import React, { useCallback, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  OnTimeChangeProps} from '@elastic/eui';
+import type { OnTimeChangeProps } from '@elastic/eui';
 import {
   EuiAccordion,
   EuiButtonIcon,

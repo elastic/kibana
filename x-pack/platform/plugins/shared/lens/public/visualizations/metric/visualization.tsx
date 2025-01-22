@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { PaletteRegistry} from '@kbn/coloring';
+import type { PaletteRegistry } from '@kbn/coloring';
 import { getOverridePaletteStops } from '@kbn/coloring';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';

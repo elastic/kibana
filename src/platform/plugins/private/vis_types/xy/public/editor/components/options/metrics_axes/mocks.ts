@@ -12,16 +12,8 @@ import { Position } from '@elastic/charts';
 import type { Vis } from '@kbn/visualizations-plugin/public';
 import type { Style } from '@kbn/charts-plugin/public';
 
-import type {
-  ValueAxis,
-  SeriesParam,
-  CategoryAxis} from '../../../../types';
-import {
-  ChartMode,
-  InterpolationMode,
-  ScaleType,
-  AxisType
-} from '../../../../types';
+import type { ValueAxis, SeriesParam, CategoryAxis } from '../../../../types';
+import { ChartMode, InterpolationMode, ScaleType, AxisType } from '../../../../types';
 import { ChartType } from '../../../../../common';
 
 const defaultValueAxisId = 'ValueAxis-1';

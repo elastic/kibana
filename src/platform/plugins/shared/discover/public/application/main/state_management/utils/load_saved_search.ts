@@ -19,12 +19,8 @@ import { getValidFilters } from '../../../../utils/get_valid_filters';
 import type { DiscoverStateContainer, LoadParams } from '../discover_state';
 import { addLog } from '../../../../utils/add_log';
 import type { DiscoverSavedSearchContainer } from '../discover_saved_search_container';
-import type {
-  DiscoverAppState,
-  DiscoverAppStateContainer} from '../discover_app_state_container';
-import {
-  getInitialState,
-} from '../discover_app_state_container';
+import type { DiscoverAppState, DiscoverAppStateContainer } from '../discover_app_state_container';
+import { getInitialState } from '../discover_app_state_container';
 import type { DiscoverGlobalStateContainer } from '../discover_global_state_container';
 import type { DiscoverServices } from '../../../../build_services';
 import { DataSourceType, isDataSourceType } from '../../../../../common/data_sources';

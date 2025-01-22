@@ -9,16 +9,8 @@ import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  BrushEndListener,
-  LegendItemListener} from '@elastic/charts';
-import {
-  Axis,
-  Chart,
-  Position,
-  timeFormatter,
-  Settings
-} from '@elastic/charts';
+import type { BrushEndListener, LegendItemListener } from '@elastic/charts';
+import { Axis, Chart, Position, timeFormatter, Settings } from '@elastic/charts';
 import { useSelector } from 'react-redux';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { getChartDateLabel } from '../../../lib/helper';

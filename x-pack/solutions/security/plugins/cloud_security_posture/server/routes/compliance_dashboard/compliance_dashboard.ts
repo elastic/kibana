@@ -18,13 +18,13 @@ import type {
 } from '../../../common/types_old';
 import { LATEST_FINDINGS_INDEX_DEFAULT_NS, STATS_ROUTE_PATH } from '../../../common/constants';
 import { getGroupedFindingsEvaluation } from './get_grouped_findings_evaluation';
-import type { ClusterWithoutTrend} from './get_clusters';
+import type { ClusterWithoutTrend } from './get_clusters';
 import { getClusters } from './get_clusters';
 import { getStats } from './get_stats';
 import type { CspRouter } from '../../types';
 import type { Trends } from './get_trends';
 import { getTrends } from './get_trends';
-import type { BenchmarkWithoutTrend} from './get_benchmarks';
+import type { BenchmarkWithoutTrend } from './get_benchmarks';
 import { getBenchmarks } from './get_benchmarks';
 import { toBenchmarkDocFieldKey } from '../../lib/mapping_field_util';
 import { getMutedRulesFilterQuery } from '../benchmark_rules/get_states/v1';

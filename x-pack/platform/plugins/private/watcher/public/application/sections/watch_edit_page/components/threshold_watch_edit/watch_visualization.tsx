@@ -6,8 +6,7 @@
  */
 
 import React, { Fragment, useContext, useEffect, useMemo } from 'react';
-import type {
-  PartialTheme} from '@elastic/charts';
+import type { PartialTheme } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,

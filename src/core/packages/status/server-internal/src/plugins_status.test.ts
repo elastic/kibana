@@ -9,7 +9,7 @@
 
 import type { PluginName } from '@kbn/core-base-common';
 import { PluginsStatusService } from './plugins_status';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { of, BehaviorSubject, ReplaySubject, firstValueFrom } from 'rxjs';
 import type { CoreStatus, ServiceStatus } from '@kbn/core-status-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';

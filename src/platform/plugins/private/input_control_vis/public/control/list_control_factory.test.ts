@@ -9,7 +9,7 @@
 
 import type { ListControl } from './list_control_factory';
 import { listControlFactory } from './list_control_factory';
-import type { ControlParams} from '../editor_utils';
+import type { ControlParams } from '../editor_utils';
 import { CONTROL_TYPES } from '../editor_utils';
 import { getDepsMock, getSearchSourceMock } from '../test_utils';
 

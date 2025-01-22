@@ -12,12 +12,10 @@ import { EuiComboBox } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FieldIcon } from '@kbn/react-field';
 import { comboBoxFieldOptionMatcher } from '@kbn/field-utils';
-import type {
-  FIELD_ORIGIN,
-  VECTOR_STYLES} from '../../../../../common/constants';
+import type { FIELD_ORIGIN, VECTOR_STYLES } from '../../../../../common/constants';
 import {
   MIDDLE_TRUNCATION_PROPS,
-  SINGLE_SELECTION_AS_TEXT_PROPS
+  SINGLE_SELECTION_AS_TEXT_PROPS,
 } from '../../../../../common/constants';
 import type { StyleField } from '../style_fields_helper';
 

@@ -18,25 +18,24 @@ import type {
   NotificationsSetup,
 } from '@kbn/core/public';
 import type { DataPublicPluginStart, SerializedSearchSourceFields } from '@kbn/data-plugin/public';
-import type {
-  PublishesSavedSearch,
-  HasTimeRange} from '@kbn/discover-plugin/public';
+import type { PublishesSavedSearch, HasTimeRange } from '@kbn/discover-plugin/public';
 import {
   loadSharingDataHelpers,
   SEARCH_EMBEDDABLE_TYPE,
-  apiPublishesSavedSearch
+  apiPublishesSavedSearch,
 } from '@kbn/discover-plugin/public';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
 import type {
   CanAccessViewMode,
   EmbeddableApiContext,
-  HasType} from '@kbn/presentation-publishing';
+  HasType,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasType,
   apiIsOfType,
-  getInheritedViewMode
+  getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { JobAppParamsCSV } from '@kbn/reporting-export-types-csv-common';

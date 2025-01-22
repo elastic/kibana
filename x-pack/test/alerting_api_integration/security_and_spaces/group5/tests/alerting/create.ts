@@ -13,14 +13,13 @@ import {
   SUB_ACTION,
 } from '@kbn/stack-connectors-plugin/common/sentinelone/constants';
 import { systemActionScenario, UserAtSpaceScenarios } from '../../../scenarios';
-import type {
-  TaskManagerDoc} from '../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   checkAAD,
   getTestRuleData,
   getUnauthorizedErrorMessage,
   getUrlPrefix,
-  ObjectRemover
+  ObjectRemover,
 } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 

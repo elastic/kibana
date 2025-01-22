@@ -34,7 +34,7 @@ import type {
 
 import type { FilesRequestHandlerContext, FilesRouter } from './routes/types';
 import { registerRoutes, registerFileKindRoutes } from './routes';
-import type { Counters} from './usage';
+import type { Counters } from './usage';
 import { registerUsageCollector } from './usage';
 import * as DefaultImageKind from '../common/default_image_file_kind';
 

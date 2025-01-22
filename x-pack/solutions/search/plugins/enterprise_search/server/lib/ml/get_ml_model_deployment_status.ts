@@ -11,7 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 
-import type { MlModelDeploymentStatus} from '../../../common/types/ml';
+import type { MlModelDeploymentStatus } from '../../../common/types/ml';
 import { MlModelDeploymentState } from '../../../common/types/ml';
 
 import { isNotFoundExceptionError } from './ml_model_deployment_common';

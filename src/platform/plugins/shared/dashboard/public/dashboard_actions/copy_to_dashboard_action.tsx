@@ -14,7 +14,8 @@ import type {
   HasParentApi,
   HasType,
   HasUniqueId,
-  PublishesSavedObjectId} from '@kbn/presentation-publishing';
+  PublishesSavedObjectId,
+} from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiHasUniqueId,
@@ -22,7 +23,7 @@ import {
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type { Action} from '@kbn/ui-actions-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 
 import { type DashboardApi, DASHBOARD_API_TYPE } from '../dashboard_api/types';

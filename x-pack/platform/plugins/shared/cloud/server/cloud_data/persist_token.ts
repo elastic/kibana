@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, SavedObjectsClientContract} from '@kbn/core/server';
+import type { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { CloudDataAttributes, SolutionType } from '../routes/types';
 import { CLOUD_DATA_SAVED_OBJECT_TYPE } from '../saved_objects';

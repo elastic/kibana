@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { AppMockRenderer} from '../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import { CenterJustifiedSpinner } from './center_justified_spinner';
 

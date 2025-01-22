@@ -11,7 +11,7 @@ import type { RouteComponentProps } from 'react-router-dom';
 
 import { EuiPageSection, EuiPageHeader, EuiSpacer, EuiCallOut } from '@elastic/eui';
 import type { SlmPolicyPayload } from '../../../../common/types';
-import type { Error} from '../../../shared_imports';
+import type { Error } from '../../../shared_imports';
 import { SectionError, PageError } from '../../../shared_imports';
 import { useDecodedParams } from '../../lib';
 import { TIME_UNITS } from '../../../../common/constants';

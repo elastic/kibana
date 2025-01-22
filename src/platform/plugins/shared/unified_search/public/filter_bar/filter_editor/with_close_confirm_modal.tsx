@@ -9,7 +9,7 @@
 
 import type { Filter } from '@kbn/es-query';
 import { compareFilters } from '@kbn/es-query';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useCallback, useState } from 'react';
 import { CloseFilterEditorConfirmModal } from './close_confirm_modal';
 

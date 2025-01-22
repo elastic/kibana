@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { CanvasServices} from '..';
+import type { CanvasServices } from '..';
 import { services } from '..';
 import { searchService } from './search';
 

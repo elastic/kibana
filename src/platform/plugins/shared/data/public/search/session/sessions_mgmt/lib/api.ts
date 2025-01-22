@@ -22,7 +22,7 @@ import type {
 } from '../types';
 import type { ISessionsClient } from '../../sessions_client';
 import type { SearchUsageCollector } from '../../../collectors';
-import type { SearchSessionsFindResponse} from '../../../../../common';
+import type { SearchSessionsFindResponse } from '../../../../../common';
 import { SearchSessionStatus } from '../../../../../common';
 import type { SearchSessionsConfigSchema } from '../../../../../server/config';
 

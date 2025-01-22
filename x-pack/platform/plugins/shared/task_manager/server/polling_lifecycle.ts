@@ -13,10 +13,10 @@ import { tap } from 'rxjs';
 import type { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
-import type { Result} from './lib/result_type';
+import type { Result } from './lib/result_type';
 import { asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
 import type { ManagedConfiguration } from './lib/create_managed_configuration';
-import type { TaskManagerConfig} from './config';
+import type { TaskManagerConfig } from './config';
 import { CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
 
 import type {
@@ -26,11 +26,12 @@ import type {
   TaskRunRequest,
   TaskPollingCycle,
   TaskManagerStat,
-  TaskManagerMetric} from './task_events';
+  TaskManagerMetric,
+} from './task_events';
 import {
   asTaskRunRequestEvent,
   asTaskPollingCycleEvent,
-  asTaskManagerStatEvent
+  asTaskManagerStatEvent,
 } from './task_events';
 import type { TimedFillPoolResult } from './lib/fill_pool';
 import { fillPool, FillPoolResult } from './lib/fill_pool';

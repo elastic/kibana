@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiSelectableTemplateSitewideOption} from '@elastic/eui';
+import type { EuiSelectableTemplateSitewideOption } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiFlexGroup,
@@ -24,7 +23,7 @@ import type { EuiSelectableOnChangeEvent } from '@elastic/eui/src/components/sel
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { GlobalSearchFindParams, GlobalSearchResult } from '@kbn/global-search-plugin/public';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import useEvent from 'react-use/lib/useEvent';

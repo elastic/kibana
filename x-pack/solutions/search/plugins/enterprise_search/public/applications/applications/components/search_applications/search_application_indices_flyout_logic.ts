@@ -11,10 +11,9 @@ import { Status } from '../../../../../common/types/api';
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 import type {
   SearchApplicationViewActions,
-  SearchApplicationViewValues} from '../search_application/search_application_view_logic';
-import {
-  SearchApplicationViewLogic
+  SearchApplicationViewValues,
 } from '../search_application/search_application_view_logic';
+import { SearchApplicationViewLogic } from '../search_application/search_application_view_logic';
 
 export interface SearchApplicationIndicesFlyoutValues {
   fetchSearchApplicationApiError?: SearchApplicationViewValues['fetchSearchApplicationApiError'];

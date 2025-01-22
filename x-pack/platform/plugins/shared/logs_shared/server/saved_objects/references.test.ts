@@ -6,12 +6,8 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import type {
-  SavedObjectAttributesWithReferences} from './references';
-import {
-  extractSavedObjectReferences,
-  resolveSavedObjectReferences
-} from './references';
+import type { SavedObjectAttributesWithReferences } from './references';
+import { extractSavedObjectReferences, resolveSavedObjectReferences } from './references';
 
 it('extractSavedObjectReferences extracts references using the given extractors', () => {
   const { attributes, references } = extractSavedObjectReferences([

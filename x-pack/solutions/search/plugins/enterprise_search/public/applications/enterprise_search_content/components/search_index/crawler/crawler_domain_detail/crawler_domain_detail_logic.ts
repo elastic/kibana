@@ -19,10 +19,9 @@ import { HttpLogic } from '../../../../../shared/http';
 import { KibanaLogic } from '../../../../../shared/kibana';
 import type {
   DeleteCrawlerDomainArgs,
-  DeleteCrawlerDomainResponse} from '../../../../api/crawler/delete_crawler_domain_api_logic';
-import {
-  DeleteCrawlerDomainApiLogic
+  DeleteCrawlerDomainResponse,
 } from '../../../../api/crawler/delete_crawler_domain_api_logic';
+import { DeleteCrawlerDomainApiLogic } from '../../../../api/crawler/delete_crawler_domain_api_logic';
 import type {
   CrawlerAuth,
   CrawlerDomain,

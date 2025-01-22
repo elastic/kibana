@@ -13,10 +13,9 @@ import type {
   LicenseCheck,
   PublicLicenseJSON,
   PublicLicense,
-  PublicFeatures} from './types';
-import {
-  LICENSE_TYPE
+  PublicFeatures,
 } from './types';
+import { LICENSE_TYPE } from './types';
 
 /**
  * @public

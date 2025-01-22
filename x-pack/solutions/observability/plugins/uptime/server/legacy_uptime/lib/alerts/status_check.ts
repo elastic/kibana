@@ -17,14 +17,12 @@ import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { ALERT_REASON } from '@kbn/rule-data-utils';
 import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
 import { uptimeMonitorStatusRuleParamsSchema } from '@kbn/response-ops-rule-params/uptime_monitor_status';
-import type {
-  AlertsLocatorParams,
-  TimeUnitChar} from '@kbn/observability-plugin/common';
+import type { AlertsLocatorParams, TimeUnitChar } from '@kbn/observability-plugin/common';
 import {
   alertsLocatorID,
   formatDurationFromTimeUnitChar,
   getAlertUrl,
-  observabilityPaths
+  observabilityPaths,
 } from '@kbn/observability-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { asyncForEach } from '@kbn/std';
@@ -51,14 +49,13 @@ import { stringifyKueries, combineFiltersAndUserSearch } from '../../../../commo
 import type { GetMonitorAvailabilityResult } from '../requests/get_monitor_availability';
 import type {
   GetMonitorStatusResult,
-  GetMonitorDownStatusMessageParams} from '../requests/get_monitor_status';
-import {
-  getMonitorDownStatusMessageParams,
+  GetMonitorDownStatusMessageParams,
 } from '../requests/get_monitor_status';
+import { getMonitorDownStatusMessageParams } from '../requests/get_monitor_status';
 import { UNNAMED_LOCATION } from '../../../../common/constants';
 import type { IndexPatternTitleAndFields } from '../requests/get_index_pattern';
 import { getUptimeIndexPattern } from '../requests/get_index_pattern';
-import type { UMServerLibs} from '../lib';
+import type { UMServerLibs } from '../lib';
 import { UptimeEsClient } from '../lib';
 import {
   ACTION_VARIABLES,

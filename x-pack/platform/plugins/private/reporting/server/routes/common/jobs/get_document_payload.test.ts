@@ -14,7 +14,7 @@ import { PDF_JOB_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { createMockConfigSchema } from '@kbn/reporting-mocks-server';
 
 import type { ReportingCore } from '../../..';
-import type { ContentStream} from '../../../lib';
+import type { ContentStream } from '../../../lib';
 import { getContentStream } from '../../../lib';
 import { createMockReportingCore } from '../../../test_helpers';
 import { STATUS_CODES } from './constants';

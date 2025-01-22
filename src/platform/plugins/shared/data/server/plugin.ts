@@ -7,7 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { CoreSetup, CoreStart, Logger, Plugin, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  CoreStart,
+  Logger,
+  Plugin,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import type { PluginStart as DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';

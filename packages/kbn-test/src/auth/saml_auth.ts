@@ -13,7 +13,7 @@ import type { AxiosResponse } from 'axios';
 import axios from 'axios';
 import util from 'util';
 import * as cheerio from 'cheerio';
-import type { Cookie} from 'tough-cookie';
+import type { Cookie } from 'tough-cookie';
 import { parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
 import { isValidHostname, isValidUrl } from './helper';

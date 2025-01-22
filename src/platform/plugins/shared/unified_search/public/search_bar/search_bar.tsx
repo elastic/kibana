@@ -8,7 +8,7 @@
  */
 
 import { compact } from 'lodash';
-import type { InjectedIntl} from '@kbn/i18n-react';
+import type { InjectedIntl } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import classNames from 'classnames';
 import React, { Component, createRef } from 'react';
@@ -40,7 +40,7 @@ import type { DataView } from '@kbn/data-views-plugin/public';
 import { i18n } from '@kbn/i18n';
 import type { AdditionalQueryBarMenuItems } from '../query_string_input/query_bar_menu_panels';
 import type { IUnifiedSearchPluginServices } from '../types';
-import type { SavedQueryMeta} from '../saved_query_form';
+import type { SavedQueryMeta } from '../saved_query_form';
 import { SaveQueryForm } from '../saved_query_form';
 import { SavedQueryManagementList } from '../saved_query_management';
 import type { QueryBarMenuProps } from '../query_string_input/query_bar_menu';

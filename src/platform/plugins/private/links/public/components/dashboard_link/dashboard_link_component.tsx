@@ -13,21 +13,14 @@ import React, { useMemo } from 'react';
 import { EuiListGroupItem } from '@elastic/eui';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { DashboardLocatorParams } from '@kbn/dashboard-plugin/public';
-import type {
-  DashboardDrilldownOptions} from '@kbn/presentation-util-plugin/public';
-import {
-  DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
-} from '@kbn/presentation-util-plugin/public';
+import type { DashboardDrilldownOptions } from '@kbn/presentation-util-plugin/public';
+import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 
 import type { Query } from '@kbn/es-query';
 import { isFilterPinned } from '@kbn/es-query';
-import type {
-  LinksLayoutType} from '../../../common/content_management';
-import {
-  DASHBOARD_LINK_TYPE,
-  LINKS_VERTICAL_LAYOUT,
-} from '../../../common/content_management';
+import type { LinksLayoutType } from '../../../common/content_management';
+import { DASHBOARD_LINK_TYPE, LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import type { LinksParentApi, ResolvedLink } from '../../types';

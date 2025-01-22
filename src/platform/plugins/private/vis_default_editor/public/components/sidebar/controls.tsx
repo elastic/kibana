@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { SetStateAction} from 'react';
+import type { SetStateAction } from 'react';
 import React, { useCallback, useState } from 'react';
 import {
   EuiFlexGroup,

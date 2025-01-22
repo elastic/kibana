@@ -11,7 +11,7 @@ import { EuiSpacer, EuiLoadingSpinner, EuiEmptyPrompt, EuiCallOut } from '@elast
 import type { ISearchSource } from '@kbn/data-plugin/common';
 import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import type { SavedQuery } from '@kbn/data-plugin/public';
-import type { EsQueryRuleMetaData, EsQueryRuleParams} from '../types';
+import type { EsQueryRuleMetaData, EsQueryRuleParams } from '../types';
 import { SearchType } from '../types';
 import { SearchSourceExpressionForm } from './search_source_expression_form';
 import { DEFAULT_VALUES, SERVERLESS_DEFAULT_VALUES } from '../constants';

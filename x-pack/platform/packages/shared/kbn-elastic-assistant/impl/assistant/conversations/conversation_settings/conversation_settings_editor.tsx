@@ -17,7 +17,7 @@ import type { Conversation } from '../../../..';
 import * as i18n from './translations';
 import * as i18nModel from '../../../connectorland/models/model_selector/translations';
 
-import type { AIConnector} from '../../../connectorland/connector_selector';
+import type { AIConnector } from '../../../connectorland/connector_selector';
 import { ConnectorSelector } from '../../../connectorland/connector_selector';
 import { SelectSystemPrompt } from '../../prompt_editor/system_prompt/select_system_prompt';
 import { ModelSelector } from '../../../connectorland/models/model_selector/model_selector';

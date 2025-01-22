@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  PageObjects,
-  ScoutTestFixtures,
-  ScoutWorkerFixtures} from '@kbn/scout';
-import {
-  test as base,
-  createLazyPageObject
-} from '@kbn/scout';
+import type { PageObjects, ScoutTestFixtures, ScoutWorkerFixtures } from '@kbn/scout';
+import { test as base, createLazyPageObject } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 
 export interface ExtendedScoutTestFixtures extends ScoutTestFixtures {

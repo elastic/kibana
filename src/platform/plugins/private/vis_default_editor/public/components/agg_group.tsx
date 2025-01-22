@@ -8,8 +8,7 @@
  */
 
 import React, { useEffect, useReducer, useMemo, useCallback } from 'react';
-import type {
-  DragDropContextProps} from '@elastic/eui';
+import type { DragDropContextProps } from '@elastic/eui';
 import {
   EuiTitle,
   EuiDragDropContext,

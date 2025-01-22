@@ -10,8 +10,7 @@
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 
-import type {
-  DragEndEvent} from '@dnd-kit/core';
+import type { DragEndEvent } from '@dnd-kit/core';
 import {
   DndContext,
   DragOverlay,

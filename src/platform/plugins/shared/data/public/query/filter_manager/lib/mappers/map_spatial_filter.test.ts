@@ -9,7 +9,7 @@
 
 import { mapSpatialFilter } from './map_spatial_filter';
 import { mapFilter } from '../map_filter';
-import type { FilterMeta, Filter} from '@kbn/es-query';
+import type { FilterMeta, Filter } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 
 describe('mapSpatialFilter', () => {

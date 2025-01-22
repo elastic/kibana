@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ActionType,
-  AsApiContract,
-  Rule} from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  transformRule,
-} from '@kbn/triggers-actions-ui-plugin/public';
+import type { ActionType, AsApiContract, Rule } from '@kbn/triggers-actions-ui-plugin/public';
+import { transformRule } from '@kbn/triggers-actions-ui-plugin/public';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import { MonitorStatusTranslations } from '../../../../common/rules/legacy_uptime/translations';
 import type { ActionConnector } from '../../../../common/rules/types';

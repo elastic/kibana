@@ -14,12 +14,13 @@ import type {
   ExternalReferenceNoSOAttachmentPayload,
   ExternalReferenceSOAttachmentPayload,
   PersistableStateAttachmentPayload,
-  Attachment} from '@kbn/cases-plugin/common/types/domain';
+  Attachment,
+} from '@kbn/cases-plugin/common/types/domain';
 import {
   AttachmentType,
   CaseStatuses,
   CaseSeverity,
-  ExternalReferenceStorageType
+  ExternalReferenceStorageType,
 } from '@kbn/cases-plugin/common/types/domain';
 import type {
   CasePostRequest,

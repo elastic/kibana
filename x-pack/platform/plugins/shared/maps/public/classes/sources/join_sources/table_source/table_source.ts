@@ -22,13 +22,12 @@ import type {
   BoundsRequestMeta,
   GeoJsonWithMeta,
   IVectorSource,
-  SourceStatus} from '../../vector_source';
-import {
-  AbstractVectorSource
+  SourceStatus,
 } from '../../vector_source';
+import { AbstractVectorSource } from '../../vector_source';
 import type { DataRequest } from '../../../util/data_request';
 import { InlineField } from '../../../fields/inline_field';
-import type { ITooltipProperty} from '../../../tooltips/tooltip_property';
+import type { ITooltipProperty } from '../../../tooltips/tooltip_property';
 import { TooltipProperty } from '../../../tooltips/tooltip_property';
 
 export class TableSource extends AbstractVectorSource implements ITermJoinSource, IVectorSource {

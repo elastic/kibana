@@ -5,16 +5,10 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useCallback, useMemo } from 'react';
-import type {
-  EuiPageHeaderProps} from '@elastic/eui';
-import {
-  EuiButton,
-  EuiPageHeader,
-  EuiPageSection,
-  EuiSpacer,
-} from '@elastic/eui';
+import type { EuiPageHeaderProps } from '@elastic/eui';
+import { EuiButton, EuiPageHeader, EuiPageSection, EuiSpacer } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
@@ -24,13 +18,8 @@ import { useIndexErrors } from '../../../../hooks/use_index_errors';
 import { resetIndexUrlParams } from './reset_index_url_params';
 import { renderBadges } from '../../../../lib/render_badges';
 import type { Index } from '../../../../../../common';
-import type {
-  IndexDetailsTab,
-  IndexDetailsTabId} from '../../../../../../common/constants';
-import {
-  INDEX_OPEN,
-  IndexDetailsSection
-} from '../../../../../../common/constants';
+import type { IndexDetailsTab, IndexDetailsTabId } from '../../../../../../common/constants';
+import { INDEX_OPEN, IndexDetailsSection } from '../../../../../../common/constants';
 import { getIndexDetailsLink } from '../../../../services/routing';
 import { useAppContext } from '../../../../app_context';
 import { DiscoverLink } from '../../../../lib/discover_link';

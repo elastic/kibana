@@ -7,15 +7,12 @@
 
 import type { ReactElement } from 'react';
 import React, { useMemo, useCallback } from 'react';
-import type {
-  DragDropIdentifier,
-  DropType,
-  DroppableProps} from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier, DropType, DroppableProps } from '@kbn/dom-drag-drop';
 import {
   useDragDropContext,
   DropTargetSwapDuplicateCombine,
   Draggable,
-  Droppable
+  Droppable,
 } from '@kbn/dom-drag-drop';
 import { isDraggedField } from '../../../../utils';
 import type {
@@ -24,10 +21,9 @@ import type {
   DatasourceLayers,
   IndexPatternMap,
   DragDropOperation,
-  Visualization} from '../../../../types';
-import {
-  isOperation
+  Visualization,
 } from '../../../../types';
+import { isOperation } from '../../../../types';
 
 export function DraggableDimensionButton({
   order,

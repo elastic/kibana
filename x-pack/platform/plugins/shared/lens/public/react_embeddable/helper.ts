@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  ViewMode} from '@kbn/presentation-publishing';
+import type { ViewMode } from '@kbn/presentation-publishing';
 import {
   apiHasParentApi,
   apiPublishesViewMode,

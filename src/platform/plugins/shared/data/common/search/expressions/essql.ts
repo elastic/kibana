@@ -15,7 +15,7 @@ import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-p
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 
 import { zipObject } from 'lodash';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { defer, throwError } from 'rxjs';
 import { catchError, map, switchMap, tap } from 'rxjs';
 import type { ISearchGeneric } from '@kbn/search-types';
@@ -27,10 +27,9 @@ import type {
   KibanaContext,
   SqlRequestParams,
   SqlSearchStrategyRequest,
-  SqlSearchStrategyResponse} from '..';
-import {
-  SQL_SEARCH_STRATEGY,
+  SqlSearchStrategyResponse,
 } from '..';
+import { SQL_SEARCH_STRATEGY } from '..';
 
 type Input = KibanaContext | null;
 type Output = Observable<Datatable>;

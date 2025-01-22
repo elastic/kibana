@@ -7,25 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BaseState, BaseStateContainer} from '../../common/state_containers';
+import type { BaseState, BaseStateContainer } from '../../common/state_containers';
 import { createStateContainer } from '../../common/state_containers';
-import type {
-  TodoActions,
-  TodoState} from '../../demos/state_containers/todomvc';
-import {
-  defaultState,
-  pureTransitions
-} from '../../demos/state_containers/todomvc';
+import type { TodoActions, TodoState } from '../../demos/state_containers/todomvc';
+import { defaultState, pureTransitions } from '../../demos/state_containers/todomvc';
 import { syncState, syncStates } from './state_sync';
 import type { IStateStorage } from './state_sync_state_storage/types';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
-import type {
-  IKbnUrlStateStorage,
-  ISessionStorageStateStorage} from './state_sync_state_storage';
+import type { IKbnUrlStateStorage, ISessionStorageStateStorage } from './state_sync_state_storage';
 import {
   createSessionStorageStateStorage,
-  createKbnUrlStateStorage
+  createKbnUrlStateStorage,
 } from './state_sync_state_storage';
 import { StubBrowserStorage } from '@kbn/test-jest-helpers';
 import type { History } from 'history';

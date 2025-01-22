@@ -8,11 +8,8 @@
  */
 
 import type { SavedObjectMigrationMap, SavedObjectUnsanitizedDoc } from '@kbn/core/server';
-import type {
-  SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest} from '../../../common';
-import {
-  SearchSessionStatus,
-} from '../../../common';
+import type { SearchSessionSavedObjectAttributes as SearchSessionSavedObjectAttributesLatest } from '../../../common';
+import { SearchSessionStatus } from '../../../common';
 
 /**
  * Search sessions were released in 7.12.0

@@ -8,8 +8,7 @@
 import React, { useState, useEffect, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { sortBy } from 'lodash';
-import type {
-  Query} from '@elastic/eui';
+import type { Query } from '@elastic/eui';
 import {
   EuiButton,
   EuiFlexGroup,
@@ -24,7 +23,7 @@ import {
   EuiTablePagination,
   EuiCallOut,
   EuiTableRowCell,
-  Pager
+  Pager,
 } from '@elastic/eui';
 import type { EnrichedDeprecationInfo } from '../../../../common/types';
 import { useAppContext } from '../../app_context';

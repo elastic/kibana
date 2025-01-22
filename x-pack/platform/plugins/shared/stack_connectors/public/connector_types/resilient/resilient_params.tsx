@@ -6,17 +6,8 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
-import type {
-  EuiComboBoxOptionOption,
-  EuiSelectOption} from '@elastic/eui';
-import {
-  EuiFormRow,
-  EuiComboBox,
-  EuiSelect,
-  EuiSpacer,
-  EuiText,
-  EuiTitle
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption, EuiSelectOption } from '@elastic/eui';
+import { EuiFormRow, EuiComboBox, EuiSelect, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { ActionParamsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {

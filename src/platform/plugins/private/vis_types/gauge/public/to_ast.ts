@@ -14,10 +14,9 @@ import { buildExpression, buildExpressionFunction } from '@kbn/expressions-plugi
 import type {
   GaugeArguments,
   GaugeExpressionFunctionDefinition,
-  GaugeShape} from '@kbn/expression-gauge-plugin/common';
-import {
-  GaugeShapes,
+  GaugeShape,
 } from '@kbn/expression-gauge-plugin/common';
+import { GaugeShapes } from '@kbn/expression-gauge-plugin/common';
 import type { Gauge, GaugeVisParams } from './types';
 import { GaugeType } from './types';
 

@@ -9,7 +9,7 @@
 
 import { omit } from 'lodash';
 import moment from 'moment';
-import type { ReactElement} from 'react';
+import type { ReactElement } from 'react';
 import React, { useState } from 'react';
 
 import { EuiCallOut, EuiCheckboxGroup } from '@elastic/eui';

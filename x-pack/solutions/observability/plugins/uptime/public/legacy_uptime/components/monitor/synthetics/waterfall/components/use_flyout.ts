@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { RefObject} from 'react';
+import type { RefObject } from 'react';
 import { useCallback, useState } from 'react';
 
 import type {

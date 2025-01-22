@@ -9,14 +9,11 @@ import type { TypeOf } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import type { ResolvedRule } from '../../../../application/rule/methods/resolve/types';
-import type {
-  ResolveRuleResponseV1} from '../../../../../common/routes/rule/apis/resolve';
-import {
-  resolveParamsSchemaV1
-} from '../../../../../common/routes/rule/apis/resolve';
+import type { ResolveRuleResponseV1 } from '../../../../../common/routes/rule/apis/resolve';
+import { resolveParamsSchemaV1 } from '../../../../../common/routes/rule/apis/resolve';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformResolveResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';

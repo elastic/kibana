@@ -23,7 +23,7 @@ import type {
   UiSettingsParams,
   UiSettingsScope,
 } from '@kbn/core-ui-settings-common';
-import type { UiSettingsConfigType} from './ui_settings_config';
+import type { UiSettingsConfigType } from './ui_settings_config';
 import { uiSettingsConfig as uiConfigDefinition } from './ui_settings_config';
 import type { UiSettingsClient, UiSettingsGlobalClient } from './clients';
 import { UiSettingsClientFactory } from './clients';

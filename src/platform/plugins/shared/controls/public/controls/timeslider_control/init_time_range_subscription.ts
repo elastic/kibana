@@ -11,7 +11,7 @@ import type { TimeRange } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { apiHasParentApi, apiPublishesTimeRange } from '@kbn/presentation-publishing';
 import moment from 'moment';
-import type { Subscription} from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { BehaviorSubject, skip } from 'rxjs';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import type { TimeRangeMeta } from './get_time_range_meta';

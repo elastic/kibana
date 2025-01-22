@@ -17,7 +17,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import type { EuiContextMenuClass } from '@elastic/eui/src/components/context_menu/context_menu';
-import type { KeyboardEvent, ReactNode, RefObject} from 'react';
+import type { KeyboardEvent, ReactNode, RefObject } from 'react';
 import React, { useCallback, useRef } from 'react';
 import useEffectOnce from 'react-use/lib/useEffectOnce';
 import { QueryBarMenuPanel } from './query_bar_menu_panels';

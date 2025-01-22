@@ -36,14 +36,13 @@ import {
   useEditorActionContext,
   useRequestActionContext,
 } from '../../contexts';
-import type {
-  ConsoleTourStepProps} from '../../components';
+import type { ConsoleTourStepProps } from '../../components';
 import {
   TopNavMenu,
   SomethingWentWrongCallout,
   HelpPopover,
   ShortcutsPopover,
-  ConsoleTourStep
+  ConsoleTourStep,
 } from '../../components';
 import { History } from '../history';
 import { useDataInit } from '../../hooks';

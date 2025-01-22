@@ -8,10 +8,9 @@ import type { SyntheticsRestApiRouteFactory } from '../types';
 import { monitorAttributes, syntheticsMonitorType } from '../../../common/types/saved_objects';
 import type {
   MonitorFiltersResult,
-  EncryptedSyntheticsMonitorAttributes} from '../../../common/runtime_types';
-import {
-  ConfigKey
+  EncryptedSyntheticsMonitorAttributes,
 } from '../../../common/runtime_types';
+import { ConfigKey } from '../../../common/runtime_types';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import { QuerySchema, getMonitorFilters, SEARCH_FIELDS } from '../common';
 import { getAllLocations } from '../../synthetics_service/get_all_locations';

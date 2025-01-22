@@ -17,26 +17,20 @@ import type { SavedObjectReference } from '@kbn/core/types';
 import type {
   MigrateFunctionsObject,
   PersistableStateService,
-  VersionedState} from '@kbn/kibana-utils-plugin/common';
-import {
-  migrateToLatest
+  VersionedState,
 } from '@kbn/kibana-utils-plugin/common';
+import { migrateToLatest } from '@kbn/kibana-utils-plugin/common';
 import type { ExecutorState, ExecutorContainer } from './container';
 import { createExecutorContainer } from './container';
-import type { AnyExpressionFunctionDefinition} from '../expression_functions';
+import type { AnyExpressionFunctionDefinition } from '../expression_functions';
 import { ExpressionFunction } from '../expression_functions';
-import type {
-  ExecutionParams,
-  ExecutionResult,
-  FunctionCacheItem} from '../execution/execution';
-import {
-  Execution
-} from '../execution/execution';
+import type { ExecutionParams, ExecutionResult, FunctionCacheItem } from '../execution/execution';
+import { Execution } from '../execution/execution';
 import type { IRegistry } from '../types';
 import { ExpressionType } from '../expression_types/expression_type';
 import type { AnyExpressionTypeDefinition } from '../expression_types/types';
 import type { ExpressionAstExpression, ExpressionAstFunction } from '../ast';
-import type { ExpressionValueError} from '../expression_types/specs';
+import type { ExpressionValueError } from '../expression_types/specs';
 import { typeSpecs } from '../expression_types/specs';
 import { ALL_NAMESPACES, getByAlias } from '../util';
 import type { ExpressionExecutionParams } from '../service';

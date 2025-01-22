@@ -11,7 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiPageSection } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 
-import type { Error} from '../../../shared_imports';
+import type { Error } from '../../../shared_imports';
 import { PageLoading, PageError, attemptToURIDecode } from '../../../shared_imports';
 import type { TemplateDeserialized } from '../../../../common';
 import { TemplateForm } from '../../components';

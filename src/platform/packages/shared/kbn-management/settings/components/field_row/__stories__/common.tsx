@@ -20,7 +20,7 @@ import type {
 } from '@kbn/management-settings-types';
 import { getDefaultValue, getUserValue } from '@kbn/management-settings-utilities/storybook';
 import { getFieldDefinition } from '@kbn/management-settings-field-definition';
-import type { FieldRow as Component} from '../field_row';
+import type { FieldRow as Component } from '../field_row';
 import { FieldRow } from '../field_row';
 import { FieldRowProvider } from '../services';
 

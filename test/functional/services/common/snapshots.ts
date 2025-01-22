@@ -13,7 +13,7 @@ import { promisify } from 'util';
 
 import expect from '@kbn/expect';
 import del from 'del';
-import type { FtrProviderContext} from '../../ftr_provider_context';
+import type { FtrProviderContext } from '../../ftr_provider_context';
 import { FtrService } from '../../ftr_provider_context';
 
 const mkdirAsync = promisify(mkdir);

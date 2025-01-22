@@ -8,7 +8,7 @@
 import React from 'react';
 import moment from 'moment';
 import { fireEvent, waitFor } from '@testing-library/react';
-import type { AppMockRenderer} from '../../../lib/test_utils';
+import type { AppMockRenderer } from '../../../lib/test_utils';
 import { createAppMockRenderer } from '../../../lib/test_utils';
 import { MaintenanceWindowsList } from './maintenance_windows_list';
 import type { MaintenanceWindow } from '../../../../common';

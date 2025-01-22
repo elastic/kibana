@@ -20,12 +20,12 @@ import {
   isTaskPollingCycleEvent,
   isTaskRunEvent,
 } from '../task_events';
-import type { TaskClaimMetric} from './task_claim_metrics_aggregator';
+import type { TaskClaimMetric } from './task_claim_metrics_aggregator';
 import { TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
 import { createAggregator } from './create_aggregator';
-import type { TaskRunMetric} from './task_run_metrics_aggregator';
+import type { TaskRunMetric } from './task_run_metrics_aggregator';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
-import type { TaskOverdueMetric} from './task_overdue_metrics_aggregator';
+import type { TaskOverdueMetric } from './task_overdue_metrics_aggregator';
 import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 import type { TaskManagerMetricsCollector } from './task_metrics_collector';
 export interface Metrics {

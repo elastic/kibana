@@ -7,7 +7,10 @@
 
 import { i18n } from '@kbn/i18n';
 import { CUMULATIVE_SUM_ID, CUMULATIVE_SUM_NAME } from '@kbn/lens-formula-docs';
-import type { FormattedIndexPatternColumn, ReferenceBasedIndexPatternColumn } from '../column_types';
+import type {
+  FormattedIndexPatternColumn,
+  ReferenceBasedIndexPatternColumn,
+} from '../column_types';
 import type { FormBasedLayer } from '../../../types';
 import {
   checkForDateHistogram,

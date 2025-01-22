@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { memo, useMemo } from 'react';
 import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';

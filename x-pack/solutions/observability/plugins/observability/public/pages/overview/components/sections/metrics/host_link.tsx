@@ -6,11 +6,8 @@
  */
 import React from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type {
-  AssetDetailsLocatorParams} from '@kbn/observability-shared-plugin/common';
-import {
-  ASSET_DETAILS_LOCATOR_ID
-} from '@kbn/observability-shared-plugin/common';
+import type { AssetDetailsLocatorParams } from '@kbn/observability-shared-plugin/common';
+import { ASSET_DETAILS_LOCATOR_ID } from '@kbn/observability-shared-plugin/common';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { StringOrNull } from '../../../../..';
 

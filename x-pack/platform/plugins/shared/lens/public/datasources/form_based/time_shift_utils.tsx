@@ -11,8 +11,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import moment from 'moment';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import { search } from '@kbn/data-plugin/public';
-import type {
-  DatatableUtilitiesService} from '@kbn/data-plugin/common';
+import type { DatatableUtilitiesService } from '@kbn/data-plugin/common';
 import {
   calcAutoIntervalNear,
   isAbsoluteTimeShift,

@@ -10,11 +10,9 @@ import type {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
   KibanaUrl,
-  KbnClient} from '@kbn/scout';
-import {
-  test as base,
-  createLazyPageObject
+  KbnClient,
 } from '@kbn/scout';
+import { test as base, createLazyPageObject } from '@kbn/scout';
 import { OnboardingHomePage } from './page_objects';
 import { CustomLogsPage } from './page_objects/custom_logs';
 

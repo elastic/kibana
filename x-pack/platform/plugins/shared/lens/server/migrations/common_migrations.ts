@@ -9,12 +9,8 @@ import { cloneDeep, mapValues } from 'lodash';
 import type { PaletteOutput, CustomPaletteParams } from '@kbn/coloring';
 import { LayerTypes } from '@kbn/expression-xy-plugin/common';
 import type { SerializableRecord } from '@kbn/utility-types';
-import type {
-  MigrateFunction,
-  MigrateFunctionsObject} from '@kbn/kibana-utils-plugin/common';
-import {
-  mergeMigrationFunctionMaps
-} from '@kbn/kibana-utils-plugin/common';
+import type { MigrateFunction, MigrateFunctionsObject } from '@kbn/kibana-utils-plugin/common';
+import { mergeMigrationFunctionMaps } from '@kbn/kibana-utils-plugin/common';
 import type {
   LensDocShapePre712,
   OperationTypePre712,

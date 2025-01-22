@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiCallOut, EuiFlexGroup, EuiFlexItem, EuiText, EuiIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import type { TextExpansionCallOutState} from './text_expansion_callout';
+import type { TextExpansionCallOutState } from './text_expansion_callout';
 import { TextExpansionDismissButton } from './text_expansion_callout';
 
 export const ModelDeploymentInProgress = ({

@@ -13,11 +13,8 @@ import type { EnterpriseSearchApplicationDetails } from '../../../../../common/t
 
 import { FetchSearchApplicationApiLogic } from '../../api/search_applications/fetch_search_application_api_logic';
 
-import type {
-  SearchApplicationIndicesFlyoutValues} from './search_application_indices_flyout_logic';
-import {
-  SearchApplicationIndicesFlyoutLogic,
-} from './search_application_indices_flyout_logic';
+import type { SearchApplicationIndicesFlyoutValues } from './search_application_indices_flyout_logic';
+import { SearchApplicationIndicesFlyoutLogic } from './search_application_indices_flyout_logic';
 
 const DEFAULT_VALUES: SearchApplicationIndicesFlyoutValues = {
   fetchSearchApplicationApiError: undefined,

@@ -12,7 +12,7 @@ import Fs from 'fs';
 import { Jsonc } from '@kbn/repo-packages';
 
 import { BundleCache } from './bundle_cache';
-import type { UnknownVals} from './ts_helpers';
+import type { UnknownVals } from './ts_helpers';
 import { isObj } from './ts_helpers';
 import { omit } from './obj_helpers';
 import { includes } from './array_helpers';

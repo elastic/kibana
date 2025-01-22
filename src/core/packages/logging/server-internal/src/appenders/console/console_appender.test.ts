@@ -19,7 +19,7 @@ jest.mock('../../layouts/layouts', () => {
   };
 });
 
-import type { LogRecord} from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { unsafeConsole } from '@kbn/security-hardening';
 import { ConsoleAppender } from './console_appender';

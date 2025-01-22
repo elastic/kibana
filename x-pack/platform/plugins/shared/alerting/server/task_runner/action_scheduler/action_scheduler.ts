@@ -6,11 +6,8 @@
  */
 
 import { createTaskRunError, TaskErrorSource } from '@kbn/task-manager-plugin/server';
-import type {
-  ExecutionResponseItem} from '@kbn/actions-plugin/server/create_execute_function';
-import {
-  ExecutionResponseType,
-} from '@kbn/actions-plugin/server/create_execute_function';
+import type { ExecutionResponseItem } from '@kbn/actions-plugin/server/create_execute_function';
+import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { chunk } from 'lodash';
 import type { ThrottledActions } from '../../types';

@@ -27,8 +27,7 @@ import {
   ORGANIZATION_ACCOUNT,
   TEMPLATE_URL_ACCOUNT_TYPE_ENV_VAR,
 } from '../../../../common/constants';
-import type {
-  GcpFormProps} from './gcp_credential_form';
+import type { GcpFormProps } from './gcp_credential_form';
 import {
   GCPSetupInfoContent,
   GcpInputVarFields,

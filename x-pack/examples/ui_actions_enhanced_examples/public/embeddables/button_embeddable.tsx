@@ -6,12 +6,8 @@
  */
 
 import React, { useCallback } from 'react';
-import type {
-  DefaultEmbeddableApi,
-  ReactEmbeddableFactory} from '@kbn/embeddable-plugin/public';
-import {
-  VALUE_CLICK_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import { VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { EuiCard, EuiFlexItem, EuiIcon } from '@elastic/eui';
 import type { AdvancedUiActionsStart } from '@kbn/ui-actions-enhanced-plugin/public';
 import { BUTTON_EMBEDDABLE } from './register_button_embeddable';

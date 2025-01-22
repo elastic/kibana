@@ -9,16 +9,8 @@
 
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { SavedSearch, SortOrder } from '@kbn/saved-search-plugin/public';
-import type {
-  BehaviorSubject} from 'rxjs';
-import {
-  combineLatest,
-  distinctUntilChanged,
-  filter,
-  firstValueFrom,
-  race,
-  switchMap,
-} from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
+import { combineLatest, distinctUntilChanged, filter, firstValueFrom, race, switchMap } from 'rxjs';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
 import { isEqual } from 'lodash';
 import { isOfAggregateQueryType } from '@kbn/es-query';

@@ -13,10 +13,9 @@ import type {
   EventObject,
   Expr,
   PureAction,
-  SendActionOptions} from 'xstate';
-import {
-  actions
+  SendActionOptions,
 } from 'xstate';
+import { actions } from 'xstate';
 
 export const sendIfDefined =
   <TSentEvent extends EventObject = AnyEventObject>(target: string | ActorRef<TSentEvent>) =>

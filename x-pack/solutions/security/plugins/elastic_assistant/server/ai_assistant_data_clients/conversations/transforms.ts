@@ -6,12 +6,8 @@
  */
 
 import type { estypes } from '@elastic/elasticsearch';
-import type {
-  ConversationResponse,
-  Replacements} from '@kbn/elastic-assistant-common';
-import {
-  replaceOriginalValuesWithUuidValues,
-} from '@kbn/elastic-assistant-common';
+import type { ConversationResponse, Replacements } from '@kbn/elastic-assistant-common';
+import { replaceOriginalValuesWithUuidValues } from '@kbn/elastic-assistant-common';
 import type { EsConversationSchema } from './types';
 
 export const transformESSearchToConversations = (

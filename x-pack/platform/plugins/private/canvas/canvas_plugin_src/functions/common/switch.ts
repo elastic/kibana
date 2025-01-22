@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { defaultIfEmpty, defer, of, switchMap } from 'rxjs';
 import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 import type { Case } from '../../../types';

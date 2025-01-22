@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent, MutableRefObject} from 'react';
+import type { FunctionComponent, MutableRefObject } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { EuiFlexGroup } from '@elastic/eui';
 import AutoSizer from 'react-virtualized/dist/commonjs/AutoSizer';

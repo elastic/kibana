@@ -13,7 +13,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import React, { useCallback, useEffect, useMemo } from 'react';
 
 import { groupActions, groupByIdSelector } from './state';
-import type { GroupOption , Action, GroupMap } from './types';
+import type { GroupOption, Action, GroupMap } from './types';
 import { defaultGroup } from './types';
 import { GroupSelector, isNoneGroup } from '..';
 import { getTelemetryEvent } from '../telemetry/const';

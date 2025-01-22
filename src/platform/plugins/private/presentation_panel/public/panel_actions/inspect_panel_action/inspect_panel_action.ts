@@ -14,11 +14,10 @@ import { tracksOverlays } from '@kbn/presentation-containers';
 import type {
   EmbeddableApiContext,
   PublishesPanelTitle,
-  HasParentApi} from '@kbn/presentation-publishing';
-import {
-  getPanelTitle
+  HasParentApi,
 } from '@kbn/presentation-publishing';
-import type { Action} from '@kbn/ui-actions-plugin/public';
+import { getPanelTitle } from '@kbn/presentation-publishing';
+import type { Action } from '@kbn/ui-actions-plugin/public';
 import { IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INSPECT_PANEL } from './constants';
 import { inspector } from '../../kibana_services';

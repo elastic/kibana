@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { ConcreteTaskInstance, TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
+import type {
+  ConcreteTaskInstance,
+  TaskManagerSetupContract,
+} from '@kbn/task-manager-plugin/server';
 import moment from 'moment';
 import {
   BROWSER_TEST_NOW_RUN,

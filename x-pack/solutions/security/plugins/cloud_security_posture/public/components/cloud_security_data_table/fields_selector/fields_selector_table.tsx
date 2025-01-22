@@ -6,10 +6,7 @@
  */
 import React, { useCallback, useMemo, useState } from 'react';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
-import type {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
-  EuiSearchBarProps} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn, EuiSearchBarProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiCheckbox,

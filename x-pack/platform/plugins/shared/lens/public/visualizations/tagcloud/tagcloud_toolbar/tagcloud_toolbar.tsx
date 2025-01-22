@@ -14,15 +14,8 @@
 
 import type { ChangeEvent } from 'react';
 import React from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSelect,
-  EuiSwitch
-} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSelect, EuiSwitch } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { $Values } from '@kbn/utility-types';
 import { Orientation } from '@kbn/expression-tagcloud-plugin/common';

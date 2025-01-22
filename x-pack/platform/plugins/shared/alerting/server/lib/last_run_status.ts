@@ -11,13 +11,8 @@ import { getReasonFromError } from './error_with_reason';
 import { getEsErrorMessage } from './errors';
 import type { RuleLastRunOutcomes } from '../../common';
 import { RuleLastRunOutcomeOrderMap } from '../../common';
-import type {
-  RawRuleLastRun,
-  RuleLastRun} from '../types';
-import {
-  RuleLastRunOutcomeValues,
-  RuleExecutionStatusWarningReasons
-} from '../types';
+import type { RawRuleLastRun, RuleLastRun } from '../types';
+import { RuleLastRunOutcomeValues, RuleExecutionStatusWarningReasons } from '../types';
 import { translations } from '../constants/translations';
 import type { RuleRunMetrics } from './rule_run_metrics_store';
 import type { RuleResultService } from '../monitoring/rule_result_service';

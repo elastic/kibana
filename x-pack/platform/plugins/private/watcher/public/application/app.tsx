@@ -24,7 +24,10 @@ import type { RouteComponentProps } from 'react-router-dom';
 import { Redirect, withRouter } from 'react-router-dom';
 import { Router, Routes, Route } from '@kbn/shared-ux-router';
 
-import type { RegisterManagementAppArgs, ManagementAppMountParams } from '@kbn/management-plugin/public';
+import type {
+  RegisterManagementAppArgs,
+  ManagementAppMountParams,
+} from '@kbn/management-plugin/public';
 
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { LicenseManagementLocator } from '@kbn/license-management-plugin/public/locator';

@@ -12,10 +12,9 @@ import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 import type {
   GetSLOResponse,
   APMTransactionDurationIndicator,
-  APMTransactionErrorRateIndicator} from '@kbn/slo-schema';
-import {
-  apmTransactionDurationIndicatorSchema
+  APMTransactionErrorRateIndicator,
 } from '@kbn/slo-schema';
+import { apmTransactionDurationIndicatorSchema } from '@kbn/slo-schema';
 import type { BurnRateAlert, BurnRateRule, TimeRange } from '../../../types';
 
 type EmbeddableId =

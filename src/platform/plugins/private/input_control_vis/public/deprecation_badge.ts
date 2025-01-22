@@ -9,9 +9,7 @@
 
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import type {
-  CanAccessViewMode,
-  EmbeddableApiContext} from '@kbn/presentation-publishing';
+import type { CanAccessViewMode, EmbeddableApiContext } from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   getInheritedViewMode,

@@ -12,7 +12,7 @@ import type {
   InternalClusterClient,
   StoredEntitySourceDefinition,
 } from '../types';
-import type { SourceAs} from '../run_esql_query';
+import type { SourceAs } from '../run_esql_query';
 import { runESQLQuery } from '../run_esql_query';
 import { EntityDefinitionConflict } from '../errors/entity_definition_conflict';
 import { readTypeDefinitionById } from './type_definition';

@@ -14,7 +14,8 @@ import type {
   EuiDataGridCellValueElementProps,
   EuiDataGridSorting,
   EuiDataGridColumn,
-  EuiDataGridCellPopoverElementProps} from '@elastic/eui';
+  EuiDataGridCellPopoverElementProps,
+} from '@elastic/eui';
 import {
   EuiDataGrid,
   EuiFlexGroup,
@@ -26,16 +27,12 @@ import {
   EuiIconTip,
   EuiText,
 } from '@elastic/eui';
-import type {
-  IExecutionLog,
-  ExecutionLogSortFields} from '@kbn/alerting-plugin/common';
-import {
-  executionLogSortableColumns
-} from '@kbn/alerting-plugin/common';
+import type { IExecutionLog, ExecutionLogSortFields } from '@kbn/alerting-plugin/common';
+import { executionLogSortableColumns } from '@kbn/alerting-plugin/common';
 import type { IExecutionLog as IConnectorsExecutionLog } from '@kbn/actions-plugin/common';
 import { get } from 'lodash';
 import { getIsExperimentalFeatureEnabled } from '../../../../../common/get_experimental_features';
-import type { ColumnId} from '.';
+import type { ColumnId } from '.';
 import { EventLogListCellRenderer, EventLogPaginationStatus } from '.';
 import { RuleActionErrorBadge } from '../../../rule_details/components/rule_action_error_badge';
 import './event_log_list.scss';

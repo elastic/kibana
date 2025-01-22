@@ -9,7 +9,10 @@
 
 import { partition } from 'lodash';
 import type { ActionVariable } from '@kbn/alerting-types';
-import type { ActionGroupWithMessageVariables, ActionVariables } from '@kbn/triggers-actions-ui-types';
+import type {
+  ActionGroupWithMessageVariables,
+  ActionVariables,
+} from '@kbn/triggers-actions-ui-types';
 import { transformActionVariables } from './transforms';
 
 export const getAvailableActionVariables = (

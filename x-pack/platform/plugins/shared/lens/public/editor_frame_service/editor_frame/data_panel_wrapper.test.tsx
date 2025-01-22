@@ -11,7 +11,7 @@ import type { Datasource, DatasourceDataPanelProps, VisualizationMap } from '../
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createMockFramePublicAPI, mockStoreDeps, renderWithReduxStore } from '../../mocks';
 import { disableAutoApply } from '../../state_management/lens_slice';
-import type { LensRootStore} from '../../state_management';
+import type { LensRootStore } from '../../state_management';
 import { selectTriggerApplyChanges } from '../../state_management';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { createIndexPatternServiceMock } from '../../mocks/data_views_service_mock';

@@ -13,7 +13,7 @@ import type { SavedObjectMigrationContext, SavedObjectUnsanitizedDoc } from '@kb
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { migrationMocks } from '@kbn/core/server/mocks';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
-import type { RuleType} from '@kbn/securitysolution-rules';
+import type { RuleType } from '@kbn/securitysolution-rules';
 import { ruleTypeMappings } from '@kbn/securitysolution-rules';
 import { isAnyActionSupportIncidents } from './7.11';
 import { RULE_SAVED_OBJECT_TYPE } from '..';

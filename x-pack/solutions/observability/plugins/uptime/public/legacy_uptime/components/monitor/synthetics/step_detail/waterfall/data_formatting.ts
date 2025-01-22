@@ -8,11 +8,7 @@
 import { euiPaletteColorBlind } from '@elastic/eui';
 import moment from 'moment';
 
-import type {
-  NetworkItems,
-  NetworkItem,
-  SidebarItems,
-  LegendItems} from './types';
+import type { NetworkItems, NetworkItem, SidebarItems, LegendItems } from './types';
 import {
   FriendlyFlyoutLabels,
   FriendlyTimingLabels,
@@ -21,7 +17,7 @@ import {
   MimeTypesMap,
   Timings,
   Metadata,
-  TIMING_ORDER
+  TIMING_ORDER,
 } from './types';
 import type { WaterfallData, WaterfallMetadata } from '../../waterfall';
 import type { NetworkEvent } from '../../../../../../../common/runtime_types';

@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Dispatch,
-  FC,
-  PropsWithChildren,
-  SetStateAction} from 'react';
-import React, {
-  createContext,
-  useState,
-} from 'react';
+import type { Dispatch, FC, PropsWithChildren, SetStateAction } from 'react';
+import React, { createContext, useState } from 'react';
 
 export interface BlockListContextValue {
   blockListIndicatorValue: string;

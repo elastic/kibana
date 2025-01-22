@@ -47,10 +47,9 @@ import type {
   BurnRateRuleParams,
   BurnRateRuleTypeState,
   Group,
-  WindowSchema} from './types';
-import {
-  AlertStates
+  WindowSchema,
 } from './types';
+import { AlertStates } from './types';
 
 export type BurnRateAlert = Omit<ObservabilitySloAlert, 'kibana.alert.group'> & {
   [ALERT_GROUP]?: Group[];

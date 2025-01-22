@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import type { OperatorFunction} from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
 import { catchError, filter, of, share, throwError } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { MessageRole } from '../../../../common';
 import type {
   ChatCompletionChunkEvent,
-  MessageOrChatEvent} from '../../../../common/conversation_complete';
+  MessageOrChatEvent,
+} from '../../../../common/conversation_complete';
 import {
   isFunctionNotFoundError,
   StreamingChatResponseEventType,

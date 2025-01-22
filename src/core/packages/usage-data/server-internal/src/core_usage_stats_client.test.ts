@@ -14,10 +14,11 @@ import type {
   BaseIncrementOptions,
   IncrementSavedObjectsImportOptions,
   IncrementSavedObjectsResolveImportErrorsOptions,
-  IncrementSavedObjectsExportOptions} from '@kbn/core-usage-data-base-server-internal';
+  IncrementSavedObjectsExportOptions,
+} from '@kbn/core-usage-data-base-server-internal';
 import {
   CORE_USAGE_STATS_TYPE,
-  CORE_USAGE_STATS_ID
+  CORE_USAGE_STATS_ID,
 } from '@kbn/core-usage-data-base-server-internal';
 import {
   BULK_CREATE_STATS_PREFIX,

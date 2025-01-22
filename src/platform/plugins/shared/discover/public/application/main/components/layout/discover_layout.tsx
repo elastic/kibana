@@ -8,7 +8,7 @@
  */
 
 import './discover_layout.scss';
-import type { ReactElement} from 'react';
+import type { ReactElement } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   EuiPage,
@@ -28,7 +28,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { useDragDropContext } from '@kbn/dom-drag-drop';
 import { type DataViewField, DataViewType } from '@kbn/data-views-plugin/public';
 import { SHOW_FIELD_STATISTICS, SORT_DEFAULT_ORDER_SETTING } from '@kbn/discover-utils';
-import type { UseColumnsProps} from '@kbn/unified-data-table';
+import type { UseColumnsProps } from '@kbn/unified-data-table';
 import { popularizeField, useColumns } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { BehaviorSubject } from 'rxjs';

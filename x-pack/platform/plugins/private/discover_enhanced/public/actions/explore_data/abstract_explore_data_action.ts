@@ -16,7 +16,8 @@ import type {
   CanAccessViewMode,
   EmbeddableApiContext,
   HasType,
-  PublishesDataViews} from '@kbn/presentation-publishing';
+  PublishesDataViews,
+} from '@kbn/presentation-publishing';
 import {
   apiCanAccessViewMode,
   apiHasParentApi,
@@ -24,7 +25,7 @@ import {
   apiIsOfType,
   apiPublishesDataViews,
   apiPublishesPartialUnifiedSearch,
-  getInheritedViewMode
+  getInheritedViewMode,
 } from '@kbn/presentation-publishing';
 import type { KibanaLocation } from '@kbn/share-plugin/public';
 

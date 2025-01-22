@@ -14,7 +14,7 @@ import {
 
 import type { ExceptionListSoSchema } from '../schemas/saved_objects';
 
-import type { OldExceptionListSoSchema} from './migrations';
+import type { OldExceptionListSoSchema } from './migrations';
 import { migrations } from './migrations';
 
 const DEFAULT_EXCEPTION_LIST_SO: ExceptionListSoSchema = {

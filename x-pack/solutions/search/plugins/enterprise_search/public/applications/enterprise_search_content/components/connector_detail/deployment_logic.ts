@@ -10,13 +10,10 @@ import { kea } from 'kea';
 
 import type { Connector } from '@kbn/search-connectors';
 
-import type { HttpError} from '../../../../../common/types/api';
+import type { HttpError } from '../../../../../common/types/api';
 import { Status } from '../../../../../common/types/api';
-import type {
-  GenerateConfigApiActions} from '../../api/connector/generate_connector_config_api_logic';
-import {
-  GenerateConfigApiLogic,
-} from '../../api/connector/generate_connector_config_api_logic';
+import type { GenerateConfigApiActions } from '../../api/connector/generate_connector_config_api_logic';
+import { GenerateConfigApiLogic } from '../../api/connector/generate_connector_config_api_logic';
 import type { APIKeyResponse } from '../../api/generate_api_key/generate_api_key_logic';
 
 export interface DeploymentLogicValues {

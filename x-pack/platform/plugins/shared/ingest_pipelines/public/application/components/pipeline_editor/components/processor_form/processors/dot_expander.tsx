@@ -13,7 +13,7 @@ import { FIELD_TYPES, UseField, Field, ToggleField } from '../../../../../../sha
 
 import { FieldNameField } from './common_fields/field_name_field';
 
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { from, to } from './shared';
 
 const fieldsConfig: FieldsConfig = {

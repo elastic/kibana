@@ -19,12 +19,11 @@ import {
 import { getJoinAggKey } from '../../../../../common/get_agg_key';
 import { ESDocField } from '../../../fields/es_doc_field';
 import { AbstractESAggSource } from '../../es_agg_source';
-import type {
-  BucketProperties} from '../../../../../common/elasticsearch_util';
+import type { BucketProperties } from '../../../../../common/elasticsearch_util';
 import {
   getField,
   addFieldToDSL,
-  extractPropertiesFromBucket
+  extractPropertiesFromBucket,
 } from '../../../../../common/elasticsearch_util';
 import type {
   DataFilters,

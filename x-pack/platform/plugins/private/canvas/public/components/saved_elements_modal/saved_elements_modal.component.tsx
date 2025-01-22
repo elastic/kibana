@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ChangeEvent,
-  FunctionComponent} from 'react';
-import React, {
-  Fragment,
-  useState,
-  useEffect,
-  useRef,
-} from 'react';
+import type { ChangeEvent, FunctionComponent } from 'react';
+import React, { Fragment, useState, useEffect, useRef } from 'react';
 import {
   EuiModal,
   EuiModalBody,

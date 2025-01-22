@@ -21,7 +21,8 @@ import type {
   EuiDataGridCustomBodyProps,
   EuiDataGridStyle,
   EuiDataGridProps,
-  EuiDataGridToolBarVisibilityDisplaySelectorOptions} from '@elastic/eui';
+  EuiDataGridToolBarVisibilityDisplaySelectorOptions,
+} from '@elastic/eui';
 import {
   EuiDataGrid,
   EuiScreenReaderOnly,
@@ -30,7 +31,7 @@ import {
   htmlIdGenerator,
   EuiLoadingSpinner,
   EuiIcon,
-  EuiHorizontalRule
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import {
@@ -40,8 +41,7 @@ import {
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';
 import type { Serializable } from '@kbn/utility-types';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
-import type {
-  RowControlColumn} from '@kbn/discover-utils';
+import type { RowControlColumn } from '@kbn/discover-utils';
 import {
   getShouldShowFieldHandler,
   canPrependTimeFieldColumn,
@@ -71,7 +71,7 @@ import {
   SELECT_ROW,
   OPEN_DETAILS,
 } from './data_table_columns';
-import type { DataTableContext} from '../table_context';
+import type { DataTableContext } from '../table_context';
 import { UnifiedDataTableContext } from '../table_context';
 import { getSchemaDetectors } from './data_table_schema';
 import { DataTableDocumentToolbarBtn } from './data_table_document_selection';

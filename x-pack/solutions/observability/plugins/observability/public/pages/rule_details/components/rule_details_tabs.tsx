@@ -6,14 +6,8 @@
  */
 
 import React, { useRef } from 'react';
-import type {
-  EuiTabbedContentTab} from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiSpacer,
-  EuiTabbedContent
-} from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiTabbedContent } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
 import type { Rule } from '@kbn/triggers-actions-ui-plugin/public';

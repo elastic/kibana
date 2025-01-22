@@ -6,7 +6,7 @@
  */
 
 import { timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
-import type { SLODefinition} from '../../../../domain/models';
+import type { SLODefinition } from '../../../../domain/models';
 import { Duration, toDurationUnit } from '../../../../domain/models';
 import { getDelayInSecondsFromSLO } from '../../../../domain/services/get_delay_in_seconds_from_slo';
 import { getLookbackDateRange } from '../../../../domain/services/get_lookback_date_range';

@@ -9,14 +9,15 @@
 
 import './solution_nav.scss';
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useState, useMemo, useEffect } from 'react';
 import classNames from 'classnames';
 import type {
   EuiAvatarProps,
   EuiFlyoutProps,
   EuiSideNavItemType,
-  EuiSideNavProps} from '@elastic/eui';
+  EuiSideNavProps,
+} from '@elastic/eui';
 import {
   EuiCollapsibleNavGroup,
   EuiFlyout,

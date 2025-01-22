@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import type { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
-import { get, uniq } from 'lodash';
 import type {
-  INDEX_PATTERN_TYPES} from '../../../../common/constants';
+  CollectorFetchContext,
+  UsageCollectionSetup,
+} from '@kbn/usage-collection-plugin/server';
+import { get, uniq } from 'lodash';
+import type { INDEX_PATTERN_TYPES } from '../../../../common/constants';
 import {
   KIBANA_STATS_TYPE_MONITORING,
   METRICBEAT_INDEX_NAME_UNIQUE_TOKEN,

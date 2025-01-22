@@ -13,16 +13,16 @@ import type {
   UnifiedHistogramContainerProps,
   UnifiedHistogramCreationOptions,
   UnifiedHistogramState,
-  UnifiedHistogramVisContext} from '@kbn/unified-histogram-plugin/public';
+  UnifiedHistogramVisContext,
+} from '@kbn/unified-histogram-plugin/public';
 import {
   canImportVisContext,
   UnifiedHistogramExternalVisContextStatus,
-  UnifiedHistogramFetchStatus
+  UnifiedHistogramFetchStatus,
 } from '@kbn/unified-histogram-plugin/public';
 import { isEqual } from 'lodash';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import type {
-  Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import {
   debounceTime,
   distinctUntilChanged,
@@ -37,7 +37,7 @@ import useObservable from 'react-use/lib/useObservable';
 import type { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { Datatable, DatatableColumn } from '@kbn/expressions-plugin/common';
 import type { SavedSearch } from '@kbn/saved-search-plugin/common';
-import type { Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import { useDiscoverCustomization } from '../../../../customizations';

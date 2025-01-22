@@ -11,13 +11,14 @@ import type {
   Case,
   UserCommentAttachmentPayload,
   CreateCaseUserAction,
-  CaseCustomFields} from '@kbn/cases-plugin/common/types/domain';
+  CaseCustomFields,
+} from '@kbn/cases-plugin/common/types/domain';
 import {
   CaseSeverity,
   CaseStatuses,
   AttachmentType,
   ConnectorTypes,
-  CustomFieldTypes
+  CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
 import { getCaseUserActionUrl } from '@kbn/cases-plugin/common/api';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';

@@ -14,12 +14,8 @@ import { euiLightVars } from '@kbn/ui-theme';
 import type { CustomPaletteParams, PaletteOutput, PaletteRegistry } from '@kbn/coloring';
 import type { VisualizationDimensionEditorProps } from '../../types';
 import type { MetricVisualizationState } from './types';
-import type {
-  SupportingVisType} from './dimension_editor';
-import {
-  DimensionEditor,
-  DimensionEditorAdditionalSection
-} from './dimension_editor';
+import type { SupportingVisType } from './dimension_editor';
+import { DimensionEditor, DimensionEditorAdditionalSection } from './dimension_editor';
 import type { DatasourcePublicAPI } from '../..';
 import { createMockFramePublicAPI, generateActiveData } from '../../mocks';
 

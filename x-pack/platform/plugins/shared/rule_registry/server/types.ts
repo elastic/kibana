@@ -12,7 +12,11 @@ import type {
   RuleTypeParams,
   RuleTypeState,
 } from '@kbn/alerting-plugin/common';
-import type { RuleExecutorOptions, RuleExecutorServices, RuleType } from '@kbn/alerting-plugin/server';
+import type {
+  RuleExecutorOptions,
+  RuleExecutorServices,
+  RuleType,
+} from '@kbn/alerting-plugin/server';
 import type { AlertsClient } from './alert_data_client/alerts_client';
 
 type SimpleAlertType<

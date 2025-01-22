@@ -12,7 +12,7 @@ import React from 'react';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { render } from '@testing-library/react';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
-import type { ContextStateManager} from '../options_list_context_provider';
+import type { ContextStateManager } from '../options_list_context_provider';
 import { OptionsListControlContext } from '../options_list_context_provider';
 import type { OptionsListComponentApi } from '../types';
 import { OptionsListControl } from './options_list_control';

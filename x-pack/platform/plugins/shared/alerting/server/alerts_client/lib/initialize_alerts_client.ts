@@ -16,10 +16,9 @@ import type {
   AlertInstanceState,
   RuleAlertData,
   RuleTypeParams,
-  SanitizedRule} from '../../types';
-import {
-  DEFAULT_FLAPPING_SETTINGS
+  SanitizedRule,
 } from '../../types';
+import { DEFAULT_FLAPPING_SETTINGS } from '../../types';
 import type { RuleTaskInstance, RuleTypeRunnerContext } from '../../task_runner/types';
 
 export type RuleData<Params extends RuleTypeParams> = Pick<

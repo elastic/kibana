@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter, AggregateQuery} from '@kbn/es-query';
+import type { Filter, AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType } from '@kbn/es-query';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import type { UiActionsActionDefinition, UiActionsStart } from '@kbn/ui-actions-plugin/public';

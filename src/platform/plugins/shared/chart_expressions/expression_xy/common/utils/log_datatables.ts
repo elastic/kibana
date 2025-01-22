@@ -14,7 +14,7 @@ import type {
   ExecutionContext,
 } from '@kbn/expressions-plugin/common';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import type { Dimension} from '@kbn/visualizations-plugin/common/utils';
+import type { Dimension } from '@kbn/visualizations-plugin/common/utils';
 import { prepareLogTable } from '@kbn/visualizations-plugin/common/utils';
 import { LayerTypes, REFERENCE_LINE } from '../constants';
 import { strings } from '../i18n';

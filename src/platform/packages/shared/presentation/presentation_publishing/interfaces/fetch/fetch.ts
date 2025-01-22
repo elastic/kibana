@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
   combineLatest,
@@ -27,13 +26,8 @@ import {
 } from 'rxjs';
 import type { AggregateQuery, Filter, Query, TimeRange } from '@kbn/es-query';
 import { useMemo, useEffect } from 'react';
-import type {
-  PublishesTimeRange,
-  PublishesUnifiedSearch} from './publishes_unified_search';
-import {
-  apiPublishesTimeRange,
-  apiPublishesUnifiedSearch
-} from './publishes_unified_search';
+import type { PublishesTimeRange, PublishesUnifiedSearch } from './publishes_unified_search';
+import { apiPublishesTimeRange, apiPublishesUnifiedSearch } from './publishes_unified_search';
 import type { PublishesSearchSession } from './publishes_search_session';
 import { apiPublishesSearchSession } from './publishes_search_session';
 import type { HasParentApi } from '../has_parent_api';

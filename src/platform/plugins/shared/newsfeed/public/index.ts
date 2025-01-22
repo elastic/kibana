@@ -8,12 +8,8 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core/public';
-import type {
-  NewsfeedPublicPluginSetup,
-  NewsfeedPublicPluginStart} from './plugin';
-import {
-  NewsfeedPublicPlugin,
-} from './plugin';
+import type { NewsfeedPublicPluginSetup, NewsfeedPublicPluginStart } from './plugin';
+import { NewsfeedPublicPlugin } from './plugin';
 import type { FetchResult, NewsfeedItem } from './types';
 import { NewsfeedApiEndpoint } from './lib/api';
 

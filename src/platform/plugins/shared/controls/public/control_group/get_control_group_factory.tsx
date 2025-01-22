@@ -18,12 +18,8 @@ import {
   apiHasSaveNotification,
   combineCompatibleChildrenApis,
 } from '@kbn/presentation-containers';
-import type {
-  PublishesDataViews} from '@kbn/presentation-publishing';
-import {
-  apiPublishesDataViews,
-  useBatchedPublishingSubjects,
-} from '@kbn/presentation-publishing';
+import type { PublishesDataViews } from '@kbn/presentation-publishing';
+import { apiPublishesDataViews, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { apiPublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 
 import type {

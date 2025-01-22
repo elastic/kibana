@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  KibanaReactContextValue} from '@kbn/kibana-react-plugin/public';
+import type { KibanaReactContextValue } from '@kbn/kibana-react-plugin/public';
 import {
   KibanaContextProvider,
   useKibana,

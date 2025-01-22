@@ -11,7 +11,8 @@ import type {
   EuiInMemoryTableProps,
   EuiTableActionsColumnType,
   EuiBasicTableColumn,
-  EuiTableSelectionType} from '@elastic/eui';
+  EuiTableSelectionType,
+} from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiToolTip,

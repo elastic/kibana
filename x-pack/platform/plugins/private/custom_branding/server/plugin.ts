@@ -12,10 +12,9 @@ import type {
   KibanaRequest,
   Logger,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/server';
-import {
-  SECURITY_EXTENSION_ID,
+  PluginInitializerContext,
 } from '@kbn/core/server';
+import { SECURITY_EXTENSION_ID } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { License } from '@kbn/license-api-guard-plugin/server';
 import type { CustomBranding } from '@kbn/core-custom-branding-common';

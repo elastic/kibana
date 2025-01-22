@@ -19,12 +19,15 @@ import type {
   PluginInitializerContext,
   AppMountParameters,
   AppUpdater,
-  AppDeepLink} from '@kbn/core/public';
-import {
-  DEFAULT_APP_CATEGORIES,
-  AppStatus
+  AppDeepLink,
 } from '@kbn/core/public';
-import type { ConfigSchema, ManagementSetup, ManagementStart, NavigationCardsSubject } from './types';
+import { DEFAULT_APP_CATEGORIES, AppStatus } from '@kbn/core/public';
+import type {
+  ConfigSchema,
+  ManagementSetup,
+  ManagementStart,
+  NavigationCardsSubject,
+} from './types';
 
 import { MANAGEMENT_APP_ID } from '../common/contants';
 import { ManagementAppLocatorDefinition } from '../common/locator';

@@ -14,11 +14,8 @@ import type { DeleteSearchApplicationApiLogicResponse } from '../../api/search_a
 import { SEARCH_APPLICATIONS_PATH } from '../../routes';
 import { SearchApplicationsListLogic } from '../search_applications/search_applications_list_logic';
 
-import type {
-  SearchApplicationViewValues} from './search_application_view_logic';
-import {
-  SearchApplicationViewLogic
-} from './search_application_view_logic';
+import type { SearchApplicationViewValues } from './search_application_view_logic';
+import { SearchApplicationViewLogic } from './search_application_view_logic';
 
 const DEFAULT_VALUES: SearchApplicationViewValues = {
   fetchSearchApplicationApiError: undefined,

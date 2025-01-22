@@ -6,9 +6,7 @@
  */
 
 import { prefixIndexPatternWithCcs } from './ccs_utils';
-import type {
-  DS_INDEX_PATTERN_LOGS,
-  INDEX_PATTERN_TYPES} from './constants';
+import type { DS_INDEX_PATTERN_LOGS, INDEX_PATTERN_TYPES } from './constants';
 import {
   INDEX_PATTERN_ELASTICSEARCH,
   INDEX_PATTERN_ELASTICSEARCH_ECS,

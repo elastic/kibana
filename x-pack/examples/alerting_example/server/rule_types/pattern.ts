@@ -10,11 +10,9 @@ import { schema } from '@kbn/config-schema';
 import type {
   RuleType as BaseRuleType,
   RuleTypeState,
-  RuleExecutorOptions as BaseRuleExecutorOptions} from '@kbn/alerting-plugin/server';
-import {
-  DEFAULT_AAD_CONFIG,
-  AlertsClientError,
+  RuleExecutorOptions as BaseRuleExecutorOptions,
 } from '@kbn/alerting-plugin/server';
+import { DEFAULT_AAD_CONFIG, AlertsClientError } from '@kbn/alerting-plugin/server';
 import type { DefaultAlert } from '@kbn/alerts-as-data-utils';
 import type { RecoveredActionGroupId } from '@kbn/alerting-plugin/common';
 

@@ -8,14 +8,15 @@
 import type { IRouter } from '@kbn/core/server';
 import type {
   DisableRuleRequestBodyV1,
-  DisableRuleRequestParamsV1} from '../../../../../common/routes/rule/apis/disable';
+  DisableRuleRequestParamsV1,
+} from '../../../../../common/routes/rule/apis/disable';
 import {
   disableRuleRequestBodySchemaV1,
   disableRuleRequestParamsSchemaV1,
 } from '../../../../../common/routes/rule/apis/disable';
-import type { ILicenseState} from '../../../../lib';
+import type { ILicenseState } from '../../../../lib';
 import { RuleTypeDisabledError } from '../../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
 import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';

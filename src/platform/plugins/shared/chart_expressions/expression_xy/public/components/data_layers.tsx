@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  BarSeriesProps} from '@elastic/charts';
+import type { BarSeriesProps } from '@elastic/charts';
 import {
   AreaSeries,
   BarSeries,
@@ -35,7 +34,8 @@ import type {
   GroupsConfiguration,
   DatatablesWithFormatInfo,
   LayersAccessorsTitles,
-  LayersFieldFormats} from '../helpers';
+  LayersFieldFormats,
+} from '../helpers';
 import {
   getColorAssignments,
   getFitOptions,

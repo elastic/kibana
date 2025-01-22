@@ -9,13 +9,8 @@
 
 import type { ContextWithProfileId } from '../../../../profile_service';
 import { createEsqlDataSource } from '../../../../../../common/data_sources';
-import type {
-  DataSourceProfileProviderParams,
-  RootContext} from '../../../../profiles';
-import {
-  DataSourceCategory,
-  SolutionType,
-} from '../../../../profiles';
+import type { DataSourceProfileProviderParams, RootContext } from '../../../../profiles';
+import { DataSourceCategory, SolutionType } from '../../../../profiles';
 import { createResolve } from './create_resolve';
 import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 

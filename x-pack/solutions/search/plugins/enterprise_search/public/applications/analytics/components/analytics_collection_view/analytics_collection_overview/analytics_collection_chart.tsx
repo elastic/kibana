@@ -29,7 +29,10 @@ import { EuiFlexGroup, EuiLoadingChart } from '@elastic/eui';
 import DateMath from '@kbn/datemath';
 
 import { i18n } from '@kbn/i18n';
-import type { DateHistogramIndexPatternColumn, TypedLensByValueInput } from '@kbn/lens-plugin/public';
+import type {
+  DateHistogramIndexPatternColumn,
+  TypedLensByValueInput,
+} from '@kbn/lens-plugin/public';
 
 import { euiThemeVars } from '@kbn/ui-theme';
 

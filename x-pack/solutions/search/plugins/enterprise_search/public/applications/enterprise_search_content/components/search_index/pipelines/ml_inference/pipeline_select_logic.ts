@@ -14,10 +14,9 @@ import { getMLType } from '../../../shared/ml_inference/utils';
 
 import type {
   MLInferenceProcessorsActions,
-  MLInferenceProcessorsValues} from './ml_inference_logic';
-import {
-  MLInferenceLogic
+  MLInferenceProcessorsValues,
 } from './ml_inference_logic';
+import { MLInferenceLogic } from './ml_inference_logic';
 import { EXISTING_PIPELINE_DISABLED_MISSING_SOURCE_FIELDS } from './utils';
 
 export interface MLInferencePipelineOption {

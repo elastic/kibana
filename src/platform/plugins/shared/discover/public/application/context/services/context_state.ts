@@ -10,15 +10,14 @@
 import { isEqual } from 'lodash';
 import type { History } from 'history';
 import type { NotificationsStart, IUiSettingsClient } from '@kbn/core/public';
-import type { Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { compareFilters, COMPARE_ALL_OPTIONS, FilterStateStore } from '@kbn/es-query';
-import type {
-  ReduxLikeStateContainer} from '@kbn/kibana-utils-plugin/public';
+import type { ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/public';
 import {
   createStateContainer,
   createKbnUrlStateStorage,
   syncStates,
-  withNotifyOnErrors
+  withNotifyOnErrors,
 } from '@kbn/kibana-utils-plugin/public';
 
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';

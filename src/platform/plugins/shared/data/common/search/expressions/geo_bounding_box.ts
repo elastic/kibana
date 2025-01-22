@@ -9,7 +9,10 @@
 
 import { chain, isNil, pick, snakeCase } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { ExpressionFunctionDefinition, ExpressionValueBoxed } from '@kbn/expressions-plugin/common';
+import type {
+  ExpressionFunctionDefinition,
+  ExpressionValueBoxed,
+} from '@kbn/expressions-plugin/common';
 import type { GeoPoint, GeoPointOutput } from './geo_point';
 
 // The API Extractor is not handling encapsulated interfaces in union types properly.

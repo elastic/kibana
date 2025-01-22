@@ -11,7 +11,7 @@ import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import React, { useCallback, useMemo, useReducer } from 'react';
 import type { UiCounterMetricType } from '@kbn/analytics';
 import { groupsReducerWithStorage, initialState } from './state/reducer';
-import type { GroupingProps, GroupSelectorProps} from '..';
+import type { GroupingProps, GroupSelectorProps } from '..';
 import { isNoneGroup } from '..';
 import { groupActions, groupByIdSelector } from './state';
 import { useGetGroupSelector } from './use_get_group_selector';

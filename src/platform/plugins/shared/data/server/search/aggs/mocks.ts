@@ -10,11 +10,9 @@
 import type {
   AggTypesRegistrySetup,
   AggTypesRegistryStart,
-  AggsCommonStart} from '../../../common';
-import {
-  AggConfigs,
-  getCalculateAutoTimeExpression,
+  AggsCommonStart,
 } from '../../../common';
+import { AggConfigs, getCalculateAutoTimeExpression } from '../../../common';
 
 import type { AggsSetup, AggsStart } from './types';
 

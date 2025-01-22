@@ -14,12 +14,8 @@ import type {
   CoreStart,
 } from '@kbn/core/server';
 import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type {
-  SecurityPluginSetup,
-  SecurityPluginStart} from '@kbn/security-plugin/server';
-import {
-  HTTPAuthorizationHeader
-} from '@kbn/security-plugin/server';
+import type { SecurityPluginSetup, SecurityPluginStart } from '@kbn/security-plugin/server';
+import { HTTPAuthorizationHeader } from '@kbn/security-plugin/server';
 import type { EncryptedSavedObjectsClient } from '@kbn/encrypted-saved-objects-plugin/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { IEventLogClientService, IEventLogger } from '@kbn/event-log-plugin/server';

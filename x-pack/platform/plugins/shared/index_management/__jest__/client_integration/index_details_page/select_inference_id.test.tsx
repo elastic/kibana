@@ -11,11 +11,8 @@ import {
 } from '../../../public/application/components/mappings_editor/shared_imports';
 import { findTestSubject, registerTestBed } from '@kbn/test-jest-helpers';
 import { act } from 'react-dom/test-utils';
-import type {
-  SelectInferenceIdProps} from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
-import {
-  SelectInferenceId
-} from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import type { SelectInferenceIdProps } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
+import { SelectInferenceId } from '../../../public/application/components/mappings_editor/components/document_fields/field_parameters/select_inference_id';
 import React from 'react';
 import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
 

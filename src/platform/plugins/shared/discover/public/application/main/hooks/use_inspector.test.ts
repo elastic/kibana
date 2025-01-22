@@ -10,7 +10,7 @@
 import { renderHook, act } from '@testing-library/react';
 import { discoverServiceMock } from '../../../__mocks__/services';
 import { useInspector } from './use_inspector';
-import type { Adapters} from '@kbn/inspector-plugin/common';
+import type { Adapters } from '@kbn/inspector-plugin/common';
 import { RequestAdapter } from '@kbn/inspector-plugin/common';
 import type { OverlayRef } from '@kbn/core/public';
 import { AggregateRequestAdapter } from '../utils/aggregate_request_adapter';

@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState, useCallback } from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
   EuiCallOut,
@@ -39,7 +38,7 @@ import {
   defaultsToDisplay,
   limitedEditableSettings,
 } from '../../../../lib/edit_settings';
-import type { AppDependencies} from '../../../../app_context';
+import type { AppDependencies } from '../../../../app_context';
 import { useAppContext } from '../../../../app_context';
 
 const getEditableSettings = ({

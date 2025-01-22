@@ -32,10 +32,9 @@ import { i18n } from '@kbn/i18n';
 
 import type {
   ExtractionRule,
-  ExtractionRuleBase} from '../../../../../../../../common/types/extraction_rules';
-import {
-  ExtractionFilter
+  ExtractionRuleBase,
 } from '../../../../../../../../common/types/extraction_rules';
+import { ExtractionFilter } from '../../../../../../../../common/types/extraction_rules';
 import { docLinks } from '../../../../../../shared/doc_links';
 
 import { ContentFieldsPanel } from './content_fields_panel';

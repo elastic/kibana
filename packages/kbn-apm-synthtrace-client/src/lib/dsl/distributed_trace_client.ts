@@ -8,7 +8,7 @@
  */
 
 import { times } from 'lodash';
-import type { HttpMethod} from '../apm/span';
+import type { HttpMethod } from '../apm/span';
 import { elasticsearchSpan, httpExitSpan, redisSpan, sqliteSpan } from '../apm/span';
 import type { BaseSpan } from '../apm/base_span';
 import type { Instance } from '../apm/instance';

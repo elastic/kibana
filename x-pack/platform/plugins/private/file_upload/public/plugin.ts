@@ -7,8 +7,7 @@
 
 import type { CoreStart, Plugin } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type {
-  FileUploadStartApi} from './api';
+import type { FileUploadStartApi } from './api';
 import {
   FileUploadComponent,
   importerFactory,

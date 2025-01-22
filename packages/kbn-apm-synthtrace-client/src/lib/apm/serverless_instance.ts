@@ -9,7 +9,7 @@
 
 import { Entity } from '../entity';
 import type { ApmFields } from './apm_fields';
-import type { FaasTriggerType} from './serverless';
+import type { FaasTriggerType } from './serverless';
 import { Serverless } from './serverless';
 
 export class ServerlessInstance extends Entity<ApmFields> {

@@ -8,7 +8,7 @@
 import type { ValidateActionsData } from './validate_actions';
 import { validateActions } from './validate_actions';
 import type { UntypedNormalizedRuleType } from '../../rule_type_registry';
-import type { AlertsFilter, RuleAction} from '../../../common';
+import type { AlertsFilter, RuleAction } from '../../../common';
 import { RecoveredActionGroup, RuleNotifyWhen } from '../../../common';
 import type { NormalizedAlertAction, NormalizedSystemAction, RulesClientContext } from '..';
 

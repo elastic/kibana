@@ -10,9 +10,9 @@
 import { sortBy } from 'lodash';
 import type { HttpStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
-import type { Tag} from '../types';
+import type { Tag } from '../types';
 import { INDEX_PATTERN_TYPE } from '../types';
-import type { MatchedItem, ResolveIndexResponse} from '../types';
+import type { MatchedItem, ResolveIndexResponse } from '../types';
 import { ResolveIndexResponseItemIndexAttrs } from '../types';
 
 const aliasLabel = i18n.translate('dataViews.aliasLabel', { defaultMessage: 'Alias' });

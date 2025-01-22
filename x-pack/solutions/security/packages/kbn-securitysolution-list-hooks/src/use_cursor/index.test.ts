@@ -7,7 +7,7 @@
 
 import { renderHook, act } from '@testing-library/react';
 
-import type { UseCursorProps} from '.';
+import type { UseCursorProps } from '.';
 import { useCursor } from '.';
 
 describe('useCursor', () => {

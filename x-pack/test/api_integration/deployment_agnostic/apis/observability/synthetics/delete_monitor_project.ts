@@ -8,10 +8,9 @@ import { v4 as uuidv4 } from 'uuid';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import type {
   ProjectMonitorsRequest,
-  PrivateLocation} from '@kbn/synthetics-plugin/common/runtime_types';
-import {
-  ConfigKey
+  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { REQUEST_TOO_LARGE_DELETE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/delete_monitor_project';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';

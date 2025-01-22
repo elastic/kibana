@@ -10,11 +10,8 @@ import { act } from 'react-dom/test-utils';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { mountWithIntl, nextTick } from '@kbn/test-jest-helpers';
 import { COMPARATORS } from '@kbn/alerting-comparators';
-import type {
-  CustomThresholdSearchSourceFields} from '../../../common/custom_threshold_rule/types';
-import {
-  Aggregators
-} from '../../../common/custom_threshold_rule/types';
+import type { CustomThresholdSearchSourceFields } from '../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import { useKibana } from '../../utils/kibana_react';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import type { RuleConditionChartExpressions } from './rule_condition_chart';

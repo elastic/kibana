@@ -14,11 +14,9 @@ import type {
   HeartbeatConfig,
   MonitorFields,
   SyntheticsMonitor,
-  SyntheticsMonitorWithSecretsAttributes} from '../../../../common/runtime_types';
-import {
-  ConfigKey,
-  type SyntheticsPrivateLocations,
+  SyntheticsMonitorWithSecretsAttributes,
 } from '../../../../common/runtime_types';
+import { ConfigKey, type SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import {
   formatTelemetryUpdateEvent,
   sendTelemetryEvents,

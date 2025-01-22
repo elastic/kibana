@@ -14,10 +14,9 @@ import { OBSERVABILITY_ENTITY_CENTRIC_EXPERIENCE } from '@kbn/management-setting
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import type {
   FieldBadgeWithActionsProps,
-  FieldBadgeWithActionsPropsAndDependencies} from './cell_actions_popover';
-import {
-  FieldBadgeWithActions
+  FieldBadgeWithActionsPropsAndDependencies,
 } from './cell_actions_popover';
+import { FieldBadgeWithActions } from './cell_actions_popover';
 
 const SERVICE_ENTITY_LOCATOR = 'SERVICE_ENTITY_LOCATOR';
 

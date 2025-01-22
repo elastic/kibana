@@ -23,10 +23,9 @@ import { percentileFields, RulesList } from './rules_list';
 import type {
   ActionTypeRegistryContract,
   RuleTypeModel,
-  RuleTypeRegistryContract} from '../../../../types';
-import {
-  Percentiles
+  RuleTypeRegistryContract,
 } from '../../../../types';
+import { Percentiles } from '../../../../types';
 import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { useKibana } from '../../../../common/lib/kibana';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';

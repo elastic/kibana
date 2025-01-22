@@ -8,7 +8,7 @@
 import axios from 'axios';
 import semver from 'semver';
 import { map } from 'lodash';
-import type { PackagePolicy, CreatePackagePolicyResponse} from '@kbn/fleet-plugin/common';
+import type { PackagePolicy, CreatePackagePolicyResponse } from '@kbn/fleet-plugin/common';
 import { API_VERSIONS } from '@kbn/fleet-plugin/common';
 import type { KbnClient } from '@kbn/test';
 import type {

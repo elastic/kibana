@@ -21,10 +21,9 @@ import type { KibanaRequest, RequestHandlerWrapper } from '@kbn/core-http-server
 import type {
   SavedObject,
   ISavedObjectTypeRegistry,
-  SavedObjectsExportResultDetails} from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
+  SavedObjectsExportResultDetails,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers } from '@kbn/core-saved-objects-server';
 import type { Logger } from '@kbn/logging';
 import { EXPORT_ALL_TYPES_TOKEN } from '@kbn/core-saved-objects-import-export-server-internal';
 

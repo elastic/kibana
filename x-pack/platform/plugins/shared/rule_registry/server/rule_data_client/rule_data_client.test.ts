@@ -12,7 +12,7 @@ import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-m
 import type { RuleDataClientConstructorOptions, WaitResult } from './rule_data_client';
 import { RuleDataClient } from './rule_data_client';
 import { IndexInfo } from '../rule_data_plugin_service/index_info';
-import type { Dataset} from '..';
+import type { Dataset } from '..';
 import { RuleDataWriterInitializationError } from '..';
 import { resourceInstallerMock } from '../rule_data_plugin_service/resource_installer.mock';
 import { loggingSystemMock, elasticsearchServiceMock } from '@kbn/core/server/mocks';

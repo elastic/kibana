@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { takeLatest, select, call, put } from 'redux-saga/effects';
 import { reducerWithInitialState } from 'typescript-fsa-reducers';
 import { createSelector } from 'reselect';
-import type { GraphStoreDependencies, GraphState} from '.';
+import type { GraphStoreDependencies, GraphState } from '.';
 import { fillWorkspace } from '.';
 import { reset } from './global';
 import { datasourceSelector } from './datasource';

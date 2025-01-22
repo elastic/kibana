@@ -15,11 +15,9 @@ import type {
   SeriesName,
   StackMode,
   XYChartSeriesIdentifier,
-  SeriesColorAccessorFn} from '@elastic/charts';
-import {
-  ColorVariant,
-  ScaleType
+  SeriesColorAccessorFn,
 } from '@elastic/charts';
+import { ColorVariant, ScaleType } from '@elastic/charts';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import type { PersistedState } from '@kbn/visualizations-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/common';

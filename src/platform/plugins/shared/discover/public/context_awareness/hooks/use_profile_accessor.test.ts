@@ -8,7 +8,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import type { AppliedProfile} from '../composable_profile';
+import type { AppliedProfile } from '../composable_profile';
 import { getMergedAccessor } from '../composable_profile';
 import { useProfileAccessor } from './use_profile_accessor';
 import { getDataTableRecords } from '../../__fixtures__/real_hits';

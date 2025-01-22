@@ -37,9 +37,7 @@ import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public'
 
 import type { IEsSearchRequest, IEsSearchResponse } from '@kbn/search-types';
 
-import type {
-  DataPublicPluginStart,
-  QueryState} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart, QueryState } from '@kbn/data-plugin/public';
 import {
   connectToQueryState,
   isRunningResponse,

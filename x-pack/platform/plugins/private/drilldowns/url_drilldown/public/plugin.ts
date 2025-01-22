@@ -9,10 +9,9 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
 import type {
   AdvancedUiActionsSetup,
-  AdvancedUiActionsStart} from '@kbn/ui-actions-enhanced-plugin/public';
-import {
-  urlDrilldownGlobalScopeProvider,
+  AdvancedUiActionsStart,
 } from '@kbn/ui-actions-enhanced-plugin/public';
+import { urlDrilldownGlobalScopeProvider } from '@kbn/ui-actions-enhanced-plugin/public';
 import { createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import { UrlDrilldown } from './lib';
 

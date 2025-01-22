@@ -12,13 +12,8 @@ import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-serve
 import type { AdHocRunSO } from '@kbn/alerting-plugin/server/data/ad_hoc_run/types';
 import { get } from 'lodash';
 import { SuperuserAtSpace1 } from '../../../../scenarios';
-import type {
-  TaskManagerDoc} from '../../../../../common/lib';
-import {
-  getTestRuleData,
-  getUrlPrefix,
-  ObjectRemover
-} from '../../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../../common/lib';
+import { getTestRuleData, getUrlPrefix, ObjectRemover } from '../../../../../common/lib';
 import type { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 
 // eslint-disable-next-line import/no-default-export

@@ -12,10 +12,9 @@ import type { Logger } from '@kbn/logging';
 import type {
   CollectorFetchContext,
   UsageCountersSavedObject,
-  UsageCountersSavedObjectAttributes} from '@kbn/usage-collection-plugin/server';
-import {
-  USAGE_COUNTERS_SAVED_OBJECT_TYPE,
+  UsageCountersSavedObjectAttributes,
 } from '@kbn/usage-collection-plugin/server';
+import { USAGE_COUNTERS_SAVED_OBJECT_TYPE } from '@kbn/usage-collection-plugin/server';
 
 export interface CounterEvent {
   domainId: string;

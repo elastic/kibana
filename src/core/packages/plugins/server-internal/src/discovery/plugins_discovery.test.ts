@@ -21,7 +21,7 @@ import { resolve } from 'path';
 import { ConfigService, Env } from '@kbn/config';
 import type { CoreContext } from '@kbn/core-base-server-internal';
 import type { NodeInfo } from '@kbn/core-node-server';
-import type { PluginsConfigType} from '../plugins_config';
+import type { PluginsConfigType } from '../plugins_config';
 import { PluginsConfig, config } from '../plugins_config';
 import type { InstanceInfo } from '../plugin_context';
 import { discover } from './plugins_discovery';

@@ -28,13 +28,8 @@ import {
   ROW_HEIGHT_OPTION,
   SHOW_MULTIFIELDS,
 } from '@kbn/discover-utils';
-import type {
-  UnifiedDataTableProps} from '@kbn/unified-data-table';
-import {
-  DataLoadingState,
-  getDataGridDensity,
-  getRowHeight,
-} from '@kbn/unified-data-table';
+import type { UnifiedDataTableProps } from '@kbn/unified-data-table';
+import { DataLoadingState, getDataGridDensity, getRowHeight } from '@kbn/unified-data-table';
 import type { DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import { useQuerySubscriber } from '@kbn/unified-field-list';
 import useObservable from 'react-use/lib/useObservable';

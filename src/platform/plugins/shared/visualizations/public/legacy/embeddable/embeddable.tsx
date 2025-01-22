@@ -14,7 +14,7 @@ import { merge } from 'rxjs';
 import { debounceTime, distinctUntilChanged, map, skip } from 'rxjs';
 import { RenderCompleteDispatcher } from '@kbn/kibana-utils-plugin/public';
 import type { Adapters } from '@kbn/inspector-plugin/public';
-import type { EmbeddableInput} from '@kbn/embeddable-plugin/common';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { ViewMode } from '@kbn/embeddable-plugin/common';
 import type { EmbeddableError, EmbeddableOutput, IEmbeddable } from './i_embeddable';
 import { genericEmbeddableInputIsEqual, omitGenericEmbeddableInput } from './diff_embeddable_input';

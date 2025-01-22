@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type { RouteComponentProps} from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter, useLocation } from 'react-router-dom';
 import {
   EuiFlexGroup,

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { VectorTile, VectorTileLayer} from '@mapbox/vector-tile';
+import type { VectorTile, VectorTileLayer } from '@mapbox/vector-tile';
 import { VectorTileFeature } from '@mapbox/vector-tile';
 
 interface MapboxVectorTileJson {

@@ -8,7 +8,7 @@
  */
 
 import { useEffect, useRef, useState } from 'react';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 
 import type { CoreSetup, CoreTheme } from '@kbn/core/public';

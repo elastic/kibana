@@ -14,7 +14,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import type { GenericBuckets, GroupPanelRenderer, GroupStatsItem, RawBucket } from '@kbn/grouping/src';
+import type {
+  GenericBuckets,
+  GroupPanelRenderer,
+  GroupStatsItem,
+  RawBucket,
+} from '@kbn/grouping/src';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { getAbbreviatedNumber } from '@kbn/cloud-security-posture-common';

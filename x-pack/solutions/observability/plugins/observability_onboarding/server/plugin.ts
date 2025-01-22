@@ -14,7 +14,7 @@ import type {
 } from '@kbn/core/server';
 import { mapValues } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type { DefaultRouteHandlerResources} from '@kbn/server-route-repository';
+import type { DefaultRouteHandlerResources } from '@kbn/server-route-repository';
 import { registerRoutes } from '@kbn/server-route-repository';
 import { getObservabilityOnboardingServerRouteRepository } from './routes';
 import type { ObservabilityOnboardingRouteHandlerResources } from './routes/types';

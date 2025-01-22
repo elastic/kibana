@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { OperatorFunction} from 'rxjs';
+import type { OperatorFunction } from 'rxjs';
 import { Observable, takeUntil } from 'rxjs';
 import { AbortError } from '@kbn/kibana-utils-plugin/common';
 

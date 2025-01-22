@@ -10,7 +10,7 @@
 import { i18n } from '@kbn/i18n';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { castEsToKbnFieldTypeName } from '@kbn/field-types';
-import type { FieldFormatsStartCommon} from '@kbn/field-formats-plugin/common';
+import type { FieldFormatsStartCommon } from '@kbn/field-formats-plugin/common';
 import { FORMATS_UI_SETTINGS } from '@kbn/field-formats-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import type { PersistenceAPI } from '../types';

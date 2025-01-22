@@ -9,7 +9,7 @@
 
 import { mockInitializer, mockPlugin, mockPluginReader } from './plugin.test.mocks';
 
-import type { DiscoveredPlugin} from '@kbn/core-base-common';
+import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { PluginType } from '@kbn/core-base-common';
 import { createPluginInitializerContextMock } from './test_helpers';
 import { PluginWrapper } from './plugin';

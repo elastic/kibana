@@ -8,11 +8,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  KbnCategoricalPaletteConfig} from '../../classes/categorical_palette';
-import {
-  KbnCategoricalPalette
-} from '../../classes/categorical_palette';
+import type { KbnCategoricalPaletteConfig } from '../../classes/categorical_palette';
+import { KbnCategoricalPalette } from '../../classes/categorical_palette';
 import { KbnPalette } from '../../constants';
 
 const commonProps = {

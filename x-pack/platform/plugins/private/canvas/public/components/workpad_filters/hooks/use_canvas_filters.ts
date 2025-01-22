@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import type { AstFunction} from '@kbn/interpreter';
+import type { AstFunction } from '@kbn/interpreter';
 import { fromExpression } from '@kbn/interpreter';
 import { shallowEqual, useSelector } from 'react-redux';
 

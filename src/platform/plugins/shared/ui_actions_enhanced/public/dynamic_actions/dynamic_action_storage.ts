@@ -9,7 +9,7 @@
 
 /* eslint-disable max-classes-per-file */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { Subject } from 'rxjs';
 import type { SerializedEvent } from './types';
 

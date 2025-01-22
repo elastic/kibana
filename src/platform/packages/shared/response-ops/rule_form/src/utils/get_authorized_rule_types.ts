@@ -8,7 +8,11 @@
  */
 
 import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import type { RuleTypeModel, RuleTypeRegistryContract, RuleTypeWithDescription } from '../common/types';
+import type {
+  RuleTypeModel,
+  RuleTypeRegistryContract,
+  RuleTypeWithDescription,
+} from '../common/types';
 import { ALERTING_FEATURE_ID, MULTI_CONSUMER_RULE_TYPE_IDS } from '../constants';
 
 export type RuleTypeItems = Array<{

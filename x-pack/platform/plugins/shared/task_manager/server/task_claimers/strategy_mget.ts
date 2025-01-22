@@ -19,24 +19,17 @@ import type { Subject } from 'rxjs';
 import { createWrappedLogger } from '../lib/wrapped_logger';
 
 import type { TaskTypeDictionary } from '../task_type_dictionary';
-import type {
-  TaskClaimerOpts,
-  ClaimOwnershipResult} from '.';
-import {
-  getEmptyClaimOwnershipResult,
-  getExcludedTaskTypes,
-} from '.';
+import type { TaskClaimerOpts, ClaimOwnershipResult } from '.';
+import { getEmptyClaimOwnershipResult, getExcludedTaskTypes } from '.';
 import type {
   ConcreteTaskInstance,
   ConcreteTaskInstanceVersion,
-  PartialConcreteTaskInstance} from '../task';
-import {
-  TaskStatus,
-  TaskCost
+  PartialConcreteTaskInstance,
 } from '../task';
+import { TaskStatus, TaskCost } from '../task';
 import { TASK_MANAGER_TRANSACTION_TYPE } from '../task_running';
 import { TASK_MANAGER_MARK_AS_CLAIMED } from '../queries/task_claiming';
-import type { TaskClaim} from '../task_events';
+import type { TaskClaim } from '../task_events';
 import { asTaskClaimEvent, startTaskTimer } from '../task_events';
 import { shouldBeOneOf, mustBeAllOf, filterDownBy, matchesClauses } from '../queries/query_clauses';
 

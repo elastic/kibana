@@ -8,7 +8,7 @@
  */
 
 import typeDetect from 'type-detect';
-import type { Duration} from '../duration';
+import type { Duration } from '../duration';
 import { ensureDuration } from '../duration';
 import { SchemaTypeError } from '../errors';
 import { internals } from '../internals';

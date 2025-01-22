@@ -9,17 +9,10 @@ import React, { useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { EuiTableSortingType } from '@elastic/eui/src/components/basic_table/table_types';
 
-import type {
-  Criteria} from '@elastic/eui';
-import {
-  EuiLink,
-  EuiLoadingSpinner,
-  EuiToolTip,
-  EuiButtonIcon,
-  EuiBasicTable,
-} from '@elastic/eui';
+import type { Criteria } from '@elastic/eui';
+import { EuiLink, EuiLoadingSpinner, EuiToolTip, EuiButtonIcon, EuiBasicTable } from '@elastic/eui';
 import type { SnapshotDetails } from '../../../../../../common/types';
-import type { UseRequestResponse} from '../../../../../shared_imports';
+import type { UseRequestResponse } from '../../../../../shared_imports';
 import { reactRouterNavigate } from '../../../../../shared_imports';
 import { SNAPSHOT_STATE, UIM_SNAPSHOT_SHOW_DETAILS_CLICK } from '../../../../constants';
 import { useServices } from '../../../../app_context';

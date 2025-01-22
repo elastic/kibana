@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { WebDriver, WebElement} from 'selenium-webdriver';
+import type { WebDriver, WebElement } from 'selenium-webdriver';
 import { By, until } from 'selenium-webdriver';
 
 import type { Browsers } from './remote/browsers';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Logger} from './create_logger';
+import type { Logger } from './create_logger';
 import { LogLevel } from './create_logger';
 
 function isPromise(val: any): val is Promise<any> {

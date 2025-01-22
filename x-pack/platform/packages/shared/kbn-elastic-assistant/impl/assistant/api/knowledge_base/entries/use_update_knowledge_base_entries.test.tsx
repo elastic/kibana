@@ -6,11 +6,8 @@
  */
 
 import { renderHook, act } from '@testing-library/react';
-import type {
-  UseUpdateKnowledgeBaseEntriesParams} from './use_update_knowledge_base_entries';
-import {
-  useUpdateKnowledgeBaseEntries
-} from './use_update_knowledge_base_entries';
+import type { UseUpdateKnowledgeBaseEntriesParams } from './use_update_knowledge_base_entries';
+import { useUpdateKnowledgeBaseEntries } from './use_update_knowledge_base_entries';
 import { useInvalidateKnowledgeBaseEntries } from './use_knowledge_base_entries';
 
 jest.mock('./use_knowledge_base_entries', () => ({

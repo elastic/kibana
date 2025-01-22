@@ -9,7 +9,7 @@
 
 import type { ReactWrapper } from 'enzyme';
 import { mount } from 'enzyme';
-import type { ReactElement} from 'react';
+import type { ReactElement } from 'react';
 import { useState } from 'react';
 import React from 'react';
 import { PanelsResizable } from './panels_resizable';

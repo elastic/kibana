@@ -10,9 +10,7 @@
 import { cloneDeep } from 'lodash';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import type { ApplicationStart, PublicAppInfo } from '@kbn/core/public';
-import type {
-  EmbeddableEditorState,
-  EmbeddablePackageState} from './types';
+import type { EmbeddableEditorState, EmbeddablePackageState } from './types';
 import {
   isEmbeddableEditorState,
   isEmbeddablePackageState,

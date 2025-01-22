@@ -15,10 +15,9 @@ import type { ESQLCallbacks } from '../../../shared/types';
 import type {
   CommandBaseDefinition,
   CommandDefinition,
-  CommandTypeDefinition} from '../../../definitions/types';
-import {
-  type SupportedDataType,
+  CommandTypeDefinition,
 } from '../../../definitions/types';
+import { type SupportedDataType } from '../../../definitions/types';
 import { getPosition, joinIndicesToSuggestions } from './util';
 import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';

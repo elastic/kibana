@@ -19,10 +19,9 @@ import type {
   IndexEntry,
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
-  Metadata} from '@kbn/elastic-assistant-common';
-import {
-  DocumentEntryType
+  Metadata,
 } from '@kbn/elastic-assistant-common';
+import { DocumentEntryType } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
 import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { StructuredTool } from '@langchain/core/tools';

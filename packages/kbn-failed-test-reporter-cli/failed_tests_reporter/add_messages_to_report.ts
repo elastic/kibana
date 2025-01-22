@@ -13,7 +13,7 @@ import { promisify } from 'util';
 import type { ToolingLog } from '@kbn/tooling-log';
 import xml2js from 'xml2js';
 
-import type { TestReport} from './test_report';
+import type { TestReport } from './test_report';
 import { makeFailedTestCaseIter } from './test_report';
 
 const writeAsync = promisify(Fs.writeFile);

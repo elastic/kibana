@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Page} from '@playwright/test';
+import type { Page } from '@playwright/test';
 import { test as base } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
 import type { ScoutPage, KibanaUrl, ScoutTestFixtures, ScoutWorkerFixtures } from '../types';

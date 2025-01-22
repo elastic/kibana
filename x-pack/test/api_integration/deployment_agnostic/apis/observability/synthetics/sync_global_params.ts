@@ -10,11 +10,9 @@ import type {
   HTTPFields,
   PrivateLocation,
   ServiceLocation,
-  SyntheticsParams} from '@kbn/synthetics-plugin/common/runtime_types';
-import {
-  ConfigKey,
-  LocationStatus
+  SyntheticsParams,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey, LocationStatus } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import expect from '@kbn/expect';

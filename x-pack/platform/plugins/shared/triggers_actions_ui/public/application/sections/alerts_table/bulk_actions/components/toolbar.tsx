@@ -16,13 +16,8 @@ import {
   ALERT_WORKFLOW_ASSIGNEE_IDS,
   ALERT_WORKFLOW_TAGS,
 } from '@kbn/rule-data-utils';
-import type {
-  Alerts,
-  BulkActionsPanelConfig,
-  RowSelection} from '../../../../../types';
-import {
-  BulkActionsVerbs
-} from '../../../../../types';
+import type { Alerts, BulkActionsPanelConfig, RowSelection } from '../../../../../types';
+import { BulkActionsVerbs } from '../../../../../types';
 import * as i18n from '../translations';
 import { AlertsTableContext } from '../../contexts/alerts_table_context';
 

@@ -13,7 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { EuiFlexGroup, EuiFlexItem, EuiHideFor, useEuiTheme } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
-import type { BehaviorSubject} from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { of } from 'rxjs';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { DataViewPicker } from '@kbn/unified-search-plugin/public';

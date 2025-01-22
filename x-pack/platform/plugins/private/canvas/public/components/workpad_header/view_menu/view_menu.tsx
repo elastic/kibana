@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useCallback, useContext } from 'react';
 import { connect, useDispatch } from 'react-redux';
 import { compose, withHandlers } from 'react-recompose';

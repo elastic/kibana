@@ -10,7 +10,12 @@ import { EuiComboBox } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { ActionConnector, ActionTypeIndex, ActionTypeModel, RuleUiAction } from '../../../types';
+import type {
+  ActionConnector,
+  ActionTypeIndex,
+  ActionTypeModel,
+  RuleUiAction,
+} from '../../../types';
 import { getValidConnectors } from '../common/connectors';
 
 interface ConnectorOption {

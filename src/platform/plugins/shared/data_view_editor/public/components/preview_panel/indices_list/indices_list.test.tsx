@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { IndicesListProps} from './indices_list';
+import type { IndicesListProps } from './indices_list';
 import { IndicesList, PER_PAGE_STORAGE_KEY } from './indices_list';
 import { shallow } from 'enzyme';
 import type { MatchedItem } from '@kbn/data-views-plugin/public';

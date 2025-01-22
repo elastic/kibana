@@ -9,11 +9,8 @@ import { i18n } from '@kbn/i18n';
 import type { ToastsApi } from '@kbn/core/public';
 import React, { useState, useEffect, useRef, useCallback, Suspense } from 'react';
 import type { Rule, RuleSummary, RuleType } from '../../../../types';
-import type {
-  ComponentOpts as RuleApis} from '../../common/components/with_bulk_rule_api_operations';
-import {
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { RuleWithApi as Rules } from './rule';
 import { useKibana } from '../../../../common/lib/kibana';
 import { CenterJustifiedSpinner } from '../../../components/center_justified_spinner';

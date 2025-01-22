@@ -7,16 +7,14 @@
 
 import type {
   GetDefaultAssistantGraphParams,
-  DefaultAssistantGraph} from './default_assistant_graph/graph';
-import {
-  getDefaultAssistantGraph
+  DefaultAssistantGraph,
 } from './default_assistant_graph/graph';
+import { getDefaultAssistantGraph } from './default_assistant_graph/graph';
 import type {
   DefaultAttackDiscoveryGraph,
-  GetDefaultAttackDiscoveryGraphParams} from '../../attack_discovery/graphs/default_attack_discovery_graph';
-import {
-  getDefaultAttackDiscoveryGraph,
+  GetDefaultAttackDiscoveryGraphParams,
 } from '../../attack_discovery/graphs/default_attack_discovery_graph';
+import { getDefaultAttackDiscoveryGraph } from '../../attack_discovery/graphs/default_attack_discovery_graph';
 
 export type GetAssistantGraph = (params: GetDefaultAssistantGraphParams) => DefaultAssistantGraph;
 export type GetAttackDiscoveryGraph = (

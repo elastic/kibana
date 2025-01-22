@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { MemoryHistory} from 'history';
+import type { MemoryHistory } from 'history';
 import { createMemoryHistory } from 'history';
 import React, { useEffect } from 'react';
 import { render, waitFor } from '@testing-library/react';

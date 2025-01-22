@@ -12,10 +12,9 @@ import type { Logger } from '@kbn/logging';
 import { getIntervalInSeconds } from '../../../../../common/utils/get_interval_in_seconds';
 import type {
   CustomMetricExpressionParams,
-  SearchConfigurationType} from '../../../../../common/custom_threshold_rule/types';
-import {
-  Aggregators
+  SearchConfigurationType,
 } from '../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 import type { AdditionalContext } from '../utils';
 import { createTimerange } from './create_timerange';
 import { getData } from './get_data';

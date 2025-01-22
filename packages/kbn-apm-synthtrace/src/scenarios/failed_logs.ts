@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LogDocument} from '@kbn/apm-synthtrace-client';
+import type { LogDocument } from '@kbn/apm-synthtrace-client';
 import { log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
 import { merge } from 'lodash';
 import type { Scenario } from '../cli/scenario';

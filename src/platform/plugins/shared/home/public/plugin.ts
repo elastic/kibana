@@ -30,13 +30,14 @@ import type {
   FeatureCatalogueRegistrySetup,
   TutorialServiceSetup,
   AddDataServiceSetup,
-  WelcomeServiceSetup} from './services';
+  WelcomeServiceSetup,
+} from './services';
 import {
   EnvironmentService,
   FeatureCatalogueRegistry,
   TutorialService,
   AddDataService,
-  WelcomeService
+  WelcomeService,
 } from './services';
 
 export interface HomePluginStartDependencies {

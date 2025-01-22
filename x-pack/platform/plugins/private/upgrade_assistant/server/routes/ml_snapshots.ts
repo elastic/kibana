@@ -12,7 +12,7 @@ import { schema } from '@kbn/config-schema';
 import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
 
 import { API_BASE_PATH } from '../../common/constants';
-import type { MlOperation} from '../../common/types';
+import type { MlOperation } from '../../common/types';
 import { ML_UPGRADE_OP_TYPE } from '../../common/types';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import type { RouteDependencies } from '../types';

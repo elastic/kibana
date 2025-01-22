@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { UiCounterMetricType} from '@kbn/analytics';
+import type { UiCounterMetricType } from '@kbn/analytics';
 import { METRIC_TYPE } from '@kbn/analytics';
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 

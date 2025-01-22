@@ -6,7 +6,7 @@
  */
 
 import { SemVer } from 'semver';
-import type { IScopedClusterClient} from '@kbn/core/server';
+import type { IScopedClusterClient } from '@kbn/core/server';
 import { kibanaResponseFactory } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';

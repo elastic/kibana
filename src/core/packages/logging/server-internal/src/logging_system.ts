@@ -15,9 +15,7 @@ import { Appenders } from './appenders/appenders';
 import { BufferAppender } from './appenders/buffer/buffer_appender';
 import { BaseLogger } from './logger';
 import { LoggerAdapter } from './logger_adapter';
-import type {
-  LoggingConfigType,
-  LoggerContextConfigType} from './logging_config';
+import type { LoggingConfigType, LoggerContextConfigType } from './logging_config';
 import {
   LoggingConfig,
   loggerContextConfigSchema,

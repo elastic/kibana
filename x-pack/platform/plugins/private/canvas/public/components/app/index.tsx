@@ -7,7 +7,7 @@
 
 import type { AppUpdater, ScopedHistory } from '@kbn/core/public';
 import PropTypes from 'prop-types';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import type { BehaviorSubject } from 'rxjs';
 // @ts-expect-error

@@ -10,7 +10,7 @@
 import type { ReactElement } from 'react';
 import { copyPersistentState } from '../../reducers/copy_persistent_state';
 import type { IField } from '../fields/field';
-import type { FieldFormatter, LAYER_TYPE} from '../../../common/constants';
+import type { FieldFormatter, LAYER_TYPE } from '../../../common/constants';
 import { MAX_ZOOM, MIN_ZOOM } from '../../../common/constants';
 import type {
   AbstractSourceDescriptor,

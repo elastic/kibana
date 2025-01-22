@@ -13,8 +13,7 @@ import { catchError, map, mergeMap, of, takeUntil, tap } from 'rxjs';
 import type { Writable } from 'stream';
 
 import type { Headers } from '@kbn/core/server';
-import type {
-  CancellationToken} from '@kbn/reporting-common';
+import type { CancellationToken } from '@kbn/reporting-common';
 import {
   LICENSE_TYPE_CLOUD_STANDARD,
   LICENSE_TYPE_ENTERPRISE,
@@ -25,12 +24,8 @@ import {
 } from '@kbn/reporting-common';
 import { REPORTING_TRANSACTION_TYPE } from '@kbn/reporting-server';
 import type { TaskInstanceFields, TaskRunResult } from '@kbn/reporting-common/types';
-import type { TaskPayloadPDFV2 ,
-  JobParamsPDFV2} from '@kbn/reporting-export-types-pdf-common';
-import {
-  PDF_JOB_TYPE_V2,
-  PDF_REPORT_TYPE_V2,
-} from '@kbn/reporting-export-types-pdf-common';
+import type { TaskPayloadPDFV2, JobParamsPDFV2 } from '@kbn/reporting-export-types-pdf-common';
+import { PDF_JOB_TYPE_V2, PDF_REPORT_TYPE_V2 } from '@kbn/reporting-export-types-pdf-common';
 import { ExportType, decryptJobHeaders, getFullRedirectAppUrl } from '@kbn/reporting-server';
 import type { UrlOrUrlWithContext } from '@kbn/screenshotting-plugin/server/screenshots';
 

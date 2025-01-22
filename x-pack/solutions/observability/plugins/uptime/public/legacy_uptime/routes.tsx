@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useEffect } from 'react';
 import { Routes, Route } from '@kbn/shared-ux-router';
 

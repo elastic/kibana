@@ -35,12 +35,8 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import type { SavedObjectManagementTypeInfo } from '../../../common/types';
 import { actionServiceMock } from '../../services/action_service.mock';
 import { columnServiceMock } from '../../services/column_service.mock';
-import type {
-  SavedObjectsTableProps,
-  SavedObjectsTableState} from './saved_objects_table';
-import {
-  SavedObjectsTable
-} from './saved_objects_table';
+import type { SavedObjectsTableProps, SavedObjectsTableState } from './saved_objects_table';
+import { SavedObjectsTable } from './saved_objects_table';
 import { Flyout, Relationships } from './components';
 import type { SavedObjectWithMetadata } from '../../types';
 import { customBrandingServiceMock } from '@kbn/core-custom-branding-browser-mocks';

@@ -8,9 +8,7 @@
 import React, { useState } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
-import type {
-  Criteria,
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,

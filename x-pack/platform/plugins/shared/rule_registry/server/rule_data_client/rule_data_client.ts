@@ -8,7 +8,7 @@
 import type { TransportResult } from '@elastic/elasticsearch';
 import { errors } from '@elastic/elasticsearch';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { Either} from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
 import { isLeft } from 'fp-ts/lib/Either';
 
 import type { ElasticsearchClient } from '@kbn/core/server';

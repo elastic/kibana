@@ -8,7 +8,7 @@
 import { schema } from '@kbn/config-schema';
 import type { ActionsConfigurationUtilities } from '../actions_config';
 import type { ActionTypeConfig, ActionTypeSecrets, ValidatorServices } from '../types';
-import type { SubActionConnectorType, ValidateFn, Validators} from './types';
+import type { SubActionConnectorType, ValidateFn, Validators } from './types';
 import { ValidatorType } from './types';
 
 export const buildValidators = <

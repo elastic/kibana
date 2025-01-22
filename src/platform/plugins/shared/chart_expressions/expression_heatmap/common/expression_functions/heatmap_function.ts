@@ -10,12 +10,8 @@
 import { i18n } from '@kbn/i18n';
 import type { DatatableColumn } from '@kbn/expressions-plugin/public';
 import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/common';
-import type {
-  Dimension} from '@kbn/visualizations-plugin/common/utils';
-import {
-  prepareLogTable,
-  validateAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import type { Dimension } from '@kbn/visualizations-plugin/common/utils';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { HeatmapExpressionFunctionDefinition, HeatmapExpressionProps } from '../types';
 import {
   EXPRESSION_HEATMAP_NAME,

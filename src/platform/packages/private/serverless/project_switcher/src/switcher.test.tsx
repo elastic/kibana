@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { RenderResult} from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
 import { render, screen, within, cleanup } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 

@@ -43,14 +43,8 @@ import type {
 import type { ActionExecutionContext } from '@kbn/ui-actions-plugin/public';
 import { CodeEditor, HJsonLang } from '@kbn/code-editor';
 import type { StartDependencies } from './plugin';
-import type {
-  AllOverrides,
-  LensAttributesByType} from './controls';
-import {
-  AttributesMenu,
-  OverridesMenu,
-  PanelMenu,
-} from './controls';
+import type { AllOverrides, LensAttributesByType } from './controls';
+import { AttributesMenu, OverridesMenu, PanelMenu } from './controls';
 
 type RequiredType = 'date' | 'string' | 'number';
 type FieldsMap = Record<RequiredType, string>;

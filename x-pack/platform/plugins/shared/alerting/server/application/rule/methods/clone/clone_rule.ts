@@ -8,7 +8,7 @@
 import Semver from 'semver';
 import Boom from '@hapi/boom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
-import type { SavedObject} from '@kbn/core/server';
+import type { SavedObject } from '@kbn/core/server';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import { withSpan } from '@kbn/apm-utils';
 import type { SanitizedRule, RawRule } from '../../../../types';

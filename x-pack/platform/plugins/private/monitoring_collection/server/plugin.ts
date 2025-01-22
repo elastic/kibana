@@ -18,7 +18,7 @@ import { metrics } from '@opentelemetry/api-metrics';
 import { OTLPMetricExporter } from '@opentelemetry/exporter-metrics-otlp-grpc';
 import { MeterProvider, PeriodicExportingMetricReader } from '@opentelemetry/sdk-metrics-base';
 import { Resource } from '@opentelemetry/resources';
-import type { DiagLogger} from '@opentelemetry/api';
+import type { DiagLogger } from '@opentelemetry/api';
 import { diag, DiagLogLevel } from '@opentelemetry/api';
 import { SemanticResourceAttributes } from '@opentelemetry/semantic-conventions';
 import * as grpc from '@grpc/grpc-js';

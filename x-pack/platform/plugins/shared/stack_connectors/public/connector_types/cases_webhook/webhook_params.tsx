@@ -14,7 +14,7 @@ import {
   TextFieldWithMessageVariables,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import type { CaseStatuses } from '@kbn/cases-components';
-import type { CaseSeverity} from './severity_filter';
+import type { CaseSeverity } from './severity_filter';
 import { SeverityFilter } from './severity_filter';
 import { StatusFilter } from './status_filter';
 import type { CasesWebhookActionConnector, CasesWebhookActionParams } from './types';

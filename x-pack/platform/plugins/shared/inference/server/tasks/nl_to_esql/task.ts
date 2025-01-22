@@ -6,7 +6,7 @@
  */
 
 import { once } from 'lodash';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { from, switchMap } from 'rxjs';
 import type { Message, ToolOptions } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';

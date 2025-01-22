@@ -10,15 +10,14 @@ import { i18n } from '@kbn/i18n';
 import InfiniteLoader from 'react-window-infinite-loader';
 import type { ListChildComponentProps } from 'react-window';
 import { FixedSizeList } from 'react-window';
-import type {
-  EuiAutoSize} from '@elastic/eui';
+import type { EuiAutoSize } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
   EuiButtonEmpty,
   EuiText,
-  EuiAutoSizer
+  EuiAutoSizer,
 } from '@elastic/eui';
 import { ShowAllSpaces } from '../../common/show_all_spaces';
 import type { OverviewStatusMetaData } from '../../../../../../../common/runtime_types';

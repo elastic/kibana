@@ -6,13 +6,8 @@
  */
 
 import pMap from 'p-map';
-import type {
-  Case,
-  Configuration} from '@kbn/cases-plugin/common/types/domain';
-import {
-  CaseSeverity,
-  CaseStatuses
-} from '@kbn/cases-plugin/common/types/domain';
+import type { Case, Configuration } from '@kbn/cases-plugin/common/types/domain';
+import { CaseSeverity, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import type { CasePostRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   createCase as createCaseAPI,

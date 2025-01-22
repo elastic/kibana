@@ -8,13 +8,8 @@
 import type { AwaitedProperties } from '@kbn/utility-types';
 import { CUSTOM_ELEMENT_TYPE } from '../../../common/lib/constants';
 import { initializeDeleteCustomElementRoute } from './delete';
-import type {
-  RequestHandlerContext,
-  RequestHandler} from '@kbn/core/server';
-import {
-  kibanaResponseFactory,
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
+import type { RequestHandlerContext, RequestHandler } from '@kbn/core/server';
+import { kibanaResponseFactory, SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { savedObjectsClientMock, httpServerMock, coreMock } from '@kbn/core/server/mocks';
 import { getMockedRouterDeps } from '../test_helpers';
 

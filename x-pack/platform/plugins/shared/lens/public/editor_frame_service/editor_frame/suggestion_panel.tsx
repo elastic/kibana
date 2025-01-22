@@ -25,7 +25,7 @@ import {
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import type { IconType } from '@elastic/eui/src/components/icon/icon';
-import type { Ast} from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { fromExpression, toExpression } from '@kbn/interpreter';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -51,8 +51,7 @@ import { getSuggestions, switchToSuggestion } from './suggestion_helpers';
 import { getDatasourceExpressionsByLayers } from './expression_helpers';
 import { showMemoizedErrorNotification } from '../../lens_ui_errors/memoized_error_notification';
 import { getMissingIndexPattern } from './state_helpers';
-import type {
-  DatasourceStates} from '../../state_management';
+import type { DatasourceStates } from '../../state_management';
 import {
   rollbackSuggestion,
   selectExecutionContextSearch,

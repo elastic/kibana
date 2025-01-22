@@ -6,7 +6,7 @@
  */
 
 import { resolve } from 'path';
-import type { FtrConfigProviderContext} from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { getKibanaCliLoggers } from '@kbn/test';
 import { pageObjects } from './page_objects';
 import { services } from './services';

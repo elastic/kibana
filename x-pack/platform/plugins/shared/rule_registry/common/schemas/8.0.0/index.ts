@@ -16,11 +16,9 @@ import type {
   ALERT_RULE_UUID,
   SPACE_IDS,
   ALERT_RULE_TAGS,
-  TIMESTAMP} from '@kbn/rule-data-utils';
-import {
-  ALERT_INSTANCE_ID,
-  ALERT_UUID
+  TIMESTAMP,
 } from '@kbn/rule-data-utils';
+import { ALERT_INSTANCE_ID, ALERT_UUID } from '@kbn/rule-data-utils';
 
 /* DO NOT MODIFY THIS SCHEMA TO ADD NEW FIELDS. These types represent the alerts that shipped in 8.0.0.
 Any changes to these types should be bug fixes so the types more accurately represent the alerts from 8.0.0.

@@ -11,7 +11,7 @@ import React from 'react';
 import { mount, shallow } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 
-import type { IAggType} from '@kbn/data-plugin/public';
+import type { IAggType } from '@kbn/data-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Schema } from '@kbn/visualizations-plugin/public';

@@ -15,19 +15,13 @@ import type {
   ResolverEntityIndex,
   ResolverNode,
 } from '@kbn/security-solution-plugin/common/endpoint/types';
-import type {
-  Event} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
-import {
-  EndpointDocGenerator
-} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import type { Event } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { EndpointDocGenerator } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 import type TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';
 import { createAncestryArray, schemaWithAncestry, HEADERS } from './common';
-import type {
-  InsertedEvents} from '../../../../config/services/security_solution_edr_workflows_resolver';
-import {
-  processEventsIndex,
-} from '../../../../config/services/security_solution_edr_workflows_resolver';
+import type { InsertedEvents } from '../../../../config/services/security_solution_edr_workflows_resolver';
+import { processEventsIndex } from '../../../../config/services/security_solution_edr_workflows_resolver';
 
 export default function ({ getService }: FtrProviderContext) {
   const resolver = getService('resolverGenerator');

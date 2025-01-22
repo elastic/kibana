@@ -8,7 +8,7 @@
  */
 
 import type { Socket } from 'net';
-import type { DetailedPeerCertificate, PeerCertificate} from 'tls';
+import type { DetailedPeerCertificate, PeerCertificate } from 'tls';
 import { TLSSocket } from 'tls';
 import { promisify } from 'util';
 import type { IKibanaSocket } from '@kbn/core-http-server';

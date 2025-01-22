@@ -6,7 +6,7 @@
  */
 
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiTextColor } from '@elastic/eui';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { HeaderMenu } from '../../header_menu';
 import { headerMenuCss, noLinkedRulesCss } from '../list_header.styles';

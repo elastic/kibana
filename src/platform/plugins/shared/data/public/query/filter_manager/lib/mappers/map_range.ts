@@ -8,15 +8,8 @@
  */
 
 import { get, identity } from 'lodash';
-import type {
-  ScriptedRangeFilter,
-  RangeFilter,
-  Filter} from '@kbn/es-query';
-import {
-  isScriptedRangeFilter,
-  isRangeFilter,
-  FILTERS,
-} from '@kbn/es-query';
+import type { ScriptedRangeFilter, RangeFilter, Filter } from '@kbn/es-query';
+import { isScriptedRangeFilter, isRangeFilter, FILTERS } from '@kbn/es-query';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
 
 export function getRangeDisplayValue(

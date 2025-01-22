@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useState, useEffect, useRef, useCallback } from 'react';
 
 import { isEqual } from 'lodash';

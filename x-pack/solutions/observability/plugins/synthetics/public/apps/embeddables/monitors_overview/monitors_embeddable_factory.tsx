@@ -12,11 +12,12 @@ import type {
   PublishesWritablePanelTitle,
   PublishesPanelTitle,
   SerializedTitles,
-  HasEditCapabilities} from '@kbn/presentation-publishing';
+  HasEditCapabilities,
+} from '@kbn/presentation-publishing';
 import {
   initializeTitles,
   useBatchedPublishingSubjects,
-  fetch$
+  fetch$,
 } from '@kbn/presentation-publishing';
 import { BehaviorSubject, Subject } from 'rxjs';
 import type { StartServicesAccessor } from '@kbn/core-lifecycle-browser';

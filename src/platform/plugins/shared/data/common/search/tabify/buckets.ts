@@ -9,7 +9,7 @@
 
 import { get, isPlainObject, keys, findKey } from 'lodash';
 import moment from 'moment-timezone';
-import type { IAggConfig} from '../aggs';
+import type { IAggConfig } from '../aggs';
 import { parseInterval } from '../aggs';
 import type { AggResponseBucket, TabbedRangeFilterParams, TimeRangeInformation } from './types';
 

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiListGroupItemProps} from '@elastic/eui';
+import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiText,
   EuiListGroup,

@@ -12,10 +12,9 @@ import type {
   ExternalServiceSIR,
   Observable,
   ExternalServiceITOM,
-  ExecutorSubActionAddEventParams} from './types';
-import {
-  ObservableTypes
+  ExecutorSubActionAddEventParams,
 } from './types';
+import { ObservableTypes } from './types';
 
 export const serviceNowCommonFields = [
   {

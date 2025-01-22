@@ -60,10 +60,9 @@ import type {
   ActionConnector,
   ActionVariables,
   ActionTypeRegistryContract,
-  NotifyWhenSelectOptions} from '../../../types';
-import {
-  ActionConnectorMode
+  NotifyWhenSelectOptions,
 } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 import { hasSaveActionsCapability } from '../../lib/capabilities';
 import type { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';

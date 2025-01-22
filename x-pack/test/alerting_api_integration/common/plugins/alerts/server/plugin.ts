@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { Plugin, CoreSetup, CoreStart, Logger, PluginInitializerContext } from '@kbn/core/server';
+import type {
+  Plugin,
+  CoreSetup,
+  CoreStart,
+  Logger,
+  PluginInitializerContext,
+} from '@kbn/core/server';
 import { firstValueFrom, Subject } from 'rxjs';
 import type { PluginSetupContract as ActionsPluginSetup } from '@kbn/actions-plugin/server/plugin';
 import type { AlertingServerSetup, AlertingServerStart } from '@kbn/alerting-plugin/server/plugin';

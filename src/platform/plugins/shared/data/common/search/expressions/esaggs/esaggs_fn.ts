@@ -16,7 +16,7 @@ import { buildExpressionFunction } from '@kbn/expressions-plugin/common';
 import type { IndexPatternExpressionType } from '@kbn/data-views-plugin/common/expressions';
 import type { DataViewsContract } from '@kbn/data-views-plugin/common';
 
-import type { AggsStart, AggExpressionType} from '../../aggs';
+import type { AggsStart, AggExpressionType } from '../../aggs';
 import { aggCountFnName } from '../../aggs';
 import type { ISearchStartSearchSource } from '../../search_source';
 

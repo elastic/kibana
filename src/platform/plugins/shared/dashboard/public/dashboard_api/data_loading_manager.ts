@@ -8,12 +8,8 @@
  */
 
 import { BehaviorSubject, debounceTime, first, map } from 'rxjs';
-import type {
-  PublishesDataLoading,
-  PublishingSubject} from '@kbn/presentation-publishing';
-import {
-  apiPublishesDataLoading,
-} from '@kbn/presentation-publishing';
+import type { PublishesDataLoading, PublishingSubject } from '@kbn/presentation-publishing';
+import { apiPublishesDataLoading } from '@kbn/presentation-publishing';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
 
 export function initializeDataLoadingManager(

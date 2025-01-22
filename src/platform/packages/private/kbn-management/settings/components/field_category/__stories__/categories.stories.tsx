@@ -11,7 +11,7 @@ import React from 'react';
 import type { ComponentMeta, Story } from '@storybook/react';
 import { action } from '@storybook/addon-actions';
 import { FieldCategories as Component } from '../categories';
-import type { Params} from './use_category_story';
+import type { Params } from './use_category_story';
 import { useCategoryStory } from './use_category_story';
 import { FieldCategoryProvider } from '../services';
 

@@ -5,12 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ReadStreamDefinition,
-  FieldDefinitionConfigWithName} from '@kbn/streams-schema';
-import {
-  isWiredReadStream,
-} from '@kbn/streams-schema';
+import type { ReadStreamDefinition, FieldDefinitionConfigWithName } from '@kbn/streams-schema';
+import { isWiredReadStream } from '@kbn/streams-schema';
 import type { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
 import { useCallback, useMemo, useState } from 'react';
 import useToggle from 'react-use/lib/useToggle';

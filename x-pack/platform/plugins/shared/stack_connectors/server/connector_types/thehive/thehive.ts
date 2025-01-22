@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceParams} from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import type { Type } from '@kbn/config-schema';

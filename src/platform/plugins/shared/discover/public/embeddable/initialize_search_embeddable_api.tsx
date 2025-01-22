@@ -9,7 +9,7 @@
 
 import { pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, combineLatest, map, skip } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ISearchSource, SerializedSearchSourceFields } from '@kbn/data-plugin/common';

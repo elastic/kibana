@@ -11,7 +11,7 @@ import {
   ensureFieldIsSafeForQuery,
   asFiltersBySpaceId,
 } from './alerting_authorization_kuery';
-import type { KueryNode} from '@kbn/es-query';
+import type { KueryNode } from '@kbn/es-query';
 import { toKqlExpression } from '@kbn/es-query';
 
 describe('asKqlFiltersByRuleTypeAndConsumer', () => {

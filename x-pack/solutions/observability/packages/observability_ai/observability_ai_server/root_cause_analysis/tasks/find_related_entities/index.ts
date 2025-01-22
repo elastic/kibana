@@ -13,16 +13,10 @@ import type {
 } from '@kbn/observability-utils-common/llm/log_analysis/document_analysis';
 import type { ObservabilityElasticsearchClient } from '@kbn/observability-utils-server/es/client/create_observability_es_client';
 import type { FieldPatternResultWithChanges } from '@kbn/observability-utils-server/entities/get_log_patterns';
-import type {
-  RelatedEntityFromSearchResults} from './analyze_fetched_related_entities';
-import {
-  analyzeFetchedRelatedEntities
-} from './analyze_fetched_related_entities';
-import type {
-  RelatedEntityKeywordSearch} from './write_keyword_searches_for_related_entities';
-import {
-  writeKeywordSearchForRelatedEntities,
-} from './write_keyword_searches_for_related_entities';
+import type { RelatedEntityFromSearchResults } from './analyze_fetched_related_entities';
+import { analyzeFetchedRelatedEntities } from './analyze_fetched_related_entities';
+import type { RelatedEntityKeywordSearch } from './write_keyword_searches_for_related_entities';
+import { writeKeywordSearchForRelatedEntities } from './write_keyword_searches_for_related_entities';
 import type { ScoredKnowledgeBaseEntry } from '../get_knowledge_base_entries';
 
 export type { RelatedEntityFromSearchResults };

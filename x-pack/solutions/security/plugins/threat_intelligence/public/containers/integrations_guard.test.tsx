@@ -10,7 +10,7 @@ import { render } from '@testing-library/react';
 import React from 'react';
 import { IntegrationsGuard } from './integrations_guard';
 import { EMPTY_PAGE_SECURITY_TEMPLATE, TestProvidersComponent } from '../mocks/test_providers';
-import type { Integration} from '../hooks/use_integrations';
+import type { Integration } from '../hooks/use_integrations';
 import { useIntegrations } from '../hooks/use_integrations';
 import { useIntegrationsPageLink } from '../hooks/use_integrations_page_link';
 import { useTIDocumentationLink } from '../hooks/use_documentation_link';

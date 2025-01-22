@@ -36,12 +36,8 @@ import {
 import { AgentManager, configureClient } from '@kbn/core-elasticsearch-client-server-internal';
 import { type LoggingConfigType, LoggingSystem } from '@kbn/core-logging-server-internal';
 
-import type {
-  ISavedObjectTypeRegistry,
-  SavedObjectsType} from '@kbn/core-saved-objects-server';
-import {
-  ALL_SAVED_OBJECT_INDICES
-} from '@kbn/core-saved-objects-server';
+import type { ISavedObjectTypeRegistry, SavedObjectsType } from '@kbn/core-saved-objects-server';
+import { ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
 import { esTestConfig, kibanaServerTestUser } from '@kbn/test';
 import type { LoggerFactory } from '@kbn/logging';
 import { createRootWithCorePlugins, createTestServers } from '@kbn/core-test-helpers-kbn-server';

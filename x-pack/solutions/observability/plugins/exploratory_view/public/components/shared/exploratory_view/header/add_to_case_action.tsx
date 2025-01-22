@@ -10,12 +10,8 @@ import { i18n } from '@kbn/i18n';
 import React, { useCallback, useEffect } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import type {
-  GetAllCasesSelectorModalProps} from '@kbn/cases-plugin/public';
-import {
-  CasesDeepLinkId,
-  generateCaseViewPath
-} from '@kbn/cases-plugin/public';
+import type { GetAllCasesSelectorModalProps } from '@kbn/cases-plugin/public';
+import { CasesDeepLinkId, generateCaseViewPath } from '@kbn/cases-plugin/public';
 import type { TypedLensByValueInput } from '@kbn/lens-plugin/public';
 import { observabilityFeatureId } from '@kbn/observability-shared-plugin/public';
 import type { ObservabilityAppServices } from '../../../../application/types';

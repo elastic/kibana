@@ -5,10 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Observable,
-  Subject,
-  Subscription} from 'rxjs';
+import type { Observable, Subject, Subscription } from 'rxjs';
 import {
   map,
   switchMap,
@@ -27,10 +24,9 @@ import type {
   Logger,
   Plugin,
   PluginInitializerContext,
-  IClusterClient} from '@kbn/core/server';
-import {
-  ServiceStatusLevels,
+  IClusterClient,
 } from '@kbn/core/server';
+import { ServiceStatusLevels } from '@kbn/core/server';
 import { registerAnalyticsContextProvider } from '../common/register_analytics_context_provider';
 import type { ILicense } from '../common/types';
 import type { LicensingPluginSetup, LicensingPluginStart } from './types';

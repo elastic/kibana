@@ -14,13 +14,8 @@ import type { IRouter } from '@kbn/core/server';
 import type { DataRequestHandlerContext } from '@kbn/data-plugin/server';
 import { errors } from '@elastic/elasticsearch';
 import type { SearchMvtRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type {
-  RENDER_AS} from '../../common/constants';
-import {
-  APP_ID,
-  MVT_GETTILE_API_PATH,
-  MVT_GETGRIDTILE_API_PATH
-} from '../../common/constants';
+import type { RENDER_AS } from '../../common/constants';
+import { APP_ID, MVT_GETTILE_API_PATH, MVT_GETGRIDTILE_API_PATH } from '../../common/constants';
 import { getAggsTileRequest, getHitsTileRequest } from '../../common/mvt_request_body';
 
 const CACHE_TIMEOUT_SECONDS = 60 * 60;

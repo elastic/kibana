@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { merge, timer, throwError, EMPTY } from 'rxjs';
 import { map, takeUntil, catchError } from 'rxjs';
 import { uniq } from 'lodash';

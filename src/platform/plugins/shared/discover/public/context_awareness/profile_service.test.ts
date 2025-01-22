@@ -12,11 +12,9 @@
 import type {
   AsyncProfileProvider,
   ContextWithProfileId,
-  ProfileProvider} from './profile_service';
-import {
-  AsyncProfileService,
-  ProfileService,
+  ProfileProvider,
 } from './profile_service';
+import { AsyncProfileService, ProfileService } from './profile_service';
 import type { CellRenderersExtensionParams, Profile } from './types';
 
 interface TestParams {

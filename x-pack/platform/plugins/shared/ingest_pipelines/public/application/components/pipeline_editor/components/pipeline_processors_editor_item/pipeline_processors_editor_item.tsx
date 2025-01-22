@@ -6,7 +6,7 @@
  */
 
 import classNames from 'classnames';
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { memo, useCallback } from 'react';
 import {
   EuiButtonIcon,

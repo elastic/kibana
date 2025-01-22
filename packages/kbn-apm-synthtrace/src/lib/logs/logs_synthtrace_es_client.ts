@@ -11,7 +11,10 @@ import type { Client, estypes } from '@elastic/elasticsearch';
 import type { Readable } from 'stream';
 import { pipeline } from 'stream';
 import type { LogDocument } from '@kbn/apm-synthtrace-client/src/lib/logs';
-import type { IngestProcessorContainer, MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IngestProcessorContainer,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ValuesType } from 'utility-types';
 import type { SynthtraceEsClientOptions } from '../shared/base_client';
 import { SynthtraceEsClient } from '../shared/base_client';

@@ -12,7 +12,7 @@ import { format as formatUrl } from 'url';
 import util from 'util';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { FtrProviderContext } from '../ftr_provider_context';
-import type { FeaturesService} from './features';
+import type { FeaturesService } from './features';
 import { FeaturesProvider } from './features';
 
 export interface BasicCredentials {

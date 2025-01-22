@@ -18,7 +18,7 @@ import { getDefaultCodingLanguage } from '../../utils/language';
 
 import { CreateIndexUIView } from './create_index';
 import { CreateIndexCodeView } from '../shared/create_index_code_view';
-import type { CreateIndexFormState} from '../../types';
+import type { CreateIndexFormState } from '../../types';
 import { CreateIndexViewMode } from '../../types';
 
 import { CreateIndexPanel } from '../shared/create_index_panel';

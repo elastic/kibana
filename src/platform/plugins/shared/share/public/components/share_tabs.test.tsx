@@ -11,17 +11,14 @@ import React from 'react';
 import { ShareMenuTabs } from './share_tabs';
 import { ShareMenuProvider, type IShareContext } from './context';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
-import type { KibanaLocation, LocatorGetUrlParams} from '../../common/url_service';
+import type { KibanaLocation, LocatorGetUrlParams } from '../../common/url_service';
 import { UrlService } from '../../common/url_service';
 import type {
   BrowserShortUrlClient,
   BrowserShortUrlClientHttp,
 } from '../url_service/short_urls/short_url_client';
-import type {
-  BrowserShortUrlClientFactoryCreateParams} from '../url_service/short_urls/short_url_client_factory';
-import {
-  BrowserShortUrlClientFactory,
-} from '../url_service/short_urls/short_url_client_factory';
+import type { BrowserShortUrlClientFactoryCreateParams } from '../url_service/short_urls/short_url_client_factory';
+import { BrowserShortUrlClientFactory } from '../url_service/short_urls/short_url_client_factory';
 import { themeServiceMock } from '@kbn/core-theme-browser-mocks';
 import { i18nServiceMock } from '@kbn/core-i18n-browser-mocks';
 import { toastsServiceMock } from '@kbn/core-notifications-browser-mocks/src/toasts_service.mock';

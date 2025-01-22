@@ -4,16 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  DefaultItemAction,
-  EuiBasicTableColumn} from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiFlexGroup,
-  EuiIcon,
-  EuiText,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { DefaultItemAction, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiFlexGroup, EuiIcon, EuiText, EuiToolTip } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import { rulesLocatorID, sloFeatureId } from '@kbn/observability-plugin/common';

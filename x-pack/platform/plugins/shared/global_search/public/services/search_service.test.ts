@@ -11,7 +11,7 @@ import {
   fetchServerSearchableTypesMock,
 } from './search_service.test.mocks';
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { firstValueFrom, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';

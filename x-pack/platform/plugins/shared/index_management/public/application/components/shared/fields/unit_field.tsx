@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState } from 'react';
 import { EuiFilterSelectItem, EuiPopover, EuiButtonEmpty } from '@elastic/eui';
 import { UseField } from '../../../../shared_imports';

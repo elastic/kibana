@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useCallback } from 'react';
-import type { BulletProps} from '@elastic/charts';
+import type { BulletProps } from '@elastic/charts';
 import { Chart, Bullet, Settings } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -24,14 +24,8 @@ import {
   isVisDimension,
 } from '@kbn/visualizations-plugin/common/utils';
 import { i18n } from '@kbn/i18n';
-import type {
-  GaugeRenderProps,
-  GaugeLabelMajorMode} from '../../common';
-import {
-  GaugeLabelMajorModes,
-  GaugeColorModes,
-  GaugeTicksPositions,
-} from '../../common';
+import type { GaugeRenderProps, GaugeLabelMajorMode } from '../../common';
+import { GaugeLabelMajorModes, GaugeColorModes, GaugeTicksPositions } from '../../common';
 import {
   getAccessorsFromArgs,
   getMaxValue,

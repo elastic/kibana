@@ -10,8 +10,7 @@
 import React, { PureComponent } from 'react';
 import type { OverlayModalStart } from '@kbn/core/public';
 import { FieldDescription } from '@kbn/field-utils';
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiIcon,
   EuiInMemoryTable,

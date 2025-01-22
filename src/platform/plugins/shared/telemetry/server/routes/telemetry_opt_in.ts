@@ -9,7 +9,7 @@
 
 import { firstValueFrom, type Observable } from 'rxjs';
 import { schema } from '@kbn/config-schema';
-import type { IRouter, Logger , RequestHandlerContext} from '@kbn/core/server';
+import type { IRouter, Logger, RequestHandlerContext } from '@kbn/core/server';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type {
   StatsGetterConfig,

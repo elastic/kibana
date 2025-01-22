@@ -9,10 +9,10 @@ import React from 'react';
 import moment from 'moment';
 import { EuiProgress } from '@elastic/eui';
 
-import type { TooltipValue} from '@elastic/charts';
+import type { TooltipValue } from '@elastic/charts';
 import { TooltipTable, TooltipHeader, TooltipContainer } from '@elastic/charts';
 
-import type { MonitorStatusTimeBin} from './monitor_status_data';
+import type { MonitorStatusTimeBin } from './monitor_status_data';
 import { SUCCESS_VIZ_COLOR, DANGER_VIZ_COLOR } from './monitor_status_data';
 import * as labels from './labels';
 

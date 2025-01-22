@@ -11,7 +11,7 @@ import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { TopNavMenuProps} from './top_nav_menu';
+import type { TopNavMenuProps } from './top_nav_menu';
 import { TopNavMenu } from './top_nav_menu';
 import type { RegisteredTopNavMenuData } from './top_nav_menu_data';
 

@@ -13,10 +13,9 @@ import type { IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
 import type { Actions } from '../../../../shared/api_logic/create_api_logic';
 import type {
   FetchCustomPipelineApiLogicArgs,
-  FetchCustomPipelineApiLogicResponse} from '../../../api/index/fetch_custom_pipeline_api_logic';
-import {
-  FetchCustomPipelineApiLogic,
+  FetchCustomPipelineApiLogicResponse,
 } from '../../../api/index/fetch_custom_pipeline_api_logic';
+import { FetchCustomPipelineApiLogic } from '../../../api/index/fetch_custom_pipeline_api_logic';
 import { IndexNameLogic } from '../index_name_logic';
 
 interface IndexPipelinesConfigurationsActions {

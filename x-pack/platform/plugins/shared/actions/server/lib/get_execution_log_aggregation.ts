@@ -11,7 +11,7 @@ import Boom from '@hapi/boom';
 import { flatMap, get, isEmpty } from 'lodash';
 import type { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-import type { IExecutionLog, IExecutionLogResult} from '../../common';
+import type { IExecutionLog, IExecutionLogResult } from '../../common';
 import { EMPTY_EXECUTION_KPI_RESULT } from '../../common';
 
 const DEFAULT_MAX_BUCKETS_LIMIT = 1000; // do not retrieve more than this number of executions

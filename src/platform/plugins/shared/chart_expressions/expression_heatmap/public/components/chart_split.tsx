@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { Accessor, AccessorFn} from '@elastic/charts';
+import type { Accessor, AccessorFn } from '@elastic/charts';
 import { GroupBy, SmallMultiples, Predicate } from '@elastic/charts';
 
 interface ChartSplitProps {

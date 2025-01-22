@@ -5,7 +5,10 @@
  * 2.0.
  */
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import type { SortFieldOrUndefined, SortOrderOrUndefined } from '@kbn/securitysolution-io-ts-list-types';
+import type {
+  SortFieldOrUndefined,
+  SortOrderOrUndefined,
+} from '@kbn/securitysolution-io-ts-list-types';
 
 export const getSortWithTieBreaker = ({
   sortField,

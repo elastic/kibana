@@ -7,17 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  ApmFields,
-  InfraDocument,
-  Instance,
-  LogDocument} from '@kbn/apm-synthtrace-client';
-import {
-  apm,
-  generateShortId,
-  infra,
-  log,
-} from '@kbn/apm-synthtrace-client';
+import type { ApmFields, InfraDocument, Instance, LogDocument } from '@kbn/apm-synthtrace-client';
+import { apm, generateShortId, infra, log } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
 import type { Logger } from '../lib/utils/create_logger';

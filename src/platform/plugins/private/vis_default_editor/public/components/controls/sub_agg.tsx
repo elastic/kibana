@@ -10,7 +10,7 @@
 import React, { useEffect } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 
-import type { AggParamType, IAggConfig} from '@kbn/data-plugin/public';
+import type { AggParamType, IAggConfig } from '@kbn/data-plugin/public';
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import { useSubAggParamsHandlers } from './utils';
 import type { AggParamEditorProps } from '../agg_param_props';

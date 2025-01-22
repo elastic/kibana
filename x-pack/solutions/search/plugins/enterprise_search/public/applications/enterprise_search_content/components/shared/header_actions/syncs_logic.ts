@@ -13,21 +13,12 @@ import type { Connector } from '@kbn/search-connectors';
 import type { Actions } from '../../../../shared/api_logic/create_api_logic';
 import { KibanaLogic } from '../../../../shared/kibana';
 
-import type {
-  CancelSyncsApiArgs} from '../../../api/connector/cancel_syncs_api_logic';
-import {
-  CancelSyncsApiLogic,
-} from '../../../api/connector/cancel_syncs_api_logic';
-import type {
-  StartAccessControlSyncArgs} from '../../../api/connector/start_access_control_sync_api_logic';
-import {
-  StartAccessControlSyncApiLogic
-} from '../../../api/connector/start_access_control_sync_api_logic';
-import type {
-  StartIncrementalSyncArgs} from '../../../api/connector/start_incremental_sync_api_logic';
-import {
-  StartIncrementalSyncApiLogic
-} from '../../../api/connector/start_incremental_sync_api_logic';
+import type { CancelSyncsApiArgs } from '../../../api/connector/cancel_syncs_api_logic';
+import { CancelSyncsApiLogic } from '../../../api/connector/cancel_syncs_api_logic';
+import type { StartAccessControlSyncArgs } from '../../../api/connector/start_access_control_sync_api_logic';
+import { StartAccessControlSyncApiLogic } from '../../../api/connector/start_access_control_sync_api_logic';
+import type { StartIncrementalSyncArgs } from '../../../api/connector/start_incremental_sync_api_logic';
+import { StartIncrementalSyncApiLogic } from '../../../api/connector/start_incremental_sync_api_logic';
 import type { StartSyncArgs } from '../../../api/connector/start_sync_api_logic';
 import { StartSyncApiLogic } from '../../../api/connector/start_sync_api_logic';
 import {

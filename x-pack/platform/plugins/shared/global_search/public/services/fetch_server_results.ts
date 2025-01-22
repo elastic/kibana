@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { from, EMPTY } from 'rxjs';
 import { map, takeUntil } from 'rxjs';
 import type { HttpStart } from '@kbn/core/public';

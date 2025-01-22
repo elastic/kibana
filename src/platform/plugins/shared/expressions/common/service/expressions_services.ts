@@ -21,7 +21,7 @@ import type {
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import type { ExecutionContextSearch } from '@kbn/es-query';
 import { Executor } from '../executor';
-import type { AnyExpressionRenderDefinition} from '../expression_renderers';
+import type { AnyExpressionRenderDefinition } from '../expression_renderers';
 import { ExpressionRendererRegistry } from '../expression_renderers';
 import type { ExpressionAstExpression } from '../ast';
 import type { ExecutionContract, ExecutionResult } from '../execution';

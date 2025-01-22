@@ -15,7 +15,8 @@ import type {
   AlertInstanceContext,
   Rule,
   RuleAlertData,
-  RawRule} from '../types';
+  RawRule,
+} from '../types';
 import {
   MaintenanceWindowStatus,
   DEFAULT_FLAPPING_SETTINGS,

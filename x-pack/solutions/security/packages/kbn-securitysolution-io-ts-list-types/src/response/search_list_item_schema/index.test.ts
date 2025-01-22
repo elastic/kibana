@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getSearchListItemResponseMock } from './index.mock';
-import type { SearchListItemSchema} from '.';
+import type { SearchListItemSchema } from '.';
 import { searchListItemSchema } from '.';
 
 describe('search_list_item_schema', () => {

@@ -6,14 +6,8 @@
  */
 
 import React from 'react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
-import {
-  EuiPopoverTitle,
-  EuiFormRow,
-  EuiComboBox,
-  EuiFormHelpText,
-} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
+import { EuiPopoverTitle, EuiFormRow, EuiComboBox, EuiFormHelpText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 import type { DataViewField } from '@kbn/data-views-plugin/public';

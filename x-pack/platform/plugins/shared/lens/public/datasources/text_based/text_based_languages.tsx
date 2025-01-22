@@ -9,7 +9,7 @@ import React from 'react';
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type { AggregateQuery} from '@kbn/es-query';
+import type { AggregateQuery } from '@kbn/es-query';
 import { isOfAggregateQueryType, getAggregateQueryMode } from '@kbn/es-query';
 import type { SavedObjectReference } from '@kbn/core/public';
 import type { ExpressionsStart, DatatableColumn } from '@kbn/expressions-plugin/public';

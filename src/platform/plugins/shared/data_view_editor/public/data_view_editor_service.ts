@@ -8,9 +8,7 @@
  */
 
 import type { HttpSetup } from '@kbn/core/public';
-import type {
-  Observable,
-  Subscription} from 'rxjs';
+import type { Observable, Subscription } from 'rxjs';
 import {
   BehaviorSubject,
   Subject,
@@ -24,10 +22,9 @@ import {
 import type {
   DataViewsServicePublic,
   MatchedItem,
-  DataViewField} from '@kbn/data-views-plugin/public';
-import {
-  INDEX_PATTERN_TYPE
+  DataViewField,
 } from '@kbn/data-views-plugin/public';
+import { INDEX_PATTERN_TYPE } from '@kbn/data-views-plugin/public';
 
 import type { RollupIndicesCapsResponse, MatchedIndicesSet, TimestampOption } from './types';
 import { getMatchedIndices, ensureMinimumTime, extractTimeFields, removeSpaces } from './lib';

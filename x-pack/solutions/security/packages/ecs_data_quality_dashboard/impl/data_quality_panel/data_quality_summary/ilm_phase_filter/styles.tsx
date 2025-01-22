@@ -6,7 +6,7 @@
  */
 
 import type { UseEuiTheme } from '@elastic/eui';
-import type { CSSObject} from '@emotion/react';
+import type { CSSObject } from '@emotion/react';
 import { css } from '@emotion/react';
 
 export const optionCss = css({

@@ -19,11 +19,8 @@ import { syntheticsMonitorType } from '../../../common/types/saved_objects';
 import { getAllLocations } from '../get_all_locations';
 import { syncNewMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/add_monitor_bulk';
 import type { SyntheticsMonitorClient } from '../synthetics_monitor/synthetics_monitor_client';
-import type {
-  MonitorConfigUpdate} from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
-import {
-  syncEditedMonitorBulk,
-} from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import type { MonitorConfigUpdate } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
+import { syncEditedMonitorBulk } from '../../routes/monitor_cruds/bulk_cruds/edit_monitor_bulk';
 import type {
   SyntheticsMonitorWithSecretsAttributes,
   EncryptedSyntheticsMonitorAttributes,
@@ -31,14 +28,11 @@ import type {
   ProjectMonitor,
   Locations,
   SyntheticsMonitor,
-  MonitorFields} from '../../../common/runtime_types';
-import {
-  ConfigKey,
-  type SyntheticsPrivateLocations,
+  MonitorFields,
 } from '../../../common/runtime_types';
+import { ConfigKey, type SyntheticsPrivateLocations } from '../../../common/runtime_types';
 import { formatSecrets, normalizeSecrets } from '../utils/secrets';
-import type {
-  ValidationResult} from '../../routes/monitor_cruds/monitor_validation';
+import type { ValidationResult } from '../../routes/monitor_cruds/monitor_validation';
 import {
   validateProjectMonitor,
   validateMonitor,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Message} from '@kbn/inference-common';
+import type { Message } from '@kbn/inference-common';
 import { MessageRole } from '@kbn/inference-common';
 
 function isUserMessage(message: Message): boolean {

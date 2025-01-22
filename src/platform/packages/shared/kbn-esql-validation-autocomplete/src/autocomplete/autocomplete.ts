@@ -104,7 +104,7 @@ import {
   getSuggestionsToRightOfOperatorExpression,
   checkFunctionInvocationComplete,
 } from './helper';
-import type { FunctionParameter} from '../definitions/types';
+import type { FunctionParameter } from '../definitions/types';
 import { isParameterType } from '../definitions/types';
 import { metadataOption } from '../definitions/options';
 import { comparisonFunctions } from '../definitions/builtin';

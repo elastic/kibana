@@ -23,8 +23,7 @@ import {
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  FilteringRule} from '@kbn/search-connectors';
+import type { FilteringRule } from '@kbn/search-connectors';
 import {
   filteringPolicyToText,
   filteringRuleToText,
@@ -34,11 +33,8 @@ import {
 import { docLinks } from '../../../../../shared/doc_links';
 
 import { InlineEditableTable } from '../../../../../shared/tables/inline_editable_table/inline_editable_table';
-import type {
-  InlineEditableTableProps} from '../../../../../shared/tables/inline_editable_table/inline_editable_table_logic';
-import {
-  InlineEditableTableLogic
-} from '../../../../../shared/tables/inline_editable_table/inline_editable_table_logic';
+import type { InlineEditableTableProps } from '../../../../../shared/tables/inline_editable_table/inline_editable_table_logic';
+import { InlineEditableTableLogic } from '../../../../../shared/tables/inline_editable_table/inline_editable_table_logic';
 import type {
   FormErrors,
   InlineEditableTableColumn,

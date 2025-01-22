@@ -10,9 +10,9 @@
 import React, { useState, useEffect, useMemo } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type { EuiContextMenuPanelDescriptor} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import { EuiIcon, EuiPopover, EuiContextMenu } from '@elastic/eui';
-import type { LegendAction, SeriesIdentifier} from '@elastic/charts';
+import type { LegendAction, SeriesIdentifier } from '@elastic/charts';
 import { useLegendAction } from '@elastic/charts';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { Datatable } from '@kbn/expressions-plugin/public';

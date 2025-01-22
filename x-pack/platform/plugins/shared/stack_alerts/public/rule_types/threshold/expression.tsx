@@ -19,8 +19,7 @@ import {
 } from '@elastic/eui';
 import type { HttpSetup } from '@kbn/core/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
-import type {
-  RuleTypeParamsExpressionProps} from '@kbn/triggers-actions-ui-plugin/public';
+import type { RuleTypeParamsExpressionProps } from '@kbn/triggers-actions-ui-plugin/public';
 import {
   getFields,
   builtInComparators,
@@ -29,7 +28,7 @@ import {
   ForLastExpression,
   GroupByExpression,
   WhenExpression,
-  builtInAggregationTypes
+  builtInAggregationTypes,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { ThresholdVisualization } from './visualization';

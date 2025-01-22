@@ -12,8 +12,7 @@ import type { Logger } from '@kbn/logging';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import { context } from '@opentelemetry/api';
 import { last, merge, omit } from 'lodash';
-import type {
-  Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import {
   catchError,
   combineLatest,
@@ -32,7 +31,7 @@ import {
 import { v4 } from 'uuid';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import type { ChatCompleteResponse, FunctionCallingMode} from '@kbn/inference-common';
+import type { ChatCompleteResponse, FunctionCallingMode } from '@kbn/inference-common';
 import { ToolChoiceType } from '@kbn/inference-common';
 
 import { resourceNames } from '..';
@@ -42,7 +41,8 @@ import type {
   ChatCompletionErrorEvent,
   ConversationCreateEvent,
   ConversationUpdateEvent,
-  TokenCountEvent} from '../../../common/conversation_complete';
+  TokenCountEvent,
+} from '../../../common/conversation_complete';
 import {
   createConversationNotFoundError,
   StreamingChatResponseEventType,

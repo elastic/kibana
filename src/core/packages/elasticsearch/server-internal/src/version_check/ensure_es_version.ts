@@ -12,8 +12,7 @@
  * that defined in Kibana's package.json.
  */
 
-import type {
-  Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import {
   interval,
   of,

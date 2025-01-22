@@ -6,13 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  TaskManagerDoc} from '../../../../common/lib';
-import {
-  getUrlPrefix,
-  ObjectRemover,
-  getTestRuleData,
-} from '../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../common/lib';
+import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../common/lib';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
 const MIGRATED_RULE_ID = '74f3e6d7-b7bb-477d-ac28-92ee22728e6e';

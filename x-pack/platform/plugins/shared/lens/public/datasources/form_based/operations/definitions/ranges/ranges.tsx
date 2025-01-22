@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 
-import type { AggFunctionsMapping} from '@kbn/data-plugin/public';
+import type { AggFunctionsMapping } from '@kbn/data-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/public';
 import { extendedBoundsToAst, numericalRangeToAst } from '@kbn/data-plugin/common';
 import type { Range } from '@kbn/expressions-plugin/public';

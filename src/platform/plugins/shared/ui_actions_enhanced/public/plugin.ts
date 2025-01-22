@@ -12,7 +12,11 @@ import { BehaviorSubject } from 'rxjs';
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import type { UiActionsSetup, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { EmbeddableSetup, EmbeddableStart } from '@kbn/embeddable-plugin/public';
-import type { ILicense, LicensingPluginSetup, LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type {
+  ILicense,
+  LicensingPluginSetup,
+  LicensingPluginStart,
+} from '@kbn/licensing-plugin/public';
 import { createStartServicesGetter, Storage } from '@kbn/kibana-utils-plugin/public';
 import { UiActionsServiceEnhancements } from './services';
 import type { PublicDrilldownManagerComponent } from './drilldowns';

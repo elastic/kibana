@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Bundle} from '../common';
+import type { Bundle } from '../common';
 import { descending, ascending } from '../common';
 
 // helper types used inside getWorkerConfigs so we don't have

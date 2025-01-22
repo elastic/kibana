@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState, useEffect } from 'react';
 import type { PhrasesFilter } from '@kbn/es-query';
 import { buildPhrasesFilter } from '@kbn/es-query';

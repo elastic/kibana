@@ -11,15 +11,10 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiCode } from '@elastic/eui';
 
-import type {
-  FieldConfig} from '../../../../../../../shared_imports';
-import {
-  FIELD_TYPES,
-  UseField,
-  ToggleField
-} from '../../../../../../../shared_imports';
+import type { FieldConfig } from '../../../../../../../shared_imports';
+import { FIELD_TYPES, UseField, ToggleField } from '../../../../../../../shared_imports';
 
-import type { FieldsConfig} from '../shared';
+import type { FieldsConfig } from '../shared';
 import { to, from } from '../shared';
 
 export const fieldsConfig: FieldsConfig = {

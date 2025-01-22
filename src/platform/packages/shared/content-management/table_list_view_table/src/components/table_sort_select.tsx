@@ -9,9 +9,7 @@
 
 import React, { useState, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiSelectableOption,
-  Direction} from '@elastic/eui';
+import type { EuiSelectableOption, Direction } from '@elastic/eui';
 import {
   EuiSelectable,
   EuiPopover,

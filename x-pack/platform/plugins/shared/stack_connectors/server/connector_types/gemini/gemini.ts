@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceParams} from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError, Method } from 'axios';
 import { PassThrough } from 'stream';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TypeOf} from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { offeringBasedSchema, schema } from '@kbn/config-schema';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 

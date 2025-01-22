@@ -19,7 +19,7 @@ import type {
 import React, { useEffect, useState } from 'react';
 import ReactDOM from 'react-dom';
 import useObservable from 'react-use/lib/useObservable';
-import type { ControlGroupRendererApi} from '@kbn/controls-plugin/public';
+import type { ControlGroupRendererApi } from '@kbn/controls-plugin/public';
 import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
 import { css } from '@emotion/react';
 import type { ControlPanelsState } from '@kbn/controls-plugin/common';

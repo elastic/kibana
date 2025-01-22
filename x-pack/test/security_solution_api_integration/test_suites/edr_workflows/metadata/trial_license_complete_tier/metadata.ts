@@ -25,11 +25,8 @@ import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/e
 import { TRANSFORM_STATES } from '@kbn/security-solution-plugin/common/constants';
 import type { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
 
-import type {
-  MetadataListResponse} from '@kbn/security-solution-plugin/common/endpoint/types';
-import {
-  EndpointSortableField
-} from '@kbn/security-solution-plugin/common/endpoint/types';
+import type { MetadataListResponse } from '@kbn/security-solution-plugin/common/endpoint/types';
+import { EndpointSortableField } from '@kbn/security-solution-plugin/common/endpoint/types';
 
 import type TestAgent from 'supertest/lib/agent';
 import type { FtrProviderContext } from '../../../../ftr_provider_context_edr_workflows';

@@ -12,7 +12,8 @@ import type {
   Pagination,
   OnTimeChangeProps,
   EuiTableSortingType,
-  EuiBasicTableColumn} from '@elastic/eui';
+  EuiBasicTableColumn,
+} from '@elastic/eui';
 import {
   EuiFieldSearch,
   EuiFlexItem,
@@ -20,17 +21,14 @@ import {
   EuiProgress,
   EuiSpacer,
   EuiSuperDatePicker,
-  EuiBasicTable
+  EuiBasicTable,
 } from '@elastic/eui';
 import type { IExecutionErrors } from '@kbn/alerting-plugin/common';
 import { useKibana } from '../../../../common/lib/kibana';
 
 import { RefineSearchPrompt } from '../../common/components/refine_search_prompt';
-import type {
-  ComponentOpts as RuleApis} from '../../common/components/with_bulk_rule_api_operations';
-import {
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import { EventLogListCellRenderer } from '../../common/components/event_log';
 import type { RefreshToken } from './types';
 

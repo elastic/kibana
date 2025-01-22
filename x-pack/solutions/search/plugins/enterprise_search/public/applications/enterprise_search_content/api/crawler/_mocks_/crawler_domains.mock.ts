@@ -16,11 +16,9 @@ import type {
   DomainConfigFromServer,
   DomainConfig,
   CrawlerDomainsWithMeta,
-  CrawlerDomainsWithMetaFromServer} from '../types';
-import {
-  CrawlerPolicies,
-  CrawlerRules
+  CrawlerDomainsWithMetaFromServer,
 } from '../types';
+import { CrawlerPolicies, CrawlerRules } from '../types';
 
 export const CRAWL_RULE: CrawlRule = {
   id: 'crawl-rule-1',

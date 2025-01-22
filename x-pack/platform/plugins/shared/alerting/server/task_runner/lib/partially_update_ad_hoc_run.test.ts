@@ -5,17 +5,10 @@
  * 2.0.
  */
 
-import type {
-  SavedObjectsClientContract,
-  ISavedObjectsRepository} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers,
-} from '@kbn/core/server';
-import type {
-  PartiallyUpdateableAdHocRunAttributes} from './partially_update_ad_hoc_run';
-import {
-  partiallyUpdateAdHocRun,
-} from './partially_update_ad_hoc_run';
+import type { SavedObjectsClientContract, ISavedObjectsRepository } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
+import type { PartiallyUpdateableAdHocRunAttributes } from './partially_update_ad_hoc_run';
+import { partiallyUpdateAdHocRun } from './partially_update_ad_hoc_run';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
 import { adHocRunStatus } from '../../../common/constants';

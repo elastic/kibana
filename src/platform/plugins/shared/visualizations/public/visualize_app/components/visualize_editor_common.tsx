@@ -9,7 +9,7 @@
 
 import './visualize_editor.scss';
 import type { EventEmitter } from 'events';
-import type { RefObject} from 'react';
+import type { RefObject } from 'react';
 import React, { useCallback, useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';

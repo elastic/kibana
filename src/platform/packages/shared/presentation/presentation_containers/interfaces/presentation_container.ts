@@ -9,7 +9,7 @@
 
 import type { PublishingSubject } from '@kbn/presentation-publishing';
 import { apiHasParentApi, apiHasUniqueId } from '@kbn/presentation-publishing';
-import type { BehaviorSubject, Observable} from 'rxjs';
+import type { BehaviorSubject, Observable } from 'rxjs';
 import { combineLatest, isObservable, map, of, switchMap } from 'rxjs';
 import type { CanAddNewPanel } from './can_add_new_panel';
 import { apiCanAddNewPanel } from './can_add_new_panel';

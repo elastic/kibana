@@ -12,11 +12,8 @@ import type { TimeRange } from '@kbn/es-query';
 
 import { KibanaLogic } from '../../../../shared/kibana/kibana_logic';
 
-import type {
-  AnalyticsCollectionToolbarLogicValues} from './analytics_collection_toolbar_logic';
-import {
-  AnalyticsCollectionToolbarLogic
-} from './analytics_collection_toolbar_logic';
+import type { AnalyticsCollectionToolbarLogicValues } from './analytics_collection_toolbar_logic';
+import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar_logic';
 
 jest.mock('../../../../shared/kibana/kibana_logic', () => ({
   KibanaLogic: {

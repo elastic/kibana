@@ -16,7 +16,7 @@ import { PLUGIN } from '../common/constants';
 import type { ClientConfigType } from './types';
 import type { AppDependencies } from './application';
 import { BreadcrumbService } from './application/breadcrumbs';
-import type { LicenseManagementLocator} from './locator';
+import type { LicenseManagementLocator } from './locator';
 import { LicenseManagementLocatorDefinition } from './locator';
 
 interface PluginsDependenciesSetup {

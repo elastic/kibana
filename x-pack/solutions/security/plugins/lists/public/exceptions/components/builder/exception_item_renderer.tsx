@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElementType} from 'react';
+import type { ElementType } from 'react';
 import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import styled from 'styled-components';
@@ -17,7 +17,8 @@ import type {
   DataViewField,
   ExceptionsBuilderExceptionItem,
   FormattedBuilderEntry,
-  OperatorOption} from '@kbn/securitysolution-list-utils';
+  OperatorOption,
+} from '@kbn/securitysolution-list-utils';
 import {
   getFormattedBuilderEntries,
   getUpdatedEntriesOnDelete,

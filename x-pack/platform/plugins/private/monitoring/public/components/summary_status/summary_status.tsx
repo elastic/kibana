@@ -6,15 +6,8 @@
  */
 
 import React, { Fragment } from 'react';
-import type {
-  UseEuiTheme} from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiStat,
-  euiTextTruncate,
-  logicalCSS,
-} from '@elastic/eui';
+import type { UseEuiTheme } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiStat, euiTextTruncate, logicalCSS } from '@elastic/eui';
 import { capitalize } from 'lodash';
 import { css } from '@emotion/react';
 

@@ -15,10 +15,9 @@ import type { DiscoverStateContainer } from '../application/main/state_managemen
 import type { CustomizationCallback } from './types';
 import type {
   DiscoverCustomizationId,
-  DiscoverCustomizationService} from './customization_service';
-import {
-  createCustomizationService
+  DiscoverCustomizationService,
 } from './customization_service';
+import { createCustomizationService } from './customization_service';
 
 const customizationContext = createContext(createCustomizationService());
 

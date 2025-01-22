@@ -13,10 +13,9 @@ import type { ElasticsearchClient, StartServicesAccessor } from '@kbn/core/serve
 import type {
   DataViewsServerPluginStart,
   ISearchStrategy,
-  SearchStrategyDependencies} from '@kbn/data-plugin/server';
-import {
-  IndexPatternsFetcher
+  SearchStrategyDependencies,
 } from '@kbn/data-plugin/server';
+import { IndexPatternsFetcher } from '@kbn/data-plugin/server';
 
 import type { FieldSpec } from '@kbn/data-views-plugin/common';
 import { DELETED_SECURITY_SOLUTION_DATA_VIEW } from '../../../common/constants';

@@ -11,14 +11,15 @@ import type {
   FoundListItemSchema,
   DeleteListItemSchema,
   PatchListItemSchema,
-  CreateListItemSchema} from '@kbn/securitysolution-io-ts-list-types';
+  CreateListItemSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   deleteListItemSchema,
   patchListItemSchema,
   createListItemSchema,
   findListItemSchema,
   foundListItemSchema,
-  listItemSchema
+  listItemSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import { chain, fromEither, tryCatch } from 'fp-ts/lib/TaskEither';
 import { flow } from 'fp-ts/lib/function';

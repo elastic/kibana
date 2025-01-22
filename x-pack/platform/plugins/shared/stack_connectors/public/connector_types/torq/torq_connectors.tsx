@@ -11,10 +11,9 @@ import { fieldValidators } from '@kbn/es-ui-shared-plugin/static/forms/helpers';
 import type { ERROR_CODE } from '@kbn/es-ui-shared-plugin/static/forms/helpers/field_validators/types';
 import type {
   ValidationError,
-  ValidationFunc} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import {
-  UseField
+  ValidationFunc,
 } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { UseField } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { isUrl } from '@kbn/es-ui-shared-plugin/static/validators/string';
 import type { ActionConnectorFieldsProps } from '@kbn/triggers-actions-ui-plugin/public';
 import React from 'react';

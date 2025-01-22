@@ -9,7 +9,7 @@
 
 import sinon from 'sinon';
 
-import type { SendRequestHelpers} from './send_request.test.helpers';
+import type { SendRequestHelpers } from './send_request.test.helpers';
 import { createSendRequestHelpers } from './send_request.test.helpers';
 
 describe('sendRequest function', () => {

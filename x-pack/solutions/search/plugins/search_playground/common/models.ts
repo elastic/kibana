@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ModelProvider} from './types';
+import type { ModelProvider } from './types';
 import { LLMs } from './types';
 
 export const MODELS: ModelProvider[] = [

@@ -7,7 +7,7 @@
 
 import React, { memo, useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { Position} from '@elastic/charts';
+import type { Position } from '@elastic/charts';
 import { LegendValue, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';

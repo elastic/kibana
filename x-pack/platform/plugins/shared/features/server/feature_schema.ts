@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { difference } from 'lodash';
 import type { Capabilities as UICapabilities } from '@kbn/core/server';
-import type { KibanaFeatureConfig} from '../common';
+import type { KibanaFeatureConfig } from '../common';
 import { KibanaFeatureScope } from '../common';
 import type { FeatureKibanaPrivileges, ElasticsearchFeatureConfig } from '.';
 import type { AlertingKibanaPrivilege } from '../common/alerting_kibana_privilege';

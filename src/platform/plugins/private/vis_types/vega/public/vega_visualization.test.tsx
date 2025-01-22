@@ -10,7 +10,7 @@
 import 'jest-canvas-mock';
 import { render, screen } from '@testing-library/react';
 
-import type { VegaVisType} from './vega_visualization';
+import type { VegaVisType } from './vega_visualization';
 import { createVegaVisualization } from './vega_visualization';
 
 import vegaliteGraph from './test_utils/vegalite_graph.json';

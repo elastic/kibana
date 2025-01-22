@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { firstValueFrom, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
 import { duration } from 'moment';
-import type { httpServerMock} from '@kbn/core/server/mocks';
+import type { httpServerMock } from '@kbn/core/server/mocks';
 import { httpServiceMock, coreMock } from '@kbn/core/server/mocks';
 import { licenseCheckerMock } from '../../common/license_checker.mock';
 import type { GlobalSearchProviderResult } from '../../common/types';

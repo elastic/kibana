@@ -7,7 +7,7 @@
 
 import { renderHook } from '@testing-library/react';
 import { useBulkActions, useBulkAddToCaseActions, useBulkUntrackActions } from './use_bulk_actions';
-import type { AppMockRenderer} from '../../test_utils';
+import type { AppMockRenderer } from '../../test_utils';
 import { createAppMockRenderer } from '../../test_utils';
 import { createCasesServiceMock } from '../index.mock';
 import { BulkActionsVerbs } from '../../../../types';

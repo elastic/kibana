@@ -27,10 +27,16 @@ import type SemVer from 'semver/classes/semver';
 
 import { useFormIsModified } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { documentationService } from '../../../../../../services/documentation';
-import type { FormHook} from '../../../../shared_imports';
+import type { FormHook } from '../../../../shared_imports';
 import { Form, FormDataProvider } from '../../../../shared_imports';
 import { TYPE_DEFINITION } from '../../../../constants';
-import type { Field, NormalizedField, NormalizedFields, MainType, SubType } from '../../../../types';
+import type {
+  Field,
+  NormalizedField,
+  NormalizedFields,
+  MainType,
+  SubType,
+} from '../../../../types';
 import { CodeBlock } from '../../../code_block';
 import { getParametersFormForType } from '../field_types';
 import type { UpdateFieldFunc } from './use_update_field';

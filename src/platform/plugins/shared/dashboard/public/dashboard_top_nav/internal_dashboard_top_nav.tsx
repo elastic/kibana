@@ -10,16 +10,8 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import UseUnmount from 'react-use/lib/useUnmount';
 
-import type {
-  EuiBreadcrumb,
-  EuiToolTipProps} from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiHorizontalRule,
-  EuiIcon,
-  EuiLink,
-  EuiPopover
-} from '@elastic/eui';
+import type { EuiBreadcrumb, EuiToolTipProps } from '@elastic/eui';
+import { EuiBadge, EuiHorizontalRule, EuiIcon, EuiLink, EuiPopover } from '@elastic/eui';
 import type { MountPoint } from '@kbn/core/public';
 import type { Query } from '@kbn/es-query';
 import { FormattedMessage } from '@kbn/i18n-react';

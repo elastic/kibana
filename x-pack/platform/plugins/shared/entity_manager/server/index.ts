@@ -7,7 +7,7 @@
 
 import type { PluginInitializerContext } from '@kbn/core-plugins-server';
 import type { EntityManagerConfig } from '../common/config';
-import type { EntityManagerServerPluginSetup, EntityManagerServerPluginStart} from './plugin';
+import type { EntityManagerServerPluginSetup, EntityManagerServerPluginStart } from './plugin';
 import { config } from './plugin';
 import type { EntityManagerRouteRepository } from './routes';
 

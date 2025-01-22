@@ -28,10 +28,9 @@ import type {
   DashboardApi,
   DashboardCreationOptions,
   DashboardInternalApi,
-  DashboardState} from './types';
-import {
-  DASHBOARD_API_TYPE
+  DashboardState,
 } from './types';
+import { DASHBOARD_API_TYPE } from './types';
 import { initializeDataViewsManager } from './data_views_manager';
 import { initializeSettingsManager } from './settings_manager';
 import { initializeUnifiedSearchManager } from './unified_search_manager';

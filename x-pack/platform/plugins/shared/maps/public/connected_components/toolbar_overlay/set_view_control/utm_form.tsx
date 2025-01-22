@@ -6,7 +6,7 @@
  */
 
 import _ from 'lodash';
-import type { ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
 import {
   EuiForm,

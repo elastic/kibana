@@ -10,11 +10,8 @@ import React from 'react';
 
 import { usePipelineProcessorsContext } from '../../context';
 
-import type {
-  Props as ViewComponentProps} from './pipeline_processors_editor_item';
-import {
-  PipelineProcessorsEditorItem as ViewComponent
-} from './pipeline_processors_editor_item';
+import type { Props as ViewComponentProps } from './pipeline_processors_editor_item';
+import { PipelineProcessorsEditorItem as ViewComponent } from './pipeline_processors_editor_item';
 
 type Props = Omit<ViewComponentProps, 'editor' | 'processorsDispatch'>;
 

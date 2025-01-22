@@ -15,7 +15,7 @@ import type {
   ShorthandPropertyAssignment,
   PropertyAssignment,
 } from 'ts-morph';
-import type { ApiDeclaration} from '../types';
+import type { ApiDeclaration } from '../types';
 import { TypeKind } from '../types';
 import { buildApiDecsForParameters } from './build_parameter_decs';
 import { getSignature } from './get_signature';

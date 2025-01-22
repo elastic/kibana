@@ -7,9 +7,7 @@
 
 import type { Action } from 'redux-actions';
 import { handleActions } from 'redux-actions';
-import type {
-  PopoverState,
-  UiPayload} from '../actions';
+import type { PopoverState, UiPayload } from '../actions';
 import {
   toggleIntegrationsPopover,
   setBasePath,

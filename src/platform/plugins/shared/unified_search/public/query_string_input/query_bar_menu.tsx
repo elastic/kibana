@@ -9,8 +9,7 @@
 
 import type { RefObject } from 'react';
 import React, { useState, useEffect, useCallback } from 'react';
-import type {
-  EuiButtonIconProps} from '@elastic/eui';
+import type { EuiButtonIconProps } from '@elastic/eui';
 import {
   EuiButtonIcon,
   EuiContextMenu,
@@ -28,19 +27,11 @@ import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import type { SavedQueryService, SavedQuery, SavedQueryTimeFilter } from '@kbn/data-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
-import type {
-  QueryBarMenuPanelsProps,
-  AdditionalQueryBarMenuItems} from './query_bar_menu_panels';
-import {
-  useQueryBarMenuPanels,
-  QueryBarMenuPanel
-} from './query_bar_menu_panels';
+import type { QueryBarMenuPanelsProps, AdditionalQueryBarMenuItems } from './query_bar_menu_panels';
+import { useQueryBarMenuPanels, QueryBarMenuPanel } from './query_bar_menu_panels';
 import { FilterEditorWrapper } from './filter_editor_wrapper';
-import type {
-  WithCloseFilterEditorConfirmModalProps} from '../filter_bar/filter_editor';
-import {
-  withCloseFilterEditorConfirmModal
-} from '../filter_bar/filter_editor';
+import type { WithCloseFilterEditorConfirmModalProps } from '../filter_bar/filter_editor';
+import { withCloseFilterEditorConfirmModal } from '../filter_bar/filter_editor';
 import type { SuggestionsAbstraction } from '../typeahead/suggestions_component';
 
 export const strings = {

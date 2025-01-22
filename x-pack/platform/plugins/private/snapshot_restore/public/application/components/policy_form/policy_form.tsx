@@ -18,7 +18,7 @@ import {
 
 import type { SlmPolicyPayload } from '../../../../common/types';
 import { TIME_UNITS } from '../../../../common/constants';
-import type { PolicyValidation} from '../../services/validation';
+import type { PolicyValidation } from '../../services/validation';
 import { validatePolicy } from '../../services/validation';
 import {
   PolicyStepLogistics,

@@ -10,7 +10,7 @@
 import React from 'react';
 import { sortBy } from 'lodash';
 
-import type { EuiSideNavItemType} from '@elastic/eui';
+import type { EuiSideNavItemType } from '@elastic/eui';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import type { AppMountParameters } from '@kbn/core/public';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';

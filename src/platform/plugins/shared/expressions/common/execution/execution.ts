@@ -12,8 +12,7 @@ import type { Logger } from '@kbn/logging';
 import { isPromise } from '@kbn/std';
 import type { ObservableLike, UnwrapObservable } from '@kbn/utility-types';
 import { keys, last as lastOf, mapValues, reduce, zipObject } from 'lodash';
-import type {
-  Subscription} from 'rxjs';
+import type { Subscription } from 'rxjs';
 import {
   combineLatest,
   defer,
@@ -26,7 +25,7 @@ import {
   throwError,
   timer,
   Observable,
-  ReplaySubject
+  ReplaySubject,
 } from 'rxjs';
 import { catchError, finalize, map, pluck, shareReplay, switchMap, tap } from 'rxjs';
 import { now, AbortError, calculateObjectHash } from '@kbn/kibana-utils-plugin/common';
@@ -41,12 +40,9 @@ import type {
   ExpressionAstArgument,
   ExpressionAstExpression,
   ExpressionAstFunction,
-  ExpressionAstNode} from '../ast';
-import {
-  parse,
-  formatExpression,
-  parseExpression
+  ExpressionAstNode,
 } from '../ast';
+import { parse, formatExpression, parseExpression } from '../ast';
 import type { ExecutionContext, DefaultInspectorAdapters } from './types';
 import type { Datatable } from '../expression_types';
 import { getType } from '../expression_types';

@@ -8,7 +8,7 @@
  */
 
 import { isEqual, omit } from 'lodash';
-import type { IAggConfig} from '@kbn/data-plugin/common';
+import type { IAggConfig } from '@kbn/data-plugin/common';
 import { METRIC_TYPES } from '@kbn/data-plugin/common';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import type { DataViewFieldBase } from '@kbn/es-query';

@@ -11,17 +11,8 @@ import type { BaseSyntheticEvent, KeyboardEvent } from 'react';
 import React, { memo, useState } from 'react';
 
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiPopoverProps,
-  EuiButtonGroupOptionProps} from '@elastic/eui';
-import {
-  EuiPopover,
-  keys,
-  EuiIcon,
-  EuiSpacer,
-  EuiButtonEmpty,
-  EuiButtonGroup
-} from '@elastic/eui';
+import type { EuiPopoverProps, EuiButtonGroupOptionProps } from '@elastic/eui';
+import { EuiPopover, keys, EuiIcon, EuiSpacer, EuiButtonEmpty, EuiButtonGroup } from '@elastic/eui';
 
 import { ColorPicker } from '@kbn/charts-plugin/public';
 import type { LegendItem } from './models';

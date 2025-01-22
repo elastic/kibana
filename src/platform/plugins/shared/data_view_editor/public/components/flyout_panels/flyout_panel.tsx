@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  CSSProperties} from 'react';
-import React, {
-  useState,
-  useLayoutEffect,
-  useCallback,
-  createContext,
-  useContext,
-} from 'react';
+import type { CSSProperties } from 'react';
+import React, { useState, useLayoutEffect, useCallback, createContext, useContext } from 'react';
 import classnames from 'classnames';
 import { EuiFlexItem } from '@elastic/eui';
 

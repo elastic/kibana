@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 
-import type { TestBed} from './helpers';
+import type { TestBed } from './helpers';
 import { setupEnvironment, pageHelpers, getRandomString } from './helpers';
 import { RepositoryForm } from '../../public/application/components/repository_form';
 import type { RepositoryEditTestSubjects } from './helpers/repository_edit.helpers';

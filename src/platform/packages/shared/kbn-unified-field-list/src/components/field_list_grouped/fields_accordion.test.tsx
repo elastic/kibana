@@ -13,7 +13,7 @@ import { EuiLoadingSpinner, EuiNotificationBadge, EuiText } from '@elastic/eui';
 import { mountWithIntl } from '@kbn/test-jest-helpers';
 import type { FieldsAccordionProps } from './fields_accordion';
 import { FieldsAccordion } from './fields_accordion';
-import type { FieldListItem} from '../../types';
+import type { FieldListItem } from '../../types';
 import { FieldsGroupNames } from '../../types';
 
 describe('UnifiedFieldList <FieldsAccordion />', () => {

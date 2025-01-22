@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { useHistory} from 'react-router-dom';
+import type { useHistory } from 'react-router-dom';
 import { useRouteMatch } from 'react-router-dom';
 import type { EuiPageHeaderProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

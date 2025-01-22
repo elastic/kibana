@@ -18,17 +18,13 @@ import { Status } from '../../../../../common/types/api';
 import type { Actions } from '../../../shared/api_logic/create_api_logic';
 import { KibanaLogic } from '../../../shared/kibana';
 
-import type {
-  FetchDefaultPipelineResponse} from '../../api/connector/get_default_pipeline_api_logic';
-import {
-  FetchDefaultPipelineApiLogic
-} from '../../api/connector/get_default_pipeline_api_logic';
+import type { FetchDefaultPipelineResponse } from '../../api/connector/get_default_pipeline_api_logic';
+import { FetchDefaultPipelineApiLogic } from '../../api/connector/get_default_pipeline_api_logic';
 import type {
   PostDefaultPipelineArgs,
-  PostDefaultPipelineResponse} from '../../api/connector/update_default_pipeline_api_logic';
-import {
-  UpdateDefaultPipelineApiLogic,
+  PostDefaultPipelineResponse,
 } from '../../api/connector/update_default_pipeline_api_logic';
+import { UpdateDefaultPipelineApiLogic } from '../../api/connector/update_default_pipeline_api_logic';
 
 type PipelinesActions = Pick<
   Actions<PostDefaultPipelineArgs, PostDefaultPipelineResponse>,

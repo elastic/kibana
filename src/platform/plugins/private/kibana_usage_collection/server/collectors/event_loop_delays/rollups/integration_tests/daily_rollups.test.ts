@@ -23,12 +23,8 @@ import {
 
 import { metricsServiceMock } from '@kbn/core/server/mocks';
 
-import type {
-  EventLoopDelaysDaily} from '../../saved_objects';
-import {
-  SAVED_OBJECTS_DAILY_TYPE,
-  serializeSavedObjectId
-} from '../../saved_objects';
+import type { EventLoopDelaysDaily } from '../../saved_objects';
+import { SAVED_OBJECTS_DAILY_TYPE, serializeSavedObjectId } from '../../saved_objects';
 import { rollDailyData } from '../daily';
 
 const eventLoopDelaysMonitor = metricsServiceMock.createEventLoopDelaysMonitor();

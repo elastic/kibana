@@ -34,7 +34,10 @@ import type {
   ObservabilitySharedPluginStart,
 } from '@kbn/observability-shared-plugin/public';
 import type { PresentationUtilPluginStart } from '@kbn/presentation-util-plugin/public';
-import type { DefaultClientOptions, RouteRepositoryClient } from '@kbn/server-route-repository-client';
+import type {
+  DefaultClientOptions,
+  RouteRepositoryClient,
+} from '@kbn/server-route-repository-client';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';

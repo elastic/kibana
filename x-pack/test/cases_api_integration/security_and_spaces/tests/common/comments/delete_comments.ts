@@ -6,8 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type {
-  Alerts} from '../../../../common/lib/alerts';
+import type { Alerts } from '../../../../common/lib/alerts';
 import {
   createCaseAttachAlertAndDeleteAlert,
   createSecuritySolutionAlerts,

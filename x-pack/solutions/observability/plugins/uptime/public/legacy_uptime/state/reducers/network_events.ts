@@ -7,10 +7,14 @@
 
 import type { Action } from 'redux-actions';
 import { handleActions } from 'redux-actions';
-import type { NetworkEvent, SyntheticsNetworkEventsApiResponse } from '../../../../common/runtime_types';
+import type {
+  NetworkEvent,
+  SyntheticsNetworkEventsApiResponse,
+} from '../../../../common/runtime_types';
 import type {
   FetchNetworkEventsParams,
-  FetchNetworkEventsFailPayload} from '../actions/network_events';
+  FetchNetworkEventsFailPayload,
+} from '../actions/network_events';
 import {
   getNetworkEvents,
   getNetworkEventsFail,

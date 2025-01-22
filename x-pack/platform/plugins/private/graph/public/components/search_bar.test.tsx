@@ -28,7 +28,7 @@ import { I18nProvider } from '@kbn/i18n-react';
 
 import { openSourceModal } from '../services/source_modal';
 
-import type { GraphStore} from '../state_management';
+import type { GraphStore } from '../state_management';
 import { setDatasource, submitSearchSaga } from '../state_management';
 import type { ReactWrapper } from 'enzyme';
 import { createMockGraphStore } from '../state_management/mocks';

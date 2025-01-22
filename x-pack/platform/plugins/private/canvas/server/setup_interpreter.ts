@@ -7,11 +7,8 @@
 
 import type { ExpressionsServerSetup } from '@kbn/expressions-plugin/server';
 import { functions } from '../canvas_plugin_src/functions/server';
-import type {
-  InitializeArguments} from '../canvas_plugin_src/functions/external';
-import {
-  initFunctions as initExternalFunctions
-} from '../canvas_plugin_src/functions/external';
+import type { InitializeArguments } from '../canvas_plugin_src/functions/external';
+import { initFunctions as initExternalFunctions } from '../canvas_plugin_src/functions/external';
 
 export function setupInterpreter(
   expressions: ExpressionsServerSetup,

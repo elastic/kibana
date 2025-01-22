@@ -10,7 +10,7 @@ import React from 'react';
 import { EuiColorPicker, EuiSelectable, EuiContextMenu, EuiButton } from '@elastic/eui';
 import { FieldPicker } from './field_picker';
 import { FieldEditor } from './field_editor';
-import type { GraphStore} from '../../state_management';
+import type { GraphStore } from '../../state_management';
 import { loadFields } from '../../state_management';
 import { getSuitableIcon } from '../../helpers/style_choices';
 import type { ShallowWrapper } from 'enzyme';

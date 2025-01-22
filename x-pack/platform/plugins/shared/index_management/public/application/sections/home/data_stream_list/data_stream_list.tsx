@@ -22,8 +22,7 @@ import {
 } from '@elastic/eui';
 import type { ScopedHistory } from '@kbn/core/public';
 
-import type {
-  Error} from '../../../../shared_imports';
+import type { Error } from '../../../../shared_imports';
 import {
   PageLoading,
   PageError,

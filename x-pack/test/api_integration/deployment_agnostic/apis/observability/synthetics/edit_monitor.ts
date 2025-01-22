@@ -11,10 +11,9 @@ import type {
   EncryptedSyntheticsSavedMonitor,
   HTTPFields,
   MonitorFields,
-  PrivateLocation} from '@kbn/synthetics-plugin/common/runtime_types';
-import {
-  ConfigKey
+  PrivateLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import type { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import expect from '@kbn/expect';

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  PutLogViewRequestPayload} from '@kbn/logs-shared-plugin/common/http_api';
+import type { PutLogViewRequestPayload } from '@kbn/logs-shared-plugin/common/http_api';
 import {
   getLogViewResponsePayloadRT,
   putLogViewRequestPayloadRT,

@@ -16,7 +16,7 @@ import type {
 } from '../../../../../common/custom_threshold_rule/types';
 
 import { UNGROUPED_FACTORY_KEY } from '../constants';
-import type { AdditionalContext} from '../utils';
+import type { AdditionalContext } from '../utils';
 import { CONTAINER_ID, doFieldsExist, KUBERNETES_POD_UID } from '../utils';
 import { getElasticsearchMetricQuery } from './metric_query';
 

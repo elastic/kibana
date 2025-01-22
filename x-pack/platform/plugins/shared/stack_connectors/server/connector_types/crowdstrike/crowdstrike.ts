@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ServiceParams} from '@kbn/actions-plugin/server';
+import type { ServiceParams } from '@kbn/actions-plugin/server';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 
 import type { AxiosError } from 'axios';
@@ -26,8 +26,7 @@ import type {
   RelaxedCrowdstrikeBaseApiResponse,
   CrowdStrikeExecuteRTRResponse,
 } from '../../../common/crowdstrike/types';
-import type {
-  CrowdstrikeGetTokenResponseSchema} from '../../../common/crowdstrike/schema';
+import type { CrowdstrikeGetTokenResponseSchema } from '../../../common/crowdstrike/schema';
 import {
   CrowdstrikeHostActionsParamsSchema,
   CrowdstrikeGetAgentsParamsSchema,
@@ -36,7 +35,7 @@ import {
   CrowdstrikeRTRCommandParamsSchema,
   CrowdstrikeExecuteRTRResponseSchema,
   CrowdstrikeGetScriptsParamsSchema,
-  CrowdstrikeApiDoNotValidateResponsesSchema
+  CrowdstrikeApiDoNotValidateResponsesSchema,
 } from '../../../common/crowdstrike/schema';
 import { SUB_ACTION } from '../../../common/crowdstrike/constants';
 import { CrowdstrikeError } from './error';

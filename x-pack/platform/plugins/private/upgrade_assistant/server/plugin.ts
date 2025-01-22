@@ -12,10 +12,9 @@ import type {
   CoreStart,
   PluginInitializerContext,
   Logger,
-  SavedObjectsServiceStart} from '@kbn/core/server';
-import {
-  SavedObjectsClient
+  SavedObjectsServiceStart,
 } from '@kbn/core/server';
+import { SavedObjectsClient } from '@kbn/core/server';
 import type { SecurityPluginStart } from '@kbn/security-plugin/server';
 import type { LogsSharedPluginSetup } from '@kbn/logs-shared-plugin/server';
 
@@ -24,7 +23,7 @@ import type { SecurityPluginSetup } from '@kbn/security-plugin/server';
 import type { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
-import type { CredentialStore} from './lib/reindexing/credential_store';
+import type { CredentialStore } from './lib/reindexing/credential_store';
 import { credentialStoreFactory } from './lib/reindexing/credential_store';
 import type { ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';

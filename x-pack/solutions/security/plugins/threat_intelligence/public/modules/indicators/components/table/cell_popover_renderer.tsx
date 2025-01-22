@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import type {
-  EuiDataGridCellPopoverElementProps} from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopoverTitle,
-} from '@elastic/eui';
+import type { EuiDataGridCellPopoverElementProps } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiPopoverTitle } from '@elastic/eui';
 import React from 'react';
 import { CopyToClipboardButtonEmpty } from '../common/copy_to_clipboard';
 import { FilterInButtonEmpty } from '../../../query_bar/components/filter_in';

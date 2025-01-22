@@ -20,10 +20,9 @@ import type {
   PluginApi,
   PluginOrPackage,
   Reference,
-  TextWithLinks} from '../types';
-import {
-  TypeKind,
+  TextWithLinks,
 } from '../types';
+import { TypeKind } from '../types';
 import { getKibanaPlatformPlugin } from './kibana_platform_plugin_mock';
 import { groupPluginApi } from '../utils';
 import { getPluginApiMap } from '../get_plugin_api_map';

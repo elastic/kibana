@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFilterButton,
   EuiFilterGroup,

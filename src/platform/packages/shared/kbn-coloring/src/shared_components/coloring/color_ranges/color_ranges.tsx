@@ -11,17 +11,13 @@ import type { Dispatch } from 'react';
 import React, { useState, useEffect } from 'react';
 import { camelCase } from 'lodash';
 import { EuiFlexGroup, EuiTextColor, EuiFlexItem } from '@elastic/eui';
-import type { CustomPaletteParams} from '../../../palettes';
+import type { CustomPaletteParams } from '../../../palettes';
 import { DEFAULT_CONTINUITY, DEFAULT_RANGE_TYPE } from '../../../palettes';
 
 import { ColorRangesExtraActions } from './color_ranges_extra_actions';
 import { ColorRangeItem } from './color_ranges_item';
-import type {
-  ColorRangeValidation} from './color_ranges_validation';
-import {
-  validateColorRanges,
-  getErrorMessages
-} from './color_ranges_validation';
+import type { ColorRangeValidation } from './color_ranges_validation';
+import { validateColorRanges, getErrorMessages } from './color_ranges_validation';
 
 import type { ColorRange } from './types';
 import type { PaletteConfigurationActions } from '../types';

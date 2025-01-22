@@ -16,10 +16,9 @@ import { KibanaLogic } from '../../../shared/kibana/kibana_logic';
 
 import type {
   AnalyticsCollectionDataViewLogicActions,
-  AnalyticsCollectionDataViewLogicValues} from './analytics_collection_data_view_logic';
-import {
-  AnalyticsCollectionDataViewLogic
+  AnalyticsCollectionDataViewLogicValues,
 } from './analytics_collection_data_view_logic';
+import { AnalyticsCollectionDataViewLogic } from './analytics_collection_data_view_logic';
 
 import {
   getBaseSearchTemplate,
@@ -33,16 +32,11 @@ import type {
   ClickedTable,
   ReferrersTable,
   WorsePerformersTable,
-  LocationsTable} from './analytics_collection_explore_table_types';
-import {
-  ExploreTableColumns,
-  ExploreTables
+  LocationsTable,
 } from './analytics_collection_explore_table_types';
-import type {
-  AnalyticsCollectionToolbarLogicValues} from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
-import {
-  AnalyticsCollectionToolbarLogic
-} from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import { ExploreTableColumns, ExploreTables } from './analytics_collection_explore_table_types';
+import type { AnalyticsCollectionToolbarLogicValues } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
+import { AnalyticsCollectionToolbarLogic } from './analytics_collection_toolbar/analytics_collection_toolbar_logic';
 
 const BASE_PAGE_SIZE = 10;
 const SEARCH_COOLDOWN = 200;

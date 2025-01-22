@@ -13,7 +13,7 @@ import { fork, type ChildProcess } from 'child_process';
 import * as Rx from 'rxjs';
 import { map, takeUntil, first, ignoreElements } from 'rxjs';
 
-import type { WorkerConfig, WorkerMsg, Bundle} from '../common';
+import type { WorkerConfig, WorkerMsg, Bundle } from '../common';
 import { isWorkerMsg, BundleRemotes } from '../common';
 
 import { observeStdio$ } from './observe_stdio';

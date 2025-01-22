@@ -8,7 +8,10 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { ExecutionContext, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
+import type {
+  ExecutionContext,
+  ExpressionFunctionDefinition,
+} from '@kbn/expressions-plugin/common';
 import type { Adapters } from '@kbn/inspector-plugin/common';
 import type { ExpressionValueSearchContext } from './kibana_context_type';
 

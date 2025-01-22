@@ -6,8 +6,7 @@
  */
 import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
+import type { EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
 import {
   EuiPopover,
   EuiButtonIcon,

@@ -7,14 +7,15 @@
 
 import { apiService } from './utils';
 import type { FetchJourneyStepsParams } from '../actions/journey';
-import type { Ping} from '../../../../common/runtime_types/ping/ping';
+import type { Ping } from '../../../../common/runtime_types/ping/ping';
 import { PingType } from '../../../../common/runtime_types/ping/ping';
 import type {
   FailedStepsApiResponse,
   ScreenshotBlockDoc,
   ScreenshotImageBlob,
   ScreenshotRefImageData,
-  SyntheticsJourneyApiResponse} from '../../../../common/runtime_types/ping/synthetics';
+  SyntheticsJourneyApiResponse,
+} from '../../../../common/runtime_types/ping/synthetics';
 import {
   FailedStepsApiResponseType,
   SyntheticsJourneyApiResponseType,

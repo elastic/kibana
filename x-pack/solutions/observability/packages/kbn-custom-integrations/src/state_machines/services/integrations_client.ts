@@ -10,9 +10,7 @@ import { EPM_API_ROUTES } from '@kbn/fleet-plugin/common';
 import * as rt from 'io-ts';
 import { i18n } from '@kbn/i18n';
 import { decodeOrThrow } from '@kbn/io-ts-utils';
-import type {
-  IntegrationName,
-  Dataset} from '../../types';
+import type { IntegrationName, Dataset } from '../../types';
 import {
   AuthorizationError,
   customIntegrationOptionsRT,
@@ -20,7 +18,7 @@ import {
   integrationNameRT,
   IntegrationNotInstalledError,
   NamingCollisionError,
-  UnknownError
+  UnknownError,
 } from '../../types';
 
 const GENERIC_CREATE_ERROR_MESSAGE = i18n.translate(

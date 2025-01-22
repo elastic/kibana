@@ -13,10 +13,9 @@ import type {
   AggBasedColumn,
   CollapseFunction,
   SchemaConfig,
-  SupportedAggregation} from '../../common';
-import {
-  isCollapseFunction
+  SupportedAggregation,
 } from '../../common';
+import { isCollapseFunction } from '../../common';
 import { convertBucketToColumns } from '../../common/convert_to_lens/lib/buckets';
 import { isSiblingPipeline } from '../../common/convert_to_lens/lib/utils';
 import type { BucketColumn } from '../../common/convert_to_lens/lib';

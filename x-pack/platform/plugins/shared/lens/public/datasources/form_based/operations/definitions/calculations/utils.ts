@@ -16,7 +16,7 @@ import type { FormBasedLayer } from '../../../types';
 import { adjustTimeScaleLabelSuffix } from '../../time_scale_utils';
 import type { ReferenceBasedIndexPatternColumn } from '../column_types';
 import { getManagedColumnsFrom, isColumnValidAsReference } from '../../layer_helpers';
-import type { FieldBasedOperationErrorMessage} from '..';
+import type { FieldBasedOperationErrorMessage } from '..';
 import { operationDefinitionMap } from '..';
 import {
   CALCULATIONS_DATE_HISTOGRAM_REQUIRED,

@@ -10,12 +10,8 @@ import type { EncryptedSavedObjectsPluginSetup } from '@kbn/encrypted-saved-obje
 import { healthFrameworkResponseSchemaV1 } from '../../../../../common/routes/framework/apis/health';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type {
-  AlertingRequestHandlerContext,
-  AlertingFrameworkHealth} from '../../../../types';
-import {
-  BASE_ALERTING_API_PATH
-} from '../../../../types';
+import type { AlertingRequestHandlerContext, AlertingFrameworkHealth } from '../../../../types';
+import { BASE_ALERTING_API_PATH } from '../../../../types';
 import { getSecurityHealth } from '../../../../lib/get_security_health';
 import { transformHealthBodyResponse } from './transforms/transform_health_response/v1';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';

@@ -9,7 +9,7 @@ import semver from 'semver';
 import expect from '@kbn/expect';
 import { entityLatestSchema } from '@kbn/entities-schema';
 import { entityDefinition as mockDefinition } from '@kbn/entityManager-plugin/server/lib/entities/helpers/fixtures';
-import type { PartialConfig} from '@kbn/data-forge';
+import type { PartialConfig } from '@kbn/data-forge';
 import { cleanup, generate } from '@kbn/data-forge';
 import { generateLatestIndexName } from '@kbn/entityManager-plugin/server/lib/entities/helpers/generate_component_id';
 import type { FtrProviderContext } from '../../ftr_provider_context';

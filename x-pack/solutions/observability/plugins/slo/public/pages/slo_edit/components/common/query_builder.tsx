@@ -7,7 +7,7 @@
 import { i18n } from '@kbn/i18n';
 
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useState } from 'react';
 import type { FieldPath } from 'react-hook-form';
 import type { DataView } from '@kbn/data-views-plugin/common';

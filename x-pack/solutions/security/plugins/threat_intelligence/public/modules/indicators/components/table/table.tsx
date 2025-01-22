@@ -7,8 +7,7 @@
 
 import type { VFC } from 'react';
 import React, { useMemo, useState } from 'react';
-import type {
-  EuiDataGridColumnCellActionProps} from '@elastic/eui';
+import type { EuiDataGridColumnCellActionProps } from '@elastic/eui';
 import {
   EuiDataGrid,
   EuiFlexGroup,
@@ -28,7 +27,7 @@ import { CellActions } from './cell_actions';
 import { cellPopoverRendererFactory } from './cell_popover_renderer';
 import { cellRendererFactory } from './cell_renderer';
 import type { BrowserFields } from '../../../../types';
-import type { Indicator} from '../../../../../common/types/indicator';
+import type { Indicator } from '../../../../../common/types/indicator';
 import { RawIndicatorFieldId } from '../../../../../common/types/indicator';
 import { EmptyState } from '../../../../components/empty_state';
 import type { IndicatorsTableContextValue } from '../../hooks/use_table_context';

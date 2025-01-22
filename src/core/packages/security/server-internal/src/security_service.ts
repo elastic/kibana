@@ -17,13 +17,8 @@ import type {
   InternalSecurityServiceSetup,
   InternalSecurityServiceStart,
 } from './internal_contracts';
-import type {
-  SecurityServiceConfigType,
-  PKCS12ConfigType} from './utils';
-import {
-  getDefaultSecurityImplementation,
-  convertSecurityApi
-} from './utils';
+import type { SecurityServiceConfigType, PKCS12ConfigType } from './utils';
+import { getDefaultSecurityImplementation, convertSecurityApi } from './utils';
 
 export class SecurityService
   implements CoreService<InternalSecurityServiceSetup, InternalSecurityServiceStart>

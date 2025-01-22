@@ -17,13 +17,8 @@ import { getAggTypes } from '../../../common';
 import { fieldFormatsServiceMock } from '@kbn/field-formats-plugin/public/mocks';
 import { dataPluginMock } from '../../mocks';
 
-import type {
-  AggsSetupDependencies,
-  AggsStartDependencies} from './aggs_service';
-import {
-  AggsService,
-  createGetConfig,
-} from './aggs_service';
+import type { AggsSetupDependencies, AggsStartDependencies } from './aggs_service';
+import { AggsService, createGetConfig } from './aggs_service';
 import { createNowProviderMock } from '../../now_provider/mocks';
 
 const { uiSettings } = coreMock.createSetup();

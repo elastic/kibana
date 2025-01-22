@@ -14,11 +14,8 @@ import type {
 import { findRulesInternalRequestBodySchemaV1 } from '../../../../../common/routes/rule/apis/find';
 import type { RuleParamsV1 } from '../../../../../common/routes/rule/response';
 import type { ILicenseState } from '../../../../lib';
-import type {
-  AlertingRequestHandlerContext} from '../../../../types';
-import {
-  INTERNAL_ALERTING_API_FIND_RULES_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_API_FIND_RULES_PATH } from '../../../../types';
 import { verifyAccessAndContext } from '../../../lib';
 import { trackLegacyTerminology } from '../../../lib/track_legacy_terminology';
 import { transformFindRulesInternalBodyV1, transformFindRulesResponseV1 } from './transforms';

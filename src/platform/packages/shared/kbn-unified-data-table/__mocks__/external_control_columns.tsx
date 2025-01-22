@@ -8,8 +8,7 @@
  */
 
 import React, { useState } from 'react';
-import type {
-  EuiDataGridControlColumn} from '@elastic/eui';
+import type { EuiDataGridControlColumn } from '@elastic/eui';
 import {
   EuiCheckbox,
   EuiButtonIcon,
@@ -17,7 +16,7 @@ import {
   EuiFlexGroup,
   EuiFlexItem,
   EuiPopoverTitle,
-  EuiSpacer
+  EuiSpacer,
 } from '@elastic/eui';
 import type { RowControlColumn } from '@kbn/discover-utils';
 

@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiFlyoutProps} from '@elastic/eui';
+import type { EuiFlyoutProps } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonGroup,

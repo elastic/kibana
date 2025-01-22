@@ -11,10 +11,9 @@ import { TestScheduler } from 'rxjs/testing';
 import type {
   SavedObjectsFindResponse,
   SavedObjectsFindResult,
-  SavedObjectsType} from '@kbn/core/server';
-import {
-  SavedObjectTypeRegistry,
+  SavedObjectsType,
 } from '@kbn/core/server';
+import { SavedObjectTypeRegistry } from '@kbn/core/server';
 import { globalSearchPluginMock } from '@kbn/global-search-plugin/server/mocks';
 import type {
   GlobalSearchResultProvider,

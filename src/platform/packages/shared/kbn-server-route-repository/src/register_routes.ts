@@ -18,15 +18,14 @@ import type {
   DefaultRouteCreateOptions,
   RouteParamsRT,
   ServerRoute,
-  ZodParamsObject} from '@kbn/server-route-repository-utils';
-import {
-  parseEndpoint,
+  ZodParamsObject,
 } from '@kbn/server-route-repository-utils';
+import { parseEndpoint } from '@kbn/server-route-repository-utils';
 import type { ServerSentEvent } from '@kbn/sse-utils';
 import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
 import { merge, omit } from 'lodash';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { isObservable } from 'rxjs';
 import { makeZodValidationObject } from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';

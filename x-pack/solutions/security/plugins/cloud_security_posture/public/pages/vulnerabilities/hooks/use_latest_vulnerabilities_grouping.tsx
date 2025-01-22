@@ -9,11 +9,9 @@ import type {
   GroupingAggregation,
   GroupPanelRenderer,
   GetGroupStats,
-  NamedAggregation} from '@kbn/grouping/src';
-import {
-  isNoneGroup,
-  parseGroupingQuery,
+  NamedAggregation,
 } from '@kbn/grouping/src';
+import { isNoneGroup, parseGroupingQuery } from '@kbn/grouping/src';
 import { useMemo } from 'react';
 import {
   CDR_3RD_PARTY_RETENTION_POLICY,
@@ -30,10 +28,9 @@ import {
 import { useDataViewContext } from '../../../common/contexts/data_view_context';
 import type {
   VulnerabilitiesGroupingAggregation,
-  VulnerabilitiesRootGroupingAggregation} from './use_grouped_vulnerabilities';
-import {
-  useGroupedVulnerabilities,
+  VulnerabilitiesRootGroupingAggregation,
 } from './use_grouped_vulnerabilities';
+import { useGroupedVulnerabilities } from './use_grouped_vulnerabilities';
 import { defaultGroupingOptions, getDefaultQuery } from '../constants';
 import { useCloudSecurityGrouping } from '../../../components/cloud_security_grouping';
 import { VULNERABILITIES_UNIT, groupingTitle, VULNERABILITIES_GROUPS_UNIT } from '../translations';

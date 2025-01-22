@@ -13,7 +13,7 @@ import type { IUiSettingsClient } from '@kbn/core/public';
 
 import { KBN_FIELD_TYPES, UI_SETTINGS } from '../../..';
 
-import type { ExtendedBounds} from '../../expressions';
+import type { ExtendedBounds } from '../../expressions';
 import { extendedBoundsToAst } from '../../expressions';
 import type { AggTypesDependencies } from '../agg_types';
 import type { BaseAggParams } from '../types';

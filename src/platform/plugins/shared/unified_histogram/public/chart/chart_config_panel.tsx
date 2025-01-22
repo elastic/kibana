@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentProps} from 'react';
+import type { ComponentProps } from 'react';
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import type { AggregateQuery, Query } from '@kbn/es-query';
 import { isEqual, isObject } from 'lodash';
@@ -21,10 +21,9 @@ import type {
   UnifiedHistogramChartLoadEvent,
   UnifiedHistogramServices,
   UnifiedHistogramSuggestionContext,
-  UnifiedHistogramVisContext} from '../types';
-import {
-  UnifiedHistogramSuggestionType
+  UnifiedHistogramVisContext,
 } from '../types';
+import { UnifiedHistogramSuggestionType } from '../types';
 
 export function ChartConfigPanel({
   services,

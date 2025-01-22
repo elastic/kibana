@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IngestPipeline, IngestProcessorContainer } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IngestPipeline,
+  IngestProcessorContainer,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { MlTrainedModels } from '@kbn/ml-plugin/server';
 

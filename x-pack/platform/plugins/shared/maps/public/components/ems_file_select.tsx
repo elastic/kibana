@@ -6,7 +6,7 @@
  */
 
 import React, { Component } from 'react';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiSelect } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

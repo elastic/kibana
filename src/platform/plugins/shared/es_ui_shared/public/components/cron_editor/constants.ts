@@ -10,7 +10,7 @@
 import { padStart } from 'lodash';
 import type { EuiSelectOption } from '@elastic/eui';
 
-import type { DayOrdinal, MonthOrdinal} from './services';
+import type { DayOrdinal, MonthOrdinal } from './services';
 import { getOrdinalValue, getDayName, getMonthName } from './services';
 import type { Frequency, Field, FieldToValueMap } from './types';
 

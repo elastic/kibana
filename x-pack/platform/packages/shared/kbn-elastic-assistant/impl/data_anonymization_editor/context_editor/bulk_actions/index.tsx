@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  EuiContextMenuPanelDescriptor} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiContextMenu,

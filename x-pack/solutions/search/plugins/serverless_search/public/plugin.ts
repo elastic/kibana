@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  AppMountParameters,
-  CoreSetup,
-  CoreStart,
-  Plugin} from '@kbn/core/public';
-import {
-  DEFAULT_APP_CATEGORIES
-} from '@kbn/core/public';
+import type { AppMountParameters, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import type { AuthenticatedUser } from '@kbn/security-plugin/common';

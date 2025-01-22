@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState, useEffect } from 'react';
 
 import { i18n } from '@kbn/i18n';

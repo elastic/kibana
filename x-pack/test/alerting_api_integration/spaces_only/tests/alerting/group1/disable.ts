@@ -11,15 +11,14 @@ import { ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 import { ALERT_STATUS } from '@kbn/rule-data-utils';
 import { Spaces } from '../../../scenarios';
 import type { FtrProviderContext } from '../../../../common/ftr_provider_context';
-import type {
-  TaskManagerDoc} from '../../../../common/lib';
+import type { TaskManagerDoc } from '../../../../common/lib';
 import {
   AlertUtils as RuleUtils,
   checkAAD,
   getUrlPrefix,
   getTestRuleData,
   ObjectRemover,
-  getEventLog
+  getEventLog,
 } from '../../../../common/lib';
 import { validateEvent } from './event_log';
 

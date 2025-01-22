@@ -7,7 +7,7 @@
 
 import type { HTTPFields } from '../../../../common/runtime_types';
 import { ConfigKey } from '../../../../common/runtime_types';
-import type { Formatter} from './common';
+import type { Formatter } from './common';
 import { commonFormatters } from './common';
 import { tlsFormatters } from './tls';
 import { arrayFormatter, objectFormatter } from './formatting_utils';

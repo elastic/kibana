@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ComponentProps} from 'react';
+import type { ComponentProps } from 'react';
 import React, { useEffect } from 'react';
 import type { Meta } from '@storybook/react';
 import { action } from '@storybook/addon-actions';

@@ -10,7 +10,11 @@
 import type { ReactElement } from 'react';
 import React from 'react';
 
-import type { FieldDefinition, SettingType, UnsavedFieldChange } from '@kbn/management-settings-types';
+import type {
+  FieldDefinition,
+  SettingType,
+  UnsavedFieldChange,
+} from '@kbn/management-settings-types';
 import { EuiText } from '@elastic/eui';
 
 import { useFieldStyles } from '../field_row.styles';

@@ -13,7 +13,7 @@ import { templateFromReactComponent } from '../../../../public/lib/template_from
 import { ArgumentStrings } from '../../../../i18n';
 import type { ColorPalette } from '../../../../common/lib';
 import { astToPalette } from './utils';
-import type { ColorPaletteName} from './palette_types';
+import type { ColorPaletteName } from './palette_types';
 import { getPaletteType } from './palette_types';
 import type { CustomColorPalette } from '../../../../public/components/palette_picker';
 

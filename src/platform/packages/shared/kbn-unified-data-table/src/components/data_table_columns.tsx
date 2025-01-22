@@ -9,12 +9,11 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiListGroupItemProps} from '@elastic/eui';
+import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   type EuiDataGridColumn,
   type EuiDataGridColumnCellAction,
-  EuiScreenReaderOnly
+  EuiScreenReaderOnly,
 } from '@elastic/eui';
 import { type DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import type { ToastsStart, IUiSettingsClient } from '@kbn/core/public';

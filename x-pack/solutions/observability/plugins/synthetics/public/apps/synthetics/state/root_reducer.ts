@@ -20,13 +20,8 @@ import type { DefaultAlertingState } from './alert_rules';
 import { defaultAlertingReducer } from './alert_rules';
 import type { ManualTestRunsState } from './manual_test_runs';
 import { manualTestRunsReducer } from './manual_test_runs';
-import type {
-  DynamicSettingsState,
-  SettingsState} from './settings';
-import {
-  dynamicSettingsReducer,
-  settingsReducer
-} from './settings';
+import type { DynamicSettingsState, SettingsState } from './settings';
+import { dynamicSettingsReducer, settingsReducer } from './settings';
 import type { QueriesState } from './elasticsearch';
 import { elasticsearchReducer } from './elasticsearch';
 import type { AgentPoliciesState } from './private_locations';

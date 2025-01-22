@@ -26,13 +26,14 @@ import type {
   GetExceptionFilterFromExceptionListIdsProps,
   GetExceptionFilterFromExceptionsProps,
   ExceptionFilterResponse,
-  DuplicateExceptionListProps} from '@kbn/securitysolution-io-ts-list-types';
+  DuplicateExceptionListProps,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   createEndpointListSchema,
   exceptionListItemSchema,
   exceptionListSchema,
   foundExceptionListItemSchema,
-  foundExceptionListSchema
+  foundExceptionListSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 
 import {

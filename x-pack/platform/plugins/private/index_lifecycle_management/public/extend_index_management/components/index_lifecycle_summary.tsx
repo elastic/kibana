@@ -11,8 +11,7 @@ import moment from 'moment-timezone';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
-import type {
-  EuiBadgeProps} from '@elastic/eui';
+import type { EuiBadgeProps } from '@elastic/eui';
 import {
   EuiCodeBlock,
   EuiLink,

@@ -9,7 +9,7 @@
 
 import { i18n } from '@kbn/i18n';
 import type { FlyoutActionItem, FlyoutCustomization } from '../../customizations';
-import type { UseNavigationProps} from '../../hooks/use_navigation_props';
+import type { UseNavigationProps } from '../../hooks/use_navigation_props';
 import { useNavigationProps } from '../../hooks/use_navigation_props';
 
 interface UseFlyoutActionsParams extends UseNavigationProps {

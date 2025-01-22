@@ -14,19 +14,15 @@ import { registerTestBed } from '@kbn/test-jest-helpers';
 
 import { FIELD_PREVIEW_PATH } from '../../common/constants';
 import type { Context } from '../../public/components/field_editor_context';
-import type {
-  Props} from '../../public/components/field_editor_flyout_content';
-import {
-  FieldEditorFlyoutContent
-} from '../../public/components/field_editor_flyout_content';
-import type {
-  TestDoc} from './helpers';
+import type { Props } from '../../public/components/field_editor_flyout_content';
+import { FieldEditorFlyoutContent } from '../../public/components/field_editor_flyout_content';
+import type { TestDoc } from './helpers';
 import {
   WithFieldEditorDependencies,
   getCommonActions,
   spyIndexPatternGetByName,
   spySearchQuery,
-  spySearchQueryResponse
+  spySearchQueryResponse,
 } from './helpers';
 
 const defaultProps: Props = {

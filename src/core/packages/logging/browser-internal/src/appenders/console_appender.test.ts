@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { LogRecord} from '@kbn/logging';
+import type { LogRecord } from '@kbn/logging';
 import { LogLevel } from '@kbn/logging';
 import { unsafeConsole } from '@kbn/security-hardening';
 import { ConsoleAppender } from './console_appender';

@@ -9,14 +9,9 @@ import type { ReactElement, ReactNode } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { BehaviorSubject, of } from 'rxjs';
-// eslint-disable-next-line import/no-extraneous-dependencies
-import type {
-  MatcherFunction,
-  RenderOptions} from '@testing-library/react';
-import {
-  render as reactTestLibRender,
-  configure,
-} from '@testing-library/react';
+
+import type { MatcherFunction, RenderOptions } from '@testing-library/react';
+import { render as reactTestLibRender, configure } from '@testing-library/react';
 import { Router } from '@kbn/shared-ux-router';
 import { Route } from '@kbn/shared-ux-router';
 

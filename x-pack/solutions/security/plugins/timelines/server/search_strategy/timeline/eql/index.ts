@@ -6,9 +6,9 @@
  */
 
 import { map, mergeMap } from 'rxjs';
-import type { ISearchStrategy, PluginStart} from '@kbn/data-plugin/server';
+import type { ISearchStrategy, PluginStart } from '@kbn/data-plugin/server';
 import { shimHitsTotal } from '@kbn/data-plugin/server';
-import type { EqlSearchStrategyResponse} from '@kbn/data-plugin/common';
+import type { EqlSearchStrategyResponse } from '@kbn/data-plugin/common';
 import { EQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 import type { TimelineEqlRequestOptions } from '../../../../common/api/search_strategy';
 import type { EqlSearchResponse } from '../../../../common/search_strategy';

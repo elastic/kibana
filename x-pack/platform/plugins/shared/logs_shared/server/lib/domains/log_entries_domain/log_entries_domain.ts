@@ -11,24 +11,20 @@ import type { LogColumn, LogEntry, LogEntryCursor } from '../../../../common/log
 import type {
   LogViewColumnConfiguration,
   LogViewReference,
-  ResolvedLogView} from '../../../../common/log_views';
-import {
-  logViewFieldColumnConfigurationRT
+  ResolvedLogView,
 } from '../../../../common/log_views';
+import { logViewFieldColumnConfigurationRT } from '../../../../common/log_views';
 import { decodeOrThrow } from '../../../../common/runtime_types';
 import { getBuiltinRules } from '../../../services/log_entries/message/builtin_rules';
 import type {
   CompiledLogMessageFormattingRule,
   Fields,
-  Highlights} from '../../../services/log_entries/message/message';
-import {
-  compileFormattingRules
+  Highlights,
 } from '../../../services/log_entries/message/message';
+import { compileFormattingRules } from '../../../services/log_entries/message/message';
 import type { LogsSharedPluginRequestHandlerContext } from '../../../types';
 import type { LogsSharedBackendLibs } from '../../logs_shared_types';
-import type {
-  CompositeDatasetKey,
-  LogEntryDatasetBucket} from './queries/log_entry_datasets';
+import type { CompositeDatasetKey, LogEntryDatasetBucket } from './queries/log_entry_datasets';
 import {
   createLogEntryDatasetsQuery,
   logEntryDatasetsResponseRT,

@@ -12,13 +12,8 @@ import type {
   AnyExpressionFunctionDefinition,
   ExpressionFunctionDefinition,
 } from '../expression_functions/types';
-import type {
-  ExpressionAstExpressionBuilder} from './build_expression';
-import {
-  buildExpression,
-  isExpressionAstBuilder,
-  isExpressionAst,
-} from './build_expression';
+import type { ExpressionAstExpressionBuilder } from './build_expression';
+import { buildExpression, isExpressionAstBuilder, isExpressionAst } from './build_expression';
 import { format } from './format';
 
 // Infers the types from an ExpressionFunctionDefinition.

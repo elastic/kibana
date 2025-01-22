@@ -12,18 +12,8 @@ import { compact, isEqual } from 'lodash';
 import React, { createContext, useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { useBreadcrumbs } from './use_breadcrumbs';
-import type {
-  PathsOf,
-  Route,
-  RouteMap,
-  RouteMatch,
-  TypeAsArgs,
-  TypeAsParams,
-  TypeOf} from '../..';
-import {
-  useMatchRoutes,
-  useRouter,
-} from '../..';
+import type { PathsOf, Route, RouteMap, RouteMatch, TypeAsArgs, TypeAsParams, TypeOf } from '../..';
+import { useMatchRoutes, useRouter } from '../..';
 
 export type Breadcrumb<
   TRouteMap extends RouteMap = RouteMap,

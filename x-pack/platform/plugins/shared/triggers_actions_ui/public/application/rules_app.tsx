@@ -42,13 +42,8 @@ import type {
   AlertsTableConfigurationRegistryContract,
   RuleTypeRegistryContract,
 } from '../types';
-import type {
-  Section} from './constants';
-import {
-  legacyRouteToRuleDetails,
-  routeToConnectors,
-  legacyRouteToAlerts,
-} from './constants';
+import type { Section } from './constants';
+import { legacyRouteToRuleDetails, routeToConnectors, legacyRouteToAlerts } from './constants';
 
 import { setDataViewsService } from '../common/lib/data_apis';
 import { KibanaContextProvider, useKibana } from '../common/lib/kibana';

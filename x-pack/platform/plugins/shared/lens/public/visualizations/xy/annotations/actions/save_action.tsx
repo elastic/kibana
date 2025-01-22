@@ -12,11 +12,8 @@ import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/pu
 import type { ToastsStart } from '@kbn/core-notifications-browser';
 import type { MountPoint } from '@kbn/core-mount-utils-browser';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  OnSaveProps as SavedObjectOnSaveProps} from '@kbn/saved-objects-plugin/public';
-import {
-  SavedObjectSaveModal,
-} from '@kbn/saved-objects-plugin/public';
+import type { OnSaveProps as SavedObjectOnSaveProps } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal } from '@kbn/saved-objects-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { EventAnnotationGroupConfig } from '@kbn/event-annotation-common';
 import { EuiIcon, EuiLink } from '@elastic/eui';
@@ -28,7 +25,11 @@ import type {
   StartServices,
   StateSetter,
 } from '../../../../types';
-import type { XYByReferenceAnnotationLayerConfig, XYAnnotationLayerConfig, XYState } from '../../types';
+import type {
+  XYByReferenceAnnotationLayerConfig,
+  XYAnnotationLayerConfig,
+  XYState,
+} from '../../types';
 import {
   getAnnotationLayerTitle,
   getGroupMetadataFromAnnotationLayer,

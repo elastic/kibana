@@ -8,7 +8,7 @@
  */
 
 import _, { get } from 'lodash';
-import type { Subscription} from 'rxjs';
+import type { Subscription } from 'rxjs';
 import { ReplaySubject, mergeMap } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import React from 'react';

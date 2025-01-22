@@ -11,13 +11,8 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { StartServicesAccessor } from '@kbn/core/server';
 import type { SavedObjectsCreatePointInTimeFinderOptions } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
-import type {
-  DataViewAttributes,
-  FieldSpec,
-  RuntimeField} from '../common';
-import {
-  DATA_VIEW_SAVED_OBJECT_TYPE
-} from '../common';
+import type { DataViewAttributes, FieldSpec, RuntimeField } from '../common';
+import { DATA_VIEW_SAVED_OBJECT_TYPE } from '../common';
 import type { DataViewsServerPluginStartDependencies, DataViewsServerPluginStart } from './types';
 
 interface CountSummary {

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, CoreStart} from '@kbn/core/server';
+import type { Logger, CoreStart } from '@kbn/core/server';
 import { SavedObjectsClient } from '@kbn/core/server';
 
 import type {

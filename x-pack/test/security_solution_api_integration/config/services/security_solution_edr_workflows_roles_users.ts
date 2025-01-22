@@ -6,8 +6,7 @@
  */
 
 import type { Role } from '@kbn/security-plugin/common';
-import type {
-  EndpointSecurityRoleNames} from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
+import type { EndpointSecurityRoleNames } from '@kbn/security-solution-plugin/scripts/endpoint/common/roles_users';
 import {
   ENDPOINT_SECURITY_ROLE_NAMES,
   getAllEndpointSecurityRoles,

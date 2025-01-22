@@ -15,10 +15,9 @@ import type {
   ConcreteTaskInstance,
   IntervalSchedule,
   TaskInstanceWithDeprecatedFields,
-  TaskInstanceWithId} from './task';
-import {
-  TaskStatus,
+  TaskInstanceWithId,
 } from './task';
+import { TaskStatus } from './task';
 import type { TaskStore } from './task_store';
 import { ensureDeprecatedFieldsAreCorrected } from './lib/correct_deprecated_fields';
 import { retryableBulkUpdate } from './lib/retryable_bulk_update';

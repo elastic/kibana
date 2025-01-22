@@ -25,10 +25,10 @@ import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import type { Datatable } from '@kbn/expressions-plugin/public';
 import { DropIllustration } from '@kbn/chart-icons';
-import type { DragDropIdentifier} from '@kbn/dom-drag-drop';
+import type { DragDropIdentifier } from '@kbn/dom-drag-drop';
 import { useDragDropContext, Droppable } from '@kbn/dom-drag-drop';
 import { reportPerformanceMetricEvent } from '@kbn/ebt-tools';
-import type { ChartSizeSpec} from '@kbn/chart-expressions-common';
+import type { ChartSizeSpec } from '@kbn/chart-expressions-common';
 import { isChartSizeEvent } from '@kbn/chart-expressions-common';
 import { getSuccessfulRequestTimings } from '../../../report_performance_metric_util';
 import { trackUiCounterEvents } from '../../../lens_ui_telemetry';
@@ -42,12 +42,13 @@ import type {
   UserMessage,
   UserMessagesGetter,
   AddUserMessages,
-  VisualizationDisplayOptions} from '../../../types';
+  VisualizationDisplayOptions,
+} from '../../../types';
 import {
   isLensBrushEvent,
   isLensFilterEvent,
   isLensMultiFilterEvent,
-  isLensEditEvent
+  isLensEditEvent,
 } from '../../../types';
 import { switchToSuggestion } from '../suggestion_helpers';
 import { buildExpression } from '../expression_helpers';
@@ -58,7 +59,8 @@ import { getOriginalRequestErrorMessages } from '../../error_helper';
 import type {
   VisualizationState,
   DatasourceStates,
-  DataViewsState} from '../../../state_management';
+  DataViewsState,
+} from '../../../state_management';
 import {
   onActiveDataChange,
   useLensDispatch,

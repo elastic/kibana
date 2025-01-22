@@ -14,13 +14,9 @@ import type {
   Project,
   ProjectConfig,
   ProjectID,
-  SolutionName} from '../../common';
-import {
-  LABS_PROJECT_PREFIX,
-  isProjectEnabledByStatus,
-  projectIDs,
-  projects,
+  SolutionName,
 } from '../../common';
+import { LABS_PROJECT_PREFIX, isProjectEnabledByStatus, projectIDs, projects } from '../../common';
 import { coreServices } from './kibana_services';
 
 export interface PresentationLabsService {

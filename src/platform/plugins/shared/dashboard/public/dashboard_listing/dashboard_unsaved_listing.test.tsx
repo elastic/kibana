@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ComponentType} from 'enzyme';
+import type { ComponentType } from 'enzyme';
 import { mount } from 'enzyme';
 import React from 'react';
 

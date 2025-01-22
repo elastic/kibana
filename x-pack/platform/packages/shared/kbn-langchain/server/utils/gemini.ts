@@ -15,18 +15,11 @@ import type {
   Part,
   POSSIBLE_ROLES,
   SafetyRating,
-  TextPart} from '@google/generative-ai';
-import {
-  FinishReason
+  TextPart,
 } from '@google/generative-ai';
-import type {
-  BaseMessage,
-  UsageMetadata} from '@langchain/core/messages';
-import {
-  AIMessageChunk,
-  ChatMessage,
-  isBaseMessage
-} from '@langchain/core/messages';
+import { FinishReason } from '@google/generative-ai';
+import type { BaseMessage, UsageMetadata } from '@langchain/core/messages';
+import { AIMessageChunk, ChatMessage, isBaseMessage } from '@langchain/core/messages';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
 import type { ToolCallChunk } from '@langchain/core/dist/messages/tool';
 import type { Readable } from 'stream';

@@ -15,12 +15,8 @@ import type { CoreContext } from '@kbn/core-base-server-internal';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import type { NodeInfo } from '@kbn/core-node-server';
 import { nodeServiceMock } from '@kbn/core-node-server-mocks';
-import type {
-  InstanceInfo} from './plugin_context';
-import {
-  createPluginInitializerContext,
-  createPluginPrebootSetupContext
-} from './plugin_context';
+import type { InstanceInfo } from './plugin_context';
+import { createPluginInitializerContext, createPluginPrebootSetupContext } from './plugin_context';
 
 import { PluginType } from '@kbn/core-base-common';
 import type { PluginManifest } from '@kbn/core-plugins-server';

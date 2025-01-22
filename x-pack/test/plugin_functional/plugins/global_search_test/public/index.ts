@@ -10,10 +10,9 @@ import type {
   GlobalSearchTestPluginSetup,
   GlobalSearchTestPluginStart,
   GlobalSearchTestPluginSetupDeps,
-  GlobalSearchTestPluginStartDeps} from './plugin';
-import {
-  GlobalSearchTestPlugin
+  GlobalSearchTestPluginStartDeps,
 } from './plugin';
+import { GlobalSearchTestPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   GlobalSearchTestPluginSetup,

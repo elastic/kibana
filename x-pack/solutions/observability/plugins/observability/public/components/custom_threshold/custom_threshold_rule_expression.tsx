@@ -29,10 +29,9 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   IErrorObject,
   RuleTypeParams,
-  RuleTypeParamsExpressionProps} from '@kbn/triggers-actions-ui-plugin/public';
-import {
-  ForLastExpression
+  RuleTypeParamsExpressionProps,
 } from '@kbn/triggers-actions-ui-plugin/public';
+import { ForLastExpression } from '@kbn/triggers-actions-ui-plugin/public';
 
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { useKibana } from '../../utils/kibana_react';
@@ -40,7 +39,7 @@ import { Aggregators } from '../../../common/custom_threshold_rule/types';
 import type { TimeUnitChar } from '../../../common/utils/formatters/duration';
 import type { AlertContextMeta, AlertParams, MetricExpression } from './types';
 import { ExpressionRow } from './components/expression_row';
-import type { MetricsExplorerFields} from './components/group_by';
+import type { MetricsExplorerFields } from './components/group_by';
 import { GroupBy } from './components/group_by';
 import { RuleConditionChart as PreviewChart } from '../rule_condition_chart/rule_condition_chart';
 import { getSearchConfiguration } from './helpers/get_search_configuration';

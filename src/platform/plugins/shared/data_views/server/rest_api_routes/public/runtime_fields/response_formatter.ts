@@ -8,7 +8,7 @@
  */
 
 import type { DataViewField, DataViewLazy } from '../../../../common';
-import type { SERVICE_KEY_TYPE} from '../../../constants';
+import type { SERVICE_KEY_TYPE } from '../../../constants';
 import { SERVICE_KEY_LEGACY, SERVICE_KEY } from '../../../constants';
 
 interface ResponseFormatterArgs {

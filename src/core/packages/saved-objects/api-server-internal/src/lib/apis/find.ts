@@ -14,11 +14,9 @@ import type {
   CheckAuthorizationResult,
   SavedObjectsRawDocSource,
   GetFindRedactTypeMapParams,
-  SavedObjectUnsanitizedDoc} from '@kbn/core-saved-objects-server';
-import {
-  SavedObjectsErrorHelpers,
-  type SavedObjectsRawDoc
+  SavedObjectUnsanitizedDoc,
 } from '@kbn/core-saved-objects-server';
+import { SavedObjectsErrorHelpers, type SavedObjectsRawDoc } from '@kbn/core-saved-objects-server';
 import {
   DEFAULT_NAMESPACE_STRING,
   FIND_DEFAULT_PAGE,

@@ -12,7 +12,7 @@ import { Redirect } from 'react-router-dom';
 import { RouterProvider, createRouter } from '@kbn/typed-react-router-config';
 import { i18n } from '@kbn/i18n';
 import type { RouteComponentProps, RouteProps } from 'react-router-dom';
-import type { AppMountParameters, CoreStart} from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

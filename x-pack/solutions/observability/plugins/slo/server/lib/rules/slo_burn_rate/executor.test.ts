@@ -16,8 +16,7 @@ import type {
   SavedObjectsClientContract,
   SavedObjectsFindResponse,
 } from '@kbn/core/server';
-import type {
-  ElasticsearchClientMock} from '@kbn/core/server/mocks';
+import type { ElasticsearchClientMock } from '@kbn/core/server/mocks';
 import {
   elasticsearchServiceMock,
   loggingSystemMock,
@@ -52,7 +51,7 @@ import type { SLODefinition, StoredSLODefinition } from '../../../domain/models'
 import { SLONotFound } from '../../../errors';
 import { SO_SLO_TYPE } from '../../../saved_objects';
 import { createSLO } from '../../../services/fixtures/slo';
-import type { BurnRateAlert} from './executor';
+import type { BurnRateAlert } from './executor';
 import { getRuleExecutor } from './executor';
 import {
   LONG_WINDOW,
@@ -67,10 +66,9 @@ import type {
   BurnRateAlertContext,
   BurnRateAlertState,
   BurnRateAllowedActionGroups,
-  BurnRateRuleParams} from './types';
-import {
-  AlertStates
+  BurnRateRuleParams,
 } from './types';
+import { AlertStates } from './types';
 
 const commonEsResponse = {
   took: 100,

@@ -16,8 +16,7 @@ import type {
   ISavedObjectTypeRegistry,
   SavedObjectsExtensions,
 } from '@kbn/core-saved-objects-server';
-import type {
-  RepositoryHelpers} from '../apis/helpers';
+import type { RepositoryHelpers } from '../apis/helpers';
 import {
   CommonHelper,
   EncryptionHelper,

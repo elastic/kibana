@@ -7,15 +7,8 @@
 
 import type { FC, ReactNode } from 'react';
 import React from 'react';
-import type {
-  EuiBasicTableColumn,
-  Query} from '@elastic/eui';
-import {
-  EuiInMemoryTable,
-  EuiLink,
-  EuiIconTip,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, Query } from '@elastic/eui';
+import { EuiInMemoryTable, EuiLink, EuiIconTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { TagsCapabilities } from '../../../common';

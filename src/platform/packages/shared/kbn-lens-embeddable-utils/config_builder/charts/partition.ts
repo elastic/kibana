@@ -19,10 +19,9 @@ import type {
   LensPieConfig,
   LensTreeMapConfig,
   LensMosaicConfig,
-  LensLegendConfig} from '../types';
-import {
-  DEFAULT_LAYER_ID
+  LensLegendConfig,
 } from '../types';
+import { DEFAULT_LAYER_ID } from '../types';
 import {
   addLayerColumn,
   buildDatasourceStates,

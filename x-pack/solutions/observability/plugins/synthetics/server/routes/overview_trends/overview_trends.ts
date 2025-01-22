@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ObjectType} from '@kbn/config-schema';
+import type { ObjectType } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { SYNTHETICS_API_URLS } from '../../../common/constants';
 import type { TrendRequest, TrendTable } from '../../../common/types';

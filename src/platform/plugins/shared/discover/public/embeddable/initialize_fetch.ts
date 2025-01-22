@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { BehaviorSubject} from 'rxjs';
+import type { BehaviorSubject } from 'rxjs';
 import { combineLatest, lastValueFrom, switchMap, tap } from 'rxjs';
 
 import type { KibanaExecutionContext } from '@kbn/core/types';
@@ -24,12 +24,9 @@ import type {
   HasParentApi,
   PublishesDataViews,
   PublishesPanelTitle,
-  PublishesSavedObjectId} from '@kbn/presentation-publishing';
-import {
-  apiHasExecutionContext,
-  apiHasParentApi,
-  fetch$
+  PublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
+import { apiHasExecutionContext, apiHasParentApi, fetch$ } from '@kbn/presentation-publishing';
 import type { PublishesWritableTimeRange } from '@kbn/presentation-publishing/interfaces/fetch/publishes_unified_search';
 import type { SavedSearch } from '@kbn/saved-search-plugin/public';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';

@@ -14,8 +14,7 @@ import type { Store } from 'redux';
 import { Provider } from 'react-redux';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type {
-  LensAppState} from '../state_management';
+import type { LensAppState } from '../state_management';
 import {
   disableAutoApply,
   enableAutoApply,

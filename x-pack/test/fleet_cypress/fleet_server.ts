@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChildProcess} from 'child_process';
+import type { ChildProcess } from 'child_process';
 import { spawn } from 'child_process';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type { AxiosRequestConfig } from 'axios';

@@ -17,7 +17,7 @@ import { i18n } from '@kbn/i18n';
 import type { Feature, Geometry, MultiPolygon, Polygon, Position } from 'geojson';
 // @ts-expect-error
 import turfCircle from '@turf/circle';
-import type { Filter, FilterMeta} from '@kbn/es-query';
+import type { Filter, FilterMeta } from '@kbn/es-query';
 import { FILTERS } from '@kbn/es-query';
 import type { MapExtent } from '../descriptor_types';
 import { getEsSpatialRelationLabel } from '../i18n_getters';

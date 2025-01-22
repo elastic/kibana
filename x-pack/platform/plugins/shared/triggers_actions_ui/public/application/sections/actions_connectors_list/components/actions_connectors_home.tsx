@@ -21,7 +21,7 @@ import { HealthContextProvider } from '../../../context/health_context';
 import { HealthCheck } from '../../../components/health_check';
 import { useKibana } from '../../../../common/lib/kibana';
 import ConnectorEventLogListTableWithApi from './actions_connectors_event_log_list_table';
-import type { ActionConnector} from '../../../../types';
+import type { ActionConnector } from '../../../../types';
 import { EditConnectorTabs } from '../../../../types';
 import { CreateConnectorFlyout } from '../../action_connector_form/create_connector_flyout';
 import { EditConnectorFlyout } from '../../action_connector_form/edit_connector_flyout';

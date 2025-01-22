@@ -8,7 +8,7 @@
  */
 
 import type * as t from 'io-ts';
-import type { Either} from 'fp-ts/lib/Either';
+import type { Either } from 'fp-ts/lib/Either';
 import { left, fold, right } from 'fp-ts/lib/Either';
 import { pipe } from 'fp-ts/lib/pipeable';
 import { isObject, get } from 'lodash/fp';

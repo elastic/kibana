@@ -20,7 +20,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 
-import type { ClusterPayload} from '../../../../../../common/lib';
+import type { ClusterPayload } from '../../../../../../common/lib';
 import { serializeCluster } from '../../../../../../common/lib';
 
 interface Props {

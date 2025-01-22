@@ -10,16 +10,12 @@ import type {
   IKibanaResponse,
   KibanaRequest,
   KibanaResponseFactory,
-  Logger} from '@kbn/core/server';
-import {
-  type AuthenticatedUser
+  Logger,
 } from '@kbn/core/server';
+import { type AuthenticatedUser } from '@kbn/core/server';
 import type { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 
-import type {
-  TraceData,
-  Message,
-  Replacements} from '@kbn/elastic-assistant-common';
+import type { TraceData, Message, Replacements } from '@kbn/elastic-assistant-common';
 import {
   replaceAnonymizedValuesWithOriginalValues,
   DEFEND_INSIGHTS_TOOL_ID,

@@ -7,17 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  Filter,
-  Query,
-  TimeRange} from '@kbn/es-query';
-import {
-  COMPARE_ALL_OPTIONS,
-  compareFilters,
-  isFilterPinned,
-} from '@kbn/es-query';
-import type {
-  Observable} from 'rxjs';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, compareFilters, isFilterPinned } from '@kbn/es-query';
+import type { Observable } from 'rxjs';
 import {
   BehaviorSubject,
   Subject,
@@ -36,9 +28,7 @@ import type { PublishingSubject, StateComparators } from '@kbn/presentation-publ
 import type { ControlGroupApi } from '@kbn/controls-plugin/public';
 import { cloneDeep } from 'lodash';
 import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
-import type {
-  GlobalQueryStateFromUrl,
-  RefreshInterval} from '@kbn/data-plugin/public';
+import type { GlobalQueryStateFromUrl, RefreshInterval } from '@kbn/data-plugin/public';
 import {
   connectToQueryState,
   extractSearchSourceReferences,

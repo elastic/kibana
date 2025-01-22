@@ -7,13 +7,12 @@
 import type { IRouter } from '@kbn/core/server';
 import type {
   ScheduleBackfillRequestBodyV1,
-  ScheduleBackfillResponseV1} from '../../../../../common/routes/backfill/apis/schedule';
-import {
-  scheduleBodySchemaV1
+  ScheduleBackfillResponseV1,
 } from '../../../../../common/routes/backfill/apis/schedule';
+import { scheduleBodySchemaV1 } from '../../../../../common/routes/backfill/apis/schedule';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type { AlertingRequestHandlerContext} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
 import { INTERNAL_BASE_ALERTING_API_PATH } from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';

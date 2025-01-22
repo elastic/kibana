@@ -13,7 +13,7 @@ import type { ActionTypeRegistryContract } from '@kbn/triggers-actions-ui-plugin
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import useSessionStorage from 'react-use/lib/useSessionStorage';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
-import type { AssistantFeatures} from '@kbn/elastic-assistant-common';
+import type { AssistantFeatures } from '@kbn/elastic-assistant-common';
 import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import type { ChromeStart, NavigateToAppOptions, UserProfileService } from '@kbn/core/public';
 import type { ProductDocBasePluginStart } from '@kbn/product-doc-base-plugin/public';

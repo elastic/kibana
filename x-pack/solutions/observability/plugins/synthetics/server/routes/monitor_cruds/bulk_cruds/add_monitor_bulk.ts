@@ -19,11 +19,9 @@ import type {
   EncryptedSyntheticsMonitorAttributes,
   MonitorFields,
   ServiceLocationErrors,
-  SyntheticsMonitor} from '../../../../common/runtime_types';
-import {
-  ConfigKey,
-  type SyntheticsPrivateLocations,
+  SyntheticsMonitor,
 } from '../../../../common/runtime_types';
+import { ConfigKey, type SyntheticsPrivateLocations } from '../../../../common/runtime_types';
 import { DeleteMonitorAPI } from '../services/delete_monitor_api';
 
 export const createNewSavedObjectMonitorBulk = async ({

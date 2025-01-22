@@ -12,11 +12,9 @@ import { API_BASE_PATH } from '../../../common/constants';
 import type {
   UseRequestConfig,
   SendRequestConfig,
-  SendRequestResponse} from '../../shared_imports';
-import {
-  sendRequest as _sendRequest,
-  useRequest as _useRequest,
+  SendRequestResponse,
 } from '../../shared_imports';
+import { sendRequest as _sendRequest, useRequest as _useRequest } from '../../shared_imports';
 import type { UiMetricService } from './ui_metric';
 import {
   UIM_PIPELINE_CREATE,

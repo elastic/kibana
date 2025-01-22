@@ -15,8 +15,7 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { DynamicColorProperty } from './dynamic_color_property';
-import type {
-  RawValue} from '../../../../../common/constants';
+import type { RawValue } from '../../../../../common/constants';
 import {
   COLOR_MAP_TYPE,
   FIELD_ORIGIN,

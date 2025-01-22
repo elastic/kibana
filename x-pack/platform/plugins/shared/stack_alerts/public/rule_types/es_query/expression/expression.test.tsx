@@ -12,13 +12,8 @@ import { httpServiceMock } from '@kbn/core/public/mocks';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
-import type {
-  CommonEsQueryRuleParams,
-  EsQueryRuleMetaData,
-  EsQueryRuleParams} from '../types';
-import {
-  SearchType,
-} from '../types';
+import type { CommonEsQueryRuleParams, EsQueryRuleMetaData, EsQueryRuleParams } from '../types';
+import { SearchType } from '../types';
 import { EsQueryRuleTypeExpression } from './expression';
 import { chartPluginMock } from '@kbn/charts-plugin/public/mocks';
 import { Subject } from 'rxjs';

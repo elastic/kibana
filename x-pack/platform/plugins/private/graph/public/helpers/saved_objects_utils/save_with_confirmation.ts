@@ -13,7 +13,10 @@ import type { GraphCreateIn, GraphCreateOut } from '../../../common/content_mana
 import { CONTENT_ID } from '../../../common/content_management';
 import { OVERWRITE_REJECTED } from './constants';
 import { confirmModalPromise } from './confirm_modal_promise';
-import type { GraphSavedObjectAttributes, GraphSavedObject } from '../../../common/content_management';
+import type {
+  GraphSavedObjectAttributes,
+  GraphSavedObject,
+} from '../../../common/content_management';
 import type { GraphWorkspaceSavedObject } from '../../types';
 
 /**

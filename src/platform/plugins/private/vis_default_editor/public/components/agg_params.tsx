@@ -33,7 +33,7 @@ import {
   initAggParamsState,
 } from './agg_params_state';
 import type { DefaultEditorCommonProps } from './agg_common_props';
-import type { EditorParamConfig, TimeIntervalParam, FixedParam} from './utils';
+import type { EditorParamConfig, TimeIntervalParam, FixedParam } from './utils';
 import { getEditorConfig } from './utils';
 import { getSchemaByName } from '../schemas';
 import type { VisDefaultEditorKibanaServices } from '../types';

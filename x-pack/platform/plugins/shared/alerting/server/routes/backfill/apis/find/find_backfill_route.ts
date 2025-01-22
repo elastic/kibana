@@ -7,17 +7,13 @@
 import type { IRouter } from '@kbn/core/server';
 import type {
   FindBackfillRequestQueryV1,
-  FindBackfillResponseV1} from '../../../../../common/routes/backfill/apis/find';
-import {
-  findQuerySchemaV1
+  FindBackfillResponseV1,
 } from '../../../../../common/routes/backfill/apis/find';
+import { findQuerySchemaV1 } from '../../../../../common/routes/backfill/apis/find';
 import type { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
-import type {
-  AlertingRequestHandlerContext} from '../../../../types';
-import {
-  INTERNAL_ALERTING_BACKFILL_FIND_API_PATH,
-} from '../../../../types';
+import type { AlertingRequestHandlerContext } from '../../../../types';
+import { INTERNAL_ALERTING_BACKFILL_FIND_API_PATH } from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 import { DEFAULT_ALERTING_ROUTE_SECURITY } from '../../../constants';
 

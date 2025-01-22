@@ -8,7 +8,7 @@
  */
 
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
-import type { Filter} from '@kbn/es-query';
+import type { Filter } from '@kbn/es-query';
 import { updateFilter } from '@kbn/es-query';
 import { BooleanRelation } from '@kbn/es-query';
 import { cloneDeep } from 'lodash';

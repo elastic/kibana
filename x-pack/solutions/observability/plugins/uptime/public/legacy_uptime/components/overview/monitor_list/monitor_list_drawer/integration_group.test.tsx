@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import type { MonitorSummary} from '../../../../../../common/runtime_types';
+import type { MonitorSummary } from '../../../../../../common/runtime_types';
 import { makePing } from '../../../../../../common/runtime_types';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 import { IntegrationGroup, extractSummaryValues } from './actions_popover/integration_group';

@@ -4,17 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type {
-  ElementClickListener,
-  XYChartElementEvent} from '@elastic/charts';
-import {
-  Axis,
-  BarSeries,
-  Chart,
-  Position,
-  ScaleType,
-  Settings
-} from '@elastic/charts';
+import type { ElementClickListener, XYChartElementEvent } from '@elastic/charts';
+import { Axis, BarSeries, Chart, Position, ScaleType, Settings } from '@elastic/charts';
 import { EuiIcon, EuiLoadingChart, useEuiTheme } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { useActiveCursor } from '@kbn/charts-plugin/public';

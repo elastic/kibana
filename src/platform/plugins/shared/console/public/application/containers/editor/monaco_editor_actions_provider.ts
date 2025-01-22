@@ -9,7 +9,7 @@
 
 import type { CSSProperties, Dispatch } from 'react';
 import { debounce, range } from 'lodash';
-import type { ConsoleParsedRequestsProvider} from '@kbn/monaco';
+import type { ConsoleParsedRequestsProvider } from '@kbn/monaco';
 import { getParsedRequestsProvider, monaco } from '@kbn/monaco';
 import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';

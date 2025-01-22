@@ -31,10 +31,9 @@ import type {
   AppMenuActionPrimary,
   AppMenuActionSecondary,
   AppMenuActionSubmenuCustom,
-  AppMenuActionSubmenuSecondary} from '@kbn/discover-utils';
-import {
-  AppMenuActionType,
+  AppMenuActionSubmenuSecondary,
 } from '@kbn/discover-utils';
+import { AppMenuActionType } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../../../build_services';
 
 const container = document.createElement('div');

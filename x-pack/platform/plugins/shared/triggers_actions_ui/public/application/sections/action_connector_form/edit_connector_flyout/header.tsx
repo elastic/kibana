@@ -7,8 +7,7 @@
 
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
-import type {
-  IconType} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import {
   EuiTitle,
   EuiFlexGroup,

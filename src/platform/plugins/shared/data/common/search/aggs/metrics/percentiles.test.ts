@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { IPercentileAggConfig} from './percentiles';
+import type { IPercentileAggConfig } from './percentiles';
 import { getPercentilesMetricAgg } from './percentiles';
 import type { IAggConfigs } from '../agg_configs';
 import { AggConfigs } from '../agg_configs';

@@ -9,18 +9,8 @@
 
 import React, { useState } from 'react';
 
-import type {
-  CriteriaWithPagination,
-  EuiBasicTableColumn,
-  Pagination} from '@elastic/eui';
-import {
-  EuiBadge,
-  EuiBasicTable,
-  EuiButtonIcon,
-  EuiCode,
-  EuiIcon,
-  EuiToolTip
-} from '@elastic/eui';
+import type { CriteriaWithPagination, EuiBasicTableColumn, Pagination } from '@elastic/eui';
+import { EuiBadge, EuiBasicTable, EuiButtonIcon, EuiCode, EuiIcon, EuiToolTip } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

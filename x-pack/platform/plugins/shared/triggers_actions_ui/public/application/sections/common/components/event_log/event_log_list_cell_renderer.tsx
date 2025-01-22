@@ -17,10 +17,11 @@ import { EventLogListStatus } from './event_log_list_status';
 import { RuleDurationFormat } from '../../../rules_list/components/rule_duration_format';
 import type {
   RULE_EXECUTION_LOG_COLUMN_IDS,
-  CONNECTOR_EXECUTION_LOG_COLUMN_IDS} from '../../../../constants';
+  CONNECTOR_EXECUTION_LOG_COLUMN_IDS,
+} from '../../../../constants';
 import {
   RULE_EXECUTION_LOG_DURATION_COLUMNS,
-  RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS
+  RULE_EXECUTION_LOG_ALERT_COUNT_COLUMNS,
 } from '../../../../constants';
 
 export const DEFAULT_DATE_FORMAT = 'MMM D, YYYY @ HH:mm:ss.SSS';

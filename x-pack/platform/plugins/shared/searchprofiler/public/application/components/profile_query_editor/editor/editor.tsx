@@ -9,7 +9,7 @@ import React, { memo, useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiScreenReaderOnly, EuiSpacer } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
-import type { monaco} from '@kbn/monaco';
+import type { monaco } from '@kbn/monaco';
 import { XJsonLang } from '@kbn/monaco';
 
 export interface Props {

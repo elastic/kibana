@@ -7,7 +7,7 @@
 
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 
-import type { EsNames} from './names';
+import type { EsNames } from './names';
 import { getEsNames } from './names';
 import { initializeEs } from './init';
 import type { IClusterClientAdapter } from './cluster_client_adapter';

@@ -7,11 +7,8 @@
 
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
-import type {
-  InferenceAPIConfigResponse} from '@kbn/ml-trained-models-utils';
-import {
-  ELASTIC_MODEL_DEFINITIONS
-} from '@kbn/ml-trained-models-utils';
+import type { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+import { ELASTIC_MODEL_DEFINITIONS } from '@kbn/ml-trained-models-utils';
 import elasticIcon from '../../../../assets/images/providers/elastic.svg';
 import huggingFaceIcon from '../../../../assets/images/providers/hugging_face.svg';
 import cohereIcon from '../../../../assets/images/providers/cohere.svg';

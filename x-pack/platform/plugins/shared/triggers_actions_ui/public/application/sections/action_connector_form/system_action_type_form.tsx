@@ -8,8 +8,7 @@
 import React, { Suspense, useCallback, useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  IconType} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -23,7 +22,7 @@ import {
   EuiToolTip,
   EuiBetaBadge,
   EuiSplitPanel,
-  EuiCallOut
+  EuiCallOut,
 } from '@elastic/eui';
 import { isEmpty, partition, some } from 'lodash';
 import type { ActionVariable, RuleActionParam } from '@kbn/alerting-plugin/common';
@@ -36,10 +35,9 @@ import type {
   ActionTypeIndex,
   ActionConnector,
   ActionVariables,
-  ActionTypeRegistryContract} from '../../../types';
-import {
-  ActionConnectorMode,
+  ActionTypeRegistryContract,
 } from '../../../types';
+import { ActionConnectorMode } from '../../../types';
 import type { ActionAccordionFormProps } from './action_form';
 import { useKibana } from '../../../common/lib/kibana';
 import { validateParamsForWarnings } from '../../lib/validate_params_for_warnings';

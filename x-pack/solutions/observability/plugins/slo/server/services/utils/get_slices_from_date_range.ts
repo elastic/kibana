@@ -6,7 +6,7 @@
  */
 
 import moment from 'moment';
-import type { DateRange, Duration} from '../../domain/models';
+import type { DateRange, Duration } from '../../domain/models';
 import { toMomentUnitOfTime } from '../../domain/models';
 
 export function getSlicesFromDateRange(dateRange: DateRange, timesliceWindow: Duration) {

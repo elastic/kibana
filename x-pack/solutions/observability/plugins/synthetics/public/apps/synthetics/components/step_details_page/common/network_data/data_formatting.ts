@@ -11,11 +11,7 @@ import type { MarkerItems } from '../../step_waterfall_chart/waterfall/context/w
 import type { DateFormatter } from '../../../../../../hooks/use_date_format';
 import type { NetworkEvent } from '../../../../../../../common/runtime_types';
 import type { WaterfallData, WaterfallMetadata } from './types';
-import type {
-  ItemMatcher,
-  LegendItem,
-  WaterfallNetworkItem,
-  WaterfallTooltipItem} from './types';
+import type { ItemMatcher, LegendItem, WaterfallNetworkItem, WaterfallTooltipItem } from './types';
 import {
   FriendlyFlyoutLabels,
   FriendlyMimetypeLabels,

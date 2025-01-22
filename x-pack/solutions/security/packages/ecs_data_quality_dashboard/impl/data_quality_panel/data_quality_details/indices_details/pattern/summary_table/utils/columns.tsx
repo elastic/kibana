@@ -5,15 +5,8 @@
  * 2.0.
  */
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
-import {
-  EuiText,
-  EuiProgress,
-  EuiToolTip,
-  CENTER_ALIGNMENT,
-  EuiButtonIcon,
-} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiText, EuiProgress, EuiToolTip, CENTER_ALIGNMENT, EuiButtonIcon } from '@elastic/eui';
 import React from 'react';
 import moment from 'moment';
 import { css } from '@emotion/react';

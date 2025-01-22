@@ -26,7 +26,7 @@ import type {
 } from '../../../../../common/descriptor_types';
 import type { TimesliceMaskConfig } from '../../../util/mb_filter_expressions';
 import type { DataRequestContext } from '../../../../actions';
-import type { IVectorStyle} from '../../../styles/vector/vector_style';
+import type { IVectorStyle } from '../../../styles/vector/vector_style';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 import type { ISource } from '../../../sources/source';
 import type { IVectorSource } from '../../../sources/vector_source';

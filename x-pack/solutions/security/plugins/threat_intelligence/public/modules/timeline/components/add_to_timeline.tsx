@@ -9,14 +9,8 @@ import type { VFC } from 'react';
 import React, { useRef } from 'react';
 import type { DataProvider } from '@kbn/timelines-plugin/common';
 import type { AddToTimelineButtonProps } from '@kbn/timelines-plugin/public';
-import type {
-  EuiButtonIcon} from '@elastic/eui';
-import {
-  EuiButtonEmpty,
-  EuiContextMenuItem,
-  EuiFlexItem,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonIcon } from '@elastic/eui';
+import { EuiButtonEmpty, EuiContextMenuItem, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { generateDataProvider } from '../utils/data_provider';
 import { fieldAndValueValid, getIndicatorFieldAndValue } from '../../indicators/utils/field_value';
 import type { Indicator } from '../../../../common/types/indicator';

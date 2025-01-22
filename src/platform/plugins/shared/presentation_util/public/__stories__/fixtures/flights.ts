@@ -8,13 +8,13 @@
  */
 
 import { map, uniq } from 'lodash';
-import type { DataView, DataViewField, IIndexPatternFieldList } from '@kbn/data-views-plugin/public';
 import type {
-  FieldFormatsGetConfigFn} from '@kbn/field-formats-plugin/common';
-import {
-  NumberFormat,
-  StringFormat,
-} from '@kbn/field-formats-plugin/common';
+  DataView,
+  DataViewField,
+  IIndexPatternFieldList,
+} from '@kbn/data-views-plugin/public';
+import type { FieldFormatsGetConfigFn } from '@kbn/field-formats-plugin/common';
+import { NumberFormat, StringFormat } from '@kbn/field-formats-plugin/common';
 import { flights } from './flights_data';
 
 export type Flight = (typeof flights)[number];

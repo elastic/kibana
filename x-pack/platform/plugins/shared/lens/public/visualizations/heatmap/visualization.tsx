@@ -11,14 +11,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { Ast } from '@kbn/interpreter';
 import { Position } from '@elastic/charts';
 import { IconChartHeatmap } from '@kbn/chart-icons';
-import type {
-  PaletteRegistry,
-  CustomPaletteParams,
-  PaletteOutput} from '@kbn/coloring';
-import {
-  CUSTOM_PALETTE,
-  getOverridePaletteStops,
-} from '@kbn/coloring';
+import type { PaletteRegistry, CustomPaletteParams, PaletteOutput } from '@kbn/coloring';
+import { CUSTOM_PALETTE, getOverridePaletteStops } from '@kbn/coloring';
 import type { ThemeServiceStart } from '@kbn/core/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
 import { LayerTypes } from '@kbn/expression-xy-plugin/public';

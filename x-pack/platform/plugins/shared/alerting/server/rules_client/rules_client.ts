@@ -32,45 +32,28 @@ import type { GetAlertSummaryParams } from './methods/get_alert_summary';
 import { getAlertSummary } from './methods/get_alert_summary';
 import type {
   GetExecutionLogByIdParams,
-  GetGlobalExecutionLogParams} from './methods/get_execution_log';
-import {
-  getExecutionLogForRule,
-  getGlobalExecutionLogWithAuth,
+  GetGlobalExecutionLogParams,
 } from './methods/get_execution_log';
-import type {
-  GetActionErrorLogByIdParams} from './methods/get_action_error_log';
-import {
-  getActionErrorLog,
-  getActionErrorLogWithAuth,
-} from './methods/get_action_error_log';
+import { getExecutionLogForRule, getGlobalExecutionLogWithAuth } from './methods/get_execution_log';
+import type { GetActionErrorLogByIdParams } from './methods/get_action_error_log';
+import { getActionErrorLog, getActionErrorLogWithAuth } from './methods/get_action_error_log';
 import type {
   GetGlobalExecutionKPIParams,
-  GetRuleExecutionKPIParams} from './methods/get_execution_kpi';
-import {
-  getGlobalExecutionKpiWithAuth,
-  getRuleExecutionKPI
+  GetRuleExecutionKPIParams,
 } from './methods/get_execution_kpi';
+import { getGlobalExecutionKpiWithAuth, getRuleExecutionKPI } from './methods/get_execution_kpi';
 import type { FindRulesParams } from '../application/rule/methods/find';
 import { findRules } from '../application/rule/methods/find';
 import type { AggregateParams } from '../application/rule/methods/aggregate/types';
 import { aggregateRules } from '../application/rule/methods/aggregate';
 import type { DeleteRuleParams } from '../application/rule/methods/delete';
 import { deleteRule } from '../application/rule/methods/delete';
-import type {
-  BulkDeleteRulesRequestBody} from '../application/rule/methods/bulk_delete';
-import {
-  bulkDeleteRules
-} from '../application/rule/methods/bulk_delete';
-import type {
-  BulkDisableRulesRequestBody} from '../application/rule/methods/bulk_disable';
-import {
-  bulkDisableRules
-} from '../application/rule/methods/bulk_disable';
-import type {
-  BulkEditOptions} from '../application/rule/methods/bulk_edit/bulk_edit_rules';
-import {
-  bulkEditRules
-} from '../application/rule/methods/bulk_edit/bulk_edit_rules';
+import type { BulkDeleteRulesRequestBody } from '../application/rule/methods/bulk_delete';
+import { bulkDeleteRules } from '../application/rule/methods/bulk_delete';
+import type { BulkDisableRulesRequestBody } from '../application/rule/methods/bulk_disable';
+import { bulkDisableRules } from '../application/rule/methods/bulk_disable';
+import type { BulkEditOptions } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
+import { bulkEditRules } from '../application/rule/methods/bulk_edit/bulk_edit_rules';
 import type { BulkEnableRulesParams } from '../application/rule/methods/bulk_enable';
 import { bulkEnableRules } from '../application/rule/methods/bulk_enable';
 import { enableRule } from '../application/rule/methods/enable_rule/enable_rule';
@@ -83,11 +66,8 @@ import { unmuteInstance } from '../application/rule/methods/unmute_alert/unmute_
 import { runSoon } from './methods/run_soon';
 import { listRuleTypes } from '../application/rule/methods/rule_types/rule_types';
 import { getScheduleFrequency } from '../application/rule/methods/get_schedule_frequency/get_schedule_frequency';
-import type {
-  BulkUntrackBody} from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
-import {
-  bulkUntrackAlerts
-} from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
+import type { BulkUntrackBody } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
+import { bulkUntrackAlerts } from '../application/rule/methods/bulk_untrack/bulk_untrack_alerts';
 import type { ScheduleBackfillParams } from '../application/backfill/methods/schedule/types';
 import { scheduleBackfill } from '../application/backfill/methods/schedule';
 import { getBackfill } from '../application/backfill/methods/get';

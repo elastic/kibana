@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiButtonEmpty, EuiPanel, EuiText, EuiTitle } from '@elastic/eui';
 
-import type { InferencePipeline} from '../../../../../../common/types/pipelines';
+import type { InferencePipeline } from '../../../../../../common/types/pipelines';
 import { TrainedModelState } from '../../../../../../common/types/pipelines';
 
 import { InferencePipelineCard, TrainedModelHealthPopover } from './inference_pipeline_card';

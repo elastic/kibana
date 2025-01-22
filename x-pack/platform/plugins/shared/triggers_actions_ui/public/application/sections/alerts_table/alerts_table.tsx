@@ -21,7 +21,8 @@ import type {
   EuiDataGridRefProps,
   EuiDataGridProps,
   RenderCellValue,
-  EuiDataGridCellPopoverElementProps} from '@elastic/eui';
+  EuiDataGridCellPopoverElementProps,
+} from '@elastic/eui';
 import {
   EuiDataGrid,
   EuiSkeletonText,

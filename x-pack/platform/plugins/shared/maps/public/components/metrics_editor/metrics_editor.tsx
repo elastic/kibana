@@ -7,7 +7,7 @@
 
 import React, { Component, Fragment } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiButtonEmpty, EuiSpacer, EuiTextAlign } from '@elastic/eui';
 import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { MetricEditor } from './metric_editor';

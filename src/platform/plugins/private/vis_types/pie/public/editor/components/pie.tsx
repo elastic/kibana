@@ -33,8 +33,7 @@ import {
 } from '@kbn/vis-default-editor-plugin/public';
 import type { VisEditorOptionsProps } from '@kbn/visualizations-plugin/public';
 import { LegendSize } from '@kbn/visualizations-plugin/public';
-import type {
-  PartitionVisParams} from '@kbn/expression-partition-vis-plugin/common';
+import type { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import {
   LabelPositions,
   ValueFormats,

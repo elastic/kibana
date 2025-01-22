@@ -8,12 +8,11 @@
  */
 
 import type { KbnClient } from '@kbn/test';
-import type {
-  PluginStateSO} from '@kbn/guided-onboarding-plugin/server/saved_objects';
+import type { PluginStateSO } from '@kbn/guided-onboarding-plugin/server/saved_objects';
 import {
   guideStateSavedObjectsType,
   pluginStateSavedObjectsId,
-  pluginStateSavedObjectsType
+  pluginStateSavedObjectsType,
 } from '@kbn/guided-onboarding-plugin/server/saved_objects';
 import type { GuideState } from '@kbn/guided-onboarding';
 

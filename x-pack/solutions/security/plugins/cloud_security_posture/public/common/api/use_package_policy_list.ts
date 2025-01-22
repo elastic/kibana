@@ -5,8 +5,7 @@
  * 2.0.
  */
 
-import type {
-  PackagePolicy} from '@kbn/fleet-plugin/common';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common';
 import {
   packagePolicyRouteService,
   SO_SEARCH_LIMIT,

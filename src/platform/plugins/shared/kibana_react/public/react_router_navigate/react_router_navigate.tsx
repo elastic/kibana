@@ -9,7 +9,7 @@
 
 import type { ScopedHistory } from '@kbn/core/public';
 import type { MouseEvent } from 'react';
-import type { History} from 'history';
+import type { History } from 'history';
 import { parsePath } from 'history';
 
 interface LocationObject {

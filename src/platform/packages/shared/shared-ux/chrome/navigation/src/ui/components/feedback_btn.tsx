@@ -8,7 +8,7 @@
  */
 
 import { EuiButton, EuiCallOut, useEuiTheme, EuiText, EuiSpacer } from '@elastic/eui';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { SolutionId } from '@kbn/core-chrome-browser';

@@ -14,7 +14,7 @@ import {
   getFieldsFromIndices,
   getMatchingDataStreams,
 } from '../helpers/fixtures';
-import type { CreateEnrichPoliciesTestBed} from './create_enrich_policy.helpers';
+import type { CreateEnrichPoliciesTestBed } from './create_enrich_policy.helpers';
 import { setup } from './create_enrich_policy.helpers';
 import { getESPolicyCreationApiCall } from '../../../common/lib';
 

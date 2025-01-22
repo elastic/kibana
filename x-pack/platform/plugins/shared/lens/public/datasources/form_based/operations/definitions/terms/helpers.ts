@@ -14,16 +14,16 @@ import { getEsQueryConfig } from '@kbn/data-plugin/public';
 import type { DataViewField } from '@kbn/data-views-plugin/common';
 import { type FieldStatsResponse } from '@kbn/unified-field-list/src/types';
 import { loadFieldStats } from '@kbn/unified-field-list/src/services/field_stats';
-import {
-  operationDefinitionMap,
-} from '..';
+import { operationDefinitionMap } from '..';
 import { defaultLabel } from '../filters';
 import { isReferenced } from '../../layer_helpers';
 
 import type { FramePublicAPI, IndexPattern, IndexPatternField } from '../../../../../types';
-import type { FiltersIndexPatternColumn ,
+import type {
+  FiltersIndexPatternColumn,
   FieldBasedOperationErrorMessage,
-  GenericIndexPatternColumn} from '..';
+  GenericIndexPatternColumn,
+} from '..';
 import type { TermsIndexPatternColumn } from './types';
 import type { LastValueIndexPatternColumn } from '../last_value';
 import type { PercentileRanksIndexPatternColumn } from '../percentile_ranks';

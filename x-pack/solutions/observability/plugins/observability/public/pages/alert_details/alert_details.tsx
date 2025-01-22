@@ -9,8 +9,7 @@ import React, { useEffect, useState } from 'react';
 import { useHistory, useLocation, useParams } from 'react-router-dom';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiTabbedContentTab} from '@elastic/eui';
+import type { EuiTabbedContentTab } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiPanel,
@@ -20,8 +19,7 @@ import {
   useEuiTheme,
   EuiFlexGroup,
 } from '@elastic/eui';
-import type {
-  AlertStatus} from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_RULE_CATEGORY,
   ALERT_RULE_TYPE_ID,
@@ -44,7 +42,7 @@ import { observabilityFeatureId } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 import { useFetchRule } from '../../hooks/use_fetch_rule';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import type { AlertData} from '../../hooks/use_fetch_alert_detail';
+import type { AlertData } from '../../hooks/use_fetch_alert_detail';
 import { useFetchAlertDetail } from '../../hooks/use_fetch_alert_detail';
 import { HeaderActions } from './components/header_actions';
 import { CenterJustifiedSpinner } from '../../components/center_justified_spinner';

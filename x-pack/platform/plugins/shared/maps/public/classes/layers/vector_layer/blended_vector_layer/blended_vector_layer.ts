@@ -9,7 +9,7 @@ import { i18n } from '@kbn/i18n';
 import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { IVectorLayer } from '../vector_layer';
 import { GeoJsonVectorLayer } from '../geojson_vector_layer';
-import type { IVectorStyle} from '../../../styles/vector/vector_style';
+import type { IVectorStyle } from '../../../styles/vector/vector_style';
 import { VectorStyle } from '../../../styles/vector/vector_style';
 import { getDefaultDynamicProperties } from '../../../styles/vector/vector_style_defaults';
 import type { IDynamicStyleProperty } from '../../../styles/vector/properties/dynamic_style_property';

@@ -10,7 +10,7 @@ import Boom from '@hapi/boom';
 import type { KueryNode } from '@kbn/es-query';
 import { withSpan } from '@kbn/apm-utils';
 import type { RawRule } from '../../types';
-import type { ReadOperations} from '../../authorization';
+import type { ReadOperations } from '../../authorization';
 import { WriteOperations, AlertingAuthorizationEntity } from '../../authorization';
 import type { BulkAction, RuleBulkOperationAggregation } from '../types';
 import {

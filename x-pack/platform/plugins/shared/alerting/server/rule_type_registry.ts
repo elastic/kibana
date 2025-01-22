@@ -24,15 +24,12 @@ import type {
   AlertInstanceContext,
   IRuleTypeAlerts,
 } from './types';
-import type {
-  RecoveredActionGroupId,
-  ActionGroup,
-  RuleAlertData} from '../common';
+import type { RecoveredActionGroupId, ActionGroup, RuleAlertData } from '../common';
 import {
   RecoveredActionGroup,
   getBuiltinActionGroups,
   validateDurationSchema,
-  parseDuration
+  parseDuration,
 } from '../common';
 import type { ILicenseState } from './lib/license_state';
 import { getRuleTypeFeatureUsageName } from './lib/get_rule_type_feature_usage_name';

@@ -12,11 +12,9 @@ import type {
   PublishesWritablePanelTitle,
   PublishesWritablePanelDescription,
   SerializedTitles,
-  StateComparators} from '@kbn/presentation-publishing';
-import {
-  getUnchangingComparator,
-  initializeTitles,
+  StateComparators,
 } from '@kbn/presentation-publishing';
+import { getUnchangingComparator, initializeTitles } from '@kbn/presentation-publishing';
 import { apiIsPresentationContainer, apiPublishesSettings } from '@kbn/presentation-containers';
 import { buildObservableVariable, isTextBasedLanguage } from '../helper';
 import type {

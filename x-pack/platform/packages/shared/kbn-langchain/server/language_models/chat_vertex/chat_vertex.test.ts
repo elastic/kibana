@@ -9,7 +9,7 @@ import { PassThrough } from 'stream';
 import { loggerMock } from '@kbn/logging-mocks';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 
-import type { BaseMessage} from '@langchain/core/messages';
+import type { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, SystemMessage } from '@langchain/core/messages';
 import { ActionsClientChatVertexAI } from './chat_vertex';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';

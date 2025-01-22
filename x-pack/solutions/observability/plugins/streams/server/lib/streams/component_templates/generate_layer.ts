@@ -10,7 +10,7 @@ import type {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { WiredStreamDefinition} from '@kbn/streams-schema';
+import type { WiredStreamDefinition } from '@kbn/streams-schema';
 import { isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings, logsLifecycle } from './logs_layer';

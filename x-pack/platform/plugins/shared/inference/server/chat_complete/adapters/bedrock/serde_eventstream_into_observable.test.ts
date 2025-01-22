@@ -6,14 +6,10 @@
  */
 
 import { Readable } from 'stream';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { toArray, firstValueFrom, map, filter } from 'rxjs';
-import type {
-  BedrockChunkMember,
-  BedrockStreamMember} from './serde_eventstream_into_observable';
-import {
-  serdeEventstreamIntoObservable,
-} from './serde_eventstream_into_observable';
+import type { BedrockChunkMember, BedrockStreamMember } from './serde_eventstream_into_observable';
+import { serdeEventstreamIntoObservable } from './serde_eventstream_into_observable';
 import { EventStreamMarshaller } from '@smithy/eventstream-serde-node';
 import { fromUtf8, toUtf8 } from '@smithy/util-utf8';
 import type { CompletionChunk } from './types';

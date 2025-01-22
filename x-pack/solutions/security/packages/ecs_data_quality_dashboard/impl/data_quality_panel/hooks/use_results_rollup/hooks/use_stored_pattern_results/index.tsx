@@ -10,12 +10,8 @@ import type { HttpHandler } from '@kbn/core-http-browser';
 import { isEmpty } from 'lodash/fp';
 
 import type { DataQualityCheckResult } from '../../../../types';
-import type {
-  GetStorageResultsOpts} from '../../utils/storage';
-import {
-  formatResultFromStorage,
-  getStorageResults,
-} from '../../utils/storage';
+import type { GetStorageResultsOpts } from '../../utils/storage';
+import { formatResultFromStorage, getStorageResults } from '../../utils/storage';
 
 export interface UseStoredPatternResultsOpts {
   patterns: string[];

@@ -12,8 +12,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { TextEditor } from '../field_components';
 
-import type {
-  FieldConfig} from '../../../../../../shared_imports';
+import type { FieldConfig } from '../../../../../../shared_imports';
 import {
   FIELD_TYPES,
   fieldValidators,

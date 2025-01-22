@@ -11,7 +11,7 @@ import { EuiFlexGroup, useEuiTheme } from '@elastic/eui';
 import type { IntlShape } from '@kbn/i18n-react';
 import { injectI18n } from '@kbn/i18n-react';
 import type { Filter } from '@kbn/es-query';
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useRef } from 'react';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import FilterItems, { type FilterItemsProps } from './filter_item/filter_items';

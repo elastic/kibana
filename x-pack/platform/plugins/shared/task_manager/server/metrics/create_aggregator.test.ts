@@ -19,7 +19,7 @@ import type { TaskLifecycleEvent } from '../polling_lifecycle';
 import type { AggregatedStat } from '../lib/runtime_statistics_aggregator';
 import type { TaskManagerConfig } from '../config';
 import { createAggregator } from './create_aggregator';
-import type { TaskClaimMetric} from './task_claim_metrics_aggregator';
+import type { TaskClaimMetric } from './task_claim_metrics_aggregator';
 import { TaskClaimMetricsAggregator } from './task_claim_metrics_aggregator';
 import { taskClaimFailureEvent, taskClaimSuccessEvent } from './task_claim_metrics_aggregator.test';
 import {
@@ -27,12 +27,12 @@ import {
   getTaskRunSuccessEvent,
   getTaskManagerStatEvent,
 } from './task_run_metrics_aggregator.test';
-import type { TaskRunMetric} from './task_run_metrics_aggregator';
+import type { TaskRunMetric } from './task_run_metrics_aggregator';
 import { TaskRunMetricsAggregator } from './task_run_metrics_aggregator';
 import * as TaskClaimMetricsAggregatorModule from './task_claim_metrics_aggregator';
 import { metricsAggregatorMock } from './metrics_aggregator.mock';
 import { getTaskManagerMetricEvent } from './task_overdue_metrics_aggregator.test';
-import type { TaskOverdueMetric} from './task_overdue_metrics_aggregator';
+import type { TaskOverdueMetric } from './task_overdue_metrics_aggregator';
 import { TaskOverdueMetricsAggregator } from './task_overdue_metrics_aggregator';
 
 const logger = loggingSystemMock.createLogger();

@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { ReactElement} from 'react';
+import type { ReactElement } from 'react';
 import { useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiButtonEmpty, EuiText, EuiTourStep } from '@elastic/eui';

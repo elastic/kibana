@@ -19,7 +19,8 @@ import type {
   SyncJobStats,
   SyncJobStatsByState,
   SyncJobStatsByType,
-  SyncJobStatsDetails} from '..';
+  SyncJobStatsDetails,
+} from '..';
 import {
   CRAWLER_SERVICE_TYPE,
   fetchConnectors,

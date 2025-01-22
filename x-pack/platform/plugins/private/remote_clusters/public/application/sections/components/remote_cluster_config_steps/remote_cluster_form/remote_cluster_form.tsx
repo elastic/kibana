@@ -9,8 +9,7 @@ import React, { Component, Fragment } from 'react';
 import { merge } from 'lodash';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -29,7 +28,7 @@ import {
   EuiTitle,
   EuiDelayRender,
   EuiScreenReaderOnly,
-  htmlIdGenerator
+  htmlIdGenerator,
 } from '@elastic/eui';
 
 import type { Cluster, ClusterPayload } from '../../../../../../common/lib';
@@ -42,8 +41,7 @@ import { skippingDisconnectedClustersUrl } from '../../../../services/documentat
 
 import { RequestFlyout } from '../components/request_flyout';
 import { ConnectionMode } from './components';
-import type {
-  ClusterErrors} from './validators';
+import type { ClusterErrors } from './validators';
 import {
   convertCloudRemoteAddressToProxyConnection,
   validateCluster,

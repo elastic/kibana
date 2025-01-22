@@ -12,7 +12,7 @@ import type { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugi
 import { aggregateTaskOverduePercentilesForType } from '@kbn/task-manager-plugin/server';
 import type { CoreSetup } from '@kbn/core/server';
 import type { ActionsPluginsStart } from '../plugin';
-import type { ClusterActionsMetric} from './types';
+import type { ClusterActionsMetric } from './types';
 import { EMPTY_CLUSTER_ACTIONS_METRICS } from './types';
 
 export function registerClusterCollector({

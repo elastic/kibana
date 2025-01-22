@@ -21,8 +21,7 @@ import { NO_FINDINGS_STATUS_TEST_SUBJ } from '../../components/test_subjects';
 import { useCspIntegrationLink } from '../../common/navigation/use_csp_integration_link';
 import type { PosturePolicyTemplate, ComplianceDashboardDataV2 } from '../../../common/types_old';
 import { CloudPosturePageTitle } from '../../components/cloud_posture_page_title';
-import type {
-  CspNoDataPageProps} from '../../components/cloud_posture_page';
+import type { CspNoDataPageProps } from '../../components/cloud_posture_page';
 import {
   CloudPosturePage,
   CspNoDataPage,

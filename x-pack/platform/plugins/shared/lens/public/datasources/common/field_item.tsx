@@ -13,8 +13,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type { Filter, Query } from '@kbn/es-query';
 import { DataViewField, type DataView } from '@kbn/data-views-plugin/common';
-import type {
-  AddFieldFilterHandler} from '@kbn/unified-field-list';
+import type { AddFieldFilterHandler } from '@kbn/unified-field-list';
 import {
   FieldStats,
   FieldPopover,

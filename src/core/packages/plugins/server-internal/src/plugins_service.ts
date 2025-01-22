@@ -27,7 +27,7 @@ import type {
 } from '@kbn/core-lifecycle-server-internal';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
-import type { PluginDiscoveryError} from './discovery';
+import type { PluginDiscoveryError } from './discovery';
 import { discover, PluginDiscoveryErrorType } from './discovery';
 import type { PluginWrapper } from './plugin';
 

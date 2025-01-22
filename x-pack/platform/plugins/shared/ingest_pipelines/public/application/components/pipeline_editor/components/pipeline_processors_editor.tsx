@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { memo, useMemo } from 'react';
 import { ProcessorsTree } from '.';
 import { usePipelineProcessorsContext } from '../context';

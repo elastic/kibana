@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { IngestGetPipelineResponse, IngestPipeline } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  IngestGetPipelineResponse,
+  IngestPipeline,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 
 import type { FieldMapping } from '../../../../../../common/ml_inference_pipeline';

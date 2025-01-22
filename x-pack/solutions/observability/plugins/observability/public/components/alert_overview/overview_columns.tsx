@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import { EuiCallOut, EuiLink, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import type { Cases } from '@kbn/cases-plugin/common';

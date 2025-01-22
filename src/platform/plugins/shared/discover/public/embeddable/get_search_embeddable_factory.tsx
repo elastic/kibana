@@ -18,8 +18,7 @@ import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
-import type {
-  FetchContext} from '@kbn/presentation-publishing';
+import type { FetchContext } from '@kbn/presentation-publishing';
 import {
   getUnchangingComparator,
   initializeTimeRange,

@@ -17,7 +17,7 @@ import type {
 } from '@kbn/alerting-state-types';
 
 import { getMigrations } from './migrations';
-import type { SerializedConcreteTaskInstance} from '../task';
+import type { SerializedConcreteTaskInstance } from '../task';
 import { TaskStatus } from '../task';
 
 type RawAlertInstances = Record<string, RawAlertInstance>;

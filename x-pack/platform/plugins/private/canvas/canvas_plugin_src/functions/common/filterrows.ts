@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { combineLatest, defer } from 'rxjs';
 import { map } from 'rxjs';
 import type { Datatable, ExpressionFunctionDefinition } from '../../../types';

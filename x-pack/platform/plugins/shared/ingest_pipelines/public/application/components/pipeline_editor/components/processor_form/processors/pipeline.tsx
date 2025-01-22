@@ -17,7 +17,7 @@ import {
   ToggleField,
 } from '../../../../../../shared_imports';
 
-import type { FieldsConfig} from './shared';
+import type { FieldsConfig } from './shared';
 import { from, to } from './shared';
 
 const { emptyField } = fieldValidators;

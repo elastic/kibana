@@ -14,14 +14,8 @@ import type { RouteDependencies } from '../../../types';
 import { addInternalBasePath } from '..';
 import { enrichPoliciesActions } from '../../../lib/enrich_policies';
 import { serializeAsESPolicy } from '../../../../common/lib';
-import type {
-  FieldCapsList} from './helpers';
-import {
-  normalizeFieldsList,
-  getIndices,
-  getCommonFields,
-  getDataStreams,
-} from './helpers';
+import type { FieldCapsList } from './helpers';
+import { normalizeFieldsList, getIndices, getCommonFields, getDataStreams } from './helpers';
 
 const validationSchema = schema.object({
   policy: schema.object({

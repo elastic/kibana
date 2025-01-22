@@ -9,7 +9,7 @@
 
 import type { ByteSizeValue, TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
-import type { ICorsConfig, IHttpConfig, ISslConfig} from '@kbn/server-http-tools';
+import type { ICorsConfig, IHttpConfig, ISslConfig } from '@kbn/server-http-tools';
 import { SslConfig, sslSchema } from '@kbn/server-http-tools';
 import type { Duration } from 'moment';
 

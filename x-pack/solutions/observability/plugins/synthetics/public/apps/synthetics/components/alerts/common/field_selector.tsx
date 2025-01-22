@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow } from '@elastic/eui';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { debounce } from 'lodash';

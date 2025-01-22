@@ -24,11 +24,9 @@ import {
 import type {
   UseRequestConfig,
   SendRequestConfig,
-  SendRequestResponse} from '../../shared_imports';
-import {
-  sendRequest as _sendRequest,
-  useRequest as _useRequest,
+  SendRequestResponse,
 } from '../../shared_imports';
+import { sendRequest as _sendRequest, useRequest as _useRequest } from '../../shared_imports';
 
 type ClusterUpgradeStateListener = (clusterUpgradeState: ClusterUpgradeState) => void;
 

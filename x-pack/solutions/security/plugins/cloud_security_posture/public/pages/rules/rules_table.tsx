@@ -9,7 +9,8 @@ import type {
   Criteria,
   EuiTableFieldDataColumnType,
   EuiBasicTableProps,
-  EuiTableSortingType} from '@elastic/eui';
+  EuiTableSortingType,
+} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiBasicTable,
@@ -17,7 +18,7 @@ import {
   EuiSwitch,
   EuiCheckbox,
   EuiFlexGroup,
-  EuiFlexItem
+  EuiFlexItem,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { METRIC_TYPE } from '@kbn/analytics';

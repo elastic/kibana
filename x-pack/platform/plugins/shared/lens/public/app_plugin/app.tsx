@@ -18,8 +18,7 @@ import { LensTopNavMenu } from './lens_top_nav';
 import type { AddUserMessages, EditorFrameInstance, Simplify, UserMessagesGetter } from '../types';
 import type { LensDocument } from '../persistence/saved_object_store';
 
-import type {
-  LensAppState} from '../state_management';
+import type { LensAppState } from '../state_management';
 import {
   setState,
   applyChanges,

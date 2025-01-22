@@ -10,19 +10,10 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { get, omit } from 'lodash';
-import type {
-  OnSaveProps,
-  SaveResult} from '@kbn/saved-objects-plugin/public';
-import {
-  SavedObjectSaveModal,
-  showSaveModal,
-} from '@kbn/saved-objects-plugin/public';
-import type {
-  EmbeddableInput,
-  SavedObjectEmbeddableInput} from '@kbn/embeddable-plugin/common';
-import {
-  isSavedObjectEmbeddableInput,
-} from '@kbn/embeddable-plugin/common';
+import type { OnSaveProps, SaveResult } from '@kbn/saved-objects-plugin/public';
+import { SavedObjectSaveModal, showSaveModal } from '@kbn/saved-objects-plugin/public';
+import type { EmbeddableInput, SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
+import { isSavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
 import { getNotifications } from '../../services';
 
 /**

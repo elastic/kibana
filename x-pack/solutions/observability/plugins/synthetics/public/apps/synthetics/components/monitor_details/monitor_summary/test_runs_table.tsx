@@ -5,13 +5,12 @@
  * 2.0.
  */
 
-import type { MouseEvent} from 'react';
+import type { MouseEvent } from 'react';
 import React, { useMemo, useState } from 'react';
 import { useHistory, useParams } from 'react-router-dom';
 import { useSelector } from 'react-redux';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiButtonEmpty,

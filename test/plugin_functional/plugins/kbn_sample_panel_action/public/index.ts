@@ -8,12 +8,8 @@
  */
 
 import type { PluginInitializer } from '@kbn/core/public';
-import type {
-  SampelPanelActionTestPluginSetup,
-  SampelPanelActionTestPluginStart} from './plugin';
-import {
-  SampelPanelActionTestPlugin
-} from './plugin';
+import type { SampelPanelActionTestPluginSetup, SampelPanelActionTestPluginStart } from './plugin';
+import { SampelPanelActionTestPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   SampelPanelActionTestPluginSetup,

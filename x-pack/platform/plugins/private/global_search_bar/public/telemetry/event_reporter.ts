@@ -12,13 +12,9 @@ import type {
   TrackedApplicationClick,
   TrackedError,
   TrackedSavedObjectClick,
-  TrackUiMetricFn} from '../types';
-import {
-  ClickMetric,
-  CountMetric,
-  EventMetric,
-  FieldType
+  TrackUiMetricFn,
 } from '../types';
+import { ClickMetric, CountMetric, EventMetric, FieldType } from '../types';
 
 export class EventReporter {
   private reportEvent: AnalyticsServiceStart['reportEvent'];

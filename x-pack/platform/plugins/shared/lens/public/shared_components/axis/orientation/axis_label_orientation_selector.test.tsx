@@ -7,11 +7,8 @@
 
 import React from 'react';
 import { render, screen } from '@testing-library/react';
-import type {
-  AxisLabelOrientationSelectorProps} from './axis_label_orientation_selector';
-import {
-  AxisLabelOrientationSelector
-} from './axis_label_orientation_selector';
+import type { AxisLabelOrientationSelectorProps } from './axis_label_orientation_selector';
+import { AxisLabelOrientationSelector } from './axis_label_orientation_selector';
 import userEvent from '@testing-library/user-event';
 
 const renderComponent = (propsOverrides?: Partial<AxisLabelOrientationSelectorProps>) => {

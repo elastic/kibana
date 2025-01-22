@@ -7,7 +7,7 @@
 
 import * as React from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
-import type { CoreSetup, AppMountParameters} from '@kbn/core/public';
+import type { CoreSetup, AppMountParameters } from '@kbn/core/public';
 import { APP_WRAPPER_CLASS } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';

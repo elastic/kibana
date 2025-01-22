@@ -10,10 +10,9 @@ import type {
   ConverseCommand,
   ConverseResponse,
   ConverseStreamCommand,
-  ConverseStreamResponse} from '@aws-sdk/client-bedrock-runtime';
-import {
-  BedrockRuntimeClient as _BedrockRuntimeClient
+  ConverseStreamResponse,
 } from '@aws-sdk/client-bedrock-runtime';
+import { BedrockRuntimeClient as _BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
 import { constructStack } from '@smithy/middleware-stack';
 import type { HttpHandlerOptions } from '@smithy/types';
 import type { PublicMethodsOf } from '@kbn/utility-types';

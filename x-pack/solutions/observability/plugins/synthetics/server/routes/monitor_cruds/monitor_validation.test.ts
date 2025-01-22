@@ -19,7 +19,8 @@ import type {
   TCPAdvancedFields,
   TCPFields,
   TCPSimpleFields,
-  TLSFields} from '../../../common/runtime_types';
+  TLSFields,
+} from '../../../common/runtime_types';
 import {
   CodeEditorMode,
   ConfigKey,

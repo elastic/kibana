@@ -12,10 +12,9 @@ import type {
   CoreSetup,
   Logger,
   SavedObjectsServiceStart,
-  IRouter} from '@kbn/core/server';
-import {
-  DEFAULT_APP_CATEGORIES,
+  IRouter,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import type { CustomIntegrationsPluginSetup } from '@kbn/custom-integrations-plugin/server';
 import type { DataPluginStart } from '@kbn/data-plugin/server/plugin';
 import { ENTERPRISE_SEARCH_APP_ID } from '@kbn/deeplinks-search';
@@ -69,11 +68,8 @@ import { WS_TELEMETRY_NAME } from './collectors/workplace_search/telemetry';
 import { registerEnterpriseSearchIntegrations } from './integrations';
 
 import { entSearchHttpAgent } from './lib/enterprise_search_http_agent';
-import type {
-  IEnterpriseSearchRequestHandler} from './lib/enterprise_search_request_handler';
-import {
-  EnterpriseSearchRequestHandler
-} from './lib/enterprise_search_request_handler';
+import type { IEnterpriseSearchRequestHandler } from './lib/enterprise_search_request_handler';
+import { EnterpriseSearchRequestHandler } from './lib/enterprise_search_request_handler';
 
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';

@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ElementType} from 'react';
+import type { ElementType } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiComboBox, EuiFormRow, EuiLink, EuiText } from '@elastic/eui';
 import type { ListSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { useFindListsBySize } from '@kbn/securitysolution-list-hooks';

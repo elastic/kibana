@@ -8,11 +8,8 @@
 import { act } from 'react-dom/test-utils';
 import type { HttpFetchOptionsWithPath } from '@kbn/core/public';
 import { setupEnvironment } from '../../../helpers';
-import type {
-  GeneralNodeAllocationTestBed} from './general_behavior.helpers';
-import {
-  setupGeneralNodeAllocation,
-} from './general_behavior.helpers';
+import type { GeneralNodeAllocationTestBed } from './general_behavior.helpers';
+import { setupGeneralNodeAllocation } from './general_behavior.helpers';
 import {
   POLICY_WITH_MIGRATE_OFF,
   POLICY_WITH_NODE_ATTR_AND_OFF_ALLOCATION,

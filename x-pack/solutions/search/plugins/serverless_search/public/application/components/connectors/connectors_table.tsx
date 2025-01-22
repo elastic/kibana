@@ -5,9 +5,7 @@
  * 2.0.
  */
 
-import type {
-  Criteria,
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
 import {
   copyToClipboard,
   EuiBadge,
@@ -28,14 +26,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  Connector,
-  SyncStatus} from '@kbn/search-connectors';
-import {
-  ConnectorStatus,
-  syncStatusToColor,
-  syncStatusToText,
-} from '@kbn/search-connectors';
+import type { Connector, SyncStatus } from '@kbn/search-connectors';
+import { ConnectorStatus, syncStatusToColor, syncStatusToText } from '@kbn/search-connectors';
 import React, { useEffect, useState } from 'react';
 import { generatePath } from 'react-router-dom';
 import {

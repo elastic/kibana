@@ -12,13 +12,8 @@ import { euiLightVars } from '@kbn/ui-theme';
 import type { FC } from 'react';
 import React from 'react';
 import type { FieldFormat } from '@kbn/field-formats-plugin/common';
-import type {
-  AxesMap,
-  AxisConfiguration} from '../../helpers';
-import {
-  getOriginalAxisPosition,
-  LINES_MARKER_SIZE,
-} from '../../helpers';
+import type { AxesMap, AxisConfiguration } from '../../helpers';
+import { getOriginalAxisPosition, LINES_MARKER_SIZE } from '../../helpers';
 import type {
   AvailableReferenceLineIcon,
   FillStyle,

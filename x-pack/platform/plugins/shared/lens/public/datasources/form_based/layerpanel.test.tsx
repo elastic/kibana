@@ -7,7 +7,7 @@
 
 import React from 'react';
 import type { FormBasedPrivateState } from './types';
-import type { FormBasedLayerPanelProps} from './layerpanel';
+import type { FormBasedLayerPanelProps } from './layerpanel';
 import { LayerPanel } from './layerpanel';
 import { fireEvent, render, screen, within } from '@testing-library/react';
 import { getFieldByNameFactory } from './pure_helpers';

@@ -10,7 +10,11 @@
 import type { SOWithMetadata } from '@kbn/content-management-utils';
 import type { LinksAttributes } from '../../common/content_management';
 import { injectReferences } from '../../common/persistable_state';
-import type { LinksByReferenceSerializedState, LinksRuntimeState, LinksSerializedState } from '../types';
+import type {
+  LinksByReferenceSerializedState,
+  LinksRuntimeState,
+  LinksSerializedState,
+} from '../types';
 import { resolveLinks } from './resolve_links';
 
 export const linksSerializeStateIsByReference = (

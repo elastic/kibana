@@ -14,8 +14,7 @@ import { introspectContext } from './introspect_context';
 import { mult } from './mult';
 import { sleep } from './sleep';
 import { sum } from './sum';
-import type {
-  AnyExpressionFunctionDefinition} from '../../expression_functions';
+import type { AnyExpressionFunctionDefinition } from '../../expression_functions';
 import {
   clog,
   font,

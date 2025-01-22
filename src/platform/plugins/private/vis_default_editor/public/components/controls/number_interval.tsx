@@ -10,9 +10,7 @@
 import { get } from 'lodash';
 import React, { useEffect, useCallback } from 'react';
 
-import type {
-  EuiSwitchProps,
-  EuiFieldNumberProps} from '@elastic/eui';
+import type { EuiSwitchProps, EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFieldNumber,
   EuiFormRow,

@@ -20,10 +20,9 @@ import { actionsMock } from '@kbn/actions-plugin/server/mocks';
 import type {
   ActionParamsType,
   PagerDutyConnectorType,
-  PagerDutyConnectorTypeExecutorOptions} from '.';
-import {
-  getConnectorType
+  PagerDutyConnectorTypeExecutorOptions,
 } from '.';
+import { getConnectorType } from '.';
 import type { ActionsConfigurationUtilities } from '@kbn/actions-plugin/server/actions_config';
 import { loggerMock } from '@kbn/logging-mocks';
 

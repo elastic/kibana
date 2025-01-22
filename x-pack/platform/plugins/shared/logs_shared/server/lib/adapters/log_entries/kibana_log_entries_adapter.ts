@@ -12,10 +12,9 @@ import type {
   LogEntriesAdapter,
   LogEntriesParams,
   LogEntryDocument,
-  LogEntryQuery} from '../../domains/log_entries_domain';
-import {
-  LOG_ENTRIES_PAGE_SIZE,
+  LogEntryQuery,
 } from '../../domains/log_entries_domain';
+import { LOG_ENTRIES_PAGE_SIZE } from '../../domains/log_entries_domain';
 import type { SortedSearchHit } from '../framework';
 import type { KibanaFramework } from '../framework/kibana_framework_adapter';
 import type { ResolvedLogView } from '../../../../common/log_views';

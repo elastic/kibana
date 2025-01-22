@@ -16,10 +16,9 @@ import type {
   CoreStart,
   Logger,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/server';
-import {
-  DEFAULT_APP_CATEGORIES
+  PluginInitializerContext,
 } from '@kbn/core/server';
+import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { DISCOVER_APP_LOCATOR, type DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
 import type { GuidedOnboardingPluginSetup } from '@kbn/guided-onboarding-plugin/server';
@@ -40,10 +39,9 @@ import {
 import { AlertsLocatorDefinition } from '../common/locators/alerts';
 import type {
   AnnotationsAPI,
-  ScopedAnnotationsClientFactory} from './lib/annotations/bootstrap_annotations';
-import {
-  bootstrapAnnotations
+  ScopedAnnotationsClientFactory,
 } from './lib/annotations/bootstrap_annotations';
+import { bootstrapAnnotations } from './lib/annotations/bootstrap_annotations';
 import { registerRuleTypes } from './lib/rules/register_rule_types';
 import { getObservabilityServerRouteRepository } from './routes/get_global_observability_server_route_repository';
 import { registerRoutes } from './routes/register_routes';

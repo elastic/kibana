@@ -6,8 +6,7 @@
  */
 
 import type { IndicesPutIndexTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import type {
-  EntityDefinition} from '@kbn/entities-schema';
+import type { EntityDefinition } from '@kbn/entities-schema';
 import {
   ENTITY_LATEST,
   ENTITY_SCHEMA_VERSION_V1,

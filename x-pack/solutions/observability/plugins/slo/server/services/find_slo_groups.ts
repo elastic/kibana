@@ -5,14 +5,8 @@
  * 2.0.
  */
 import type { ElasticsearchClient, Logger, SavedObjectsClientContract } from '@kbn/core/server';
-import type {
-  FindSLOGroupsParams,
-  FindSLOGroupsResponse,
-  Pagination} from '@kbn/slo-schema';
-import {
-  findSLOGroupsResponseSchema,
-  sloGroupWithSummaryResponseSchema,
-} from '@kbn/slo-schema';
+import type { FindSLOGroupsParams, FindSLOGroupsResponse, Pagination } from '@kbn/slo-schema';
+import { findSLOGroupsResponseSchema, sloGroupWithSummaryResponseSchema } from '@kbn/slo-schema';
 import { getListOfSummaryIndices, getSloSettings } from './slo_settings';
 import { DEFAULT_SLO_GROUPS_PAGE_SIZE } from '../../common/constants';
 import { IllegalArgumentError } from '../errors';

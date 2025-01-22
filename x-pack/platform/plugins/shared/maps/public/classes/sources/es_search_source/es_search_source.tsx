@@ -14,20 +14,19 @@ import type { SearchResponseWarning } from '@kbn/search-response-warnings';
 import type { GeoJsonProperties, Geometry, Position } from 'geojson';
 import type { KibanaExecutionContext } from '@kbn/core/public';
 import { type Filter, buildExistsFilter, buildPhraseFilter, type TimeRange } from '@kbn/es-query';
-import type { DataViewField, DataView , SortDirectionNumeric } from '@kbn/data-plugin/common';
+import type { DataViewField, DataView, SortDirectionNumeric } from '@kbn/data-plugin/common';
 import { lastValueFrom } from 'rxjs';
 import type { Adapters } from '@kbn/inspector-plugin/common/adapters';
 import { SortDirection } from '@kbn/data-plugin/common';
 import { getTileUrlParams } from '@kbn/maps-vector-tile-utils';
 import { AbstractESSource } from '../es_source';
 import { getCore, getHttp, getSearchService, getTimeFilter } from '../../../kibana_services';
-import type {
-  TotalHits} from '../../../../common/elasticsearch_util';
+import type { TotalHits } from '../../../../common/elasticsearch_util';
 import {
   addFieldToDSL,
   getField,
   hitsToGeoJson,
-  isTotalHitsGreaterThan
+  isTotalHitsGreaterThan,
 } from '../../../../common/elasticsearch_util';
 import { UpdateSourceEditor } from './update_source_editor';
 import {
@@ -59,10 +58,9 @@ import type {
   GetFeatureActionsArgs,
   GeoJsonWithMeta,
   IMvtVectorSource,
-  SourceStatus} from '../vector_source';
-import {
-  getLayerFeaturesRequestName
+  SourceStatus,
 } from '../vector_source';
+import { getLayerFeaturesRequestName } from '../vector_source';
 import type { ITooltipProperty } from '../../tooltips/tooltip_property';
 import type { DataRequest } from '../../util/data_request';
 import { isValidStringConfig } from '../../util/valid_string_config';

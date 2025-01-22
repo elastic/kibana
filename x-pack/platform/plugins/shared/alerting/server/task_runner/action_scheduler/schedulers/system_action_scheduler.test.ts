@@ -13,12 +13,8 @@ import { alertingEventLoggerMock } from '../../../lib/alerting_event_logger/aler
 import { RuleRunMetricsStore } from '../../../lib/rule_run_metrics_store';
 import { mockAAD } from '../../fixtures';
 import type { Alert } from '../../../alert';
-import type {
-  AlertInstanceContext,
-  AlertInstanceState} from '@kbn/alerting-state-types';
-import {
-  ActionsCompletion
-} from '@kbn/alerting-state-types';
+import type { AlertInstanceContext, AlertInstanceState } from '@kbn/alerting-state-types';
+import { ActionsCompletion } from '@kbn/alerting-state-types';
 import { getRule, getRuleType, getDefaultSchedulerContext, generateAlert } from '../test_fixtures';
 import { SystemActionScheduler } from './system_action_scheduler';
 import { ALERT_UUID } from '@kbn/rule-data-utils';

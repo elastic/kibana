@@ -11,16 +11,14 @@ import { EuiCode } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type {
-  ValidationFunc,
-  SerializerFunc} from '../../../../../../shared_imports';
+import type { ValidationFunc, SerializerFunc } from '../../../../../../shared_imports';
 import {
   FIELD_TYPES,
   fieldValidators,
   UseField,
   Field,
   ToggleField,
-  ComboBoxField
+  ComboBoxField,
 } from '../../../../../../shared_imports';
 
 import type { FieldsConfig } from './shared';

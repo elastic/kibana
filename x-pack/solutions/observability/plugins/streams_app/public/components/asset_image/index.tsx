@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiImageProps} from '@elastic/eui';
+import type { EuiImageProps } from '@elastic/eui';
 import { EuiImage, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';

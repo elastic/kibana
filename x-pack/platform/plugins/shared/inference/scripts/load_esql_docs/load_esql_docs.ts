@@ -6,7 +6,7 @@
  */
 
 import { run } from '@kbn/dev-cli-runner';
-import type { ESQLMessage, EditorError} from '@kbn/esql-ast';
+import type { ESQLMessage, EditorError } from '@kbn/esql-ast';
 import { getAstAndSyntaxErrors } from '@kbn/esql-ast';
 import { validateQuery } from '@kbn/esql-validation-autocomplete';
 import Fs from 'fs/promises';

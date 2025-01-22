@@ -26,7 +26,7 @@ import type { AppDataType, ReportViewType } from '../types';
 import { OperationTypeComponent } from '../series_editor/columns/operation_type_select';
 import type { DataViewState } from '../hooks/use_app_data_view';
 import type { ReportConfigMap } from '../contexts/exploratory_view_config';
-import type { ActionTypes} from './use_actions';
+import type { ActionTypes } from './use_actions';
 import { useActions } from './use_actions';
 import { AddToCaseAction } from '../header/add_to_case_action';
 import { useEmbeddableAttributes } from './use_embeddable_attributes';

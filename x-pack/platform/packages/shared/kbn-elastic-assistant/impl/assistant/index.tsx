@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Dispatch,
-  SetStateAction} from 'react';
-import React, {
-  useCallback,
-  useEffect,
-  useLayoutEffect,
-  useMemo,
-  useState,
-} from 'react';
+import type { Dispatch, SetStateAction } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useState } from 'react';
 import {
   EuiPanel,
   EuiFlexGroup,

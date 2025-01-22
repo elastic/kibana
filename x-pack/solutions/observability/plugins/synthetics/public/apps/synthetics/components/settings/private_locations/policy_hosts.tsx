@@ -8,8 +8,7 @@
 import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 import { useSelector } from 'react-redux';
-import type {
-  EuiSuperSelectProps} from '@elastic/eui';
+import type { EuiSuperSelectProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,

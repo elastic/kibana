@@ -15,7 +15,10 @@ import {
   NOTIFICATION_DEFAULT_FREQUENCY,
 } from '@kbn/security-solution-plugin/common/constants';
 import { ExceptionListTypeEnum } from '@kbn/securitysolution-io-ts-list-types';
-import type { RuleActionArray, RuleActionThrottle } from '@kbn/securitysolution-io-ts-alerting-types';
+import type {
+  RuleActionArray,
+  RuleActionThrottle,
+} from '@kbn/securitysolution-io-ts-alerting-types';
 import {
   getSimpleRuleOutput,
   removeServerGeneratedProperties,

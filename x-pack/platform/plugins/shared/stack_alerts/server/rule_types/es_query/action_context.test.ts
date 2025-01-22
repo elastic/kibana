@@ -5,13 +5,9 @@
  * 2.0.
  */
 
-import type {
-  EsQueryRuleActionContext} from './action_context';
-import {
-  addMessages,
-  getContextConditionsDescription,
-} from './action_context';
-import type { EsQueryRuleParams} from './rule_type_params';
+import type { EsQueryRuleActionContext } from './action_context';
+import { addMessages, getContextConditionsDescription } from './action_context';
+import type { EsQueryRuleParams } from './rule_type_params';
 import { EsQueryRuleParamsSchema } from './rule_type_params';
 import { Comparator } from '../../../common/comparator_types';
 

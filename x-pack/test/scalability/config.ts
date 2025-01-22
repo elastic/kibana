@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FtrConfigProviderContext} from '@kbn/test';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { getKibanaCliLoggers } from '@kbn/test';
 import fs from 'fs';
 import path from 'path';

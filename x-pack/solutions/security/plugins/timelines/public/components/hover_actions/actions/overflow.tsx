@@ -7,15 +7,8 @@
 
 import React, { useEffect, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiButtonEmpty,
-  EuiContextMenuItem} from '@elastic/eui';
-import {
-  EuiButtonIcon,
-  EuiContextMenuPanel,
-  EuiPopover,
-  EuiToolTip,
-} from '@elastic/eui';
+import type { EuiButtonEmpty, EuiContextMenuItem } from '@elastic/eui';
+import { EuiButtonIcon, EuiContextMenuPanel, EuiPopover, EuiToolTip } from '@elastic/eui';
 
 import styled from 'styled-components';
 import { stopPropagationAndPreventDefault } from '../../../../common/utils/accessibility';

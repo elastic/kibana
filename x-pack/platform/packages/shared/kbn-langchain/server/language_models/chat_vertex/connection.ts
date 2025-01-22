@@ -9,10 +9,9 @@ import type {
   GeminiContent,
   GoogleAbstractedClient,
   GoogleAIBaseLLMInput,
-  GoogleLLMResponse} from '@langchain/google-common';
-import {
-  ChatConnection
+  GoogleLLMResponse,
 } from '@langchain/google-common';
+import { ChatConnection } from '@langchain/google-common';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { PublicMethodsOf } from '@kbn/utility-types';
 import type { EnhancedGenerateContentResponse } from '@google/generative-ai';

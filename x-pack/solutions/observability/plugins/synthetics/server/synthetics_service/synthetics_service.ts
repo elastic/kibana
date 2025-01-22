@@ -35,15 +35,13 @@ import type {
   ServiceLocations,
   SyntheticsMonitorWithSecretsAttributes,
   SyntheticsParams,
-  ThrottlingOptions} from '../../common/runtime_types';
-import {
-  ConfigKey
+  ThrottlingOptions,
 } from '../../common/runtime_types';
+import { ConfigKey } from '../../common/runtime_types';
 import { getServiceLocations } from './get_service_locations';
 
 import { normalizeSecrets } from './utils/secrets';
-import type {
-  ConfigData} from './formatters/public_formatters/format_configs';
+import type { ConfigData } from './formatters/public_formatters/format_configs';
 import {
   formatHeartbeatRequest,
   formatMonitorConfigFields,

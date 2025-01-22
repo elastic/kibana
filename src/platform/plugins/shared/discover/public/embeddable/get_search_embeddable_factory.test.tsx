@@ -16,7 +16,11 @@ import { SHOW_FIELD_STATISTICS } from '@kbn/discover-utils';
 import { buildDataViewMock, deepMockedFields } from '@kbn/discover-utils/src/__mocks__';
 import type { BuildReactEmbeddableApiRegistration } from '@kbn/embeddable-plugin/public/react_embeddable_system/types';
 import type { PresentationContainer } from '@kbn/presentation-containers';
-import type { PhaseEvent, PublishesUnifiedSearch, StateComparators } from '@kbn/presentation-publishing';
+import type {
+  PhaseEvent,
+  PublishesUnifiedSearch,
+  StateComparators,
+} from '@kbn/presentation-publishing';
 import { VIEW_MODE } from '@kbn/saved-search-plugin/common';
 import { act, render, waitFor } from '@testing-library/react';
 

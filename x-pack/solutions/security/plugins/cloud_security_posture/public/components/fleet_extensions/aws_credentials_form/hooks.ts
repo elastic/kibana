@@ -8,12 +8,11 @@
 import { useEffect, useRef } from 'react';
 import type { NewPackagePolicy, PackageInfo } from '@kbn/fleet-plugin/common';
 import { cspIntegrationDocsNavigation } from '../../../common/navigation/constants';
-import type {
-  NewPackagePolicyPostureInput} from '../utils';
+import type { NewPackagePolicyPostureInput } from '../utils';
 import {
   getAwsCredentialsType,
   getCspmCloudFormationDefaultValue,
-  getPosturePolicy
+  getPosturePolicy,
 } from '../utils';
 import {
   DEFAULT_MANUAL_AWS_CREDENTIALS_TYPE,

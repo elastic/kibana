@@ -7,13 +7,8 @@
 import { EuiFlexGroup, EuiFlexItem, EuiIconTip } from '@elastic/eui';
 import { FilterStateStore } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
-import type {
-  FiltersSchema,
-  QuerySchema,
-  SyntheticsAvailabilityIndicator} from '@kbn/slo-schema';
-import {
-  ALL_VALUE
-} from '@kbn/slo-schema';
+import type { FiltersSchema, QuerySchema, SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
+import { ALL_VALUE } from '@kbn/slo-schema';
 import moment from 'moment';
 import React, { useEffect, useState } from 'react';
 import { useFormContext } from 'react-hook-form';

@@ -7,7 +7,7 @@
 
 import { isRight } from 'fp-ts/lib/Either';
 import Mustache from 'mustache';
-import type { AlertsLocatorParams} from '@kbn/observability-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
 import { getAlertUrl } from '@kbn/observability-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type { ObservabilityUptimeAlert } from '@kbn/alerts-as-data-utils';
@@ -20,7 +20,7 @@ import type { AlertInstanceState } from '@kbn/alerting-plugin/server';
 import type { AlertInstanceContext } from '@kbn/alerting-plugin/server';
 import { uptimeRuleFieldMap } from '../../../../common/rules/uptime_rule_field_map';
 import { SYNTHETICS_RULE_TYPES_ALERT_CONTEXT } from '../../../../common/constants/synthetics_alerts';
-import type { UptimeCommonState} from '../../../../common/runtime_types';
+import type { UptimeCommonState } from '../../../../common/runtime_types';
 import { UptimeCommonStateType } from '../../../../common/runtime_types';
 import { ALERT_DETAILS_URL } from './action_variables';
 

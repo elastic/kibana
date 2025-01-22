@@ -21,8 +21,7 @@ import {
 } from '@elastic/eui';
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { APP_RESTORE_INDEX_PRIVILEGES } from '../../../../../common';
-import type {
-  Error} from '../../../../shared_imports';
+import type { Error } from '../../../../shared_imports';
 import {
   WithPrivileges,
   NotAuthorizedSection,

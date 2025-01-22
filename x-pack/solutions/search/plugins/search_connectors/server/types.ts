@@ -11,7 +11,10 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { SavedObjectsServiceSetup, SavedObjectsServiceStart } from '@kbn/core-saved-objects-server';
+import type {
+  SavedObjectsServiceSetup,
+  SavedObjectsServiceStart,
+} from '@kbn/core-saved-objects-server';
 import type { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type { CloudSetup } from '@kbn/cloud-plugin/server';
 

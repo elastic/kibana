@@ -10,7 +10,7 @@
 import type { FunctionComponent, PropsWithChildren } from 'react';
 import React from 'react';
 import type { DataGridCellValueElementProps } from '@kbn/unified-data-table';
-import type { RootProfileProvider} from '../../../profiles';
+import type { RootProfileProvider } from '../../../profiles';
 import { SolutionType } from '../../../profiles';
 import type { ProfileProviderServices } from '../../profile_provider_services';
 import type { SecurityProfileProviderFactory } from '../types';

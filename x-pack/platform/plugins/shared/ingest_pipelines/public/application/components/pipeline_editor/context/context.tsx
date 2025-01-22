@@ -8,11 +8,8 @@
 import type { FunctionComponent } from 'react';
 import React from 'react';
 
-import type {
-  Props as ProcessorsContextProps} from './processors_context';
-import {
-  PipelineProcessorsContextProvider
-} from './processors_context';
+import type { Props as ProcessorsContextProps } from './processors_context';
+import { PipelineProcessorsContextProvider } from './processors_context';
 import { TestPipelineContextProvider } from './test_pipeline_context';
 
 interface Props extends ProcessorsContextProps {

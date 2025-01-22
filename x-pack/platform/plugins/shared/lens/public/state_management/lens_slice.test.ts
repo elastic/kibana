@@ -7,8 +7,7 @@
 
 import type { EnhancedStore } from '@reduxjs/toolkit';
 import type { Query } from '@kbn/es-query';
-import type {
-  LensRootStore} from '.';
+import type { LensRootStore } from '.';
 import {
   switchDatasource,
   switchAndCleanDatasource,

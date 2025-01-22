@@ -8,10 +8,9 @@ import type { CoreSetup, CoreStart, Plugin, PluginInitializerContext } from '@kb
 import type {
   ItemDefinition,
   ItemDefinitionData,
-  ItemDefinitionParams} from './investigation/item_definition_registry';
-import {
-  ItemDefinitionRegistry,
+  ItemDefinitionParams,
 } from './investigation/item_definition_registry';
+import { ItemDefinitionRegistry } from './investigation/item_definition_registry';
 import type {
   ConfigSchema,
   InvestigatePublicSetup,

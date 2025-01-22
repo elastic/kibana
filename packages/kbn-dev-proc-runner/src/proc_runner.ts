@@ -12,7 +12,7 @@ import exitHook from 'exit-hook';
 import type { ToolingLog } from '@kbn/tooling-log';
 import { createFailError } from '@kbn/dev-cli-errors';
 
-import type { Proc, ProcOptions} from './proc';
+import type { Proc, ProcOptions } from './proc';
 import { startProc } from './proc';
 
 const SECOND = 1000;

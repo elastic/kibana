@@ -9,7 +9,7 @@
 
 import { join } from 'path';
 import { accessSync, constants } from 'fs';
-import type { TypeOf} from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 import { REPO_ROOT } from '@kbn/repo-info';
 

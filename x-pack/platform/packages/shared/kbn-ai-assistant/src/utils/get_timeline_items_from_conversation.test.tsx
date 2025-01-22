@@ -9,7 +9,7 @@ import { last, pick } from 'lodash';
 import { render } from '@testing-library/react';
 import { getTimelineItemsfromConversation } from './get_timeline_items_from_conversation';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import type { Message} from '@kbn/observability-ai-assistant-plugin/public';
+import type { Message } from '@kbn/observability-ai-assistant-plugin/public';
 import { ChatState, MessageRole } from '@kbn/observability-ai-assistant-plugin/public';
 import { createMockChatService } from './create_mock_chat_service';
 import { KibanaContextProvider } from '@kbn/triggers-actions-ui-plugin/public/common/lib/kibana';

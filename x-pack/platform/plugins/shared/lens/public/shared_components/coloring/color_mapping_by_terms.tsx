@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MutableRefObject} from 'react';
+import type { MutableRefObject } from 'react';
 import React, { useState } from 'react';
 
 import {
@@ -21,11 +21,12 @@ import type {
   ColorMapping,
   PaletteOutput,
   PaletteRegistry,
-  CustomPaletteParams} from '@kbn/coloring';
+  CustomPaletteParams,
+} from '@kbn/coloring';
 import {
   DEFAULT_COLOR_MAPPING_CONFIG,
   CategoricalColorMapping,
-  SPECIAL_TOKENS_STRING_CONVERSION
+  SPECIAL_TOKENS_STRING_CONVERSION,
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import type { KbnPalettes } from '@kbn/palettes';

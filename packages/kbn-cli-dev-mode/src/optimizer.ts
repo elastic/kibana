@@ -19,13 +19,12 @@ import {
 } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
 import { ignoreElements } from 'rxjs';
-import type {
-  OptimizerUpdate} from '@kbn/optimizer';
+import type { OptimizerUpdate } from '@kbn/optimizer';
 import {
   runOptimizer,
   OptimizerConfig,
   logOptimizerState,
-  logOptimizerProgress
+  logOptimizerProgress,
 } from '@kbn/optimizer';
 
 export interface Options {

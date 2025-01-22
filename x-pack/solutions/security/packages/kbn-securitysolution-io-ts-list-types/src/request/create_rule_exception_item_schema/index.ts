@@ -15,7 +15,8 @@ import type {
   NamespaceType,
   OsTypeArray,
   Tags,
-  ExpireTimeOrUndefined} from '../../common';
+  ExpireTimeOrUndefined,
+} from '../../common';
 import {
   DefaultCreateCommentsArray,
   description,

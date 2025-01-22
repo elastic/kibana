@@ -15,7 +15,7 @@ import { format, parse } from 'url';
 import type { GraphState, GraphStoreDependencies } from './store';
 import type { UrlTemplate } from '../types';
 import { reset } from './global';
-import type { IndexpatternDatasource} from './datasource';
+import type { IndexpatternDatasource } from './datasource';
 import { setDatasource, requestDatasource } from './datasource';
 import { outlinkEncoders } from '../helpers/outlink_encoders';
 import { urlTemplatePlaceholder } from '../helpers/url_template';

@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useState } from 'react';
 import { EuiButtonIcon, EuiPopover } from '@elastic/eui';
 import { strings } from './action_strings';

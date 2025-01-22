@@ -24,14 +24,10 @@ import {
 
 import type { CoreStart } from '@kbn/core/public';
 import type { IKibanaSearchResponse } from '@kbn/search-types';
-import type { DataPublicPluginStart} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { isRunningResponse } from '@kbn/data-plugin/public';
-import type {
-  SqlSearchStrategyRequest,
-  SqlSearchStrategyResponse} from '@kbn/data-plugin/common';
-import {
-  SQL_SEARCH_STRATEGY
-} from '@kbn/data-plugin/common';
+import type { SqlSearchStrategyRequest, SqlSearchStrategyResponse } from '@kbn/data-plugin/common';
+import { SQL_SEARCH_STRATEGY } from '@kbn/data-plugin/common';
 
 interface SearchExamplesAppDeps {
   notifications: CoreStart['notifications'];

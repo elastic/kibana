@@ -24,8 +24,7 @@ import { LENS_APP_LOCATOR } from '../../common/locator/locator';
 import { LENS_APP_NAME } from '../../common/constants';
 import type { LensAppServices, LensTopNavActions, LensTopNavMenuProps } from './types';
 import { toggleSettingsMenuOpen } from './settings_menu';
-import type {
-  LensAppState} from '../state_management';
+import type { LensAppState } from '../state_management';
 import {
   setState,
   useLensSelector,

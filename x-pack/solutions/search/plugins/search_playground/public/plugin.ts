@@ -7,9 +7,7 @@
 
 import { BehaviorSubject, type Subscription } from 'rxjs';
 
-import type {
-  Plugin,
-  AppUpdater} from '@kbn/core/public';
+import type { Plugin, AppUpdater } from '@kbn/core/public';
 import {
   type CoreSetup,
   type CoreStart,

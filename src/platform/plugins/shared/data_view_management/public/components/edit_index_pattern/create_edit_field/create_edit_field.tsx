@@ -8,7 +8,7 @@
  */
 
 import React from 'react';
-import type { RouteComponentProps} from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter } from 'react-router-dom';
 
 import { EuiSpacer } from '@elastic/eui';

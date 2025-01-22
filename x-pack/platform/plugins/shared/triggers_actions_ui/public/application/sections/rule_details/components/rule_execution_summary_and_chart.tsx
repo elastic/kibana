@@ -23,11 +23,8 @@ import {
   formatMillisForDisplay,
   shouldShowDurationWarning,
 } from '../../../lib/execution_duration_utils';
-import type {
-  ComponentOpts as RuleApis} from '../../common/components/with_bulk_rule_api_operations';
-import {
-  withBulkRuleOperations,
-} from '../../common/components/with_bulk_rule_api_operations';
+import type { ComponentOpts as RuleApis } from '../../common/components/with_bulk_rule_api_operations';
+import { withBulkRuleOperations } from '../../common/components/with_bulk_rule_api_operations';
 import type { RefreshToken } from './types';
 
 export const DEFAULT_NUMBER_OF_EXECUTIONS = 60;

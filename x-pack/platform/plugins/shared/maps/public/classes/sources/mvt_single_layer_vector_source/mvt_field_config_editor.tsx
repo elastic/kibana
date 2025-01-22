@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react';
 import React, { Component, Fragment } from 'react';
 import {
   EuiButtonIcon,

@@ -9,7 +9,8 @@ import React, { useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type {
   EuiContextMenuPanelDescriptor,
-  EuiContextMenuPanelItemDescriptor} from '@elastic/eui';
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButtonIcon,

@@ -12,13 +12,8 @@ import { BehaviorSubject, combineLatest } from 'rxjs';
 import deepEqual from 'fast-deep-equal';
 import type { Filter } from '@kbn/es-query';
 import { combineCompatibleChildrenApis } from '@kbn/presentation-containers';
-import type {
-  PublishesFilters,
-  PublishesTimeslice} from '@kbn/presentation-publishing';
-import {
-  apiPublishesFilters,
-  apiPublishesTimeslice
-} from '@kbn/presentation-publishing';
+import type { PublishesFilters, PublishesTimeslice } from '@kbn/presentation-publishing';
+import { apiPublishesFilters, apiPublishesTimeslice } from '@kbn/presentation-publishing';
 import type { ControlGroupApi } from './types';
 
 export function initSelectionsManager(

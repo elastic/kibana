@@ -7,7 +7,7 @@
 
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { IUiSettingsClient } from '@kbn/core-ui-settings-browser';
-import type { DataPublicPluginStart} from '@kbn/data-plugin/public';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import { NowProvider, QueryService } from '@kbn/data-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { createPropertyGetProxy } from '../utils/proxies';

@@ -9,13 +9,12 @@ import React from 'react';
 import { act } from 'react-dom/test-utils';
 import type { Query, AggregateQuery } from '@kbn/es-query';
 
-import type {
-  MountStoreProps} from '../../../mocks';
+import type { MountStoreProps } from '../../../mocks';
 import {
   createMockFramePublicAPI,
   mockVisualizationMap,
   mockDatasourceMap,
-  mockStoreDeps
+  mockStoreDeps,
 } from '../../../mocks';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import type { Visualization } from '../../../types';

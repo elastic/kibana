@@ -17,12 +17,9 @@ import type {
   HttpSetup,
   Plugin,
   PluginInitializerContext,
-  AppDeepLink} from '@kbn/core/public';
-import {
-  DEFAULT_APP_CATEGORIES,
-  type AppUpdater,
-  AppStatus,
+  AppDeepLink,
 } from '@kbn/core/public';
+import { DEFAULT_APP_CATEGORIES, type AppUpdater, AppStatus } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FleetStart } from '@kbn/fleet-plugin/public';
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';

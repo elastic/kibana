@@ -15,8 +15,7 @@ import type {
 } from '@kbn/core-saved-objects-server';
 
 import '../jest_matchers';
-import type {
-  KibanaMigratorTestKit} from '../kibana_migrator_test_kit';
+import type { KibanaMigratorTestKit } from '../kibana_migrator_test_kit';
 import {
   clearLog,
   defaultKibanaIndex,

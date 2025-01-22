@@ -9,8 +9,7 @@ import './dimension_editor.scss';
 import React, { useState, useMemo, useCallback, useRef, useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import type {
-  EuiListGroupItemProps} from '@elastic/eui';
+import type { EuiListGroupItemProps } from '@elastic/eui';
 import {
   EuiListGroup,
   EuiFormRow,
@@ -33,8 +32,7 @@ import type { FormBasedDimensionEditorProps } from './dimension_panel';
 import type { OperationSupportMatrix } from './operation_support';
 import type { GenericIndexPatternColumn } from '../form_based';
 import { deleteColumn } from '../form_based';
-import type {
-  FieldBasedIndexPatternColumn} from '../operations';
+import type { FieldBasedIndexPatternColumn } from '../operations';
 import {
   operationDefinitionMap,
   getOperationDisplay,
@@ -73,8 +71,7 @@ import {
   isLayerChangingDueToDecimalsPercentile,
   isLayerChangingDueToOtherBucketChange,
 } from './dimensions_editor_helpers';
-import type { TemporaryState ,
-  DimensionEditorGroupsOptions} from './dimensions_editor_helpers';
+import type { TemporaryState, DimensionEditorGroupsOptions } from './dimensions_editor_helpers';
 import { FieldInput } from './field_input';
 import type { ParamEditorProps } from '../operations/definitions';
 import { WrappingHelpPopover } from '../help_popover';

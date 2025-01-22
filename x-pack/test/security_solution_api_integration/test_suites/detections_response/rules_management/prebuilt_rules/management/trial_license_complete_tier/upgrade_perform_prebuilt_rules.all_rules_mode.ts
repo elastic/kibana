@@ -17,10 +17,11 @@ import type {
   ThreatMatchRule,
   AllFieldsDiff,
   DataSourceIndexPatterns,
-  QueryRule} from '@kbn/security-solution-plugin/common/api/detection_engine';
+  QueryRule,
+} from '@kbn/security-solution-plugin/common/api/detection_engine';
 import {
   FIELDS_TO_UPGRADE_TO_CURRENT_VERSION,
-  ModeEnum
+  ModeEnum,
 } from '@kbn/security-solution-plugin/common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '@kbn/security-solution-plugin/server/lib/detection_engine/prebuilt_rules';
 import type { FtrProviderContext } from '../../../../../../ftr_provider_context';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElementType, FC} from 'react';
+import type { ElementType, FC } from 'react';
 import React, { memo } from 'react';
 import { EuiExpression, EuiToken, EuiFlexGroup } from '@elastic/eui';
 import type { ListOperatorTypeEnum } from '@kbn/securitysolution-io-ts-list-types';

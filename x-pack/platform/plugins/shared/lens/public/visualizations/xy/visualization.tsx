@@ -12,7 +12,12 @@ import { i18n } from '@kbn/i18n';
 import type { PaletteRegistry } from '@kbn/coloring';
 import { IconChartBarReferenceLine, IconChartBarAnnotations } from '@kbn/chart-icons';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
-import type { CoreStart, CoreTheme, SavedObjectReference, ThemeServiceStart } from '@kbn/core/public';
+import type {
+  CoreStart,
+  CoreTheme,
+  SavedObjectReference,
+  ThemeServiceStart,
+} from '@kbn/core/public';
 import type { EventAnnotationServiceType } from '@kbn/event-annotation-plugin/public';
 import { getAnnotationAccessor } from '@kbn/event-annotation-components';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
@@ -121,7 +126,7 @@ import { LayerSettings } from './layer_settings';
 import { IgnoredGlobalFiltersEntries } from '../../shared_components/ignore_global_filter';
 import { getColorMappingTelemetryEvents } from '../../lens_ui_telemetry/color_telemetry_helpers';
 import { getLegendStatsTelemetryEvents } from './legend_stats_telemetry_helpers';
-import type { XYPersistedState} from './persistence';
+import type { XYPersistedState } from './persistence';
 import { convertToPersistable, convertToRuntime } from './persistence';
 import { shouldDisplayTable } from '../../shared_components/legend/legend_settings_popover';
 import {

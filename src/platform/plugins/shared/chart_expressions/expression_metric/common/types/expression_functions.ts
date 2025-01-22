@@ -17,7 +17,10 @@ import type {
   ExpressionFunctionDefinition,
   ExpressionValueRender,
 } from '@kbn/expressions-plugin/common';
-import type { ExpressionValueVisDimension, prepareLogTable } from '@kbn/visualizations-plugin/common';
+import type {
+  ExpressionValueVisDimension,
+  prepareLogTable,
+} from '@kbn/visualizations-plugin/common';
 import type {
   AllowedChartOverrides,
   AllowedSettingsOverrides,

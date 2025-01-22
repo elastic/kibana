@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { BehaviorSubject, Subject } from 'rxjs';
 import { distinctUntilChanged, endWith, map, pairwise, startWith, takeUntil, tap } from 'rxjs';
 import type { CoreService } from '@kbn/core-base-browser-internal';

@@ -17,10 +17,9 @@ import type {
   RenderMode,
   AnyExpressionFunctionDefinition,
   ExpressionsService,
-  ExecutionContract} from '../common';
-import {
-  parseExpression
+  ExecutionContract,
 } from '../common';
+import { parseExpression } from '../common';
 
 // eslint-disable-next-line @typescript-eslint/no-var-requires
 const { __getLastExecution, __getLastRenderMode } = require('./services');

@@ -9,7 +9,7 @@
 
 import { stubLogstashDataView } from '@kbn/data-views-plugin/common/data_view.stub';
 import { BUCKET_TYPES, METRIC_TYPES } from '@kbn/data-plugin/common';
-import type { BucketAggs} from '.';
+import type { BucketAggs } from '.';
 import { convertBucketToColumns } from '.';
 import type { DateHistogramColumn, FiltersColumn, RangeColumn, TermsColumn } from '../../types';
 import type { AggBasedColumn, SchemaConfig } from '../../..';

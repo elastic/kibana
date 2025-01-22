@@ -9,15 +9,8 @@ import _ from 'lodash';
 import type { ChangeEvent, ReactNode } from 'react';
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiFormRow,
-  EuiSpacer,
-  EuiSwitch
-} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiSpacer, EuiSwitch } from '@elastic/eui';
 import { FieldSelect } from '../field_select';
 import { ColorMapSelect } from './color_map_select';
 import { OtherCategoryColorPicker } from './other_category_color_picker';
@@ -26,12 +19,8 @@ import type {
   ColorDynamicOptions,
   OrdinalColorStop,
 } from '../../../../../../common/descriptor_types';
-import type {
-  VECTOR_STYLES} from '../../../../../../common/constants';
-import {
-  CATEGORICAL_DATA_TYPES,
-  COLOR_MAP_TYPE
-} from '../../../../../../common/constants';
+import type { VECTOR_STYLES } from '../../../../../../common/constants';
+import { CATEGORICAL_DATA_TYPES, COLOR_MAP_TYPE } from '../../../../../../common/constants';
 import type { StyleField } from '../../style_fields_helper';
 import type { DynamicColorProperty } from '../../properties/dynamic_color_property';
 

@@ -8,7 +8,7 @@
 import { act } from 'react-dom/test-utils';
 
 import { setupEnvironment } from '../../helpers';
-import type { OverviewTestBed} from '../overview.helpers';
+import type { OverviewTestBed } from '../overview.helpers';
 import { setupOverviewPage } from '../overview.helpers';
 
 describe('Overview - Migrate system indices', () => {

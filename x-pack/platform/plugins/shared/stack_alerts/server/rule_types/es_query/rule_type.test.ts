@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 import type { Writable } from '@kbn/utility-types';
 import type { RuleExecutorServices } from '@kbn/alerting-plugin/server';
-import type { RuleExecutorServicesMock} from '@kbn/alerting-plugin/server/mocks';
+import type { RuleExecutorServicesMock } from '@kbn/alerting-plugin/server/mocks';
 import { alertsMock } from '@kbn/alerting-plugin/server/mocks';
 import { loggingSystemMock } from '@kbn/core/server/mocks';
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';

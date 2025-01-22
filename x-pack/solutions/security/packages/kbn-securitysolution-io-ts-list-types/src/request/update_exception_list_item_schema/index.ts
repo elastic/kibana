@@ -11,10 +11,10 @@ import type { NamespaceType } from '../../common/default_namespace';
 import { DefaultUpdateCommentsArray } from '../../common/default_update_comments_array';
 import { exceptionListItemType } from '../../common/exception_list_item_type';
 import { nonEmptyEntriesArray } from '../../common/non_empty_entries_array';
-import type { OsTypeArray} from '../../common/os_type';
+import type { OsTypeArray } from '../../common/os_type';
 import { osTypeArrayOrUndefined } from '../../common/os_type';
 import type { RequiredKeepUndefined } from '../../common/required_keep_undefined';
-import type { Tags} from '../../common/tags';
+import type { Tags } from '../../common/tags';
 import { tags } from '../../common/tags';
 import type { UpdateCommentsArray } from '../../common/update_comment';
 import { description } from '../../common/description';
@@ -24,7 +24,7 @@ import { id } from '../../common/id';
 import { item_id } from '../../common/item_id';
 import { meta } from '../../common/meta';
 import { namespace_type } from '../../common/namespace_type';
-import type { ExpireTimeOrUndefined} from '../../common';
+import type { ExpireTimeOrUndefined } from '../../common';
 import { expireTimeOrUndefined } from '../../common';
 
 export const updateExceptionListItemSchema = t.intersection([

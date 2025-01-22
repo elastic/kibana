@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ReactNode, ChangeEvent} from 'react';
+import type { ReactNode, ChangeEvent } from 'react';
 import React, { useCallback, useEffect } from 'react';
 import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 

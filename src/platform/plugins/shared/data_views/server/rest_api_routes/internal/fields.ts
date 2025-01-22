@@ -17,7 +17,7 @@ import type {
 } from '../../types';
 import type { FieldDescriptorRestResponse } from '../route_types';
 import { FIELDS_PATH as path } from '../../../common/constants';
-import type { IBody, IQuery} from './fields_for';
+import type { IBody, IQuery } from './fields_for';
 import { parseFields, querySchema, validate } from './fields_for';
 import { DEFAULT_FIELD_CACHE_FRESHNESS } from '../../constants';
 

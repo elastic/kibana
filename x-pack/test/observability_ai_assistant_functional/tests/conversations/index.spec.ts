@@ -11,11 +11,10 @@ import type { ChatFeedback } from '@kbn/observability-ai-assistant-plugin/public
 import { pick } from 'lodash';
 import { parse as parseCookie } from 'tough-cookie';
 import { kbnTestConfig } from '@kbn/test';
-import type {
-  LlmProxy} from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
+import type { LlmProxy } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import {
   createLlmProxy,
-  isFunctionTitleRequest
+  isFunctionTitleRequest,
 } from '../../../observability_ai_assistant_api_integration/common/create_llm_proxy';
 import { interceptRequest } from '../../common/intercept_request';
 import type { FtrProviderContext } from '../../ftr_provider_context';

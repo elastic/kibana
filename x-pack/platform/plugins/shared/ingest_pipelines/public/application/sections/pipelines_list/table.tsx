@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useState, useMemo, useEffect } from 'react';
 import qs from 'query-string';
 import { i18n } from '@kbn/i18n';
@@ -15,7 +15,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type {
   EuiInMemoryTableProps,
   EuiTableFieldDataColumnType,
-  EuiSelectableOption} from '@elastic/eui';
+  EuiSelectableOption,
+} from '@elastic/eui';
 import {
   EuiInMemoryTable,
   EuiLink,

@@ -9,7 +9,7 @@
 
 import type { DockerContainerMetricsDocument } from './docker_container';
 import { dockerContainer } from './docker_container';
-import type { HostMetricsDocument} from './host';
+import type { HostMetricsDocument } from './host';
 import { host, minimalHost } from './host';
 import type { K8sContainerMetricsDocument } from './k8s_container';
 import { k8sContainer } from './k8s_container';

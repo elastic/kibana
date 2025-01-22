@@ -16,7 +16,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import type {
   LanguageDefinition,
-  LanguageDefinitionSnippetArguments} from '@kbn/search-api-panels';
+  LanguageDefinitionSnippetArguments,
+} from '@kbn/search-api-panels';
 import {
   SelectClientPanel,
   LanguageClientPanel,

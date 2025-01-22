@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
-  EuiSuperDatePickerProps} from '@elastic/eui';
+import type { EuiSuperDatePickerProps } from '@elastic/eui';
 import {
   EuiEmptyPrompt,
   EuiFlexGroup,

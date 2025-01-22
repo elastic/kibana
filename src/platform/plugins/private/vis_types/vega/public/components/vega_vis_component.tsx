@@ -8,7 +8,7 @@
  */
 
 import React, { useEffect, useRef, useCallback } from 'react';
-import type { EuiResizeObserverProps} from '@elastic/eui';
+import type { EuiResizeObserverProps } from '@elastic/eui';
 import { EuiResizeObserver, useEuiTheme } from '@elastic/eui';
 
 import type { IInterpreterRenderHandlers, RenderMode } from '@kbn/expressions-plugin/common';

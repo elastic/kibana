@@ -8,13 +8,8 @@
  */
 
 import type { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
-import type {
-  CorePluginBDeps,
-  CorePluginBPluginSetup,
-  CorePluginBPluginStart} from './plugin';
-import {
-  CorePluginBPlugin
-} from './plugin';
+import type { CorePluginBDeps, CorePluginBPluginSetup, CorePluginBPluginStart } from './plugin';
+import { CorePluginBPlugin } from './plugin';
 
 export const plugin: PluginInitializer<
   CorePluginBPluginSetup,

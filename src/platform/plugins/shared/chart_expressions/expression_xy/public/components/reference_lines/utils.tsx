@@ -21,9 +21,7 @@ import type {
   CommonXYReferenceLineLayerConfig,
 } from '../../../common/types';
 import { FillStyles } from '../../../common/constants';
-import type {
-  GroupsConfiguration,
-  AxesMap} from '../../helpers';
+import type { GroupsConfiguration, AxesMap } from '../../helpers';
 import {
   mapVerticalToHorizontalPlacement,
   Marker,

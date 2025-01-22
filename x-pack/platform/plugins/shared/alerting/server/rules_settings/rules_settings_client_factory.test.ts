@@ -6,11 +6,8 @@
  */
 
 import { mockRouter } from '@kbn/core-http-router-server-mocks';
-import type {
-  RulesSettingsClientFactoryOpts} from './rules_settings_client_factory';
-import {
-  RulesSettingsClientFactory
-} from './rules_settings_client_factory';
+import type { RulesSettingsClientFactoryOpts } from './rules_settings_client_factory';
+import { RulesSettingsClientFactory } from './rules_settings_client_factory';
 import {
   savedObjectsClientMock,
   savedObjectsServiceMock,

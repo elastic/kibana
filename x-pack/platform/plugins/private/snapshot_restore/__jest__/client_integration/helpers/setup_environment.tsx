@@ -18,13 +18,8 @@ import {
   breadcrumbService,
   docTitleService,
 } from '../../../public/application/services/navigation';
-import type {
-  Authorization,
-  Privileges} from '../../../public/shared_imports';
-import {
-  AuthorizationContext,
-  GlobalFlyout,
-} from '../../../public/shared_imports';
+import type { Authorization, Privileges } from '../../../public/shared_imports';
+import { AuthorizationContext, GlobalFlyout } from '../../../public/shared_imports';
 import { AppContextProvider } from '../../../public/application/app_context';
 import { textService } from '../../../public/application/services/text';
 import { init as initHttpRequests } from './http_requests';

@@ -6,8 +6,7 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiPanel,

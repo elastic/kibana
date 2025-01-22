@@ -19,7 +19,7 @@ import {
 import { NO_CA_PATH, NO_CERT_PATH, NO_KEY_PATH, TWO_CAS_PATH, TWO_KEYS_PATH } from './__fixtures__';
 import { readFileSync } from 'fs';
 
-import type { Pkcs12ReadResult} from './pkcs12';
+import type { Pkcs12ReadResult } from './pkcs12';
 import { readPkcs12Keystore, readPkcs12Truststore } from './pkcs12';
 
 const reformatPem = (pem: string) => {

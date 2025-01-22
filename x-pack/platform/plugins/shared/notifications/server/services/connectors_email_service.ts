@@ -6,11 +6,8 @@
  */
 
 import type { IUnsecuredActionsClient } from '@kbn/actions-plugin/server';
-import type {
-  ExecutionResponseItem} from '@kbn/actions-plugin/server/create_execute_function';
-import {
-  ExecutionResponseType,
-} from '@kbn/actions-plugin/server/create_execute_function';
+import type { ExecutionResponseItem } from '@kbn/actions-plugin/server/create_execute_function';
+import { ExecutionResponseType } from '@kbn/actions-plugin/server/create_execute_function';
 import type { Logger } from '@kbn/core/server';
 import type { EmailService, PlainTextEmail, HTMLEmail } from './types';
 

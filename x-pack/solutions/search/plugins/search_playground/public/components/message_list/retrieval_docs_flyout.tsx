@@ -6,8 +6,7 @@
  */
 
 import React, { useEffect } from 'react';
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,

@@ -6,14 +6,10 @@
  */
 
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import type { IEvent} from '@kbn/event-log-plugin/server';
+import type { IEvent } from '@kbn/event-log-plugin/server';
 import { SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
-import type {
-  ContextOpts,
-  Context,
-  RuleContext,
-  SavedObjects} from './alerting_event_logger';
+import type { ContextOpts, Context, RuleContext, SavedObjects } from './alerting_event_logger';
 import {
   AlertingEventLogger,
   initializeExecuteRecord,

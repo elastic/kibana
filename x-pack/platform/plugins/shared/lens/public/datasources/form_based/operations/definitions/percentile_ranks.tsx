@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { EuiFieldNumberProps} from '@elastic/eui';
+import type { EuiFieldNumberProps } from '@elastic/eui';
 import { EuiFieldNumber } from '@elastic/eui';
 import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';

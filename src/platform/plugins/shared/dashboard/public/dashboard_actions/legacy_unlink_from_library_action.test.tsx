@@ -10,11 +10,8 @@
 import type { PublishesViewMode, ViewMode } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { coreServices } from '../services/kibana_services';
-import type {
-  LegacyUnlinkPanelFromLibraryActionApi} from './legacy_unlink_from_library_action';
-import {
-  LegacyUnlinkFromLibraryAction
-} from './legacy_unlink_from_library_action';
+import type { LegacyUnlinkPanelFromLibraryActionApi } from './legacy_unlink_from_library_action';
+import { LegacyUnlinkFromLibraryAction } from './legacy_unlink_from_library_action';
 
 describe('Unlink from library action', () => {
   let action: LegacyUnlinkFromLibraryAction;

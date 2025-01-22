@@ -6,15 +6,8 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import type {
-  Criteria,
-  EuiTableSortingType} from '@elastic/eui';
-import {
-  EuiBasicTable,
-  EuiPanel,
-  EuiHorizontalRule,
-  useIsWithinMinBreakpoint,
-} from '@elastic/eui';
+import type { Criteria, EuiTableSortingType } from '@elastic/eui';
+import { EuiBasicTable, EuiPanel, EuiHorizontalRule, useIsWithinMinBreakpoint } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { EuiTableSelectionType } from '@elastic/eui/src/components/basic_table/table_types';
 import { MonitorListHeader } from './monitor_list_header';
@@ -24,11 +17,9 @@ import type { IHttpSerializedFetchError } from '../../../../state/utils/http_err
 import type { MonitorListPageState } from '../../../../state';
 import type {
   EncryptedSyntheticsSavedMonitor,
-  OverviewStatusState} from '../../../../../../../common/runtime_types';
-import {
-  ConfigKey,
-  SourceType,
+  OverviewStatusState,
 } from '../../../../../../../common/runtime_types';
+import { ConfigKey, SourceType } from '../../../../../../../common/runtime_types';
 import { useMonitorListColumns } from './columns';
 import * as labels from './labels';
 

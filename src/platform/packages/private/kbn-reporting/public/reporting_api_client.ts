@@ -18,7 +18,12 @@ import {
   buildKibanaPath,
   REPORTING_REDIRECT_APP,
 } from '@kbn/reporting-common';
-import type { BaseParams, JobId, ManagementLinkFn, ReportApiJSON } from '@kbn/reporting-common/types';
+import type {
+  BaseParams,
+  JobId,
+  ManagementLinkFn,
+  ReportApiJSON,
+} from '@kbn/reporting-common/types';
 import rison from '@kbn/rison';
 import moment from 'moment';
 import { stringify } from 'query-string';

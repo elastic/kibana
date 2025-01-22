@@ -8,7 +8,7 @@
  */
 
 import { resolve, relative } from 'path';
-import type { Stats} from 'fs';
+import type { Stats } from 'fs';
 import { createReadStream, createWriteStream } from 'fs';
 import { stat, rename } from 'fs/promises';
 import type { Readable, Writable } from 'stream';

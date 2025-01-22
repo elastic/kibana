@@ -6,12 +6,12 @@
  */
 
 import type { DegradedFieldSortField } from '../../hooks';
+import type { DatasetQualityDetailsControllerContext } from '../../state_machines/dataset_quality_details_controller';
+import { DEFAULT_CONTEXT } from '../../state_machines/dataset_quality_details_controller';
 import type {
-  DatasetQualityDetailsControllerContext} from '../../state_machines/dataset_quality_details_controller';
-import {
-  DEFAULT_CONTEXT,
-} from '../../state_machines/dataset_quality_details_controller';
-import type { DatasetQualityDetailsPublicState, DatasetQualityDetailsPublicStateUpdate } from './types';
+  DatasetQualityDetailsPublicState,
+  DatasetQualityDetailsPublicStateUpdate,
+} from './types';
 
 export const getPublicStateFromContext = (
   context: DatasetQualityDetailsControllerContext

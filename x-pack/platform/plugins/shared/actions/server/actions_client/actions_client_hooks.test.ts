@@ -7,7 +7,7 @@
 
 import { omit } from 'lodash';
 import { schema } from '@kbn/config-schema';
-import type { MockedLogger} from '@kbn/logging-mocks';
+import type { MockedLogger } from '@kbn/logging-mocks';
 import { loggerMock } from '@kbn/logging-mocks';
 import type { ActionTypeRegistryOpts } from '../action_type_registry';
 import { ActionTypeRegistry } from '../action_type_registry';

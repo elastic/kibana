@@ -10,13 +10,8 @@ import type { GetViewInAppRelativeUrlFnOpts } from '@kbn/alerting-plugin/server'
 import { AlertsClientError } from '@kbn/alerting-plugin/server';
 import moment from 'moment';
 import type { ActionGroupIdsOf } from '@kbn/alerting-plugin/common';
-import type {
-  AlertsLocatorParams} from '@kbn/observability-plugin/common';
-import {
-  alertsLocatorID,
-  getAlertUrl,
-  observabilityPaths,
-} from '@kbn/observability-plugin/common';
+import type { AlertsLocatorParams } from '@kbn/observability-plugin/common';
+import { alertsLocatorID, getAlertUrl, observabilityPaths } from '@kbn/observability-plugin/common';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import { ALERT_REASON, ALERT_UUID } from '@kbn/rule-data-utils';
 import { asyncForEach } from '@kbn/std';

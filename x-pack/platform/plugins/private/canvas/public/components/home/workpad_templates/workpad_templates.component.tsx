@@ -8,14 +8,8 @@
 import React from 'react';
 import { uniq } from 'lodash';
 import { i18n } from '@kbn/i18n';
-import type {
-  EuiBasicTableColumn,
-  EuiSearchBarProps,
-  SearchFilterConfig} from '@elastic/eui';
-import {
-  EuiInMemoryTable,
-  EuiButtonEmpty
-} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiSearchBarProps, SearchFilterConfig } from '@elastic/eui';
+import { EuiInMemoryTable, EuiButtonEmpty } from '@elastic/eui';
 
 import type { CanvasTemplate } from '../../../../types';
 import { tagsRegistry } from '../../../lib/tags_registry';

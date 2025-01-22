@@ -15,12 +15,11 @@ import { stubLogstashDataView as dataView } from '@kbn/data-views-plugin/common/
 import { ActionInternal } from '@kbn/ui-actions-plugin/public';
 import { uiActionsPluginMock } from '@kbn/ui-actions-plugin/public/mocks';
 import { getFieldVisualizeButton } from './field_visualize_button';
-import type {
-  VisualizeFieldContext} from '@kbn/ui-actions-plugin/public';
+import type { VisualizeFieldContext } from '@kbn/ui-actions-plugin/public';
 import {
   ACTION_VISUALIZE_LENS_FIELD,
   VISUALIZE_FIELD_TRIGGER,
-  VISUALIZE_GEO_FIELD_TRIGGER
+  VISUALIZE_GEO_FIELD_TRIGGER,
 } from '@kbn/ui-actions-plugin/public';
 import type { TriggerContract } from '@kbn/ui-actions-plugin/public/triggers';
 

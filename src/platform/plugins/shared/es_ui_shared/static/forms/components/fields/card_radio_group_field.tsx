@@ -10,7 +10,7 @@
 import React, { Fragment } from 'react';
 import { EuiFormRow, EuiSpacer, EuiCheckableCard, useGeneratedHtmlId } from '@elastic/eui';
 
-import type { FieldHook} from '../../hook_form_lib';
+import type { FieldHook } from '../../hook_form_lib';
 import { getFieldValidityAndErrorMessage } from '../../hook_form_lib';
 
 interface Props {

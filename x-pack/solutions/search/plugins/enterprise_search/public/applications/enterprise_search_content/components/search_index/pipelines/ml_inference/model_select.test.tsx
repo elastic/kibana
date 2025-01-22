@@ -13,7 +13,7 @@ import { shallow } from 'enzyme';
 
 import { EuiSelectable, EuiText } from '@elastic/eui';
 
-import type { MlModel} from '../../../../../../../common/types/ml';
+import type { MlModel } from '../../../../../../../common/types/ml';
 import { MlModelDeploymentState } from '../../../../../../../common/types/ml';
 
 import { LicenseBadge } from './license_badge';

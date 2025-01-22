@@ -10,7 +10,7 @@
 import type { History } from 'history';
 import React from 'react';
 import ReactDOM from 'react-dom';
-import type { RouteComponentProps} from 'react-router-dom';
+import type { RouteComponentProps } from 'react-router-dom';
 import { withRouter, Redirect } from 'react-router-dom';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { Router, Route } from '@kbn/shared-ux-router';

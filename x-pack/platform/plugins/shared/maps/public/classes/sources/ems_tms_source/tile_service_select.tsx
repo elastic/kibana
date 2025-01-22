@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import type { ChangeEvent} from 'react';
+import type { ChangeEvent } from 'react';
 import React, { Component } from 'react';
-import type { EuiSelectOption} from '@elastic/eui';
+import type { EuiSelectOption } from '@elastic/eui';
 import { EuiSelect, EuiFormRow } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';

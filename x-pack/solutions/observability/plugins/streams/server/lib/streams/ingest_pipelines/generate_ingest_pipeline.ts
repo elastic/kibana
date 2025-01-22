@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { StreamDefinition} from '@kbn/streams-schema';
+import type { StreamDefinition } from '@kbn/streams-schema';
 import { isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';

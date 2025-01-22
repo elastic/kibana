@@ -9,8 +9,7 @@ import React, { useCallback, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiCode,
@@ -24,11 +23,9 @@ import {
 import type {
   AggFunctionsMapping,
   AggParamOption,
-  IndexPatternAggRestrictions} from '@kbn/data-plugin/public';
-import {
-  search,
-  UI_SETTINGS,
+  IndexPatternAggRestrictions,
 } from '@kbn/data-plugin/public';
+import { search, UI_SETTINGS } from '@kbn/data-plugin/public';
 import { extendedBoundsToAst, intervalOptions } from '@kbn/data-plugin/common';
 import { buildExpressionFunction } from '@kbn/expressions-plugin/public';
 import { TooltipWrapper } from '@kbn/visualization-utils';

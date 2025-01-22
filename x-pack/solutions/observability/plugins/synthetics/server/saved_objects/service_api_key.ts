@@ -6,12 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type {
-  SavedObjectsClientContract,
-  SavedObjectsType} from '@kbn/core/server';
-import {
-  SavedObjectsErrorHelpers
-} from '@kbn/core/server';
+import type { SavedObjectsClientContract, SavedObjectsType } from '@kbn/core/server';
+import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import type { SyntheticsServerSetup } from '../types';
 import type { SyntheticsServiceApiKey } from '../../common/runtime_types/synthetics_service_api_key';
 

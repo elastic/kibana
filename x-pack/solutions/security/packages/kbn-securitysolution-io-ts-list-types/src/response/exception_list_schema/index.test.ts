@@ -10,7 +10,7 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { exactCheck, foldLeftRight, getPaths } from '@kbn/securitysolution-io-ts-utils';
 
 import { getExceptionListSchemaMock } from './index.mock';
-import type { ExceptionListSchema} from '.';
+import type { ExceptionListSchema } from '.';
 import { exceptionListSchema } from '.';
 
 describe('exception_list_schema', () => {

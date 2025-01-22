@@ -22,12 +22,9 @@ import type {
   LogstashProcessOptions,
   LogstashState,
   LogstashStats,
-  LogstashStatsByClusterUuid} from './logstash_monitoring';
-import {
-  HITS_SIZE,
-  LOGSTASH_PLUGIN_TYPES,
-  getLogstashBaseStats
+  LogstashStatsByClusterUuid,
 } from './logstash_monitoring';
+import { HITS_SIZE, LOGSTASH_PLUGIN_TYPES, getLogstashBaseStats } from './logstash_monitoring';
 
 export class LogstashAgentMonitoring implements LogstashMonitoring {
   /*

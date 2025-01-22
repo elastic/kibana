@@ -12,7 +12,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { EuiLink, EuiCode } from '@elastic/eui';
 
 import { documentationService } from '../../../../services/documentation';
-import type { FormSchema} from '../../shared_imports';
+import type { FormSchema } from '../../shared_imports';
 import { FIELD_TYPES, fieldValidators } from '../../shared_imports';
 import type { ComboBoxOption } from '../../types';
 

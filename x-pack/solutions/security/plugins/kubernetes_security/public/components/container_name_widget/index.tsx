@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useMemo, useState, useRef, useCallback } from 'react';
 import type { EuiTableSortingType, EuiBasicTableColumn } from '@elastic/eui';
 import { EuiBasicTable, EuiProgress } from '@elastic/eui';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { ElasticsearchErrorDetails} from '@kbn/es-errors';
+import type { ElasticsearchErrorDetails } from '@kbn/es-errors';
 import { isResponseError } from '@kbn/es-errors';
 import { i18n } from '@kbn/i18n';
 

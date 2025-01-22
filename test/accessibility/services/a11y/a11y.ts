@@ -12,7 +12,7 @@ import { subj as testSubjectToCss } from '@kbn/test-subj-selector';
 import { AXE_CONFIG, AXE_OPTIONS } from '@kbn/axe-config';
 
 import { FtrService } from '../../ftr_provider_context';
-import type { AxeReport} from './axe_report';
+import type { AxeReport } from './axe_report';
 import { printResult } from './axe_report';
 import { analyzeWithAxe, analyzeWithAxeWithClient } from './analyze_with_axe';
 

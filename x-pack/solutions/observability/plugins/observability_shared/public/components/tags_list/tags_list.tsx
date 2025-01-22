@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { MouseEvent} from 'react';
+import type { MouseEvent } from 'react';
 import React, { useState } from 'react';
 import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiText, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';

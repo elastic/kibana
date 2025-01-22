@@ -9,7 +9,7 @@
 
 import type * as i18nModule from './i18n';
 import type { Translation, TranslationInput } from '../translation';
-import type { Formats} from './formats';
+import type { Formats } from './formats';
 import { defaultEnFormats } from './formats';
 
 const createExpectedTranslations = (

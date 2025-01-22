@@ -8,8 +8,7 @@
 import type { estypes } from '@elastic/elasticsearch';
 import type { TransformPutTransformRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { DataViewsService } from '@kbn/data-views-plugin/common';
-import type {
-  SyntheticsAvailabilityIndicator} from '@kbn/slo-schema';
+import type { SyntheticsAvailabilityIndicator } from '@kbn/slo-schema';
 import {
   ALL_VALUE,
   occurrencesBudgetingMethodSchema,

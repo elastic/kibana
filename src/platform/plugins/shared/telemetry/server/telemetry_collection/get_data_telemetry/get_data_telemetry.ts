@@ -9,12 +9,8 @@
 
 import type { ElasticsearchClient } from '@kbn/core/server';
 
-import type {
-  DataPatternName,
-  DataTelemetryType} from './constants';
-import {
-  DATA_DATASETS_INDEX_PATTERNS_UNIQUE
-} from './constants';
+import type { DataPatternName, DataTelemetryType } from './constants';
+import { DATA_DATASETS_INDEX_PATTERNS_UNIQUE } from './constants';
 
 /**
  * Common counters for the {@link DataTelemetryDocument}s

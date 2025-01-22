@@ -13,8 +13,7 @@ import { omit } from 'lodash';
 import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import type { RoleCredentials } from '../../../../services';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
-import type {
-  ApmAlertFields} from './helpers/alerting_helper';
+import type { ApmAlertFields } from './helpers/alerting_helper';
 import {
   fetchServiceInventoryAlertCounts,
   fetchServiceTabAlertCount,

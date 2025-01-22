@@ -8,15 +8,11 @@
  */
 
 import type { Logger } from '@kbn/logging';
-import type {
-  ServerSentErrorEvent} from '@kbn/sse-utils/src/errors';
-import {
-  isSSEError,
-  ServerSentEventErrorCode,
-} from '@kbn/sse-utils/src/errors';
-import type { ServerSentEvent} from '@kbn/sse-utils/src/events';
+import type { ServerSentErrorEvent } from '@kbn/sse-utils/src/errors';
+import { isSSEError, ServerSentEventErrorCode } from '@kbn/sse-utils/src/errors';
+import type { ServerSentEvent } from '@kbn/sse-utils/src/events';
 import { ServerSentEventType } from '@kbn/sse-utils/src/events';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { catchError, map, of } from 'rxjs';
 import { PassThrough } from 'stream';
 

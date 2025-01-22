@@ -12,11 +12,9 @@ import type {
   LoadRuleAggregationsProps,
   LoadRuleTagsProps,
   GetRuleTagsResponse,
-  AggregateRulesResponse} from './aggregate_helpers';
-import {
-  rewriteBodyRes,
-  rewriteTagsBodyRes
+  AggregateRulesResponse,
 } from './aggregate_helpers';
+import { rewriteBodyRes, rewriteTagsBodyRes } from './aggregate_helpers';
 
 export async function loadRuleTags({
   http,

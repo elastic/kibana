@@ -10,14 +10,8 @@ import {
   type TestElasticsearchUtils,
   type TestKibanaUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import type {
-  IStorageClient,
-  StorageClientBulkResponse,
-  StorageClientIndexResponse} from '../..';
-import {
-  StorageIndexAdapter,
-  type StorageSettings,
-} from '../..';
+import type { IStorageClient, StorageClientBulkResponse, StorageClientIndexResponse } from '../..';
+import { StorageIndexAdapter, type StorageSettings } from '../..';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { httpServerMock } from '@kbn/core/server/mocks';
 import * as getSchemaVersionModule from '../../get_schema_version';

@@ -6,7 +6,7 @@
  */
 import type { Logger } from '@kbn/core/server';
 import type { ActionsConfigurationUtilities } from '../actions_config';
-import type { OAuthTokenResponse} from './request_oauth_token';
+import type { OAuthTokenResponse } from './request_oauth_token';
 import { requestOAuthToken } from './request_oauth_token';
 import type { RewriteResponseCase } from '../../common';
 

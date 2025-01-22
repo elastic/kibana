@@ -7,8 +7,7 @@
 
 import type { IScopedClusterClient } from '@kbn/core/server';
 
-import type {
-  ConnectorDocument} from '@kbn/search-connectors';
+import type { ConnectorDocument } from '@kbn/search-connectors';
 import {
   CONNECTORS_ACCESS_CONTROL_INDEX_PREFIX,
   CONNECTORS_INDEX,

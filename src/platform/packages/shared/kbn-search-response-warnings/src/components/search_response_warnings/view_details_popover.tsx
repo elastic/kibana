@@ -8,15 +8,8 @@
  */
 
 import React, { useState } from 'react';
-import type {
-  EuiContextMenuPanelDescriptor} from '@elastic/eui';
-import {
-  EuiButton,
-  EuiIcon,
-  EuiLink,
-  EuiContextMenu,
-  EuiPopover,
-} from '@elastic/eui';
+import type { EuiContextMenuPanelDescriptor } from '@elastic/eui';
+import { EuiButton, EuiIcon, EuiLink, EuiContextMenu, EuiPopover } from '@elastic/eui';
 import { viewDetailsLabel } from './i18n_utils';
 import type { SearchResponseWarning } from '../../types';
 

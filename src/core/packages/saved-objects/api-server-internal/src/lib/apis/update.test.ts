@@ -12,8 +12,7 @@
 import { mockGetCurrentTime, mockPreflightCheckForCreate } from '../repository.test.mock';
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type {
-  SavedObjectsRawDocSource} from '@kbn/core-saved-objects-server';
+import type { SavedObjectsRawDocSource } from '@kbn/core-saved-objects-server';
 import {
   type SavedObjectUnsanitizedDoc,
   type SavedObjectReference,
@@ -22,11 +21,8 @@ import {
 import { ALL_NAMESPACES_STRING } from '@kbn/core-saved-objects-utils-server';
 import { SavedObjectsRepository } from '../repository';
 import { loggerMock } from '@kbn/logging-mocks';
-import type {
-  SavedObjectsSerializer} from '@kbn/core-saved-objects-base-server-internal';
-import {
-  encodeHitVersion,
-} from '@kbn/core-saved-objects-base-server-internal';
+import type { SavedObjectsSerializer } from '@kbn/core-saved-objects-base-server-internal';
+import { encodeHitVersion } from '@kbn/core-saved-objects-base-server-internal';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
 import { kibanaMigratorMock } from '../../mocks';
 import {

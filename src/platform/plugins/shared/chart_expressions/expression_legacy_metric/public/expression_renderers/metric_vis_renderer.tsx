@@ -11,11 +11,8 @@ import React, { lazy } from 'react';
 import { render, unmountComponentAtNode } from 'react-dom';
 import { METRIC_TYPE } from '@kbn/analytics';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import type {
-  ExpressionValueVisDimension} from '@kbn/visualizations-plugin/public';
-import {
-  VisualizationContainer,
-} from '@kbn/visualizations-plugin/public';
+import type { ExpressionValueVisDimension } from '@kbn/visualizations-plugin/public';
+import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import type {
   ExpressionRenderDefinition,
   IInterpreterRenderHandlers,
@@ -23,12 +20,8 @@ import type {
 import { getColumnByAccessor } from '@kbn/visualizations-plugin/common/utils';
 import type { Datatable } from '@kbn/expressions-plugin/common';
 import type { StartServicesGetter } from '@kbn/kibana-utils-plugin/public';
-import type {
-  ChartSizeEvent} from '@kbn/chart-expressions-common';
-import {
-  extractContainerType,
-  extractVisualizationType,
-} from '@kbn/chart-expressions-common';
+import type { ChartSizeEvent } from '@kbn/chart-expressions-common';
+import { extractContainerType, extractVisualizationType } from '@kbn/chart-expressions-common';
 import type { ExpressionLegacyMetricPluginStart } from '../plugin';
 import type { MetricVisRenderConfig, VisParams } from '../../common';
 import { EXPRESSION_METRIC_NAME } from '../../common';

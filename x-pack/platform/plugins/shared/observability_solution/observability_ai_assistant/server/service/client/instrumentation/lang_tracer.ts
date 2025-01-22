@@ -6,9 +6,9 @@
  */
 
 import type { LLMSpanAttributes } from '@langtrase/trace-attributes';
-import type { Context, Span, SpanKind} from '@opentelemetry/api';
+import type { Context, Span, SpanKind } from '@opentelemetry/api';
 import { SpanStatusCode, trace } from '@opentelemetry/api';
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { finalize, tap } from 'rxjs';
 import { getLangtraceSpanAttributes } from './get_langtrace_span_attributes';
 import { getLangtraceTracer } from './get_langtrace_tracer';

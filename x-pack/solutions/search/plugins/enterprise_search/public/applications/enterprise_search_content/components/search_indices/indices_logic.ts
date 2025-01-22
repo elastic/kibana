@@ -13,28 +13,20 @@ import { IngestionMethod } from '@kbn/search-connectors';
 import { Status } from '../../../../../common/types/api';
 import type { Meta } from '../../../../../common/types/pagination';
 import type { Actions } from '../../../shared/api_logic/create_api_logic';
-import type {
-  CancelSyncsActions} from '../../api/connector/cancel_syncs_api_logic';
-import {
-  CancelSyncsApiLogic,
-} from '../../api/connector/cancel_syncs_api_logic';
+import type { CancelSyncsActions } from '../../api/connector/cancel_syncs_api_logic';
+import { CancelSyncsApiLogic } from '../../api/connector/cancel_syncs_api_logic';
 import type {
   DeleteIndexApiLogicArgs,
-  DeleteIndexApiLogicValues} from '../../api/index/delete_index_api_logic';
-import {
-  DeleteIndexApiLogic
+  DeleteIndexApiLogicValues,
 } from '../../api/index/delete_index_api_logic';
+import { DeleteIndexApiLogic } from '../../api/index/delete_index_api_logic';
 import type {
   FetchIndexActions,
-  FetchIndexApiResponse} from '../../api/index/fetch_index_api_logic';
-import {
-  FetchIndexApiLogic
+  FetchIndexApiResponse,
 } from '../../api/index/fetch_index_api_logic';
-import type {
-  FetchIndicesApiActions} from '../../api/index/fetch_indices_api_logic';
-import {
-  FetchIndicesAPILogic,
-} from '../../api/index/fetch_indices_api_logic';
+import { FetchIndexApiLogic } from '../../api/index/fetch_index_api_logic';
+import type { FetchIndicesApiActions } from '../../api/index/fetch_indices_api_logic';
+import { FetchIndicesAPILogic } from '../../api/index/fetch_indices_api_logic';
 import type { ElasticsearchViewIndex } from '../../types';
 import { getIngestionMethod, indexToViewIndex } from '../../utils/indices';
 

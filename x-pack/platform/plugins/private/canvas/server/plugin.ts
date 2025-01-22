@@ -5,7 +5,13 @@
  * 2.0.
  */
 
-import type { CoreSetup, PluginInitializerContext, Plugin, Logger, CoreStart } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  PluginInitializerContext,
+  Plugin,
+  Logger,
+  CoreStart,
+} from '@kbn/core/server';
 import type {
   PluginSetup as DataPluginSetup,
   PluginStart as DataPluginStart,
@@ -24,7 +30,7 @@ import { customElementType, workpadTypeFactory, workpadTemplateType } from './sa
 import type { CanvasSavedObjectTypeMigrationsDeps } from './saved_objects/migrations';
 import { initializeTemplates } from './templates';
 import { getUISettings } from './ui_settings';
-import type { CanvasRouteHandlerContext} from './workpad_route_context';
+import type { CanvasRouteHandlerContext } from './workpad_route_context';
 import { createWorkpadRouteContext } from './workpad_route_context';
 
 interface PluginsSetup {

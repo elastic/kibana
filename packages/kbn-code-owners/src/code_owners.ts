@@ -14,7 +14,7 @@ import path from 'node:path';
 import type { Ignore } from 'ignore';
 import ignore from 'ignore';
 import { CODE_OWNERS_FILE, throwIfPathIsMissing, throwIfPathNotInRepo } from './path';
-import type { CodeOwnerArea} from './code_owner_areas';
+import type { CodeOwnerArea } from './code_owner_areas';
 import { findAreaForCodeOwner } from './code_owner_areas';
 
 export interface CodeOwnersEntry {

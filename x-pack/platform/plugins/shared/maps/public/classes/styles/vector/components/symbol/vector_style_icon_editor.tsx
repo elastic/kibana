@@ -7,7 +7,7 @@
 
 import React from 'react';
 
-import type { Props} from '../style_prop_editor';
+import type { Props } from '../style_prop_editor';
 import { StylePropEditor } from '../style_prop_editor';
 import { DynamicIconForm } from './dynamic_icon_form';
 import { StaticIconForm } from './static_icon_form';

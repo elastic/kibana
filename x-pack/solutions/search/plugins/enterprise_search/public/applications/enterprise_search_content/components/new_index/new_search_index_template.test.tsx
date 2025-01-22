@@ -12,11 +12,8 @@ import React from 'react';
 import { shallow } from 'enzyme';
 
 import { UNIVERSAL_LANGUAGE_VALUE } from './constants';
-import type {
-  Props as NewSearchIndexTemplateProps} from './new_search_index_template';
-import {
-  NewSearchIndexTemplate
-} from './new_search_index_template';
+import type { Props as NewSearchIndexTemplateProps } from './new_search_index_template';
+import { NewSearchIndexTemplate } from './new_search_index_template';
 
 describe('NewSearchIndexTemplate', () => {
   const mockProps: NewSearchIndexTemplateProps = {

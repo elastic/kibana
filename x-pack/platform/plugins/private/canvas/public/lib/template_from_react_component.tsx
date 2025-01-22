@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  ComponentType,
-  ForwardRefRenderFunction} from 'react';
-import React, {
-  forwardRef,
-  useImperativeHandle,
-  useState,
-} from 'react';
+import type { ComponentType, ForwardRefRenderFunction } from 'react';
+import React, { forwardRef, useImperativeHandle, useState } from 'react';
 import { unmountComponentAtNode, createPortal } from 'react-dom';
 import PropTypes from 'prop-types';
 import { I18nProvider } from '@kbn/i18n-react';

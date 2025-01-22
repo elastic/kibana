@@ -12,14 +12,8 @@ import './reference_lines/reference_lines.scss';
 
 import React, { Fragment } from 'react';
 import { snakeCase } from 'lodash';
-import type {
-  CustomAnnotationTooltip} from '@elastic/charts';
-import {
-  AnnotationDomainType,
-  LineAnnotation,
-  Position,
-  RectAnnotation,
-} from '@elastic/charts';
+import type { CustomAnnotationTooltip } from '@elastic/charts';
+import { AnnotationDomainType, LineAnnotation, Position, RectAnnotation } from '@elastic/charts';
 import moment from 'moment';
 import {
   EuiFlexGroup,

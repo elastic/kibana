@@ -18,11 +18,8 @@ import { DefendInsightStatus, DefendInsightType } from '@kbn/elastic-assistant-c
 import type { DefendInsightsDataClient } from '../../ai_assistant_data_clients/defend_insights';
 
 import { serverMock } from '../../__mocks__/server';
-import type {
-  ElasticAssistantRequestHandlerContextMock} from '../../__mocks__/request_context';
-import {
-  requestContextMock,
-} from '../../__mocks__/request_context';
+import type { ElasticAssistantRequestHandlerContextMock } from '../../__mocks__/request_context';
+import { requestContextMock } from '../../__mocks__/request_context';
 import { transformESSearchToDefendInsights } from '../../ai_assistant_data_clients/defend_insights/helpers';
 import { getDefendInsightsSearchEsMock } from '../../__mocks__/defend_insights_schema.mock';
 import { postDefendInsightsRequest } from '../../__mocks__/request';

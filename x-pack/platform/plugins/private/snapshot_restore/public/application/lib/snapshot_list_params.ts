@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Direction} from '@elastic/eui';
+import type { Direction } from '@elastic/eui';
 import { Query } from '@elastic/eui';
 import type { SchemaType } from '@elastic/eui/src/components/search_bar/search_bar';
 

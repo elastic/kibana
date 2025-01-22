@@ -5,8 +5,7 @@
  * 2.0.
  */
 import React from 'react';
-import type {
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiContextMenuPanel,

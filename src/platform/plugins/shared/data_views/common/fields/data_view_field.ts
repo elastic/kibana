@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { KbnFieldType} from '@kbn/field-types';
+import type { KbnFieldType } from '@kbn/field-types';
 import { getKbnFieldType } from '@kbn/field-types';
 import { KBN_FIELD_TYPES } from '@kbn/field-types';
 import type { DataViewFieldBase } from '@kbn/es-query';

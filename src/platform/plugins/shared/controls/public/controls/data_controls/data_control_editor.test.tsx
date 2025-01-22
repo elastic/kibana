@@ -14,7 +14,7 @@ import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub
 import { stubFieldSpecMap } from '@kbn/data-views-plugin/common/field.stub';
 import type { TimeRange } from '@kbn/es-query';
 import { I18nProvider } from '@kbn/i18n-react';
-import type { RenderResult} from '@testing-library/react';
+import type { RenderResult } from '@testing-library/react';
 import { act, fireEvent, render, waitFor } from '@testing-library/react';
 
 import {

@@ -9,11 +9,8 @@ import { schema } from '@kbn/config-schema';
 import type { RefResult } from '../../../../common/runtime_types/ping/synthetics';
 import { isRefResult } from '../../../../common/runtime_types/ping/synthetics';
 import type { UMServerLibs } from '../../lib/lib';
-import type {
-  ScreenshotReturnTypesUnion} from '../../lib/requests/get_journey_screenshot';
-import {
-  getJourneyScreenshot
-} from '../../lib/requests/get_journey_screenshot';
+import type { ScreenshotReturnTypesUnion } from '../../lib/requests/get_journey_screenshot';
+import { getJourneyScreenshot } from '../../lib/requests/get_journey_screenshot';
 import type { RouteContext, UMRestApiRouteFactory, UptimeRouteContext } from '../types';
 import { API_URLS } from '../../../../common/constants';
 

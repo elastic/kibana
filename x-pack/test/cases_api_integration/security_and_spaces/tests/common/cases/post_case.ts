@@ -13,7 +13,7 @@ import {
   CaseSeverity,
   CustomFieldTypes,
 } from '@kbn/cases-plugin/common/types/domain';
-import type { ConnectorJiraTypeFields} from '@kbn/cases-plugin/common/types/domain';
+import type { ConnectorJiraTypeFields } from '@kbn/cases-plugin/common/types/domain';
 import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import { getPostCaseRequest, postCaseResp, defaultUser } from '../../../../common/lib/mock';
 import {

@@ -8,8 +8,7 @@
 import React, { Fragment, useEffect, useState } from 'react';
 import type { IUiSettingsClient, HttpSetup } from '@kbn/core/public';
 import { interval } from 'rxjs';
-import type {
-  PartialTheme} from '@elastic/charts';
+import type { PartialTheme } from '@elastic/charts';
 import {
   AnnotationDomainType,
   Axis,
@@ -19,7 +18,7 @@ import {
   Position,
   ScaleType,
   Settings,
-  niceTimeFormatter
+  niceTimeFormatter,
 } from '@elastic/charts';
 import moment from 'moment-timezone';
 import {
@@ -38,11 +37,8 @@ import type { AggregationType } from '@kbn/triggers-actions-ui-plugin/public';
 import type { Comparator } from '@kbn/alerting-comparators';
 import { parseDuration } from '@kbn/alerting-plugin/common/parse_duration';
 import { i18n } from '@kbn/i18n';
-import type {
-  GetThresholdRuleVisualizationDataParams} from './index_threshold_api';
-import {
-  getThresholdRuleVisualizationData
-} from './index_threshold_api';
+import type { GetThresholdRuleVisualizationDataParams } from './index_threshold_api';
+import { getThresholdRuleVisualizationData } from './index_threshold_api';
 import type { IndexThresholdRuleParams } from './types';
 
 const chartThemeOverrides = (): PartialTheme => {

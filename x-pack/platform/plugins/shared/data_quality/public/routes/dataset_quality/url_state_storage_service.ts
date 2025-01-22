@@ -8,7 +8,7 @@
 import type { IToasts } from '@kbn/core-notifications-browser';
 import type { DatasetQualityPublicState } from '@kbn/dataset-quality-plugin/public/controller/dataset_quality';
 import { createPlainError, formatErrors } from '@kbn/io-ts-utils';
-import type { IKbnUrlStateStorage} from '@kbn/kibana-utils-plugin/public';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Either from 'fp-ts/lib/Either';
 import * as rt from 'io-ts';

@@ -5,14 +5,8 @@
  * 2.0.
  */
 
-import type {
-  SeriesIdentifier,
-  TooltipAction,
-  TooltipSpec} from '@elastic/charts';
-import {
-  Tooltip,
-  TooltipType,
-} from '@elastic/charts';
+import type { SeriesIdentifier, TooltipAction, TooltipSpec } from '@elastic/charts';
+import { Tooltip, TooltipType } from '@elastic/charts';
 import { EuiErrorBoundary } from '@elastic/eui';
 import React from 'react';
 import { i18n } from '@kbn/i18n';

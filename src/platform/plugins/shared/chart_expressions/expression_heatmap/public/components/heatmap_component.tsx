@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { memo, useMemo, useState, useCallback, useRef } from 'react';
 import { ESQL_TABLE_TYPE } from '@kbn/data-plugin/common';
 import type {
@@ -21,15 +21,9 @@ import type {
   PartialTheme,
   SettingsProps,
   SeriesIdentifier,
-  TooltipValue} from '@elastic/charts';
-import {
-  Chart,
-  Heatmap,
-  ScaleType,
-  Settings,
-  TooltipType,
-  Tooltip
+  TooltipValue,
 } from '@elastic/charts';
+import { Chart, Heatmap, ScaleType, Settings, TooltipType, Tooltip } from '@elastic/charts';
 import type { CustomPaletteState } from '@kbn/charts-plugin/public';
 import { search } from '@kbn/data-plugin/public';
 import { LegendToggle, EmptyPlaceholder, useActiveCursor } from '@kbn/charts-plugin/public';

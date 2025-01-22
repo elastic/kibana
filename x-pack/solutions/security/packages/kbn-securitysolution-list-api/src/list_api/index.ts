@@ -20,7 +20,8 @@ import type {
   ListItemIndexExistSchema,
   ListSchema,
   ReadListSchema,
-  FoundListsBySizeSchema} from '@kbn/securitysolution-io-ts-list-types';
+  FoundListsBySizeSchema,
+} from '@kbn/securitysolution-io-ts-list-types';
 import {
   acknowledgeSchema,
   deleteListSchema,
@@ -32,7 +33,7 @@ import {
   importListItemSchema,
   listItemIndexExistSchema,
   listSchema,
-  foundListsBySizeSchema
+  foundListsBySizeSchema,
 } from '@kbn/securitysolution-io-ts-list-types';
 import {
   LIST_INDEX,

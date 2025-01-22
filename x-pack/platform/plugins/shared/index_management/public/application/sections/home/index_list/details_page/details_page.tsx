@@ -13,12 +13,8 @@ import { EuiPageTemplate, EuiText, EuiCode } from '@elastic/eui';
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
 
 import { resetIndexUrlParams } from './reset_index_url_params';
-import type {
-  IndexDetailsTabId} from '../../../../../../common/constants';
-import {
-  IndexDetailsSection,
-  Section,
-} from '../../../../../../common/constants';
+import type { IndexDetailsTabId } from '../../../../../../common/constants';
+import { IndexDetailsSection, Section } from '../../../../../../common/constants';
 import type { Index } from '../../../../../../common';
 import type { Error } from '../../../../../shared_imports';
 import { loadIndex } from '../../../../services';

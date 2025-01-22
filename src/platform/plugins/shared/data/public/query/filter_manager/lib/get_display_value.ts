@@ -9,17 +9,14 @@
 
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import type {
-  Filter,
-  DataViewBase,
-  DataViewFieldBase} from '@kbn/es-query';
+import type { Filter, DataViewBase, DataViewFieldBase } from '@kbn/es-query';
 import {
   isPhraseFilter,
   isPhrasesFilter,
   isRangeFilter,
   isScriptedPhraseFilter,
   isScriptedRangeFilter,
-  getFilterField
+  getFilterField,
 } from '@kbn/es-query';
 import { getPhraseDisplayValue } from './mappers/map_phrase';
 import { getPhrasesDisplayValue } from './mappers/map_phrases';

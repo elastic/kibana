@@ -14,11 +14,8 @@ import { querySavedObjectType } from '../saved_objects';
 import * as queryPersistableState from '../../common/query/persistable_state';
 import * as filtersPersistableState from '../../common/query/filters/persistable_state';
 import { registerSavedQueryRoutes } from './routes';
-import type {
-  SavedQueryRouteHandlerContext} from './route_handler_context';
-import {
-  registerSavedQueryRouteHandlerContext
-} from './route_handler_context';
+import type { SavedQueryRouteHandlerContext } from './route_handler_context';
+import { registerSavedQueryRouteHandlerContext } from './route_handler_context';
 import type { QueryState } from '../../common';
 
 export interface QuerySetup extends PersistableStateService<QueryState> {

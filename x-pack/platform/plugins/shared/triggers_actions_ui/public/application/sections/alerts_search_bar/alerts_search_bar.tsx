@@ -11,7 +11,10 @@ import type { Query, TimeRange } from '@kbn/es-query';
 import { compareFilters } from '@kbn/es-query';
 import type { SuggestionsAbstraction } from '@kbn/unified-search-plugin/public/typeahead/suggestions_component';
 import { isSiemRuleType } from '@kbn/rule-data-utils';
-import type { EuiContextMenuPanelDescriptor, EuiContextMenuPanelItemDescriptor } from '@elastic/eui';
+import type {
+  EuiContextMenuPanelDescriptor,
+  EuiContextMenuPanelItemDescriptor,
+} from '@elastic/eui';
 import { useAlertsDataView } from '@kbn/alerts-ui-shared/src/common/hooks/use_alerts_data_view';
 import type { QuickFiltersMenuItem } from './quick_filters';
 import { isQuickFiltersGroup } from './quick_filters';

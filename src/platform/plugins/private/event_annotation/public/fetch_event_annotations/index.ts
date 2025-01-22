@@ -12,7 +12,8 @@ import type { EventAnnotationPluginStart, EventAnnotationStartDependencies } fro
 
 import type {
   FetchEventAnnotationsExpressionFunctionDefinition,
-  FetchEventAnnotationsStartDependencies} from '../../common/fetch_event_annotations';
+  FetchEventAnnotationsStartDependencies,
+} from '../../common/fetch_event_annotations';
 import {
   getFetchEventAnnotationsMeta,
   requestEventAnnotations,

@@ -7,16 +7,12 @@
 
 import type { HttpSetup } from '@kbn/core/public';
 
-import type {
-  ActionTypeExecutorResult} from '@kbn/actions-plugin/common';
-import {
-  INTERNAL_BASE_ACTION_API_PATH,
-  BASE_ACTION_API_PATH,
-} from '@kbn/actions-plugin/common';
+import type { ActionTypeExecutorResult } from '@kbn/actions-plugin/common';
+import { INTERNAL_BASE_ACTION_API_PATH, BASE_ACTION_API_PATH } from '@kbn/actions-plugin/common';
 import { snExternalServiceConfig } from '../../../../common/servicenow_config';
 import { API_INFO_ERROR } from './translations';
 import type { AppInfo, RESTApiError, ServiceNowActionConnector } from './types';
-import type { ConnectorExecutorResult} from '../rewrite_response_body';
+import type { ConnectorExecutorResult } from '../rewrite_response_body';
 import { rewriteResponseToCamelCase } from '../rewrite_response_body';
 import type { Choice } from './types';
 

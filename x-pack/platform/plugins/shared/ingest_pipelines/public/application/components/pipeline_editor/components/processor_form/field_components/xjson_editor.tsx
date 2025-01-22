@@ -6,7 +6,7 @@
  */
 
 import { XJsonLang } from '@kbn/monaco';
-import type { FunctionComponent} from 'react';
+import type { FunctionComponent } from 'react';
 import React, { useCallback } from 'react';
 import type { FieldHook } from '../../../../../../shared_imports';
 

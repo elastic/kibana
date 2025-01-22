@@ -5,14 +5,10 @@
  * 2.0.
  */
 
-import type {
-  AssistantMessage,
-  Message as InferenceMessage} from '@kbn/inference-common';
-import {
-  MessageRole as InferenceMessageRole,
-} from '@kbn/inference-common';
+import type { AssistantMessage, Message as InferenceMessage } from '@kbn/inference-common';
+import { MessageRole as InferenceMessageRole } from '@kbn/inference-common';
 import { generateFakeToolCallId } from '@kbn/inference-plugin/common';
-import type { Message} from '.';
+import type { Message } from '.';
 import { MessageRole } from '.';
 
 export function convertMessagesForInference(messages: Message[]): InferenceMessage[] {

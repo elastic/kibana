@@ -6,7 +6,7 @@
  */
 
 import { registerDynamicRoute } from '.';
-import type { KibanaRequest, KibanaResponseFactory} from '@kbn/core/server';
+import type { KibanaRequest, KibanaResponseFactory } from '@kbn/core/server';
 import { ServiceStatusLevels } from '@kbn/core/server';
 import { httpServerMock, httpServiceMock } from '@kbn/core/server/mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';

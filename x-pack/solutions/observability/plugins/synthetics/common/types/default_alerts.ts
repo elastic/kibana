@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { SanitizedRule, SanitizedRuleAction, RuleSystemAction } from '@kbn/alerting-plugin/common';
+import type {
+  SanitizedRule,
+  SanitizedRuleAction,
+  RuleSystemAction,
+} from '@kbn/alerting-plugin/common';
 import type { SYNTHETICS_STATUS_RULE, SYNTHETICS_TLS_RULE } from '../constants/synthetics_alerts';
 
 export type DefaultRuleType = typeof SYNTHETICS_STATUS_RULE | typeof SYNTHETICS_TLS_RULE;

@@ -28,7 +28,8 @@ import type {
   BaseIndexPatternColumn,
   OperationType,
   FormulaIndexPatternColumn,
-  ColumnAdvancedParams} from './operations';
+  ColumnAdvancedParams,
+} from './operations';
 import {
   insertNewColumn,
   replaceColumn,
@@ -39,7 +40,7 @@ import {
   isReferenced,
   getReferencedColumnIds,
   hasTermsWithManyBuckets,
-  updateColumnLabel
+  updateColumnLabel,
 } from './operations';
 import { hasField } from './pure_utils';
 import type { FormBasedPrivateState, FormBasedLayer } from './types';

@@ -8,11 +8,10 @@
 import expect from '@kbn/expect';
 import type { JsonObject } from '@kbn/utility-types';
 
-import type {
-  TimelineEventsAllStrategyResponse} from '@kbn/security-solution-plugin/common/search_strategy';
+import type { TimelineEventsAllStrategyResponse } from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   Direction,
-  TimelineEventsQueries
+  TimelineEventsQueries,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import type TestAgent from 'supertest/lib/agent';
 import type { SearchService } from '@kbn/ftr-common-functional-services';

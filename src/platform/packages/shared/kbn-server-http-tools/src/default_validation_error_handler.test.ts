@@ -9,11 +9,8 @@
 
 import Joi from 'joi';
 import type { Request, ResponseToolkit } from '@hapi/hapi';
-import type {
-  HapiValidationError} from './default_validation_error_handler';
-import {
-  defaultValidationErrorHandler
-} from './default_validation_error_handler';
+import type { HapiValidationError } from './default_validation_error_handler';
+import { defaultValidationErrorHandler } from './default_validation_error_handler';
 
 const emptyOutput = {
   statusCode: 400,

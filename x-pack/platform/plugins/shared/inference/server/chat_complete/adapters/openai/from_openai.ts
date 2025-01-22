@@ -8,10 +8,9 @@
 import type OpenAI from 'openai';
 import type {
   ChatCompletionChunkEvent,
-  ChatCompletionTokenCountEvent} from '@kbn/inference-common';
-import {
-  ChatCompletionEventType
+  ChatCompletionTokenCountEvent,
 } from '@kbn/inference-common';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 
 export function chunkFromOpenAI(chunk: OpenAI.ChatCompletionChunk): ChatCompletionChunkEvent {
   const delta = chunk.choices[0].delta;

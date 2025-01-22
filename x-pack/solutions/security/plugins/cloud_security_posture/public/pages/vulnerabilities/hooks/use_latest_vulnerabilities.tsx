@@ -21,7 +21,7 @@ import {
   CDR_VULNERABILITIES_INDEX_PATTERN,
   CDR_3RD_PARTY_RETENTION_POLICY,
 } from '@kbn/cloud-security-posture-common';
-import type { FindingsBaseEsQuery} from '@kbn/cloud-security-posture';
+import type { FindingsBaseEsQuery } from '@kbn/cloud-security-posture';
 import { showErrorToast } from '@kbn/cloud-security-posture';
 import type { CspVulnerabilityFinding } from '@kbn/cloud-security-posture-common/schema/vulnerabilities/latest';
 import type { RuntimePrimitiveTypes } from '@kbn/data-views-plugin/common';

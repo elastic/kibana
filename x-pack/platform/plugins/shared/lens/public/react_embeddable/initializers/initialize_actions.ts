@@ -7,22 +7,10 @@
 
 import type { Capabilities } from '@kbn/core-capabilities-common';
 import { getEsQueryConfig } from '@kbn/data-plugin/public';
-import type {
-  AggregateQuery,
-  EsQueryConfig,
-  Filter,
-  Query,
-  TimeRange} from '@kbn/es-query';
-import {
-  isOfQueryType,
-} from '@kbn/es-query';
-import type {
-  PublishingSubject,
-  StateComparators} from '@kbn/presentation-publishing';
-import {
-  apiPublishesUnifiedSearch,
-  getUnchangingComparator,
-} from '@kbn/presentation-publishing';
+import type { AggregateQuery, EsQueryConfig, Filter, Query, TimeRange } from '@kbn/es-query';
+import { isOfQueryType } from '@kbn/es-query';
+import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import { apiPublishesUnifiedSearch, getUnchangingComparator } from '@kbn/presentation-publishing';
 import type { HasDynamicActions } from '@kbn/embeddable-enhanced-plugin/public';
 import type { DynamicActionsSerializedState } from '@kbn/embeddable-enhanced-plugin/public/plugin';
 import { partition } from 'lodash';

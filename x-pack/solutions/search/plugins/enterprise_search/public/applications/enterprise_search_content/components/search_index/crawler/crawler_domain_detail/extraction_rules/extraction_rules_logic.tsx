@@ -14,34 +14,21 @@ import type {
   ExtractionRuleBase,
   ExtractionRuleFieldRule,
 } from '../../../../../../../../common/types/extraction_rules';
-import type {
-  AddExtractionRuleActions} from '../../../../../api/crawler/extraction_rules/add_extraction_rule_api_logic';
-import {
-  AddExtractionRuleApiLogic,
-} from '../../../../../api/crawler/extraction_rules/add_extraction_rule_api_logic';
-import type {
-  DeleteExtractionRuleActions} from '../../../../../api/crawler/extraction_rules/delete_extraction_rule_api_logic';
-import {
-  DeleteExtractionRuleApiLogic,
-} from '../../../../../api/crawler/extraction_rules/delete_extraction_rule_api_logic';
-import type {
-  FetchExtractionRulesActions} from '../../../../../api/crawler/extraction_rules/fetch_extraction_rules_api_logic';
-import {
-  FetchExtractionRulesApiLogic,
-} from '../../../../../api/crawler/extraction_rules/fetch_extraction_rules_api_logic';
-import type {
-  UpdateExtractionRuleActions} from '../../../../../api/crawler/extraction_rules/update_extraction_rule_api_logic';
-import {
-  UpdateExtractionRuleApiLogic,
-} from '../../../../../api/crawler/extraction_rules/update_extraction_rule_api_logic';
+import type { AddExtractionRuleActions } from '../../../../../api/crawler/extraction_rules/add_extraction_rule_api_logic';
+import { AddExtractionRuleApiLogic } from '../../../../../api/crawler/extraction_rules/add_extraction_rule_api_logic';
+import type { DeleteExtractionRuleActions } from '../../../../../api/crawler/extraction_rules/delete_extraction_rule_api_logic';
+import { DeleteExtractionRuleApiLogic } from '../../../../../api/crawler/extraction_rules/delete_extraction_rule_api_logic';
+import type { FetchExtractionRulesActions } from '../../../../../api/crawler/extraction_rules/fetch_extraction_rules_api_logic';
+import { FetchExtractionRulesApiLogic } from '../../../../../api/crawler/extraction_rules/fetch_extraction_rules_api_logic';
+import type { UpdateExtractionRuleActions } from '../../../../../api/crawler/extraction_rules/update_extraction_rule_api_logic';
+import { UpdateExtractionRuleApiLogic } from '../../../../../api/crawler/extraction_rules/update_extraction_rule_api_logic';
 import { IndexNameLogic } from '../../../index_name_logic';
 
 import type {
   CrawlerDomainDetailActions,
-  CrawlerDomainDetailValues} from '../crawler_domain_detail_logic';
-import {
-  CrawlerDomainDetailLogic
+  CrawlerDomainDetailValues,
 } from '../crawler_domain_detail_logic';
+import { CrawlerDomainDetailLogic } from '../crawler_domain_detail_logic';
 
 export type ExtractionRuleView = ExtractionRule & { isExpanded: boolean };
 

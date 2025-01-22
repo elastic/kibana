@@ -7,8 +7,7 @@
 
 import _ from 'lodash';
 import React, { Fragment, useContext, useEffect, useState } from 'react';
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiButton,
   EuiButtonEmpty,

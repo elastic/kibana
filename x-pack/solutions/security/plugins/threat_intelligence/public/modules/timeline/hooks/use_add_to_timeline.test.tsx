@@ -8,11 +8,10 @@
 import { EMPTY_VALUE } from '../../../constants/common';
 import type { RenderHookResult } from '@testing-library/react';
 import { renderHook } from '@testing-library/react';
-import type {
-  Indicator} from '../../../../common/types/indicator';
+import type { Indicator } from '../../../../common/types/indicator';
 import {
   generateMockIndicator,
-  generateMockUrlIndicator
+  generateMockUrlIndicator,
 } from '../../../../common/types/indicator';
 import { TestProvidersComponent } from '../../../mocks/test_providers';
 import type { UseAddToTimelineValue } from './use_add_to_timeline';

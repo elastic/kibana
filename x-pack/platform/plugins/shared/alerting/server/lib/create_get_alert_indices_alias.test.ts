@@ -9,7 +9,7 @@ import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { inMemoryMetricsMock } from '../monitoring/in_memory_metrics.mock';
-import type { ConstructorOptions} from '../rule_type_registry';
+import type { ConstructorOptions } from '../rule_type_registry';
 import { RuleTypeRegistry } from '../rule_type_registry';
 import { TaskRunnerFactory } from '../task_runner/task_runner_factory';
 import type { ILicenseState } from './license_state';

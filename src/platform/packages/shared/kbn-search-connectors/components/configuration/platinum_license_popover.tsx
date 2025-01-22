@@ -11,8 +11,7 @@ import React from 'react';
 
 import { css } from '@emotion/react';
 
-import type {
-  EuiPopoverProps} from '@elastic/eui';
+import type { EuiPopoverProps } from '@elastic/eui';
 import {
   EuiPopover,
   EuiPopoverTitle,

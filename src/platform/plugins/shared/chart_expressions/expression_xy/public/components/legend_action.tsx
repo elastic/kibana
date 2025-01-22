@@ -18,11 +18,9 @@ import { LegendActionPopover } from './legend_action_popover';
 import type {
   DatatablesWithFormatInfo,
   LayersAccessorsTitles,
-  LayersFieldFormats} from '../helpers';
-import {
-  getSeriesName,
-  hasMultipleLayersWithSplits
+  LayersFieldFormats,
 } from '../helpers';
+import { getSeriesName, hasMultipleLayersWithSplits } from '../helpers';
 
 export const getLegendAction = (
   dataLayers: CommonXYDataLayerConfig[],

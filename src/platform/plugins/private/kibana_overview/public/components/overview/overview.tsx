@@ -10,7 +10,7 @@
 import './overview.scss';
 
 import { snakeCase } from 'lodash';
-import type { FC} from 'react';
+import type { FC } from 'react';
 import React, { useState, useEffect } from 'react';
 import useObservable from 'react-use/lib/useObservable';
 import {

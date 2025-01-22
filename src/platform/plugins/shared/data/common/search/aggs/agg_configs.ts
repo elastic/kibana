@@ -25,7 +25,7 @@ import { AggConfig } from './agg_config';
 import type { IAggType } from './agg_type';
 import type { AggTypesRegistryStart } from './agg_types_registry';
 import { AggGroupNames } from './agg_groups';
-import type { AggTypesDependencies, GetConfigFn} from '../..';
+import type { AggTypesDependencies, GetConfigFn } from '../..';
 import { getUserTimeZone } from '../..';
 import { getTime, calculateBounds } from '../..';
 import type { IBucketAggConfig } from './buckets';

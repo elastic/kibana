@@ -9,7 +9,7 @@ import type { AlertInstanceState, AlertInstanceContext } from '@kbn/alerting-sta
 import type { RuleAction, RuleTypeParams } from '@kbn/alerting-types';
 import { compact } from 'lodash';
 import type { CombinedSummarizedAlerts } from '../../../types';
-import type { RuleTypeState, RuleAlertData} from '../../../../common';
+import type { RuleTypeState, RuleAlertData } from '../../../../common';
 import { parseDuration } from '../../../../common';
 import type { GetSummarizedAlertsParams } from '../../../alerts_client/types';
 import {

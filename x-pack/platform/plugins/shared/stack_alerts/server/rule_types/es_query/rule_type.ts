@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type { CoreSetup} from '@kbn/core/server';
+import type { CoreSetup } from '@kbn/core/server';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/server';
 import { extractReferences, injectReferences } from '@kbn/data-plugin/common';
 import { ES_QUERY_ID, STACK_ALERTS_FEATURE_ID } from '@kbn/rule-data-utils';
@@ -16,11 +16,9 @@ import type { ActionContext } from './action_context';
 import type {
   EsQueryRuleParams,
   EsQueryRuleParamsExtractedParams,
-  EsQueryRuleState} from './rule_type_params';
-import {
-  EsQueryRuleParamsSchema,
-  validateServerless,
+  EsQueryRuleState,
 } from './rule_type_params';
+import { EsQueryRuleParamsSchema, validateServerless } from './rule_type_params';
 import type { ExecutorOptions } from './types';
 import { ActionGroupId } from './constants';
 import { executor } from './executor';

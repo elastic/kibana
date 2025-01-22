@@ -27,12 +27,10 @@ import type {
   SearchSessionRequestInfo,
   SearchSessionSavedObjectAttributes,
   SearchSessionsFindResponse,
-  SearchSessionStatusResponse} from '../../../common';
-import {
-  ENHANCED_ES_SEARCH_STRATEGY,
-  SEARCH_SESSION_TYPE
+  SearchSessionStatusResponse,
 } from '../../../common';
-import type { ISearchSessionService} from '../..';
+import { ENHANCED_ES_SEARCH_STRATEGY, SEARCH_SESSION_TYPE } from '../../../common';
+import type { ISearchSessionService } from '../..';
 import { NoSearchIdInSessionError } from '../..';
 import { createRequestHash } from './utils';
 import type { ConfigSchema, SearchSessionsConfigSchema } from '../../config';

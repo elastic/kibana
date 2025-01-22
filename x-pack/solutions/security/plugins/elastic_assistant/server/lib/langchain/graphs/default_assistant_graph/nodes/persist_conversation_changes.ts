@@ -5,11 +5,8 @@
  * 2.0.
  */
 
-import type {
-  Replacements} from '@kbn/elastic-assistant-common';
-import {
-  replaceAnonymizedValuesWithOriginalValues,
-} from '@kbn/elastic-assistant-common';
+import type { Replacements } from '@kbn/elastic-assistant-common';
+import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import type { AgentState, NodeParamsBase } from '../types';
 import type { AIAssistantConversationsDataClient } from '../../../../../ai_assistant_data_clients/conversations';
 import { getLangChainMessages } from '../../../helpers';

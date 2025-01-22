@@ -6,8 +6,7 @@
  */
 
 import { isPendingBlock } from '../../../../common/runtime_types';
-import type {
-  SyntheticsReducerState} from './synthetics';
+import type { SyntheticsReducerState } from './synthetics';
 import {
   fetchBlocksAction,
   pruneCacheAction,

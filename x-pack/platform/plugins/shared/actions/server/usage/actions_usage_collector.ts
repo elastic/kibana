@@ -8,13 +8,8 @@
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import { get } from 'lodash';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
-import type {
-  ActionsUsage} from './types';
-import {
-  byGenAiProviderTypeSchema,
-  byServiceProviderTypeSchema,
-  byTypeSchema,
-} from './types';
+import type { ActionsUsage } from './types';
+import { byGenAiProviderTypeSchema, byServiceProviderTypeSchema, byTypeSchema } from './types';
 import type { ActionsConfig } from '../config';
 
 export function createActionsUsageCollector(

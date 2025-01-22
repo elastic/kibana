@@ -17,7 +17,7 @@ import {
   EuiTourStep,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { Workflow, WorkflowId} from '../../code_examples/workflows';
+import type { Workflow, WorkflowId } from '../../code_examples/workflows';
 import { workflows } from '../../code_examples/workflows';
 import { useGuideTour } from './hooks/use_guide_tour';
 

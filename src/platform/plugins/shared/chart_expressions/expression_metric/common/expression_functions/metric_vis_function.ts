@@ -9,14 +9,10 @@
 
 import { i18n } from '@kbn/i18n';
 
-import type {
-  Dimension} from '@kbn/visualizations-plugin/common/utils';
-import {
-  prepareLogTable,
-  validateAccessor,
-} from '@kbn/visualizations-plugin/common/utils';
+import type { Dimension } from '@kbn/visualizations-plugin/common/utils';
+import { prepareLogTable, validateAccessor } from '@kbn/visualizations-plugin/common/utils';
 import { LayoutDirection } from '@elastic/charts';
-import type { MetricVisRenderConfig} from '../types';
+import type { MetricVisRenderConfig } from '../types';
 import { visType } from '../types';
 import type { MetricVisExpressionFunctionDefinition } from '../types';
 import { EXPRESSION_METRIC_NAME, EXPRESSION_METRIC_TRENDLINE_NAME } from '../constants';

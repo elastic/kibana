@@ -13,16 +13,11 @@ import { v4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import type { Reference } from '@kbn/content-management-utils';
 import { METRIC_TYPE } from '@kbn/analytics';
-import type { PanelPackage} from '@kbn/presentation-containers';
+import type { PanelPackage } from '@kbn/presentation-containers';
 import { apiHasSerializableState } from '@kbn/presentation-containers';
-import type {
-  DefaultEmbeddableApi,
-  EmbeddablePackageState} from '@kbn/embeddable-plugin/public';
-import {
-  PanelNotFoundError,
-} from '@kbn/embeddable-plugin/public';
-import type {
-  StateComparators} from '@kbn/presentation-publishing';
+import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { PanelNotFoundError } from '@kbn/embeddable-plugin/public';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import {
   apiHasInPlaceLibraryTransforms,
   apiHasLibraryTransforms,
@@ -34,7 +29,7 @@ import {
 import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
 import { i18n } from '@kbn/i18n';
 import { coreServices, usageCollectionService } from '../services/kibana_services';
-import type { DashboardPanelMap, DashboardPanelState} from '../../common';
+import type { DashboardPanelMap, DashboardPanelState } from '../../common';
 import { prefixReferencesFromPanel } from '../../common';
 import type { initializeTrackPanel } from './track_panel';
 import { getPanelAddedSuccessString } from '../dashboard_app/_dashboard_app_strings';

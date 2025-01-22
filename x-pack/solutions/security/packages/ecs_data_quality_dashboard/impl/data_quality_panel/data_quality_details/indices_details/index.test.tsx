@@ -21,7 +21,7 @@ import {
   TestExternalProviders,
 } from '../../mock/test_providers/test_providers';
 import type { PatternRollup } from '../../types';
-import type { Props} from '.';
+import type { Props } from '.';
 import { IndicesDetails } from '.';
 import userEvent from '@testing-library/user-event';
 import { HISTORICAL_RESULTS_TOUR_IS_DISMISSED_STORAGE_KEY } from './constants';

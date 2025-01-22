@@ -19,7 +19,8 @@ import type {
   EuiSearchBarProps,
   EuiTableFieldDataColumnType,
   IconType,
-  SearchFilterConfig} from '@elastic/eui';
+  SearchFilterConfig,
+} from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -28,7 +29,7 @@ import {
   EuiText,
   EuiToolTip,
   EuiIconTip,
-  Query
+  Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
@@ -38,7 +39,7 @@ import {
   type EuiTablePersistInjectedProps,
 } from '@kbn/shared-ux-table-persist/src';
 
-import type { FinderAttributes, SavedObjectCommon} from '../../common';
+import type { FinderAttributes, SavedObjectCommon } from '../../common';
 import { LISTING_LIMIT_SETTING } from '../../common';
 
 const PAGE_SIZE_OPTIONS = [5, 10, 15, 25];

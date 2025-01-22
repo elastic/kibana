@@ -8,13 +8,8 @@
 import { act } from 'react-dom/test-utils';
 import type { ReactWrapper } from 'enzyme';
 
-import type {
-  TestBed,
-  AsyncTestBedConfig} from '@kbn/test-jest-helpers';
-import {
-  registerTestBed,
-  findTestSubject,
-} from '@kbn/test-jest-helpers';
+import type { TestBed, AsyncTestBedConfig } from '@kbn/test-jest-helpers';
+import { registerTestBed, findTestSubject } from '@kbn/test-jest-helpers';
 import type { HttpSetup } from '@kbn/core/public';
 import type { DataStream } from '../../../common';
 import { IndexManagementHome } from '../../../public/application/sections/home';

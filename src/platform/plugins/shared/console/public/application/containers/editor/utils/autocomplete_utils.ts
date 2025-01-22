@@ -15,12 +15,8 @@ import {
   getTopLevelUrlCompleteComponents,
   getUnmatchedEndpointComponents,
 } from '../../../../lib/kb';
-import type {
-  AutoCompleteContext,
-  ResultTerm} from '../../../../lib/autocomplete/types';
-import {
-  type DataAutoCompleteRulesOneOf
-} from '../../../../lib/autocomplete/types';
+import type { AutoCompleteContext, ResultTerm } from '../../../../lib/autocomplete/types';
+import { type DataAutoCompleteRulesOneOf } from '../../../../lib/autocomplete/types';
 import { populateContext } from '../../../../lib/autocomplete/engine';
 import type { EditorRequest } from '../types';
 import { parseBody, parseLine, parseUrl } from './tokens_utils';

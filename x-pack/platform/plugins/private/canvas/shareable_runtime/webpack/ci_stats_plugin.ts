@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable import/no-extraneous-dependencies */
-
 import Path from 'path';
 
 import type webpack from 'webpack';

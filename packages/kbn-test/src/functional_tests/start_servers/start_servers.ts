@@ -17,7 +17,7 @@ import { withProcRunner } from '@kbn/dev-proc-runner';
 import { getTimeReporter } from '@kbn/ci-stats-reporter';
 
 import { applyFipsOverrides } from '../lib/fips_overrides';
-import type { Config} from '../../functional_test_runner';
+import type { Config } from '../../functional_test_runner';
 import { readConfigFile } from '../../functional_test_runner';
 import { runElasticsearch } from '../lib/run_elasticsearch';
 import { runKibanaServer } from '../lib/run_kibana_server';

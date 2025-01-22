@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Observable} from 'rxjs';
+import type { Observable } from 'rxjs';
 import { of } from 'rxjs';
 import { catchError, map, startWith } from 'rxjs';
 import type { IKibanaSearchResponse } from '@kbn/search-types';

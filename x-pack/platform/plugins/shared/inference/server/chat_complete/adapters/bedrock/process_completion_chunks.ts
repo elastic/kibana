@@ -10,10 +10,9 @@ import { Observable } from 'rxjs';
 import type {
   ChatCompletionChunkEvent,
   ChatCompletionTokenCountEvent,
-  ChatCompletionChunkToolCall} from '@kbn/inference-common';
-import {
-  ChatCompletionEventType,
+  ChatCompletionChunkToolCall,
 } from '@kbn/inference-common';
+import { ChatCompletionEventType } from '@kbn/inference-common';
 import type { CompletionChunk, MessageStopChunk } from './types';
 
 export function processCompletionChunks() {

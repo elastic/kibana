@@ -14,11 +14,9 @@ import type {
   CoreStart,
   AppMountParameters,
   Plugin,
-  PluginInitializerContext} from '@kbn/core/public';
-import {
-  AppStatus,
-  DEFAULT_APP_CATEGORIES,
+  PluginInitializerContext,
 } from '@kbn/core/public';
+import { AppStatus, DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 
 import type { Start as InspectorPublicPluginStart } from '@kbn/inspector-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';

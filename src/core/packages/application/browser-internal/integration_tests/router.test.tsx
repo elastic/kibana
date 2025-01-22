@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import type { History} from 'history';
+import type { History } from 'history';
 import { createMemoryHistory, createHashHistory } from 'history';
 
 import { analyticsServiceMock } from '@kbn/core-analytics-browser-mocks';

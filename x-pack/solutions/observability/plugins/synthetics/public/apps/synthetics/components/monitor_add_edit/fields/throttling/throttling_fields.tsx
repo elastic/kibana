@@ -11,10 +11,11 @@ import { ThrottlingUploadField } from './throttling_upload_field';
 import { ThrottlingExceededCallout } from './throttling_exceeded_callout';
 import type {
   ThrottlingConfig,
-  ThrottlingConfigValue} from '../../../../../../../common/runtime_types';
+  ThrottlingConfigValue,
+} from '../../../../../../../common/runtime_types';
 import {
   BandwidthLimitKey,
-  DEFAULT_BANDWIDTH_LIMIT
+  DEFAULT_BANDWIDTH_LIMIT,
 } from '../../../../../../../common/runtime_types';
 import type { Validation } from '../../types';
 import { ThrottlingDisabledCallout } from './throttling_disabled_callout';

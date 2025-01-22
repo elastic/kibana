@@ -9,10 +9,9 @@ import type {
   ServerRouteRepository,
   EndpointOf,
   ReturnOf,
-  ClientRequestParamsOf} from '@kbn/server-route-repository';
-import {
-  formatRequest
+  ClientRequestParamsOf,
 } from '@kbn/server-route-repository';
+import { formatRequest } from '@kbn/server-route-repository';
 import type { Subtract, RequiredKeys } from 'utility-types';
 import { format } from 'url';
 import type supertest from 'supertest';

@@ -11,8 +11,7 @@ import { useLocation } from 'react-router-dom';
 
 import { useActions, useValues } from 'kea';
 
-import type {
-  EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { TaskPriority} from '@kbn/task-manager-plugin/server';
+import type { TaskPriority } from '@kbn/task-manager-plugin/server';
 import { TaskStatus } from '@kbn/task-manager-plugin/server';
 import type { SavedObject } from '@kbn/core/server';
 import { ALERTING_CASES_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
@@ -15,11 +15,9 @@ import type {
   RuleMonitoring,
   RuleLastRunOutcomes,
   SanitizedRule,
-  SanitizedRuleAction} from '../../common';
-import {
-  RecoveredActionGroup,
-  RuleLastRunOutcomeOrderMap
+  SanitizedRuleAction,
 } from '../../common';
+import { RecoveredActionGroup, RuleLastRunOutcomeOrderMap } from '../../common';
 import { getDefaultMonitoring } from '../lib/monitoring';
 import type { UntypedNormalizedRuleType } from '../rule_type_registry';
 import { EVENT_LOG_ACTIONS } from '../plugin';

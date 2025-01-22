@@ -6,7 +6,7 @@
  */
 
 import { createKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
-import type { FC, PropsWithChildren} from 'react';
+import type { FC, PropsWithChildren } from 'react';
 import React, { useEffect, useMemo } from 'react';
 import { Provider as ReduxProvider } from 'react-redux';
 import { useHistory } from 'react-router-dom';

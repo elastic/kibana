@@ -7,7 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import type { EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import { EuiForm, EuiFormRow, EuiSwitch, EuiToolTip } from '@elastic/eui';
 import { ValidatedDualRange } from '@kbn/kibana-react-plugin/public';
 import type { LabelZoomRangeStylePropertyDescriptor } from '../../../../../../common/descriptor_types';

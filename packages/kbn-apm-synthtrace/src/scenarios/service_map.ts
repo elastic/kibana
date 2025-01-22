@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApmFields} from '@kbn/apm-synthtrace-client';
+import type { ApmFields } from '@kbn/apm-synthtrace-client';
 import { serviceMap } from '@kbn/apm-synthtrace-client';
 import type { Scenario } from '../cli/scenario';
 import type { RunOptions } from '../cli/utils/parse_run_cli_flags';

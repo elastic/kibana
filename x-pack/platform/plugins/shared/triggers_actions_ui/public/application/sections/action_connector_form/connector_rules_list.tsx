@@ -9,9 +9,7 @@ import type { ChangeEvent } from 'react';
 import React, { useCallback, useState, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { getRuleDetailsRoute } from '@kbn/rule-data-utils';
-import type {
-  EuiBasicTableColumn,
-  EuiTableSortingType} from '@elastic/eui';
+import type { EuiBasicTableColumn, EuiTableSortingType } from '@elastic/eui';
 import {
   EuiBasicTable,
   EuiLink,

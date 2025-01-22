@@ -12,16 +12,14 @@ import { act } from 'react-dom/test-utils';
 import { EuiComboBox } from '@elastic/eui';
 import userEvent from '@testing-library/user-event';
 import type { GenericOperationDefinition } from '../operations';
-import type {
-  FieldBasedIndexPatternColumn,
-  FieldInputProps} from '../operations/definitions';
+import type { FieldBasedIndexPatternColumn, FieldInputProps } from '../operations/definitions';
 import {
   averageOperation,
   countOperation,
   derivativeOperation,
   termsOperation,
   staticValueOperation,
-  minOperation
+  minOperation,
 } from '../operations/definitions';
 import { FieldInput, getErrorMessage } from './field_input';
 import { createMockedIndexPattern, createMockedIndexPatternWithAdditionalFields } from '../mocks';

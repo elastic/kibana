@@ -12,10 +12,9 @@ import type {
   ScriptBasedSortClause,
   ScriptClause,
   MustCondition,
-  MustNotCondition} from './query_clauses';
-import {
-  mustBeAllOf
+  MustNotCondition,
 } from './query_clauses';
+import { mustBeAllOf } from './query_clauses';
 
 export function tasksOfType(taskTypes: string[]): estypes.QueryDslQueryContainer {
   return {

@@ -9,7 +9,7 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import { get } from 'lodash';
 import { setTimeout as setTimeoutAsync } from 'timers/promises';
-import type { IValidatedEvent} from '@kbn/event-log-plugin/server';
+import type { IValidatedEvent } from '@kbn/event-log-plugin/server';
 import { nanosToMillis } from '@kbn/event-log-plugin/server';
 import { RuleNotifyWhen } from '@kbn/alerting-plugin/common';
 import { ES_TEST_INDEX_NAME, ESTestIndexTool } from '@kbn/alerting-api-integration-helpers';

@@ -7,9 +7,7 @@
 
 import type { AnalyticsServiceStart, HttpResponse } from '@kbn/core/public';
 import type { IncomingMessage } from 'http';
-import type {
-  Observable,
-  OperatorFunction} from 'rxjs';
+import type { Observable, OperatorFunction } from 'rxjs';
 import {
   catchError,
   concatMap,
@@ -26,7 +24,7 @@ import {
 } from 'rxjs';
 import { BehaviorSubject } from 'rxjs';
 import type { AssistantScope } from '@kbn/ai-assistant-common';
-import type { ChatCompletionChunkEvent, Message} from '../../common';
+import type { ChatCompletionChunkEvent, Message } from '../../common';
 import { MessageRole } from '../../common';
 import {
   StreamingChatResponseEventType,
@@ -42,7 +40,7 @@ import type {
 import { filterFunctionDefinitions } from '../../common/utils/filter_function_definitions';
 import { throwSerializedChatCompletionErrors } from '../../common/utils/throw_serialized_chat_completion_errors';
 import { untilAborted } from '../../common/utils/until_aborted';
-import type { TelemetryEventTypeWithPayload} from '../analytics';
+import type { TelemetryEventTypeWithPayload } from '../analytics';
 import { sendEvent } from '../analytics';
 import type {
   ObservabilityAIAssistantAPIClient,

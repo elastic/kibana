@@ -6,8 +6,7 @@
  */
 import React, { useCallback, useMemo, useState, useRef, useEffect } from 'react';
 import moment from 'moment';
-import type {
-  FormSubmitHandler} from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import type { FormSubmitHandler } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import {
   FIELD_TYPES,
   Form,
@@ -35,7 +34,7 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core-application-common';
 import type { Filter } from '@kbn/es-query';
 import type { IHttpFetchError } from '@kbn/core-http-browser';
 import type { KibanaServerError } from '@kbn/kibana-utils-plugin/public';
-import type { FormProps} from './schema';
+import type { FormProps } from './schema';
 import { schema } from './schema';
 import * as i18n from '../translations';
 import { RecurringSchedule } from './recurring_schedule_form/recurring_schedule';

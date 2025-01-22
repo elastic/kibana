@@ -13,7 +13,7 @@ import {
   historicalSummaryData,
 } from '../../../data/slo/historical_summary_data';
 import { buildSlo } from '../../../data/slo/slo';
-import type { Props} from './slo_summary';
+import type { Props } from './slo_summary';
 import { SloSummary as Component } from './slo_summary';
 
 export default {

@@ -13,10 +13,9 @@ import { isAstWithMeta } from '@kbn/interpreter';
 import { parse } from '@kbn/interpreter';
 import type {
   ExpressionFunction,
-  ExpressionFunctionParameter} from '@kbn/expressions-plugin/common';
-import {
-  getByAlias,
+  ExpressionFunctionParameter,
 } from '@kbn/expressions-plugin/common';
+import { getByAlias } from '@kbn/expressions-plugin/common';
 
 const MARKER = 'EXPRESSIONS_SUGGESTION_MARKER';
 

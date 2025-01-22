@@ -12,8 +12,7 @@ import { Position } from '@elastic/charts';
 import { AggGroupNames } from '@kbn/data-plugin/public';
 import type { VisTypeDefinition } from '@kbn/visualizations-plugin/public';
 import { VIS_EVENT_TO_TRIGGER } from '@kbn/visualizations-plugin/public';
-import type {
-  PartitionVisParams} from '@kbn/expression-partition-vis-plugin/common';
+import type { PartitionVisParams } from '@kbn/expression-partition-vis-plugin/common';
 import {
   LabelPositions,
   ValueFormats,

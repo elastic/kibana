@@ -5,14 +5,8 @@
  * 2.0.
  */
 import { Chart, Metric, MetricTrendShape, Settings } from '@elastic/charts';
-import type {
-  EuiThemeComputed} from '@elastic/eui';
-import {
-  EuiPanel,
-  EuiSpacer,
-  euiPaletteColorBlindBehindText,
-  useEuiTheme,
-} from '@elastic/eui';
+import type { EuiThemeComputed } from '@elastic/eui';
+import { EuiPanel, EuiSpacer, euiPaletteColorBlindBehindText, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

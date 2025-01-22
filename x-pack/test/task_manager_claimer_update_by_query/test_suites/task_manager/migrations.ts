@@ -11,10 +11,9 @@ import type { TransportResult } from '@elastic/elasticsearch';
 import type {
   ConcreteTaskInstance,
   SerializedConcreteTaskInstance,
-  TaskInstanceWithDeprecatedFields} from '@kbn/task-manager-plugin/server/task';
-import {
-  TaskStatus,
+  TaskInstanceWithDeprecatedFields,
 } from '@kbn/task-manager-plugin/server/task';
+import { TaskStatus } from '@kbn/task-manager-plugin/server/task';
 import { SavedObjectsUtils } from '@kbn/core/server';
 import type { RuleTaskState, WrappedLifecycleRuleState } from '@kbn/alerting-state-types';
 import type { FtrProviderContext } from '../../../common/ftr_provider_context';

@@ -18,12 +18,8 @@ import type {
 } from '../../../common/microsoft_defender_endpoint/types';
 import { MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID } from '../../../common/microsoft_defender_endpoint/constants';
 import { MicrosoftDefenderEndpointConnector } from './microsoft_defender_endpoint';
-import type {
-  ConnectorInstanceMock} from '../lib/mocks';
-import {
-  createAxiosResponseMock,
-  createConnectorInstanceMock,
-} from '../lib/mocks';
+import type { ConnectorInstanceMock } from '../lib/mocks';
+import { createAxiosResponseMock, createConnectorInstanceMock } from '../lib/mocks';
 
 export interface CreateMicrosoftDefenderConnectorMockResponse {
   options: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>;

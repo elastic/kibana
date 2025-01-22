@@ -18,8 +18,7 @@ import {
   EuiIcon,
 } from '@elastic/eui';
 
-import type {
-  FieldConfig} from '../../../../../../../shared_imports';
+import type { FieldConfig } from '../../../../../../../shared_imports';
 import {
   getUseField,
   Field,
@@ -27,7 +26,7 @@ import {
   useForm,
   Form,
   TextField,
-  fieldValidators
+  fieldValidators,
 } from '../../../../../../../shared_imports';
 import { useIsMounted } from '../../../../use_is_mounted';
 import type { Document } from '../../../../types';

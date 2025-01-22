@@ -10,12 +10,8 @@ import React, { useCallback, useContext, useReducer } from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { useKibana } from '../../../../shared_imports';
-import type {
-  DeserializedProcessorResult,
-  DeserializeResult} from '../deserialize';
-import {
-  deserializeVerboseTestOutput
-} from '../deserialize';
+import type { DeserializedProcessorResult, DeserializeResult } from '../deserialize';
+import { deserializeVerboseTestOutput } from '../deserialize';
 import { serialize } from '../serialize';
 import type { Document } from '../types';
 import { useIsMounted } from '../use_is_mounted';

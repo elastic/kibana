@@ -16,7 +16,7 @@ import { VisualizationContainer } from '@kbn/visualizations-plugin/public';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 
 import type { VisTypeVislibCoreSetup } from './plugin';
-import type { VislibRenderValue} from './vis_type_vislib_vis_fn';
+import type { VislibRenderValue } from './vis_type_vislib_vis_fn';
 import { vislibVisName } from './vis_type_vislib_vis_fn';
 import type { VislibChartType } from './types';
 

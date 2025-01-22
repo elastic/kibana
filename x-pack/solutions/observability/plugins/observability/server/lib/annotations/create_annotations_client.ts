@@ -17,10 +17,9 @@ import type {
   CreateAnnotationParams,
   DeleteAnnotationParams,
   FindAnnotationParams,
-  GetByIdAnnotationParams} from '../../../common/annotations';
-import {
-  DEFAULT_ANNOTATION_INDEX
+  GetByIdAnnotationParams,
 } from '../../../common/annotations';
+import { DEFAULT_ANNOTATION_INDEX } from '../../../common/annotations';
 import { createOrUpdateIndex } from '../../utils/create_or_update_index';
 import { unwrapEsResponse } from '../../../common/utils/unwrap_es_response';
 

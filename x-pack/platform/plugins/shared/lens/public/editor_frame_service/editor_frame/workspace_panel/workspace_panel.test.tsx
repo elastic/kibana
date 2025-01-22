@@ -38,7 +38,7 @@ import {
 import { getLensInspectorService } from '../../../lens_inspector_service';
 import { inspectorPluginMock } from '@kbn/inspector-plugin/public/mocks';
 import { disableAutoApply, enableAutoApply } from '../../../state_management/lens_slice';
-import type { Ast} from '@kbn/interpreter';
+import type { Ast } from '@kbn/interpreter';
 import { toExpression } from '@kbn/interpreter';
 import { faker } from '@faker-js/faker';
 

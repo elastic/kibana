@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import type { CollectorFetchContext, UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
+import type {
+  CollectorFetchContext,
+  UsageCollectionSetup,
+} from '@kbn/usage-collection-plugin/server';
 import type { CoreStart, Logger } from '@kbn/core/server';
 import type { CloudDefendPluginStart, CloudDefendPluginStartDeps } from '../../../types';
 import { getIndicesStats } from './indices_stats_collector';

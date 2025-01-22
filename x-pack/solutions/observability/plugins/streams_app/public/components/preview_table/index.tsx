@@ -6,7 +6,7 @@
  */
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { CSSProperties} from 'react';
+import type { CSSProperties } from 'react';
 import React, { useEffect, useMemo, useState } from 'react';
 
 export function PreviewTable({

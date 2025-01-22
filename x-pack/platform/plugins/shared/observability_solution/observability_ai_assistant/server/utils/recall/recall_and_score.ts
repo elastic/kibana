@@ -11,7 +11,7 @@ import { scoreSuggestions } from './score_suggestions';
 import type { Message } from '../../../common';
 import type { ObservabilityAIAssistantClient } from '../../service/client';
 import type { FunctionCallChatFunction } from '../../service/types';
-import type { RecallRanking} from '../../analytics/recall_ranking';
+import type { RecallRanking } from '../../analytics/recall_ranking';
 import { recallRankingEventType } from '../../analytics/recall_ranking';
 import type { RecalledEntry } from '../../service/knowledge_base_service';
 

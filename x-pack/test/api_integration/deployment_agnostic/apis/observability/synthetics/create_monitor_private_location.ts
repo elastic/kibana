@@ -12,10 +12,9 @@ import { formatKibanaNamespace } from '@kbn/synthetics-plugin/common/formatters'
 import type {
   HTTPFields,
   PrivateLocation,
-  ServiceLocation} from '@kbn/synthetics-plugin/common/runtime_types';
-import {
-  ConfigKey
+  ServiceLocation,
 } from '@kbn/synthetics-plugin/common/runtime_types';
+import { ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { omit } from 'lodash';
 import type { PackagePolicy } from '@kbn/fleet-plugin/common';

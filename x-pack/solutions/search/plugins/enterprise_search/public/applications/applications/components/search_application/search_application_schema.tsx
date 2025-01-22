@@ -9,8 +9,7 @@ import React, { useState, useCallback, useMemo } from 'react';
 
 import { useValues } from 'kea';
 
-import type {
-  EuiBasicTableColumn} from '@elastic/eui';
+import type { EuiBasicTableColumn } from '@elastic/eui';
 import {
   EuiBadge,
   EuiBasicTable,

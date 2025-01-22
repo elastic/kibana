@@ -22,9 +22,7 @@ import type {
   FieldFormatConfig,
   IFieldFormatsRegistry,
 } from '@kbn/field-formats-plugin/common';
-import type {
-  CancellationToken,
-  ReportingError} from '@kbn/reporting-common';
+import type { CancellationToken, ReportingError } from '@kbn/reporting-common';
 import {
   AuthenticationExpiredError,
   byteSizeValueToNumber,

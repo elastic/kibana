@@ -15,13 +15,9 @@ import type {
   DataViewFieldBase,
   DataViewBase,
   RangeFilter,
-  PhraseFilter} from '@kbn/es-query';
-import {
-  isExistsFilter,
-  buildExistsFilter,
-  isPhraseFilter,
-  isRangeFilter
+  PhraseFilter,
 } from '@kbn/es-query';
+import { isExistsFilter, buildExistsFilter, isPhraseFilter, isRangeFilter } from '@kbn/es-query';
 
 const INDEX_NAME = 'my-index';
 const MOCKED_INDEX = { id: INDEX_NAME } as unknown as DataViewBase;

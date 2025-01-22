@@ -10,7 +10,7 @@ import { LogicMounter, mockFlashMessageHelpers } from '../../../__mocks__/kea_lo
 import { nextTick } from '@kbn/test-jest-helpers';
 
 import type { AnalyticsCollection } from '../../../../../common/types/analytics';
-import type { HttpError} from '../../../../../common/types/api';
+import type { HttpError } from '../../../../../common/types/api';
 import { Status } from '../../../../../common/types/api';
 
 import { FetchAnalyticsCollectionsAPILogic } from '../../api/index/fetch_analytics_collections_api_logic';

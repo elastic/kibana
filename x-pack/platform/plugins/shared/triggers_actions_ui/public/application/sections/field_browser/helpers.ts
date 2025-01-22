@@ -6,12 +6,8 @@
  */
 
 import type { EcsMetadata } from '@kbn/alerts-as-data-utils/src/field_maps/types';
-import type {
-  DefaultAlertFieldName} from '@kbn/rule-data-utils';
-import {
-  ALERT_CASE_IDS,
-  ALERT_MAINTENANCE_WINDOW_IDS
-} from '@kbn/rule-data-utils';
+import type { DefaultAlertFieldName } from '@kbn/rule-data-utils';
+import { ALERT_CASE_IDS, ALERT_MAINTENANCE_WINDOW_IDS } from '@kbn/rule-data-utils';
 import type { BrowserField, BrowserFields } from '@kbn/rule-registry-plugin/common';
 import { isEmpty } from 'lodash/fp';
 import { CASES, MAINTENANCE_WINDOWS } from '../translations';

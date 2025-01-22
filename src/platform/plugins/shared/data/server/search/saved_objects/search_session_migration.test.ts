@@ -11,10 +11,9 @@ import type {
   SearchSessionSavedObjectAttributesPre$7$13$0,
   SearchSessionSavedObjectAttributesPre$7$14$0,
   SearchSessionSavedObjectAttributesPre$8$0$0,
-  SearchSessionSavedObjectAttributesPre$8$6$0} from './search_session_migration';
-import {
-  searchSessionSavedObjectMigrations
+  SearchSessionSavedObjectAttributesPre$8$6$0,
 } from './search_session_migration';
+import { searchSessionSavedObjectMigrations } from './search_session_migration';
 import type { SavedObject } from '@kbn/core/server';
 import { SEARCH_SESSION_TYPE, SearchSessionStatus, SearchStatus } from '../../../common';
 import type { SavedObjectMigrationContext } from '@kbn/core/server';

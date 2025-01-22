@@ -6,8 +6,7 @@
  */
 
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import type {
-  AggregationBuckets} from './hooks_utils';
+import type { AggregationBuckets } from './hooks_utils';
 import {
   getVulnerabilitiesAggregationCount,
   VULNERABILITIES_RESULT_EVALUATION,

@@ -20,18 +20,8 @@ import {
   takeUntil,
   tap,
 } from 'rxjs';
-import type {
-  Observable} from 'rxjs';
-import {
-  BehaviorSubject,
-  combineLatest,
-  EMPTY,
-  from,
-  merge,
-  of,
-  Subscription,
-  timer,
-} from 'rxjs';
+import type { Observable } from 'rxjs';
+import { BehaviorSubject, combineLatest, EMPTY, from, merge, of, Subscription, timer } from 'rxjs';
 import type {
   PluginInitializerContext,
   StartServicesAccessor,

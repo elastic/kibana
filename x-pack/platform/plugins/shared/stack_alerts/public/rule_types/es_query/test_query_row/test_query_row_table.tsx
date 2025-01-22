@@ -6,8 +6,7 @@
  */
 import React from 'react';
 import { css } from '@emotion/react';
-import type {
-  EuiDataGridColumn} from '@elastic/eui';
+import type { EuiDataGridColumn } from '@elastic/eui';
 import {
   EuiDataGrid,
   EuiPanel,

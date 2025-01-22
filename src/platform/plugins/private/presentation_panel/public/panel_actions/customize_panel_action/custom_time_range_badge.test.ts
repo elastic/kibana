@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Filter, TimeRange} from '@kbn/es-query';
+import type { Filter, TimeRange } from '@kbn/es-query';
 import { type AggregateQuery, type Query } from '@kbn/es-query';
 
 import type { PublishesUnifiedSearch } from '@kbn/presentation-publishing';

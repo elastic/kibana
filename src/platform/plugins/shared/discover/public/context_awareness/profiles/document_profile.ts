@@ -9,7 +9,7 @@
 
 import type { DataTableRecord } from '@kbn/discover-utils';
 import type { Profile } from '../types';
-import type { ContextWithProfileId, ProfileProvider} from '../profile_service';
+import type { ContextWithProfileId, ProfileProvider } from '../profile_service';
 import { ProfileService } from '../profile_service';
 import type { RootContext } from './root_profile';
 import type { DataSourceContext } from './data_source_profile';

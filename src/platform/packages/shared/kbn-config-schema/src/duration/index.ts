@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { Duration} from 'moment';
+import type { Duration } from 'moment';
 import { duration as momentDuration, isDuration } from 'moment';
 export type { Duration };
 export { isDuration };

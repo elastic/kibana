@@ -24,10 +24,9 @@ import type {
   Event,
   Tree,
   TreeNode,
-  RelatedEventInfo} from '@kbn/security-solution-plugin/common/endpoint/generate_data';
-import {
-  categoryMapping,
+  RelatedEventInfo,
 } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
+import { categoryMapping } from '@kbn/security-solution-plugin/common/endpoint/generate_data';
 
 export const HEADERS = Object.freeze({
   'kbn-xsrf': 'security_solution',

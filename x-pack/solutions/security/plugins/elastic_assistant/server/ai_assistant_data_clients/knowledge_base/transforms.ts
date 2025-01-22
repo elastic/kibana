@@ -9,11 +9,9 @@ import type { estypes } from '@elastic/elasticsearch';
 import type {
   DocumentEntry,
   IndexEntry,
-  KnowledgeBaseEntryResponse} from '@kbn/elastic-assistant-common';
-import {
-  DocumentEntryType,
-  IndexEntryType
+  KnowledgeBaseEntryResponse,
 } from '@kbn/elastic-assistant-common';
+import { DocumentEntryType, IndexEntryType } from '@kbn/elastic-assistant-common';
 import type { EsKnowledgeBaseEntrySchema, LegacyEsKnowledgeBaseEntrySchema } from './types';
 
 export const transformESSearchToKnowledgeBaseEntry = (

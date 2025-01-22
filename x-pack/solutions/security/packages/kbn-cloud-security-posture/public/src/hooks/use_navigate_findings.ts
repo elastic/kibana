@@ -13,7 +13,7 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { findingsNavigation } from '../constants/navigation';
 import { useDataView } from './use_data_view';
 import type { CspClientPluginStartDeps } from '../..';
-import type { NavFilter} from '../utils/query_utils';
+import type { NavFilter } from '../utils/query_utils';
 import { encodeQueryUrl, composeQueryFilters } from '../utils/query_utils';
 
 const useNavigate = (pathname: string, dataViewId?: string) => {

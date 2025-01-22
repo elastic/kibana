@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { InferenceConnector} from '@kbn/inference-common';
+import type { InferenceConnector } from '@kbn/inference-common';
 import { InferenceConnectorType } from '@kbn/inference-common';
 
 export const createInferenceConnectorMock = (

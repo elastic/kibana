@@ -7,7 +7,7 @@
 
 import { act } from 'react-dom/test-utils';
 import { setupEnvironment } from '../../helpers';
-import type { RolloverTestBed} from './rollover.helpers';
+import type { RolloverTestBed } from './rollover.helpers';
 import { setupRolloverTestBed } from './rollover.helpers';
 
 describe('<EditPolicy /> rollover', () => {

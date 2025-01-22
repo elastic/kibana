@@ -6,15 +6,14 @@
  */
 
 import React, { Component, Fragment } from 'react';
-import type {
-  EuiSwitchEvent} from '@elastic/eui';
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiFormRow,
   EuiTitle,
   EuiPanel,
   EuiSkeletonText,
   EuiSpacer,
-  EuiSwitch
+  EuiSwitch,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

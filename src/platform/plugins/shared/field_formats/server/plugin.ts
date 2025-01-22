@@ -17,7 +17,7 @@ import type {
 } from '@kbn/core/server';
 import type { FieldFormatsStart, FieldFormatsSetup } from './types';
 import { DateFormat, DateNanosFormat } from './lib/converters';
-import type { FieldFormatInstanceType} from '../common';
+import type { FieldFormatInstanceType } from '../common';
 import { baseFormatters, FieldFormatsRegistry } from '../common';
 import { getUiSettings } from './ui_settings';
 

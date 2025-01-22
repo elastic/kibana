@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback } from 'react';
-import type { IconType} from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { EuiSwitch, EuiFormRow, EuiButtonGroup, EuiSelect } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { isEqual } from 'lodash';

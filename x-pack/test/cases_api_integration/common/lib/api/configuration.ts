@@ -13,10 +13,9 @@ import type {
 import type {
   CaseConnector,
   Configuration,
-  Configurations} from '@kbn/cases-plugin/common/types/domain';
-import {
-  ConnectorTypes,
+  Configurations,
 } from '@kbn/cases-plugin/common/types/domain';
+import { ConnectorTypes } from '@kbn/cases-plugin/common/types/domain';
 import type SuperTest from 'supertest';
 import type { User } from '../authentication/types';
 

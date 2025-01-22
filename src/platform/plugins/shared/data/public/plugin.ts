@@ -10,12 +10,8 @@
 import './index.scss';
 
 import type { PluginInitializerContext, CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import type {
-  IStorageWrapper} from '@kbn/kibana-utils-plugin/public';
-import {
-  Storage,
-  createStartServicesGetter,
-} from '@kbn/kibana-utils-plugin/public';
+import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
+import { Storage, createStartServicesGetter } from '@kbn/kibana-utils-plugin/public';
 import type { ConfigSchema } from '../server/config';
 import type {
   DataPublicPluginSetup,

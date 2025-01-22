@@ -12,11 +12,8 @@ import type { OperatorOption } from '@kbn/securitysolution-list-utils';
 import type { DataViewFieldBase } from '@kbn/es-query';
 
 import { getOperators } from '../get_operators';
-import type {
-  GetGenericComboBoxPropsReturn} from '../get_generic_combo_box_props';
-import {
-  getGenericComboBoxProps
-} from '../get_generic_combo_box_props';
+import type { GetGenericComboBoxPropsReturn } from '../get_generic_combo_box_props';
+import { getGenericComboBoxProps } from '../get_generic_combo_box_props';
 
 const AS_PLAIN_TEXT = { asPlainText: true };
 

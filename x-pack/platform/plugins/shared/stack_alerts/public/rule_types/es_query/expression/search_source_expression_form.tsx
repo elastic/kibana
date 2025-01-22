@@ -16,8 +16,7 @@ import type { SearchBarProps, StatefulSearchBarProps } from '@kbn/unified-search
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { mapAndFlattenFilters, getTime } from '@kbn/data-plugin/public';
 import type { SavedQuery, ISearchSource } from '@kbn/data-plugin/public';
-import type {
-  FieldOption} from '@kbn/triggers-actions-ui-plugin/public/common';
+import type { FieldOption } from '@kbn/triggers-actions-ui-plugin/public/common';
 import {
   BUCKET_SELECTOR_FIELD,
   buildAggregation,

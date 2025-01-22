@@ -7,15 +7,8 @@
 
 import React, { useEffect } from 'react';
 
-import type {
-  EuiAccordionProps} from '@elastic/eui';
-import {
-  EuiAccordion,
-  EuiSpacer,
-  EuiText,
-  EuiLink,
-  EuiCode,
-} from '@elastic/eui';
+import type { EuiAccordionProps } from '@elastic/eui';
+import { EuiAccordion, EuiSpacer, EuiText, EuiLink, EuiCode } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';

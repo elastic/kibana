@@ -23,11 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataViewBase } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
 import { convertToApiThreshold } from '../../helpers/threshold_unit';
-import type {
-  CustomThresholdExpressionMetric} from '../../../../../common/custom_threshold_rule/types';
-import {
-  Aggregators
-} from '../../../../../common/custom_threshold_rule/types';
+import type { CustomThresholdExpressionMetric } from '../../../../../common/custom_threshold_rule/types';
+import { Aggregators } from '../../../../../common/custom_threshold_rule/types';
 
 import type { MetricExpression } from '../../types';
 import type { CustomMetrics, AggregationTypes, NormalizedFields } from './types';

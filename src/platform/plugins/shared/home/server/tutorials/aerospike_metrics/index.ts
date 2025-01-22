@@ -15,10 +15,9 @@ import {
 } from '../instructions/metricbeat_instructions';
 import type {
   TutorialContext,
-  TutorialSchema} from '../../services/tutorials/lib/tutorials_registry_types';
-import {
-  TutorialsCategory
+  TutorialSchema,
 } from '../../services/tutorials/lib/tutorials_registry_types';
+import { TutorialsCategory } from '../../services/tutorials/lib/tutorials_registry_types';
 
 export function aerospikeMetricsSpecProvider(context: TutorialContext): TutorialSchema {
   const moduleName = 'aerospike';

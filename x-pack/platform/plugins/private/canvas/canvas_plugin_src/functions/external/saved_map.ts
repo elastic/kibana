@@ -9,12 +9,8 @@ import type { ExpressionFunctionDefinition } from '@kbn/expressions-plugin/commo
 import type { MapSerializedState } from '@kbn/maps-plugin/public';
 import type { SavedObjectReference } from '@kbn/core/types';
 import type { ExpressionValueFilter, MapCenter, TimeRange as TimeRangeArg } from '../../../types';
-import type {
-  EmbeddableExpression} from '../../expression_types';
-import {
-  EmbeddableTypes,
-  EmbeddableExpressionType
-} from '../../expression_types';
+import type { EmbeddableExpression } from '../../expression_types';
+import { EmbeddableTypes, EmbeddableExpressionType } from '../../expression_types';
 import { getFunctionHelp } from '../../../i18n';
 
 interface Arguments {

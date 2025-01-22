@@ -10,7 +10,7 @@
 import dateMath from '@kbn/datemath';
 import classNames from 'classnames';
 import { css } from '@emotion/react';
-import type { ReactNode} from 'react';
+import type { ReactNode } from 'react';
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import deepEqual from 'fast-deep-equal';
 import useObservable from 'react-use/lib/useObservable';
@@ -25,10 +25,7 @@ import { ESQLLangEditor } from '@kbn/esql/public';
 import { EMPTY } from 'rxjs';
 import { map } from 'rxjs';
 import { throttle } from 'lodash';
-import type {
-  EuiFieldText,
-  EuiIconProps,
-  OnRefreshProps} from '@elastic/eui';
+import type { EuiFieldText, EuiIconProps, OnRefreshProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -44,7 +41,7 @@ import {
 import { i18n } from '@kbn/i18n';
 import { getQueryLog } from '@kbn/data-plugin/public';
 import type { DataView } from '@kbn/data-views-plugin/public';
-import type { PersistedLog , TimeHistoryContract} from '@kbn/data-plugin/public';
+import type { PersistedLog, TimeHistoryContract } from '@kbn/data-plugin/public';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { UI_SETTINGS } from '@kbn/data-plugin/common';
 import type { IUnifiedSearchPluginServices } from '../types';

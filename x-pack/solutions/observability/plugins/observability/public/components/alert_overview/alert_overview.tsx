@@ -14,8 +14,7 @@ import {
   EuiHorizontalRule,
   EuiInMemoryTable,
 } from '@elastic/eui';
-import type {
-  AlertStatus} from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_CASE_IDS,
   ALERT_DURATION,
@@ -39,11 +38,8 @@ import type { TopAlert } from '../../typings/alerts';
 import { useFetchBulkCases } from '../../hooks/use_fetch_bulk_cases';
 import { useCaseViewNavigation } from '../../hooks/use_case_view_navigation';
 import { useKibana } from '../../utils/kibana_react';
-import type {
-  FlyoutThresholdData} from './helpers/map_rules_params_with_flyout';
-import {
-  mapRuleParamsWithFlyout,
-} from './helpers/map_rules_params_with_flyout';
+import type { FlyoutThresholdData } from './helpers/map_rules_params_with_flyout';
+import { mapRuleParamsWithFlyout } from './helpers/map_rules_params_with_flyout';
 import { ColumnIDs, overviewColumns } from './overview_columns';
 import { getSources } from '../alert_sources/get_sources';
 import { RULE_DETAILS_PAGE_ID } from '../../pages/rule_details/constants';

@@ -16,7 +16,7 @@ import {
   Settings,
   LEGACY_LIGHT_THEME,
 } from '@elastic/charts';
-import type { EuiComboBoxOptionOption} from '@elastic/eui';
+import type { EuiComboBoxOptionOption } from '@elastic/eui';
 import { EuiThemeProvider } from '@elastic/eui';
 import type { TimeRangeBounds } from '@kbn/data-plugin/common';
 import { i18n } from '@kbn/i18n';

@@ -11,8 +11,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiText, useEuiTheme, EuiToolTip } 
 import { AlertLifecycleStatusBadge } from '@kbn/alerts-ui-shared';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type {
-  AlertStatus} from '@kbn/rule-data-utils';
+import type { AlertStatus } from '@kbn/rule-data-utils';
 import {
   ALERT_DURATION,
   ALERT_FLAPPING,

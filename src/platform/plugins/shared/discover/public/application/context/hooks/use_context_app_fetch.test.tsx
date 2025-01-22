@@ -13,7 +13,7 @@ import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_ma
 import { CONTEXT_TIE_BREAKER_FIELDS_SETTING } from '@kbn/discover-utils';
 import type { DiscoverServices } from '../../../build_services';
 import { FailureReason, LoadingStatus } from '../services/context_query_state';
-import type { ContextAppFetchProps} from './use_context_app_fetch';
+import type { ContextAppFetchProps } from './use_context_app_fetch';
 import { useContextAppFetch } from './use_context_app_fetch';
 import {
   mockAnchorHit,

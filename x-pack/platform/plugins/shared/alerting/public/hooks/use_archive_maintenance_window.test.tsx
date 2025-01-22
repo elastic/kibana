@@ -7,7 +7,7 @@
 
 import { waitFor, renderHook, act } from '@testing-library/react';
 
-import type { AppMockRenderer} from '../lib/test_utils';
+import type { AppMockRenderer } from '../lib/test_utils';
 import { createAppMockRenderer } from '../lib/test_utils';
 import { useArchiveMaintenanceWindow } from './use_archive_maintenance_window';
 

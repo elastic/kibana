@@ -8,7 +8,7 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import type { StateComparators} from '@kbn/presentation-publishing';
+import type { StateComparators } from '@kbn/presentation-publishing';
 import { initializeTitles } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import type { DashboardSettings, DashboardState } from './types';

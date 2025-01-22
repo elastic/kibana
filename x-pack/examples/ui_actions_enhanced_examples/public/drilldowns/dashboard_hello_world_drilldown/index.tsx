@@ -8,12 +8,8 @@
 import React from 'react';
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import type { UiActionsEnhancedDrilldownDefinition as Drilldown } from '@kbn/ui-actions-enhanced-plugin/public';
-import type {
-  ChartActionContext} from '@kbn/embeddable-plugin/public';
-import {
-  SELECT_RANGE_TRIGGER,
-  VALUE_CLICK_TRIGGER,
-} from '@kbn/embeddable-plugin/public';
+import type { ChartActionContext } from '@kbn/embeddable-plugin/public';
+import { SELECT_RANGE_TRIGGER, VALUE_CLICK_TRIGGER } from '@kbn/embeddable-plugin/public';
 import type { CollectConfigProps } from '@kbn/kibana-utils-plugin/public';
 
 export type ActionContext = ChartActionContext;

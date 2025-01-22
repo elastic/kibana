@@ -7,11 +7,9 @@
 
 import type {
   DynamicSettings,
-  DynamicSettingsSaveResponse} from '../../../../common/runtime_types';
-import {
-  DynamicSettingsCodec,
-  DynamicSettingsSaveCodec,
+  DynamicSettingsSaveResponse,
 } from '../../../../common/runtime_types';
+import { DynamicSettingsCodec, DynamicSettingsSaveCodec } from '../../../../common/runtime_types';
 import { apiService } from './utils';
 import { API_URLS, INITIAL_REST_VERSION } from '../../../../common/constants';
 

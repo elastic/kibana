@@ -7,19 +7,17 @@
 
 import expect from '@kbn/expect';
 import sinon from 'sinon';
-import type {
-  LogThresholdAlertReporter} from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
+import type { LogThresholdAlertReporter } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
 import {
   executeAlert,
-  executeRatioAlert
+  executeRatioAlert,
 } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
 import type {
   TimeUnit,
   RatioCriteria,
-  RuleParams} from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
-import {
-  Comparator
+  RuleParams,
 } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
+import { Comparator } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
 import { DATES } from './utils/constants';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 

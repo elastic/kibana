@@ -9,14 +9,8 @@
 
 import type { IUiSettingsClient } from '@kbn/core/public';
 import type { IStorageWrapper } from '@kbn/kibana-utils-plugin/public';
-import type {
-  TimeHistoryContract,
-  TimefilterContract,
-  TimefilterConfig} from '.';
-import {
-  TimeHistory,
-  Timefilter
-} from '.';
+import type { TimeHistoryContract, TimefilterContract, TimefilterConfig } from '.';
+import { TimeHistory, Timefilter } from '.';
 import { UI_SETTINGS } from '../../../common';
 import type { NowProviderInternalContract } from '../../now_provider';
 

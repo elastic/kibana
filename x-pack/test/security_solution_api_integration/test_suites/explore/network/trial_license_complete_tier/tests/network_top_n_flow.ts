@@ -8,12 +8,13 @@
 import expect from '@kbn/expect';
 import type {
   NetworkTopNFlowEdges,
-  NetworkTopNFlowStrategyResponse} from '@kbn/security-solution-plugin/common/search_strategy';
+  NetworkTopNFlowStrategyResponse,
+} from '@kbn/security-solution-plugin/common/search_strategy';
 import {
   NetworkQueries,
   Direction,
   FlowTargetSourceDest,
-  NetworkTopTablesFields
+  NetworkTopTablesFields,
 } from '@kbn/security-solution-plugin/common/search_strategy';
 import type TestAgent from 'supertest/lib/agent';
 import type { SearchService } from '@kbn/ftr-common-functional-services';

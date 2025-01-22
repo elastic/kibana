@@ -21,7 +21,11 @@ import type {
   ExpressionRendererEvent,
 } from './types';
 import { renderErrorHandler as defaultRenderErrorHandler } from './render_error_handler';
-import type { IInterpreterRenderHandlers, IInterpreterRenderUpdateParams, RenderMode } from '../common';
+import type {
+  IInterpreterRenderHandlers,
+  IInterpreterRenderUpdateParams,
+  RenderMode,
+} from '../common';
 
 import { getRenderersRegistry } from './services';
 

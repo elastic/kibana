@@ -7,8 +7,7 @@
 
 import React from 'react';
 
-import type {
-  EuiSelectableOption} from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
