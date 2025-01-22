@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+import { API_BASE_PATH } from '../../common/constants';
 import { RouteDependencies } from '../types';
 
 export const register = ({ router, getLicenseStatus, log }: RouteDependencies) => {
@@ -50,6 +51,54 @@ export const register = ({ router, getLicenseStatus, log }: RouteDependencies) =
           body: {
             ok: true,
             resp,
+          },
+        });
+      } catch (err) {
+        log.error(err);
+        const { statusCode, body: errorBody } = err;
+
+        return response.customError({
+          statusCode: statusCode || 500,
+          body: errorBody
+            ? {
+                message: errorBody.error?.reason,
+                attributes: errorBody,
+              }
+            : err,
+        });
+      }
+    }
+  );
+  router.get(
+    {
+      path: `${API_BASE_PATH}/has_indices`,
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'Relies on es client for authorization',
+        },
+      },
+      validate: false,
+    },
+    async (ctx, _request, response) => {
+      const currentLicenseStatus = getLicenseStatus();
+      if (!currentLicenseStatus.valid) {
+        return response.forbidden({
+          body: {
+            message: currentLicenseStatus.message!,
+          },
+        });
+      }
+
+      try {
+        const client = (await ctx.core).elasticsearch.client.asCurrentUser;
+        const resp = await client.cat.indices({ format: 'json' });
+
+        const hasIndices = resp.length > 0;
+
+        return response.ok({
+          body: {
+            hasIndices,
           },
         });
       } catch (err) {
