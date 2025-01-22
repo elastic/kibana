@@ -13,6 +13,8 @@ if ! command -v curl >/dev/null 2>&1; then
   fail "curl is required to run this script"
 fi
 
+update_step_progress "logs-detect" "initialize"
+
 # Check if the `lsof` command exists in PATH, if not use `/usr/sbin/lsof` if possible
 LSOF_PATH=""
 if command -v lsof >/dev/null 2>&1; then
@@ -122,6 +124,7 @@ elif [ "${OS}" == "Darwin" ]; then
   fi
   elastic_agent_config_path=/Library/Elastic/Agent/elastic-agent.yml
 else
+  update_step_progress "logs-detect" "danger" "Unable to run auto-detect script on \"${os} (${arch})\""
   fail "This script is only supported on Linux and macOS"
 fi
 
@@ -244,7 +247,7 @@ backup_elastic_agent_config() {
       if [ "$?" -eq 0 ]; then
         printf "\n\e[32;1m✓\e[0m %s \e[36m%s\e[0m\n" "Backup saved to" "$backup_path"
       else
-        update_step_progress "ea-config" "warning" "Failed to backup existing configuration"
+        update_step_progress "ea-config" "danger" "Failed to backup existing configuration"
         fail "Failed to backup existing config - Try manually creating a backup or delete your existing config before re-running this script"
       fi
     else
@@ -289,7 +292,7 @@ install_integrations() {
   if [ "$?" -eq 0 ]; then
     printf "\n\e[32;1m✓\e[0m %s\n" "Integrations installed"
   else
-    update_step_progress "ea-config" "warning" "Failed to install integrations"
+    update_step_progress "install-integrations" "danger" "Failed to install integrations"
     fail "Failed to install integrations"
   fi
 }
@@ -318,7 +321,7 @@ apply_elastic_agent_config() {
 
     update_step_progress "ea-config" "complete"
   else
-    update_step_progress "ea-config" "warning" "Failed to configure Elastic Agent"
+    update_step_progress "ea-config" "danger" "Failed to configure Elastic Agent"
     fail "Failed to configure Elastic Agent"
   fi
 }
@@ -588,7 +591,7 @@ generate_custom_integration_name() {
 }
 
 printf "\e[1m%s\e[0m\n" "Looking for log files..."
-update_step_progress "logs-detect" "loading"
+update_step_progress "logs-detect" "loading" "" "{\"os\": \"${os}\", \"arch\": \"${arch}\"}"
 detect_known_integrations
 
 # Check if LSOF_PATH is executable
@@ -596,6 +599,7 @@ if [ -x "$LSOF_PATH" ]; then
   read_open_log_file_list
   build_unknown_log_file_patterns
 else
+  update_step_progress "logs-detect" "warning" "lsof is not available on the host"
   echo -e "\nlsof is required to detect custom log files. Looking for known integrations only."
 fi
 
