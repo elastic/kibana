@@ -17,10 +17,8 @@ export interface ContentReferenceNode extends Node {
   contentReferenceBlock: ContentReferenceBlock;
 }
 
-const START_SIGNAL = '{reference';
-
 /**
- * Parses `{reference(contentReferenceId)}` into ContentReferenceNode
+ * Parses `{reference(contentReferenceId)}` or ` {reference(contentReferenceId)}` (notice space prefix) into ContentReferenceNode
  */
 export const ContentReferenceParser: Plugin = function ContentReferenceParser() {
   const Parser = this.Parser;
@@ -35,15 +33,14 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
     value,
     silent
   ) {
-    if (value.startsWith(START_SIGNAL) === false) return false;
+    const [match] = value.match(/^\s?{reference/) || [];
+    if (!match) return false;
 
     if (value.includes('\n')) return false;
 
-    const nextChar = value[START_SIGNAL.length];
+    if (value[match.length] !== '(') return false;
 
-    if (nextChar !== '(') return false;
-
-    let index = START_SIGNAL.length;
+    let index = match.length;
 
     function readArg(open: string, close: string) {
       if (value[index] !== open) return '';
@@ -72,15 +69,15 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
 
     const contentReferenceId = readArg('(', ')');
 
-    const lastChar = value[index];
-    if (lastChar !== '}') return false;
+    const closeChar = value[index++];
+    if (closeChar !== '}') return false;
 
     const now = eat.now();
 
     if (!contentReferenceId) {
       this.file.info('No content reference id found', {
         line: now.line,
-        column: now.column + START_SIGNAL.length + 1,
+        column: now.column + match.length + 1,
       });
     }
 
@@ -92,8 +89,8 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
       return true;
     }
 
-    now.column += START_SIGNAL.length + 1;
-    now.offset += START_SIGNAL.length + 1;
+    now.column += match.length + 1;
+    now.offset += match.length + 1;
 
     const contentReferenceBlock: ContentReferenceBlock = `{reference(${contentReferenceId})}`;
 
@@ -105,7 +102,9 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
       return contentReferenceCounts[id];
     };
 
-    return eat(contentReferenceBlock)({
+    const toEat = `${match.startsWith(' ') ? ' ' : ''}${contentReferenceBlock}`;
+
+    return eat(toEat)({
       type: 'contentReference',
       contentReferenceId,
       contentReferenceCount: getContentReferenceCount(contentReferenceId),
@@ -116,7 +115,7 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
   tokenizeCustomCitation.notInLink = true;
 
   tokenizeCustomCitation.locator = (value, fromIndex) => {
-    return value.indexOf(START_SIGNAL, fromIndex);
+    return 1 + (value.substring(fromIndex).match(/\s?{reference/)?.index ?? -2);
   };
 
   tokenizers.contentReference = tokenizeCustomCitation;

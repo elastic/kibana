@@ -141,7 +141,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         </EuiContextMenuItem>,
         <EuiPanel color="transparent" paddingSize="s" key={'chat-options-panel'}>
           <EuiTitle size="xxxs" key={'chat-options-title'}>
-            <h3>Chat options</h3>
+            <h3>{i18n.CHAT_OPTIONS}</h3>
           </EuiTitle>
           <EuiHorizontalRule margin="none" />
           <EuiToolTip

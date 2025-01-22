@@ -70,6 +70,13 @@ export const SHOW_CITATIONS = i18n.translate(
   }
 );
 
+export const CHAT_OPTIONS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.chatOptions.label',
+  {
+    defaultMessage: 'Chat options',
+  }
+);
+
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 export const ANONYMIZE_VALUES_SHORTCUT = i18n.translate(
