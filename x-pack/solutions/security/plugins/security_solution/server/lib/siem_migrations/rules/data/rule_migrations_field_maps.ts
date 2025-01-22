@@ -58,7 +58,7 @@ export const integrationsFieldMap: FieldMap<SchemaFieldMapKeys<RuleMigrationInte
   id: { type: 'keyword', required: true },
   title: { type: 'text', required: true },
   description: { type: 'text', required: true },
-  data_streams: { type: 'nested', array: true, required: true },
+  data_streams: { type: 'object', array: true, required: true },
   'data_streams.dataset': { type: 'keyword', required: true },
   'data_streams.title': { type: 'text', required: true },
   'data_streams.index_pattern': { type: 'keyword', required: true },
