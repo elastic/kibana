@@ -27,7 +27,9 @@ steps:
       - echo "Manually fetching Kibana with SHA=$BUILDKITE_COMMIT..."
       - wget -q "https://github.com/elastic/kibana/archive/$BUILDKITE_COMMIT.tar.gz" -O "kibana.tar.gz"
       - echo "Extracting Kibana archive..."
-      - tar -xvzf kibana.tar.gz
+      - tar -xzf kibana.tar.gz
+      - echo "Setting executable permissions for the script..."
+      - chmod +x kibana-$BUILDKITE_COMMIT/.buildkite/scripts/steps/functional/performance_playwright.sh
       - echo "Running Performance Playwright script..."
       - ./kibana-$BUILDKITE_COMMIT/.buildkite/scripts/steps/functional/performance_playwright.sh
     env:
