@@ -9,7 +9,8 @@ import React from 'react';
 
 import { EuiHealth, EuiTextColor, transparentize } from '@elastic/eui';
 
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import { euiLightVars } from '@kbn/ui-theme';
 
 import { RISK_SEVERITY_COLOUR } from '../../../common/utils';
@@ -17,21 +18,21 @@ import { HoverPopover } from '../../../../common/components/hover_popover';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
 const RiskBadge = styled.div<{ $severity: RiskSeverity; $hideBackgroundColor: boolean }>`
-  ${({ theme, $severity, $hideBackgroundColor }) => css`
+  ${({ theme: { euiTheme }, $severity, $hideBackgroundColor }) => css`
     width: fit-content;
-    padding-right: ${theme.eui.euiSizeS};
-    padding-left: ${theme.eui.euiSizeXS};
+    padding-right: ${euiTheme.size.s};
+    padding-left: ${euiTheme.size.xs};
 
     ${($severity === 'Critical' || $severity === 'High') &&
     !$hideBackgroundColor &&
     css`
-      background-color: ${transparentize(theme.eui.euiColorDanger, 0.2)};
+      background-color: ${transparentize(euiTheme.colors.danger, 0.2)};
       border-radius: 999px; // pill shaped
     `};
   `}
 `;
 const TooltipContainer = styled.div`
-  padding: ${({ theme }) => theme.eui.euiSizeS};
+  padding: ${({ theme: { euiTheme } }) => euiTheme.size.s};
 `;
 
 export const RiskScoreLevel: React.FC<{

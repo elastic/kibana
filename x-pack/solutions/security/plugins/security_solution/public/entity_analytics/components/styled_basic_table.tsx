@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 import { EuiBasicTable } from '@elastic/eui';
 
 // @ts-expect-error TS2769
