@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 
 import type { ExperimentalFeatures } from '../../../common';
 
@@ -18,12 +18,7 @@ interface AssetInventoryClientOpts {
 // AssetInventoryDataClient is responsible for managing the asset inventory,
 // including initializing and cleaning up resources such as Elasticsearch ingest pipelines.
 export class AssetInventoryDataClient {
-  private esClient: ElasticsearchClient;
-
-  constructor(private readonly options: AssetInventoryClientOpts) {
-    const { clusterClient } = options;
-    this.esClient = clusterClient.asCurrentUser;
-  }
+  constructor(private readonly options: AssetInventoryClientOpts) {}
 
   // Enables the asset inventory by deferring the initialization to avoid blocking the main thread.
   public async enable() {
