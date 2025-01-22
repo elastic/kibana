@@ -61,5 +61,6 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./sentinelone_connector')),
     actionParamsFields: lazy(() => import('./sentinelone_params')),
+    subFeature: 'endpointSecurity',
   };
 }

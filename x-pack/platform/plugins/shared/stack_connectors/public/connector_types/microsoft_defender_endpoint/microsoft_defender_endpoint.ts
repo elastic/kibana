@@ -61,5 +61,6 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./microsoft_defender_endpoint_connector')),
     actionParamsFields: lazy(() => import('./microsoft_defender_endpoint_params')),
+    subFeature: 'endpointSecurity',
   };
 }

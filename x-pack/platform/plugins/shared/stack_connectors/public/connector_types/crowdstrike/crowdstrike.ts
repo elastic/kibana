@@ -61,5 +61,6 @@ export function getConnectorType(): ConnectorTypeModel<
     },
     actionConnectorFields: lazy(() => import('./crowdstrike_connector')),
     actionParamsFields: lazy(() => import('./crowdstrike_params')),
+    subFeature: 'endpointSecurity',
   };
 }
