@@ -231,7 +231,9 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             ],
                           },
                         },
-                        unsupported: {},
+                        unsupported: {
+                          type: 'final',
+                        },
                         errorFetchingFailedDocs: {},
                         doneFetchingFailedDocs: {
                           type: 'final',
