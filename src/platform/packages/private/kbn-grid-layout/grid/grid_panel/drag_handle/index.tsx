@@ -41,7 +41,8 @@ export const DragHandle = React.forwardRef<
       for (const handle of dragHandles) {
         if (handle === null) return;
         handle.addEventListener('mousedown', startInteraction, { passive: true });
-        handle.addEventListener('touchstart', startInteraction, { passive: false });
+        handle.addEventListener('touchstart', startInteraction);
+        handle.style.touchAction = 'none';
       }
       removeEventListenersRef.current = () => {
         for (const handle of dragHandles) {

@@ -48,7 +48,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         grid-column-end: ${initialPanel.column + 1 + initialPanel.width};
         grid-row-start: ${initialPanel.row + 1};
         grid-row-end: ${initialPanel.row + 1 + initialPanel.height};
-        touch-action: none;
       `;
     }, [gridLayoutStateManager, rowIndex, panelId]);
 
