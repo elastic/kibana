@@ -190,7 +190,7 @@ export default function ({ getService }: FtrProviderContext) {
         .auth(username, password)
         .set('kbn-xsrf', 'true')
         .send({ ...location, spaces: [SPACE_ID] });
-      expect(response.status).to.be(400);
+      expect(response1.status).to.be(400);
     });
   });
 }
