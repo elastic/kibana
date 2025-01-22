@@ -499,7 +499,7 @@ export const UnifiedDataTable = ({
   rowLineHeightOverride,
   customGridColumnsConfiguration,
   enableComparisonMode,
-  enableInTableSearch,
+  enableInTableSearch = false,
   cellContext,
   renderCellPopover,
   getRowIndicator,

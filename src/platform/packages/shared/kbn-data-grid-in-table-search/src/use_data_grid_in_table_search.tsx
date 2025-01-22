@@ -37,7 +37,7 @@ export const useDataGridInTableSearch = (
   props: UseDataGridInTableSearchProps
 ): UseDataGridInTableSearchReturn => {
   const {
-    enableInTableSearch,
+    enableInTableSearch = true,
     dataGridWrapper,
     dataGridRef,
     visibleColumns,
