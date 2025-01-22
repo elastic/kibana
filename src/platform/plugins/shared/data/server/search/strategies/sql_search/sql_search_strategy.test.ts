@@ -84,7 +84,6 @@ describe('SQL search strategy', () => {
         const [request, searchOptions] = mockSqlQuery.mock.calls[0];
         expect(request).toEqual({
           format: 'json',
-          keep_alive: '60000ms',
           keep_on_completion: false,
           query:
             'SELECT customer_first_name FROM kibana_sample_data_ecommerce ORDER BY order_date DESC',
@@ -194,7 +193,7 @@ describe('SQL search strategy', () => {
     });
 
     describe('with sessionId (until SQL ignores session Id)', () => {
-      it('makes a POST request with params (long keepalive)', async () => {
+      it('makes a POST request with params', async () => {
         mockSqlQuery.mockResolvedValueOnce(mockSqlResponse);
         const params: SqlSearchStrategyRequest['params'] = {
           query:
@@ -209,10 +208,9 @@ describe('SQL search strategy', () => {
         expect(request.query).toEqual(params.query);
 
         expect(request).toHaveProperty('wait_for_completion_timeout');
-        expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
-      it('makes a GET request to async search with keepalive', async () => {
+      it('makes a GET request to async search', async () => {
         mockSqlGetAsync.mockResolvedValueOnce(mockSqlResponse);
 
         const params: SqlSearchStrategyRequest['params'] = {
@@ -228,7 +226,6 @@ describe('SQL search strategy', () => {
         const request = mockSqlGetAsync.mock.calls[0][0];
         expect(request.id).toEqual('foo');
         expect(request).toHaveProperty('wait_for_completion_timeout');
-        expect(request).toHaveProperty('keep_alive', '60000ms');
       });
     });
 
