@@ -128,7 +128,7 @@ export default function ({ getService }: FtrProviderContext) {
         });
 
         describe('with logs-*-* index pattern', () => {
-          const logsdbTemplateName = 'logs';
+          const logsdbTemplateName = 'test-logsdb-template';
           before(async () => {
             const template = svlTemplatesHelpers.getTemplatePayload(logsdbTemplateName, [
               'logs-*-*',
