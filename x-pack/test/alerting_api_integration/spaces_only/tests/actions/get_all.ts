@@ -75,7 +75,6 @@ export default function getAllConnectorsTests({ getService }: FtrProviderContext
           is_deprecated: false,
           is_preconfigured: true,
           is_system_action: false,
-          config: { from: 'me@test.com', service: '__json' },
           name: 'Notification Email Connector',
           referenced_by_count: 0,
         },
