@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import classNames from 'classnames';
 import { usePopperTooltip } from 'react-popper-tooltip';
 
@@ -92,27 +92,30 @@ export const FormattedTooltip: FC<{ tooltipData: TooltipData }> = ({ tooltipData
  */
 const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) => {
   const [tooltipData, setData] = useState<TooltipData>([]);
-  const refCallback = useRef<HTMLElement | null>();
 
-  const { getTooltipProps, setTooltipRef, setTriggerRef } = usePopperTooltip({
-    modifiers: [
-      {
-        name: 'preventOverflow',
-        options: {
-          rootBoundary: 'viewport',
+  const { getTooltipProps, setTooltipRef, setTriggerRef } = usePopperTooltip(
+    {
+      placement: 'top-start',
+      trigger: null,
+      delayHide: 1000,
+    },
+    {
+      modifiers: [
+        {
+          name: 'preventOverflow',
+          options: {
+            rootBoundary: 'viewport',
+          },
         },
-      },
-    ],
-    placement: 'top-start',
-    trigger: null,
-    delayHide: 1000,
-  });
+      ],
+    }
+  );
 
   useEffect(() => {
     const subscription = service.tooltipState$.subscribe((tooltipState) => {
-      if (refCallback.current && typeof refCallback.current === 'function') {
+      if (setTriggerRef && typeof setTriggerRef === 'function') {
         // update trigger
-        refCallback.current(tooltipState.target);
+        setTriggerRef(tooltipState.target);
       }
       setData(tooltipState.tooltipData);
     });
@@ -121,12 +124,6 @@ const Tooltip: FC<{ service: ChartTooltipService }> = React.memo(({ service }) =
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  useEffect(() => {
-    // obtain the reference to the trigger setter callback
-    // to update the target based on changes from the service.
-    refCallback.current = setTriggerRef;
-  }, [setTriggerRef]);
 
   const isTooltipShown = tooltipData.length > 0;
 
