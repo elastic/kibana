@@ -623,6 +623,13 @@ export default async function ({ readConfigFile }) {
               'manage_slm',
               'cluster:admin/snapshot',
               'cluster:admin/repository',
+              'manage_index_templates',
+            ],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
             ],
           },
           kibana: [

@@ -9,7 +9,7 @@ import {
   IndicesPutIndexTemplateRequest,
   MappingTypeMapping,
   Metadata,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { isEmpty } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';
@@ -57,42 +57,40 @@ export const getIndexTemplate = ({
 
   return {
     name: indexPatterns.template,
-    body: {
-      ...(dataStreamFields.data_stream ? { data_stream: dataStreamFields.data_stream } : {}),
-      index_patterns: dataStreamFields.index_patterns,
-      composed_of: componentTemplateRefs,
-      template: {
-        settings: {
-          auto_expand_replicas: '0-1',
-          hidden: true,
-          ...(dataStreamAdapter.isUsingDataStreams()
-            ? {}
-            : {
-                'index.lifecycle': indexLifecycle,
-              }),
-          'index.mapping.ignore_malformed': true,
-          'index.mapping.total_fields.limit': totalFieldsLimit,
-        },
-        mappings: {
-          dynamic: false,
-          _meta: indexMetadata,
-        },
-        ...(indexPatterns.secondaryAlias
-          ? {
-              aliases: {
-                [indexPatterns.secondaryAlias]: {
-                  is_write_index: false,
-                },
-              },
-            }
-          : {}),
+    ...(dataStreamFields.data_stream ? { data_stream: dataStreamFields.data_stream } : {}),
+    index_patterns: dataStreamFields.index_patterns,
+    composed_of: componentTemplateRefs,
+    template: {
+      settings: {
+        auto_expand_replicas: '0-1',
+        hidden: true,
+        ...(dataStreamAdapter.isUsingDataStreams()
+          ? {}
+          : {
+              'index.lifecycle': indexLifecycle,
+            }),
+        'index.mapping.ignore_malformed': true,
+        'index.mapping.total_fields.limit': totalFieldsLimit,
       },
-      _meta: indexMetadata,
-
-      // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
-      // then newly created indices will use the matching template with the *longest* namespace
-      priority: namespace.length,
+      mappings: {
+        dynamic: false,
+        _meta: indexMetadata,
+      },
+      ...(indexPatterns.secondaryAlias
+        ? {
+            aliases: {
+              [indexPatterns.secondaryAlias]: {
+                is_write_index: false,
+              },
+            },
+          }
+        : {}),
     },
+    _meta: indexMetadata,
+
+    // By setting the priority to namespace.length, we ensure that if one namespace is a prefix of another namespace
+    // then newly created indices will use the matching template with the *longest* namespace
+    priority: namespace.length,
   };
 };
 
