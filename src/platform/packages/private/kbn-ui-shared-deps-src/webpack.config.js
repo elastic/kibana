@@ -19,8 +19,10 @@ const UiSharedDepsNpm = require('@kbn/ui-shared-deps-npm');
 const { distDir: UiSharedDepsSrcDistDir } = require('./src/definitions');
 
 const MOMENT_SRC = require.resolve('moment/min/moment-with-locales.js');
-
-const REPO_ROOT = Path.resolve(__dirname, '..', '..', '..', '..', '..');
+const REPO_ROOT = require('child_process')
+  .execSync('git rev-parse --show-toplevel')
+  .toString()
+  .trim();
 
 module.exports = {
   node: {
