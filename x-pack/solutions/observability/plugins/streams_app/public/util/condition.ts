@@ -5,10 +5,32 @@
  * 2.0.
  */
 
-import type { BinaryFilterCondition } from '@kbn/streams-schema';
+import {
+  isAlwaysCondition,
+  type AlwaysCondition,
+  type BinaryFilterCondition,
+  type Condition,
+} from '@kbn/streams-schema';
+import { cloneDeep, isEqual } from 'lodash';
 
-export const EMPTY_EQUALS_CONDITION: BinaryFilterCondition = {
+export const EMPTY_EQUALS_CONDITION: BinaryFilterCondition = Object.freeze({
   field: '',
   operator: 'eq',
   value: '',
-};
+});
+
+export function alwaysToEmptyEquals<T extends Condition>(condition: T): Exclude<T, AlwaysCondition>;
+
+export function alwaysToEmptyEquals(condition: Condition) {
+  if (isAlwaysCondition(condition)) {
+    return cloneDeep(EMPTY_EQUALS_CONDITION);
+  }
+  return condition;
+}
+
+export function emptyEqualsToAlways(condition: Condition) {
+  if (isEqual(condition, EMPTY_EQUALS_CONDITION)) {
+    return { always: {} };
+  }
+  return condition;
+}

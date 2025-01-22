@@ -22,7 +22,7 @@ import { htmlIdGenerator } from '@elastic/eui';
 import { isEqual, omit } from 'lodash';
 import { DetectedField, EnrichmentUIProcessorDefinition, ProcessingDefinition } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
-import { EMPTY_EQUALS_CONDITION } from '../../../util/condition';
+import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
 export const useDefinition = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
   const { core, dependencies } = useKibana();
@@ -142,7 +142,7 @@ const createProcessorsList = (
 const createProcessorWithId = (
   processor: ProcessorDefinition
 ): EnrichmentUIProcessorDefinition => ({
-  condition: getProcessorConfig(processor).if,
+  condition: alwaysToEmptyEquals(getProcessorConfig(processor).if),
   config: {
     ...('grok' in processor
       ? { grok: omit(processor.grok, 'if') }
@@ -156,20 +156,18 @@ const convertUiDefinitionIntoApiDefinition = (
 ): ProcessorDefinition => {
   const { id: _id, config, condition } = processor;
 
-  const validCondition = isEqual(EMPTY_EQUALS_CONDITION, condition) ? { always: {} } : condition;
-
   if ('grok' in config) {
     return {
       grok: {
         ...config.grok,
-        if: validCondition,
+        if: emptyEqualsToAlways(condition),
       },
     };
   }
   return {
     dissect: {
       ...config.dissect,
-      if: validCondition,
+      if: emptyEqualsToAlways(condition),
     },
   };
 };

@@ -47,7 +47,7 @@ import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_
 import { DraggableProvided } from '@hello-pangea/dnd';
 import { IToasts, Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
-import { isEqual } from 'lodash';
+import { cloneDeep } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -58,7 +58,11 @@ import { NestedView } from '../nested_view';
 import { PreviewTable } from '../preview_table';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { AssetImage } from '../asset_image';
-import { EMPTY_EQUALS_CONDITION } from '../../util/condition';
+import {
+  EMPTY_EQUALS_CONDITION,
+  alwaysToEmptyEquals,
+  emptyEqualsToAlways,
+} from '../../util/condition';
 
 interface ChildUnderEdit {
   isNew: boolean;
@@ -316,11 +320,6 @@ function ControlBar({
     if (!routingAppState.childUnderEdit) {
       return;
     }
-    const condition = isEqual(routingAppState.childUnderEdit.child.if, EMPTY_EQUALS_CONDITION)
-      ? {
-          always: {},
-        }
-      : routingAppState.childUnderEdit.child.if;
 
     return streamsRepositoryClient.fetch('POST /api/streams/{id}/_fork', {
       signal,
@@ -329,7 +328,7 @@ function ControlBar({
           id: definition.name,
         },
         body: {
-          if: condition,
+          if: emptyEqualsToAlways(routingAppState.childUnderEdit.child.if),
           stream: {
             name: routingAppState.childUnderEdit.child.destination,
           },
@@ -508,10 +507,6 @@ function PreviewPanel({
         return Promise.resolve({ documents: [] });
       }
 
-      const condition = isEqual(debouncedChildUnderEdit.child.if, EMPTY_EQUALS_CONDITION)
-        ? { always: {} }
-        : debouncedChildUnderEdit.child.if;
-
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
         signal,
         params: {
@@ -519,7 +514,7 @@ function PreviewPanel({
             id: definition.name,
           },
           body: {
-            if: condition,
+            if: emptyEqualsToAlways(debouncedChildUnderEdit.child.if),
             start: start?.valueOf(),
             end: end?.valueOf(),
             size: 100,
@@ -804,11 +799,7 @@ function ChildStreamList({
                     isNew: true,
                     child: {
                       destination: `${definition.name}.child`,
-                      if: {
-                        field: '',
-                        operator: 'eq',
-                        value: '',
-                      },
+                      if: cloneDeep(EMPTY_EQUALS_CONDITION),
                     },
                   });
                 }}
@@ -932,7 +923,7 @@ function RoutingStreamEntry({
       </EuiFlexGroup>
       <ConditionEditor
         readonly={!edit}
-        condition={child.if}
+        condition={alwaysToEmptyEquals(child.if)}
         onConditionChange={(condition) => {
           onChildChange({
             ...child,
