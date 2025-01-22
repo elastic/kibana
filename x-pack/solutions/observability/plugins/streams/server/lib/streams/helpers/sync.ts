@@ -7,8 +7,8 @@
 
 import { IScopedClusterClient, Logger } from '@kbn/core/server';
 import {
-  IngestStreamDefinition,
   StreamDefinition,
+  UnwiredStreamDefinition,
   WiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { isResponseError } from '@kbn/es-errors';
@@ -187,15 +187,15 @@ async function ensureStreamManagedPipelineReference(
   }
 }
 
-export async function syncIngestStreamDefinitionObjects({
+export async function syncUnwiredStreamDefinitionObjects({
   definition,
   dataStream,
   scopedClusterClient,
 }: SyncStreamParamsBase & {
   dataStream: IndicesDataStream;
-  definition: IngestStreamDefinition;
+  definition: UnwiredStreamDefinition;
 }) {
-  if (definition.stream.ingest.routing.length) {
+  if (definition.ingest.routing.length) {
     throw new Error('Unmanaged streams cannot have managed children, coming soon');
   }
   const unmanagedAssets = await getUnmanagedElasticsearchAssets({
@@ -218,7 +218,7 @@ export async function syncIngestStreamDefinitionObjects({
     executionPlan
   );
 
-  if (definition.stream.ingest.processing.length) {
+  if (definition.ingest.processing.length) {
     // if the stream has processing, we need to create or update the stream managed pipeline
     executionPlan.push({
       method: 'PUT',
