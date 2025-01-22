@@ -29,7 +29,6 @@ import {
   updateSLOParamsSchema,
 } from '@kbn/slo-schema';
 import { getOverviewParamsSchema } from '@kbn/slo-schema/src/rest_specs/routes/get_overview';
-import { executeWithErrorHandler } from '../../errors';
 import {
   CreateSLO,
   DefaultBurnRatesClient,
@@ -132,7 +131,7 @@ const createSLORoute = createSloServerRoute({
       userId
     );
 
-    return await executeWithErrorHandler(() => createSLO.execute(params.body));
+    return await createSLO.execute(params.body);
   },
 });
 
@@ -188,7 +187,7 @@ const inspectSLORoute = createSloServerRoute({
       username
     );
 
-    return await executeWithErrorHandler(() => createSLO.inspect(params.body));
+    return await createSLO.inspect(params.body);
   },
 });
 
@@ -246,7 +245,7 @@ const updateSLORoute = createSloServerRoute({
       userId
     );
 
-    return await executeWithErrorHandler(() => updateSLO.execute(params.path.id, params.body));
+    return await updateSLO.execute(params.path.id, params.body);
   },
 });
 
@@ -303,7 +302,7 @@ const deleteSLORoute = createSloServerRoute({
       rulesClient
     );
 
-    await executeWithErrorHandler(() => deleteSLO.execute(params.path.id));
+    await deleteSLO.execute(params.path.id);
     return response.noContent();
   },
 });
@@ -330,9 +329,7 @@ const getSLORoute = createSloServerRoute({
     const definitionClient = new SloDefinitionClient(repository, esClient, logger);
     const getSLO = new GetSLO(definitionClient, summaryClient);
 
-    return await executeWithErrorHandler(() =>
-      getSLO.execute(params.path.id, spaceId, params.query)
-    );
+    return await getSLO.execute(params.path.id, spaceId, params.query);
   },
 });
 
@@ -377,7 +374,7 @@ const enableSLORoute = createSloServerRoute({
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
-    await executeWithErrorHandler(() => manageSLO.enable(params.path.id));
+    await manageSLO.enable(params.path.id);
 
     return response.noContent();
   },
@@ -424,7 +421,7 @@ const disableSLORoute = createSloServerRoute({
 
     const manageSLO = new ManageSLO(repository, transformManager, summaryTransformManager);
 
-    await executeWithErrorHandler(() => manageSLO.disable(params.path.id));
+    await manageSLO.disable(params.path.id);
     return response.noContent();
   },
 });
@@ -480,7 +477,7 @@ const resetSLORoute = createSloServerRoute({
       basePath
     );
 
-    return await executeWithErrorHandler(() => resetSLO.execute(params.path.id));
+    return await resetSLO.execute(params.path.id);
   },
 });
 
@@ -504,7 +501,7 @@ const findSLORoute = createSloServerRoute({
 
     const findSLO = new FindSLO(repository, summarySearchClient);
 
-    return await executeWithErrorHandler(() => findSLO.execute(params?.query ?? {}));
+    return await findSLO.execute(params?.query ?? {});
   },
 });
 
@@ -525,7 +522,7 @@ const findSLOGroupsRoute = createSloServerRoute({
     const coreContext = context.core;
     const esClient = (await coreContext).elasticsearch.client.asCurrentUser;
     const findSLOGroups = new FindSLOGroups(esClient, soClient, logger, spaceId);
-    return await executeWithErrorHandler(() => findSLOGroups.execute(params?.query ?? {}));
+    return await findSLOGroups.execute(params?.query ?? {});
   },
 });
 
@@ -542,7 +539,7 @@ const getSLOSuggestionsRoute = createSloServerRoute({
 
     const soClient = (await context.core).savedObjects.client;
     const getSLOSuggestions = new GetSLOSuggestions(soClient);
-    return await executeWithErrorHandler(() => getSLOSuggestions.execute());
+    return await getSLOSuggestions.execute();
   },
 });
 
@@ -561,7 +558,7 @@ const deleteSloInstancesRoute = createSloServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const deleteSloInstances = new DeleteSLOInstances(esClient);
 
-    await executeWithErrorHandler(() => deleteSloInstances.execute(params.body));
+    await deleteSloInstances.execute(params.body);
     return response.noContent();
   },
 });
@@ -582,7 +579,7 @@ const findSloDefinitionsRoute = createSloServerRoute({
     const repository = new KibanaSavedObjectsSLORepository(soClient, logger);
     const findSloDefinitions = new FindSLODefinitions(repository);
 
-    return await executeWithErrorHandler(() => findSloDefinitions.execute(params?.query ?? {}));
+    return await findSloDefinitions.execute(params?.query ?? {});
   },
 });
 
@@ -601,7 +598,7 @@ const fetchHistoricalSummary = createSloServerRoute({
     const esClient = (await context.core).elasticsearch.client.asCurrentUser;
     const historicalSummaryClient = new DefaultHistoricalSummaryClient(esClient);
 
-    return await executeWithErrorHandler(() => historicalSummaryClient.fetch(params.body));
+    return await historicalSummaryClient.fetch(params.body);
   },
 });
 
@@ -628,9 +625,7 @@ const getSLOGroupingsRoute = createSloServerRoute({
 
     const getSLOGroupings = new GetSLOGroupings(definitionClient, esClient, settings, spaceId);
 
-    return await executeWithErrorHandler(() =>
-      getSLOGroupings.execute(params.path.id, params.query)
-    );
+    return await getSLOGroupings.execute(params.path.id, params.query);
   },
 });
 
@@ -680,7 +675,7 @@ const fetchSloHealthRoute = createSloServerRoute({
 
     const getSLOHealth = new GetSLOHealth(esClient, scopedClusterClient, repository);
 
-    return await executeWithErrorHandler(() => getSLOHealth.execute(params.body));
+    return await getSLOHealth.execute(params.body);
   },
 });
 
@@ -702,20 +697,18 @@ const getSloBurnRates = createSloServerRoute({
     const soClient = (await context.core).savedObjects.client;
     const { instanceId, windows, remoteName } = params.body;
 
-    return await executeWithErrorHandler(() =>
-      getBurnRates({
-        instanceId,
-        spaceId,
-        windows,
-        remoteName,
-        sloId: params.path.id,
-        services: {
-          soClient,
-          esClient,
-          logger,
-        },
-      })
-    );
+    return await getBurnRates({
+      instanceId,
+      spaceId,
+      windows,
+      remoteName,
+      sloId: params.path.id,
+      services: {
+        soClient,
+        esClient,
+        logger,
+      },
+    });
   },
 });
 
@@ -755,7 +748,7 @@ const getSloSettingsRoute = createSloServerRoute({
 
     const soClient = (await context.core).savedObjects.client;
 
-    return await executeWithErrorHandler(() => getSloSettings(soClient));
+    return await getSloSettings(soClient);
   },
 });
 
@@ -773,9 +766,7 @@ const putSloSettings = (isServerless?: boolean) =>
       await assertPlatinumLicense(plugins);
 
       const soClient = (await context.core).savedObjects.client;
-      return await executeWithErrorHandler(() =>
-        storeSloSettings(soClient, params.body as PutSLOSettingsParams)
-      );
+      return await storeSloSettings(soClient, params.body as PutSLOSettingsParams);
     },
   });
 
@@ -811,7 +802,7 @@ const getSLOsOverview = createSloServerRoute({
       racClient
     );
 
-    return await executeWithErrorHandler(() => slosOverview.execute(params?.query ?? {}));
+    return await slosOverview.execute(params?.query ?? {});
   },
 });
 
