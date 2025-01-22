@@ -32,9 +32,14 @@ import { KBN_CERT_PATH, KBN_KEY_PATH } from '@kbn/dev-utils';
 import moment from 'moment';
 import { of, Observable, BehaviorSubject } from 'rxjs';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 const routerOptions: RouterOptions = {
-  isDev: false,
+  env,
   versionedRouterOptions: {
     defaultHandlerResolutionStrategy: 'oldest',
     useVersionResolutionStrategyForInternalPaths: [],
