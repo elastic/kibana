@@ -80,7 +80,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         const superTest = await utils.createSuperTestWithUser(users.secTimelineAllUser);
         const {
-          body: { savedObjectId },
+          body: {
+            data: {
+              persistTimeline: {
+                timeline: { savedObjectId },
+              },
+            },
+          },
         } = await createBasicTimeline(superTest, 'test timeline');
         getTimelineId = () => savedObjectId;
       });
@@ -106,8 +112,17 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
 
           const createResponse = await createBasicTimeline(superTest, 'test timeline');
           expect(createResponse.status).to.be(200);
+          const {
+            body: {
+              data: {
+                persistTimeline: {
+                  timeline: { savedObjectId },
+                },
+              },
+            },
+          } = createResponse;
 
-          await deleteTimeline(superTest, createResponse.body.savedObjectId).expect(200);
+          await deleteTimeline(superTest, savedObjectId).expect(200);
         });
       });
 
@@ -117,9 +132,15 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
           // create a timeline with a privileged user
           const privilegedSuperTest = await utils.createSuperTestWithUser(users.secTimelineAllUser);
           const {
-            body: { savedObjectId: timelineId },
+            body: {
+              data: {
+                persistTimeline: {
+                  timeline: { savedObjectId },
+                },
+              },
+            },
           } = await createBasicTimeline(privilegedSuperTest, 'test timeline');
-          getTimelineToDeleteId = () => timelineId;
+          getTimelineToDeleteId = () => savedObjectId;
         });
 
         cannotWriteUsers.forEach((user) => {
@@ -142,10 +163,16 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         it(`user "${user.username}" can update timelines`, async () => {
           const superTest = await utils.createSuperTestWithUser(user);
           const {
-            body: { savedObjectId: timelineId, version },
+            body: {
+              data: {
+                persistTimeline: {
+                  timeline: { savedObjectId, version },
+                },
+              },
+            },
           } = await createBasicTimeline(superTest, 'test timeline');
 
-          await patchTimeline(superTest, timelineId, version, {
+          await patchTimeline(superTest, savedObjectId, version, {
             title: 'updated title',
           }).expect(200);
         });
@@ -157,7 +184,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         before(async () => {
           const superTest = await utils.createSuperTestWithUser(users.secTimelineAllUser);
           const {
-            body: { savedObjectId, version },
+            body: {
+              data: {
+                persistTimeline: {
+                  timeline: { savedObjectId, version },
+                },
+              },
+            },
           } = await createBasicTimeline(superTest, 'test timeline');
           getTimelineId = () => savedObjectId;
           getVersion = () => version;
@@ -178,7 +211,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         const superTest = await utils.createSuperTestWithUser(users.secTimelineAllUser);
         const {
-          body: { savedObjectId },
+          body: {
+            data: {
+              persistTimeline: {
+                timeline: { savedObjectId },
+              },
+            },
+          },
         } = await createBasicTimeline(superTest, 'test timeline');
         getTimelineId = () => savedObjectId;
       });
@@ -207,7 +246,13 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
       before(async () => {
         const superTest = await utils.createSuperTestWithUser(users.secTimelineAllUser);
         const {
-          body: { savedObjectId },
+          body: {
+            data: {
+              persistTimeline: {
+                timeline: { savedObjectId },
+              },
+            },
+          },
         } = await createBasicTimeline(superTest, 'test timeline');
         getTimelineId = () => savedObjectId;
       });
