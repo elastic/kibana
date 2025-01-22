@@ -18,6 +18,12 @@ export const isMouseEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserMo
 
 const MOUSE_BUTTON_LEFT = 0;
 
+/*
+ * This function should be attached to `mousedown` event listener. 
+ * It follows the flow of `mousedown` -> `mousemove` -> `mouseup` where the consumer is responsible for handling the interaction logic and defining what happens on each event.
+ * Additionally, it adds autoscroll behavior - when the cursor during the interaction is near the viewport's edge, the page will scroll in that direction.
+ */
+
 export const startMouseInteraction = ({
   e,
   onStart,

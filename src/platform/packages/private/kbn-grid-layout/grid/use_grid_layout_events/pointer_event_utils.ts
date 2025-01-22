@@ -16,7 +16,7 @@ const getGridWidth = (runtimeSettings: RuntimeGridSettings) => {
   return (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
 };
 
-// Calculates the preview rect coordinates for a resized panel  
+// Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
   interactionEvent,
   pointerPixel,
@@ -38,7 +38,7 @@ export const getResizePreviewRect = ({
   };
 };
 
-// Calculates the preview rect coordinates for a dragged panel  
+// Calculates the preview rect coordinates for a dragged panel
 export const getDragPreviewRect = ({
   pointerPixel,
   interactionEvent,

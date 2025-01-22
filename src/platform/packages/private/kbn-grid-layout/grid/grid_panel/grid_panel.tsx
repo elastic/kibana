@@ -34,7 +34,8 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
 
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
-      const initialPanel = gridLayoutStateManager.proposedGridLayout$.getValue()[rowIndex].panels[panelId];
+      const initialPanel =
+        gridLayoutStateManager.proposedGridLayout$.getValue()[rowIndex].panels[panelId];
       return css`
         position: relative;
         height: calc(

@@ -8,4 +8,3 @@
  */
 
 export type UserInteractionEvent = React.UIEvent<HTMLElement> | Event;
-

@@ -8,11 +8,7 @@
  */
 
 import { useCallback, useRef } from 'react';
-import {
-  GridPanelData,
-  GridLayoutStateManager,
-  PanelInteractionEvent,
-} from '../types';
+import { GridPanelData, GridLayoutStateManager, PanelInteractionEvent } from '../types';
 import {
   getPointerPosition,
   isMouseEvent,
@@ -23,11 +19,11 @@ import {
 import { commitAction, moveAction, startAction } from './state_manager_actions';
 import { UserInteractionEvent } from './types';
 
-/* 
- * This hook sets up and manages drag/resize interaction logic for grid panels. 
- * It initializes event handlers to start, move, and commit the interaction, 
- * ensuring responsive updates to the panel's position and grid layout state. 
- * The interaction behavior is dynamic and adapts to the input type (mouse or touch). 
+/*
+ * This hook sets up and manages drag/resize interaction logic for grid panels.
+ * It initializes event handlers to start, move, and commit the interaction,
+ * ensuring responsive updates to the panel's position and grid layout state.
+ * The interaction behavior is dynamic and adapts to the input type (mouse or touch).
  */
 
 export const useGridLayoutEvents = ({

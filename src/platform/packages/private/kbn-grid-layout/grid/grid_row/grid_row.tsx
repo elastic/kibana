@@ -97,7 +97,9 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             ) {
               setPanelIds(newRowData.panelIds);
               setPanelIdsInOrder(
-                getKeysInOrder(gridLayoutStateManager.proposedGridLayout$.getValue()[rowIndex].panels)
+                getKeysInOrder(
+                  gridLayoutStateManager.proposedGridLayout$.getValue()[rowIndex].panels
+                )
               );
             }
           });

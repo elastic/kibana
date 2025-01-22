@@ -122,4 +122,3 @@ export interface PanelPlacementSettings {
 }
 
 export type GridAccessMode = 'VIEW' | 'EDIT';
-

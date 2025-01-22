@@ -15,7 +15,7 @@ const MAX_SPEED = 150;
 let scrollInterval: NodeJS.Timeout | null = null;
 
 // Automatically scrolls the screen when the user drags or resizes a panel near the top or bottom edge.
-export function handleAutoscroll (e: UserMouseEvent){
+export function handleAutoscroll(e: UserMouseEvent) {
   const heightPercentage = 100 - ((window.innerHeight - e.clientY) / window.innerHeight) * 100;
   const atTheTop = window.scrollY <= 0;
   const atTheBottom = window.innerHeight + window.scrollY >= document.body.scrollHeight;
@@ -30,9 +30,9 @@ export function handleAutoscroll (e: UserMouseEvent){
   } else {
     stopAutoScroll();
   }
-};
+}
 
-function scrollOnInterval (direction: 'up' | 'down') {
+function scrollOnInterval(direction: 'up' | 'down') {
   let count = 0;
   let currentSpeed = MIN_SPEED;
   let maxSpeed = MIN_SPEED;
@@ -66,11 +66,11 @@ function scrollOnInterval (direction: 'up' | 'down') {
     count++; // increase the counter to increase the time interval used in the parabola formula
   }, 60);
   return scrollInterval;
-};
+}
 
-export function stopAutoScroll () {
+export function stopAutoScroll() {
   if (scrollInterval) {
     clearInterval(scrollInterval);
     scrollInterval = null;
   }
-};
+}
