@@ -94,7 +94,7 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
           { feature: NOTES_FEATURE_ID, privileges: ['all'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['all', 'endpoint_exceptions_all'] },
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['all'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['all'] },
@@ -144,7 +144,7 @@ export const getSecurityBaseKibanaFeature = ({
         default: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
           { feature: NOTES_FEATURE_ID, privileges: ['read'] },
-          { feature: SECURITY_FEATURE_ID_V2, privileges: ['read', 'endpoint_exceptions_read'] },
+          { feature: SECURITY_FEATURE_ID_V2, privileges: ['read'] },
         ],
         minimal: [
           { feature: TIMELINE_FEATURE_ID, privileges: ['read'] },
