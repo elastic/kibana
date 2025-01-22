@@ -7,21 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useRef, useState } from 'react';
 import type { SerializedStyles } from '@emotion/react';
 import type { EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
 import { InTableSearchControl } from './in_table_search_control';
 import { InTableSearchControlProps } from './in_table_search_control';
 
 export interface UseDataGridInTableSearchProps
-  extends Pick<
-    InTableSearchControlProps,
-    'rows' | 'visibleColumns' | 'renderCellValue' | 'pageSize' | 'onChangeToExpectedPage'
-  > {
+  extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns' | 'renderCellValue'> {
   enableInTableSearch?: boolean;
   dataGridWrapper: HTMLElement | null;
   dataGridRef: React.RefObject<EuiDataGridRefProps>;
   cellContext: EuiDataGridProps['cellContext'] | undefined;
+  pagination: EuiDataGridProps['pagination'] | undefined;
 }
 
 export interface UseDataGridInTableSearchState {
@@ -45,10 +43,15 @@ export const useDataGridInTableSearch = (
     visibleColumns,
     rows,
     renderCellValue,
-    pageSize,
+    pagination,
     cellContext,
-    onChangeToExpectedPage,
   } = props;
+  const isPaginationEnabled = Boolean(pagination);
+  const pageSize = (isPaginationEnabled && pagination?.pageSize) || null;
+  const onChangePage = pagination?.onChangePage;
+  const pageIndexRef = useRef<number>();
+  pageIndexRef.current = pagination?.pageIndex ?? 0;
+
   const [{ inTableSearchTerm, inTableSearchTermCss }, setInTableSearchState] =
     useState<UseDataGridInTableSearchState>(() => ({ inTableSearchTerm: '' }));
 
@@ -80,7 +83,11 @@ export const useDataGridInTableSearch = (
         onChangeCss={(styles) =>
           setInTableSearchState((prevState) => ({ ...prevState, inTableSearchTermCss: styles }))
         }
-        onChangeToExpectedPage={onChangeToExpectedPage}
+        onChangeToExpectedPage={(expectedPageIndex: number) => {
+          if (isPaginationEnabled && pageIndexRef.current !== expectedPageIndex) {
+            onChangePage?.(expectedPageIndex);
+          }
+        }}
       />
     );
   }, [
@@ -92,8 +99,9 @@ export const useDataGridInTableSearch = (
     dataGridRef,
     dataGridWrapper,
     inTableSearchTerm,
+    isPaginationEnabled,
     pageSize,
-    onChangeToExpectedPage,
+    onChangePage,
   ]);
 
   const extendedCellContext: EuiDataGridProps['cellContext'] = useMemo(() => {

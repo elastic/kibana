@@ -750,15 +750,6 @@ export const UnifiedDataTable = ({
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
-  const onChangeToExpectedPage = useCallback(
-    (expectedPageIndex: number) => {
-      if (isPaginationEnabled && currentPageIndexRef.current !== expectedPageIndex) {
-        changeCurrentPageIndex(expectedPageIndex);
-      }
-    },
-    [isPaginationEnabled, changeCurrentPageIndex]
-  );
-
   const { inTableSearchTermCss, inTableSearchControl, extendedCellContext } =
     useDataGridInTableSearch({
       enableInTableSearch,
@@ -767,9 +758,8 @@ export const UnifiedDataTable = ({
       visibleColumns,
       rows: displayedRows,
       renderCellValue,
-      pageSize: isPaginationEnabled ? currentPageSize : null,
       cellContext,
-      onChangeToExpectedPage,
+      pagination: paginationObj,
     });
 
   const renderCustomPopover = useMemo(
