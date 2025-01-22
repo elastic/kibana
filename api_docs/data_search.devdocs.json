@@ -25425,7 +25425,7 @@
             "label": "aggregate",
             "description": [],
             "signature": [
-              "\"min\" | \"max\" | \"sum\" | \"concat\" | \"average\""
+              "\"min\" | \"sum\" | \"max\" | \"concat\" | \"average\""
             ],
             "path": "src/platform/plugins/shared/data/common/search/aggs/metrics/top_hit.ts",
             "deprecated": false,
@@ -33796,7 +33796,7 @@
         "label": "SearchTypes",
         "description": [],
         "signature": [
-          "string | number | boolean | object | string[] | boolean[] | number[] | object[] | undefined"
+          "string | number | boolean | object | string[] | number[] | boolean[] | object[] | undefined"
         ],
         "path": "src/platform/plugins/shared/data/common/search/expressions/eql_raw_response.ts",
         "deprecated": false,
