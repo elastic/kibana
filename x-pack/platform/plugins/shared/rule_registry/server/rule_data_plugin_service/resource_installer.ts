@@ -93,8 +93,8 @@ export class ResourceInstaller {
                     logger,
                     esClient: clusterClient,
                     template: {
-                      name: ECS_COMPONENT_TEMPLATE_NAME,
                       ...ecsComponentTemplate,
+                      name: ECS_COMPONENT_TEMPLATE_NAME,
                     },
                     totalFieldsLimit: TOTAL_FIELDS_LIMIT,
                   }),
@@ -103,8 +103,8 @@ export class ResourceInstaller {
               logger,
               esClient: clusterClient,
               template: {
-                name: TECHNICAL_COMPONENT_TEMPLATE_NAME,
                 ...technicalComponentTemplate,
+                name: TECHNICAL_COMPONENT_TEMPLATE_NAME,
               },
               totalFieldsLimit: TOTAL_FIELDS_LIMIT,
             }),

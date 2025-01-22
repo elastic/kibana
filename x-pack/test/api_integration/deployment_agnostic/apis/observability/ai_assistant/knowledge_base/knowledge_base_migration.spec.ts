@@ -13,10 +13,11 @@ import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/commo
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   clearKnowledgeBase,
   deleteInferenceEndpoint,
-  TINY_ELSER,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from './helpers';
 
 interface InferenceChunk {
@@ -46,6 +47,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const es = getService('es');
   const ml = getService('ml');
   const retry = getService('retry');
+  const log = getService('log');
 
   const archive =
     'x-pack/test/functional/es_archives/observability/ai_assistant/knowledge_base_8_15';
@@ -67,23 +69,16 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
 
   // Failing: See https://github.com/elastic/kibana/issues/206474
   describe.skip('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
-    // security_exception: action [indices:admin/settings/update] is unauthorized for user [testing-internal] with effective roles [superuser] on restricted indices [.kibana_security_solution_1,.kibana_task_manager_1,.kibana_alerting_cases_1,.kibana_usage_counters_1,.kibana_1,.kibana_ingest_1,.kibana_analytics_1], this action is granted by the index privileges [manage,all]
-    this.tags(['failsOnMKI']);
+    // Intentionally skipped on MKI because es_archiver.load is not allowed there, and because the migration scenario being tested is not relevant to MKI.
+    // https://github.com/elastic/obs-ai-assistant-team/issues/195
+    this.tags(['skipMKI']);
 
     before(async () => {
       await clearKnowledgeBase(es);
       await esArchiver.load(archive);
-      await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-
-      expect(status).to.be(200);
+      await importTinyElserModel(ml);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
     });
 
     after(async () => {

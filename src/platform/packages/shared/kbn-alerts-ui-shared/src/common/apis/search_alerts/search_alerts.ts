@@ -20,7 +20,7 @@ import type {
   QueryDslFieldAndFormat,
   QueryDslQueryContainer,
   SortCombinations,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+} from '@elastic/elasticsearch/lib/api/types';
 import type { EsQuerySnapshot, LegacyField } from '../../types';
 
 export interface SearchAlertsParams {
