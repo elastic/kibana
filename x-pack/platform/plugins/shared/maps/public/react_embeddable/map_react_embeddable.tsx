@@ -207,17 +207,13 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
         );
 
         useEffect(() => {
-          mapSettings$.next({
-            ...state.mapSettings,
-            backgroundColor: euiTheme.colors.backgroundBasePlain,
-          });
           return () => {
             crossPanelActions.cleanup();
             reduxSync.cleanup();
             unsubscribeFromFetch();
             maybeStopDynamicActions?.stopDynamicActions();
           };
-        }, [euiTheme.colors.backgroundBasePlain]);
+        }, []);
 
         return sharingSavedObjectProps &&
           spaces &&
