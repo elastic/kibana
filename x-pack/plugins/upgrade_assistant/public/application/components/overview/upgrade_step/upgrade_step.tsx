@@ -87,7 +87,8 @@ const UpgradeStep = () => {
         </EuiCallOut>
       );
     } else {
-      const readyForUpgrade = upgradeStatus?.readyForUpgrade;
+      // Should re-enable this behaviour on 8.18 and 8.19
+      // const readyForUpgrade = upgradeStatus?.readyForUpgrade;
       const upgradeOnCloudUrl = cloud!.deploymentUrl + '?show_upgrade=true';
       callToAction = (
         <EuiFlexGroup alignItems="center" gutterSize="s">
@@ -99,7 +100,7 @@ const UpgradeStep = () => {
               iconSide="right"
               iconType="popout"
               isLoading={isLoading}
-              isDisabled={!readyForUpgrade}
+              // isDisabled={!readyForUpgrade}
             >
               {isLoading ? i18nTexts.loadingUpgradeStatus : i18nTexts.upgradeStepCloudLink}
             </EuiButton>
