@@ -39,6 +39,8 @@ import { ParenthesizedExpressionContext } from "./esql_parser.js";
 import { FunctionContext } from "./esql_parser.js";
 import { FunctionExpressionContext } from "./esql_parser.js";
 import { FunctionNameContext } from "./esql_parser.js";
+import { MapExpressionContext } from "./esql_parser.js";
+import { EntryExpressionContext } from "./esql_parser.js";
 import { ToDataTypeContext } from "./esql_parser.js";
 import { RowCommandContext } from "./esql_parser.js";
 import { FieldsContext } from "./esql_parser.js";
@@ -48,8 +50,6 @@ import { IndexPatternContext } from "./esql_parser.js";
 import { ClusterStringContext } from "./esql_parser.js";
 import { IndexStringContext } from "./esql_parser.js";
 import { MetadataContext } from "./esql_parser.js";
-import { MetadataOptionContext } from "./esql_parser.js";
-import { Deprecated_metadataContext } from "./esql_parser.js";
 import { MetricsCommandContext } from "./esql_parser.js";
 import { EvalCommandContext } from "./esql_parser.js";
 import { StatsCommandContext } from "./esql_parser.js";
@@ -418,6 +418,26 @@ export default class esql_parserListener extends ParseTreeListener {
 	 */
 	exitFunctionName?: (ctx: FunctionNameContext) => void;
 	/**
+	 * Enter a parse tree produced by `esql_parser.mapExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterMapExpression?: (ctx: MapExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.mapExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitMapExpression?: (ctx: MapExpressionContext) => void;
+	/**
+	 * Enter a parse tree produced by `esql_parser.entryExpression`.
+	 * @param ctx the parse tree
+	 */
+	enterEntryExpression?: (ctx: EntryExpressionContext) => void;
+	/**
+	 * Exit a parse tree produced by `esql_parser.entryExpression`.
+	 * @param ctx the parse tree
+	 */
+	exitEntryExpression?: (ctx: EntryExpressionContext) => void;
+	/**
 	 * Enter a parse tree produced by the `toDataType`
 	 * labeled alternative in `esql_parser.dataType`.
 	 * @param ctx the parse tree
@@ -509,26 +529,6 @@ export default class esql_parserListener extends ParseTreeListener {
 	 * @param ctx the parse tree
 	 */
 	exitMetadata?: (ctx: MetadataContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.metadataOption`.
-	 * @param ctx the parse tree
-	 */
-	enterMetadataOption?: (ctx: MetadataOptionContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.metadataOption`.
-	 * @param ctx the parse tree
-	 */
-	exitMetadataOption?: (ctx: MetadataOptionContext) => void;
-	/**
-	 * Enter a parse tree produced by `esql_parser.deprecated_metadata`.
-	 * @param ctx the parse tree
-	 */
-	enterDeprecated_metadata?: (ctx: Deprecated_metadataContext) => void;
-	/**
-	 * Exit a parse tree produced by `esql_parser.deprecated_metadata`.
-	 * @param ctx the parse tree
-	 */
-	exitDeprecated_metadata?: (ctx: Deprecated_metadataContext) => void;
 	/**
 	 * Enter a parse tree produced by `esql_parser.metricsCommand`.
 	 * @param ctx the parse tree

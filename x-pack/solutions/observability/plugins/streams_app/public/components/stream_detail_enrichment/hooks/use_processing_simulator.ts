@@ -8,14 +8,22 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { ReadStreamDefinition, ProcessingDefinition, Condition } from '@kbn/streams-schema';
+import {
+  DissectProcessorDefinition,
+  ReadStreamDefinition,
+  Condition,
+  ProcessorDefinition,
+  GrokProcessorDefinition,
+} from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType, StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
+import { ProcessingDefinition } from '../types';
 import { DetectedField } from '../types';
+import { emptyEqualsToAlways } from '../../../util/condition';
 
 type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
 type SimulationRequestBody =
@@ -69,10 +77,10 @@ export const useProcessingSimulator = ({
         params: {
           path: { id: definition.name },
           body: {
-            condition,
+            if: condition ? emptyEqualsToAlways(condition) : { always: {} },
             start: start?.valueOf(),
             end: end?.valueOf(),
-            number: 100,
+            size: 100,
           },
         },
       });
@@ -89,6 +97,29 @@ export const useProcessingSimulator = ({
         return Promise.resolve(null);
       }
 
+      const processorDefinition: ProcessorDefinition =
+        'grok' in processingDefinition.config
+          ? ({
+              grok: {
+                field: processingDefinition.config.grok.field,
+                ignore_failure: processingDefinition.config.grok.ignore_failure,
+                ignore_missing: processingDefinition.config.grok.ignore_missing,
+                if: emptyEqualsToAlways(processingDefinition.condition),
+                patterns: processingDefinition.config.grok.patterns,
+                pattern_definitions: processingDefinition.config.grok.pattern_definitions,
+              },
+            } satisfies GrokProcessorDefinition)
+          : ({
+              dissect: {
+                field: processingDefinition.config.dissect.field,
+                ignore_failure: processingDefinition.config.dissect.ignore_failure,
+                ignore_missing: processingDefinition.config.dissect.ignore_missing,
+                if: emptyEqualsToAlways(processingDefinition.condition),
+                pattern: processingDefinition.config.dissect.pattern,
+                append_separator: processingDefinition.config.dissect.append_separator,
+              },
+            } satisfies DissectProcessorDefinition);
+
       const detected_fields = detectedFields
         ? (detectedFields.filter(
             (field) => field.type !== 'unmapped'
@@ -101,7 +132,7 @@ export const useProcessingSimulator = ({
           path: { id: definition.name },
           body: {
             documents: sampleDocs,
-            processing: [processingDefinition],
+            processing: [processorDefinition],
             detected_fields,
           },
         },
