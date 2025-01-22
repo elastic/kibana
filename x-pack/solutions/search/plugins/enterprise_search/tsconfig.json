@@ -88,5 +88,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
+    "@kbn/search-indices",
   ]
 }
