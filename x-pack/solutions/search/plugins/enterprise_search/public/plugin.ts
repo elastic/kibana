@@ -268,6 +268,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
       order: 1,
       title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
