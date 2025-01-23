@@ -122,9 +122,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
       responseSchema:
         MicrosoftDefenderEndpointDoNotValidateResponseSchema as unknown as SubActionRequestParams<R>['responseSchema'],
       headers: {
-        Authorization: `Bearer ${
-          '--invalid-test--' + (await this.oAuthToken.get(connectorUsageCollector))
-        }`,
+        Authorization: `Bearer ${await this.oAuthToken.get(connectorUsageCollector)}`,
       },
     };
     let response: AxiosResponse<R>;

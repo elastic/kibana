@@ -205,11 +205,40 @@ export class OAuthTokenManager {
 
     this.reGenerateNewTokenPromise = new Promise(async (resolve, reject) => {
       try {
+        const connectorTokenClient = this.params.services.connectorTokenClient;
+
         if (this.generatingNewTokenPromise) {
           this.logger.debug(
             `Waiting for current new token retrieval/generate to complete before performing proceeding with generating new one`
           );
           await this.generatingNewTokenPromise;
+        }
+
+        // First check if the token was already updated by another instance of the connector and if so, then do nothing
+        if (this.connectorToken) {
+          const currentToken = this.connectorToken.token;
+          const latestStoredToken = await connectorTokenClient.get({
+            connectorId: this.params.connector.id,
+            tokenType: this.tokenType,
+          });
+
+          if (
+            latestStoredToken.connectorToken &&
+            latestStoredToken.connectorToken.token !== currentToken
+          ) {
+            this.logger.debug(
+              `Token has been updated since it was last read. Using it instead of generating a new one.\n${JSON.stringify(
+                {
+                  ...latestStoredToken.connectorToken,
+                  token: '[redacted]',
+                },
+                null,
+                2
+              )}`
+            );
+            this.connectorToken = latestStoredToken.connectorToken;
+            return resolve(undefined);
+          }
         }
 
         await this.fetchAndStoreNewToken(connectorUsageCollector);
