@@ -920,6 +920,14 @@ export const getSavedObjectTypes = (
             },
           ],
         },
+        '3': {
+          changes: [
+            {
+              type: 'data_backfill',
+              backfillFn: packagePolicyV17AdvancedFieldsForEndpointV818,
+            },
+          ],
+        },
       },
     },
     [PACKAGES_SAVED_OBJECT_TYPE]: {
