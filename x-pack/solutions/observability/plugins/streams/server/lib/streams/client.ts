@@ -31,7 +31,11 @@ import {
   streamDefinitionSchema,
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
-import { isDSNS, parseStreamName } from '@kbn/streams-schema/src/helpers/stream_name';
+import {
+  DSNSStreamName,
+  isDSNS,
+  parseStreamName,
+} from '@kbn/streams-schema/src/helpers/stream_name';
 import { AssetClient } from './assets/asset_client';
 import { DefinitionNotFound, SecurityException } from './errors';
 import { MalformedStreamId } from './errors/malformed_stream_id';
@@ -595,7 +599,7 @@ export class StreamsClient {
   async listStreams(): Promise<StreamDefinition[]> {
     const [managedStreams, unmanagedStreams] = await Promise.all([
       this.getStreamDefinitions(),
-      this.getUnmanagedDataStreams(),
+      this.getAllDataStreamsAsUnmanaged(),
     ]);
 
     const allDefinitionsById = new Map<string, StreamDefinition>(
@@ -615,7 +619,7 @@ export class StreamsClient {
    * Lists all unmanaged streams (unwired streams without a
    * stored definition).
    */
-  private async getUnmanagedDataStreams(): Promise<UnwiredStreamDefinition[]> {
+  private async getAllDataStreamsAsUnmanaged(): Promise<UnwiredStreamDefinition[]> {
     const response =
       await this.dependencies.scopedClusterClient.asCurrentUser.indices.getDataStream();
 
@@ -811,48 +815,76 @@ export class StreamsClient {
   async getUnwiredRootForStream(
     definition: WiredStreamDefinition
   ): Promise<StreamDefinition | undefined> {
-    let classicRoot: StreamDefinition | undefined;
-    let classicRootSegmentLength = 0;
     const streamName = parseStreamName(definition.name);
-    if (streamName.type === 'dsns') {
-      const streams = await this.getStreamDefinitions({
-        query: {
-          bool: {
-            filter: [
-              {
-                prefix: {
-                  name: `${streamName.datastreamType}-${streamName.datasetSegments[0]}`,
-                },
-              },
-            ],
-          },
-        },
-      });
-
-      streams
-        .filter((candidateStream) => !isWiredStreamDefinition(candidateStream))
-        .forEach((candidateStream) => {
-          const candidateStreamName = parseStreamName(candidateStream.name);
-          // The longest unwired stream with a matching prefix is the classic root
-          if (
-            candidateStreamName.type === 'dsns' &&
-            candidateStreamName.datasetSegments.every(
-              (segment, index) => segment === streamName.datasetSegments[index]
-            ) &&
-            candidateStreamName.datastreamType === streamName.datastreamType &&
-            candidateStreamName.datastreamNamespace === streamName.datastreamNamespace &&
-            candidateStreamName.datasetSegments.length > classicRootSegmentLength
-          ) {
-            classicRoot = candidateStream;
-            classicRootSegmentLength = candidateStreamName.datasetSegments.length;
-          }
-        });
+    if (streamName.type !== 'dsns') {
+      return;
     }
-    return classicRoot;
+    const streamDefinitions = await this.getStreamDefinitions({
+      query: {
+        bool: {
+          filter: [
+            {
+              prefix: {
+                name: `${streamName.datastreamType}-${streamName.datasetSegments[0]}`,
+              },
+            },
+          ],
+        },
+      },
+    });
+
+    const unwiredRoot = this.findLongestUnwiredDSNSMatch(streamName, streamDefinitions);
+
+    const routesToChild = unwiredRoot?.ingest.routing.some(
+      (route) => route.destination === definition.name
+    );
+
+    if (unwiredRoot && routesToChild) {
+      // The unwired root is routing to the child, so we can be sure it is the unwired root
+      return unwiredRoot;
+    }
+
+    // Otherwise, there could be an unmanaged stream that actually should be the unwired root. In this case,
+    // we need to check for a match in the unmanaged streams.
+
+    const managedStreamNames = new Set(streamDefinitions.map((stream) => stream.name));
+    const unmanagedStreams = (await this.getAllDataStreamsAsUnmanaged()).filter(
+      (stream) => !managedStreamNames.has(stream.name)
+    );
+
+    return this.findLongestUnwiredDSNSMatch(streamName, [
+      ...streamDefinitions,
+      ...unmanagedStreams,
+    ]);
+  }
+
+  private findLongestUnwiredDSNSMatch(streamName: DSNSStreamName, streams: StreamDefinition[]) {
+    let match: StreamDefinition | undefined;
+    let maxLength = 0;
+
+    streams
+      .filter((candidateStream) => !isWiredStreamDefinition(candidateStream))
+      .forEach((candidateStream) => {
+        const candidateStreamName = parseStreamName(candidateStream.name);
+        // The longest unwired stream with a matching prefix is the classic root
+        if (
+          candidateStreamName.type === 'dsns' &&
+          candidateStreamName.datasetSegments.every(
+            (segment, index) => segment === streamName.datasetSegments[index]
+          ) &&
+          candidateStreamName.datastreamType === streamName.datastreamType &&
+          candidateStreamName.datastreamNamespace === streamName.datastreamNamespace &&
+          candidateStreamName.datasetSegments.length > maxLength
+        ) {
+          match = candidateStream;
+          maxLength = candidateStreamName.datasetSegments.length;
+        }
+      });
+    return match;
   }
 
   async getAncestors(definition: StreamDefinition): Promise<StreamDefinition[]> {
-    let unwiredRoot = isWiredStreamDefinition(definition)
+    const unwiredRoot = isWiredStreamDefinition(definition)
       ? await this.getUnwiredRootForStream(definition)
       : undefined;
 
@@ -869,27 +901,12 @@ export class StreamsClient {
     if (
       isWiredStreamDefinition(definition) &&
       streamName.type === 'dsns' &&
-      ancestors.length === 0
+      ancestors.length === 0 &&
+      unwiredRoot
     ) {
-      // We have a DSNS stream, which means it is not connected to the root logs stream, but no ancestors.
-      // This can happen if the classic stream definition for the unwired root hasn't been created yet.
-      // In this case, we need to fetch unmanaged streams and check for a match there.
-      const unmanagedStreams = await this.getUnmanagedDataStreams();
-      unwiredRoot = unmanagedStreams.find((candidateStream) => {
-        const candidateStreamName = parseStreamName(candidateStream.name);
-        return (
-          candidateStreamName.type === 'dsns' &&
-          candidateStreamName.datastreamType === streamName.datastreamType &&
-          candidateStreamName.datastreamNamespace === streamName.datastreamNamespace &&
-          candidateStreamName.datasetSegments.every(
-            (segment, index) => segment === streamName.datasetSegments[index]
-          )
-        );
-      });
-
-      if (unwiredRoot) {
-        ancestors.push(unwiredRoot);
-      }
+      // We didn't find persisted definitions, but we know the unwired root
+      // so we can add it to the ancestors
+      ancestors.push(unwiredRoot);
     }
     return ancestors;
   }

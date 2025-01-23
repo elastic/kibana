@@ -36,6 +36,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     after(async () => {
       await disableStreams(apiClient);
+      await esClient.indices.deleteDataStream({ name: 'logs-shared-default' });
+      await esClient.indices.deleteDataStream({ name: 'logs-shared.prefix-default' });
     });
 
     it('Allows to fork classic data stream', async () => {
@@ -324,6 +326,60 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
         400
       );
+    });
+
+    it('should attach to the correct unwired stream in case of matching prefix', async () => {
+      await esClient.indices.createDataStream({ name: 'logs-shared-default' });
+      await esClient.indices.createDataStream({ name: 'logs-shared.prefix-default' });
+
+      await putStream(apiClient, 'logs-shared.prefix.myfork-default', {
+        dashboards: [],
+        stream: {
+          ingest: {
+            processing: [],
+            routing: [],
+            wired: {
+              fields: {},
+            },
+          },
+        },
+      });
+
+      await assertStreamInList(apiClient, 'logs-shared.prefix.myfork-default', {
+        name: 'logs-shared.prefix.myfork-default',
+        ingest: {
+          processing: [],
+          routing: [],
+          wired: {
+            fields: {},
+          },
+        },
+      });
+
+      await assertStreamInList(apiClient, 'logs-shared.prefix-default', {
+        name: 'logs-shared.prefix-default',
+        ingest: {
+          processing: [],
+          routing: [
+            {
+              destination: 'logs-shared.prefix.myfork-default',
+              if: {
+                never: {},
+              },
+            },
+          ],
+          unwired: {},
+        },
+      });
+
+      await assertStreamInList(apiClient, 'logs-shared-default', {
+        name: 'logs-shared-default',
+        ingest: {
+          processing: [],
+          routing: [],
+          unwired: {},
+        },
+      });
     });
   });
 }
