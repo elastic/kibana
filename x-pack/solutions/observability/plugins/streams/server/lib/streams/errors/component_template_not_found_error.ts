@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class SecurityException extends Error {
+import { StatusError } from './status_error';
+
+export class ComponentTemplateNotFoundError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'SecurityException';
+    super(message, 404);
+    this.name = 'ComponentTemplateNotFoundError';
   }
 }
