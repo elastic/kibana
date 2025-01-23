@@ -6,8 +6,20 @@ info:
 paths: {}
 components:
   schemas:
+    PrivmonDoc:
+      # either login doc or privilege doc
+      oneOf:
+        - $ref: '#/components/schemas/PrivmonLoginDoc'
+        - $ref: '#/components/schemas/PrivmonPrivilegeDoc'
     PrivilegedUserObservation:
       type: object
+      required:
+        - "@timestamp"
+        - observation_type
+        - summary
+        - raw_event
+        - timestamp
+        - ingested
       properties:
         observation_type:
           type: string
@@ -19,19 +31,22 @@ components:
           type: string
         ingested:
           type: string
+        outdated:
+          type: boolean
     PrivilegedUserDoc:
       type: object
       required:
         - "@timestamp"
         - created_at
-        - is_privileged
+        - active
         - user
+        - observations
       properties:
         "@timestamp":
           type: string
         created_at:
           type: string
-        is_privileged:
+        active:
           type: boolean
         observations:
           type: array
@@ -208,6 +223,8 @@ components:
               type: string
         user:
           type: object
+          required:
+            - name
           properties:
             id:
               type: string
@@ -217,9 +234,13 @@ components:
               type: string
         target:
           type: object
+          required:
+            - user
           properties:
             user:
               type: object
+              required:
+                - name
               properties:
                 id:
                   type: string

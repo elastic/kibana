@@ -7,6 +7,7 @@
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import objectHash from 'object-hash';
 import type {
   InitPrivmonResult,
   PrivilegedUserDoc,
@@ -26,7 +27,11 @@ import {
 } from '../../../../common/entity_analytics/privmon';
 import { startPrivmonTask } from './task';
 import type { EntityAnalyticsConfig } from '../types';
-import { createPrivmonIngestPipeline } from './utils';
+import {
+  createPrivmonIngestPipeline,
+  mergePrivilegedUsersByUser,
+  privilegedUsersToUserQuery,
+} from './utils';
 import { PRIVILEGED_USER_MAPPING } from './mappings';
 
 interface PrivMonClientOpts {
@@ -226,15 +231,33 @@ export class PrivmonDataClient {
     });
   }
 
-  public async bulkUpsertUsers(users: PrivilegedUserDoc[]): Promise<void> {
-    const { esClient } = this.options;
+  public async bulkUpsertUsers(users: PrivilegedUserDoc[]): Promise<{
+    created: number;
+    updated: number;
+  }> {
+    const { esClient, logger, namespace } = this.options;
 
     if (users.length === 0) {
-      return;
+      return {
+        created: 0,
+        updated: 0,
+      };
     }
 
-    const body = users.flatMap((doc) => [
-      { index: { _index: getPrivmonUsersIndex(this.options.namespace) } },
+    const { records: existingUsers } = await this.searchUsers({
+      query: privilegedUsersToUserQuery(users, logger),
+      size: users.length,
+    });
+
+    const mergedUsers = mergePrivilegedUsersByUser([...existingUsers, ...users]);
+
+    const body = mergedUsers.flatMap((doc) => [
+      {
+        index: {
+          _index: getPrivmonUsersIndex(namespace),
+          _id: objectHash(doc.user),
+        },
+      },
       doc,
     ]);
 
@@ -243,10 +266,16 @@ export class PrivmonDataClient {
     });
 
     if (result.errors) {
-      this.options.logger.error(
-        `[PrivmonDataClient] Error upserting users: ${JSON.stringify(result.items)}`
-      );
+      logger.error(`[PrivmonDataClient] Error upserting users: ${JSON.stringify(result.items)}`);
       throw new Error(`Error upserting users`);
     }
+
+    const mergedUserCount = mergedUsers.length;
+    const existingUserCount = existingUsers.length;
+
+    return {
+      created: mergedUserCount - existingUserCount,
+      updated: existingUserCount,
+    };
   }
 }

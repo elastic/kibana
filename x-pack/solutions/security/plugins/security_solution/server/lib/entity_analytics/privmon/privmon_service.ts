@@ -13,6 +13,7 @@ import type { AssetCriticalityService } from '../asset_criticality/asset_critica
 import type { PrivmonDataClient, PrivmonSearchOptions } from './privmon_data_client';
 import type { LatestTaskStateSchema } from './task/state';
 import { processLogins, processPrivileges } from './processors';
+import { mergePrivilegedUsersByUser } from './utils';
 export interface UpdatePrivilegedUsersParams {
   timestamps: LatestTaskStateSchema['timestamps'];
 }
@@ -70,18 +71,20 @@ export const privmonServiceFactory = ({
       privmonDataClient,
     });
 
-    const users = [...privilegeResult.privilegedUsers, ...loginResult.privilegedUsers];
+    const users = mergePrivilegedUsersByUser([
+      ...privilegeResult.privilegedUsers,
+      ...loginResult.privilegedUsers,
+    ]);
 
-    logger.info(`Upserting ${users.length} users`);
+    const { created: usersCreated, updated: usersUpdated } =
+      await privmonDataClient.bulkUpsertUsers(users);
 
-    await privmonDataClient.bulkUpsertUsers(users);
-
-    const { timestamps } = getLastProcessedData(logins, privileges);
+    const { timestamps } = getLastProcessedData(logins, privileges, params);
 
     return Promise.resolve({
       errors: [],
-      usersUpdated: 0,
-      usersCreated: 0,
+      usersUpdated,
+      usersCreated,
       timestamps,
     });
   },
@@ -92,17 +95,24 @@ interface Queries {
   privileges: PrivmonSearchOptions;
 }
 
-const afterTimestampQuery = (timestamp?: string): PrivmonSearchOptions => ({
-  query: {
-    range: {
-      'event.ingested': {
-        gt: timestamp,
+const afterTimestampQuery = (timestamp?: string): PrivmonSearchOptions => {
+  const query: PrivmonSearchOptions = {
+    sort: [{ 'event.ingested': 'asc' }],
+    size: 100,
+  };
+
+  if (timestamp) {
+    query.query = {
+      range: {
+        'event.ingested': {
+          gt: timestamp,
+        },
       },
-    },
-  },
-  sort: [{ 'event.ingested': 'asc' }],
-  size: 100,
-});
+    };
+  }
+
+  return query;
+};
 
 const getsearchRequests = (params: UpdatePrivilegedUsersParams): Queries => {
   return {
@@ -127,14 +137,17 @@ const getNextData = async (
 
 const getLastProcessedData = (
   logins: PrivmonLoginDoc[],
-  privileges: PrivmonPrivilegeDoc[]
+  privileges: PrivmonPrivilegeDoc[],
+  params: UpdatePrivilegedUsersParams
 ): {
   timestamps: LatestTaskStateSchema['timestamps'];
 } => {
-  const lastLoginTimestamp = logins.length ? logins[logins.length - 1].event.ingested : undefined;
+  const lastLoginTimestamp = logins.length
+    ? logins[logins.length - 1].event.ingested
+    : params.timestamps?.lastProcessedLogin;
   const lastPrivilegeTimestamp = privileges.length
     ? privileges[privileges.length - 1].event.ingested
-    : undefined;
+    : params.timestamps?.lastProcessedPrivilege;
 
   return {
     timestamps: {

@@ -22,9 +22,14 @@ export const PRIVMON_USERS_INDEX_TEMPLATE_NAME = `${PRIVMON_INDEX_PREFIX}.users`
 export const OBSERVATION_TYPES = {
   LOGIN: {
     CRITICAL_HOST: 'critical_host_login',
-    MANY_IPS: 'many_ips_login',
   },
   PRIVILEGE: {
-    ESCALATION: 'privilege_escalation',
+    ADDED_TO_PRIVILEGED_GROUP: 'added_to_privileged_group',
+    CONTROLS_PRIVILEGED_GROUP: 'controls_privileged_group',
   },
 } as const;
+
+export const ACTIONS = {
+  LOGIN: 'login',
+  GROUP_ADD: 'group-add',
+};

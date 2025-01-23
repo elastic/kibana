@@ -15,11 +15,11 @@ import type {
 import type {
   PrivmonLoginDoc,
   PrivilegedUserDoc,
-  PrivilegedUserObservation,
 } from '../../../../../common/api/entity_analytics/privmon';
 import type { AssetCriticalityService } from '../../asset_criticality';
 import type { PrivmonDataClient } from '../privmon_data_client';
-import type { ProcessorResult } from './types';
+import type { ProcessorResult, UserAndObservations } from './types';
+import { mergeObservationsByUser } from './utils';
 
 const MAX_CONCURRENCY = 10;
 
@@ -103,41 +103,42 @@ const processLogin = async ({
   logger: Logger;
   privmonDataClient: PrivmonDataClient;
 }): Promise<ProcessorResult> => {
-  const observations = await getObservations({
+  const usersAndObservations = await getUsersAndObservations({
     login,
     hostAssetCriticalityRecord,
     logger,
     privmonDataClient,
   });
 
-  if (observations.length === 0) {
+  if (usersAndObservations.length === 0) {
     return {
       privilegedUsers: [],
     };
   }
 
+  const mergedUsersAndObservations = mergeObservationsByUser(usersAndObservations);
+
   return {
-    privilegedUsers: [loginDocToPrivilegedUser(login, observations)],
+    privilegedUsers: mergedUsersAndObservations.map((userAndObservations) =>
+      loginDocToPrivilegedUser(login, userAndObservations)
+    ),
   };
 };
 
 const loginDocToPrivilegedUser = (
   login: PrivmonLoginDoc,
-  observations: PrivilegedUserObservation[]
+  { observations, user }: UserAndObservations
 ): PrivilegedUserDoc => {
   return {
-    user: {
-      name: login.user.name,
-      id: login.user.id,
-    },
-    is_privileged: true,
+    user,
+    active: true,
     '@timestamp': login['@timestamp'],
     created_at: new Date().toISOString(),
     observations,
   };
 };
 
-const getObservations = async ({
+const getUsersAndObservations = async ({
   login,
   hostAssetCriticalityRecord,
   logger,
@@ -147,8 +148,8 @@ const getObservations = async ({
   hostAssetCriticalityRecord?: AssetCriticalityRecord;
   logger: Logger;
   privmonDataClient: PrivmonDataClient;
-}): Promise<PrivilegedUserObservation[]> => {
-  const observations: PrivilegedUserObservation[] = [];
+}): Promise<UserAndObservations[]> => {
+  const observations: UserAndObservations[] = [];
 
   const criticalHostObservation = loginToCriticalHostObservation({
     login,
@@ -168,18 +169,23 @@ const loginToCriticalHostObservation = ({
 }: {
   login: PrivmonLoginDoc;
   hostAssetCriticalityRecord?: AssetCriticalityRecord;
-}): PrivilegedUserObservation | undefined => {
+}): UserAndObservations | undefined => {
   if (!hostAssetCriticalityRecord) {
     return;
   }
 
   if (PRIVILEGED_CRITICALITY_LEVELS.includes(hostAssetCriticalityRecord.criticality_level)) {
     return {
-      observation_type: OBSERVATION_TYPES.LOGIN.CRITICAL_HOST,
-      summary: `User logged into host '${hostAssetCriticalityRecord.id_value}' with criticality level '${hostAssetCriticalityRecord.criticality_level}' at ${login['@timestamp']}`,
-      timestamp: login['@timestamp'],
-      ingested: login.event.ingested,
-      raw_event: login,
+      user: login.user,
+      observations: [
+        {
+          observation_type: OBSERVATION_TYPES.LOGIN.CRITICAL_HOST,
+          summary: `User logged into host '${hostAssetCriticalityRecord.id_value}' with criticality level '${hostAssetCriticalityRecord.criticality_level}' at ${login['@timestamp']}`,
+          timestamp: login['@timestamp'],
+          ingested: login.event.ingested,
+          raw_event: login,
+        },
+      ],
     };
   }
 };

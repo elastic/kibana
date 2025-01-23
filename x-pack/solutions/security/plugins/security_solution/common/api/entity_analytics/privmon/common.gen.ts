@@ -16,27 +16,6 @@
 
 import { z } from '@kbn/zod';
 
-export type PrivilegedUserObservation = z.infer<typeof PrivilegedUserObservation>;
-export const PrivilegedUserObservation = z.object({
-  observation_type: z.string().optional(),
-  summary: z.string().optional(),
-  raw_event: z.object({}).optional(),
-  timestamp: z.string().optional(),
-  ingested: z.string().optional(),
-});
-
-export type PrivilegedUserDoc = z.infer<typeof PrivilegedUserDoc>;
-export const PrivilegedUserDoc = z.object({
-  '@timestamp': z.string(),
-  created_at: z.string(),
-  is_privileged: z.boolean(),
-  observations: z.array(PrivilegedUserObservation).optional(),
-  user: z.object({
-    id: z.string().optional(),
-    name: z.string(),
-  }),
-});
-
 export type PrivmonLoginDoc = z.infer<typeof PrivmonLoginDoc>;
 export const PrivmonLoginDoc = z.object({
   '@timestamp': z.string(),
@@ -119,18 +98,16 @@ export const PrivmonPrivilegeDoc = z.object({
   }),
   user: z.object({
     id: z.string().optional(),
-    name: z.string().optional(),
+    name: z.string(),
     type: z.string().optional(),
   }),
   target: z.object({
-    user: z
-      .object({
-        id: z.string().optional(),
-        name: z.string().optional(),
-        type: z.string().optional(),
-        created: z.string().optional(),
-      })
-      .optional(),
+    user: z.object({
+      id: z.string().optional(),
+      name: z.string(),
+      type: z.string().optional(),
+      created: z.string().optional(),
+    }),
   }),
   group: z
     .object({
@@ -156,4 +133,29 @@ export const PrivmonPrivilegeDoc = z.object({
     })
     .optional(),
   tags: z.array(z.string()).optional(),
+});
+
+export type PrivmonDoc = z.infer<typeof PrivmonDoc>;
+export const PrivmonDoc = z.union([PrivmonLoginDoc, PrivmonPrivilegeDoc]);
+
+export type PrivilegedUserObservation = z.infer<typeof PrivilegedUserObservation>;
+export const PrivilegedUserObservation = z.object({
+  observation_type: z.string(),
+  summary: z.string(),
+  raw_event: z.object({}),
+  timestamp: z.string(),
+  ingested: z.string(),
+  outdated: z.boolean().optional(),
+});
+
+export type PrivilegedUserDoc = z.infer<typeof PrivilegedUserDoc>;
+export const PrivilegedUserDoc = z.object({
+  '@timestamp': z.string(),
+  created_at: z.string(),
+  active: z.boolean(),
+  observations: z.array(PrivilegedUserObservation),
+  user: z.object({
+    id: z.string().optional(),
+    name: z.string(),
+  }),
 });

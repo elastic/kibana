@@ -6,3 +6,5 @@
  */
 
 export * from './create_privmon_ingest_pipeline';
+export * from './merge_privileged_users';
+export * from './users_to_query';
