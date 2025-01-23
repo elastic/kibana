@@ -134,22 +134,21 @@ export function DiscoverMainRoute({
           stateContainer.actions.loadDataViewList(),
         ]);
 
-        const hasAdHocDataViews = stateContainer.internalState.getState().adHocDataViews.length > 0;
+        const persistedDataViewsExist = hasUserDataViewValue && defaultDataViewExists;
+        const canAccessWithAdHocDataViews =
+          hasESDataValue && stateContainer.internalState.getState().adHocDataViews.length > 0;
 
-        if (
-          (!hasUserDataViewValue || !defaultDataViewExists) &&
-          (!hasAdHocDataViews || !hasESDataValue)
-        ) {
-          setNoDataState({
-            showNoDataPage: true,
-            hasESData: hasESDataValue,
-            hasUserDataView: hasUserDataViewValue,
-          });
-
-          return false;
+        if (persistedDataViewsExist || canAccessWithAdHocDataViews) {
+          return true;
         }
 
-        return true;
+        setNoDataState({
+          showNoDataPage: true,
+          hasESData: hasESDataValue,
+          hasUserDataView: hasUserDataViewValue,
+        });
+
+        return false;
       } catch (e) {
         setError(e);
         return false;
