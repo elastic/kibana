@@ -51,6 +51,7 @@ import { useQueryToggle } from '../../../../common/containers/query_toggle';
 import { VIEW_ALERTS } from '../../../pages/translations';
 import { SEVERITY_COLOR } from '../utils';
 import { FormattedCount } from '../../../../common/components/formatted_number';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 import { ChartLabel } from './chart_label';
 import { Legend } from '../../../../common/components/charts/legend';
 import { emptyDonutColor } from '../../../../common/components/charts/donutchart_empty';
@@ -109,6 +110,9 @@ export const AlertsByStatus = ({
   const { toggleStatus, setToggleStatus } = useQueryToggle(DETECTION_RESPONSE_ALERTS_BY_STATUS_ID);
   const { openTimelineWithFilters } = useNavigateToTimeline();
   const navigateToAlerts = useNavigateToAlertsPageWithFilters();
+  const {
+    timelinePrivileges: { read: canAccessTimelines },
+  } = useUserPrivileges();
   const { onClick: goToAlerts, href } = useGetSecuritySolutionLinkProps()({
     deepLinkId: SecurityPageName.alerts,
   });
@@ -125,15 +129,16 @@ export const AlertsByStatus = ({
 
   const detailsButtonOptions = useMemo(
     () => ({
-      name: entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
-      href: entityFilter ? undefined : href,
-      onClick: entityFilter
-        ? async () => {
-            await openTimelineWithFilters([[entityFilter, eventKindSignalFilter]]);
-          }
-        : goToAlerts,
+      name: canAccessTimelines && entityFilter ? INVESTIGATE_IN_TIMELINE : VIEW_ALERTS,
+      href: canAccessTimelines && entityFilter ? undefined : href,
+      onClick:
+        canAccessTimelines && entityFilter
+          ? async () => {
+              await openTimelineWithFilters([[entityFilter, eventKindSignalFilter]]);
+            }
+          : goToAlerts,
     }),
-    [entityFilter, href, goToAlerts, openTimelineWithFilters]
+    [entityFilter, href, goToAlerts, openTimelineWithFilters, canAccessTimelines]
   );
 
   const {

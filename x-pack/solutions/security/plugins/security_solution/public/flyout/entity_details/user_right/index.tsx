@@ -32,7 +32,7 @@ import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_
 import { UserPreviewPanelFooter } from '../user_preview/footer';
 import { DETECTION_RESPONSE_ALERTS_BY_STATUS_ID } from '../../../overview/components/detection_response/alerts_by_status/types';
 import { useNavigateToUserDetails } from './hooks/use_navigate_to_user_details';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 
 export interface UserPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -99,7 +99,7 @@ export const UserPanel = ({
   const { hasMisconfigurationFindings } = useHasMisconfigurations('user.name', userName);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: 'user.name',
+    field: EntityIdentifierFields.userName,
     value: userName,
     to,
     from,
@@ -121,7 +121,7 @@ export const UserPanel = ({
     scopeId,
     contextID,
     isDraggable,
-    isRiskScoreExist: !!userRiskData?.user?.risk,
+    isRiskScoreExist,
     hasMisconfigurationFindings,
     hasNonClosedAlerts,
     isPreviewMode,

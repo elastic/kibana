@@ -111,4 +111,21 @@ export class DefaultSummaryTransformManager implements TransformManager {
       throw err;
     }
   }
+
+  async getVersion(transformId: TransformId): Promise<number | undefined> {
+    try {
+      const response = await retryTransientEsErrors(
+        () =>
+          this.scopedClusterClient.asSecondaryAuthUser.transform.getTransform(
+            { transform_id: transformId },
+            { ignore: [404] }
+          ),
+        { logger: this.logger }
+      );
+      return response?.transforms[0]?._meta?.version;
+    } catch (err) {
+      this.logger.error(`Cannot retrieve SLO transform version [${transformId}]. ${err}`);
+      throw err;
+    }
+  }
 }
