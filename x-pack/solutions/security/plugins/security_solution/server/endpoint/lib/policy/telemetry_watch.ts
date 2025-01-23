@@ -22,6 +22,7 @@ import { SECURITY_EXTENSION_ID } from '@kbn/core-saved-objects-server';
 import type { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 import type { PolicyData } from '../../../../common/endpoint/types';
 import { getPolicyDataForUpdate } from '../../../../common/endpoint/service/policy';
+import type { EndpointAppContextService } from '../../endpoint_app_context_services';
 
 export class TelemetryConfigWatcher {
   private logger: Logger;
@@ -33,11 +34,11 @@ export class TelemetryConfigWatcher {
     policyService: PackagePolicyClient,
     soStart: SavedObjectsServiceStart,
     esStart: ElasticsearchServiceStart,
-    logger: Logger
+    endpointAppContextService: EndpointAppContextService
   ) {
     this.policyService = policyService;
     this.esClient = esStart.client.asInternalUser;
-    this.logger = logger;
+    this.logger = endpointAppContextService.createLogger(this.constructor.name);
     this.soStart = soStart;
   }
 
@@ -80,7 +81,7 @@ export class TelemetryConfigWatcher {
     };
 
     this.logger.debug(
-      `Checking Endpoint policies to update due to changed telemetry config setting: ${isTelemetryEnabled}`
+      `Checking Endpoint policies to update due to changed global telemetry config setting. (New value: ${isTelemetryEnabled})`
     );
 
     do {

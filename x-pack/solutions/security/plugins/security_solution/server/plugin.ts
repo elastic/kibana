@@ -678,7 +678,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         plugins.fleet.packagePolicyService,
         core.savedObjects,
         core.elasticsearch,
-        logger
+        this.endpointContext.service
       );
       this.telemetryWatcher.start(this.telemetryConfigProvider);
     }

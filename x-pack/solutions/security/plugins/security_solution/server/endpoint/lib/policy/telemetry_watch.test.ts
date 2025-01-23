@@ -6,11 +6,7 @@
  */
 
 import { Subject } from 'rxjs';
-import {
-  elasticsearchServiceMock,
-  loggingSystemMock,
-  savedObjectsServiceMock,
-} from '@kbn/core/server/mocks';
+import { elasticsearchServiceMock, savedObjectsServiceMock } from '@kbn/core/server/mocks';
 import { createPackagePolicyServiceMock } from '@kbn/fleet-plugin/server/mocks';
 import type { PackagePolicyClient } from '@kbn/fleet-plugin/server';
 import type { PackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
@@ -19,6 +15,7 @@ import { policyFactory } from '../../../../common/endpoint/models/policy_config'
 import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { TelemetryConfigWatcher } from './telemetry_watch';
 import { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
+import { createMockEndpointAppContextService } from '../../mocks';
 
 const MockPackagePolicyWithEndpointPolicy = (
   cb?: (p: PolicyConfig) => PolicyConfig
@@ -35,7 +32,6 @@ const MockPackagePolicyWithEndpointPolicy = (
 };
 
 describe('Telemetry config watcher', () => {
-  const logger = loggingSystemMock.create().get('telemetry_watch.test');
   const soStartMock = savedObjectsServiceMock.createStartContract();
   const esStartMock = elasticsearchServiceMock.createStart();
   let packagePolicySvcMock: jest.Mocked<PackagePolicyClient>;
@@ -66,7 +62,7 @@ describe('Telemetry config watcher', () => {
       packagePolicySvcMock,
       soStartMock,
       esStartMock,
-      logger
+      createMockEndpointAppContextService()
     );
   });
 
