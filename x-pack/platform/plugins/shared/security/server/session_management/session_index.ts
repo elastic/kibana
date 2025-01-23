@@ -12,19 +12,16 @@ import type {
   CreateRequest,
   IndicesCreateRequest,
   MsearchRequestItem,
-  SearchHit,
   SortResults,
 } from '@elastic/elasticsearch/lib/api/types';
-import semver from 'semver';
 
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 
 import type { AuthenticationProvider } from '../../common';
-import { sessionCleanupConcurrentLimitEvent, sessionCleanupEvent } from '../audit';
 import { AnonymousAuthenticationProvider } from '../authentication';
 import type { ConfigType } from '../config';
-import { getDetailedErrorMessage, getErrorStatusCode } from '../errors';
+import { getDetailedErrorMessage } from '../errors';
 
 export interface SessionIndexOptions {
   readonly elasticsearchClient: ElasticsearchClient;
