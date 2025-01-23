@@ -6,10 +6,9 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { css } from '@emotion/react';
 import type { Index } from '@kbn/index-management-shared-types';
 
-import { EuiPanel, useEuiTheme, type UseEuiTheme } from '@elastic/eui';
+import { EuiPanel, useEuiTheme } from '@elastic/eui';
 import { Mappings } from '../../types';
 import { IndexDocuments } from '../../hooks/api/use_document_search';
 
@@ -21,11 +20,8 @@ import { IndexStatusStat } from './index_status_stat';
 import { QuickStatsContainer } from './quick_stats_container';
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
 import { StatelessDocumentCountStat } from './stateless_document_cout_stat';
-
-const QuickStatsPanelStyle = (euiTheme: UseEuiTheme['euiTheme']) => css`
-  background: ${euiTheme.colors.lightestShade};
-  overflow: hidden;
-`;
+import { StatelessQuickStats } from './stateless_quick_stats';
+import { QuickStatsPanelStyle } from './styles';
 
 export interface QuickStatsProps {
   index: Index;
@@ -94,7 +90,11 @@ export const QuickStats: React.FC<QuickStatsProps> = ({
       hasShadow={false}
       css={QuickStatsPanelStyle(euiTheme)}
     >
-      <QuickStatsContainer>{stats}</QuickStatsContainer>
+      {isStateless ? (
+        <StatelessQuickStats>{stats}</StatelessQuickStats>
+      ) : (
+        <QuickStatsContainer>{stats}</QuickStatsContainer>
+      )}
     </EuiPanel>
   );
 };

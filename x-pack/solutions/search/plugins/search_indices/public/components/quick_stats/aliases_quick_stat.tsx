@@ -9,6 +9,7 @@ import { EuiFlexGroup, EuiFlexItem, EuiText, EuiI18nNumber, useEuiTheme } from '
 import { i18n } from '@kbn/i18n';
 
 import { QuickStat } from './quick_stat';
+import { AliasesContentStyle } from './styles';
 
 export interface AliasesStatProps {
   aliases: string[];
@@ -33,7 +34,7 @@ export const AliasesStat = ({ aliases, open, setOpen }: AliasesStatProps) => {
         <EuiFlexGroup
           direction="column"
           gutterSize="s"
-          css={{ maxHeight: '100px' }}
+          css={AliasesContentStyle}
           className="eui-yScroll"
         >
           {aliases.map((alias, i) => (
