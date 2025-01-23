@@ -91,7 +91,7 @@ type PrimitiveOf<TProperty extends StorageMappingProperty> = {
   float: number;
   object: TProperty extends { properties: Record<string, StorageMappingProperty> }
     ? {
-        [key in keyof TProperty['properties']]: StorageFieldTypeOf<TProperty['properties'][key]>;
+        [key in keyof TProperty['properties']]?: StorageFieldTypeOf<TProperty['properties'][key]>;
       }
     : object;
 }[TProperty['type']];
