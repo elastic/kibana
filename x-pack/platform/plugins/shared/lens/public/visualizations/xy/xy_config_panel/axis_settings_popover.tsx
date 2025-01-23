@@ -28,13 +28,11 @@ import {
   allowedOrientations,
 } from '../../../shared_components';
 import type { Orientation } from '../../../shared_components';
-import { XYLayerConfig, AxesSettingsConfig } from '../types';
-
+import { XYLayerConfig } from '../types';
 import './axis_settings_popover.scss';
 import { validateExtent } from '../../../shared_components/axis/extent/helpers';
 import { getBounds } from '../../../shared_components/axis/extent/axis_extent_settings';
-
-type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
+import type { AxesSettingsConfigKeys } from '../../../shared_components/axis/types';
 
 export interface AxisSettingsPopoverProps {
   /**

@@ -8,9 +8,7 @@
 import React, { useCallback } from 'react';
 import { EuiSwitch, EuiFormRow } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { AxesSettingsConfig } from '../../../visualizations/xy/types';
-
-type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
+import type { AxesSettingsConfigKeys } from '../types';
 
 export interface AxisTicksSettingsProps {
   /**

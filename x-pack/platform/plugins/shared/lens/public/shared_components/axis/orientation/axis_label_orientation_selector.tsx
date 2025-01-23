@@ -8,8 +8,7 @@
 import React from 'react';
 import { EuiFormRow, EuiButtonGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-
-type AxesSettingsConfigKeys = 'x' | 'yRight' | 'yLeft';
+import type { AxesSettingsConfigKeys } from '../types';
 
 export const allowedOrientations = [0, -45, -90] as const;
 export type Orientation = (typeof allowedOrientations)[number];

@@ -63,11 +63,6 @@ export const defaultSeriesType = SeriesTypes.BAR_STACKED;
 
 export type YAxisMode = $Values<typeof YAxisModes>;
 export type SeriesType = $Values<typeof SeriesTypes>;
-export interface AxesSettingsConfig {
-  x: boolean;
-  yRight: boolean;
-  yLeft: boolean;
-}
 
 export interface AxisConfig extends Omit<YAxisConfig, 'extent'> {
   extent?: AxisExtentConfig;
