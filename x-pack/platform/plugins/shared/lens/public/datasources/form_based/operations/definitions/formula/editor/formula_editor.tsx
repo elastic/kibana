@@ -932,7 +932,7 @@ export function FormulaEditor({
                 // make sure docs are rendered in front of monaco
                 z-index: 1;
               `}
-          >
+            >
               <LanguageDocumentationPopoverContent
                 language="Formula"
                 sections={documentationSections}
