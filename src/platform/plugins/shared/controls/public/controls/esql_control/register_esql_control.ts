@@ -14,7 +14,7 @@ import { registerControlFactory } from '../../control_factory_registry';
 export function registerESQLControl() {
   registerControlFactory(ESQL_CONTROL, async () => {
     const [{ getESQLControlFactory }] = await Promise.all([
-      import('./get_esql_control_factory'),
+      import('../../controls_module'),
       untilPluginStartServicesReady(),
     ]);
     return getESQLControlFactory();
