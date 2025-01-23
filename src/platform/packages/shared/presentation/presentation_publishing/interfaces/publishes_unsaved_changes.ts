@@ -9,15 +9,15 @@
 
 import { PublishingSubject } from '../publishing_subject';
 
-export interface PublishesUnsavedChanges<Runtime extends object = object> {
-  unsavedChanges$: PublishingSubject<Partial<Runtime> | undefined>;
-  resetUnsavedChanges: () => boolean;
+export interface PublishesUnsavedChanges {
+  hasUnsavedChanges$: PublishingSubject<boolean>;
+  resetUnsavedChanges: () => void;
 }
 
 export const apiPublishesUnsavedChanges = (api: unknown): api is PublishesUnsavedChanges => {
   return Boolean(
     api &&
-      (api as PublishesUnsavedChanges).unsavedChanges$ &&
+      (api as PublishesUnsavedChanges).hasUnsavedChanges$ &&
       (api as PublishesUnsavedChanges).resetUnsavedChanges
   );
 };

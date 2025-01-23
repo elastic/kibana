@@ -95,17 +95,18 @@ export const ReactEmbeddableRenderer = <
         const buildEmbeddable = async () => {
           const factory = await getReactEmbeddableFactory<SerializedState, RuntimeState, Api>(type);
           const serializedState = parentApi.getSerializedStateForChild(uuid);
-          const lastSavedRuntimeState = serializedState
+
+          const deserializedRuntimeState = serializedState
             ? await factory.deserializeState(serializedState)
             : ({} as RuntimeState);
 
           // If the parent provides runtime state for the child (usually as a state backup or cache),
-          // we merge it with the last saved runtime state.
+          // we merge it with the last saved runtime state. TODO: Remove this.
           const partialRuntimeState = apiHasRuntimeChildState<RuntimeState>(parentApi)
             ? parentApi.getRuntimeStateForChild(uuid) ?? ({} as Partial<RuntimeState>)
             : ({} as Partial<RuntimeState>);
 
-          const initialRuntimeState = { ...lastSavedRuntimeState, ...partialRuntimeState };
+          const initialRuntimeState = { ...deserializedRuntimeState, ...partialRuntimeState };
 
           const setApi = (
             apiRegistration: SetReactEmbeddableApiRegistration<SerializedState, RuntimeState, Api>
@@ -154,7 +155,7 @@ export const ReactEmbeddableRenderer = <
             }
 
             const unsavedChanges = initializeUnsavedChanges<RuntimeState>(
-              lastSavedRuntimeState,
+              uuid,
               parentApi,
               comparators
             );

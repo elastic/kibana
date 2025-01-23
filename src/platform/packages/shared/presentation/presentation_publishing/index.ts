@@ -10,9 +10,7 @@
 export { isEmbeddableApiContext, type EmbeddableApiContext } from './embeddable_api_context';
 
 export {
-  getInitialValuesFromComparators,
   getUnchangingComparator,
-  runComparators,
   type ComparatorDefinition,
   type ComparatorFunction,
   type StateComparators,
@@ -75,6 +73,10 @@ export {
   type HasSnapshottableState,
   type SerializedPanelState,
 } from './interfaces/has_serializable_state';
+export {
+  apiHasSerializedStateComparator,
+  type HasSerializedStateComparator,
+} from './interfaces/has_serialized_state_comparator';
 export {
   apiHasSupportedTriggers,
   type HasSupportedTriggers,

@@ -8,33 +8,38 @@
  */
 
 import {
+  apiHasParentApi,
+  apiHasSerializableState,
+  apiHasSerializedStateComparator,
+  HasSnapshottableState,
+  PublishesUnsavedChanges,
+  PublishingSubject,
+  SerializedPanelState,
+  StateComparators,
+} from '@kbn/presentation-publishing';
+import deepEqual from 'fast-deep-equal';
+import {
   BehaviorSubject,
   combineLatest,
   combineLatestWith,
   debounceTime,
-  map,
   Subscription,
 } from 'rxjs';
-import {
-  getInitialValuesFromComparators,
-  PublishesUnsavedChanges,
-  PublishingSubject,
-  runComparators,
-  StateComparators,
-  HasSnapshottableState,
-} from '@kbn/presentation-publishing';
-import { apiHasSaveNotification } from '../has_save_notification';
+import { apiHasLastSavedChildState, HasLastSavedChildState } from '../child_state';
+import { apiIsPresentationContainer } from '../presentation_container';
 
 export const COMPARATOR_SUBJECTS_DEBOUNCE = 100;
 
-export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
-  initialLastSavedState: RuntimeState,
-  parentApi: unknown,
-  comparators: StateComparators<RuntimeState>
+export const initializeUnsavedChanges = <
+  SerializedState extends object = object,
+  RuntimeState extends object = SerializedState,
+  Api extends unknown = unknown
+>(
+  uuid: string,
+  type: string,
+  comparators: StateComparators<RuntimeState>,
+  api: Api
 ) => {
-  const subscriptions: Subscription[] = [];
-  const lastSavedState$ = new BehaviorSubject<RuntimeState | undefined>(initialLastSavedState);
-
   const snapshotRuntimeState = () => {
     const comparatorKeys = Object.keys(comparators) as Array<keyof RuntimeState>;
     const snapshot = {} as RuntimeState;
@@ -45,72 +50,69 @@ export const initializeUnsavedChanges = <RuntimeState extends {} = {}>(
     return snapshot;
   };
 
-  if (apiHasSaveNotification(parentApi)) {
-    subscriptions.push(
-      // any time the parent saves, the current state becomes the last saved state...
-      parentApi.saveNotification$.subscribe(() => {
-        lastSavedState$.next(snapshotRuntimeState());
-      })
+  if (
+    !apiHasParentApi(api) ||
+    !apiHasLastSavedChildState<SerializedState>(api.parentApi) ||
+    !apiHasSerializableState<SerializedState>(api)
+  ) {
+    return {
+      api: {
+        hasUnsavedChanges$: new BehaviorSubject<boolean>(false),
+        resetUnsavedChanges: () => {},
+        snapshotRuntimeState,
+      } as PublishesUnsavedChanges & HasSnapshottableState<RuntimeState>,
+      cleanup: () => {},
+    };
+  }
+  const subscriptions: Subscription[] = [];
+
+  /**
+   * Set up a subject that refreshes the last saved state from the parent any time
+   * the parent saves.
+   */
+  const getLastSavedState = () => {
+    return (api.parentApi as HasLastSavedChildState<SerializedState>).getLastSavedStateForChild(
+      uuid
     );
-  }
-
-  const comparatorSubjects: Array<PublishingSubject<unknown>> = [];
-  const comparatorKeys: Array<keyof RuntimeState> = []; // index maps comparator subject to comparator key
-  for (const key of Object.keys(comparators) as Array<keyof RuntimeState>) {
-    const comparatorSubject = comparators[key][0]; // 0th element of tuple is the subject
-    comparatorSubjects.push(comparatorSubject as PublishingSubject<unknown>);
-    comparatorKeys.push(key);
-  }
-
-  const unsavedChanges$ = new BehaviorSubject<Partial<RuntimeState> | undefined>(
-    runComparators(
-      comparators,
-      comparatorKeys,
-      lastSavedState$.getValue() as RuntimeState,
-      getInitialValuesFromComparators(comparators, comparatorKeys)
-    )
+  };
+  const lastSavedState$ = new BehaviorSubject<SerializedPanelState<SerializedState> | undefined>(
+    getLastSavedState()
+  );
+  subscriptions.push(
+    // any time the parent saves, refresh the last saved state...
+    api.parentApi.saveNotification$.subscribe(() => {
+      lastSavedState$.next(getLastSavedState());
+    })
   );
 
+  /**
+   * set up hasUnsavedChanges$. It should recalculate whether this API has unsaved changes any time the
+   * last saved state or the runtime state changes.
+   */
+  const comparatorFunction = apiHasSerializedStateComparator<SerializedState>(api)
+    ? api.isSerializedStateEqual
+    : deepEqual;
+  const compareState = () => comparatorFunction(lastSavedState$.getValue(), api.serializeState());
+  const hasUnsavedChanges$ = new BehaviorSubject<boolean>(!compareState());
+  const comparatorSubjects$: Array<PublishingSubject<unknown>> = Object.values(comparators);
   subscriptions.push(
-    combineLatest(comparatorSubjects)
-      .pipe(
-        debounceTime(COMPARATOR_SUBJECTS_DEBOUNCE),
-        map((latestStates) =>
-          comparatorKeys.reduce((acc, key, index) => {
-            acc[key] = latestStates[index] as RuntimeState[typeof key];
-            return acc;
-          }, {} as Partial<RuntimeState>)
-        ),
-        combineLatestWith(lastSavedState$)
-      )
-      .subscribe(([latestState, lastSavedState]) => {
-        unsavedChanges$.next(
-          runComparators(comparators, comparatorKeys, lastSavedState, latestState)
-        );
-      })
+    combineLatest(comparatorSubjects$)
+      .pipe(debounceTime(COMPARATOR_SUBJECTS_DEBOUNCE), combineLatestWith(lastSavedState$))
+      .subscribe(() => hasUnsavedChanges$.next(!compareState()))
   );
 
   return {
     api: {
-      unsavedChanges$,
+      hasUnsavedChanges$,
       resetUnsavedChanges: () => {
-        const lastSaved = lastSavedState$.getValue();
-
-        // Do not reset to undefined or empty last saved state
-        // Temporary fix for https://github.com/elastic/kibana/issues/201627
-        // TODO remove when architecture fix resolves issue.
-        if (comparatorKeys.length && (!lastSaved || Object.keys(lastSaved).length === 0)) {
-          return false;
-        }
-
-        for (const key of comparatorKeys) {
-          const setter = comparators[key][1]; // setter function is the 1st element of the tuple
-          setter(lastSaved?.[key] as RuntimeState[typeof key]);
-        }
-        return true;
+        if (!apiIsPresentationContainer(api.parentApi)) return;
+        api.parentApi.replacePanel(uuid, {
+          panelType: type,
+          serializedState: lastSavedState$.getValue(),
+        });
       },
       snapshotRuntimeState,
-    } as PublishesUnsavedChanges<RuntimeState> & HasSnapshottableState<RuntimeState>,
+    } as PublishesUnsavedChanges & HasSnapshottableState<RuntimeState>,
     cleanup: () => {
       subscriptions.forEach((subscription) => subscription.unsubscribe());
     },
