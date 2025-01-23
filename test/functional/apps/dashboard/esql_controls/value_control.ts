@@ -27,7 +27,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const browser = getService('browser');
   const comboBox = getService('comboBox');
 
-  describe('dashboard - meow', function () {
+  describe('dashboard - add an value type ES|QL control', function () {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
