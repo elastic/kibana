@@ -10,7 +10,7 @@ import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
 import { ASSET_INVENTORY_URL } from '../../urls/navigation';
 
-const ALL_ASSETS_TITLE = getDataTestSubjectSelector('all_assets_title');
+const ALL_ASSETS_TITLE = getDataTestSubjectSelector('all-assets-title');
 
 describe(
   'Asset Inventory page',
