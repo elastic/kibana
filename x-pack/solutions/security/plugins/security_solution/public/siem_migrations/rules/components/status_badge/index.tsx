@@ -50,7 +50,7 @@ export const StatusBadge: React.FC<StatusBadgeProps> = React.memo(
     // Failed
     if (migrationRule.status === RuleMigrationStatusEnum.failed) {
       const tooltipMessage = migrationRule.comments?.length
-        ? migrationRule.comments[0]
+        ? migrationRule.comments[0].message
         : i18n.RULE_STATUS_FAILED;
       return (
         <EuiToolTip content={tooltipMessage}>

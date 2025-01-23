@@ -9,13 +9,13 @@ In order to make ongoing maintenance of log collection easy we want to introduce
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. The following command runs all Data Set Quality unit tests:
 
 ```
-yarn jest --config x-pack/platform/plugins/shared/observability_solution/dataset_quality/jest.config.js
+yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
 
 ```
-yarn jest --config x-pack/platform/plugins/shared/observability_solution/dataset_quality/jest.config.js x-pack/platform/plugins/shared/observability_solution/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
+yarn jest --config x-pack/platform/plugins/shared/dataset_quality/jest.config.js x-pack/platform/plugins/shared/dataset_quality/server/routes/data_streams/get_data_streams/get_data_streams.test.ts
 ```
 
 ### Deployment-agnostic API tests
@@ -58,7 +58,7 @@ The API tests are located in [`x-pack/test/dataset_quality_api_integration/`](/x
 #### Start server and run test (single process)
 
 ```
-node x-pack/platform/plugins/shared/observability_solution/dataset_quality/scripts/api [--help]
+node x-pack/platform/plugins/shared/dataset_quality/scripts/api [--help]
 ```
 
 The above command will start an ES instance on http://localhost:9220, a Kibana instance on http://localhost:5620 and run the api tests.
@@ -68,10 +68,10 @@ Once the tests finish, the instances will be terminated.
 
 ```sh
 # start server
-node x-pack/platform/plugins/shared/observability_solution/dataset_quality/scripts/api --server
+node x-pack/platform/plugins/shared/dataset_quality/scripts/api --server
 
 # run tests
-node x-pack/platform/plugins/shared/observability_solution/dataset_quality/scripts/api --runner --grep-files=data_stream_settings.spec.ts
+node x-pack/platform/plugins/shared/dataset_quality/scripts/api --runner --grep-files=data_stream_settings.spec.ts
 ```
 
 ### Using dockerized package registry
