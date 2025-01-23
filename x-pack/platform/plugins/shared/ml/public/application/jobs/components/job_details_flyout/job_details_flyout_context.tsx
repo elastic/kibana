@@ -10,6 +10,7 @@ import React, { createContext, useContext, useMemo, useState, useCallback } from
 export enum FlyoutType {
   JOB_DETAILS = 'jobDetails',
   DATAFEED_CHART = 'datafeedChart',
+  DATA_FRAME_ANALYTICS_DETAILS = 'dataFrameAnalyticsDetails',
 }
 interface JobInfoFlyoutsContextValue {
   activeJobId: string | null;
@@ -19,6 +20,7 @@ interface JobInfoFlyoutsContextValue {
   isDetailFlyoutOpen: boolean;
   isDatafeedChartFlyoutOpen: boolean;
   closeActiveFlyout: () => void;
+  isDataFrameAnalyticsDetailsFlyoutOpen: boolean;
 }
 
 export const JobInfoFlyoutsContext = createContext<JobInfoFlyoutsContextValue>({
@@ -28,6 +30,8 @@ export const JobInfoFlyoutsContext = createContext<JobInfoFlyoutsContextValue>({
   setActiveFlyout: () => {},
   isDetailFlyoutOpen: false,
   isDatafeedChartFlyoutOpen: false,
+  closeActiveFlyout: () => {},
+  isDataFrameAnalyticsDetailsFlyoutOpen: false,
 });
 
 export const useJobInfoFlyouts = () => useContext(JobInfoFlyoutsContext);
@@ -38,6 +42,10 @@ export const JobInfoFlyoutsProvider: React.FC<{ children: React.ReactNode }> = (
   const isDetailFlyoutOpen = useMemo(() => activeFlyout === FlyoutType.JOB_DETAILS, [activeFlyout]);
   const isDatafeedChartFlyoutOpen = useMemo(
     () => activeFlyout === FlyoutType.DATAFEED_CHART,
+    [activeFlyout]
+  );
+  const isDataFrameAnalyticsDetailsFlyoutOpen = useMemo(
+    () => activeFlyout === FlyoutType.DATA_FRAME_ANALYTICS_DETAILS,
     [activeFlyout]
   );
   const closeActiveFlyout = useCallback(() => {
@@ -51,6 +59,7 @@ export const JobInfoFlyoutsProvider: React.FC<{ children: React.ReactNode }> = (
         setActiveJobId,
         isDetailFlyoutOpen,
         isDatafeedChartFlyoutOpen,
+        isDataFrameAnalyticsDetailsFlyoutOpen,
         setActiveFlyout,
         activeFlyout,
         closeActiveFlyout,

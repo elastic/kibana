@@ -38,7 +38,7 @@ export const isGetDataFrameAnalyticsStatsResponseOk = (
   );
 };
 
-export type GetAnalytics = (forceRefresh?: boolean) => void;
+export type GetAnalytics = (forceRefresh?: boolean, nullableAnalyticsId?: string | null) => void;
 
 /**
  * Gets initial object for analytics stats.
@@ -120,7 +120,7 @@ export const useGetAnalytics = (
 
   let concurrentLoads = 0;
 
-  const getAnalytics = async (forceRefresh = false) => {
+  const getAnalytics = async (forceRefresh = false, nullableAnalyticsId?: string | null) => {
     if (forceRefresh === true || blockRefresh === false) {
       refreshAnalyticsList$.next(REFRESH_ANALYTICS_LIST_STATE.LOADING);
       concurrentLoads++;
@@ -129,9 +129,13 @@ export const useGetAnalytics = (
         return;
       }
 
+      const analyticsId = nullableAnalyticsId ?? undefined;
+
       try {
-        const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics();
-        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats();
+        const analyticsConfigs = await mlApi.dataFrameAnalytics.getDataFrameAnalytics(analyticsId);
+        const analyticsStats = await mlApi.dataFrameAnalytics.getDataFrameAnalyticsStats(
+          analyticsId
+        );
 
         const analyticsStatsResult = isGetDataFrameAnalyticsStatsResponseOk(analyticsStats)
           ? getAnalyticsJobsStats(analyticsStats)

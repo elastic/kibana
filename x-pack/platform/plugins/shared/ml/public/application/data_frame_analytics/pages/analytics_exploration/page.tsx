@@ -26,6 +26,8 @@ import type { AnalyticsSelectorIds } from '../components/analytics_selector';
 import { AnalyticsIdSelector, AnalyticsIdSelectorControls } from '../components/analytics_selector';
 import { AnalyticsEmptyPrompt } from '../analytics_management/components/empty_prompt';
 import { SavedObjectsWarning } from '../../../components/saved_objects_warning';
+import { JobInfoFlyoutsProvider } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
+import { AnalyticsDetailFlyout } from './components/analytics_detail_flyout';
 
 export const Page: FC<{
   jobId: string;
@@ -131,52 +133,55 @@ export const Page: FC<{
 
   return (
     <>
-      <AnalyticsIdSelectorControls
-        setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
-        selectedId={jobIdToUse}
-      />
-      {isIdSelectorFlyoutVisible ? (
-        <AnalyticsIdSelector
-          setAnalyticsId={setAnalyticsId}
+      <JobInfoFlyoutsProvider>
+        <AnalyticsDetailFlyout />
+        <AnalyticsIdSelectorControls
           setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
+          selectedId={jobIdToUse}
         />
-      ) : null}
-      {jobIdToUse !== undefined && (
-        <MlPageHeader>
-          <FormattedMessage
-            id="xpack.ml.dataframe.analyticsExploration.titleWithId"
-            defaultMessage="Explore results for job ID {id}"
-            values={{ id: jobIdToUse }}
+        {isIdSelectorFlyoutVisible ? (
+          <AnalyticsIdSelector
+            setAnalyticsId={setAnalyticsId}
+            setIsIdSelectorFlyoutVisible={setIsIdSelectorFlyoutVisible}
           />
-        </MlPageHeader>
-      )}
-      {jobIdToUse === undefined && (
-        <MlPageHeader>
-          <FormattedMessage
-            id="xpack.ml.dataframe.analyticsExploration.title"
-            defaultMessage="Explore results"
-          />
-        </MlPageHeader>
-      )}
+        ) : null}
+        {jobIdToUse !== undefined && (
+          <MlPageHeader>
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsExploration.titleWithId"
+              defaultMessage="Explore results for job ID {id}"
+              values={{ id: jobIdToUse }}
+            />
+          </MlPageHeader>
+        )}
+        {jobIdToUse === undefined && (
+          <MlPageHeader>
+            <FormattedMessage
+              id="xpack.ml.dataframe.analyticsExploration.title"
+              defaultMessage="Explore results"
+            />
+          </MlPageHeader>
+        )}
 
-      <SavedObjectsWarning onCloseFlyout={refresh} />
+        <SavedObjectsWarning onCloseFlyout={refresh} />
 
-      {jobIdToUse && analysisTypeToUse ? (
-        <div data-test-subj="mlPageDataFrameAnalyticsExploration">
-          {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
-            <OutlierExploration jobId={jobIdToUse} />
-          )}
-          {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.REGRESSION && (
-            <RegressionExploration jobId={jobIdToUse} />
-          )}
-          {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
-            <ClassificationExploration jobId={jobIdToUse} />
-          )}
-        </div>
-      ) : (
-        getEmptyState()
-      )}
-      <HelpMenu docLink={helpLink} />
+        {jobIdToUse && analysisTypeToUse ? (
+          <div data-test-subj="mlPageDataFrameAnalyticsExploration">
+            {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.OUTLIER_DETECTION && (
+              <OutlierExploration jobId={jobIdToUse} />
+            )}
+            {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.REGRESSION && (
+              <RegressionExploration jobId={jobIdToUse} />
+            )}
+            {analysisTypeToUse === ANALYSIS_CONFIG_TYPE.CLASSIFICATION && (
+              <ClassificationExploration jobId={jobIdToUse} />
+            )}
+          </div>
+        ) : (
+          getEmptyState()
+        )}
+        <HelpMenu docLink={helpLink} />
+      </JobInfoFlyoutsProvider>
     </>
   );
 };
