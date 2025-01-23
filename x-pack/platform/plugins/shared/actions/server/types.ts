@@ -102,6 +102,7 @@ export interface InMemoryConnector<
 > extends ActionResult {
   secrets: Secrets;
   config: Config;
+  exposeConfig?: boolean;
 }
 
 export type FindActionResult = ConnectorWithExtraFindData;

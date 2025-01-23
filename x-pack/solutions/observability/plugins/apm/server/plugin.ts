@@ -200,6 +200,7 @@ export class APMPlugin
     // This will add an API key to all existing APM package policies
     addApiKeysToEveryPackagePolicyIfMissing({
       coreStartPromise: getCoreStart(),
+      licensing: plugins.licensing,
       pluginStartPromise: getPluginStart(),
       logger: this.logger,
     }).catch((e) => {
