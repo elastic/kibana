@@ -7,9 +7,9 @@
 
 import { takeUntil, of, map } from 'rxjs';
 
+import type { IStaticAssets } from '@kbn/core-http-browser';
 import { GlobalSearchResultProvider } from '@kbn/global-search-plugin/server';
 import { i18n } from '@kbn/i18n';
-
 import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 
 import { ConfigType } from '..';
@@ -73,7 +73,8 @@ export function toSearchResult({
 export function getSearchResultProvider(
   config: ConfigType,
   connectorTypes: ConnectorServerSideDefinition[],
-  isCloud: boolean
+  isCloud: boolean,
+  staticAssets: IStaticAssets
 ): GlobalSearchResultProvider {
   return {
     find: ({ term, types, tags }, { aborted$, maxResults }, { core: { capabilities } }) => {
@@ -105,8 +106,12 @@ export function getSearchResultProvider(
           ];
           const result = services
             .map((service) => {
-              const { iconPath, isNative, keywords, name, serviceType } = service;
+              const { isNative, keywords, name, serviceType } = service;
               const url = 'url' in service ? service.url : undefined;
+              const iconPath =
+                'iconPath' in service
+                  ? staticAssets.getPluginAssetHref(`images/${service.iconPath}`)
+                  : undefined;
               let score = 0;
               const searchTerm = (term || '').toLowerCase();
               const searchName = name.toLowerCase();
