@@ -10,7 +10,7 @@ import type { RuleMigrationsRetriever } from '../../../../../retrievers';
 import type { ChatModel } from '../../../../../util/actions_client_chat';
 import type { GraphNode } from '../../types';
 import { MATCH_INTEGRATION_PROMPT } from './prompts';
-import { cleanMarkdown } from '../../../../../util/comments';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
 interface GetRetrieveIntegrationsNodeParams {
   model: ChatModel;
@@ -31,7 +31,13 @@ export const getRetrieveIntegrationsNode = ({
 
     const integrations = await ruleMigrationsRetriever.integrations.getIntegrations(query);
     if (integrations.length === 0) {
-      return { comments: ['## Integration Matching Summary\nNo related integration found.'] };
+      return {
+        comments: [
+          generateAssistantComment(
+            '## Integration Matching Summary\nNo related integration found.'
+          ),
+        ],
+      };
     }
 
     const outputParser = new JsonOutputParser();
@@ -55,7 +61,9 @@ export const getRetrieveIntegrationsNode = ({
       splunk_rule: JSON.stringify(splunkRule, null, 2),
     })) as GetMatchedIntegrationResponse;
 
-    const comments = response.summary ? [cleanMarkdown(response.summary)] : undefined;
+    const comments = response.summary
+      ? [generateAssistantComment(cleanMarkdown(response.summary))]
+      : undefined;
 
     if (response.match) {
       const matchedIntegration = integrations.find((r) => r.title === response.match);
