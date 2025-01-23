@@ -16,5 +16,6 @@ export const mapResult = (docHit: SearchHit<ProductDocumentationAttributes>): Do
     content: typeof content === 'string' ? content : content.text,
     url: docHit._source!.url,
     productName: docHit._source!.product_name,
+    highlights: docHit.highlight?.content_body ?? [],
   };
 };

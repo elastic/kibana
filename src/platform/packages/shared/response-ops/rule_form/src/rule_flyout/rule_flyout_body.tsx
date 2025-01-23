@@ -28,19 +28,24 @@ import { hasRuleErrors } from '../validation';
 import { RuleFlyoutCreateFooter } from './rule_flyout_create_footer';
 import { RuleFlyoutEditFooter } from './rule_flyout_edit_footer';
 import { RuleFlyoutEditTabs } from './rule_flyout_edit_tabs';
+import { RuleFormStepId } from '../constants';
 
 interface RuleFlyoutBodyProps {
   isEdit?: boolean;
   isSaving?: boolean;
   onCancel: () => void;
   onSave: (formData: RuleFormData) => void;
+  onShowRequest: () => void;
+  initialStep?: RuleFormStepId;
 }
 
 export const RuleFlyoutBody = ({
   isEdit = false,
   isSaving = false,
+  initialStep,
   onCancel,
   onSave,
+  onShowRequest,
 }: RuleFlyoutBodyProps) => {
   const {
     formData,
@@ -77,7 +82,7 @@ export const RuleFlyoutBody = ({
     goToPreviousStep,
     hasNextStep,
     hasPreviousStep,
-  } = useRuleFormHorizontalSteps();
+  } = useRuleFormHorizontalSteps(initialStep);
 
   const { actions } = formData;
 
@@ -133,7 +138,7 @@ export const RuleFlyoutBody = ({
         <RuleFlyoutEditFooter
           onCancel={onCancel}
           onSave={onSaveInternal}
-          onShowRequest={() => {} /* TODO */}
+          onShowRequest={onShowRequest}
           isSaving={isSaving}
           hasErrors={hasErrors}
         />
@@ -141,7 +146,7 @@ export const RuleFlyoutBody = ({
         <RuleFlyoutCreateFooter
           onCancel={onCancel}
           onSave={onSaveInternal}
-          onShowRequest={() => {} /* TODO */}
+          onShowRequest={onShowRequest}
           goToNextStep={goToNextStep}
           goToPreviousStep={goToPreviousStep}
           isSaving={isSaving}

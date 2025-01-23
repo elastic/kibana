@@ -67,8 +67,9 @@ export const storybookAliases = {
   presentation: 'src/platform/plugins/shared/presentation_util/storybook',
   random_sampling: 'x-pack/platform/packages/private/kbn-random-sampling/.storybook',
   esql_editor: 'src/platform/packages/private/kbn-esql-editor/.storybook',
-  security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
-  security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
+  // Skipped, please check and fix https://github.com/elastic/kibana/issues/207227
+  // security_solution: 'x-pack/solutions/security/plugins/security_solution/.storybook',
+  // security_solution_packages: 'x-pack/solutions/security/packages/storybook/config',
   serverless: 'packages/serverless/storybook/config',
   shared_ux: 'src/platform/packages/private/shared-ux/storybook/config',
   threat_intelligence: 'x-pack/solutions/security/plugins/threat_intelligence/.storybook',
@@ -76,4 +77,5 @@ export const storybookAliases = {
   ui_actions_enhanced: 'src/platform/plugins/shared/ui_actions_enhanced/.storybook',
   unified_search: 'src/platform/plugins/shared/unified_search/.storybook',
   profiling: 'x-pack/solutions/observability/plugins/profiling/.storybook',
+  event_stacktrace: 'x-pack/platform/packages/shared/kbn-event-stacktrace/.storybook',
 };
