@@ -1,5 +1,7 @@
 # Timeline Batching Functional Design ADR
 
+
+
 This document details the design of how Timeline Batching is supposed to work. The purpose of this document is to have a source of truth where reviewers of any changes can refer back and decide if the change is in line with the design or not.
 
 This document is only applicable for Timeline datagrid.
