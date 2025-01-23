@@ -26,7 +26,7 @@ import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { CreateIndexViewMode } from '../../types';
 
-const MAX_WIDTH = '980px';
+const WIDTH = '980px';
 
 export interface CreateIndexPanelProps {
   children: React.ReactNode | React.ReactNode[];
@@ -65,7 +65,7 @@ export const CreateIndexPanel = ({
         hasShadow={false}
         hasBorder
         style={{
-          maxWidth: MAX_WIDTH,
+          width: WIDTH,
           margin: '0 auto',
           padding: euiTheme.size.l,
           paddingTop: euiTheme.size.m,

@@ -79,9 +79,7 @@ export const CreateIndexCodeView = ({
           <APIKeyCallout apiKey={apiKey} />
         </EuiFlexItem>
       )}
-      <EuiFlexItem>
-        <EuiHorizontalRule />
-      </EuiFlexItem>
+      <EuiHorizontalRule margin="none" />
       <EuiFlexItem>
         <EuiTitle size="xs">
           <h5>
