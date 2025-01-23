@@ -15,7 +15,12 @@ import {
 
 export const LOG_VIEW_REFERENCE_NAME = 'log-view-reference-0';
 
-export const extractReferences = (params: LogThresholdParams) => {
+interface ExtractReferencesReturnType {
+  params: LogThresholdParams;
+  references: SavedObjectReference[];
+}
+
+export const extractReferences = (params: LogThresholdParams): ExtractReferencesReturnType => {
   if (!logViewReferenceRT.is(params.logView)) {
     return { params, references: [] };
   }
@@ -42,7 +47,7 @@ export const extractReferences = (params: LogThresholdParams) => {
 export const injectReferences = (
   params: LogThresholdParams,
   references: SavedObjectReference[]
-) => {
+): LogThresholdParams => {
   const decodedParams = logThresholdParamsSchema.validate(params);
 
   if (!logViewReferenceRT.is(decodedParams.logView)) {
