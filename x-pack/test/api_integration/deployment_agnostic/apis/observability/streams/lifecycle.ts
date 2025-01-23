@@ -11,8 +11,8 @@ import {
   InheritedIngestStreamLifecycle,
   WiredReadStreamDefinition,
   WiredStreamGetResponse,
-  isDslLifecycleSchema,
-  isIlmLifecycleSchema,
+  isDslLifecycle,
+  isIlmLifecycle,
 } from '@kbn/streams-schema';
 import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -39,7 +39,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const dataStreams = await esClient.indices.getDataStream({ name: streams });
     for (const dataStream of dataStreams.data_streams) {
-      if (isDslLifecycleSchema(expectedLifecycle)) {
+      if (isDslLifecycle(expectedLifecycle)) {
         expect(dataStream.lifecycle?.data_retention).to.eql(expectedLifecycle.dsl.data_retention);
         expect(dataStream.indices.every((index) => !index.ilm_policy)).to.eql(
           true,
@@ -52,7 +52,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'backing indices should not specify prefer_ilm'
           );
         }
-      } else if (isIlmLifecycleSchema(expectedLifecycle)) {
+      } else if (isIlmLifecycle(expectedLifecycle)) {
         expect(dataStream.prefer_ilm).to.eql(true, 'data stream should specify prefer_ilm');
         expect(dataStream.ilm_policy).to.eql(expectedLifecycle.ilm.policy);
         expect(

@@ -24,8 +24,8 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
-  isIlmLifecycleSchema,
-  isInheritLifecycleSchema,
+  isIlmLifecycle,
+  isInheritLifecycle,
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
@@ -198,7 +198,7 @@ export class StreamsClient {
 
       const effectiveLifecycle = findInheritedLifecycle(
         definition,
-        isInheritLifecycleSchema(definition.ingest.lifecycle)
+        isInheritLifecycle(definition.ingest.lifecycle)
           ? await this.getAncestors(definition.name)
           : []
       );
@@ -321,7 +321,7 @@ export class StreamsClient {
     }
 
     if (isWiredStreamDefinition(definition)) {
-      if (this.dependencies.isServerless && isIlmLifecycleSchema(definition.ingest.lifecycle)) {
+      if (this.dependencies.isServerless && isIlmLifecycle(definition.ingest.lifecycle)) {
         throw new MalformedStreamError('ILM lifecycle is not supported in serverless environments');
       }
 

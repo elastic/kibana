@@ -8,7 +8,7 @@
 import {
   StreamDefinition,
   WiredStreamDefinition,
-  isInheritLifecycleSchema,
+  isInheritLifecycle,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -44,7 +44,7 @@ export function validateRootStreamChanges(
     throw new RootStreamImmutabilityError('Root stream processing rules cannot be changed');
   }
 
-  if (isInheritLifecycleSchema(nextStreamDefinition.ingest.lifecycle)) {
+  if (isInheritLifecycle(nextStreamDefinition.ingest.lifecycle)) {
     throw new MalformedStreamError('Root stream cannot inherit lifecycle');
   }
 }

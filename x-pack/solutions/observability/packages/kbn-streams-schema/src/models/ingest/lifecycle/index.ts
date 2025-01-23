@@ -54,22 +54,16 @@ export type InheritedIngestStreamLifecycle = IngestStreamLifecycle & { from: str
 export const inheritedIngestStreamLifecycleSchema: z.Schema<InheritedIngestStreamLifecycle> =
   ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));
 
-export const isDslLifecycleSchema = createIsNarrowSchema(
-  ingestStreamLifecycleSchema,
-  dslLifecycleSchema
-);
+export const isDslLifecycle = createIsNarrowSchema(ingestStreamLifecycleSchema, dslLifecycleSchema);
 
-export const isIlmLifecycleSchema = createIsNarrowSchema(
-  ingestStreamLifecycleSchema,
-  ilmLifecycleSchema
-);
+export const isIlmLifecycle = createIsNarrowSchema(ingestStreamLifecycleSchema, ilmLifecycleSchema);
 
-export const isInheritLifecycleSchema = createIsNarrowSchema(
+export const isInheritLifecycle = createIsNarrowSchema(
   ingestStreamLifecycleSchema,
   inheritLifecycleSchema
 );
 
-export const isDisabledLifecycleSchema = createIsNarrowSchema(
+export const isDisabledLifecycle = createIsNarrowSchema(
   ingestStreamLifecycleSchema,
   disabledLifecycleSchema
 );

@@ -10,13 +10,7 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import {
-  WiredStreamDefinition,
-  isDisabledLifecycleSchema,
-  isDslLifecycleSchema,
-  isIlmLifecycleSchema,
-  isRoot,
-} from '@kbn/streams-schema';
+import { WiredStreamDefinition, isDslLifecycle, isIlmLifecycle, isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
@@ -65,15 +59,15 @@ function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: b
   if (isServerless) {
     // dlm cannot be disabled in serverless
     return {
-      data_retention: isDslLifecycleSchema(lifecycle) ? lifecycle.dsl.data_retention : undefined,
+      data_retention: isDslLifecycle(lifecycle) ? lifecycle.dsl.data_retention : undefined,
     };
   }
 
-  if (isIlmLifecycleSchema(lifecycle)) {
+  if (isIlmLifecycle(lifecycle)) {
     return { enabled: false };
   }
 
-  if (isDslLifecycleSchema(lifecycle)) {
+  if (isDslLifecycle(lifecycle)) {
     return {
       enabled: true,
       data_retention: lifecycle.dsl.data_retention,
@@ -91,7 +85,7 @@ function getTemplateSettings(definition: WiredStreamDefinition, isServerless: bo
     return baseSettings;
   }
 
-  if (isIlmLifecycleSchema(lifecycle)) {
+  if (isIlmLifecycle(lifecycle)) {
     return {
       ...baseSettings,
       'index.lifecycle.prefer_ilm': true,
@@ -99,7 +93,7 @@ function getTemplateSettings(definition: WiredStreamDefinition, isServerless: bo
     };
   }
 
-  if (isDslLifecycleSchema(lifecycle)) {
+  if (isDslLifecycle(lifecycle)) {
     return {
       ...baseSettings,
       'index.lifecycle.prefer_ilm': false,
