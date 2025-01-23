@@ -104,7 +104,8 @@
     "version",
     "watch",
     "watchAll",
-    "watchman"
+    "watchman",
+    "workerThreads"
   ],
   "alias": {
     "b": "bail",
