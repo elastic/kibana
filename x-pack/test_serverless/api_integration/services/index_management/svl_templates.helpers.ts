@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TemplateDeserialized, TemplateSerialized } from '@kbn/index-management-plugin/common';
+import { TemplateDeserialized, TemplateSerialized, IndexMode } from '@kbn/index-management-plugin/common';
 import { INDEX_PATTERNS } from './constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -52,7 +52,7 @@ export function SvlTemplatesHelpers({ getService }: FtrProviderContext) {
     indexPatterns: string[] = INDEX_PATTERNS,
     isLegacy: boolean = false,
     isMappingsSourceFieldEnabled: boolean = true,
-    indexMode?: string
+    indexMode?: IndexMode
   ) => {
     const baseTemplate: TemplateDeserialized = {
       name,
