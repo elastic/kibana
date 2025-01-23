@@ -23,11 +23,13 @@ module.exports = {
   },
   plugins: ['@typescript-eslint'],
   rules: {
+    // 'no-duplicate-imports': 'off',
+    // '@typescript-eslint/no-duplicate-imports': 'error',
     '@typescript-eslint/consistent-type-imports': [
       'error',
       {
         disallowTypeAnnotations: false,
-        fixStyle: 'inline-type-imports',
+        fixStyle: 'separate-type-imports',
         prefer: 'type-imports',
       },
     ],
