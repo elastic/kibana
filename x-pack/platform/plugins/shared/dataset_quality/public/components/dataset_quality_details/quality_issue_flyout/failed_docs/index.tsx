@@ -9,7 +9,6 @@ import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { useQualityIssues } from '../../../../hooks';
 import { QualityIssueFieldInfo } from '../field_info';
-import { PossibleMitigations } from '../possible_mitigations';
 import { FailedFieldInfo } from './filed_info';
 
 // Allow for lazy loading
@@ -29,7 +28,6 @@ export default function FailedDocsFlyout() {
         <FailedFieldInfo />
       </QualityIssueFieldInfo>
       <EuiSpacer size="s" />
-      <PossibleMitigations />
     </>
   );
 }

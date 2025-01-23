@@ -88,7 +88,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
     it('shows the last activity', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const lastActivityCol = cols['Last activity'];
+      const lastActivityCol = cols[PageObjects.datasetQuality.texts.datasetLastActivityColumn];
       const activityCells = await lastActivityCol.getCellTexts();
       const lastActivityCell = activityCells[activityCells.length - 1];
       const restActivityCells = activityCells.slice(0, -1);
@@ -106,7 +106,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('shows degraded docs percentage', async () => {
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
 
-      const degradedDocsCol = cols['Degraded docs (%)'];
+      const degradedDocsCol = cols[PageObjects.datasetQuality.texts.datasetDegradedDocsColumn];
       const degradedDocsColCellTexts = await degradedDocsCol.getCellTexts();
       expect(degradedDocsColCellTexts).to.eql(['0%', '0%', '0%', '100%']);
     });
@@ -152,7 +152,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     it('hides inactive datasets', async () => {
       // Get number of rows with Last Activity not equal to "No activity in the selected timeframe"
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
-      const lastActivityCol = cols['Last activity'];
+      const lastActivityCol = cols[PageObjects.datasetQuality.texts.datasetLastActivityColumn];
       const lastActivityColCellTexts = await lastActivityCol.getCellTexts();
       const activeDatasets = lastActivityColCellTexts.filter(
         (activity: string) => activity !== PageObjects.datasetQuality.texts.noActivityText

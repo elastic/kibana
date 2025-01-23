@@ -15,6 +15,7 @@ import {
   EuiTextColor,
   EuiTitle,
   EuiToolTip,
+  useEuiTheme,
 } from '@elastic/eui';
 import { useQualityIssues } from '../../../../hooks';
 import {
@@ -25,6 +26,7 @@ import {
 } from '../../../../../common/translations';
 
 export const DegradedFieldInfo = () => {
+  const { euiTheme } = useEuiTheme();
   const {
     degradedFieldValues,
     isAnalysisInProgress,

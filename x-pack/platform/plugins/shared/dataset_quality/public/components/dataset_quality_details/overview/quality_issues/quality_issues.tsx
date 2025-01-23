@@ -24,7 +24,7 @@ import {
   currentIssuesToggleSwitchTooltip,
   overviewQualityIssuesAccordionTechPreviewBadge,
 } from '../../../../../common/translations';
-import { DegradedFieldTable } from './table';
+import { QualityIssuesTable } from './table';
 import { useQualityIssues } from '../../../../hooks';
 
 export function QualityIssues() {
@@ -81,7 +81,7 @@ export function QualityIssues() {
         extraAction={latestBackingIndexToggle}
         data-test-subj="datasetQualityDetailsOverviewDocumentTrends"
       >
-        <DegradedFieldTable />
+        <QualityIssuesTable />
       </EuiAccordion>
     </EuiPanel>
   );

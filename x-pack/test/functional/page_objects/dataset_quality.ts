@@ -79,6 +79,9 @@ const texts = {
   datasetFailedDocsColumn: 'Failed docs (%)',
   datasetLastActivityColumn: 'Last activity',
   datasetActionsColumn: 'Actions',
+  datasetIssueColumn: 'Issue',
+  datasetDocsCountColumn: 'Docs count',
+  datasetLastOccurrenceColumn: 'Last Occurrence',
 };
 
 export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProviderContext) {
@@ -328,7 +331,12 @@ export function DatasetQualityPageObject({ getPageObjects, getService }: FtrProv
     async parseDegradedFieldTable() {
       await this.waitUntilTableLoaded();
       const table = await this.getDatasetQualityDetailsDegradedFieldTable();
-      return this.parseTable(table, ['0', 'Issue', 'Docs count', 'Last Occurrence']);
+      return this.parseTable(table, [
+        '0',
+        texts.datasetIssueColumn,
+        texts.datasetDocsCountColumn,
+        texts.datasetLastOccurrenceColumn,
+      ]);
     },
 
     async filterForIntegrations(integrations: string[]) {

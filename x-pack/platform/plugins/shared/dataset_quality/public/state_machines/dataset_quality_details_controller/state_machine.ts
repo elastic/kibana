@@ -207,37 +207,40 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                         },
                       },
                     },
-                    ...(isServerless
-                      ? {}
-                      : {
-                          dataStreamFailedDocs: {
-                            initial: 'fetchingFailedDocs',
-                            states: {
-                              fetchingFailedDocs: {
-                                invoke: {
-                                  src: 'loadFailedDocsDetails',
-                                  onDone: {
-                                    target: 'doneFetchingFailedDocs',
-                                    actions: ['storeFailedDocsDetails'],
-                                  },
-                                  onError: [
-                                    {
-                                      target: '#DatasetQualityDetailsController.indexNotFound',
-                                      cond: 'isIndexNotFoundError',
-                                    },
-                                    {
-                                      target: 'errorFetchingFailedDocs',
-                                    },
-                                  ],
-                                },
-                              },
-                              errorFetchingFailedDocs: {},
-                              doneFetchingFailedDocs: {
-                                type: 'final',
-                              },
+                    dataStreamFailedDocs: {
+                      initial: 'fetchingFailedDocs',
+                      states: {
+                        fetchingFailedDocs: {
+                          invoke: {
+                            src: 'loadFailedDocsDetails',
+                            onDone: {
+                              target: 'doneFetchingFailedDocs',
+                              actions: ['storeFailedDocsDetails'],
                             },
+                            onError: [
+                              {
+                                target: 'notImplemented',
+                                cond: 'checkIfNotImplemented',
+                              },
+                              {
+                                target: '#DatasetQualityDetailsController.indexNotFound',
+                                cond: 'isIndexNotFoundError',
+                              },
+                              {
+                                target: 'errorFetchingFailedDocs',
+                              },
+                            ],
                           },
-                        }),
+                        },
+                        notImplemented: {
+                          type: 'final',
+                        },
+                        errorFetchingFailedDocs: {},
+                        doneFetchingFailedDocs: {
+                          type: 'final',
+                        },
+                      },
+                    },
                   },
                   onDone: {
                     target:
@@ -325,7 +328,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                   always: [
                     {
                       target: 'closed',
-                      cond: 'hasNoDegradedFieldsSelected',
+                      cond: 'hasNoQualityIssueSelected',
                     },
                   ],
                 },
@@ -355,6 +358,10 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             },
                             onError: [
                               {
+                                target: 'unsupported',
+                                cond: 'checkIfNotImplemented',
+                              },
+                              {
                                 target: '#DatasetQualityDetailsController.indexNotFound',
                                 cond: 'isIndexNotFoundError',
                               },
@@ -372,6 +379,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             },
                           },
                         },
+                        unsupported: {},
                       },
                     },
                     degradedFieldFlyout: {
@@ -709,6 +717,14 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             event.data.statusCode === 403
           );
         },
+        checkIfNotImplemented: (_context, event) => {
+          return (
+            'data' in event &&
+            typeof event.data === 'object' &&
+            'statusCode' in event.data! &&
+            event.data.statusCode === 501
+          );
+        },
         isIndexNotFoundError: (_, event) => {
           return (
             ('data' in event &&
@@ -735,7 +751,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             context.expandedQualityIssue && context.expandedQualityIssue.type === 'degraded'
           );
         },
-        hasNoDegradedFieldsSelected: (context) => {
+        hasNoQualityIssueSelected: (context) => {
           return !Boolean(context.expandedQualityIssue);
         },
         hasFailedToUpdateLastBackingIndex: (_, event) => {
@@ -838,10 +854,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return false;
       },
       loadFailedDocsDetails: (context) => {
-        if (!context.dataStreamSettings.datasetUserPrivileges.canReadFailureStore) {
-          return Promise.resolve();
-        }
-
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamDetailsClient.getFailedDocsDetails({

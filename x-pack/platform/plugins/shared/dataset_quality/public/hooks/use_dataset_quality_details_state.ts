@@ -165,6 +165,7 @@ export const useDatasetQualityDetailsState = () => {
   return {
     service,
     telemetryClient,
+    isServerless,
     fieldFormats,
     isIndexNotFoundError,
     dataStream,

@@ -127,45 +127,46 @@ export const createPureDatasetQualityControllerStateMachine = (
                 },
               },
             },
-            ...(isServerless
-              ? {}
-              : {
-                  failedDocs: {
-                    initial: 'fetching',
-                    states: {
-                      fetching: {
-                        invoke: {
-                          src: 'loadFailedDocs',
-                          onDone: {
-                            target: 'loaded',
-                            actions: ['storeFailedDocStats', 'storeDatasets'],
-                          },
-                          onError: [
-                            {
-                              target: 'unauthorized',
-                              cond: 'checkIfActionForbidden',
-                            },
-                            {
-                              target: 'loaded',
-                              actions: ['notifyFetchFailedStatsFailed'],
-                            },
-                          ],
-                        },
-                      },
-                      loaded: {},
-                      unauthorized: { type: 'final' },
+            failedDocs: {
+              initial: 'fetching',
+              states: {
+                fetching: {
+                  invoke: {
+                    src: 'loadFailedDocs',
+                    onDone: {
+                      target: 'loaded',
+                      actions: ['storeFailedDocStats', 'storeDatasets'],
                     },
-                    on: {
-                      UPDATE_TIME_RANGE: {
-                        target: 'failedDocs.fetching',
-                        actions: ['storeTimeRange'],
+                    onError: [
+                      {
+                        target: 'notImplemented',
+                        cond: 'checkIfNotImplemented',
                       },
-                      REFRESH_DATA: {
-                        target: 'failedDocs.fetching',
+                      {
+                        target: 'unauthorized',
+                        cond: 'checkIfActionForbidden',
                       },
-                    },
+                      {
+                        target: 'loaded',
+                        actions: ['notifyFetchFailedStatsFailed'],
+                      },
+                    ],
                   },
-                }),
+                },
+                loaded: {},
+                notImplemented: {},
+                unauthorized: { type: 'final' },
+              },
+              on: {
+                UPDATE_TIME_RANGE: {
+                  target: 'failedDocs.fetching',
+                  actions: ['storeTimeRange'],
+                },
+                REFRESH_DATA: {
+                  target: 'failedDocs.fetching',
+                },
+              },
+            },
             docsStats: {
               initial: 'fetching',
               states: {
@@ -462,12 +463,20 @@ export const createPureDatasetQualityControllerStateMachine = (
         }),
       },
       guards: {
-        checkIfActionForbidden: (context, event) => {
+        checkIfActionForbidden: (_context, event) => {
           return (
             'data' in event &&
             typeof event.data === 'object' &&
             'statusCode' in event.data! &&
             event.data.statusCode === 403
+          );
+        },
+        checkIfNotImplemented: (_context, event) => {
+          return (
+            'data' in event &&
+            typeof event.data === 'object' &&
+            'statusCode' in event.data! &&
+            event.data.statusCode === 501
           );
         },
       },
@@ -544,10 +553,6 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadFailedDocs: (context) => {
-        if (!context.datasetUserPrivileges.canReadFailureStore) {
-          return Promise.resolve();
-        }
-
         const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsFailedStats({

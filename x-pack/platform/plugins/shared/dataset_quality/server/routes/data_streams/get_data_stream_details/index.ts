@@ -62,14 +62,16 @@ export async function getDataStreamDetails({
     );
 
     const failedDocs = isServerless
-      ? []
-      : await getFailedDocsPaginated({
-          esClient: esClientAsCurrentUser,
-          types: [],
-          datasetQuery: dataStream,
-          start,
-          end,
-        });
+      ? undefined
+      : (
+          await getFailedDocsPaginated({
+            esClient: esClientAsCurrentUser,
+            types: [],
+            datasetQuery: dataStream,
+            start,
+            end,
+          })
+        )?.[0];
 
     const avgDocSizeInBytes =
       dataStreamPrivileges.monitor && dataStreamSummaryStats.docsCount > 0
@@ -82,7 +84,7 @@ export async function getDataStreamDetails({
 
     return {
       ...dataStreamSummaryStats,
-      failedDocsCount: failedDocs[0]?.count,
+      failedDocsCount: failedDocs?.count,
       sizeBytes,
       lastActivity: esDataStream?.lastActivity,
       userPrivileges: {

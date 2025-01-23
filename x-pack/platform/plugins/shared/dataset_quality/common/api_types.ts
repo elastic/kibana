@@ -135,7 +135,6 @@ export const qualityIssueBaseRT = rt.type({
 export const qualityIssueRT = rt.intersection([
   qualityIssueBaseRT,
   rt.partial({
-    name: rt.string,
     indexFieldWasLastPresentIn: rt.string,
   }),
   rt.type({

@@ -9,23 +9,30 @@ import React from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import { FieldMappingLimit } from './field_limit/field_mapping_limit';
 import { useDatasetQualityDetailsState, useQualityIssues } from '../../../../../hooks';
-import { PossibleMitigations } from '../../possible_mitigations';
+import { ManualMitigations } from './manual';
+import { PossibleMitigationTitle } from './title';
 
 export function PossibleDegradedFieldMitigations() {
-  const { degradedFieldAnalysis } = useQualityIssues();
+  const { degradedFieldAnalysis, isAnalysisInProgress } = useQualityIssues();
   const { integrationDetails } = useDatasetQualityDetailsState();
   const areIntegrationAssetsAvailable = Boolean(
     integrationDetails?.integration?.areAssetsAvailable
   );
 
   return (
-    <PossibleMitigations>
-      {degradedFieldAnalysis?.isFieldLimitIssue && (
-        <>
-          <FieldMappingLimit areIntegrationAssetsAvailable={areIntegrationAssetsAvailable} />
-          <EuiSpacer size="m" />
-        </>
-      )}
-    </PossibleMitigations>
+    !isAnalysisInProgress && (
+      <div>
+        <EuiSpacer size="s" />
+        <PossibleMitigationTitle />
+        <EuiSpacer size="m" />
+        {degradedFieldAnalysis?.isFieldLimitIssue && (
+          <>
+            <FieldMappingLimit areIntegrationAssetsAvailable={areIntegrationAssetsAvailable} />
+            <EuiSpacer size="m" />
+          </>
+        )}
+        <ManualMitigations />
+      </div>
+    )
   );
 }
