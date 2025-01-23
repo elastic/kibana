@@ -998,7 +998,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     expect(validationHasErrors(validationResults)).toBe(true);
   });
 
-  it('should not return package policy validation errors if required_vars have values', () => {
+  it('should not return package policy validation errors if required_vars have existence and a value', () => {
     const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo([
       {
         title: 'Foo',
@@ -1009,6 +1009,60 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
         ],
         required_vars: {
           'foo-required-var-name': [{ name: 'foo-name' }, { name: 'foo-age', value: '1' }],
+        },
+      },
+    ]);
+    const invalidPackagePolicyWithRequiredVars = createPackagePolicyForRequiredVars([
+      {
+        data_stream: { dataset: 'foo', type: 'logs' },
+        enabled: true,
+        vars: {
+          'foo-name': { type: 'text', value: 'Some name' },
+          'foo-age': { type: 'text', value: '1' },
+        },
+      },
+    ]);
+
+    const validationResults = validatePackagePolicy(
+      invalidPackagePolicyWithRequiredVars,
+      mockPackageInfoRequireVars,
+      load
+    );
+
+    expect(validationResults).toEqual(
+      expect.objectContaining({
+        inputs: {
+          'foo-input': {
+            streams: {
+              foo: {
+                vars: {
+                  'foo-name': null,
+                  'foo-age': null,
+                },
+              },
+            },
+          },
+        },
+      })
+    );
+
+    expect(validationHasErrors(validationResults)).toBe(false);
+  });
+
+  it('should not return package policy validation errors if required_vars all have values', () => {
+    const mockPackageInfoRequireVars = createMockRequiredVarPackageInfo([
+      {
+        title: 'Foo',
+        input: 'foo-input',
+        vars: [
+          { name: 'foo-name', type: 'text' },
+          { name: 'foo-age', type: 'text' },
+        ],
+        required_vars: {
+          'foo-required-var-name': [
+            { name: 'foo-name', value: 'Some name' },
+            { name: 'foo-age', value: '1' },
+          ],
         },
       },
     ]);
