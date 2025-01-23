@@ -69,9 +69,3 @@ export function setProp<T extends object, P extends string, V>(...args: [T, P, V
   const [path, value] = args;
   return (obj: T) => fp.set(path, value)(obj);
 }
-
-interface Foo {
-  a: number;
-  b?: string;
-}
-type Bar = SetProp<'b', number, Foo>;
