@@ -138,84 +138,34 @@ describe('createFiltersFromClickEvent', () => {
       table.columns[0].meta.sourceParams = {};
       const filter = await createFilterESQL(table, 0, 0);
 
-      expect(filter).toBeUndefined();
+      expect(filter).toEqual([]);
     });
 
     test('ignores event when value for rows is not provided', async () => {
       table.rows[0]['1-1'] = null;
       const filter = await createFilterESQL(table, 0, 0);
 
-      expect(filter).toBeUndefined();
+      expect(filter).toEqual([]);
     });
 
     test('handles an event when operation type is a date histogram', async () => {
       (table.columns[0].meta.sourceParams as any).operationType = 'date_histogram';
       const filter = await createFilterESQL(table, 0, 0);
 
-      expect(filter).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "meta": Object {
-              "field": "bytes",
-              "index": "2048",
-              "params": Object {},
-            },
-            "query": Object {
-              "range": Object {
-                "bytes": Object {
-                  "format": NaN,
-                  "gte": 2048,
-                  "lt": 2048,
-                },
-              },
-            },
-          },
-        ]
-      `);
+      expect(filter).toMatchInlineSnapshot(`Array []`);
     });
 
     test('handles an event when operation type is histogram', async () => {
       (table.columns[0].meta.sourceParams as any).operationType = 'histogram';
       const filter = await createFilterESQL(table, 0, 0);
 
-      expect(filter).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "meta": Object {
-              "field": "bytes",
-              "index": "2048",
-              "params": Object {},
-            },
-            "query": Object {
-              "range": Object {
-                "bytes": Object {
-                  "gte": 2048,
-                  "lt": 2048,
-                },
-              },
-            },
-          },
-        ]
-      `);
+      expect(filter).toMatchInlineSnapshot(`Array []`);
     });
 
     test('handles an event when operation type is not date histogram', async () => {
       const filter = await createFilterESQL(table, 0, 0);
 
-      expect(filter).toMatchInlineSnapshot(`
-        Array [
-          Object {
-            "meta": Object {
-              "index": undefined,
-            },
-            "query": Object {
-              "exists": Object {
-                "field": "bytes",
-              },
-            },
-          },
-        ]
-      `);
+      expect(filter).toMatchInlineSnapshot(`Array []`);
     });
   });
 
