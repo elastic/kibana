@@ -165,7 +165,7 @@ export function loadEmbeddableData(
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading);
+      onLoad?.(false, adapters, api.dataLoading$);
 
       api.loadViewUnderlyingData();
 
@@ -266,7 +266,7 @@ export function loadEmbeddableData(
       }),
       map(() => 'attributes' as ReloadReason)
     ),
-    api.savedObjectId.pipe(
+    api.savedObjectId$.pipe(
       waitUntilChanged(),
       map(() => 'savedObjectId' as ReloadReason)
     ),
@@ -283,7 +283,7 @@ export function loadEmbeddableData(
   const subscriptions: Subscription[] = [
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // make sure to reload on viewMode change
-    api.viewMode.subscribe(() => {
+    api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
       if (getState().enhancements?.dynamicActions) {
         reload('viewMode');
