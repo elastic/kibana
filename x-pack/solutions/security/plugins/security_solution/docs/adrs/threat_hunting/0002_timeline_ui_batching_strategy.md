@@ -110,11 +110,13 @@ When user is on the first batch i.e. Batch 0, it will be re-fetched with the bel
 
 When user is on the 4th batch i.e. Batch 3, it will be re-fetched with the below strategy. 
 
+```js
 {
-	/* Fetch Batch 0 */
-	activePage: 0,
-	querySize: 2000 /* cumulative 4 batches ( 500 * 4 ) */
+  /* Fetch Batch 0 */
+  activePage: 0,
+  querySize: 2000 /* cumulative 4 batches ( 500 * 4 ) */
 }
+```
 
 One important thing to notice here is that the querySize is 2000 instead of 500 which means we are cumulatively for all the visible batches. This comes with its own performance considerations but since the maximum allowed resultset is 10K, I think we can work through it.
 
