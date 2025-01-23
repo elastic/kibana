@@ -3910,7 +3910,7 @@
         "label": "SummaryActionContextVariablesFlatten",
         "description": [],
         "signature": [
-          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
+          "\"params\" | \"spaceId\" | \"date\" | \"tags\" | \"alertId\" | \"alertInstanceId\" | \"rule.id\" | \"rule.name\" | \"alert.uuid\" | \"alert.flapping\" | \"rule.tags\" | \"rule.type\" | \"alertName\" | \"alertActionGroup\" | \"alertActionGroupName\" | \"kibanaBaseUrl\" | \"rule.spaceId\" | \"rule.url\" | `rule.params.${string}` | \"alert.id\" | \"alert.actionGroup\" | \"alert.actionGroupName\" | \"alert.consecutiveMatches\" | \"rule.params\" | \"alerts.recovered.count\" | \"alerts.recovered.data\" | \"alerts.new.count\" | \"alerts.new.data\" | \"alerts.all.count\" | \"alerts.all.data\" | \"alerts.ongoing.count\" | \"alerts.ongoing.data\""
         ],
         "path": "src/platform/packages/shared/kbn-alerting-types/action_variable.ts",
         "deprecated": false,
