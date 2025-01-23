@@ -7,30 +7,29 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { z } from '@kbn/zod';
-import { notFound, internal, badRequest } from '@hapi/boom';
+import { IScopedClusterClient } from '@kbn/core/server';
+import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
 import {
   FieldDefinitionConfig,
-  fieldDefinitionConfigSchema,
-  processingDefinitionSchema,
+  namedFieldDefinitionConfigSchema,
+  processorDefinitionSchema,
 } from '@kbn/streams-schema';
-import { calculateObjectDiff, flattenObject } from '@kbn/object-utils';
+import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
-import { IScopedClusterClient } from '@kbn/core/server';
-import { DetectedMappingFailure } from '../../../lib/streams/errors/detected_mapping_failure';
-import { NonAdditiveProcessor } from '../../../lib/streams/errors/non_additive_processor';
-import { SimulationFailed } from '../../../lib/streams/errors/simulation_failed';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
-import { createServerRoute } from '../../create_server_route';
-import { DefinitionNotFound } from '../../../lib/streams/errors';
 import { checkAccess } from '../../../lib/streams/stream_crud';
+import { createServerRoute } from '../../create_server_route';
+import { DefinitionNotFoundError } from '../../../lib/streams/errors/definition_not_found_error';
+import { SimulationFailedError } from '../../../lib/streams/errors/simulation_failed_error';
+import { DetectedMappingFailureError } from '../../../lib/streams/errors/detected_mapping_failure_error';
+import { NonAdditiveProcessorError } from '../../../lib/streams/errors/non_additive_processor_error';
 
 const paramsSchema = z.object({
   path: z.object({ id: z.string() }),
   body: z.object({
-    processing: z.array(processingDefinitionSchema),
+    processing: z.array(processorDefinitionSchema),
     documents: z.array(z.record(z.unknown())),
-    detected_fields: z.array(fieldDefinitionConfigSchema.extend({ name: z.string() })).optional(),
+    detected_fields: z.array(namedFieldDefinitionConfigSchema).optional(),
   }),
 });
 
@@ -50,41 +49,27 @@ export const simulateProcessorRoute = createServerRoute({
   },
   params: paramsSchema,
   handler: async ({ params, request, getScopedClients }) => {
-    try {
-      const { scopedClusterClient } = await getScopedClients({ request });
+    const { scopedClusterClient } = await getScopedClients({ request });
 
-      const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
-      if (!read) {
-        throw new DefinitionNotFound(`Stream definition for ${params.path.id} not found.`);
-      }
-
-      const simulationBody = prepareSimulationBody(params);
-
-      const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
-
-      const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
-
-      assertSimulationResult(simulationResult, simulationDiffs);
-
-      return prepareSimulationResponse(
-        simulationResult,
-        simulationBody.docs,
-        simulationDiffs,
-        params.body.detected_fields
-      );
-    } catch (error) {
-      if (error instanceof DefinitionNotFound) {
-        throw notFound(error);
-      }
-      if (
-        error instanceof SimulationFailed ||
-        error instanceof NonAdditiveProcessor ||
-        error instanceof DetectedMappingFailure
-      ) {
-        throw badRequest(error);
-      }
-      throw internal(error);
+    const { read } = await checkAccess({ id: params.path.id, scopedClusterClient });
+    if (!read) {
+      throw new DefinitionNotFoundError(`Stream definition for ${params.path.id} not found.`);
     }
+
+    const simulationBody = prepareSimulationBody(params);
+
+    const simulationResult = await executeSimulation(scopedClusterClient, simulationBody);
+
+    const simulationDiffs = prepareSimulationDiffs(simulationResult, simulationBody.docs);
+
+    assertSimulationResult(simulationResult, simulationDiffs);
+
+    return prepareSimulationResponse(
+      simulationResult,
+      simulationBody.docs,
+      simulationDiffs,
+      params.body.detected_fields
+    );
   },
 });
 
@@ -137,7 +122,7 @@ const executeSimulation = async (
       body: simulationBody,
     });
   } catch (error) {
-    throw new SimulationFailed(error);
+    throw new SimulationFailedError(error);
   }
 };
 
@@ -148,14 +133,14 @@ const assertSimulationResult = (
   // Assert mappings are compatible with the documents
   const entryWithError = simulationResult.docs.find(isMappingFailure);
   if (entryWithError) {
-    throw new DetectedMappingFailure(
+    throw new DetectedMappingFailureError(
       `The detected field types might not be compatible with these documents. ${entryWithError.doc.error.reason}`
     );
   }
   // Assert that the processors are purely additive to the documents
   const updatedFields = computeUpdatedFields(simulationDiffs);
   if (!isEmpty(updatedFields)) {
-    throw new NonAdditiveProcessor(
+    throw new NonAdditiveProcessorError(
       `The processor is not additive to the documents. It might update fields [${updatedFields.join()}]`
     );
   }
