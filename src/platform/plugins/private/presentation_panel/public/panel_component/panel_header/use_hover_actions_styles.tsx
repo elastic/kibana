@@ -124,7 +124,7 @@ export const useHoverActionStyles = () => {
         ${singleWrapperStyles}
       }
 
-      .dshDashboardViewportWrapper--isFullscreen .kbnGridPanel[data-kbn-grid-row='0'] & {
+      .dshDashboardViewportWrapper--isFullscreen .dshDashboardGrid__item[data-grid-row='0'] & {
         // when in fullscreen mode, combine all floating actions on first row and nudge them down
         ${singleWrapperStyles}
         top: -${euiTheme.size.s} !important;

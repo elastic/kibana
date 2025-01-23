@@ -99,7 +99,6 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
 
             const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
 
-            ref.setAttribute('data-kbn-grid-row', `${panel.row}`);
             if (panelId === activePanel?.id) {
               ref.classList.add('kbnGridPanel--active');
 

@@ -52,6 +52,10 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
         width: gridData.w,
         height: gridData.h,
       };
+      const panelRef = panelRefs.current[panelId];
+      if (typeof panelRef !== 'function' && panelRef?.current) {
+        panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
+      }
     });
 
     return [singleRow];
@@ -97,10 +101,10 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
       return (
         <DashboardGridItem
           ref={panelRefs.current[id]}
-          data-grid={currentPanels[id].gridData}
           key={id}
           id={id}
           type={type}
+          data-grid-row={currentPanels[id].gridData.y}
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
           dashboardContainer={dashboardContainer}
