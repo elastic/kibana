@@ -25,6 +25,7 @@ import { offsetRt } from '../../../common/comparison_rt';
 import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 import { EntityLink } from '../app/entities/entity_link';
+import { ErrorGroupLink } from '../app/error_group_link';
 
 const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
   defaultMessage: 'Services',
@@ -89,6 +90,23 @@ const apmRoutes = {
           rangeFrom: t.string,
           rangeTo: t.string,
           waterfallItemId: t.string,
+        }),
+      }),
+    ]),
+  },
+  '/link-to/error_group/{errorGroupId}': {
+    element: <ErrorGroupLink />,
+    params: t.intersection([
+      t.type({
+        path: t.type({
+          errorGroupId: t.string,
+        }),
+      }),
+      t.partial({
+        query: t.partial({
+          rangeFrom: t.string,
+          rangeTo: t.string,
+          serviceName: t.string,
         }),
       }),
     ]),
