@@ -1,8 +1,12 @@
 # -----
-# Source: project-controller/blob/main/internal/project/security/config/roles.yml
+# Source: elasticsearch-controller/blob/main/helm/values.yaml
+# The project-specific roles are defined under config.project-settings.security.elasticsearch.predefined-roles.
 # -----
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -64,6 +68,9 @@ viewer:
 
 # modeled after t3_analyst
 editor:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -144,6 +151,9 @@ editor:
   run_as: []
 
 t1_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -197,6 +207,9 @@ t1_analyst:
       resources: '*'
 
 t2_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -254,6 +267,9 @@ t2_analyst:
       resources: '*'
 
 t3_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -327,6 +343,9 @@ t3_analyst:
       resources: '*'
 
 threat_intelligence_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -391,6 +410,9 @@ threat_intelligence_analyst:
       resources: '*'
 
 rule_author:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -462,6 +484,9 @@ rule_author:
       resources: '*'
 
 soc_manager:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -539,6 +564,9 @@ soc_manager:
       resources: '*'
 
 detections_admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['manage_index_templates', 'manage_transform']
   indices:
     - names:
@@ -600,6 +628,9 @@ detections_admin:
       resources: '*'
 
 platform_engineer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster:
     - manage
   indices:
@@ -665,6 +696,9 @@ platform_engineer:
       resources: '*'
 
 endpoint_operations_analyst:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -740,6 +774,9 @@ endpoint_operations_analyst:
       resources: '*'
 
 endpoint_policy_manager:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -819,6 +856,9 @@ endpoint_policy_manager:
 
 # admin role defined in elasticsearch controller
 admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']
@@ -831,6 +871,9 @@ admin:
 
 # temporarily added for testing purpose
 system_indices_superuser:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ['all']
   indices:
     - names: ['*']
