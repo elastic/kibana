@@ -28,7 +28,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  describe.only('Forking classic streams', () => {
+  describe('Forking classic streams', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
