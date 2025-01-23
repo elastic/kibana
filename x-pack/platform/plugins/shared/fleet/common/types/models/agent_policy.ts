@@ -44,6 +44,7 @@ export interface NewAgentPolicy {
   keep_monitoring_alive?: boolean | null;
   supports_agentless?: boolean | null;
   global_data_tags?: GlobalDataTag[];
+  agentless?: AgentlessPolicy;
   monitoring_pprof_enabled?: boolean;
   monitoring_http?: {
     enabled?: boolean;
@@ -59,6 +60,15 @@ export interface NewAgentPolicy {
       max_retries?: number;
       init_dur?: string;
       max_dur?: string;
+    };
+  };
+}
+
+export interface AgentlessPolicy {
+  resources?: {
+    requests?: {
+      memory?: string;
+      cpu?: string;
     };
   };
 }

@@ -24,6 +24,7 @@ import type { TimelineItem } from '../../../../common/search_strategy';
 import { getAlertsDefaultModel } from '../../components/alerts_table/default_config';
 import type { State } from '../../../common/store';
 import { RowAction } from '../../../common/components/control_columns/row_action';
+import { useUserPrivileges } from '../../../common/components/user_privileges';
 
 // we show a maximum of 6 action buttons
 // - open flyout
@@ -46,11 +47,21 @@ export const getUseActionColumnHook =
       ACTION_BUTTON_COUNT--;
     }
 
-    // we only want to show the note icon if the new notes system feature flag is enabled
+    const {
+      timelinePrivileges: { read: canReadTimelines },
+      notesPrivileges: { read: canReadNotes },
+    } = useUserPrivileges();
+
+    // remove space if investigate timeline icon shouldn't be displayed
+    if (!canReadTimelines) {
+      ACTION_BUTTON_COUNT--;
+    }
+
+    // remove space if add notes icon shouldn't be displayed
     const securitySolutionNotesDisabled = useIsExperimentalFeatureEnabled(
       'securitySolutionNotesDisabled'
     );
-    if (securitySolutionNotesDisabled) {
+    if (!canReadNotes || securitySolutionNotesDisabled) {
       ACTION_BUTTON_COUNT--;
     }
 

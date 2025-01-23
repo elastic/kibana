@@ -26,8 +26,8 @@ import type {
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesRendered,
-  PublishesWritablePanelDescription,
-  PublishesWritablePanelTitle,
+  PublishesWritableDescription,
+  PublishesWritableTitle,
   PublishingSubject,
   SerializedTitles,
   ViewMode,
@@ -378,8 +378,8 @@ export type LensApi = Simplify<
     // Let the container know the used data views
     PublishesDataViews &
     // Let the container operate on panel title/description
-    PublishesWritablePanelTitle &
-    PublishesWritablePanelDescription &
+    PublishesWritableTitle &
+    PublishesWritableDescription &
     // This embeddable can narrow down specific triggers usage
     HasSupportedTriggers &
     PublishesDisabledActionIds &

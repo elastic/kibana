@@ -86,16 +86,19 @@ export const hasFleetServersForPolicies = async (
 };
 
 /**
- * Check if at least one fleet server agent exists, regardless of its online status
+ * Check if at least one fleet server agent exists.
+ * `activeOnly` flag can be used to filter only active agents.
  */
 export async function hasFleetServers(
   esClient: ElasticsearchClient,
-  soClient: SavedObjectsClientContract
+  soClient: SavedObjectsClientContract,
+  activeOnly: boolean = false
 ) {
   return await hasFleetServersForPolicies(
     esClient,
     soClient,
-    await getFleetServerPolicies(soClient)
+    await getFleetServerPolicies(soClient),
+    activeOnly
   );
 }
 
