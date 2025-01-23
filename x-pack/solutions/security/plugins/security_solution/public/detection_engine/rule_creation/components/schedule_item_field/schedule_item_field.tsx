@@ -84,7 +84,7 @@ export function ScheduleItemField({
 
   const onChangeTimeVal = useCallback<NonNullable<EuiFieldNumberProps['onChange']>>(
     (e) => {
-      const number = parseInt(e.target.value, 10);
+      const number = e.target.value === '' ? minValue : parseInt(e.target.value, 10);
 
       if (Number.isNaN(number)) {
         return;
