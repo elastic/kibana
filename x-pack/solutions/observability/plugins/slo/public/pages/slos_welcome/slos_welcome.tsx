@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
-import { paths, SLO_DOCUMENTATION_URL } from '../../../common/locators/paths';
+import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
 import { SloPermissionsCallout } from '../../components/slo/slo_permissions_callout';
@@ -32,6 +32,7 @@ export function SlosWelcomePage() {
   const {
     application: { navigateToUrl },
     http: { basePath },
+    docLinks,
   } = useKibana().services;
 
   const { ObservabilityPageTemplate } = usePluginContext();
@@ -179,7 +180,7 @@ export function SlosWelcomePage() {
             &nbsp;
             <EuiLink
               data-test-subj="o11ySloListWelcomePromptReadTheDocsLink"
-              href={SLO_DOCUMENTATION_URL}
+              href={docLinks.links.observability.slo}
               target="_blank"
             >
               {i18n.translate('xpack.slo.sloList.welcomePrompt.learnMoreLink', {

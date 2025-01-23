@@ -11,14 +11,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elast
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import {
-  SLOS_BASE_PATH,
-  SLO_DOCUMENTATION_URL,
-  SLO_SETTINGS_PATH,
-} from '../../../common/locators/paths';
+import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
 
 export function HeaderMenu(): React.ReactElement | null {
-  const { http, theme } = useKibana().services;
+  const { http, theme, docLinks } = useKibana().services;
 
   const { appMountParameters, isServerless } = usePluginContext();
   return (
@@ -31,7 +27,7 @@ export function HeaderMenu(): React.ReactElement | null {
           <EuiHeaderLinks>
             <EuiHeaderLink
               color="primary"
-              href={SLO_DOCUMENTATION_URL}
+              href={docLinks.links.observability.slo}
               iconType="documentation"
               target="_blank"
             >

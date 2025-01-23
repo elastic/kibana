@@ -36,4 +36,3 @@ export const paths = {
   },
 };
 
-export const SLO_DOCUMENTATION_URL = `https://www.elastic.co/guide/en/observability/current/slo.html`;
