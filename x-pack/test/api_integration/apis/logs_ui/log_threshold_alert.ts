@@ -12,9 +12,12 @@ import {
   executeRatioAlert,
   LogThresholdAlertReporter,
 } from '@kbn/infra-plugin/server/lib/alerting/log_threshold/log_threshold_executor';
-import { RatioCriteria } from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
-import { Comparator } from '@kbn/response-ops-rule-params/log_threshold';
-import type { LogThresholdParams, TimeUnit } from '@kbn/response-ops-rule-params/log_threshold';
+import {
+  Comparator,
+  TimeUnit,
+  RatioCriteria,
+  RuleParams,
+} from '@kbn/infra-plugin/common/alerting/logs/log_threshold/types';
 import { DATES } from './utils/constants';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
@@ -38,7 +41,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertData: sinon.fake(),
             isTrackedAlert: sinon.fake(),
           };
-          const ruleParams: LogThresholdParams = {
+          const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
               type: 'log-view-reference',
@@ -105,7 +108,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertData: sinon.fake(),
             isTrackedAlert: sinon.fake(),
           };
-          const ruleParams: LogThresholdParams = {
+          const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
               type: 'log-view-reference',
@@ -174,7 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertData: sinon.fake(),
             isTrackedAlert: sinon.fake(),
           };
-          const ruleParams: LogThresholdParams = {
+          const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
               type: 'log-view-reference',
@@ -252,7 +255,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertData: sinon.fake(),
             isTrackedAlert: sinon.fake(),
           };
-          const ruleParams: LogThresholdParams = {
+          const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
               type: 'log-view-reference',
@@ -301,7 +304,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertData: sinon.fake(),
             isTrackedAlert: sinon.fake(),
           };
-          const ruleParams: LogThresholdParams = {
+          const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
               type: 'log-view-reference',
@@ -377,7 +380,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertData: sinon.fake(),
             isTrackedAlert: sinon.fake(),
           };
-          const ruleParams: LogThresholdParams = {
+          const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
               type: 'log-view-reference',
@@ -442,7 +445,7 @@ export default function ({ getService }: FtrProviderContext) {
             setAlertData: sinon.fake(),
             isTrackedAlert: sinon.fake(),
           };
-          const ruleParams: LogThresholdParams = {
+          const ruleParams: RuleParams = {
             logView: {
               logViewId: 'Default',
               type: 'log-view-reference',
