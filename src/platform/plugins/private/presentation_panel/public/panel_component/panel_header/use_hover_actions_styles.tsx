@@ -43,10 +43,19 @@ export const useHoverActionStyles = () => {
       .embPanel__hoverActions:hover,
       .embPanel__hoverActions:focus,
       .embPanel__hoverActions:has(:focus-visible) {
-        z-index: ${euiTheme.levels.toast};
+        z-index: ${euiTheme.levels.menu};
         opacity: 1;
         visibility: visible;
         transition: none; // apply transition delay on hover out only
+      }
+
+      // for dashboards with no controls, increase the z-index of the hover actions in the
+      // top row so that they overlap the sticky nav in Dashboard
+      .dshDashboardViewportWrapper:not(:has(.dshDashboardViewport-controls))
+        .dshDashboardGrid__item[data-grid-row='0']
+        &
+        .embPanel__hoverActions {
+        z-index: ${euiTheme.levels.toast};
       }
     `;
   }, [euiTheme]);
