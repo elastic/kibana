@@ -541,7 +541,7 @@ describe('useTimelineEventsHandler', () => {
         });
       });
 
-      test('should fetch all the current batches when refetch is triggered', async () => {
+      test('should fetch first batch again when refetch is triggered when user has already fetched multiple batches', async () => {
         const { result } = renderHook((args) => useTimelineEvents(args), {
           initialProps: { ...props },
         });
@@ -571,7 +571,48 @@ describe('useTimelineEventsHandler', () => {
         await waitFor(() => {
           expect(mockSearch).toHaveBeenNthCalledWith(
             1,
-            expect.objectContaining({ pagination: { activePage: 0, querySize: 50 } })
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
+      });
+    });
+
+    describe('sort', () => {
+      test('should fetch first batch again when sort is updated', async () => {
+        const { result, rerender } = renderHook((args) => useTimelineEvents(args), {
+          initialProps: { ...props } as UseTimelineEventsProps,
+        });
+
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenCalledWith(
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
+
+        act(() => {
+          result.current[1].loadNextBatch();
+        });
+
+        await waitFor(() => {
+          expect(result.current[0]).toBe(DataLoadingState.loaded);
+          expect(mockSearch).toHaveBeenCalledWith(
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
+          );
+        });
+
+        mockSearch.mockClear();
+
+        act(() => {
+          rerender({
+            ...props,
+            sort: [...initSortDefault, { ...initSortDefault[0], field: 'event.kind' }],
+          });
+        });
+
+        await waitFor(() => {
+          expect(mockSearch).toHaveBeenNthCalledWith(
+            1,
+            expect.objectContaining({ pagination: { activePage: 0, querySize: 25 } })
           );
         });
       });

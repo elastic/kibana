@@ -360,14 +360,15 @@ export const useTimelineEventsHandler = ({
       fields: timelineRequest?.fieldRequested ?? fields,
       pagination: {
         activePage: 0,
-        querySize: (activeBatch + 1) * limit,
+        querySize: limit,
       },
     };
 
     setTimelineRequest(newTimelineRequest);
 
     timelineSearch(newTimelineRequest);
-  }, [timelineRequest, timelineSearch, activeBatch, limit, language, sort, fields]);
+    setActiveBatch(0);
+  }, [timelineRequest, timelineSearch, limit, language, sort, fields]);
 
   useEffect(() => {
     if (indexNames.length === 0) {
@@ -427,7 +428,7 @@ export const useTimelineEventsHandler = ({
          * For example, newly requested fields
          *
          * */
-        activePage: activeBatch,
+        activePage: newActiveBatch,
         querySize: limit,
       };
 
@@ -576,7 +577,7 @@ export const useTimelineEvents = ({
 
     setEventsPerPage((prev) => {
       let result = [...prev];
-      if (querySize === limit) {
+      if (querySize === limit && activePage > 0) {
         result[activePage] = timelineResponse.events;
       } else {
         result = [timelineResponse.events];
