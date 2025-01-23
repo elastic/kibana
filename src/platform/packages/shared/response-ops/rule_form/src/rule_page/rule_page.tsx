@@ -38,7 +38,7 @@ export const RulePage = (props: RulePageProps) => {
   const { isEdit = false, isSaving = false, onCancel = () => {}, onSave } = props;
   const [isCancelModalOpen, setIsCancelModalOpen] = useState<boolean>(false);
 
-  const { formData, multiConsumerSelection, connectorTypes, connectors, touched } =
+  const { formData, multiConsumerSelection, connectorTypes, connectors, touched, onInteraction } =
     useRuleFormState();
 
   const { steps } = useRuleFormSteps();
@@ -83,7 +83,14 @@ export const RulePage = (props: RulePageProps) => {
 
   return (
     <>
-      <EuiPageTemplate grow bottomBorder offset={0} css={styles}>
+      <EuiPageTemplate
+        grow
+        bottomBorder
+        offset={0}
+        css={styles}
+        onClick={onInteraction}
+        onKeyDown={onInteraction}
+      >
         <EuiPageTemplate.Header>
           <EuiFlexGroup
             direction="column"

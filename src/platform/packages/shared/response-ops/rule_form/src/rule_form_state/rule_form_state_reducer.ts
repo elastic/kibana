@@ -8,7 +8,7 @@
  */
 
 import { RuleActionParams } from '@kbn/alerting-types';
-import { isEmpty, omit, isEqual } from 'lodash';
+import { isEmpty, omit } from 'lodash';
 import { RuleFormActionsErrors, RuleFormParamsErrors, RuleUiAction } from '../common';
 import { RuleFormData, RuleFormState } from '../types';
 import { validateRuleBase, validateRuleParams } from '../validation';
@@ -109,7 +109,8 @@ export type RuleFormStateReducerAction =
     }
   | {
       type: 'runValidation';
-    };
+    }
+  | { type: 'setTouched' };
 
 const getUpdateWithValidation =
   (ruleFormState: RuleFormState) =>
@@ -119,7 +120,6 @@ const getUpdateWithValidation =
       selectedRuleTypeModel,
       multiConsumerSelection,
       selectedRuleType,
-      formData: originalFormData,
     } = ruleFormState;
 
     const formData = updater();
@@ -150,14 +150,11 @@ const getUpdateWithValidation =
       }
     }
 
-    const touched = !isEqual(originalFormData, formData);
-
     return {
       ...ruleFormState,
       formData,
       baseErrors,
       paramsErrors,
-      touched,
     };
   };
 
@@ -355,6 +352,12 @@ export const ruleFormStateReducer = (
     }
     case 'runValidation': {
       return updateWithValidation(() => formData);
+    }
+    case 'setTouched': {
+      return {
+        ...ruleFormState,
+        touched: true,
+      };
     }
     default: {
       return ruleFormState;

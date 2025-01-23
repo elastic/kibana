@@ -191,7 +191,6 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
   return (
     <div data-test-subj="editRuleForm">
       <RuleFormStateProvider
-        isFlyout={isFlyout}
         initialRuleFormState={{
           connectors,
           connectorTypes,

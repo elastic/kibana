@@ -67,7 +67,7 @@ export const RuleFlyout = ({
     [isConnectorsScreenVisible, isShowRequestScreenVisible]
   );
 
-  const { touched } = useRuleFormState();
+  const { touched, onInteraction } = useRuleFormState();
 
   const onClickCloseOrCancelButton = useCallback(() => {
     if (touched) {
@@ -87,6 +87,8 @@ export const RuleFlyout = ({
         maxWidth={500}
         className="ruleFormFlyout__container"
         hideCloseButton={hideCloseButton}
+        onClick={onInteraction}
+        onKeyDown={onInteraction}
       >
         {isShowRequestScreenVisible ? (
           <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
