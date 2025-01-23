@@ -10,32 +10,25 @@ import { AI_ASSISTANT_KB_INFERENCE_ID } from '@kbn/observability-ai-assistant-pl
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
   deleteKnowledgeBaseModel,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   TINY_ELSER,
   deleteInferenceEndpoint,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from './helpers';
 
 export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
+  const log = getService('log');
+  const retry = getService('retry');
   const observabilityAIAssistantAPIClient = getService('observabilityAIAssistantApi');
 
   describe('/internal/observability_ai_assistant/kb/status', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205677
-    this.tags(['failsOnMKI']);
-
     beforeEach(async () => {
-      await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-
-      expect(status).to.be(200);
+      await importTinyElserModel(ml);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
     });
 
     afterEach(async () => {

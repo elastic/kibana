@@ -13,7 +13,7 @@ export const searchSessionsConfigSchema = schema.object({
   /**
    * Turns the feature on \ off (incl. removing indicator and management screens)
    */
-  enabled: schema.boolean({ defaultValue: true }),
+  enabled: schema.boolean({ defaultValue: false }),
 
   /**
    * notTouchedTimeout controls how long user can save a session after all searches completed.

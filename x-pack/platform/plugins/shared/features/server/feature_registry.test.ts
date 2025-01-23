@@ -2702,10 +2702,12 @@ describe('FeatureRegistry', () => {
       }
 
       function createDeprecatedFeature({
+        deprecated,
         all,
         read,
         subAlpha,
       }: {
+        deprecated?: { notice: string; replacedBy?: string[] };
         all?: FeatureKibanaPrivilegesReference[];
         read?: {
           minimal: FeatureKibanaPrivilegesReference[];
@@ -2714,7 +2716,7 @@ describe('FeatureRegistry', () => {
         subAlpha?: FeatureKibanaPrivilegesReference[];
       } = {}): KibanaFeatureConfig {
         return {
-          deprecated: { notice: 'It was a mistake.' },
+          deprecated: deprecated ?? { notice: 'It was a mistake.' },
           id: 'feature-alpha',
           name: 'Feature Alpha',
           app: [],
@@ -3239,6 +3241,50 @@ describe('FeatureRegistry', () => {
         ).toThrowErrorMatchingInlineSnapshot(
           `"Cannot replace privilege \\"sub-alpha-1-1\\" of deprecated feature \\"feature-alpha\\" with disabled privilege \\"read\\" of feature \\"feature-delta\\"."`
         );
+      });
+
+      it('requires correct list of feature IDs to be replaced by', () => {
+        // Case 1: empty list of feature IDs.
+        expect(() =>
+          createRegistry(
+            createDeprecatedFeature({ deprecated: { notice: 'some notice', replacedBy: [] } })
+          ).validateFeatures()
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Feature “feature-alpha” is deprecated and must have at least one feature ID added to the “replacedBy” property, or the property must be left out completely."`
+        );
+
+        // Case 2: invalid feature IDs.
+        expect(() =>
+          createRegistry(
+            createDeprecatedFeature({
+              deprecated: {
+                notice: 'some notice',
+                replacedBy: ['feature-beta', 'feature-gamma', 'feature-delta'],
+              },
+            })
+          ).validateFeatures()
+        ).toThrowErrorMatchingInlineSnapshot(
+          `"Cannot replace deprecated feature “feature-alpha” with the following features, as they aren’t used to replace feature privileges: feature-gamma, feature-delta."`
+        );
+
+        // Case 3: valid feature ID.
+        expect(() =>
+          createRegistry(
+            createDeprecatedFeature({
+              deprecated: { notice: 'some notice', replacedBy: ['feature-beta'] },
+            })
+          ).validateFeatures()
+        ).not.toThrow();
+
+        // Case 4: valid multiple feature IDs.
+        expect(() =>
+          createRegistry(
+            createDeprecatedFeature({
+              deprecated: { notice: 'some notice', replacedBy: ['feature-beta', 'feature-delta'] },
+              all: [{ feature: 'feature-delta', privileges: ['all'] }],
+            })
+          ).validateFeatures()
+        ).not.toThrow();
       });
     });
   });

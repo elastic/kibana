@@ -1781,7 +1781,7 @@
             "section": "def-common.RangeFilter",
             "text": "RangeFilter"
           },
-          ") => { from: moment.Moment; to: moment.Moment; }"
+          ") => { from: string | moment.Moment; to: string | moment.Moment; }"
         ],
         "path": "src/platform/packages/shared/kbn-es-query/src/filters/helpers/convert_range_filter.ts",
         "deprecated": false,
@@ -2803,7 +2803,7 @@
         "tags": [],
         "label": "isCCSRemoteIndexName",
         "description": [
-          "\nCheck whether the index expression represents a remote index (CCS) or not.\nThe index name is assumed to be individual index (no commas) but can contain `-`, wildcards,\ndatemath, remote cluster name and any other syntax permissible in index expression component.\n\n2024/10/11 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java\n"
+          "\nCheck whether the index expression represents a remote index (CCS) or not.\nThe index name is assumed to be individual index (no commas) but can contain `-`, wildcards,\ndatemath, remote cluster name and any other syntax permissible in index expression component.\n\n2025/01/21 Implementation taken from https://github.com/smalyshev/elasticsearch/blob/main/server/src/main/java/org/elasticsearch/transport/RemoteClusterAware.java\n"
         ],
         "signature": [
           "(indexExpression: string) => boolean"
