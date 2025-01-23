@@ -261,15 +261,17 @@ export const validatePackagePolicy = (
           }, {} as ValidationEntry);
         }
 
-        inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
-
         if (stream.vars && stream.enabled) {
-          inputValidationResults.streams![stream.data_stream.dataset].required_vars =
-            validateConditionalRequiredVars(
-              stream,
-              streamRequiredVarsDefsByDataAndInput[`${stream.data_stream.dataset}-${input.type}`]
-            );
+          const requiredVars = validateConditionalRequiredVars(
+            stream,
+            streamRequiredVarsDefsByDataAndInput[`${stream.data_stream.dataset}-${input.type}`]
+          );
+          if (requiredVars) {
+            streamValidationResults.required_vars = requiredVars;
+          }
         }
+
+        inputValidationResults.streams![stream.data_stream.dataset] = streamValidationResults;
       });
     } else {
       delete inputValidationResults.streams;
