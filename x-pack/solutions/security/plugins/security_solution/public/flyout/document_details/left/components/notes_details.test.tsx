@@ -84,7 +84,8 @@ describe('NotesDetails', () => {
   beforeEach(() => {
     jest.clearAllMocks();
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: true },
+      notesPrivileges: { crud: true },
+      timelinePrivileges: { crud: true },
     });
     (useWhichFlyout as jest.Mock).mockReturnValue(Flyouts.timeline);
     (useBasicDataFromDetailsData as jest.Mock).mockReturnValue({ isAlert: true });
@@ -196,7 +197,8 @@ describe('NotesDetails', () => {
 
   it('should not render the add note section for users without crud privileges', () => {
     useUserPrivilegesMock.mockReturnValue({
-      kibanaSecuritySolutionsPrivileges: { crud: false },
+      notesPrivileges: { crud: false },
+      timelinePrivileges: { crud: false },
     });
 
     const { queryByTestId } = renderNotesDetails();

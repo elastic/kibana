@@ -1444,7 +1444,7 @@
             "label": "excludedRowRendererIds",
             "description": [],
             "signature": [
-              "(\"alert\" | \"alerts\" | \"plain\" | \"system\" | \"registry\" | \"auditd\" | \"auditd_file\" | \"library\" | \"netflow\" | \"suricata\" | \"system_dns\" | \"system_endgame_process\" | \"system_file\" | \"system_fim\" | \"system_security_event\" | \"system_socket\" | \"threat_match\" | \"zeek\")[]"
+              "(\"plain\" | \"alert\" | \"alerts\" | \"system\" | \"registry\" | \"auditd\" | \"auditd_file\" | \"library\" | \"netflow\" | \"suricata\" | \"system_dns\" | \"system_endgame_process\" | \"system_file\" | \"system_fim\" | \"system_security_event\" | \"system_socket\" | \"threat_match\" | \"zeek\")[]"
             ],
             "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/store/model.ts",
             "deprecated": false,
@@ -3234,6 +3234,21 @@
         "description": [],
         "signature": [
           "\"/manage\""
+        ],
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
+        "id": "def-common.SECURITY_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"siemV2\""
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
         "deprecated": false,

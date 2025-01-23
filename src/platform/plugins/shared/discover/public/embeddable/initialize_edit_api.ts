@@ -29,8 +29,8 @@ export async function getAppTarget(
   partialApi: SavedSearchPartialApi,
   discoverServices: DiscoverServices
 ) {
-  const savedObjectId = partialApi.savedObjectId.getValue();
-  const dataViews = partialApi.dataViews.getValue();
+  const savedObjectId = partialApi.savedObjectId$.getValue();
+  const dataViews = partialApi.dataViews$.getValue();
   const locatorParams = getDiscoverLocatorParams(partialApi);
 
   // We need to use a redirect URL if this is a by value saved search using
