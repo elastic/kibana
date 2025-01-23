@@ -9,41 +9,38 @@ import type { FC } from 'react';
 import React from 'react';
 import type { IconType } from '@elastic/eui';
 import { EuiCallOut } from '@elastic/eui';
-import type { RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import {
-  RuleMigrationTranslationResultEnum,
+  type RuleMigration,
   type RuleMigrationTranslationResult,
 } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 
-enum MappedTranslationResult {
-  MAPPED = 'mapped',
-}
+type RuleMigrationTranslationCallOutMode = RuleMigrationTranslationResult | 'mapped';
 
 const getCallOutInfo = (
-  translationResult: RuleMigrationTranslationResult | MappedTranslationResult
+  mode: RuleMigrationTranslationCallOutMode
 ): { title: string; message?: string; icon: IconType; color: 'success' | 'warning' | 'danger' } => {
-  switch (translationResult) {
-    case RuleMigrationTranslationResultEnum.full:
-      return {
-        title: i18n.CALLOUT_TRANSLATED_RULE_TITLE,
-        icon: 'checkInCircleFilled',
-        color: 'success',
-      };
-    case MappedTranslationResult.MAPPED:
+  switch (mode) {
+    case 'mapped':
       return {
         title: i18n.CALLOUT_MAPPED_TRANSLATED_RULE_TITLE,
         icon: 'checkInCircleFilled',
         color: 'success',
       };
-    case RuleMigrationTranslationResultEnum.partial:
+    case 'full':
+      return {
+        title: i18n.CALLOUT_TRANSLATED_RULE_TITLE,
+        icon: 'checkInCircleFilled',
+        color: 'success',
+      };
+    case 'partial':
       return {
         title: i18n.CALLOUT_PARTIALLY_TRANSLATED_RULE_TITLE,
         message: i18n.CALLOUT_PARTIALLY_TRANSLATED_RULE_DESCRIPTION,
         icon: 'warningFilled',
         color: 'warning',
       };
-    case RuleMigrationTranslationResultEnum.untranslatable:
+    case 'untranslatable':
       return {
         title: i18n.CALLOUT_NOT_TRANSLATED_RULE_TITLE,
         message: i18n.CALLOUT_NOT_TRANSLATED_RULE_DESCRIPTION,
@@ -62,10 +59,10 @@ export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(({ rul
     return null;
   }
 
-  const translationResult = ruleMigration.elastic_rule?.prebuilt_rule_id
-    ? MappedTranslationResult.MAPPED
+  const mode = ruleMigration.elastic_rule?.prebuilt_rule_id
+    ? 'mapped'
     : ruleMigration.translation_result;
-  const { title, message, icon, color } = getCallOutInfo(translationResult);
+  const { title, message, icon, color } = getCallOutInfo(mode);
 
   return (
     <EuiCallOut
@@ -73,7 +70,7 @@ export const TranslationCallOut: FC<TranslationCallOutProps> = React.memo(({ rul
       title={title}
       iconType={icon}
       size={'s'}
-      data-test-subj={`ruleMigrationCallOut-${translationResult}`}
+      data-test-subj={`ruleMigrationCallOut-${mode}`}
     >
       {message}
     </EuiCallOut>
