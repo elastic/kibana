@@ -10,7 +10,7 @@ import {
   SearchHit,
   SearchHitsMetadata,
   AggregationsSingleMetricAggregateBase,
-} from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Group } from '@kbn/observability-alerting-rule-utils';
 
 export const UngroupedGroupId = 'all documents';

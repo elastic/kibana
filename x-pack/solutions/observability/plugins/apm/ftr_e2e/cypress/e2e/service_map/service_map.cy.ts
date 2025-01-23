@@ -29,7 +29,8 @@ const detailedServiceMap = url.format({
   },
 });
 
-describe('service map', () => {
+// Failing: See https://github.com/elastic/kibana/issues/207005
+describe.skip('service map', () => {
   before(() => {
     synthtrace.index(
       opbeans({
