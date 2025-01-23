@@ -55,7 +55,7 @@ export function toSearchResult({
     : null;
   const newUrl = isCrawler
     ? `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/crawlers/new_crawler`
-    : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/new_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
+    : `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector?connector_type=${connectorTypeParam}&service_type=${serviceType}`;
 
   return {
     icon: iconPath || 'logoEnterpriseSearch',
