@@ -80,6 +80,9 @@ describe('Alerts', () => {
       cy.getByTestSubj('apmIsAboveFieldFieldNumber').clear();
       cy.contains('is above 0 errors');
 
+      // Navigate to Rule Details step
+      cy.getByTestSubj('ruleFormStep-details').click();
+
       // Save, with no actions
       cy.contains('Save').click();
       cy.get(confirmModalButtonSelector).click();
