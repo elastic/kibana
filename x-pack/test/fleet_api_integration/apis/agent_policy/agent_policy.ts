@@ -617,12 +617,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return 400 if setting data output to non-local ES for agentless policy', async () => {
-        const { body: fleetServerHosts } = await supertest
-          .get(`/api/fleet/fleet_server_hosts`)
-          .expect(200);
-        // eslint-disable-next-line no-console
-        console.log(fleetServerHosts);
-
         const { body: outputResponse } = await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -1669,12 +1663,6 @@ export default function (providerContext: FtrProviderContext) {
       });
 
       it('should return 400 if updating data output to non-local ES for agentless policy', async () => {
-        const { body: fleetServerHosts } = await supertest
-          .get(`/api/fleet/fleet_server_hosts`)
-          .expect(200);
-        // eslint-disable-next-line no-console
-        console.log(fleetServerHosts);
-
         const { body: outputResponse } = await supertest
           .post(`/api/fleet/outputs`)
           .set('kbn-xsrf', 'xxxx')
@@ -1696,12 +1684,8 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'test-agentless-policy',
             namespace: 'default',
-            supports_agentless: true,
-          });
-
-        // .expect(200);
-        // eslint-disable-next-line no-console
-        console.log(agentPolicyResponse);
+          })
+          .expect(200);
 
         const agentPolicy = agentPolicyResponse.body.item;
 
@@ -1711,6 +1695,7 @@ export default function (providerContext: FtrProviderContext) {
           .send({
             name: 'test-agentless-policy',
             namespace: 'default',
+            supports_agentless: true,
             data_output_id: outputResponse.item.id,
           })
           .expect(400);

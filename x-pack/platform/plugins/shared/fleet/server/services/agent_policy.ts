@@ -221,7 +221,7 @@ class AgentPolicyService {
         soClient,
         agentPolicy,
         existingAgentPolicy,
-        getAllowedOutputTypesForAgentPolicy(existingAgentPolicy)
+        getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
     await soClient.update<AgentPolicySOAttributes>(savedObjectType, id, {
