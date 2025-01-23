@@ -15,6 +15,7 @@ import { SpanLink } from './components/span_link';
 import { TransactionLink } from './components/transaction_link';
 import { ErrorGroupLink } from './components/error_group_link';
 import { ErrorLink } from './components/error_link';
+import { TracesExplorerWaterfallLink } from './components/traces_explorer_waterfall_link';
 
 export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider<{
   category: DataSourceCategory;
@@ -101,6 +102,12 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                             errorGroupId={errorGroupKey as string}
                             errorGroupName={errorGroupKey as string}
                           />
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            Traces
+                          </EuiText>
+                          <TracesExplorerWaterfallLink errorId={errorId as string} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                       <EuiSpacer size="l" />
