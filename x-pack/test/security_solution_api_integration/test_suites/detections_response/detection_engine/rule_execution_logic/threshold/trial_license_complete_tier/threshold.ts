@@ -718,6 +718,7 @@ export default ({ getService }: FtrProviderContext) => {
         expect(requests).toHaveLength(2);
         expect(requests![0].description).toBe('Find all terms that exceeds threshold value');
         expect(requests![0].request).toContain('POST /auditbeat-*/_search?allow_no_indices=true');
+        expect(requests![0].request_type).toBe('findThresholdBuckets');
         expect(requests![1].description).toBe(
           'Find all terms that exceeds threshold value after host.id: f9c7ca2d33f548a8b37667f6fffc59ce'
         );

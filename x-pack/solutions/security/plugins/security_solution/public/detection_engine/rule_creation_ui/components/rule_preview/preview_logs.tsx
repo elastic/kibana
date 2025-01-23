@@ -7,6 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React, { Fragment, useMemo } from 'react';
+import { css } from '@emotion/css';
 import { EuiCallOut, EuiText, EuiSpacer, EuiAccordion } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 
@@ -112,7 +113,9 @@ const LogAccordion: FC<PropsWithChildren<LogAccordionProps>> = ({ logs, isError,
             isError ? i18n.QUERY_PREVIEW_SEE_ALL_ERRORS : i18n.QUERY_PREVIEW_SEE_ALL_WARNINGS
           }
           borders="horizontal"
-          css={cssStyles}
+          css={css`
+            ${cssStyles}
+          `}
         >
           {restOfLogs.map((log, key) => (
             <CalloutGroup

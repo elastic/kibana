@@ -2820,6 +2820,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(requests).toHaveLength(1);
         expect(requests![0].description).toBe('Find events');
+        expect(requests![0].request_type).toBe('findDocuments');
         expect(requests![0].request).toContain('POST /ecs_compliant/_search?allow_no_indices=true');
       });
 
@@ -2843,6 +2844,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(requests).toHaveLength(1);
         expect(requests![0].description).toBe('Find events');
+        expect(requests![0].request_type).toBe('findDocuments');
         expect(requests![0].request).toContain('POST /ecs_compliant/_search?allow_no_indices=true');
       });
     });
