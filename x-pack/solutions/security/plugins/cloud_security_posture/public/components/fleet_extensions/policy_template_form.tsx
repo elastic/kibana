@@ -52,6 +52,7 @@ import {
   type NewPackagePolicyPostureInput,
   POSTURE_NAMESPACE,
   POLICY_TEMPLATE_FORM_DTS,
+  hasErrors,
 } from './utils';
 import {
   PolicyTemplateInfo,
@@ -763,9 +764,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
       (key) => (validationResults?.vars || {})[key] !== null
     );
-
-    const inputName = `${input.policy_template}-${input.type}`;
-    const hasInvalidRequiredVars = !!validationResults?.inputs?.[inputName]?.required_vars;
+    const hasInvalidRequiredVars = hasErrors(validationResults);
 
     const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
     const [canFetchIntegration, setCanFetchIntegration] = useState(true);

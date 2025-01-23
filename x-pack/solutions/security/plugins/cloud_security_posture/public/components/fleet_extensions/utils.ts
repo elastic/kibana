@@ -43,6 +43,8 @@ import {
 } from './aws_credentials_form/get_aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE, GCP_SETUP_ACCESS } from './gcp_credentials_form/gcp_credential_form';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
+import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import { getFlattenedObject } from '@kbn/std';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
@@ -400,4 +402,12 @@ export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars
 
 export const POLICY_TEMPLATE_FORM_DTS = {
   LOADER: 'policy-template-form-loader',
+};
+
+export const hasErrors = (validationResults: PackagePolicyValidationResults | undefined) => {
+  if (!validationResults) return 0;
+
+  const flattenedValidation = getFlattenedObject(validationResults);
+  const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
+  return errors.length;
 };
