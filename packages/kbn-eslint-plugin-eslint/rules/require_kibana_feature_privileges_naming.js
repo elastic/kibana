@@ -32,8 +32,10 @@ module.exports = {
 
         const scopedVariables = new Map();
 
-        const parent = context
-          .getAncestors()
+        const sourceCode = context.getSourceCode();
+
+        const parent = sourceCode
+          .getAncestors(node)
           .find((ancestor) => ['BlockStatement', 'Program'].includes(ancestor.type));
 
         if (parent) {
@@ -100,11 +102,11 @@ module.exports = {
                 }
 
                 if (valueToCheck.includes('delete')) {
-                  method = 'create';
+                  method = 'delete';
                 }
 
                 if (valueToCheck.includes('update')) {
-                  method = 'create';
+                  method = 'update';
                 }
 
                 if (!isValid) {
