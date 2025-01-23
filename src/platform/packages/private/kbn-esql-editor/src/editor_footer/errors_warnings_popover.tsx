@@ -86,9 +86,7 @@ function ErrorsWarningsContent({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} className="ESQLEditor_errorMessage">
-                  {item.message}
-                </EuiFlexItem>
+                <EuiFlexItem grow={false}>{item.message}</EuiFlexItem>
               </EuiFlexGroup>
             </EuiDescriptionListDescription>
           );

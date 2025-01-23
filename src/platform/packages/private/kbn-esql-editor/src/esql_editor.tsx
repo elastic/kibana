@@ -42,6 +42,7 @@ import {
   useDebounceWithOptions,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
+  getEditorOverwrites,
   type MonacoMessage,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
@@ -53,8 +54,6 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps } from './types';
-
-import './overwrite.scss';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -640,6 +639,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               <div css={styles.editorContainer}>
                 <CodeEditor
                   languageId={ESQL_LANG_ID}
+                  classNameCss={getEditorOverwrites(euiTheme)}
                   value={code}
                   options={codeEditorOptions}
                   width="100%"
