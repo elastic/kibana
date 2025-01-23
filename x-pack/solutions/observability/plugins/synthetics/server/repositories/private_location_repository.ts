@@ -53,7 +53,7 @@ export class PrivateLocationRepository {
 
     const locations = data.saved_objects.map((loc) => ({
       ...loc.attributes,
-      spaces: loc.spaces || loc.namespaces,
+      spaces: loc.attributes.spaces || loc.namespaces,
     }));
 
     const locWithAgentPolicyId = locations.find(
