@@ -52,7 +52,7 @@ type ReloadReason =
   | 'viewMode'
   | 'searchContext';
 
-function getSearchContext(parentApi: unknown) {
+function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable[] = []) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
     ? pick(parentApi, 'filters$', 'query$', 'timeslice$', 'timeRange$')
     : {
@@ -61,10 +61,6 @@ function getSearchContext(parentApi: unknown) {
         timeslice$: new BehaviorSubject(undefined),
         timeRange$: new BehaviorSubject(undefined),
       };
-
-  const esqlVariables = apiPublishesESQLVariables(parentApi)
-    ? parentApi.esqlVariables$.getValue()
-    : ([] as ESQLControlVariable[]);
 
   return {
     esqlVariables,
@@ -195,9 +191,11 @@ export function loadEmbeddableData(
       callbacks
     );
 
+    const esqlVariables = internalApi?.esqlVariables$?.getValue();
+
     const searchContext = getMergedSearchContext(
       currentState,
-      getSearchContext(parentApi),
+      getSearchContext(parentApi, esqlVariables),
       api.timeRange$,
       parentApi,
       services

@@ -13,6 +13,7 @@ import type {
   TimeRange,
 } from '@kbn/es-query';
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { PublishesESQLVariables } from '@kbn/esql-variables-types';
 import type {
   HasEditCapabilities,
@@ -418,6 +419,7 @@ export type LensInternalApi = Simplify<
   Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
     PublishesDataViews &
     VisualizationContextHelper & {
+      esqlVariables$: PublishingSubject<ESQLControlVariable[]> | undefined;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
