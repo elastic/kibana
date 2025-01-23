@@ -51,8 +51,6 @@ export default ({ getService, getPageObject }: FtrProviderContext) => {
     });
 
     it('does render the correct error message', async () => {
-      await testSubjects.setValue('ruleDetailsNameInput', 'test custom threshold rule');
-
       await testSubjects.click('customEquation');
       const customEquationField = await find.byCssSelector(
         '[data-test-subj="thresholdRuleCustomEquationEditorFieldText"]'
