@@ -26,14 +26,14 @@ export const promptDictionary = {
 interface GetPromptArgs {
   savedObjectsClient: SavedObjectsClientContract;
   promptId: string;
-  llm?: string;
+  provider?: string;
   model?: string;
   actionsClient: PublicMethodsOf<ActionsClient>;
   connectorId: string;
 }
 interface ElasticModelDictionary {
   [key: string]: {
-    llm: string;
+    provider: string;
     model: string;
   };
 }
@@ -43,14 +43,14 @@ interface Prompt {
   prompt: {
     default: string;
   };
-  llm?: string;
+  provider?: string;
   model?: string;
   description?: string;
 }
 
 const elasticModelDictionary: ElasticModelDictionary = {
   'rainbow-sprinkles': {
-    llm: 'bedrock',
+    provider: 'bedrock',
     model: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
   },
 };
@@ -58,70 +58,78 @@ export const getPrompt = async ({
   savedObjectsClient,
   promptId,
   model: providedModel,
-  llm: providedLlm,
+  provider: providedProvider,
   actionsClient,
   connectorId,
 }: GetPromptArgs): Promise<string> => {
   let model = providedModel;
-  let llm = providedLlm;
-  if (!llm || !model || llm === 'inference') {
+  let provider = providedProvider;
+  if (!provider || !model || provider === 'inference') {
     const connector = await actionsClient.get({ id: connectorId });
-    // At least one of 'llm' or 'model' is missing, get it from connector details
-    if (llm === 'inference' && !!connector.config) {
-      llm = connector.config.provider || llm;
+    // At least one of 'provider' or 'model' is missing, get it from connector details
+    if (provider === 'inference' && !!connector.config) {
+      provider = connector.config.provider || provider;
       model = connector.config.providerConfig?.model_id || model;
-      if (llm === 'elastic' && !!model) {
-        // default back to inference if no llm exists for the model
-        llm = elasticModelDictionary[model]?.llm || 'inference';
+      if (provider === 'elastic' && !!model) {
+        // default back to inference if no provider exists for the model
+        provider = elasticModelDictionary[model]?.provider || 'inference';
         model = elasticModelDictionary[model]?.model;
       }
-    } else if (llm !== 'inference' && !!connector.config) {
-      llm = llm || getLlmType(connector.actionTypeId);
+    } else if (provider !== 'inference' && !!connector.config) {
+      provider = provider || getLlmType(connector.actionTypeId);
       model = model || connector.config.defaultModel;
     }
   }
 
-  // if after all of this, llm is still inference, treat as Bedrock
-  if (llm === 'inference') {
-    llm = 'bedrock';
+  // if after all of this, provider is still inference, treat as Bedrock
+  if (provider === 'inference') {
+    provider = 'bedrock';
   }
 
   const prompts = await savedObjectsClient.find<Prompt>({
     type: promptSavedObjectType,
     searchFields: ['promptId'],
     search: promptId,
-    fields: ['llm', 'model', 'prompt'],
+    fields: ['provider', 'model', 'prompt'],
   });
 
-  return findPromptEntry(prompts.saved_objects, promptId, llm, model) || '';
+  return findPromptEntry(prompts.saved_objects, promptId, provider, model) || '';
 };
 
 const findPromptEntry = (
   prompts: Array<SavedObject<Prompt>>,
   promptId: string,
-  llm?: string,
+  provider?: string,
   model?: string
 ) => {
   const backupPrompts = localPrompts.filter((p) => p.attributes.promptId === promptId);
 
-  // Try to find the entry with matching llm and model
+  // Try to find the entry with matching provider and model
   let entry =
-    prompts.find((prompt) => prompt.attributes.llm === llm && prompt.attributes.model === model) ||
+    prompts.find(
+      (prompt) => prompt.attributes.provider === provider && prompt.attributes.model === model
+    ) ||
     backupPrompts.find(
-      (prompt) => prompt.attributes.llm === llm && prompt.attributes.model === model
+      (prompt) => prompt.attributes.provider === provider && prompt.attributes.model === model
     );
   if (!entry) {
-    // If no match, try to find an entry with matching llm
+    // If no match, try to find an entry with matching provider
     entry =
-      prompts.find((prompt) => prompt.attributes.llm === llm && !prompt.attributes.model) ||
-      backupPrompts.find((prompt) => prompt.attributes.llm === llm && !prompt.attributes.model);
+      prompts.find(
+        (prompt) => prompt.attributes.provider === provider && !prompt.attributes.model
+      ) ||
+      backupPrompts.find(
+        (prompt) => prompt.attributes.provider === provider && !prompt.attributes.model
+      );
   }
 
   if (!entry) {
-    // If still no match, find the entry without llm or model
+    // If still no match, find the entry without provider or model
     entry =
-      prompts.find((prompt) => !prompt.attributes.llm && !prompt.attributes.model) ||
-      backupPrompts.find((prompt) => prompt.attributes.llm === llm && !prompt.attributes.model);
+      prompts.find((prompt) => !prompt.attributes.provider && !prompt.attributes.model) ||
+      backupPrompts.find(
+        (prompt) => prompt.attributes.provider === provider && !prompt.attributes.model
+      );
   }
 
   return entry?.attributes?.prompt?.default;
@@ -138,7 +146,7 @@ const localPrompts: Array<SavedObject<Prompt>> = [
     ...defaultSavedObject,
     attributes: {
       promptId: promptDictionary.systemPrompt,
-      llm: 'openai',
+      provider: 'openai',
       prompt: {
         default: DEFAULT_SYSTEM_PROMPT,
       },
@@ -157,7 +165,7 @@ const localPrompts: Array<SavedObject<Prompt>> = [
     ...defaultSavedObject,
     attributes: {
       promptId: promptDictionary.systemPrompt,
-      llm: 'bedrock',
+      provider: 'bedrock',
       prompt: {
         default: BEDROCK_SYSTEM_PROMPT,
       },
@@ -167,7 +175,7 @@ const localPrompts: Array<SavedObject<Prompt>> = [
     ...defaultSavedObject,
     attributes: {
       promptId: promptDictionary.systemPrompt,
-      llm: 'gemini',
+      provider: 'gemini',
       prompt: {
         default: GEMINI_SYSTEM_PROMPT,
       },
@@ -177,7 +185,7 @@ const localPrompts: Array<SavedObject<Prompt>> = [
     ...defaultSavedObject,
     attributes: {
       promptId: promptDictionary.systemPrompt,
-      llm: 'openai',
+      provider: 'openai',
       model: 'oss',
       prompt: {
         default: STRUCTURED_SYSTEM_PROMPT,
@@ -188,7 +196,7 @@ const localPrompts: Array<SavedObject<Prompt>> = [
     ...defaultSavedObject,
     attributes: {
       promptId: promptDictionary.userPrompt,
-      llm: 'gemini',
+      provider: 'gemini',
       prompt: {
         default: GEMINI_USER_PROMPT,
       },

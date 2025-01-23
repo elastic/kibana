@@ -37,7 +37,7 @@ describe('getPrompt', () => {
             id: '977b39b8-5bb9-4530-9a39-7aa7084fb5c0',
             attributes: {
               promptId: promptDictionary.systemPrompt,
-              llm: 'openai',
+              provider: 'openai',
               model: 'gpt-4o',
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
@@ -59,7 +59,7 @@ describe('getPrompt', () => {
             id: 'd6dacb9b-1029-4c4c-85e1-e4f97b31c7f4',
             attributes: {
               promptId: promptDictionary.systemPrompt,
-              llm: 'openai',
+              provider: 'openai',
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
                 default: 'Hello world this is a system prompt no model',
@@ -80,7 +80,7 @@ describe('getPrompt', () => {
             id: 'd6dacb9b-1029-4c4c-85e1-e4f97b31c7f4',
             attributes: {
               promptId: promptDictionary.systemPrompt,
-              llm: 'bedrock',
+              provider: 'bedrock',
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
                 default: 'Hello world this is a system prompt for bedrock',
@@ -101,7 +101,7 @@ describe('getPrompt', () => {
             id: 'd6dacb9b-1029-4c4c-85e1-e4f97b31c7f4',
             attributes: {
               promptId: promptDictionary.systemPrompt,
-              llm: 'bedrock',
+              provider: 'bedrock',
               model: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
@@ -125,7 +125,7 @@ describe('getPrompt', () => {
               promptId: promptDictionary.systemPrompt,
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
-                default: 'Hello world this is a system prompt no model, no llm',
+                default: 'Hello world this is a system prompt no model, no provider',
               },
             },
             references: [],
@@ -152,11 +152,11 @@ describe('getPrompt', () => {
     } as unknown as jest.Mocked<ActionsClient>;
   });
 
-  it('should return the prompt matching llm and model', async () => {
+  it('should return the prompt matching provider and model', async () => {
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'openai',
+      provider: 'openai',
       model: 'gpt-4o',
       actionsClient,
       connectorId: 'connector-123',
@@ -166,11 +166,11 @@ describe('getPrompt', () => {
     expect(result).toBe('Hello world this is a system prompt');
   });
 
-  it('should return the prompt matching llm when model does not have a match', async () => {
+  it('should return the prompt matching provider when model does not have a match', async () => {
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'openai',
+      provider: 'openai',
       model: 'gpt-4o-mini',
       actionsClient,
       connectorId: 'connector-123',
@@ -180,11 +180,11 @@ describe('getPrompt', () => {
     expect(result).toBe('Hello world this is a system prompt no model');
   });
 
-  it('should return the prompt matching llm when model is not provided', async () => {
+  it('should return the prompt matching provider when model is not provided', async () => {
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'openai',
+      provider: 'openai',
       actionsClient,
       connectorId: 'connector-123',
     });
@@ -193,25 +193,25 @@ describe('getPrompt', () => {
     expect(result).toBe('Hello world this is a system prompt no model');
   });
 
-  it('should return the default prompt when there is no match on llm', async () => {
+  it('should return the default prompt when there is no match on provider', async () => {
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'badone',
+      provider: 'badone',
       actionsClient,
       connectorId: 'connector-123',
     });
 
-    expect(result).toBe('Hello world this is a system prompt no model, no llm');
+    expect(result).toBe('Hello world this is a system prompt no model, no provider');
   });
 
-  it('should default llm to bedrock if llm is "inference"', async () => {
+  it('should default provider to bedrock if provider is "inference"', async () => {
     actionsClient.get.mockResolvedValue(defaultConnector);
 
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'inference',
+      provider: 'inference',
       model: 'gpt-4o',
       actionsClient,
       connectorId: 'connector-123',
@@ -220,7 +220,7 @@ describe('getPrompt', () => {
     expect(result).toBe('Hello world this is a system prompt for bedrock');
   });
 
-  it('should return the expected prompt from when llm is "elastic" and model matches in elasticModelDictionary', async () => {
+  it('should return the expected prompt from when provider is "elastic" and model matches in elasticModelDictionary', async () => {
     actionsClient.get.mockResolvedValue({
       ...defaultConnector,
       config: {
@@ -232,7 +232,7 @@ describe('getPrompt', () => {
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'inference',
+      provider: 'inference',
       actionsClient,
       connectorId: 'connector-123',
     });
@@ -240,7 +240,7 @@ describe('getPrompt', () => {
     expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-5-sonnet');
   });
 
-  it('should return the bedrock prompt when llm is "elastic" but model does not match elasticModelDictionary', async () => {
+  it('should return the bedrock prompt when provider is "elastic" but model does not match elasticModelDictionary', async () => {
     actionsClient.get.mockResolvedValue({
       ...defaultConnector,
       config: {
@@ -252,7 +252,7 @@ describe('getPrompt', () => {
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'inference',
+      provider: 'inference',
       actionsClient,
       connectorId: 'connector-123',
     });
@@ -272,7 +272,7 @@ describe('getPrompt', () => {
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
       actionsClient,
-      llm: 'bedrock',
+      provider: 'bedrock',
       connectorId: 'connector-123',
     });
 
@@ -315,7 +315,7 @@ describe('getPrompt', () => {
     expect(result).toBe('');
   });
 
-  it('should handle invalid connector configuration gracefully when llm is "inference"', async () => {
+  it('should handle invalid connector configuration gracefully when provider is "inference"', async () => {
     actionsClient.get.mockResolvedValue({
       ...defaultConnector,
       config: {},
@@ -323,7 +323,7 @@ describe('getPrompt', () => {
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'inference',
+      provider: 'inference',
       actionsClient,
       connectorId: 'connector-123',
     });
@@ -331,7 +331,7 @@ describe('getPrompt', () => {
     expect(result).toBe('Hello world this is a system prompt for bedrock');
   });
 
-  it('should retrieve the connector when no model or llm is provided', async () => {
+  it('should retrieve the connector when no model or provider is provided', async () => {
     actionsClient.get.mockResolvedValue({
       ...defaultConnector,
       actionTypeId: '.bedrock',
@@ -361,7 +361,7 @@ describe('getPrompt', () => {
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'bedrock',
+      provider: 'bedrock',
       actionsClient,
       connectorId: 'connector-123',
     });
@@ -370,11 +370,11 @@ describe('getPrompt', () => {
     expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-5-sonnet');
   });
 
-  it('should return the OSS prompt matching llm and model', async () => {
+  it('should return the OSS prompt matching provider and model', async () => {
     const result = await getPrompt({
       savedObjectsClient,
       promptId: promptDictionary.systemPrompt,
-      llm: 'openai',
+      provider: 'openai',
       model: 'oss',
       actionsClient,
       connectorId: 'connector-123',

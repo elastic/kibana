@@ -17,7 +17,7 @@ export const promptSavedObjectMappings: SavedObjectsType['mappings'] = {
     promptId: {
       type: 'keyword',
     },
-    llm: {
+    provider: {
       type: 'keyword',
     },
     model: {
