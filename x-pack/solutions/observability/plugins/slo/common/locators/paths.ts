@@ -35,3 +35,5 @@ export const paths = {
     return `${SLOS_BASE_PATH}/${encodeURIComponent(sloId)}?${qs.toString()}`;
   },
 };
+
+export const SLO_DOCUMENTATION_URL = `https://www.elastic.co/guide/en/observability/current/slo.html`;

@@ -77,8 +77,6 @@ export const SLO_SUMMARY_DESTINATION_INDEX_NAME = `.slo-observability.summary-v$
 export const SLO_SUMMARY_TEMP_INDEX_NAME = `.slo-observability.summary-v${SLO_RESOURCES_VERSION}.temp`; // store the temporary summary document
 export const SLO_SUMMARY_DESTINATION_INDEX_PATTERN = `.slo-observability.summary-v${SLO_RESOURCES_VERSION_MAJOR}*`; // include temp and non-temp summary indices
 
-export const SLO_DOCUMENTATION_URL = `https://www.elastic.co/guide/en/observability/current/slo.html`;
-
 export const getSLOTransformId = (sloId: string, sloRevision: number) =>
   `slo-${sloId}-${sloRevision}`;
 

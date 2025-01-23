@@ -9,10 +9,13 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
-import { SLO_DOCUMENTATION_URL } from '../../../common/constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
-import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
+import {
+  SLOS_BASE_PATH,
+  SLO_DOCUMENTATION_URL,
+  SLO_SETTINGS_PATH,
+} from '../../../common/locators/paths';
 
 export function HeaderMenu(): React.ReactElement | null {
   const { http, theme } = useKibana().services;
