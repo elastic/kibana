@@ -9,11 +9,11 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { DefaultEmbeddableApi, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
   fetch$,
-  PublishesWritablePanelTitle,
-  PublishesPanelTitle,
+  PublishesWritableTitle,
+  PublishesTitle,
   SerializedTitles,
   HasEditCapabilities,
 } from '@kbn/presentation-publishing';
@@ -34,8 +34,8 @@ export type OverviewEmbeddableState = SerializedTitles & {
 };
 
 export type StatusOverviewApi = DefaultEmbeddableApi<OverviewEmbeddableState> &
-  PublishesWritablePanelTitle &
-  PublishesPanelTitle &
+  PublishesWritableTitle &
+  PublishesTitle &
   HasEditCapabilities;
 
 export const getMonitorsEmbeddableFactory = (
@@ -53,15 +53,15 @@ export const getMonitorsEmbeddableFactory = (
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
       const [coreStart, pluginStart] = await getStartServices();
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
       const defaultTitle$ = new BehaviorSubject<string | undefined>(getOverviewPanelTitle());
       const reload$ = new Subject<boolean>();
       const filters$ = new BehaviorSubject(state.filters);
 
       const api = buildApi(
         {
-          ...titlesApi,
-          defaultPanelTitle: defaultTitle$,
+          ...titleManager.api,
+          defaultTitle$,
           getTypeDisplayName: () =>
             i18n.translate('xpack.synthetics.editSloOverviewEmbeddableTitle.typeDisplayName', {
               defaultMessage: 'filters',
@@ -70,7 +70,7 @@ export const getMonitorsEmbeddableFactory = (
           serializeState: () => {
             return {
               rawState: {
-                ...serializeTitles(),
+                ...titleManager.serialize(),
                 filters: filters$.getValue(),
               },
             };
@@ -101,7 +101,7 @@ export const getMonitorsEmbeddableFactory = (
           },
         },
         {
-          ...titleComparators,
+          ...titleManager.comparators,
           filters: [filters$, (value) => filters$.next(value)],
         }
       );
