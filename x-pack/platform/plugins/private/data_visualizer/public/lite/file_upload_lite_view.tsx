@@ -6,15 +6,13 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useMemo, useRef, useEffect, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useState } from 'react';
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
-import { i18n } from '@kbn/i18n';
 import {
   EuiButton,
   EuiButtonEmpty,
-  EuiFilePicker,
   EuiFlexGroup,
   EuiFlexItem,
   EuiFlyoutBody,
@@ -25,10 +23,6 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import type {
-  EuiFilePickerClass,
-  EuiFilePickerProps,
-} from '@elastic/eui/src/components/form/file_picker/file_picker';
 import useObservable from 'react-use/lib/useObservable';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ResultLinks } from '../../common/app';
@@ -40,6 +34,7 @@ import { FileStatus } from './file_status';
 import { OverallUploadStatus } from './overall_upload_status';
 import { FileClashWarning } from './file_clash_warning';
 import { IndexInput } from './index_input';
+import { FilePicker } from './file_picker';
 // import { OverallUploadProgress } from './overall_upload_progress';
 
 interface Props {
@@ -71,7 +66,7 @@ export const FileUploadLiteView: FC<Props> = ({
   const [indexName, setIndexName] = useState<string>('');
   const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
   // const [showErrors] = useState<boolean>(false);
-  const filePickerRef = useRef<EuiFilePickerClass>(null);
+
   const fm = useMemo(
     () => new FileManager(fileUpload, http, dataStart.dataViews, autoAddSemanticTextField),
     [autoAddSemanticTextField, dataStart.dataViews, fileUpload, http]
@@ -84,17 +79,6 @@ export const FileUploadLiteView: FC<Props> = ({
   const fileClashes = useMemo(
     () => uploadStatus.fileClashes.some((f) => f.clash),
     [uploadStatus.fileClashes]
-  );
-
-  const onFilePickerChange = useCallback(
-    (files: FileList | null) => {
-      if (files && files.length > 0) {
-        fm.addFiles(files).then((res) => {
-          filePickerRef.current?.removeFiles();
-        });
-      }
-    },
-    [fm]
   );
 
   useEffect(() => {
@@ -165,22 +149,7 @@ export const FileUploadLiteView: FC<Props> = ({
 
                 <EuiSpacer />
 
-                <EuiFilePicker
-                  ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
-                  id="filePicker"
-                  fullWidth
-                  display="large"
-                  compressed
-                  multiple
-                  initialPromptText={i18n.translate(
-                    'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
-                    {
-                      defaultMessage: 'Select or drag and drop a file',
-                    }
-                  )}
-                  onChange={(files) => onFilePickerChange(files)}
-                />
-                <EuiSpacer />
+                <FilePicker fileManager={fm} />
               </>
             ) : null}
 
