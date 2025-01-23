@@ -593,7 +593,7 @@ describe('Task Runner', () => {
           index: '.alerts-test.alerts-default',
           refresh: 'wait_for',
           require_alias: !useDataStreamForAlerts,
-          operations: [
+          body: [
             {
               create: {
                 _id: '5f6aa57d-3e22-484e-bae8-cbed868f4d28',

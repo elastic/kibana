@@ -29,6 +29,7 @@ const mockProviders = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -38,6 +39,7 @@ const mockProviders = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
       url: {
         default_value: 'https://api.openai.com/v1/embeddings',
@@ -47,6 +49,7 @@ const mockProviders = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
     },
   },
@@ -63,6 +66,7 @@ const mockProviders = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'rerank', 'completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -72,6 +76,7 @@ const mockProviders = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'completion'],
       },
     },
   },
@@ -88,6 +93,7 @@ const mockProviders = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -98,6 +104,7 @@ const mockProviders = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['completion'],
       },
       model_id: {
         default_value: null,
@@ -107,6 +114,7 @@ const mockProviders = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['completion'],
       },
     },
   },
