@@ -30,13 +30,13 @@ Below are the parameters that affect a batch. Any changes to these parameters sh
 - **indexNames**: List of indices in Timeline.
 - **id**: Timeline Id
 - **fields**:  List of requested fields
-- **filterQuery:  combined query consisting **: 
-- **KQL/Lucene Query**
-- **Filters**
-- **Data Providers**
-- **runtimeMappings **: List of runtime mappings that need to be fetched
+- **filterQuery**:  combined query consisting: 
+  * **KQL/Lucene Query**
+  * **Filters**
+  * **Data Providers**
+- **runtimeMappings**: List of runtime mappings that need to be fetched
 - **language**: KQL | Lucene
-- **limit **: Sample Size or Batch Size
+- **limit**: Sample Size or Batch Size
 - **sort**
 
 ## Batch fetch/re-fetch Strategy
