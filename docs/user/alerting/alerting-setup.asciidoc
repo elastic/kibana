@@ -64,10 +64,11 @@ a|
 ====
 The *{connectors-feature}* feature privilege is required to manage connectors.
 To add rule actions and test connectors, you require only `Read` privileges.
+By default, `All` privileges include authority to run {endpoint-sec} connectors (such as SentinelOne and CrowdStrike) unless you customize the sub-feature privileges.
 
-By default, `All` privileges for the *Rules Settings* feature include authority to edit flapping detection settings unless you customize the sub-feature privileges.
+Likewise, you can customize the *Rules Settings* sub-feature privileges related to flapping detection settings.
 
-preview:[] To create a rule that uses the <<cases-action-type,Cases connector>>, you must also have `all` privileges for the *Cases* feature.
+To create a rule that uses the <<cases-action-type,Cases connector>>, you must also have `All` privileges for the *Cases* feature.
 
 The rule type also affects the privileges that are required.
 For example, to create or edit {ml} rules, you must have `all` privileges for the *Analytics > {ml-app}* feature.

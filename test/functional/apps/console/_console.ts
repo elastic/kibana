@@ -89,7 +89,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     });
 
-    describe('tabs navigation', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/204381
+    describe.skip('tabs navigation', () => {
       let currentUrl: string;
 
       beforeEach(async () => {
