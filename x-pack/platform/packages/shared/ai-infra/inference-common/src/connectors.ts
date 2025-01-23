@@ -15,7 +15,7 @@ export enum InferenceConnectorType {
   Inference = '.inference',
 }
 
-export const COMPLETION_TASK_TYPE = 'completion';
+export const COMPLETION_TASK_TYPE = 'chat_completion';
 
 const allSupportedConnectorTypes = Object.values(InferenceConnectorType);
 

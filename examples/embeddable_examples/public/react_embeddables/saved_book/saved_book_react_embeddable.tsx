@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import {
   apiHasParentApi,
   getUnchangingComparator,
-  initializeTitles,
+  initializeTitleManager,
   SerializedTitles,
   SerializedPanelState,
   useBatchedPublishingSubjects,
@@ -81,7 +81,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
       };
     },
     buildEmbeddable: async (state, buildApi) => {
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
       const bookAttributesManager = stateManagerFromAttributes(state);
       const isByReference = Boolean(state.savedBookId);
 
@@ -90,21 +90,21 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
           // if this book is currently by reference, we serialize the reference only.
           const bookByReferenceState: BookByReferenceSerializedState = {
             savedBookId: newId ?? state.savedBookId!,
-            ...serializeTitles(),
+            ...titleManager.serialize(),
           };
           return { rawState: bookByReferenceState };
         }
         // if this book is currently by value, we serialize the entire state.
         const bookByValueState: BookByValueSerializedState = {
           attributes: serializeBookAttributes(bookAttributesManager),
-          ...serializeTitles(),
+          ...titleManager.serialize(),
         };
         return { rawState: bookByValueState };
       };
 
       const api = buildApi(
         {
-          ...titlesApi,
+          ...titleManager.api,
           onEdit: async () => {
             openSavedBookEditor({
               attributesManager: bookAttributesManager,
@@ -152,7 +152,7 @@ export const getSavedBookEmbeddableFactory = (core: CoreStart) => {
         {
           savedBookId: getUnchangingComparator(), // saved book id will not change over the lifetime of the embeddable.
           ...bookAttributesManager.comparators,
-          ...titleComparators,
+          ...titleManager.comparators,
         }
       );
 
