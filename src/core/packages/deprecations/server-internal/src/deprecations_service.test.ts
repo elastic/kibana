@@ -19,6 +19,7 @@ import { configServiceMock } from '@kbn/config-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { DeprecationsService, DeprecationsSetupDeps } from './deprecations_service';
+import { firstValueFrom } from 'rxjs';
 
 describe('DeprecationsService', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
@@ -65,10 +66,30 @@ describe('DeprecationsService', () => {
       expect(registerConfigDeprecationsInfoMock).toBeCalledTimes(1);
     });
 
-    it('calls logging.configure once', async () => {
-      const deprecationsService = new DeprecationsService(coreContext);
-      await deprecationsService.setup(deprecationsCoreSetupDeps);
-      expect(loggingMock.configure).toBeCalledTimes(1);
+    describe('logging.configure tests', () => {
+      it('calls logging.configure without allow_http_debug_logs', async () => {
+        const deprecationsService = new DeprecationsService(coreContext);
+        await deprecationsService.setup(deprecationsCoreSetupDeps);
+        expect(loggingMock.configure).toBeCalledTimes(1);
+        const config$ = loggingMock.configure.mock.calls[0][1];
+        expect(await firstValueFrom(config$)).toStrictEqual({
+          loggers: [{ name: 'http', level: 'off', appenders: [] }],
+        });
+      });
+
+      it('calls logging.configure with allow_http_debug_logs set to true', async () => {
+        const configService = configServiceMock.create({
+          atPath: { allow_http_debug_logs: true },
+        });
+        coreContext = mockCoreContext.create({ configService });
+        const deprecationsService = new DeprecationsService(coreContext);
+        await deprecationsService.setup(deprecationsCoreSetupDeps);
+        expect(loggingMock.configure).toBeCalledTimes(1);
+        const config$ = loggingMock.configure.mock.calls[0][1];
+        expect(await firstValueFrom(config$)).toStrictEqual({
+          loggers: [{ name: 'http', level: 'debug', appenders: [] }],
+        });
+      });
     });
 
     it('creates DeprecationsFactory with the correct parameters', async () => {
