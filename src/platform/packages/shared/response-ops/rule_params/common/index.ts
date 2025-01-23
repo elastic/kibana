@@ -8,4 +8,4 @@
  */
 
 export * from './search_configuration_schema';
-export { dataViewSpecSchema } from './data_view_spec_schema/data_view_spec_schema';
+export { dataViewSpecSchema } from './data_view_spec_schema';
