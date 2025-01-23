@@ -71,11 +71,11 @@ journey('MonitorAlerts', async ({ page, params }: { page: Page; params: any }) =
   step('close anomaly detection flyout', async () => {
     await page.click(byTestId('ruleFlyoutFooterCancelButton'));
     if (
-      await page.waitForSelector(byTestId('ruleFlyoutConfirmCancelConfirmButton'), {
+      await page.waitForSelector(byTestId('confirmRuleCloseModal'), {
         timeout: 1000,
       })
     ) {
-      await page.click(byTestId('ruleFlyoutConfirmCancelConfirmButton'));
+      await page.click(byTestId('confirmModalConfirmButton'));
     }
   });
 
