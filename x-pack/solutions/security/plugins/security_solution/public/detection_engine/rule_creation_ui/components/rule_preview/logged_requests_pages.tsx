@@ -7,6 +7,7 @@
 
 import type { FC } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useEuiPaddingSize } from '@elastic/eui';
@@ -88,10 +89,10 @@ const LoggedRequestsPagesComponent: FC<{
             />
           }
           borders="horizontal"
-          css={{
-            marginLeft: paddingLarge,
-            ...cssStyles,
-          }}
+          css={css`
+            margin-left: ${paddingLarge};
+            ${cssStyles}
+          `}
         >
           {pageRequests.map((request, requestKey) => (
             <LoggedRequestsQuery key={requestKey} {...request} />

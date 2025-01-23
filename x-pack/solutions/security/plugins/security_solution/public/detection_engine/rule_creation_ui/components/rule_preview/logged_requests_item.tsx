@@ -7,6 +7,7 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
+import { css } from '@emotion/react';
 
 import { useEuiPaddingSize, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -45,10 +46,10 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs & { rule
         </>
       }
       id={`ruleExecution-${startedAt}`}
-      css={{
-        marginLeft: paddingLarge,
-        ...cssStyles,
-      }}
+      css={css`
+        margin-left: ${paddingLarge};
+        ${cssStyles}
+      `}
     >
       {requests.length > 2 ? (
         <>
@@ -56,9 +57,9 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs & { rule
           <EuiText
             color="warning"
             size="s"
-            css={{
-              marginLeft: paddingLarge,
-            }}
+            css={css`
+              margin-left: ${paddingLarge};
+            `}
           >
             {i18n.REQUESTS_SAMPLE_WARNING}
           </EuiText>

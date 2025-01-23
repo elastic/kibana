@@ -9,6 +9,7 @@ import type { FC } from 'react';
 import React, { useMemo } from 'react';
 import { EuiSpacer } from '@elastic/eui';
 import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
+import { css } from '@emotion/react';
 
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
@@ -47,7 +48,9 @@ const LoggedRequestsComponent: FC<{ logs: RulePreviewLogs[]; ruleType: Type }> =
         data-test-subj="preview-logged-requests-accordion"
         buttonContent={i18n.LOGGED_REQUESTS_ACCORDION_BUTTON}
         borders="horizontal"
-        css={cssStyles}
+        css={css`
+          ${cssStyles}
+        `}
       >
         {AccordionContent}
       </OptimizedAccordion>
