@@ -7,20 +7,19 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { LogDocument, log, generateShortId, generateLongId } from '@kbn/apm-synthtrace-client';
-import { merge } from 'lodash';
+import { LogDocument, generateLongId, generateShortId, log } from '@kbn/apm-synthtrace-client';
 import { Scenario } from '../cli/scenario';
 import { IndexTemplateName } from '../lib/logs/custom_logsdb_index_templates';
+import { LogsCustom } from '../lib/logs/logs_synthtrace_es_client';
 import { withClient } from '../lib/utils/with_client';
 import {
-  getServiceName,
-  getCluster,
-  getCloudRegion,
-  getCloudProvider,
   MORE_THAN_1024_CHARS,
+  getCloudProvider,
+  getCloudRegion,
+  getCluster,
+  getServiceName,
 } from './helpers/logs_mock_data';
 import { parseLogsScenarioOpts } from './helpers/logs_scenario_opts_parser';
-import { LogsIndex } from '../lib/logs/logs_synthtrace_es_client';
 
 const processors = [
   {
@@ -61,30 +60,20 @@ const MESSAGE_LOG_LEVELS = [
 
 const scenario: Scenario<LogDocument> = async (runOptions) => {
   const { isLogsDb } = parseLogsScenarioOpts(runOptions.scenarioOpts);
+
   return {
     bootstrap: async ({ logsEsClient }) => {
       await logsEsClient.createCustomPipeline(processors);
       if (isLogsDb) await logsEsClient.createIndexTemplate(IndexTemplateName.LogsDb);
 
-      await logsEsClient.updateIndexTemplate(
-        isLogsDb ? IndexTemplateName.LogsDb : LogsIndex,
-        (template) => {
-          const next = {
-            name: LogsIndex,
-            data_stream: {
-              failure_store: true,
-            },
-            // The output requires it to be `string[] | undefined` but the input is `string | string[] | undefined`
-            ignore_missing_component_templates: !template.ignore_missing_component_templates
-              ? undefined
-              : Array.isArray(template.ignore_missing_component_templates)
-              ? template.ignore_missing_component_templates
-              : [template.ignore_missing_component_templates],
-          };
-
-          return merge({}, template, next);
-        }
-      );
+      await logsEsClient.createComponentTemplate({
+        name: LogsCustom,
+        dataStreamOptions: {
+          failure_store: {
+            enabled: true,
+          },
+        },
+      });
     },
     generate: ({ range, clients: { logsEsClient } }) => {
       const { logger } = runOptions;
