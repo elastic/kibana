@@ -30,8 +30,6 @@ import {
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
-import { DefinitionNotFound, SecurityException } from './errors';
-import { MalformedStreamId } from './errors/malformed_stream_id';
 import {
   syncUnwiredStreamDefinitionObjects,
   syncWiredStreamDefinitionObjects,
@@ -50,6 +48,9 @@ import {
   deleteStreamObjects,
   deleteUnmanagedStreamObjects,
 } from './stream_crud';
+import { DefinitionNotFoundError } from './errors/definition_not_found_error';
+import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
+import { SecurityError } from './errors/security_error';
 
 interface AcknowledgeResponse<TResult extends Result> {
   acknowledged: true;
@@ -70,8 +71,8 @@ function isElasticsearch404(error: unknown): error is errors.ResponseError & { s
   return isResponseError(error) && error.statusCode === 404;
 }
 
-function isDefinitionNotFoundError(error: unknown): error is DefinitionNotFound {
-  return error instanceof DefinitionNotFound;
+function isDefinitionNotFoundError(error: unknown): error is DefinitionNotFoundError {
+  return error instanceof DefinitionNotFoundError;
 }
 
 export class StreamsClient {
@@ -362,7 +363,7 @@ export class StreamsClient {
       parentDefinition &&
       !isWiredStreamDefinition(parentDefinition)
     ) {
-      throw new MalformedStreamId('Cannot fork a stream that is not managed');
+      throw new MalformedStreamIdError('Cannot fork a stream that is not managed');
     }
 
     validateAncestorFields({
@@ -384,7 +385,7 @@ export class StreamsClient {
         continue;
       }
       if (!isChildOf(definition.name, item.destination)) {
-        throw new MalformedStreamId(
+        throw new MalformedStreamIdError(
           `The ID (${item.destination}) from the child stream must start with the parent's id (${definition.name}), followed by a dot and a name`
         );
       }
@@ -435,12 +436,12 @@ export class StreamsClient {
 
     // check whether root stream has a child of the given name already
     if (parentDefinition.ingest.routing.some((item) => item.destination === childDefinition.name)) {
-      throw new MalformedStreamId(
+      throw new MalformedStreamIdError(
         `The stream with ID (${name}) already exists as a child of the parent stream`
       );
     }
     if (!isChildOf(parentDefinition.name, childDefinition.name)) {
-      throw new MalformedStreamId(
+      throw new MalformedStreamIdError(
         `The ID (${name}) from the new stream must start with the parent's id (${parentDefinition.name}), followed by a dot and a name`
       );
     }
@@ -483,7 +484,7 @@ export class StreamsClient {
       checkAccess({ id: name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
         (privileges) => {
           if (!privileges.read) {
-            throw new DefinitionNotFound(`Stream definition for ${name} not found`);
+            throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
           }
         }
       ),
@@ -500,7 +501,7 @@ export class StreamsClient {
       })
       .catch(async (error) => {
         if (isElasticsearch404(error)) {
-          throw new DefinitionNotFound(`Cannot find stream ${name}`);
+          throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
         }
         throw error;
       });
@@ -711,7 +712,7 @@ export class StreamsClient {
     ]);
 
     if (!access.write) {
-      throw new SecurityException(`Cannot delete stream, insufficient privileges`);
+      throw new SecurityError(`Cannot delete stream, insufficient privileges`);
     }
 
     if (!definition) {
@@ -720,7 +721,7 @@ export class StreamsClient {
 
     const parentId = getParentId(name);
     if (isWiredStreamDefinition(definition) && !parentId) {
-      throw new MalformedStreamId('Cannot delete root stream');
+      throw new MalformedStreamIdError('Cannot delete root stream');
     }
 
     await this.deleteStreamFromDefinition(definition);

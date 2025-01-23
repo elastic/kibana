@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export class DefinitionIdInvalid extends Error {
-  constructor(message: string) {
+export class StatusError extends Error {
+  constructor(message: string, public readonly statusCode: number) {
     super(message);
-    this.name = 'DefinitionIdInvalid';
   }
 }
