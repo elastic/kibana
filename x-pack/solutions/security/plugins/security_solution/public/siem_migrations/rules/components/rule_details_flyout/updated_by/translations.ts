@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class NonAdditiveProcessor extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = 'NonAdditiveProcessor';
+import { i18n } from '@kbn/i18n';
+
+export const LAST_UPDATED_LABEL = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.lastUpdated.label',
+  {
+    defaultMessage: 'Last updated',
   }
-}
+);

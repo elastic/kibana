@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class MalformedStream extends Error {
+import { StatusError } from './status_error';
+
+export class DetectedMappingFailureError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'MalformedStream';
+    super(message, 400);
+    this.name = 'DetectedMappingFailureError';
   }
 }

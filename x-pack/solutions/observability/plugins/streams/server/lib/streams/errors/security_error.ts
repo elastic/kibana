@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class IdConflict extends Error {
+import { StatusError } from './status_error';
+
+export class SecurityError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'IdConflict';
+    super(message, 403);
+    this.name = 'SecurityError';
   }
 }

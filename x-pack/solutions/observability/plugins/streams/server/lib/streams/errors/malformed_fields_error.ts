@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class RootStreamImmutabilityException extends Error {
+import { StatusError } from './status_error';
+
+export class MalformedFieldsError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'RootStreamImmutabilityException';
+    super(message, 400);
+    this.name = 'MalformedFieldsError';
   }
 }

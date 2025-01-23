@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import {
   EuiAccordion,
   EuiBadge,
+  EuiCallOut,
   EuiFlexGroup,
   EuiFlexItem,
   EuiSpacer,
@@ -18,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { RuleTranslationResult } from '../../../../../../../common/siem_migrations/constants';
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 import type { RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TranslationTabHeader } from './header';
@@ -78,7 +80,7 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
         <EuiSpacer size="m" />
         {ruleMigration.translation_result && !isInstalled && (
           <>
-            <TranslationCallOut translationResult={ruleMigration.translation_result} />
+            <TranslationCallOut ruleMigration={ruleMigration} />
             <EuiSpacer size="m" />
           </>
         )}
@@ -131,6 +133,19 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
             </EuiSplitPanel.Outer>
           </EuiFlexItem>
         </EuiAccordion>
+        {ruleMigration.translation_result === RuleTranslationResult.FULL && (
+          <>
+            <EuiSpacer size="m" />
+            <EuiCallOut
+              color={'primary'}
+              title={i18n.CALLOUT_TRANSLATED_RULE_INFO_TITLE}
+              iconType={'iInCircle'}
+              size={'s'}
+            >
+              {i18n.CALLOUT_TRANSLATED_RULE_INFO_DESCRIPTION}
+            </EuiCallOut>
+          </>
+        )}
       </>
     );
   }

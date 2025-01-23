@@ -6,15 +6,17 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
+import { StatusError } from './status_error';
 
-export class SimulationFailed extends Error {
+export class SimulationFailedError extends StatusError {
   constructor(error: errors.ResponseError) {
     super(
       error.body?.error?.reason ||
         error.body?.error?.caused_by?.reason ||
         error.message ||
-        'Unknown error'
+        'Unknown error',
+      error.statusCode ?? 500
     );
-    this.name = 'SimulationFailed';
+    this.name = 'SimulationFailedError';
   }
 }

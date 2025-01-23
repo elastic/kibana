@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class ComponentTemplateNotFound extends Error {
+import { StatusError } from './status_error';
+
+export class MalformedChildrenError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'ComponentTemplateNotFound';
+    super(message, 400);
+    this.name = 'MalformedChildrenError';
   }
 }

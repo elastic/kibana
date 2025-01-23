@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class DefinitionIdInvalid extends Error {
+import { StatusError } from './status_error';
+
+export class NonAdditiveProcessorError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'DefinitionIdInvalid';
+    super(message, 400);
+    this.name = 'NonAdditiveProcessorError';
   }
 }

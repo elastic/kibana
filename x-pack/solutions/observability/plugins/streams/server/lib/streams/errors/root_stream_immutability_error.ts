@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class DetectedMappingFailure extends Error {
+import { StatusError } from './status_error';
+
+export class RootStreamImmutabilityError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'DetectedMappingFailure';
+    super(message, 400);
+    this.name = 'RootStreamImmutabilityError';
   }
 }

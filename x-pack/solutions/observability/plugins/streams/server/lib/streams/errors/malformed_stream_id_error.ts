@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class IndexTemplateNotFound extends Error {
+import { StatusError } from './status_error';
+
+export class MalformedStreamIdError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'IndexTemplateNotFound';
+    super(message, 400);
+    this.name = 'MalformedStreamIdError';
   }
 }
