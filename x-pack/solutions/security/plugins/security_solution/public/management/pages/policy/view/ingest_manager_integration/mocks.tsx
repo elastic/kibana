@@ -96,7 +96,7 @@ export const createFleetContextRendererMock = (): AppContextTestRender => {
 
     startServices.application.capabilities = deepFreeze({
       ...startServices.application.capabilities,
-      siem: { show: true, crud: true },
+      siemV2: { show: true, crud: true },
     });
 
     return (
