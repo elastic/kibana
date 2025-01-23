@@ -74,8 +74,8 @@ export const mockControlGroupApi = {
   query$: new BehaviorSubject(undefined),
   timeslice$: new BehaviorSubject(undefined),
   esqlVariables$: new BehaviorSubject(undefined),
-  dataViews: new BehaviorSubject(undefined),
-  unsavedChanges: new BehaviorSubject(undefined),
+  dataViews$: new BehaviorSubject(undefined),
+  unsavedChanges$: new BehaviorSubject(undefined),
 } as unknown as ControlGroupApi;
 
 export function buildMockDashboardApi({

@@ -16,7 +16,6 @@ import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
 import { PublishesESQLVariables } from '@kbn/esql-variables-types';
 import type {
   HasEditCapabilities,
-  HasInPlaceLibraryTransforms,
   HasLibraryTransforms,
   HasParentApi,
   HasSupportedTriggers,
@@ -28,8 +27,8 @@ import type {
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesRendered,
-  PublishesWritablePanelDescription,
-  PublishesWritablePanelTitle,
+  PublishesWritableDescription,
+  PublishesWritableTitle,
   PublishingSubject,
   SerializedTitles,
   ViewMode,
@@ -393,14 +392,13 @@ export type LensApi = Simplify<
     // Let the container know the used data views
     PublishesDataViews &
     // Let the container operate on panel title/description
-    PublishesWritablePanelTitle &
-    PublishesWritablePanelDescription &
+    PublishesWritableTitle &
+    PublishesWritableDescription &
     // This embeddable can narrow down specific triggers usage
     HasSupportedTriggers &
     PublishesDisabledActionIds &
     // Offers methods to operate from/on the linked saved object
-    HasInPlaceLibraryTransforms &
-    HasLibraryTransforms<LensRuntimeState> &
+    HasLibraryTransforms<LensSerializedState, LensSerializedState> &
     // Let the container know the view mode
     PublishesViewMode &
     // forward the parentApi, note that will be exposed only if it satisfy the PresentationContainer interface

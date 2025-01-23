@@ -7,12 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
 import {
   ControlGroupApi,
   ControlGroupRuntimeState,
   ControlGroupSerializedState,
 } from '@kbn/controls-plugin/public';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
 import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
 import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
 import { Filter, Query, TimeRange } from '@kbn/es-query';
@@ -25,11 +25,11 @@ import {
   HasSerializedChildState,
   PresentationContainer,
   PublishesSettings,
-  SerializedPanelState,
   TrackContentfulRender,
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
+  SerializedPanelState,
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -37,8 +37,8 @@ import {
   HasUniqueId,
   PublishesDataLoading,
   PublishesDataViews,
-  PublishesPanelDescription,
-  PublishesPanelTitle,
+  PublishesDescription,
+  PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
@@ -103,6 +103,12 @@ export interface DashboardState extends DashboardSettings {
   panels: DashboardPanelMap;
 
   /**
+   * Temporary. Currently Dashboards are in charge of providing references to all of their children.
+   * Eventually this will be removed in favour of the Dashboard injecting references serverside.
+   */
+  references?: Reference[];
+
+  /**
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
@@ -126,8 +132,8 @@ export type DashboardApi = CanExpandPanels &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
-  PublishesPanelDescription &
-  Pick<PublishesPanelTitle, 'panelTitle'> &
+  PublishesDescription &
+  Pick<PublishesTitle, 'title$'> &
   PublishesReload &
   PublishesSavedObjectId &
   PublishesESQLVariables &
@@ -147,7 +153,7 @@ export type DashboardApi = CanExpandPanels &
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
       attributes: DashboardAttributes;
-      references: SavedObjectReference[];
+      references: Reference[];
     };
     getDashboardPanelFromId: (id: string) => DashboardPanelState;
     hasOverlays$: PublishingSubject<boolean>;

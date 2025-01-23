@@ -46,7 +46,7 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
         {
           ...defaultControl.api,
           ...selections.api,
-          defaultPanelTitle: new BehaviorSubject<string | undefined>(initialState.title),
+          defaultTitle$: new BehaviorSubject<string | undefined>(initialState.title),
           isEditingEnabled: () => true,
           getTypeDisplayName: () => displayName,
           onEdit: async () => {

@@ -8,7 +8,7 @@
  */
 import { PublishesESQLVariable } from '@kbn/esql-variables-types';
 import type { ESQLControlState as ControlState } from '@kbn/esql/public';
-import type { HasEditCapabilities, PublishesPanelTitle } from '@kbn/presentation-publishing';
+import type { HasEditCapabilities, PublishesTitle } from '@kbn/presentation-publishing';
 import type { DefaultControlState } from '../../../common';
 import type { DefaultControlApi } from '../types';
 
@@ -17,4 +17,4 @@ export interface ESQLControlState extends DefaultControlState, Omit<ControlState
 export type ESQLControlApi = DefaultControlApi &
   PublishesESQLVariable &
   HasEditCapabilities &
-  Pick<PublishesPanelTitle, 'defaultPanelTitle'>;
+  Pick<PublishesTitle, 'defaultTitle$'>;
