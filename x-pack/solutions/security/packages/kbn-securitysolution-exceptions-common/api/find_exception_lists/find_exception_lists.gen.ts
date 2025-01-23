@@ -49,11 +49,11 @@ or available in all spaces (`agnostic` or `single`)
    */
   per_page: z.coerce.number().int().min(1).optional(),
   /**
-   * Determines which field is used to sort the results
+   * Determines which field is used to sort the results.
    */
   sort_field: z.string().optional(),
   /**
-   * Determines the sort order, which can be `desc` or `asc`
+   * Determines the sort order, which can be `desc` or `asc`.
    */
   sort_order: z.enum(['desc', 'asc']).optional(),
 });

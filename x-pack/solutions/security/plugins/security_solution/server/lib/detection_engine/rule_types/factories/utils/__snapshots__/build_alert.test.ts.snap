@@ -218,6 +218,9 @@ Object {
   "kibana.space_ids": Array [
     "default",
   ],
+  "service.asset.criticality": undefined,
+  "service.risk.calculated_level": undefined,
+  "service.risk.calculated_score_norm": undefined,
   "user.asset.criticality": undefined,
   "user.risk.calculated_level": undefined,
   "user.risk.calculated_score_norm": undefined,
@@ -442,6 +445,9 @@ Object {
   "kibana.space_ids": Array [
     "default",
   ],
+  "service.asset.criticality": undefined,
+  "service.risk.calculated_level": undefined,
+  "service.risk.calculated_score_norm": undefined,
   "user.asset.criticality": undefined,
   "user.risk.calculated_level": undefined,
   "user.risk.calculated_score_norm": undefined,

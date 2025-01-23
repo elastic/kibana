@@ -15,7 +15,7 @@ export const TINY_ELSER = {
   id: SUPPORTED_TRAINED_MODELS.TINY_ELSER.name,
 };
 
-export async function createKnowledgeBaseModel(ml: ReturnType<typeof MachineLearningProvider>) {
+export async function importTinyElserModel(ml: ReturnType<typeof MachineLearningProvider>) {
   const config = {
     ...ml.api.getTrainedModelConfig(TINY_ELSER.name),
     input: {

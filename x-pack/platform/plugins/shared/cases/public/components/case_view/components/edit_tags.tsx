@@ -149,7 +149,7 @@ export const EditTags = React.memo(({ isLoading, onSubmit, tags }: EditTagsProps
               <EuiFlexGroup alignItems="center" responsive={false}>
                 <EuiFlexItem grow={false}>
                   <EuiButton
-                    color="success"
+                    color="primary"
                     data-test-subj="edit-tags-submit"
                     fill
                     iconType="save"

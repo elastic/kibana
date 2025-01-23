@@ -45,8 +45,6 @@ If any exception items have the same `item_id`, those are also overwritten.
  
       */
   overwrite: BooleanFromString.optional().default(false),
-  overwrite_exceptions: BooleanFromString.optional().default(false),
-  overwrite_action_connectors: BooleanFromString.optional().default(false),
   /** 
       * Determines whether the list being imported will have a new `list_id` generated.
 Additional `item_id`'s are generated for each exception item. Both the exception

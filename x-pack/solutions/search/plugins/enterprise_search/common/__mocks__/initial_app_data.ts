@@ -27,10 +27,6 @@ export const DEFAULT_INITIAL_APP_DATA = {
       },
     },
   },
-  access: {
-    hasAppSearchAccess: true,
-    hasWorkplaceSearchAccess: true,
-  },
   features: {
     hasConnectors: true,
     hasDefaultIngestPipeline: true,

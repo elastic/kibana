@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { createMockStore } from '../../../common/mock';
+import { createMockStore, kibanaMock } from '../../../common/mock';
 import { selectTimelineById } from '../selectors';
 import { TimelineId } from '../../../../common/types/timeline';
 
@@ -79,10 +79,10 @@ const timelineChangedTypesCopy = [
 const setChangedMock = setChanged as unknown as jest.Mock;
 
 describe('Timeline changed middleware', () => {
-  let store = createMockStore();
+  let store = createMockStore(undefined, undefined, kibanaMock);
 
   beforeEach(() => {
-    store = createMockStore();
+    store = createMockStore(undefined, undefined, kibanaMock);
     setChangedMock.mockClear();
   });
 

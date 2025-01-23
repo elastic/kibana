@@ -9,14 +9,15 @@ import { v4 as uuidv4 } from 'uuid';
 import type { LensAttributes } from '@kbn/lens-embeddable-utils';
 import capitalize from 'lodash/capitalize';
 import { SEVERITY_UI_SORT_ORDER, RISK_SEVERITY_COLOUR, RISK_SCORE_RANGES } from '../common/utils';
+import type { EntityType } from '../../../common/entity_analytics/types';
 import type { RiskSeverity } from '../../../common/search_strategy';
-import { RiskScoreEntity, RiskScoreFields } from '../../../common/search_strategy';
+import { EntityTypeToScoreField, RiskScoreFields } from '../../../common/search_strategy';
 
 interface GetRiskScoreSummaryAttributesProps {
   query?: string;
   spaceId?: string;
   severity?: RiskSeverity;
-  riskEntity: RiskScoreEntity;
+  riskEntity: EntityType;
 }
 
 export const getRiskScoreSummaryAttributes: (
@@ -25,10 +26,7 @@ export const getRiskScoreSummaryAttributes: (
   const layerIds = [uuidv4(), uuidv4()];
   const internalReferenceId = uuidv4();
   const columnIds = [uuidv4(), uuidv4(), uuidv4()];
-  const sourceField =
-    riskEntity === RiskScoreEntity.user
-      ? RiskScoreFields.userRiskScore
-      : RiskScoreFields.hostRiskScore;
+  const sourceField = EntityTypeToScoreField[riskEntity];
 
   return {
     title: 'Risk score summary',
