@@ -47,10 +47,6 @@ const getParameters = async (event: RangeSelectDataContext) => {
     const indexPatternId =
       column.meta.sourceParams.indexPatternId || column.meta.sourceParams.indexPattern;
     const indexPattern = await getIndexPatterns().get(indexPatternId);
-    // if (event.table.meta?.type === 'es_ql') {
-    //   const field = indexPattern.fields.getByName(sourceField);
-    //   return { field, indexPattern };
-    // }
     const aggConfigsInstance = getSearchService().aggs.createAggConfigs(indexPattern, [
       aggConfigs as AggConfigSerialized,
     ]);
