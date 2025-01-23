@@ -49,7 +49,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
-        supported_task_types: ['text_embedding', 'rerank', 'completion'],
+        supported_task_types: ['sparse_embedding'],
       },
       model_id: {
         default_value: null,
@@ -59,7 +59,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
-        supported_task_types: ['text_embedding', 'rerank', 'completion'],
+        supported_task_types: ['sparse_embedding'],
       },
       max_input_tokens: {
         default_value: null,
@@ -69,7 +69,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
-        supported_task_types: ['text_embedding', 'completion'],
+        supported_task_types: ['sparse_embedding'],
       },
     },
   },
@@ -143,7 +143,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
-        supported_task_types: ['text_embedding'],
+        supported_task_types: ['text_embedding', 'completion'],
       },
       provider: {
         default_value: null,
@@ -381,7 +381,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
-        supported_task_types: ['text_embedding', 'sparse_embedding'],
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank'],
       },
       num_threads: {
         default_value: 2,
@@ -594,7 +594,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
-        supported_task_types: ['text_embedding'],
+        supported_task_types: ['text_embedding', 'rerank'],
       },
       project_id: {
         default_value: null,
@@ -653,7 +653,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
-        supported_task_types: ['text_embedding', 'rerank'],
+        supported_task_types: ['text_embedding', 'sparse_embedding', 'rerank', 'completion'],
       },
       api_key: {
         default_value: null,

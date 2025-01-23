@@ -84,7 +84,9 @@ export const mapProviderFields = (
   newProvider: InferenceProvider
 ): ConfigEntryView[] => {
   return Object.keys(newProvider.configurations ?? {})
-    .filter((pk) => (newProvider.configurations[pk].supported_task_types ?? []).includes(taskType))
+    .filter((pk) =>
+      (newProvider.configurations[pk].supported_task_types ?? [taskType]).includes(taskType)
+    )
     .map(
       (k): ConfigEntryView => ({
         key: k,

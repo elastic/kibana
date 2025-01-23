@@ -120,20 +120,39 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
       const newProvider = providers?.find(
         (p) => p.service === (config.provider === '' ? providerSelected : config.provider)
       );
-
       if (newProvider) {
         const newProviderSchema: ConfigEntryView[] = mapProviderFields(taskType, newProvider);
         setProviderSchema(newProviderSchema);
+      }
+
+      // Update config and secrets with the new set of fields + keeps the entered data for a common
+      const newConfig = { ...(config.providerConfig ?? {}) };
+      const newSecrets = { ...(secrets?.providerSecrets ?? {}) };
+      Object.keys(config.providerConfig ?? {}).forEach((k) => {
+        if (!newProvider?.configurations[k].supported_task_types.includes(taskType)) {
+          delete newConfig[k];
+        }
+      });
+      if (secrets && secrets?.providerSecrets) {
+        Object.keys(secrets.providerSecrets).forEach((k) => {
+          if (!newProvider?.configurations[k].supported_task_types.includes(taskType)) {
+            delete newSecrets[k];
+          }
+        });
       }
 
       updateFieldValues({
         config: {
           taskType,
           inferenceId,
+          providerConfig: newConfig,
+        },
+        secrets: {
+          providerSecrets: newSecrets,
         },
       });
     },
-    [config, providers, updateFieldValues]
+    [config, providers, secrets, updateFieldValues]
   );
 
   const onProviderChange = useCallback(
