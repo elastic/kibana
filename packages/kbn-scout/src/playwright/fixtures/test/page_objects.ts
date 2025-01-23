@@ -20,8 +20,8 @@ import { createCorePageObjects } from '../../page_objects';
  * Note: Page Objects are lazily instantiated on first access.
  */
 export const pageObjectsFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async ({ page }, use) => {
-    const corePageObjects = createCorePageObjects(page);
+  pageObjects: async ({ page, log }, use) => {
+    const corePageObjects = createCorePageObjects(page, log);
 
     await use(corePageObjects);
   },
