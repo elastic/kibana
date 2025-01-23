@@ -12,6 +12,7 @@ import React, { useCallback, useEffect, useState, useMemo } from 'react';
 import { useSelector } from 'react-redux';
 import { createHtmlPortalNode, InPortal, OutPortal } from 'react-reverse-portal';
 import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 import type { Filter, Query } from '@kbn/es-query';
 import { isEqual } from 'lodash/fp';
 import type { MapApi, RenderTooltipContentParams } from '@kbn/maps-plugin/public';
@@ -37,30 +38,32 @@ interface EmbeddableMapProps {
   maintainRatio?: boolean;
 }
 
-const EmbeddableMapRatioHolder = styled('div', {
-  shouldForwardProp: (prop) => prop !== 'maintainRatio',
-})<EmbeddableMapProps>(({ maintainRatio, theme: { euiTheme } }) => ({
-  '& .mapToolbarOverlay__button': {
-    display: 'none',
-  },
-  ...(maintainRatio && {
-    paddingTop: 'calc(3 / 4 * 100%)',
-    position: 'relative',
-    [`@media only screen and (min-width: ${euiTheme.breakpoint.m})`]: {
-      paddingTop: 'calc(9 / 32 * 100%)',
-    },
-    '@media only screen and (min-width: 1441px) and (min-height: 901px)': {
-      paddingTop: 'calc(9 / 21 * 100%)',
-    },
-    '& .embPanel': {
-      bottom: 0,
-      left: 0,
-      position: 'absolute',
-      right: 0,
-      top: 0,
-    },
-  }),
-}));
+const EmbeddableMapRatioHolder = styled.div<EmbeddableMapProps>`
+  .mapToolbarOverlay__button {
+    display: none;
+  }
+  ${({ maintainRatio, theme: { euiTheme } }) =>
+    maintainRatio &&
+    css`
+      padding-top: calc(3 / 4 * 100%); /* 4:3 (standard) ratio */
+      position: relative;
+
+      @media only screen and (min-width: ${euiTheme.breakpoint.m}) {
+        padding-top: calc(9 / 32 * 100%); /* 32:9 (ultra widescreen) ratio */
+      }
+      @media only screen and (min-width: 1441px) and (min-height: 901px) {
+        padding-top: calc(9 / 21 * 100%); /* 21:9 (ultrawide) ratio */
+      }
+
+      .embPanel {
+        bottom: 0;
+        left: 0;
+        position: absolute;
+        right: 0;
+        top: 0;
+      }
+    `}
+`;
 
 const StyledEuiText = styled(EuiText)`
   margin-right: 16px;
