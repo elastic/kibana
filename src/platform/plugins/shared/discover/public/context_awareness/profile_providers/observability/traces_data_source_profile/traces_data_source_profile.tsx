@@ -30,10 +30,7 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
           width: 212,
         },
         {
-          name: 'span.name',
-        },
-        {
-          name: 'service.name',
+          name: '_source',
         },
       ],
       rowHeight: 5,
