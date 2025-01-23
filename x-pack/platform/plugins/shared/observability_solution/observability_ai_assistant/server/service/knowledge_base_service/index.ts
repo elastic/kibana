@@ -152,7 +152,7 @@ export class KnowledgeBaseService {
         return {
           id: doc.url,
           text: doc.content,
-          score: 1,
+          score: doc.score,
           labels: {},
         };
       });
@@ -209,14 +209,23 @@ export class KnowledgeBaseService {
         this.dependencies.logger.debug(error);
         return [];
       }),
-      this.recallFromProductDocumentation({ queries }),
+      this.recallFromProductDocumentation({ queries }).catch((error) => {
+        this.dependencies.logger.debug('Error getting data from product documentation');
+        this.dependencies.logger.debug(error);
+        return [];
+      }),
     ]);
 
     this.dependencies.logger.debug(
-      `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
+      () => `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
     );
     this.dependencies.logger.debug(
-      `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
+      () =>
+        `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
+    );
+    this.dependencies.logger.debug(
+      () =>
+        `documentsFromProductDoc: ${JSON.stringify(documentsFromProductDoc.slice(0, 5), null, 2)}`
     );
 
     const sortedEntries = orderBy(
@@ -227,10 +236,8 @@ export class KnowledgeBaseService {
 
     const maxTokens = limit.tokens ?? 4_000;
 
-    let tokenCount = 0;
-
     const returnedEntries: RecalledEntry[] = [];
-
+    let tokenCount = 0;
     for (const entry of sortedEntries) {
       returnedEntries.push(entry);
       tokenCount += encode(entry.text).length;

@@ -17,5 +17,6 @@ export const mapResult = (docHit: SearchHit<ProductDocumentationAttributes>): Do
     url: docHit._source!.url,
     productName: docHit._source!.product_name,
     highlights: docHit.highlight?.content_body ?? [],
+    score: docHit._score ?? 0,
   };
 };

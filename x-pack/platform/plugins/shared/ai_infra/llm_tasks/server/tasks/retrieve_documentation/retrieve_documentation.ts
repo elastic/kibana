@@ -88,6 +88,7 @@ export const retrieveDocumentation =
             url: document.url,
             content,
             summarized: docHasTooManyTokens,
+            score: document.score,
           };
         })
       );
