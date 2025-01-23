@@ -75,6 +75,10 @@ describe('Rules', () => {
           // has loaded.
           cy.contains('for the last');
           cy.contains('Actions');
+          cy.contains('Next').should('not.be.disabled');
+
+          // Navigate to Rule Details step
+          cy.getByTestSubj('ruleFormStep-details').click();
           cy.contains('Save').should('not.be.disabled');
 
           // Save, with no actions

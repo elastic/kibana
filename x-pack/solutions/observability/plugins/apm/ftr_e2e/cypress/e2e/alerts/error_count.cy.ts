@@ -73,7 +73,7 @@ describe('Alerts', () => {
       // has loaded.
       cy.contains('for the last');
       cy.contains('Actions');
-      cy.contains('Save').should('not.be.disabled');
+      cy.contains('Next').should('not.be.disabled');
 
       // Update "Is above" to "0"
       cy.contains('is above').click();
@@ -82,6 +82,7 @@ describe('Alerts', () => {
 
       // Navigate to Rule Details step
       cy.getByTestSubj('ruleFormStep-details').click();
+      cy.contains('Save').should('not.be.disabled');
 
       // Save, with no actions
       cy.contains('Save').click();
