@@ -8,5 +8,4 @@
 export const VISIBLE_CHROME = 'kbnAppWrapper visibleChrome';
 export const HIDDEN_CHROME = 'kbnAppWrapper hiddenChrome';
 export const FULL_SCREEN_MODE = 'mapsFullScreenMode';
-export const ADD_LAYER_BTN = 'addLayerButton';
 export const EXIT_FULL_SCREEN = 'exitFullScreenModeButton';
