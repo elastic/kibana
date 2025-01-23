@@ -12,7 +12,7 @@ export const DEFAULT_INITIAL_APP_DATA = {
     hasDefaultIngestPipeline: true,
     hasDocumentLevelSecurityEnabled: true,
     hasIncrementalSyncEnabled: true,
-    hasNativeConnectors: false,
+    hasNativeConnectors: true,
     hasWebCrawler: false,
   },
 };
