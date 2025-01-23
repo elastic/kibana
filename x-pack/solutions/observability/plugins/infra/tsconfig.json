@@ -117,7 +117,9 @@
     "@kbn/config",
     "@kbn/observability-utils-common",
     "@kbn/charts-theme",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/core-deprecations-common",
+    "@kbn/core-deprecations-server"
   ],
   "exclude": ["target/**/*"]
 }
