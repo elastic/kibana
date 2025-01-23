@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
+import { useUrlState } from '@kbn/ml-url-state';
+import moment from 'moment';
 import { JobDetailsFlyout } from './job_details_flyout';
 import { DatafeedChartFlyout } from '../../jobs_list/components/datafeed_chart_flyout';
 import { JobInfoFlyoutsContext } from './job_details_flyout_context';
@@ -13,8 +15,11 @@ import { JobInfoFlyoutsContext } from './job_details_flyout_context';
 export const JobInfoFlyoutsManager = () => {
   const { isDatafeedChartFlyoutOpen, activeJobId, closeActiveFlyout } =
     useContext(JobInfoFlyoutsContext);
-  // @TODO: retrieve from hashmap?
-  const job = {};
+  const [globalState] = useUrlState('_g');
+  const end = useMemo(
+    () => moment(globalState?.time?.to).unix() * 1000 ?? 0,
+    [globalState?.time?.to]
+  );
 
   return (
     <>
@@ -25,7 +30,7 @@ export const JobInfoFlyoutsManager = () => {
             closeActiveFlyout();
           }}
           jobId={activeJobId}
-          end={job?.data_counts?.latest_bucket_timestamp}
+          end={end}
         />
       ) : null}
     </>

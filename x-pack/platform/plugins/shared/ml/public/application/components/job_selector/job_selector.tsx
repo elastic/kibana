@@ -13,7 +13,6 @@ import {
   EuiFlexGroup,
   EuiFlyout,
   EuiHorizontalRule,
-  useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -104,7 +103,6 @@ export function JobSelector({
   selectedGroups = [],
   onSelectionChange,
 }: JobSelectorProps) {
-  const { euiTheme } = useEuiTheme();
   const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
     ML_APPLY_TIME_RANGE_CONFIG,
     true

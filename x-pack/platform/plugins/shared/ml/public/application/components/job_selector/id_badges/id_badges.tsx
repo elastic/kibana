@@ -20,7 +20,7 @@ export interface IdBadgesProps {
   onLinkClick: () => void;
   showAllBarBadges: boolean;
   page: MlPages;
-  setSelectedIds: (ids: string[]) => void;
+  onRemoveJobId: (jobId: string) => void;
 }
 
 export function IdBadges({
