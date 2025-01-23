@@ -58,10 +58,12 @@ describe('Mobile Service overview page', () => {
       it('shows the most used charts', () => {
         cy.wait(aliasNames, { timeout: 60000 });
 
-        cy.getByTestSubj('mostUsedChart-device').should('exist');
-        cy.getByTestSubj('mostUsedChart-netConnectionType').should('exist');
-        cy.getByTestSubj('mostUsedChart-osVersion').should('exist');
-        cy.getByTestSubj('mostUsedChart-appVersion').should('exist');
+        cy.get('[data-test-subj="mostUsedChart-device"]', { timeout: 60000 }).should('exist');
+        cy.get('[data-test-subj="mostUsedChart-netConnectionType"]', { timeout: 60000 }).should(
+          'exist'
+        );
+        cy.get('[data-test-subj="mostUsedChart-osVersion"]', { timeout: 60000 }).should('exist');
+        cy.get('[data-test-subj="mostUsedChart-appVersion"]', { timeout: 60000 }).should('exist');
       });
 
       it('shows No results found, when no data is present', () => {
