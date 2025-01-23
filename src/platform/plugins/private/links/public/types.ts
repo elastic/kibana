@@ -11,8 +11,8 @@ import {
   HasEditCapabilities,
   HasLibraryTransforms,
   HasType,
-  PublishesPanelDescription,
-  PublishesPanelTitle,
+  PublishesDescription,
+  PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   SerializedTitles,
@@ -31,8 +31,8 @@ export type LinksParentApi = PresentationContainer &
   HasType<typeof DASHBOARD_API_TYPE> &
   HasSerializedChildState<LinksSerializedState> &
   PublishesSavedObjectId &
-  PublishesPanelTitle &
-  PublishesPanelDescription &
+  PublishesTitle &
+  PublishesDescription &
   PublishesUnifiedSearch & {
     locator?: Pick<LocatorPublic<DashboardLocatorParams>, 'navigate' | 'getRedirectUrl'>;
   };
