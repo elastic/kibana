@@ -17,11 +17,11 @@ interface GenerateReroutePipelineParams {
 export function generateReroutePipeline({ definition }: GenerateReroutePipelineParams) {
   return {
     id: getReroutePipelineName(definition.name),
-    processors: definition.stream.ingest.routing.map((child) => {
+    processors: definition.ingest.routing.map((child) => {
       return {
         reroute: {
-          destination: child.name,
-          if: conditionToPainless(child.condition),
+          destination: child.destination,
+          if: conditionToPainless(child.if),
         },
       };
     }),
