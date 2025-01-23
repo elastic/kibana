@@ -21,6 +21,7 @@ import {
   findCases,
 } from '../../../../common/lib/api';
 import { superUser } from '../../../../common/lib/authentication/users';
+import { findAttachments } from '../../../../common/lib/api/attachments';
 
 // eslint-disable-next-line import/no-default-export
 export default function createGetTests({ getService }: FtrProviderContext) {
@@ -98,7 +99,6 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           category: null,
           closed_at: null,
           closed_by: null,
-          comments: [],
           connector: {
             fields: null,
             id: 'connector-1',
@@ -388,14 +388,13 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           });
 
           it('should preserve the comment', async () => {
-            const { case: theCase } = await resolveCase({
+            const { comments } = await findAttachments({
               supertest,
               caseId: 'a97a13b0-22f3-11ec-9f3b-fbc97859d7ed',
               auth,
-              includeComments: true,
             });
 
-            const comment = theCase.comments![0] as UserCommentAttachmentAttributes;
+            const comment = comments![0] as UserCommentAttachmentAttributes;
             expect(comment.comment).to.be('a comment');
             expect(comment.owner).to.be(SECURITY_SOLUTION_OWNER);
           });
