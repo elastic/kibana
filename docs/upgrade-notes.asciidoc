@@ -49,6 +49,42 @@ For Elastic Security solution release information, refer to {security-guide}/rel
 === Breaking changes
 
 [discrete]
+[[breaking-207091]]
+.Removed legacy security rules bulk endpoints (9.0.0)
+[%collapsible]
+====
+*Details* +
+--
+* `POST /api/detection_engine/rules/_bulk_create` has been replaced by `POST /api/detection_engine/rules/_import`
+* `PUT /api/detection_engine/rules/_bulk_update` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
+* `PATCH /api/detection_engine/rules/_bulk_update has been replaced by `POST /api/detection_engine/rules/_bulk_action`
+* `DELETE /api/detection_engine/rules/_bulk_delete` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
+* `POST api/detection_engine/rules/_bulk_delete` has been replaced by `POST /api/detection_engine/rules/_bulk_action`
+--
+These changes were introduced in {kibana-pull}197422[#197422].
+
+*Impact* +
+Deprecated endpoints will fail with a 404 status code starting from version 9.0.0
+
+*Action* +
+--
+Update your implementations to use the new endpoints:
+
+* **For bulk creation of rules:**
+   - Use `POST /api/detection_engine/rules/_import` (link:{api-kibana}/operation/operation-importrules[API documentation]) to create multiple rules along with their associated entities (for example, exceptions and action connectors).
+   - Alternatively, create rules individually using `POST /api/detection_engine/rules` (link:{api-kibana}/operation/operation-createrule[API documentation]).
+
+* **For bulk updates of rules:**
+   - Use `POST /api/detection_engine/rules/_bulk_action` (link:{api-kibana}/operation/operation-performrulesbulkaction[API documentation]) to update fields in multiple rules simultaneously.
+   - Alternatively, update rules individually using `PUT /api/detection_engine/rules` (link:{api-kibana}/operation/operation-updaterule[API documentation]).
+
+* **For bulk deletion of rules:**
+   - Use `POST /api/detection_engine/rules/_bulk_action` (link:{api-kibana}/operation/operation-performrulesbulkaction[API documentation]) to delete multiple rules by IDs or query.
+   - Alternatively, delete rules individually using `DELETE /api/detection_engine/rules` (link:{api-kibana}/operation/operation-deleterule[API documentation]).
+--
+====
+
+[discrete]
 [[breaking-199598]]
 .Remove deprecated endpoint management endpoints (9.0.0)
 [%collapsible]
@@ -211,6 +247,28 @@ Upgrade to use the Risk Engine in all spaces which use the legacy risk scoring m
 
 - In the main menu, go to *Security > Manage > Entity Risk Score*.
 - If the original user and host risk score modules are enabled, you'll see a button to "Start update". Click the button, and follow the instructions.
+====
+
+[discrete]
+[[breaking-200834]]
+.Reporting uses Kibana feature privileges only to control access to reporting features
+[%collapsible]
+====
+*Details* +
+--
+In 8.x, the default access control model was based on a built-in role called `reporting_user`, which granted access to reporting features. Since 7.13, the preferred model for controlling access to reporting features has been Kibana feature privileges, enabled by setting `xpack.reporting.roles.enabled: false` in `kibana.yml`.
+
+In 9.0.0, the `xpack.reporting.roles.*` settings will be ignored.
+--
+
+*Impact* +
+The built-in `reporting_user` role is no longer deprecated and provides access to reporting features using Kibana feature privileges. This means that users that do not have privileges to use reporting will not see reporting features in the Kibana UI.
+
+*Action* +
+Use Kibana feature privileges to control access to reporting features. For more information, see {kibana-pull}200834[#200834].
+
+- The `reporting_user` role is still supported, but gives full access to all reporting features. We recommend creating custom roles with minimal privileges in **Stack Management > Roles**.
+- The `xpack.reporting.roles.allow` setting is no longer supported. If you have a `xpack.reporting.roles.allow` value in your `kibana.yml`, you should remove this setting and assign privileges to reporting features using Kibana feature privileges.
 ====
 
 [discrete]
