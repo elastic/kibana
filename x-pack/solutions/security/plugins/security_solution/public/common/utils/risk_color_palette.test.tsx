@@ -13,27 +13,24 @@ jest.mock('@elastic/eui', () => ({
   useEuiTheme: jest.fn(),
 }));
 
+const EXPECTED_SEVERITY_COLOR = {
+  low: '#54B399',
+  medium: '#D6BF57',
+  high: '#DA8B45',
+  critical: '#E7664C',
+} as const;
+
 describe('risk_color_palette', () => {
   const scenarios = [
     {
       mockEuiTheme: getMockEuiAmsterdamTheme(),
       themeName: 'Amsterdam',
-      expected: {
-        low: 'euiColorVis0',
-        medium: 'euiColorVis5',
-        high: 'euiColorVis7',
-        critical: 'euiColorVis9',
-      },
+      expected: EXPECTED_SEVERITY_COLOR,
     },
     {
       mockEuiTheme: getMockEuiBorealisTheme(),
       themeName: 'Borealis',
-      expected: {
-        low: 'euiColorVisSuccess0',
-        medium: 'euiColorSeverity7',
-        high: 'euiColorSeverity10',
-        critical: 'euiColorSeverity14',
-      },
+      expected: EXPECTED_SEVERITY_COLOR,
     },
   ];
 

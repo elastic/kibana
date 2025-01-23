@@ -10,6 +10,7 @@ import { useEuiTheme } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useMemo } from 'react';
 
+// Temporary solution until we have a decision for color palette
 export const SEVERITY_COLOR = {
   low: '#54B399',
   medium: '#D6BF57',
