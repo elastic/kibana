@@ -501,7 +501,7 @@ export class LensVisService {
         fieldName: '',
         textBasedColumns: [
           {
-            id: `${dataView.timeFieldName} every ${interval}`,
+            id: `timestamp`,
             name: `${dataView.timeFieldName} every ${interval}`,
             meta: {
               type: 'date',
@@ -598,7 +598,7 @@ export class LensVisService {
 
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown}${sortBy} | rename timestamp as \`${dataView.timeFieldName} every ${queryInterval}\``
+      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown}${sortBy}`
     );
   };
 
