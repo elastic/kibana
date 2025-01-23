@@ -34,6 +34,7 @@
     "@kbn/react-kibana-mount",
     "@kbn/core-test-helpers-kbn-server",
     "@kbn/i18n-react",
+    "@kbn/visualization-utils",
   ],
   "exclude": [
     "target/**/*",
