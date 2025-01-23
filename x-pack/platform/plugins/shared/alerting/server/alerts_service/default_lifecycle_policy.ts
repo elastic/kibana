@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IlmPolicy } from '@elastic/elasticsearch/lib/api/types';
+import { IlmPolicy } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 /**
  * Default alert index ILM policy
