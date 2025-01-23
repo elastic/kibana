@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-deploy-project-from-pr
-  description: 'Builds and deploys a Kibana serverless project from a PR'
+  name: bk-kibana-deploy-cloud-from-pr
+  description: 'Builds Kibana and initiates a Kibana cloud deployment from a PR'
   links:
-    - url: 'https://buildkite.com/elastic/kibana-deploy-project-from-pr'
+    - url: 'https://buildkite.com/elastic/kibana-deploy-cloud-from-pr'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,8 +15,8 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / deploy project from PR
-      description: 'Builds and deploys a Kibana serverless project from a PR'
+      name: kibana / deploy cloud from PR
+      description: 'Builds Kibana and initiates a Kibana cloud deployment from a PR'
     spec:
       env:
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
@@ -25,7 +25,7 @@ spec:
       branch_configuration: main
       default_branch: main
       repository: elastic/kibana
-      pipeline_file: .buildkite/pipelines/serverless_deployment/build_pr_and_deploy_project.yml
+      pipeline_file: .buildkite/pipelines/build_pr_and_deploy_cloud.yml
       provider_settings:
         build_pull_requests: true
         prefix_pull_request_fork_branch_names: false
