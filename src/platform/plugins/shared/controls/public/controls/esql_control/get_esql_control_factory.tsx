@@ -57,14 +57,19 @@ export const getESQLControlFactory = (): ControlFactory<ESQLControlState, ESQLCo
             const variablesInParent = apiPublishesESQLVariables(api.parentApi)
               ? api.parentApi.esqlVariables$.value
               : [];
-            await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
-              queryString: initialState.esqlQuery,
-              variableType: initialState.variableType,
-              controlType: initialState.controlType,
-              esqlVariables: variablesInParent,
-              onSaveControl,
-              initialState: state,
-            });
+            try {
+              await uiActionsService.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+                queryString: initialState.esqlQuery,
+                variableType: initialState.variableType,
+                controlType: initialState.controlType,
+                esqlVariables: variablesInParent,
+                onSaveControl,
+                initialState: state,
+              });
+            } catch (e) {
+              // eslint-disable-next-line no-console
+              console.error('Error getting ESQL control trigger', e);
+            }
           },
           serializeState: () => {
             const { rawState: defaultControlState } = defaultControl.serialize();
