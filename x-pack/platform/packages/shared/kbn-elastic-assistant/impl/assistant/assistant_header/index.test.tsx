@@ -18,7 +18,6 @@ import {
   CLOSE,
   SHOW_ANONYMIZED,
   SHOW_REAL_VALUES,
-  THIS_CONVERSATION_DOES_NOT_INCLUDE_ANONYMIZED_FIELDS,
 } from './translations';
 
 const onConversationSelected = jest.fn();
@@ -105,94 +104,5 @@ describe('AssistantHeader', () => {
     });
 
     expect(screen.getByRole('button', { name: CLOSE })).toBeInTheDocument();
-  });
-
-  it('disables the anonymization toggle button when there are NO replacements', () => {
-    render(
-      <AssistantHeader
-        {...testProps}
-        selectedConversation={{ ...emptyWelcomeConvo, replacements: {} }} // <-- no replacements
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    expect(screen.getByTestId('showAnonymizedValues')).toBeDisabled();
-  });
-
-  it('displays the expected anonymization toggle button tooltip when there are NO replacements', async () => {
-    render(
-      <AssistantHeader
-        {...testProps}
-        selectedConversation={{ ...emptyWelcomeConvo, replacements: {} }} // <-- no replacements
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    await userEvent.hover(screen.getByTestId('showAnonymizedValues'), {
-      pointerEventsCheck: PointerEventsCheckLevel.Never,
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('showAnonymizedValuesTooltip')).toHaveTextContent(
-        THIS_CONVERSATION_DOES_NOT_INCLUDE_ANONYMIZED_FIELDS
-      );
-    });
-  });
-
-  it('enables the anonymization toggle button when there are replacements', () => {
-    render(
-      <AssistantHeader {...testProps} selectedConversation={alertConvo} />, // <-- conversation with replacements
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    expect(screen.getByTestId('showAnonymizedValues')).toBeEnabled();
-  });
-
-  it('displays the SHOW_ANONYMIZED toggle button tooltip when there are replacements and showAnonymizedValues is false', async () => {
-    render(
-      <AssistantHeader
-        {...testProps}
-        selectedConversation={alertConvo} // <-- conversation with replacements
-        showAnonymizedValues={false} // <-- false
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    await userEvent.hover(screen.getByTestId('showAnonymizedValues'), {
-      pointerEventsCheck: PointerEventsCheckLevel.Never,
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('showAnonymizedValuesTooltip')).toHaveTextContent(SHOW_ANONYMIZED);
-    });
-  });
-
-  it('displays the SHOW_REAL_VALUES toggle button tooltip when there are replacements and showAnonymizedValues is true', async () => {
-    render(
-      <AssistantHeader
-        {...testProps}
-        selectedConversation={alertConvo} // <-- conversation with replacements
-        showAnonymizedValues={true} // <-- true
-      />,
-      {
-        wrapper: TestProviders,
-      }
-    );
-
-    await userEvent.hover(screen.getByTestId('showAnonymizedValues'), {
-      pointerEventsCheck: PointerEventsCheckLevel.Never,
-    });
-
-    await waitFor(() => {
-      expect(screen.getByTestId('showAnonymizedValuesTooltip')).toHaveTextContent(SHOW_REAL_VALUES);
-    });
   });
 });

@@ -24,8 +24,8 @@ import { ConnectorSelectorInline } from '../../connectorland/connector_selector_
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
 import { AIConnector } from '../../connectorland/connector_selector';
-import { getAnonymizationTooltip } from './get_anonymization_tooltip';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
+import * as i18n from './translations';
 
 interface OwnProps {
   selectedConversation: Conversation | undefined;
@@ -90,12 +90,6 @@ export const AssistantHeader: React.FC<Props> = ({
     },
     [onConversationSelected]
   );
-
-  const conversationHasReplacements = !isEmpty(selectedConversation?.replacements);
-  const anonymizationTooltip = getAnonymizationTooltip({
-    conversationHasReplacements,
-    showAnonymizedValuesChecked,
-  });
 
   return (
     <>
