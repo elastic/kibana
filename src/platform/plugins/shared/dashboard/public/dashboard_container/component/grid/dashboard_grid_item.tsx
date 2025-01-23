@@ -15,7 +15,7 @@ import { css } from '@emotion/react';
 import { ReactEmbeddableRenderer } from '@kbn/embeddable-plugin/public';
 
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
-import { DASHBOARD_MARGIN_SIZE } from '../../../dashboard_constants';
+import { DASHBOARD_MARGIN_SIZE } from './constants';
 import { useDashboardInternalApi } from '../../../dashboard_api/use_dashboard_internal_api';
 import { DashboardPanelState } from '../../../../common';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
@@ -62,10 +62,10 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
     ] = useBatchedPublishingSubjects(
       dashboardApi.highlightPanelId$,
       dashboardApi.scrollToPanelId$,
-      dashboardApi.expandedPanelId,
+      dashboardApi.expandedPanelId$,
       dashboardApi.focusedPanelId$,
       dashboardApi.settings.useMargins$,
-      dashboardApi.viewMode
+      dashboardApi.viewMode$
     );
 
     const expandPanel = expandedPanelId !== undefined && expandedPanelId === id;
@@ -200,7 +200,7 @@ export const DashboardGridItem = React.forwardRef<HTMLDivElement, Props>((props,
   const dashboardApi = useDashboardApi();
   const [focusedPanelId, viewMode] = useBatchedPublishingSubjects(
     dashboardApi.focusedPanelId$,
-    dashboardApi.viewMode
+    dashboardApi.viewMode$
   );
 
   const deferBelowFoldEnabled = useMemo(

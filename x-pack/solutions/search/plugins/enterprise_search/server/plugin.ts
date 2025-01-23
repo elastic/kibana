@@ -45,6 +45,8 @@ import {
   AI_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
   SEARCH_PRODUCT_NAME,
+  SEARCH_INDICES,
+  SEARCH_INDICES_START,
 } from '../common/constants';
 
 import {
@@ -163,11 +165,17 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       VECTOR_SEARCH_PLUGIN.ID,
       SEMANTIC_SEARCH_PLUGIN.ID,
       AI_SEARCH_PLUGIN.ID,
+      SEARCH_INDICES,
+      SEARCH_INDICES_START,
     ];
     const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(config, customIntegrations);
+      registerEnterpriseSearchIntegrations(
+        config,
+        customIntegrations,
+        http.staticAssets.getPluginAssetHref('images/crawler.svg')
+      );
     }
 
     /*
@@ -365,12 +373,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(
-          config,
-          searchConnectors?.getConnectorTypes() || [],
-          isCloud,
-          http.staticAssets.getPluginAssetHref('images/crawler.svg')
-        )
+        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [], isCloud)
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
