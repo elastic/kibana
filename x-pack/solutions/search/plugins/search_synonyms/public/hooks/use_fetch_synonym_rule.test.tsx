@@ -6,11 +6,10 @@
  */
 
 import { renderHook, waitFor } from '@testing-library/react';
-
 const mockHttpGet = jest.fn();
 
 jest.mock('@tanstack/react-query', () => ({
-  useQuery: jest.fn().mockImplementation(async ({ queryKey, queryFn, opts }) => {
+  useQuery: jest.fn().mockImplementation(async ({ queryFn, opts }) => {
     try {
       const res = await queryFn();
       return Promise.resolve(res);
@@ -35,30 +34,21 @@ jest.mock('./use_kibana', () => ({
   }),
 }));
 
-describe('useFetchSynonymsSet Hook', () => {
+describe('useFetchSynonymRule Hook', () => {
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
-  it('should return synonyms set', async () => {
-    const synonyms = {
-      _meta: {
-        pageIndex: 0,
-        pageSize: 10,
-        totalItemCount: 2,
-      },
-      id: 'my_synonyms_set',
-      synonyms: [
-        {
-          id: '1',
-          synonyms: 'foo, bar',
-        },
-      ],
+  it('should return synonym rule', async () => {
+    const synonymRule = {
+      id: '1',
+      synonyms: 'synoym1, synonym2',
     };
-    mockHttpGet.mockReturnValue(synonyms);
-    const { useFetchSynonymsSets } = jest.requireActual('./use_fetch_synonyms_sets');
 
-    const { result } = renderHook(() => useFetchSynonymsSets());
-    await waitFor(() => expect(result.current).resolves.toStrictEqual(synonyms));
+    mockHttpGet.mockReturnValue(synonymRule);
+    const { useFetchSynonymRule } = jest.requireActual('./use_fetch_synonym_rule');
+
+    const { result } = renderHook(() => useFetchSynonymRule('my_synonyms_set', '1'));
+    await waitFor(() => expect(result.current).resolves.toStrictEqual(synonymRule));
   });
 });

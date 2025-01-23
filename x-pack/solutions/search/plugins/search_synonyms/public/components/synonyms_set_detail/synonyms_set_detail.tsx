@@ -21,6 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchSynonymsSet } from '../../hooks/use_fetch_synonyms_set';
 import { getExplicitSynonym, isExplicitSynonym } from '../../utils/synonyms_utils';
+import { DeleteSynonymRuleModal } from './delete_synonym_rule_modal';
 
 export const SynonymsSetDetail = () => {
   const { synonymsSetId = '' } = useParams<{
@@ -30,7 +31,7 @@ export const SynonymsSetDetail = () => {
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_VALUE.size);
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
-
+  const [synonymRuleToDelete, setSynonymRuleToDelete] = React.useState<string | null>(null);
   const { data, isLoading } = useFetchSynonymsSet(synonymsSetId, { from, size: pageSize });
 
   if (!data) return null;
@@ -103,7 +104,11 @@ export const SynonymsSetDetail = () => {
           icon: 'trash',
           color: 'danger',
           type: 'icon',
-          onClick: () => {},
+          onClick: (synonymRule: SynonymsSynonymRule) => {
+            if (synonymRule.id) {
+              setSynonymRuleToDelete(synonymRule.id);
+            }
+          },
         },
         {
           name: i18n.translate('xpack.searchSynonyms.synonymsSetTable.actions.edit', {
@@ -124,16 +129,25 @@ export const SynonymsSetDetail = () => {
   ];
 
   return (
-    <EuiBasicTable
-      data-test-subj="synonyms-set-table"
-      items={data.data}
-      columns={columns}
-      loading={isLoading}
-      pagination={pagination}
-      onChange={({ page }) => {
-        setPageIndex(page.index);
-        setPageSize(page.size);
-      }}
-    />
+    <>
+      {synonymRuleToDelete && (
+        <DeleteSynonymRuleModal
+          synonymsSetId={synonymsSetId}
+          ruleId={synonymRuleToDelete}
+          closeDeleteModal={() => setSynonymRuleToDelete(null)}
+        />
+      )}
+      <EuiBasicTable
+        data-test-subj="synonyms-set-table"
+        items={data.data}
+        columns={columns}
+        loading={isLoading}
+        pagination={pagination}
+        onChange={({ page }) => {
+          setPageIndex(page.index);
+          setPageSize(page.size);
+        }}
+      />
+    </>
   );
 };
