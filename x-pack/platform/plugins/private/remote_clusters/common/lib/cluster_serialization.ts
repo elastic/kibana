@@ -48,7 +48,7 @@ export interface Cluster {
   initialConnectTimeout?: string | number;
   connectedSocketsCount?: number;
   hasDeprecatedProxySetting?: boolean;
-  securityModel: SECURITY_MODEL.CERTIFICATE | SECURITY_MODEL.API;
+  securityModel: 'certificate' | 'api_key';
 }
 
 export type ClusterPayload = Omit<Cluster, 'securityModel'>;

@@ -7,7 +7,6 @@
 
 import expect from '@kbn/expect';
 import { API_BASE_PATH } from './constants';
-import { SECURITY_MODEL } from '@kbn/remote-clusters-plugin/common/constants';
 
 export default function ({ getService }) {
   const supertest = getService('supertest');
@@ -93,7 +92,7 @@ export default function ({ getService }) {
           seeds: [NODE_SEED],
           isConfiguredByNode: false,
           mode: 'sniff',
-          securityModel: SECURITY_MODEL.CERTIFICATE,
+          securityModel: 'certificate',
         });
       });
     });
@@ -117,7 +116,7 @@ export default function ({ getService }) {
               skipUnavailable: false,
               isConfiguredByNode: false,
               mode: 'sniff',
-              securityModel: SECURITY_MODEL.CERTIFICATE,
+              securityModel: 'certificate',
             },
           ]);
         });
