@@ -86,10 +86,10 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
   ];
 
   switch (field) {
-    case FINDINGS_GROUPING_OPTIONS.RESOURCE_NAME:
+    case FINDINGS_GROUPING_OPTIONS.RESOURCE_ID:
       return [
         ...aggMetrics,
-        getTermAggregation('resourceName', 'resource.id'),
+        getTermAggregation('resourceName', 'resource.name'),
         getTermAggregation('resourceSubType', 'resource.sub_type'),
       ];
     case FINDINGS_GROUPING_OPTIONS.RULE_NAME:
@@ -98,17 +98,19 @@ const getAggregationsByGroupField = (field: string): NamedAggregation[] => {
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkVersion', 'rule.benchmark.version'),
       ];
-    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_NAME:
+    case FINDINGS_GROUPING_OPTIONS.CLOUD_ACCOUNT_ID:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkId', 'rule.benchmark.id'),
+        getTermAggregation('accountName', 'cloud.account.name'),
       ];
-    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_NAME:
+    case FINDINGS_GROUPING_OPTIONS.ORCHESTRATOR_CLUSTER_ID:
       return [
         ...aggMetrics,
         getTermAggregation('benchmarkName', 'rule.benchmark.name'),
         getTermAggregation('benchmarkId', 'rule.benchmark.id'),
+        getTermAggregation('clusterName', 'orchestrator.cluster.name'),
       ];
   }
   return aggMetrics;

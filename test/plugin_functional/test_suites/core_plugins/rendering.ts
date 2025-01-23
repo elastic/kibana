@@ -186,6 +186,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildName (string?)',
         'telemetry.labels.performancePhase (string?)',
         'telemetry.labels.serverless (string?|never)', // Can only be set on Serverless.
+        'telemetry.localShipper (boolean?|false?)',
         'telemetry.hidePrivacyStatement (boolean?)',
         'telemetry.optIn (boolean?)',
         'telemetry.sendUsageFrom (server?|browser?)',
@@ -441,6 +442,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildName (string?)',
         'telemetry.labels.performancePhase (string?)',
         'telemetry.labels.serverless (string?|never)', // Can only be set on Serverless.
+        'telemetry.localShipper (boolean?|false?)',
         'telemetry.hidePrivacyStatement (boolean?)',
         'telemetry.optIn (boolean?)',
         'telemetry.sendUsageFrom (server?|browser?)',

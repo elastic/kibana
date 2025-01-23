@@ -46,6 +46,8 @@ export const AgentStatuses = [
   'unenrolled',
   'updating',
   'degraded',
+  'uninstalled',
+  'orphaned',
 ] as const;
 
 // Kueries for finding unprivileged and privileged agents

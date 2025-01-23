@@ -7,9 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type {
+import {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  useEuiTheme,
 } from '@elastic/eui';
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -43,6 +44,8 @@ const GroupSelectorComponent = ({
       !!groupsSelected.find((selectedGroupKey) => selectedGroupKey === groupKey),
     [groupsSelected]
   );
+
+  const { euiTheme } = useEuiTheme();
 
   const panels: EuiContextMenuPanelDescriptor[] = useMemo(() => {
     const isOptionDisabled = (key?: string) => {
@@ -147,6 +150,7 @@ const GroupSelectorComponent = ({
         data-test-subj="groupByContextMenu"
         initialPanelId="firstPanel"
         panels={panels}
+        euiTheme={euiTheme}
       />
     </EuiPopover>
   );

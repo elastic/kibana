@@ -15,7 +15,7 @@ import { createFleetTestRendererMock } from '../../../../../../mock';
 import type { LicenseService } from '../../../../services';
 import { ExperimentalFeaturesService } from '../../../../services';
 import { AgentReassignAgentPolicyModal } from '../../components/agent_reassign_policy_modal';
-
+import { useAuthz } from '../../../../../../hooks/use_authz';
 import { useLicense } from '../../../../../../hooks/use_license';
 
 import { AgentBulkActions } from './bulk_actions';
@@ -24,6 +24,7 @@ jest.mock('../../../../../../services/experimental_features');
 const mockedExperimentalFeaturesService = jest.mocked(ExperimentalFeaturesService);
 
 jest.mock('../../../../../../hooks/use_license');
+jest.mock('../../../../../../hooks/use_authz');
 const mockedUseLicence = useLicense as jest.MockedFunction<typeof useLicense>;
 
 jest.mock('../../components/agent_reassign_policy_modal');
@@ -48,8 +49,13 @@ const defaultProps = {
 
 describe('AgentBulkActions', () => {
   beforeAll(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      diagnosticFileUploadEnabled: true,
+    mockedExperimentalFeaturesService.get.mockReturnValue({} as any);
+    jest.mocked(useAuthz).mockReturnValue({
+      fleet: {
+        allAgents: true,
+        readAgents: true,
+      },
+      integrations: {},
     } as any);
   });
 

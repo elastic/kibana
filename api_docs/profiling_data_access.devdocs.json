@@ -39,7 +39,7 @@
         "signature": [
           "{ services: { fetchFlamechartData: ({ core, esClient, indices, stacktraceIdsField, query, totalSeconds, }: ",
           "FetchFlamechartParams",
-          ") => Promise<{ TotalSeconds: number; Size: number; Edges: number[][]; FileID: string[]; FrameType: number[]; Inline: boolean[]; ExeFilename: string[]; AddressOrLine: number[]; FunctionName: string[]; FunctionOffset: number[]; SourceFilename: string[]; SourceLine: number[]; CountInclusive: number[]; CountExclusive: number[]; SamplingRate: number; TotalSamples: number; TotalCPU: number; SelfCPU: number; AnnualCO2TonsExclusive: number[]; AnnualCO2TonsInclusive: number[]; AnnualCostsUSDInclusive: number[]; AnnualCostsUSDExclusive: number[]; }>; getStatus: ({ esClient, soClient, spaceId }: ",
+          ") => Promise<{ TotalSeconds: number; Size: number; Edges: number[][]; FileID: string[]; FrameType: number[]; Inline: boolean[]; ExeFilename: string[]; AddressOrLine: number[]; FunctionName: string[]; FunctionOffset: number[]; SourceFilename: string[]; SourceLine: number[]; CountInclusive: number[]; CountExclusive: number[]; SamplingRate: number; TotalSamples: number; SelfCPU: number; AnnualCO2TonsExclusive: number[]; AnnualCO2TonsInclusive: number[]; AnnualCostsUSDInclusive: number[]; AnnualCostsUSDExclusive: number[]; }>; getStatus: ({ esClient, soClient, spaceId }: ",
           "HasSetupParams",
           ") => Promise<",
           {

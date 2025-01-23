@@ -27,7 +27,7 @@ export const useIndexDocumentSearch = (indexName: string) => {
   const {
     services: { http },
   } = useKibana();
-  const response = useQuery({
+  const { data, isInitialLoading } = useQuery({
     queryKey: [QueryKeys.SearchDocuments, indexName],
     refetchInterval: INDEX_SEARCH_POLLING,
     refetchIntervalInBackground: true,
@@ -46,7 +46,8 @@ export const useIndexDocumentSearch = (indexName: string) => {
       }),
   });
   return {
-    ...response,
-    meta: pageToPagination(response?.data?.results?._meta?.page ?? DEFAULT_PAGINATION),
+    data,
+    isInitialLoading,
+    meta: pageToPagination(data?.results?._meta?.page ?? DEFAULT_PAGINATION),
   };
 };

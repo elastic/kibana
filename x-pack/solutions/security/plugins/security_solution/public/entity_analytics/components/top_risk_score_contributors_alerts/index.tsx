@@ -15,8 +15,12 @@ import { HeaderSection } from '../../../common/components/header_section';
 
 import * as i18n from './translations';
 import type { RiskInputs } from '../../../../common/entity_analytics/risk_engine';
-import { RiskScoreEntity } from '../../../../common/entity_analytics/risk_engine';
-import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
+import type { EntityRiskScore } from '../../../../common/search_strategy';
+import {
+  EntityType,
+  type HostRiskScore,
+  type UserRiskScore,
+} from '../../../../common/search_strategy';
 import { ALERTS_TABLE_REGISTRY_CONFIG_IDS } from '../../../../common/constants';
 import { AlertsTableComponent } from '../../../detections/components/alerts_table';
 import { GroupedAlertsTable } from '../../../detections/components/alerts_table/alerts_grouping';
@@ -28,21 +32,21 @@ import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { RiskInformationButtonEmpty } from '../risk_information';
 
-export interface TopRiskScoreContributorsAlertsProps {
+export interface TopRiskScoreContributorsAlertsProps<T extends EntityType> {
   toggleStatus: boolean;
   toggleQuery?: (status: boolean) => void;
-  riskScore: HostRiskScore | UserRiskScore;
-  riskEntity: RiskScoreEntity;
+  riskScore: EntityRiskScore<T>;
+  riskEntity: T;
   loading: boolean;
 }
 
-export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAlertsProps> = ({
+export const TopRiskScoreContributorsAlerts = <T extends EntityType>({
   toggleStatus,
   toggleQuery,
   riskScore,
   riskEntity,
   loading,
-}) => {
+}: TopRiskScoreContributorsAlertsProps<T>) => {
   const { to, from } = useGlobalTime();
   const [{ loading: userInfoLoading, signalIndexName, hasIndexWrite, hasIndexMaintenance }] =
     useUserData();
@@ -57,8 +61,9 @@ export const TopRiskScoreContributorsAlerts: React.FC<TopRiskScoreContributorsAl
   const filters = useDeepEqualSelector(getGlobalFiltersQuerySelector);
 
   const inputFilters = useMemo(() => {
+    // TODO Add support for services on a follow-up PR
     const riskScoreEntity =
-      riskEntity === RiskScoreEntity.host
+      riskEntity === EntityType.host
         ? (riskScore as HostRiskScore).host
         : (riskScore as UserRiskScore).user;
 

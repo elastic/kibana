@@ -18,6 +18,8 @@ import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
 } from './translations';
 import { RuleFormPlugins } from './types';
+import './rule_form.scss';
+import { RuleFormScreenContextProvider } from './rule_form_screen_context';
 
 const queryClient = new QueryClient();
 
@@ -114,5 +116,11 @@ export const RuleForm = (props: RuleFormProps) => {
     onSubmit,
   ]);
 
-  return <QueryClientProvider client={queryClient}>{ruleFormComponent}</QueryClientProvider>;
+  return (
+    <QueryClientProvider client={queryClient}>
+      <RuleFormScreenContextProvider>
+        <div className="ruleForm__container">{ruleFormComponent}</div>
+      </RuleFormScreenContextProvider>
+    </QueryClientProvider>
+  );
 };

@@ -27,5 +27,6 @@
     "@kbn/core-elasticsearch-server",
     "@kbn/licensing-plugin",
     "@kbn/core-saved-objects-server",
+    "@kbn/cloud-plugin",
   ]
 }
