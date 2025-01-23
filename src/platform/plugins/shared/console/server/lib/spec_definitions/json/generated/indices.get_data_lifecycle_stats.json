@@ -1,0 +1,21 @@
+{
+  "indices.get_data_lifecycle_stats": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_lifecycle/stats"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/data-streams-get-lifecycle-stats.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}
