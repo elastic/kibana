@@ -6,9 +6,10 @@
  */
 
 import * as Gemini from '@google/generative-ai';
-import { from, map, switchMap } from 'rxjs';
-import { Readable } from 'stream';
+import { from, map, switchMap, throwError } from 'rxjs';
+import { isReadable, Readable } from 'stream';
 import {
+  createInferenceInternalError,
   Message,
   MessageRole,
   ToolChoiceType,
@@ -48,8 +49,19 @@ export const geminiAdapter: InferenceConnectorAdapter = {
       })
     ).pipe(
       switchMap((response) => {
-        const readable = response.data as Readable;
-        return eventSourceStreamIntoObservable(readable);
+        if (response.status === 'error') {
+          return throwError(() =>
+            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
+              rootError: response.serviceMessage,
+            })
+          );
+        }
+        if (isReadable(response.data as any)) {
+          return eventSourceStreamIntoObservable(response.data as Readable);
+        }
+        return throwError(() =>
+          createInferenceInternalError('Unexpected error', response.data as Record<string, any>)
+        );
       }),
       map((line) => {
         return JSON.parse(line) as GenerateContentResponseChunk;
