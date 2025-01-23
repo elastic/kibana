@@ -73,7 +73,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.15.1",
+    "node": "20.18.2",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -572,6 +572,7 @@
     "@kbn/index-management-shared-types": "link:x-pack/platform/packages/shared/index-management/index_management_shared_types",
     "@kbn/index-patterns-test-plugin": "link:test/plugin_functional/plugins/index_patterns",
     "@kbn/inference-common": "link:x-pack/platform/packages/shared/ai-infra/inference-common",
+    "@kbn/inference-endpoint-plugin": "link:x-pack/platform/plugins/shared/inference_endpoint",
     "@kbn/inference-endpoint-ui-common": "link:x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common",
     "@kbn/inference-plugin": "link:x-pack/platform/plugins/shared/inference",
     "@kbn/inference_integration_flyout": "link:x-pack/platform/packages/private/ml/inference_integration_flyout",
@@ -1529,7 +1530,7 @@
     "@octokit/rest": "^17.11.2",
     "@parcel/watcher": "^2.1.0",
     "@playwright/test": "1.49.0",
-    "@redocly/cli": "^1.27.1",
+    "@redocly/cli": "^1.27.2",
     "@statoscope/webpack-plugin": "^5.28.2",
     "@storybook/addon-a11y": "^6.5.16",
     "@storybook/addon-actions": "^6.5.16",
