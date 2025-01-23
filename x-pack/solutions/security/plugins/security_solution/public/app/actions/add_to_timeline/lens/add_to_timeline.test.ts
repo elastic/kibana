@@ -85,7 +85,7 @@ describe('createAddToTimelineLensAction', () => {
           ...context,
           embeddable: {
             ...getMockLensApi(),
-            blockingError: new BehaviorSubject(new Error('some error')),
+            blockingError$: new BehaviorSubject(new Error('some error')),
           },
         })
       ).toEqual(false);
