@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { i18n } from '@kbn/i18n';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import { isEmpty } from 'lodash';
 import { getAgentPoliciesAsInternalUser } from '../routes/settings/private_locations/get_agent_policies';
@@ -51,15 +51,38 @@ export class PrivateLocationRepository {
       await getAgentPoliciesAsInternalUser({ server }),
     ]);
 
-    const locations = data.saved_objects.map((loc) => loc.attributes);
+    const locations = data.saved_objects.map((loc) => ({
+      ...loc.attributes,
+      spaces: loc.spaces || loc.namespaces,
+    }));
 
-    if (locations.find((loc) => loc.agentPolicyId === location.agentPolicyId)) {
-      errorMessages = `Private location with agentPolicyId ${location.agentPolicyId} already exists`;
+    const locWithAgentPolicyId = locations.find(
+      (loc) => loc.agentPolicyId === location.agentPolicyId
+    );
+
+    if (locWithAgentPolicyId) {
+      errorMessages = i18n.translate(
+        'xpack.synthetics.privateLocations.create.errorMessages.policyExists',
+        {
+          defaultMessage: `Private location with agentPolicyId {agentPolicyId} already exists in spaces {spaces}`,
+          values: {
+            agentPolicyId: location.agentPolicyId,
+            spaces: formatSpaces(locWithAgentPolicyId.spaces),
+          },
+        }
+      );
     }
 
     // return if name is already taken
-    if (locations.find((loc) => loc.label === location.label)) {
-      errorMessages = `Private location with label ${location.label} already exists`;
+    const locWithSameLabel = locations.find((loc) => loc.label === location.label);
+    if (locWithSameLabel) {
+      errorMessages = i18n.translate(
+        'xpack.synthetics.privateLocations.create.errorMessages.labelExists',
+        {
+          defaultMessage: `Private location with label {label} already exists in spaces: {spaces}`,
+          values: { label: location.label, spaces: formatSpaces(locWithSameLabel.spaces) },
+        }
+      );
     }
 
     const agentPolicy = agentPolicies?.find((policy) => policy.id === location.agentPolicyId);
@@ -75,3 +98,15 @@ export class PrivateLocationRepository {
     }
   }
 }
+
+const formatSpaces = (spaces: string[] | undefined) => {
+  return (
+    spaces
+      ?.map((space) =>
+        space === '*'
+          ? i18n.translate('xpack.synthetics.formatSpaces.', { defaultMessage: '* All Spaces' })
+          : space
+      )
+      .join(', ') ?? 'Unknown'
+  );
+};
