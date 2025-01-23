@@ -7,25 +7,22 @@
 
 import {
   getCaseFindUserActionsUrl,
-  getCaseUserActionUrl,
   getCaseUserActionStatsUrl,
   getCaseUsersUrl,
 } from '@kbn/cases-plugin/common/api';
 import {
-  CaseUserActionDeprecatedResponse,
-  CaseUserActionsDeprecatedResponse,
   CaseUserActionStatsResponse,
   GetCaseUsersResponse,
   UserActionFindRequest,
   UserActionFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
+import { UserAction } from '@kbn/cases-plugin/common/types/domain';
 import { User } from '../authentication/types';
 
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix } from './helpers';
 import { removeServerGeneratedPropertiesFromObject } from './omit';
-import { UserAction } from '@kbn/cases-plugin/common/types/domain';
 
 export const removeServerGeneratedPropertiesFromUserAction = (attributes: UserAction) => {
   const keysToRemove: Array<keyof UserAction> = ['id', 'created_at', 'version'];
