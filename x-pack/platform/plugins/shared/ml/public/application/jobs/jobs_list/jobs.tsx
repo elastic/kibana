@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback } from 'react';
+import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { usePageUrlState } from '@kbn/ml-url-state';
@@ -19,7 +19,7 @@ import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
 import { useEnabledFeatures } from '../../contexts/ml';
-import { getEmptyFunctionComponent } from '../../components/empty_component/get_empty_function_component';
+import { SpaceManagementContextWrapper } from '../../components/space_management_context_wrapper';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -51,12 +51,6 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
   const { showNodeInfo } = useEnabledFeatures();
   const helpLink = docLinks.links.ml.anomalyDetection;
 
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const ContextWrapper = useCallback(
-    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
-    [spaces]
-  );
-
   return (
     <>
       <MlPageHeader>
@@ -65,7 +59,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>
-      <ContextWrapper>
+      <SpaceManagementContextWrapper>
         <JobsListView
           euiTheme={euiTheme}
           isMlEnabledInSpace={isMlEnabledInSpace}
@@ -74,7 +68,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
           onJobsViewStateUpdate={setPageState}
           showNodeInfo={showNodeInfo}
         />
-      </ContextWrapper>
+      </SpaceManagementContextWrapper>
       <HelpMenu docLink={helpLink} />
     </>
   );

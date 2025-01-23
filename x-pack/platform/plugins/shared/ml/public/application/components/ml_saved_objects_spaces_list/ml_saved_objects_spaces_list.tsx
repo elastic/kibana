@@ -41,7 +41,7 @@ export const MLSavedObjectsSpacesList: FC<Props> = ({
   id,
   mlSavedObjectType,
   refresh,
-  disabled = true,
+  disabled = false,
 }) => {
   const {
     savedObjects: { updateJobsSpaces, updateModelsSpaces },

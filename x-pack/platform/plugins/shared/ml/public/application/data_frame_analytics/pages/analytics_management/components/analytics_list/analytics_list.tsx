@@ -41,7 +41,7 @@ import { AnalyticsEmptyPrompt } from '../empty_prompt';
 import { useTableSettings } from './use_table_settings';
 import { JobsAwaitingNodeWarning } from '../../../../../components/jobs_awaiting_node_warning';
 import { useRefresh } from '../../../../../routing/use_refresh';
-import { useSpacesContextWrapper } from '../../../../../hooks/use_spaces';
+import { SpaceManagementContextWrapper } from '../../../../../components/space_management_context_wrapper';
 
 const filters: EuiSearchBarProps['filters'] = [
   {
@@ -171,8 +171,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const getAnalyticsCallback = useCallback(() => getAnalytics(true), []);
 
-  const SpacesContextWrapper = useSpacesContextWrapper();
-
   // Subscribe to the refresh observable to trigger reloading the analytics list.
   const { refresh } = useRefreshAnalyticsList({
     isLoading: setIsLoading,
@@ -262,7 +260,7 @@ export const DataFrameAnalyticsList: FC<Props> = ({
   };
 
   return (
-    <SpacesContextWrapper>
+    <SpaceManagementContextWrapper>
       <div data-test-subj="mlAnalyticsJobList">
         {modals}
         <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
@@ -301,6 +299,6 @@ export const DataFrameAnalyticsList: FC<Props> = ({
           />
         </div>
       </div>
-    </SpacesContextWrapper>
+    </SpaceManagementContextWrapper>
   );
 };

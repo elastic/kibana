@@ -402,6 +402,8 @@ export const ModelsList: FC<Props> = ({
     onModelDownloadRequest,
   });
   const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
+  const shouldDisableSpacesColumn =
+    !canManageSpacesAndSavedObjects || !capabilities.savedObjectsManagement?.shareIntoSpace;
 
   const toggleDetails = async (item: TrainedModelUIItem) => {
     const itemIdToExpandedRowMapValues = { ...itemIdToExpandedRowMap };
@@ -589,6 +591,7 @@ export const ModelsList: FC<Props> = ({
             render: (item: TrainedModelUIItem) => {
               return (
                 <MLSavedObjectsSpacesList
+                  disabled={shouldDisableSpacesColumn}
                   spacesApi={spaces}
                   spaceIds={item.spaces}
                   id={item.model_id}

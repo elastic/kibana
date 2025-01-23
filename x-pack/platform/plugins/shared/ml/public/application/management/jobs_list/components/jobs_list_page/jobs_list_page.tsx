@@ -6,7 +6,7 @@
  */
 
 import type { FC } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { Router } from '@kbn/shared-ux-router';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage, I18nProvider } from '@kbn/i18n-react';
@@ -29,6 +29,7 @@ import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
+import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
 import { UpgradeWarning } from '../../../../components/upgrade/upgrade_warning';
 import { getMlGlobalServices } from '../../../../util/get_services';
 import { EnabledFeaturesContextProvider } from '../../../../contexts/ml';
@@ -44,7 +45,6 @@ import type { MlSavedObjectType } from '../../../../../../common/types/saved_obj
 
 import { SpaceManagement } from './space_management';
 import { DocsLink } from './docs_link';
-import { getEmptyFunctionComponent } from '../../../../components/empty_component/get_empty_function_component';
 
 interface Props {
   coreStart: CoreStart;
@@ -102,12 +102,6 @@ export const JobsListPage: FC<Props> = ({
     check();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const ContextWrapper = useCallback(
-    spaces ? spaces.ui.components.getSpacesContextProvider : getEmptyFunctionComponent,
-    [spaces]
-  );
 
   if (initialized === false) {
     return null;
@@ -181,7 +175,7 @@ export const JobsListPage: FC<Props> = ({
               mlServices,
             }}
           >
-            <ContextWrapper feature={PLUGIN_ID}>
+            <SpaceManagementContextWrapper feature={PLUGIN_ID}>
               <EnabledFeaturesContextProvider isServerless={isServerless} mlFeatures={mlFeatures}>
                 <Router history={history}>
                   <EuiPageTemplate.Header
@@ -244,7 +238,7 @@ export const JobsListPage: FC<Props> = ({
                   </EuiPageTemplate.Section>
                 </Router>
               </EnabledFeaturesContextProvider>
-            </ContextWrapper>
+            </SpaceManagementContextWrapper>
           </KibanaContextProvider>
         </RedirectAppLinks>
       </KibanaRenderContextProvider>
