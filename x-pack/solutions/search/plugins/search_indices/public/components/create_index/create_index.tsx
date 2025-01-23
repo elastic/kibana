@@ -52,7 +52,11 @@ export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
       ? CreateIndexViewMode.Code
       : CreateIndexViewMode.UI
   );
-  const { workflow, setSelectedWorkflowId, createIndexExamples: selectedCodeExamples } = useWorkflow();
+  const {
+    workflow,
+    setSelectedWorkflowId,
+    createIndexExamples: selectedCodeExamples,
+  } = useWorkflow();
   const usageTracker = useUsageTracker();
   const onChangeView = useCallback(
     (id: string) => {

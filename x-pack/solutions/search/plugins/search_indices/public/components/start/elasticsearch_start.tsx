@@ -50,7 +50,11 @@ export const ElasticsearchStart: React.FC<ElasticsearchStartProps> = () => {
       : CreateIndexViewMode.UI
   );
   const usageTracker = useUsageTracker();
-  const { workflow, setSelectedWorkflowId, createIndexExamples: selectedCodeExamples } = useWorkflow();
+  const {
+    workflow,
+    setSelectedWorkflowId,
+    createIndexExamples: selectedCodeExamples,
+  } = useWorkflow();
 
   useEffect(() => {
     usageTracker.load(AnalyticsEvents.startPageOpened);

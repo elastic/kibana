@@ -5,21 +5,11 @@
  * 2.0.
  */
 
-import React, { useState, useEffect } from 'react';
+import React from 'react';
 
-import {
-  EuiButton,
-  EuiCard,
-  EuiText,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPopover,
-  EuiTourStep,
-  EuiTitle,
-  EuiSpacer,
-} from '@elastic/eui';
+import { EuiCard, EuiText, EuiFlexGroup, EuiFlexItem, EuiTourStep } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Workflow, WorkflowId, workflows } from '../../code_examples/workflows';
+import { WorkflowId, workflows } from '../../code_examples/workflows';
 import { useGuideTour } from './hooks/use_guide_tour';
 
 interface GuideSelectorProps {
@@ -64,29 +54,33 @@ export const GuideSelector: React.FC<GuideSelectorProps> = ({
   );
 };
 
-const GuideSelectorTiles: React.FC<Pick<GuideSelectorProps, 'selectedWorkflowId' | 'onChange'>> = ({ selectedWorkflowId, onChange }) => {
-
+const GuideSelectorTiles: React.FC<Pick<GuideSelectorProps, 'selectedWorkflowId' | 'onChange'>> = ({
+  selectedWorkflowId,
+  onChange,
+}) => {
   return (
     <EuiFlexGroup gutterSize="m">
       {workflows.map((workflow) => {
         const isSelected = selectedWorkflowId === workflow.id;
-        return (<EuiFlexItem key={workflow.id}>
-          <EuiCard
-            title={workflow.title}
-            hasBorder={!isSelected}
-            titleSize="xs"
-            description={
-              <EuiText color="subdued" size="s">
-                {workflow.summary}
-              </EuiText>
-            }
-            selectable={{
-              onClick: () => onChange(workflow.id),
-              isSelected
-            }}
-          />
-        </EuiFlexItem>)
-      }
-      )}
-    </EuiFlexGroup>)
-}
+        return (
+          <EuiFlexItem key={workflow.id}>
+            <EuiCard
+              title={workflow.title}
+              hasBorder={!isSelected}
+              titleSize="xs"
+              description={
+                <EuiText color="subdued" size="s">
+                  {workflow.summary}
+                </EuiText>
+              }
+              selectable={{
+                onClick: () => onChange(workflow.id),
+                isSelected,
+              }}
+            />
+          </EuiFlexItem>
+        );
+      })}
+    </EuiFlexGroup>
+  );
+};

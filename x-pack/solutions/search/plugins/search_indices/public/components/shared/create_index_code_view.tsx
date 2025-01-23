@@ -5,10 +5,18 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiHorizontalRule,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+} from '@elastic/eui';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
+import { i18n } from '@kbn/i18n';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
@@ -21,7 +29,6 @@ import { LanguageSelector } from './language_selector';
 import { GuideSelector } from './guide_selector';
 import { Workflow, WorkflowId } from '../../code_examples/workflows';
 import { CreateIndexCodeExamples } from '../../types';
-import { i18n } from '@kbn/i18n';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;
@@ -76,7 +83,13 @@ export const CreateIndexCodeView = ({
         <EuiHorizontalRule />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiTitle size="xs"><h5>{i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', { defaultMessage: "Select a workflow guide" })}</h5></EuiTitle>
+        <EuiTitle size="xs">
+          <h5>
+            {i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', {
+              defaultMessage: 'Select a workflow guide',
+            })}
+          </h5>
+        </EuiTitle>
         <EuiSpacer />
         <GuideSelector
           selectedWorkflowId={selectedWorkflow?.id || 'default'}

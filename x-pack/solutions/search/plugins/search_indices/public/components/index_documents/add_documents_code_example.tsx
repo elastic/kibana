@@ -82,13 +82,21 @@ export const AddDocumentsCodeExample = ({
       hasShadow={false}
       paddingSize="m"
       data-test-subj="SearchIndicesAddDocumentsCode"
-
     >
       <EuiFlexGroup direction="column">
-        <EuiFlexGroup justifyContent={indexHasMappings ? "flexEnd" : "spaceBetween"} alignItems="center">
+        <EuiFlexGroup
+          justifyContent={indexHasMappings ? 'flexEnd' : 'spaceBetween'}
+          alignItems="center"
+        >
           {!indexHasMappings && (
             <EuiFlexItem grow={false}>
-              <EuiTitle size="xs"><h5>{i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', { defaultMessage: "Select a workflow guide" })}</h5></EuiTitle>
+              <EuiTitle size="xs">
+                <h5>
+                  {i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', {
+                    defaultMessage: 'Select a workflow guide',
+                  })}
+                </h5>
+              </EuiTitle>
             </EuiFlexItem>
           )}
           <EuiFlexItem grow={false}>
@@ -100,15 +108,14 @@ export const AddDocumentsCodeExample = ({
                   onSelectLanguage={onSelectLanguage}
                   showLabel
                 />
-
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <TryInConsoleButton
                   request={
                     !indexHasMappings
                       ? `${ingestExamples.sense.updateMappingsCommand(
-                        codeParams
-                      )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
+                          codeParams
+                        )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
                       : ingestExamples.sense.ingestCommand(codeParams)
                   }
                   application={application}
