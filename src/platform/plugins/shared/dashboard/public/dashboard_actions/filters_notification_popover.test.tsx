@@ -59,15 +59,15 @@ describe('filters notification popover', () => {
     updateFilters = (filters) => filtersSubject.next(filters);
     const querySubject = new BehaviorSubject<Query | AggregateQuery | undefined>(undefined);
     updateQuery = (query) => querySubject.next(query);
-    const viewModeSubject = new BehaviorSubject<ViewMode>('view');
-    updateViewMode = (viewMode) => viewModeSubject.next(viewMode);
+    const viewMode$ = new BehaviorSubject<ViewMode>('view');
+    updateViewMode = (viewMode) => viewMode$.next(viewMode);
 
     api = {
       uuid: 'testId',
       filters$: filtersSubject,
       query$: querySubject,
       parentApi: {
-        viewMode: viewModeSubject,
+        viewMode$,
       },
     };
   });
