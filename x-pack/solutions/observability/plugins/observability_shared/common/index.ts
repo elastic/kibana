@@ -191,6 +191,8 @@ export type {
   TransactionDetailsByTraceIdLocatorParams,
   SpanDetailsBySpanIdAndTraceIdLocator,
   SpanDetailsBySpanIdAndTraceIdLocatorParams,
+  ErrorGroupDetailsLocator,
+  ErrorGroupDetailsLocatorParams,
   EntitiesInventoryLocator,
 } from './locators';
 
@@ -218,6 +220,8 @@ export {
   TRANSACTION_DETAILS_BY_TRACE_ID_LOCATOR,
   SpanDetailsBySpanIdAndTraceIdLocatorDefinition,
   SPAN_DETAILS_BY_SPAN_ID_AND_TRACE_ID_LOCATOR,
+  ErrorGroupDetailsLocatorDefinition,
+  ERROR_GROUP_DETAILS_LOCATOR,
   EntitiesInventoryLocatorDefinition,
   ENTITIES_INVENTORY_LOCATOR_ID,
 } from './locators';

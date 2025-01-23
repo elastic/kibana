@@ -27,3 +27,12 @@ export interface SpanDetailsBySpanIdAndTraceIdLocatorParams extends Serializable
   traceId: string;
   spanId: string;
 }
+
+export const ERROR_GROUP_DETAILS_LOCATOR = 'ERROR_GROUP_DETAILS_LOCATOR';
+
+export interface ErrorGroupDetailsLocatorParams extends SerializableRecord {
+  rangeFrom?: string;
+  rangeTo?: string;
+  errorGroupId: string;
+  serviceName: string;
+}

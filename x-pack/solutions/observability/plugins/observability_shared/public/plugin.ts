@@ -47,6 +47,8 @@ import {
   type TransactionDetailsByTraceIdLocator,
   type EntitiesInventoryLocator,
   EntitiesInventoryLocatorDefinition,
+  ErrorGroupDetailsLocator,
+  ErrorGroupDetailsLocatorDefinition,
 } from '../common';
 import { updateGlobalNavigation } from './services/update_global_navigation';
 import {
@@ -87,6 +89,7 @@ interface ObservabilitySharedLocators {
     transactionDetailsByName: TransactionDetailsByNameLocator;
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
     spanDetailsBySpanIdAndTraceIdLocator: SpanDetailsBySpanIdAndTraceIdLocator;
+    errorGroupDetailsLocator: ErrorGroupDetailsLocator;
     serviceEntity: ServiceEntityLocator;
   };
   entitiesInventory: EntitiesInventoryLocator;
@@ -167,6 +170,9 @@ export class ObservabilitySharedPlugin implements Plugin {
         ),
         spanDetailsBySpanIdAndTraceIdLocator: urlService.locators.create(
           new SpanDetailsBySpanIdAndTraceIdLocatorDefinition()
+        ),
+        errorGroupDetailsLocator: urlService.locators.create(
+          new ErrorGroupDetailsLocatorDefinition()
         ),
         serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
       },
