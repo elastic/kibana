@@ -17,7 +17,7 @@ export const AwsInputVarFields = ({
   fields,
   onChange,
   packageInfo,
-  hasInvalidRequiredVars,
+  hasInvalidRequiredVars = false,
 }: {
   fields: Array<
     AwsOptions[keyof AwsOptions]['fields'][number] & {
@@ -28,7 +28,7 @@ export const AwsInputVarFields = ({
   >;
   onChange: (key: string, value: string) => void;
   packageInfo: PackageInfo;
-  hasInvalidRequiredVars: boolean;
+  hasInvalidRequiredVars?: boolean;
 }) => {
   return (
     <div>
