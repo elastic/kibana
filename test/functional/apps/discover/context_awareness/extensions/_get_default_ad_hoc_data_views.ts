@@ -55,7 +55,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     it('should create a copy of the profile data view when saving the Discover session', async () => {
       await discover.saveSearch('Default profile data view session');
       await discover.waitUntilSearchingHasFinished();
-      expect(await dataViews.getSelectedName()).to.be('Example profile data view (copy)');
+      expect(await dataViews.getSelectedName()).to.be(
+        'Example profile data view (Default profile data view session)'
+      );
       expect(await unifiedFieldList.getSidebarSectionFieldNames('available')).to.have.length(7);
       expect(
         await (await dataGrid.getCellElementByColumnName(0, '@timestamp')).getVisibleText()

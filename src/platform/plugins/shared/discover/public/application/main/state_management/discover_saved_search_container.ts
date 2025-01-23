@@ -193,8 +193,11 @@ export function getSavedSearchContainer({
         ...dataView.toSpec(),
         id: uuidv4(),
         name: i18n.translate('discover.savedSearch.defaultProfileDataViewCopyName', {
-          defaultMessage: '{name} (copy)',
-          values: { name: dataView.name ?? dataView.getIndexPattern() },
+          defaultMessage: '{dataViewName} ({discoverSessionTitle})',
+          values: {
+            dataViewName: dataView.name ?? dataView.getIndexPattern(),
+            discoverSessionTitle: nextSavedSearch.title,
+          },
         }),
       });
     }
