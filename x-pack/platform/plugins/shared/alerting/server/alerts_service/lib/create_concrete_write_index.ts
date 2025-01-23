@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesSimulateIndexTemplateResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { get, sortBy } from 'lodash';
 import { IIndexPatternString } from '../resource_installer_utils';
@@ -45,7 +45,7 @@ const updateTotalFieldLimitSetting = async ({
       () =>
         esClient.indices.putSettings({
           index,
-          settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+          body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
         }),
       { logger }
     );
@@ -90,7 +90,7 @@ const updateUnderlyingMapping = async ({
 
   try {
     await retryTransientEsErrors(
-      () => esClient.indices.putMapping({ index, ...simulatedMapping }),
+      () => esClient.indices.putMapping({ index, body: simulatedMapping }),
       { logger }
     );
 
@@ -183,16 +183,18 @@ export async function setConcreteWriteIndex(opts: SetConcreteWriteIndexOpts) {
     await retryTransientEsErrors(
       () =>
         esClient.indices.updateAliases({
-          actions: [
-            { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
-            {
-              add: {
-                index: concreteIndex.index,
-                alias: concreteIndex.alias,
-                is_write_index: true,
+          body: {
+            actions: [
+              { remove: { index: concreteIndex.index, alias: concreteIndex.alias } },
+              {
+                add: {
+                  index: concreteIndex.index,
+                  alias: concreteIndex.alias,
+                  is_write_index: true,
+                },
               },
-            },
-          ],
+            ],
+          },
         }),
       { logger }
     );
