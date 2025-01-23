@@ -1062,6 +1062,8 @@
       "@kbn/inference_integration_flyout/*": ["x-pack/platform/packages/private/ml/inference_integration_flyout/*"],
       "@kbn/inference-common": ["x-pack/platform/packages/shared/ai-infra/inference-common"],
       "@kbn/inference-common/*": ["x-pack/platform/packages/shared/ai-infra/inference-common/*"],
+      "@kbn/inference-endpoint-plugin": ["x-pack/platform/plugins/shared/inference_endpoint"],
+      "@kbn/inference-endpoint-plugin/*": ["x-pack/platform/plugins/shared/inference_endpoint/*"],
       "@kbn/inference-endpoint-ui-common": ["x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common"],
       "@kbn/inference-endpoint-ui-common/*": ["x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/*"],
       "@kbn/inference-plugin": ["x-pack/platform/plugins/shared/inference"],
