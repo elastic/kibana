@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class NonAdditiveProcessor extends Error {
+import { StatusError } from './status_error';
+
+export class DefinitionNotFoundError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'NonAdditiveProcessor';
+    super(message, 404);
+    this.name = 'DefinitionNotFoundError';
   }
 }

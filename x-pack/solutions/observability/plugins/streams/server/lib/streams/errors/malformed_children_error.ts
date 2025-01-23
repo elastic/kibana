@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class IdConflict extends Error {
+import { StatusError } from './status_error';
+
+export class MalformedChildrenError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'IdConflict';
+    super(message, 400);
+    this.name = 'MalformedChildrenError';
   }
 }

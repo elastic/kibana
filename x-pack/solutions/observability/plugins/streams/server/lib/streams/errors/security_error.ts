@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-export class IngestPipelineNotFound extends Error {
+import { StatusError } from './status_error';
+
+export class SecurityError extends StatusError {
   constructor(message: string) {
-    super(message);
-    this.name = 'IngestPipelineNotFound';
+    super(message, 403);
+    this.name = 'SecurityError';
   }
 }
