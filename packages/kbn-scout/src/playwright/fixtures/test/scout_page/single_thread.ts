@@ -7,9 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Page, test as base } from '@playwright/test';
+import { Page } from '@playwright/test';
 import { subj } from '@kbn/test-subj-selector';
-import { ScoutPage, KibanaUrl, ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
+import { KibanaUrl, ToolingLog, coreWorkerFixtures } from '../../worker';
+import { ScoutPage } from '.';
+import { serviceLoadedMsg } from '../../../utils';
 
 /**
  * Instead of defining each method individually, we use a list of method names and loop through them, creating methods dynamically.
@@ -69,6 +71,26 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
   return extendedMethods as ScoutPage['testSubj'];
 }
 
+export function extendPlaywrightPage({
+  page,
+  kbnUrl,
+}: {
+  page: Page;
+  kbnUrl: KibanaUrl;
+}): ScoutPage {
+  const extendedPage = page as ScoutPage;
+  // Extend page with '@kbn/test-subj-selector' support
+  extendedPage.testSubj = extendPageWithTestSubject(page);
+  // Method to navigate to specific Kibana apps
+  extendedPage.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+  // Method to wait for global loading indicator to be hidden
+  extendedPage.waitForLoadingIndicatorHidden = () =>
+    extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', {
+      state: 'attached',
+    });
+  return extendedPage;
+}
+
 /**
  * Extends the 'page' fixture with Kibana-specific functionality
  *
@@ -95,20 +117,17 @@ function extendPageWithTestSubject(page: Page): ScoutPage['testSubj'] {
  * await page.gotoApp('discover);
  * ```
  */
-export const scoutPageFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures>({
+export const scoutPageFixture = coreWorkerFixtures.extend<
+  { page: ScoutPage; log: ToolingLog },
+  { kbnUrl: KibanaUrl }
+>({
   page: async (
-    { page, kbnUrl }: { page: Page; kbnUrl: KibanaUrl },
+    { page, kbnUrl, log }: { page: Page; kbnUrl: KibanaUrl; log: ToolingLog },
     use: (extendedPage: ScoutPage) => Promise<void>
   ) => {
-    const extendedPage = page as ScoutPage;
-    // Extend page with '@kbn/test-subj-selector' support
-    extendedPage.testSubj = extendPageWithTestSubject(page);
-    // Method to navigate to specific Kibana apps
-    extendedPage.gotoApp = (appName: string) => page.goto(kbnUrl.app(appName));
+    const extendedPage = extendPlaywrightPage({ page, kbnUrl });
 
-    extendedPage.waitForLoadingIndicatorHidden = () =>
-      extendedPage.testSubj.waitForSelector('globalLoadingIndicator-hidden', { state: 'attached' });
-
+    log.debug(serviceLoadedMsg(`scoutPage`));
     await use(extendedPage);
   },
 });

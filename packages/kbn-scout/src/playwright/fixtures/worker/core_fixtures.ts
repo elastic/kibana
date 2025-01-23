@@ -9,18 +9,28 @@
 
 import { test as base } from '@playwright/test';
 
-import { LoadActionPerfOptions } from '@kbn/es-archiver';
+import type { ToolingLog } from '@kbn/tooling-log';
+
+import { KbnClient, SamlSessionManager } from '@kbn/test';
+import { Client } from '@elastic/elasticsearch';
 import {
   createKbnUrl,
-  createEsArchiver,
   createEsClient,
   createKbnClient,
   createLogger,
   createSamlSessionManager,
   createScoutConfig,
+  KibanaUrl,
 } from '../../../common/services';
-import { ScoutWorkerFixtures } from '../types/worker_scope';
 import { ScoutTestOptions } from '../../types';
+import { ScoutTestConfig } from '.';
+
+// re-export to import types from '@kbn-scout'
+export type { KbnClient, SamlSessionManager } from '@kbn/test';
+export type { ToolingLog } from '@kbn/tooling-log';
+export type { Client as EsClient } from '@elastic/elasticsearch';
+export type { KibanaUrl } from '../../../common/services/kibana_url';
+export type { ScoutTestConfig } from '../../../types';
 
 /**
  * The coreWorkerFixtures setup defines foundational fixtures that are essential
@@ -29,7 +39,17 @@ import { ScoutTestOptions } from '../../types';
  * and isolated access to critical services such as logging, configuration, and
  * clients for interacting with Kibana and Elasticsearch.
  */
-export const coreWorkerFixtures = base.extend<{}, ScoutWorkerFixtures>({
+export const coreWorkerFixtures = base.extend<
+  {},
+  {
+    log: ToolingLog;
+    config: ScoutTestConfig;
+    kbnUrl: KibanaUrl;
+    esClient: Client;
+    kbnClient: KbnClient;
+    samlAuth: SamlSessionManager;
+  }
+>({
   // Provides a scoped logger instance for each worker. This logger is shared across
   // all other fixtures within the worker scope.
   log: [
@@ -83,25 +103,6 @@ export const coreWorkerFixtures = base.extend<{}, ScoutWorkerFixtures>({
   kbnClient: [
     ({ log, config }, use) => {
       use(createKbnClient(config, log));
-    },
-    { scope: 'worker' },
-  ],
-
-  /**
-   * Provides utilities for managing test data in Elasticsearch. The "loadIfNeeded" method
-   * optimizes test execution by loading data archives only if required, avoiding redundant
-   * data ingestion.
-   *
-   * Note: In order to speedup test execution and avoid the overhead of deleting the data
-   * we only expose capability to ingest the data indexes.
-   */
-  esArchiver: [
-    ({ log, esClient, kbnClient }, use) => {
-      const esArchiverInstance = createEsArchiver(esClient, kbnClient, log);
-      const loadIfNeeded = async (name: string, performance?: LoadActionPerfOptions | undefined) =>
-        esArchiverInstance!.loadIfNeeded(name, performance);
-
-      use({ loadIfNeeded });
     },
     { scope: 'worker' },
   ],

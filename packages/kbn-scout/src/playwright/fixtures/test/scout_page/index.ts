@@ -7,32 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Page } from 'playwright/test';
-import { PageObjects } from '../../page_objects';
-
-export interface ScoutTestFixtures {
-  browserAuth: LoginFixture;
-  page: ScoutPage;
-  pageObjects: PageObjects;
-}
-
-export interface LoginFixture {
-  /**
-   * Logs in as a user with viewer-only permissions.
-   * @returns A Promise that resolves once the cookie in browser is set.
-   */
-  loginAsViewer: () => Promise<void>;
-  /**
-   * Logs in as a user with administrative privileges
-   * @returns A Promise that resolves once the cookie in browser is set.
-   */
-  loginAsAdmin: () => Promise<void>;
-  /**
-   * Logs in as a user with elevated, but not admin, permissions.
-   * @returns A Promise that resolves once the cookie in browser is set.
-   */
-  loginAsPrivilegedUser: () => Promise<void>;
-}
+import { Page } from '@playwright/test';
 
 /**
  * Extends the Playwright 'Page' interface with methods specific to Kibana.
@@ -124,3 +99,6 @@ export type ScoutPage = Page & {
     clearInput: (selector: string) => Promise<void>;
   };
 };
+
+export { scoutPageFixture } from './single_thread';
+export { scoutPageParallelFixture } from './parallel';

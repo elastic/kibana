@@ -7,19 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test as base } from '@playwright/test';
-import { PROJECT_DEFAULT_ROLES } from '../../../common';
-import { LoginFixture, ScoutWorkerFixtures } from '../types';
-import { serviceLoadedMsg } from '../../utils';
-
-type LoginFunction = (role: string) => Promise<void>;
+import { PROJECT_DEFAULT_ROLES } from '../../../../common';
+import { serviceLoadedMsg } from '../../../utils';
+import { coreWorkerFixtures } from '../../worker';
+import { BrowserAuthFixture, LoginFunction } from '.';
 
 /**
  * The "browserAuth" fixture simplifies the process of logging into Kibana with
  * different roles during tests. It uses the "samlAuth" fixture to create an authentication session
  * for the specified role and the "context" fixture to update the cookie with the role-scoped session.
  */
-export const browserAuthFixture = base.extend<{ browserAuth: LoginFixture }, ScoutWorkerFixtures>({
+export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: BrowserAuthFixture }>({
   browserAuth: async ({ log, context, samlAuth, config }, use) => {
     const setSessionCookie = async (cookieValue: string) => {
       await context.clearCookies();
