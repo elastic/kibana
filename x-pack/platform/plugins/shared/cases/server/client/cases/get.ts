@@ -28,7 +28,7 @@ import {
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
+import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
