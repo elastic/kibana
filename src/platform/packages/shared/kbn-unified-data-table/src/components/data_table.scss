@@ -144,48 +144,6 @@
   }
 }
 
-.unifiedDataTable__descriptionList {
-  // force the content truncation when "Single line" row height setting is active
-  .euiDataGridRowCell__content--defaultHeight & {
-    -webkit-line-clamp: 1;
-    display: -webkit-box;
-    -webkit-box-orient: vertical;
-    height: 100%;
-    overflow: hidden;
-  }
-}
-
-.unifiedDataTable__descriptionListTitle {
-  margin-inline: 0 0;
-  padding-inline: 0;
-  background: transparent;
-  font-weight: $euiFontWeightBold;
-  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
-}
-
-.unifiedDataTable__descriptionListDescription {
-  margin-inline: $euiSizeS $euiSizeS;
-  padding-inline: 0;
-  word-break: break-all;
-  white-space: normal;
-  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
-
-  // Special handling for images coming from the image field formatter
-  img {
-    // Align the images vertically centered with the text
-    vertical-align: middle;
-    // Set the maximum height to the line-height. The used function is the same
-    // function used to calculate the line-height for the EuiDescriptionList Description.
-    // !important is required to overwrite the max-height on the element from the field formatter
-    max-height: lineHeightFromBaseline(2) !important;
-    // An arbitrary amount of width we don't want to go over, to not have very wide images.
-    // For most width-height-ratios that will never be hit, because we'd usually limit
-    // it by the way smaller height. But images with very large width and very small height
-    // might be limited by that.
-    max-width: ($euiSizeXXL * 12.5) !important;
-  }
-}
-
 @include euiBreakpoint('xs', 's', 'm') {
   // EUI issue to hide 'of' text https://github.com/elastic/eui/issues/4654
   .unifiedDataTable__flyoutDocumentNavigation .euiPagination__compressedText {
