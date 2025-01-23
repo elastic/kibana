@@ -26,62 +26,6 @@ const CELL_CLASS = 'unifiedDataTable__cellValue';
 const descriptionListCss = css`
   text-align: start;
 
-  & .unifiedDataTable__descriptionListTitle {
-    // as in eui
-    display: inline;
-    overflow-wrap: break-word !important;
-    word-break: break-word;
-    margin-block: 0;
-    padding-block: 1px;
-    font-size: 1rem;
-
-    // custom
-    margin-inline: 0 0;
-    padding-inline: 0;
-    background: transparent;
-    font-weight: 700;
-    line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
-  }
-
-  & .unifiedDataTable__descriptionListDescription {
-    // as in eui
-    display: inline;
-    font-size: 1rem;
-
-    // custom
-    margin-inline: 8px 8px;
-    padding-inline: 0;
-    word-break: break-all;
-    white-space: normal;
-    line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
-
-    // Special handling for images coming from the image field formatter
-    img {
-      // Align the images vertically centered with the text
-      vertical-align: middle;
-      // Set the maximum height to the line-height. The used function is the same
-      // function used to calculate the line-height for the EuiDescriptionList Description.
-      // !important is required to overwrite the max-height on the element from the field formatter
-      max-height: 1rem !important;
-      // An arbitrary amount of width we don't want to go over, to not have very wide images.
-      // For most width-height-ratios that will never be hit, because we'd usually limit
-      // it by the way smaller height. But images with very large width and very small height
-      // might be limited by that.
-      max-width: 500px !important;
-    }
-  }
-
-  &.unifiedDataTable__descriptionList--compressed {
-    & .unifiedDataTable__descriptionListTitle {
-      padding-block: 0;
-      font-size: 0.8571rem;
-    }
-
-    & .unifiedDataTable__descriptionListDescription {
-      font-size: 0.8571rem;
-    }
-  }
-
   // force the content truncation when "Single line" row height setting is active
   .euiDataGridRowCell__content--defaultHeight & {
     -webkit-line-clamp: 1;
@@ -89,6 +33,60 @@ const descriptionListCss = css`
     -webkit-box-orient: vertical;
     height: 100%;
     overflow: hidden;
+  }
+`;
+
+const descriptionListTitleCss = css`
+  // as in eui
+  display: inline;
+  overflow-wrap: break-word !important;
+  word-break: break-word;
+  margin-block: 0;
+  padding-block: 1px;
+  font-size: 1rem;
+
+  // custom
+  margin-inline: 0 0;
+  padding-inline: 0;
+  background: transparent;
+  font-weight: 700;
+  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
+
+  .unifiedDataTable__descriptionList--compressed & {
+    padding-block: 0;
+    font-size: 0.8571rem;
+  }
+`;
+
+const descriptionListDescriptionCss = css`
+  // as in eui
+  display: inline;
+  font-size: 1rem;
+
+  // custom
+  margin-inline: 8px 8px;
+  padding-inline: 0;
+  word-break: break-all;
+  white-space: normal;
+  line-height: inherit; // Required for EuiDataGrid lineCount to work correctly
+
+  // Special handling for images coming from the image field formatter
+  & img {
+    // Align the images vertically centered with the text
+    vertical-align: middle;
+    // Set the maximum height to the line-height. The used function is the same
+    // function used to calculate the line-height for the EuiDescriptionList Description.
+    // !important is required to overwrite the max-height on the element from the field formatter
+    max-height: 1rem !important;
+    // An arbitrary amount of width we don't want to go over, to not have very wide images.
+    // For most width-height-ratios that will never be hit, because we'd usually limit
+    // it by the way smaller height. But images with very large width and very small height
+    // might be limited by that.
+    max-width: 500px !important;
+  }
+
+  .unifiedDataTable__descriptionList--compressed & {
+    font-size: 0.8571rem;
   }
 `;
 
@@ -126,7 +124,7 @@ export function SourceDocument({
 
   return (
     <dl
-      className={classnames('unifiedDataTable__descriptionList', CELL_CLASS, className, {
+      className={classnames(CELL_CLASS, className, {
         'unifiedDataTable__descriptionList--compressed': isCompressed,
       })}
       data-test-subj={dataTestSubj}
@@ -138,9 +136,9 @@ export function SourceDocument({
         if (isPlainRecord && fieldName && (row.flattened[fieldName] ?? null) === null) return null;
         return (
           <Fragment key={fieldDisplayName}>
-            <dt className="unifiedDataTable__descriptionListTitle">{fieldDisplayName}</dt>
+            <dt css={descriptionListTitleCss}>{fieldDisplayName}</dt>
             <dd
-              className="unifiedDataTable__descriptionListDescription"
+              css={descriptionListDescriptionCss}
               dangerouslySetInnerHTML={{ __html: value }} // eslint-disable-line react/no-danger
             />
           </Fragment>
