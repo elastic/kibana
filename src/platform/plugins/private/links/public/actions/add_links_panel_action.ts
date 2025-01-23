@@ -49,4 +49,4 @@ export const addLinksPanelAction: ActionDefinition<EmbeddableApiContext> = {
   },
   grouping: [ADD_PANEL_ANNOTATION_GROUP],
   getDisplayName: () => APP_NAME,
-}
+};
