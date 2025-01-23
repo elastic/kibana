@@ -20,6 +20,7 @@ import {
   toolChoiceToOpenAI,
   messagesToOpenAI,
   processOpenAIStream,
+  emitTokenCountEstimateIfMissing,
 } from '../openai';
 
 export const inferenceAdapter: InferenceConnectorAdapter = {
@@ -85,6 +86,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         );
       }),
       processOpenAIStream(),
+      emitTokenCountEstimateIfMissing({ request }),
       simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
