@@ -23,6 +23,10 @@ describe('getAllowedOutputTypesForAgentPolicy', () => {
     } as any);
 
     expect(res).toHaveLength(4);
+    expect(res).toContain('elasticsearch');
+    expect(res).toContain('logstash');
+    expect(res).toContain('kafka');
+    expect(res).toContain('remote_elasticsearch');
   });
 
   it('should return only elasticsearch for an agent policy with APM', () => {
