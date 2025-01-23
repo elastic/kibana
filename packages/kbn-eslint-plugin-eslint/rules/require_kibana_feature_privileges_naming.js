@@ -90,7 +90,8 @@ module.exports = {
               }
 
               if (valueToCheck) {
-                const isValid = /^(manage|create|update|delete|read)_/.test(valueToCheck);
+                const isValid = /^(manage|create|update|delete|read)/.test(valueToCheck);
+                const usesValidSeparator = /^[a-z0-9_]+$/.test(valueToCheck);
                 let method = 'manage';
 
                 if (valueToCheck.includes('read')) {
@@ -110,9 +111,16 @@ module.exports = {
                 }
 
                 if (!isValid) {
-                  context.report({
+                  return context.report({
                     node: element,
-                    message: `API privilege '${valueToCheck}' should start with [manage|create|update|delete|read]_ or use ApiPrivileges.${method} instead`,
+                    message: `API privilege '${valueToCheck}' should start with [manage|create|update|delete|read] or use ApiPrivileges.${method} instead`,
+                  });
+                }
+
+                if (!usesValidSeparator) {
+                  return context.report({
+                    node: element,
+                    message: `API privilege '${valueToCheck}' should use '_' as a separator`,
                   });
                 }
               }

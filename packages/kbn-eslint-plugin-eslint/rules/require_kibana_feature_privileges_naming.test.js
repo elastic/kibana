@@ -83,7 +83,7 @@ ruleTester.run('@kbn/require_kibana_feature_privileges_naming', rule, {
       `,
       errors: [
         {
-          message: `API privilege 'incorrect_value' should start with [manage|create|update|delete|read]_ or use ApiPrivileges.manage instead`,
+          message: `API privilege 'incorrect_value' should start with [manage|create|update|delete|read] or use ApiPrivileges.manage instead`,
         },
       ],
     },
@@ -99,7 +99,23 @@ ruleTester.run('@kbn/require_kibana_feature_privileges_naming', rule, {
       `,
       errors: [
         {
-          message: `API privilege 'entry_read' should start with [manage|create|update|delete|read]_ or use ApiPrivileges.read instead`,
+          message: `API privilege 'entry_read' should start with [manage|create|update|delete|read] or use ApiPrivileges.read instead`,
+        },
+      ],
+    },
+    {
+      code: `
+        features.registerKibanaFeature({
+          privileges: {
+            all: {
+              api: ["read_entry-log", "create_logs"],
+            },
+          },
+        });
+      `,
+      errors: [
+        {
+          message: `API privilege 'read_entry-log' should use '_' as a separator`,
         },
       ],
     },
