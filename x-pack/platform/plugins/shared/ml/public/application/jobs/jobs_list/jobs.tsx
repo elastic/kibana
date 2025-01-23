@@ -44,7 +44,7 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
     getDefaultAnomalyDetectionJobsListState()
   );
   const {
-    services: { docLinks, spaces },
+    services: { docLinks },
   } = useMlKibana();
   const { euiTheme } = useEuiTheme();
 
