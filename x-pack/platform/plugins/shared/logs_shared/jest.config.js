@@ -8,11 +8,11 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../../..',
-  roots: ['<rootDir>/x-pack/platform/plugins/shared/observability_solution/dataset_quality'],
+  roots: ['<rootDir>/x-pack/platform/plugins/shared/logs_shared'],
   coverageDirectory:
-    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/observability_solution/dataset_quality',
+    '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/logs_shared',
   coverageReporters: ['text', 'html'],
   collectCoverageFrom: [
-    '<rootDir>/x-pack/platform/plugins/shared/observability_solution/dataset_quality/{common,public}/**/*.{ts,tsx}',
+    '<rootDir>/x-pack/platform/plugins/shared/logs_shared/{common,public,server}/**/*.{ts,tsx}',
   ],
 };
