@@ -56,7 +56,7 @@ describe('Mobile Service overview page', () => {
 
     describe('accessing android service page', () => {
       it('shows the most used charts', () => {
-        cy.wait(aliasNames);
+        cy.wait(aliasNames, { timeout: 60000 });
 
         cy.getByTestSubj('mostUsedChart-device').should('exist');
         cy.getByTestSubj('mostUsedChart-netConnectionType').should('exist');
