@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export type DescribeFn = (text: string, fn: () => void) => void;
+import { createTestConfig } from '../../common/config';
 
-export interface TestDefinitionAuthentication {
-  username?: string;
-  password?: string;
-  role: string;
-}
+export default createTestConfig('copy_to_space - basic license', {
+  license: 'basic',
+  testFiles: [require.resolve('./apis/copy_to_space')],
+});
