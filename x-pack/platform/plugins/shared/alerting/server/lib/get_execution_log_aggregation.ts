@@ -7,7 +7,7 @@
 
 import { i18n } from '@kbn/i18n';
 import { KueryNode } from '@kbn/es-query';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import Boom from '@hapi/boom';
 import { flatMap, get, isEmpty } from 'lodash';
 import { AggregateEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
