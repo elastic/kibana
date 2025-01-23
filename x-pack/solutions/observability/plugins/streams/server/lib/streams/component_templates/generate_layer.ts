@@ -10,10 +10,9 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamDefinition } from '@kbn/streams-schema';
+import { WiredStreamDefinition, isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings, logsLifecycle } from './logs_layer';
-import { isRoot } from '../helpers/hierarchy';
 import { getComponentTemplateName } from './name';
 
 export function generateLayer(
@@ -21,7 +20,7 @@ export function generateLayer(
   definition: WiredStreamDefinition
 ): ClusterPutComponentTemplateRequest {
   const properties: Record<string, MappingProperty> = {};
-  Object.entries(definition.stream.ingest.wired.fields).forEach(([field, props]) => {
+  Object.entries(definition.ingest.wired.fields).forEach(([field, props]) => {
     const property: MappingProperty = {
       type: props.type,
     };

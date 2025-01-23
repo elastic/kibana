@@ -7,7 +7,7 @@
 
 import {
   ReadStreamDefinition,
-  FieldDefinitionConfigWithName,
+  NamedFieldDefinitionConfig,
   isWiredReadStream,
 } from '@kbn/streams-schema';
 import { StreamsRepositoryClient } from '@kbn/streams-plugin/public/api';
@@ -22,9 +22,9 @@ import { FieldStatus } from '../field_status';
 export type SchemaEditorEditingState = ReturnType<typeof useEditingState>;
 
 export interface FieldEntry {
-  name: FieldDefinitionConfigWithName['name'];
-  type?: FieldDefinitionConfigWithName['type'];
-  format?: FieldDefinitionConfigWithName['format'];
+  name: NamedFieldDefinitionConfig['name'];
+  type?: NamedFieldDefinitionConfig['type'];
+  format?: NamedFieldDefinitionConfig['format'];
   parent: string;
   status: FieldStatus;
 }
@@ -100,7 +100,7 @@ export const useEditingState = ({
       ? async () => {
           toggleIsSaving(true);
           try {
-            await streamsRepositoryClient.fetch(`PUT /api/streams/{id}`, {
+            await streamsRepositoryClient.fetch(`PUT /api/streams/{id}/_ingest`, {
               signal: abortController.signal,
               params: {
                 path: {
@@ -175,14 +175,14 @@ export const useEditingState = ({
 };
 
 export const isFullFieldDefinition = (
-  value?: Partial<FieldDefinitionConfigWithName>
-): value is FieldDefinitionConfigWithName => {
+  value?: Partial<NamedFieldDefinitionConfig>
+): value is NamedFieldDefinitionConfig => {
   return !!value && !!value.name && !!value.type;
 };
 
 const hasChanges = (
-  selectedField: Partial<FieldDefinitionConfigWithName>,
-  nextFieldEntry: Partial<FieldDefinitionConfigWithName>
+  selectedField: Partial<NamedFieldDefinitionConfig>,
+  nextFieldEntry: Partial<NamedFieldDefinitionConfig>
 ) => {
   return (
     selectedField.type !== nextFieldEntry.type || selectedField.format !== nextFieldEntry.format

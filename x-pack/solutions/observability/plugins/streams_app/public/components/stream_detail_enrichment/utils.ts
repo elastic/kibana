@@ -5,23 +5,23 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/naming-convention */
+
+import { ProcessorType, conditionSchema, createIsNarrowSchema } from '@kbn/streams-schema';
+import { isEmpty } from 'lodash';
+import { z } from '@kbn/zod';
 import {
+  DissectFormState,
   DissectProcessingDefinition,
+  EnrichmentUIProcessorDefinition,
+  GrokFormState,
   GrokProcessingDefinition,
   ProcessingDefinition,
-  ProcessorType,
-  isCompleteCondition,
+  ProcessorFormState,
   isDissectProcessor,
   isGrokProcessor,
-} from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
-import { DissectFormState, GrokFormState, ProcessorDefinition, ProcessorFormState } from './types';
-
-const defaultCondition: ProcessingDefinition['condition'] = {
-  field: '',
-  operator: 'eq',
-  value: '',
-};
+} from './types';
+import { EMPTY_EQUALS_CONDITION } from '../../util/condition';
 
 const defaultGrokProcessorFormState: GrokFormState = {
   type: 'grok',
@@ -30,7 +30,7 @@ const defaultGrokProcessorFormState: GrokFormState = {
   pattern_definitions: {},
   ignore_failure: true,
   ignore_missing: true,
-  condition: defaultCondition,
+  condition: EMPTY_EQUALS_CONDITION,
 };
 
 const defaultDissectProcessorFormState: DissectFormState = {
@@ -39,7 +39,7 @@ const defaultDissectProcessorFormState: DissectFormState = {
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
-  condition: defaultCondition,
+  condition: EMPTY_EQUALS_CONDITION,
 };
 
 const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
@@ -49,69 +49,75 @@ const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState>
 
 export const getDefaultFormState = (
   type: ProcessorType,
-  processor?: ProcessorDefinition
+  processor?: EnrichmentUIProcessorDefinition
 ): ProcessorFormState => {
   if (!processor) return defaultProcessorFormStateByType[type];
-
-  let configValues: ProcessorFormState = defaultProcessorFormStateByType[type];
 
   if (isGrokProcessor(processor.config)) {
     const { grok } = processor.config;
 
-    configValues = structuredClone({
+    return structuredClone({
       ...grok,
+      condition: processor.condition,
       type: 'grok',
       patterns: grok.patterns.map((pattern) => ({ value: pattern })),
     });
   }
 
-  if (isDissectProcessor(processor.config)) {
-    const { dissect } = processor.config;
+  const { dissect } = processor.config;
 
-    configValues = structuredClone({
-      ...dissect,
-      type: 'dissect',
-    });
-  }
-
-  return {
-    condition: processor.condition || defaultCondition,
-    ...configValues,
-  };
+  return structuredClone({
+    ...dissect,
+    condition: processor.condition,
+    type: 'dissect',
+  });
 };
 
 export const convertFormStateToProcessing = (
   formState: ProcessorFormState
 ): ProcessingDefinition => {
   if (formState.type === 'grok') {
-    const { condition, patterns, ...grokConfig } = formState;
+    const { condition, patterns, field, pattern_definitions, ignore_failure, ignore_missing } =
+      formState;
 
     return {
-      condition: isCompleteCondition(condition) ? condition : undefined,
+      condition,
       config: {
         grok: {
           patterns: patterns
             .filter(({ value }) => value.trim().length > 0)
             .map(({ value }) => value),
-          ...grokConfig,
+          field,
+          pattern_definitions,
+          ignore_failure,
+          ignore_missing,
         },
       },
     };
   }
 
   if (formState.type === 'dissect') {
-    const { condition, ...dissectConfig } = formState;
+    const { condition, field, pattern, append_separator, ignore_failure, ignore_missing } =
+      formState;
 
     return {
-      condition: isCompleteCondition(condition) ? condition : undefined,
+      condition,
       config: {
-        dissect: dissectConfig,
+        dissect: {
+          field,
+          pattern,
+          append_separator,
+          ignore_failure,
+          ignore_missing,
+        },
       },
     };
   }
 
   throw new Error('Cannot convert form state to processing: unknown type.');
 };
+
+export const isCompleteCondition = createIsNarrowSchema(z.unknown(), conditionSchema);
 
 export const isCompleteGrokDefinition = (processing: GrokProcessingDefinition) => {
   const { patterns } = processing.grok;

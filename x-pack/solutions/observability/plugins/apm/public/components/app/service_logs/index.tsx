@@ -95,6 +95,7 @@ export function ClassicServiceLogsStream() {
       query={query}
       height={'60vh'}
       displayOptions={{
+        solutionNavIdOverride: 'oblt',
         enableDocumentViewer: true,
         enableFilters: false,
       }}
