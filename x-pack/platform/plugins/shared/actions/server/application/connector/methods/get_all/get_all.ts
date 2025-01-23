@@ -120,6 +120,7 @@ async function getAllHelper({
       isPreconfigured: inMemoryConnector.isPreconfigured,
       isDeprecated: isConnectorDeprecated(inMemoryConnector),
       isSystemAction: inMemoryConnector.isSystemAction,
+      ...(inMemoryConnector.exposeConfig ? { config: inMemoryConnector.config } : {}),
     })),
   ].sort((a, b) => a.name.localeCompare(b.name));
 
