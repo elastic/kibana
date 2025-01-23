@@ -342,7 +342,6 @@ export function HeaderActions({
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
-
       {rule && ruleConditionsFlyoutOpen ? (
         <EditRuleFlyout
           initialRule={rule}

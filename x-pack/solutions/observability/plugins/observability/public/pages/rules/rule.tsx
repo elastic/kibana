@@ -8,7 +8,7 @@
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { RuleForm } from '@kbn/response-ops-rule-form';
-import { useLocation, useParams } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
 import { HeaderMenu } from '../overview/components/header_menu/header_menu';
@@ -17,13 +17,7 @@ import { paths } from '../../../common/locators/paths';
 import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 
-interface RulePageProps {
-  ruleTypeId?: string;
-  id?: string;
-}
-
 export function RulePage() {
-  const { id } = useParams<RulePageProps>();
   const {
     http,
     docLinks,
@@ -61,13 +55,9 @@ export function RulePage() {
         }),
       },
       {
-        text: id
-          ? i18n.translate('xpack.observability.breadcrumbs.editLinkText', {
-              defaultMessage: 'Edit',
-            })
-          : i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
-              defaultMessage: 'Create',
-            }),
+        text: i18n.translate('xpack.observability.breadcrumbs.createLinkText', {
+          defaultMessage: 'Create',
+        }),
       },
     ],
     { serverless }

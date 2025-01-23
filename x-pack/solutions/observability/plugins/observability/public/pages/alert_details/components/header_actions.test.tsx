@@ -148,6 +148,7 @@ describe('Header Actions', () => {
         );
 
         fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
+        fireEvent.click(await findByTestId('edit-rule-button'));
         expect(getByTestId('edit-rule-flyout')).toBeDefined();
       });
 
