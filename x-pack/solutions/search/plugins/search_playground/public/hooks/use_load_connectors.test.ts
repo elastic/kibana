@@ -81,7 +81,7 @@ describe('useLoadConnectors', () => {
         id: '6',
         actionTypeId: '.inference',
         isMissingSecrets: false,
-        config: { provider: 'openai', taskType: 'completion' },
+        config: { provider: 'openai', taskType: 'chat_completion' },
       },
     ];
     mockedLoadConnectors.mockResolvedValue(connectors);
@@ -130,7 +130,7 @@ describe('useLoadConnectors', () => {
           actionTypeId: '.inference',
           config: {
             provider: 'openai',
-            taskType: 'completion',
+            taskType: 'chat_completion',
           },
           id: '6',
           isMissingSecrets: false,

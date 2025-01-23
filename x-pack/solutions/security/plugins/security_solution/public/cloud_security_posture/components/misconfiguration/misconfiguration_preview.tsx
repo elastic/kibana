@@ -7,13 +7,13 @@
 
 import React, { useCallback, useEffect, useMemo } from 'react';
 import { css } from '@emotion/react';
-import type { EuiThemeComputed } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, useEuiTheme, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { DistributionBar } from '@kbn/security-solution-distribution-bar';
 import { useHasMisconfigurations } from '@kbn/cloud-security-posture/src/hooks/use_has_misconfigurations';
 import { i18n } from '@kbn/i18n';
-import { statusColors } from '@kbn/cloud-security-posture';
+import { getMisconfigurationStatusColor } from '@kbn/cloud-security-posture';
+import { MISCONFIGURATION_STATUS } from '@kbn/cloud-security-posture-common';
 import { METRIC_TYPE } from '@kbn/analytics';
 import {
   ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT,
@@ -38,7 +38,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
         }
       ),
       count: passedFindingsStats,
-      color: statusColors.passed,
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.PASSED),
     },
     {
       key: i18n.translate(
@@ -48,7 +48,7 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
         }
       ),
       count: failedFindingsStats,
-      color: statusColors.failed,
+      color: getMisconfigurationStatusColor(MISCONFIGURATION_STATUS.FAILED),
     },
   ];
 };
@@ -56,12 +56,12 @@ export const getFindingsStats = (passedFindingsStats: number, failedFindingsStat
 const MisconfigurationPreviewScore = ({
   passedFindings,
   failedFindings,
-  euiTheme,
 }: {
   passedFindings: number;
   failedFindings: number;
-  euiTheme: EuiThemeComputed<{}>;
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   return (
     <EuiFlexItem>
       <EuiFlexGroup direction="column" gutterSize="none">
@@ -158,7 +158,6 @@ export const MisconfigurationsPreview = ({
         <MisconfigurationPreviewScore
           passedFindings={passedFindings}
           failedFindings={failedFindings}
-          euiTheme={euiTheme}
         />
 
         <EuiFlexItem grow={2}>

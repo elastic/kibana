@@ -27,7 +27,7 @@ import {
   apiPublishesViewMode,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
-import { FloatingActions } from '@kbn/presentation-util-plugin/public';
+import { FloatingActions } from './floating_actions';
 import { DEFAULT_CONTROL_GROW, DEFAULT_CONTROL_WIDTH } from '../../../common';
 
 import { ControlPanelProps, DefaultControlApi } from '../../controls/types';
@@ -87,7 +87,7 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
       apiHasParentApi(api.parentApi) && // api.parentApi => controlGroupApi
       apiPublishesViewMode(api.parentApi.parentApi) // controlGroupApi.parentApi => dashboardApi
     )
-      return api.parentApi.parentApi.viewMode; // get view mode from dashboard API
+      return api.parentApi.parentApi.viewMode$; // get view mode from dashboard API
   })();
 
   const [
@@ -101,21 +101,21 @@ export const ControlPanel = <ApiType extends DefaultControlApi = DefaultControlA
     disabledActionIds,
     rawViewMode,
   ] = useBatchedOptionalPublishingSubjects(
-    api?.dataLoading,
-    api?.blockingError,
-    api?.panelTitle,
-    api?.defaultPanelTitle,
+    api?.dataLoading$,
+    api?.blockingError$,
+    api?.title$,
+    api?.defaultTitle$,
     api?.grow,
     api?.width,
     api?.parentApi?.labelPosition,
-    api?.parentApi?.disabledActionIds,
+    api?.parentApi?.disabledActionIds$,
     viewModeSubject
   );
   const usingTwoLineLayout = labelPosition === 'twoLine';
   const controlType = api ? api.type : undefined;
 
   const [initialLoadComplete, setInitialLoadComplete] = useState(!dataLoading);
-  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading))) {
+  if (!initialLoadComplete && (dataLoading === false || (api && !api.dataLoading$))) {
     setInitialLoadComplete(true);
   }
 

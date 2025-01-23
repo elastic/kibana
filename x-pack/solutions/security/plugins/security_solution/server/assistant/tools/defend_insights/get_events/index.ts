@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { SearchRequest } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import type { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
@@ -19,6 +19,26 @@ import {
 
 import { getFileEventsQuery } from './get_file_events_query';
 import { InvalidDefendInsightTypeError } from '../errors';
+
+interface AggregationResponse {
+  unique_process_executable: {
+    buckets: Array<{
+      key: string;
+      doc_count: number;
+      latest_event: {
+        hits: {
+          hits: Array<{
+            _id: string;
+            _source: {
+              agent: { id: string };
+              process: { executable: string };
+            };
+          }>;
+        };
+      };
+    }>;
+  };
+}
 
 export async function getAnonymizedEvents({
   endpointIds,
@@ -70,7 +90,17 @@ const getAnonymized = async ({
   onNewReplacements?: (replacements: Replacements) => void;
   replacements?: Replacements;
 }): Promise<string[]> => {
-  const result = await esClient.search<SearchResponse>(query);
+  const result = await esClient.search<{}, AggregationResponse>(query);
+  const fileEvents = (result.aggregations?.unique_process_executable.buckets ?? []).map(
+    (bucket) => {
+      const latestEvent = bucket.latest_event.hits.hits[0];
+      return {
+        _id: [latestEvent._id],
+        'agent.id': [latestEvent._source.agent.id],
+        'process.executable': [latestEvent._source.process.executable],
+      };
+    }
+  );
 
   // Accumulate replacements locally so we can, for example use the same
   // replacement for a hostname when we see it in multiple alerts:
@@ -81,13 +111,13 @@ const getAnonymized = async ({
     onNewReplacements?.(localReplacements); // invoke the callback with the latest replacements
   };
 
-  return result.hits?.hits?.map((hit) =>
+  return fileEvents.map((fileEvent) =>
     transformRawData({
       anonymizationFields,
       currentReplacements: localReplacements, // <-- the latest local replacements
       getAnonymizedValue,
       onNewReplacements: localOnNewReplacements, // <-- the local callback
-      rawData: getRawDataOrDefault(hit.fields),
+      rawData: getRawDataOrDefault(fileEvent),
     })
   );
 };
