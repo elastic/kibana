@@ -15,7 +15,7 @@ import { EuiListGroup, EuiPanel } from '@elastic/eui';
 import { PanelIncompatibleError, ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   SerializedTitles,
-  initializeTitles,
+  initializeTitleManager,
   SerializedPanelState,
   useBatchedOptionalPublishingSubjects,
 } from '@kbn/presentation-publishing';
@@ -94,25 +94,25 @@ export const getLinksEmbeddableFactory = () => {
       };
     },
     buildEmbeddable: async (state, buildApi, uuid, parentApi) => {
-      const error$ = new BehaviorSubject<Error | undefined>(state.error);
-      if (!isParentApiCompatible(parentApi)) error$.next(new PanelIncompatibleError());
+      const blockingError$ = new BehaviorSubject<Error | undefined>(state.error);
+      if (!isParentApiCompatible(parentApi)) blockingError$.next(new PanelIncompatibleError());
 
       const links$ = new BehaviorSubject<ResolvedLink[] | undefined>(state.links);
       const layout$ = new BehaviorSubject<LinksLayoutType | undefined>(state.layout);
-      const defaultPanelTitle = new BehaviorSubject<string | undefined>(state.defaultPanelTitle);
-      const defaultPanelDescription = new BehaviorSubject<string | undefined>(
+      const defaultTitle$ = new BehaviorSubject<string | undefined>(state.defaultPanelTitle);
+      const defaultDescription$ = new BehaviorSubject<string | undefined>(
         state.defaultPanelDescription
       );
       const savedObjectId$ = new BehaviorSubject(state.savedObjectId);
       const isByReference = Boolean(state.savedObjectId);
 
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
 
       const serializeLinksState = (byReference: boolean, newId?: string) => {
         if (byReference) {
           const linksByReferenceState: LinksByReferenceSerializedState = {
             savedObjectId: newId ?? state.savedObjectId!,
-            ...serializeTitles(),
+            ...titleManager.serialize(),
           };
           return { rawState: linksByReferenceState, references: [] };
         }
@@ -120,22 +120,22 @@ export const getLinksEmbeddableFactory = () => {
         const { attributes, references } = serializeLinksAttributes(runtimeState);
         const linksByValueState: LinksByValueSerializedState = {
           attributes,
-          ...serializeTitles(),
+          ...titleManager.serialize(),
         };
         return { rawState: linksByValueState, references };
       };
 
       const api = buildApi(
         {
-          ...titlesApi,
-          blockingError: error$,
-          defaultPanelTitle,
-          defaultPanelDescription,
-          isEditingEnabled: () => Boolean(error$.value === undefined),
+          ...titleManager.api,
+          blockingError$,
+          defaultTitle$,
+          defaultDescription$,
+          isEditingEnabled: () => Boolean(blockingError$.value === undefined),
           getTypeDisplayName: () => DISPLAY_NAME,
           serializeState: () => serializeLinksState(isByReference),
           saveToLibrary: async (newTitle: string) => {
-            defaultPanelTitle.next(newTitle);
+            defaultTitle$.next(newTitle);
             const runtimeState = api.snapshotRuntimeState();
             const { attributes, references } = serializeLinksAttributes(runtimeState);
             const {
@@ -196,26 +196,23 @@ export const getLinksEmbeddableFactory = () => {
             }
             links$.next(newState.links);
             layout$.next(newState.layout);
-            defaultPanelTitle.next(newState.defaultPanelTitle);
-            defaultPanelDescription.next(newState.defaultPanelDescription);
+            defaultTitle$.next(newState.defaultPanelTitle);
+            defaultDescription$.next(newState.defaultPanelDescription);
           },
         },
         {
-          ...titleComparators,
+          ...titleManager.comparators,
           links: [links$, (nextLinks?: ResolvedLink[]) => links$.next(nextLinks ?? [])],
           layout: [
             layout$,
             (nextLayout?: LinksLayoutType) => layout$.next(nextLayout ?? LINKS_VERTICAL_LAYOUT),
           ],
-          error: [error$, (nextError?: Error) => error$.next(nextError)],
+          error: [blockingError$, (nextError?: Error) => blockingError$.next(nextError)],
           defaultPanelDescription: [
-            defaultPanelDescription,
-            (nextDescription?: string) => defaultPanelDescription.next(nextDescription),
+            defaultDescription$,
+            (nextDescription?: string) => defaultDescription$.next(nextDescription),
           ],
-          defaultPanelTitle: [
-            defaultPanelTitle,
-            (nextTitle?: string) => defaultPanelTitle.next(nextTitle),
-          ],
+          defaultPanelTitle: [defaultTitle$, (nextTitle?: string) => defaultTitle$.next(nextTitle)],
           savedObjectId: [savedObjectId$, (val) => savedObjectId$.next(val)],
         }
       );

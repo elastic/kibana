@@ -11,7 +11,7 @@
         "label": "isLensApi",
         "description": [],
         "signature": [
-          "(api: unknown) => api is { uuid: string; panelTitle: ",
+          "(api: unknown) => api is { uuid: string; title$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19,7 +19,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; hidePanelTitle: ",
+          "<string | undefined>; hideTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -27,7 +27,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; defaultPanelTitle?: ",
+          "<boolean | undefined>; defaultTitle$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -35,7 +35,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; dataLoading: ",
+          "<string | undefined> | undefined; dataLoading$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -43,7 +43,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; blockingError: ",
+          "<boolean | undefined>; blockingError$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -51,7 +51,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<Error | undefined>; panelDescription: ",
+          "<Error | undefined>; description$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -59,7 +59,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; defaultPanelDescription?: ",
+          "<string | undefined>; defaultDescription$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -67,7 +67,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; disabledActionIds: ",
+          "<string | undefined> | undefined; disabledActionIds$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -88,10 +88,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          ", \"hidePanelTitle\"> & ",
+          ", \"hideTitle$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -123,7 +123,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; unsavedChanges?: ",
+          " | undefined>; unsavedChanges$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -655,7 +655,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean>; dataViews: ",
+          "<boolean>; dataViews$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -671,7 +671,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[] | undefined>; setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setPanelDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
+          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1115,7 +1115,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; }>; viewMode: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1131,7 +1131,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          ">; savedObjectId: ",
+          ">; savedObjectId$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -8296,7 +8296,7 @@
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "\"min\" | \"sum\" | \"avg\" | \"max\" | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "x-pack/platform/plugins/shared/lens/public/visualizations/metric/types.ts",
             "deprecated": false,
@@ -16551,7 +16551,7 @@
         "label": "LensApi",
         "description": [],
         "signature": [
-          "{ uuid: string; panelTitle: ",
+          "{ uuid: string; title$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16559,7 +16559,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; hidePanelTitle: ",
+          "<string | undefined>; hideTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16567,7 +16567,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; defaultPanelTitle?: ",
+          "<boolean | undefined>; defaultTitle$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16575,7 +16575,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; dataLoading: ",
+          "<string | undefined> | undefined; dataLoading$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16583,7 +16583,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; blockingError: ",
+          "<boolean | undefined>; blockingError$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16591,7 +16591,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<Error | undefined>; panelDescription: ",
+          "<Error | undefined>; description$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16599,7 +16599,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; defaultPanelDescription?: ",
+          "<string | undefined>; defaultDescription$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16607,7 +16607,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; disabledActionIds: ",
+          "<string | undefined> | undefined; disabledActionIds$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16628,10 +16628,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          ", \"hidePanelTitle\"> & ",
+          ", \"hideTitle$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16663,7 +16663,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; unsavedChanges?: ",
+          " | undefined>; unsavedChanges$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17195,7 +17195,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean>; dataViews: ",
+          "<boolean>; dataViews$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17211,7 +17211,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[] | undefined>; setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setPanelDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
+          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17655,7 +17655,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; }>; viewMode: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17671,7 +17671,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          ">; savedObjectId: ",
+          ">; savedObjectId$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18897,7 +18897,7 @@
         "label": "LensEmbeddableOutput",
         "description": [],
         "signature": [
-          "{ uuid: string; panelTitle: ",
+          "{ uuid: string; title$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18905,7 +18905,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; hidePanelTitle: ",
+          "<string | undefined>; hideTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18913,7 +18913,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; defaultPanelTitle?: ",
+          "<boolean | undefined>; defaultTitle$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18921,7 +18921,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; dataLoading: ",
+          "<string | undefined> | undefined; dataLoading$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18929,7 +18929,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; blockingError: ",
+          "<boolean | undefined>; blockingError$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18937,7 +18937,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<Error | undefined>; panelDescription: ",
+          "<Error | undefined>; description$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18945,7 +18945,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; defaultPanelDescription?: ",
+          "<string | undefined>; defaultDescription$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18953,7 +18953,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; disabledActionIds: ",
+          "<string | undefined> | undefined; disabledActionIds$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18974,10 +18974,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          ", \"hidePanelTitle\"> & ",
+          ", \"hideTitle$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19009,7 +19009,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; unsavedChanges?: ",
+          " | undefined>; unsavedChanges$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19541,7 +19541,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean>; dataViews: ",
+          "<boolean>; dataViews$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19557,7 +19557,7 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[] | undefined>; setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setPanelDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
+          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20001,7 +20001,7 @@
             "section": "def-common.DynamicActionsState",
             "text": "DynamicActionsState"
           },
-          "; } | undefined; isNewPanel?: boolean | undefined; }>; viewMode: ",
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -20017,7 +20017,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          ">; savedObjectId: ",
+          ">; savedObjectId$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
