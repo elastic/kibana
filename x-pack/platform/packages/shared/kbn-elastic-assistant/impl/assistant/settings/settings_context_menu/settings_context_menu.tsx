@@ -29,6 +29,7 @@ import { useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
+import { AI_ASSISTANT_MENU } from './translations';
 
 interface Params {
   isDisabled?: boolean;
@@ -228,7 +229,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           button={
             <KnowledgeBaseTour>
               <EuiButtonIcon
-                aria-label="test"
+                aria-label={AI_ASSISTANT_MENU}
                 isDisabled={isDisabled}
                 iconType="boxesVertical"
                 onClick={onButtonClick}

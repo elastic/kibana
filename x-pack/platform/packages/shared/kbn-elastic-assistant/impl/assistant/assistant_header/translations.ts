@@ -21,6 +21,13 @@ export const ANONYMIZATION = i18n.translate(
   }
 );
 
+export const CLOSE = i18n.translate(
+  'xpack.elasticAssistant.assistant.assistantHeader.closeButtonLabel',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
 export const KNOWLEDGE_BASE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBase',
   {

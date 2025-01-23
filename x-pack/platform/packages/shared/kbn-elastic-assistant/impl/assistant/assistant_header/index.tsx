@@ -24,6 +24,7 @@ import { ConnectorSelectorInline } from '../../connectorland/connector_selector_
 import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
 import { AIConnector } from '../../connectorland/connector_selector';
+import { getAnonymizationTooltip } from './get_anonymization_tooltip';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 
 interface OwnProps {
@@ -90,6 +91,12 @@ export const AssistantHeader: React.FC<Props> = ({
     [onConversationSelected]
   );
 
+  const conversationHasReplacements = !isEmpty(selectedConversation?.replacements);
+  const anonymizationTooltip = getAnonymizationTooltip({
+    conversationHasReplacements,
+    showAnonymizedValuesChecked,
+  });
+
   return (
     <>
       <FlyoutNavigation
@@ -122,6 +129,7 @@ export const AssistantHeader: React.FC<Props> = ({
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
+                aria-label={i18n.CLOSE}
                 data-test-subj="euiFlyoutCloseButton"
                 iconType="cross"
                 color="text"

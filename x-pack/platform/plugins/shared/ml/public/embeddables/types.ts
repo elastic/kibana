@@ -19,7 +19,7 @@ import type {
   PublishesUnifiedSearch,
   PublishingSubject,
   PublishesTimeRange,
-  PublishesWritablePanelTitle,
+  PublishesWritableTitle,
   PublishesDataViews,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -144,7 +144,7 @@ export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoad
 
 export type AnomalyChartsEmbeddableApi = MlEmbeddableBaseApi<AnomalyChartsEmbeddableState> &
   PublishesDataViews &
-  PublishesWritablePanelTitle &
+  PublishesWritableTitle &
   HasEditCapabilities &
   AnomalyChartsApi;
 
@@ -204,7 +204,7 @@ export interface SingleMetricViewerEmbeddableState
 
 export type SingleMetricViewerEmbeddableApi =
   MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
-    PublishesWritablePanelTitle &
+    PublishesWritableTitle &
     HasEditCapabilities &
     SingleMetricViewerComponentApi;
 
