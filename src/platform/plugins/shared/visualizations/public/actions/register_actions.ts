@@ -19,12 +19,12 @@ export function registerActions(
   types: TypesStart
 ) {
   uiActions.addTriggerActionAsync(CONTEXT_MENU_TRIGGER, ACTION_EDIT_IN_LENS, async () => {
-    const { EditInLensAction } = await import('./actions_module');
+    const { EditInLensAction } = await import('./edit_in_lens_action');
     return new EditInLensAction(data.query.timefilter.timefilter);
   });
 
   uiActions.addTriggerActionAsync(ADD_PANEL_TRIGGER, ADD_AGG_VIS_ACTION_ID, async () => {
-    const { AddAggVisualizationPanelAction } = await import('./actions_module');
+    const { AddAggVisualizationPanelAction } = await import('./add_agg_vis_action');
     return new AddAggVisualizationPanelAction(types);
   });
 }
