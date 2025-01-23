@@ -48,7 +48,7 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
     null
   );
 
-  const dashboardId = api.parentApi.savedObjectId.value;
+  const dashboardId = api.parentApi.savedObjectId$.value;
 
   const onSubmit = useCallback(() => {
     const dashboard = api.parentApi;

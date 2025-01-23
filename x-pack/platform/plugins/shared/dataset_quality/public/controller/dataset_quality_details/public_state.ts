@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DegradedFieldSortField } from '../../hooks';
+import { QualityIssueSortField } from '../../hooks';
 import {
   DatasetQualityDetailsControllerContext,
   DEFAULT_CONTEXT,
@@ -17,11 +17,13 @@ export const getPublicStateFromContext = (
 ): DatasetQualityDetailsPublicState => {
   return {
     dataStream: context.dataStream,
-    degradedFields: context.degradedFields,
+    qualityIssues: context.qualityIssues,
+    failedDocsErrors: context.failedDocsErrors,
     timeRange: context.timeRange,
     breakdownField: context.breakdownField,
+    qualityIssuesChart: context.qualityIssuesChart,
     integration: context.integration,
-    expandedDegradedField: context.expandedDegradedField,
+    expandedQualityIssue: context.expandedQualityIssue,
     showCurrentQualityIssues: context.showCurrentQualityIssues,
   };
 };
@@ -30,16 +32,16 @@ export const getContextFromPublicState = (
   publicState: DatasetQualityDetailsPublicStateUpdate
 ): DatasetQualityDetailsControllerContext => ({
   ...DEFAULT_CONTEXT,
-  degradedFields: {
+  qualityIssues: {
     table: {
-      ...DEFAULT_CONTEXT.degradedFields.table,
-      ...publicState.degradedFields?.table,
-      sort: publicState.degradedFields?.table?.sort
+      ...DEFAULT_CONTEXT.qualityIssues.table,
+      ...publicState.qualityIssues?.table,
+      sort: publicState.qualityIssues?.table?.sort
         ? {
-            ...publicState.degradedFields.table.sort,
-            field: publicState.degradedFields.table.sort.field as DegradedFieldSortField,
+            ...publicState.qualityIssues.table.sort,
+            field: publicState.qualityIssues.table.sort.field as QualityIssueSortField,
           }
-        : DEFAULT_CONTEXT.degradedFields.table.sort,
+        : DEFAULT_CONTEXT.qualityIssues.table.sort,
     },
   },
   timeRange: {
@@ -52,7 +54,8 @@ export const getContextFromPublicState = (
   },
   dataStream: publicState.dataStream,
   breakdownField: publicState.breakdownField,
-  expandedDegradedField: publicState.expandedDegradedField,
+  qualityIssuesChart: publicState.qualityIssuesChart ?? DEFAULT_CONTEXT.qualityIssuesChart,
+  expandedQualityIssue: publicState.expandedQualityIssue,
   showCurrentQualityIssues:
     publicState.showCurrentQualityIssues ?? DEFAULT_CONTEXT.showCurrentQualityIssues,
 });
