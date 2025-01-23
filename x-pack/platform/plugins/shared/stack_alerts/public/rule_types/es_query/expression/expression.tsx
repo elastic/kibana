@@ -66,13 +66,13 @@ export const EsQueryRuleTypeExpression: React.FunctionComponent<
         // @ts-expect-error upgrade typescript v5.1.6
         errors[errorKey]?.length >= 1 && ruleParams[errorKey] !== undefined
       );
-    }) ??
+    }) ||
     // For search source alerts, if the only error is timeField, show this error even if the param is undefined
     // timeField is inherently a part of the selectable data view, so if the user selects a data view with no
     // timeField, this data view is incompatible with the rule.
-    (isSearchSource && !!errors.timeField?.length && !errors.searchConfiguration?.length)
+    (isSearchSource && !!errors.timeField?.length && !errors.searchConfiguration?.length
       ? 'timeField'
-      : undefined;
+      : undefined);
 
   const expressionError = !!errorParam && (
     <>
