@@ -25,7 +25,7 @@ type DivProps = Pick<React.HTMLAttributes<HTMLDivElement>, 'className' | 'style'
 
 export interface Props extends DivProps {
   appFixedViewport?: HTMLElement;
-  dashboardContainer?: HTMLElement;
+  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
   id: DashboardPanelState['explicitInput']['id'];
   index?: number;
   type: DashboardPanelState['type'];
@@ -38,7 +38,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
   (
     {
       appFixedViewport,
-      dashboardContainer,
+      dashboardContainerRef,
       id,
       index,
       type,
@@ -103,7 +103,7 @@ export const Item = React.forwardRef<HTMLDivElement, Props>(
       }
     }, [id, dashboardApi, scrollToPanelId, highlightPanelId, ref, blurPanel]);
 
-    const dashboardContainerTopOffset = dashboardContainer?.offsetTop || 0;
+    const dashboardContainerTopOffset = dashboardContainerRef?.current?.offsetTop || 0;
     const globalNavTopOffset = appFixedViewport?.offsetTop || 0;
 
     const focusStyles = blurPanel
