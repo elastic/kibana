@@ -23,11 +23,10 @@ type InitialState = DatasetQualityPublicStateUpdate;
 interface Dependencies {
   core: CoreStart;
   dataStreamStatsService: DataStreamsStatsServiceStart;
-  isServerless: boolean;
 }
 
 export const createDatasetQualityControllerFactory =
-  ({ core, dataStreamStatsService, isServerless }: Dependencies) =>
+  ({ core, dataStreamStatsService }: Dependencies) =>
   async ({
     initialState = DEFAULT_CONTEXT,
   }: {
@@ -41,7 +40,6 @@ export const createDatasetQualityControllerFactory =
       initialContext,
       toasts: core.notifications.toasts,
       dataStreamStatsClient,
-      isServerless,
     });
 
     const service = interpret(machine, {

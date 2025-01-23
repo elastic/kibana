@@ -138,8 +138,8 @@ export const createPureDatasetQualityControllerStateMachine = (
                     },
                     onError: [
                       {
-                        target: 'unsupported',
-                        cond: 'checkIfUnsupported',
+                        target: 'notImplemented',
+                        cond: 'checkIfNotImplemented',
                       },
                       {
                         target: 'unauthorized',
@@ -153,7 +153,7 @@ export const createPureDatasetQualityControllerStateMachine = (
                   },
                 },
                 loaded: {},
-                unsupported: {},
+                notImplemented: {},
                 unauthorized: { type: 'final' },
               },
               on: {
@@ -465,12 +465,12 @@ export const createPureDatasetQualityControllerStateMachine = (
             event.data.statusCode === 403
           );
         },
-        checkIfUnsupported: (_context, event) => {
+        checkIfNotImplemented: (_context, event) => {
           return (
             'data' in event &&
             typeof event.data === 'object' &&
-            'type' in event.data! &&
-            event.data.type === 'unsupported'
+            'statusCode' in event.data! &&
+            event.data.statusCode === 501
           );
         },
       },
@@ -481,14 +481,12 @@ export interface DatasetQualityControllerStateMachineDependencies {
   initialContext?: DatasetQualityControllerContext;
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
-  isServerless: boolean;
 }
 
 export const createDatasetQualityControllerStateMachine = ({
   initialContext = DEFAULT_CONTEXT,
   toasts,
   dataStreamStatsClient,
-  isServerless,
 }: DatasetQualityControllerStateMachineDependencies) =>
   createPureDatasetQualityControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -547,14 +545,6 @@ export const createDatasetQualityControllerStateMachine = ({
         });
       },
       loadFailedDocs: (context) => {
-        if (isServerless) {
-          const unsupportedError = {
-            message: 'Failure store is not available in serverless mode',
-            type: 'unsupported',
-          };
-          return Promise.reject(unsupportedError);
-        }
-
         const { startDate: start, endDate: end } = getDateISORange(context.filters.timeRange);
 
         return dataStreamStatsClient.getDataStreamsFailedStats({

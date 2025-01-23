@@ -218,8 +218,8 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             },
                             onError: [
                               {
-                                target: 'unsupported',
-                                cond: 'checkIfUnsupported',
+                                target: 'notImplemented',
+                                cond: 'checkIfNotImplemented',
                               },
                               {
                                 target: '#DatasetQualityDetailsController.indexNotFound',
@@ -231,7 +231,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             ],
                           },
                         },
-                        unsupported: {
+                        notImplemented: {
                           type: 'final',
                         },
                         errorFetchingFailedDocs: {},
@@ -358,7 +358,7 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
                             onError: [
                               {
                                 target: 'unsupported',
-                                cond: 'checkIfUnsupported',
+                                cond: 'checkIfNotImplemented',
                               },
                               {
                                 target: '#DatasetQualityDetailsController.indexNotFound',
@@ -716,12 +716,12 @@ export const createPureDatasetQualityDetailsControllerStateMachine = (
             event.data.statusCode === 403
           );
         },
-        checkIfUnsupported: (_context, event) => {
+        checkIfNotImplemented: (_context, event) => {
           return (
             'data' in event &&
             typeof event.data === 'object' &&
-            'type' in event.data! &&
-            event.data.type === 'unsupported'
+            'statusCode' in event.data! &&
+            event.data.statusCode === 501
           );
         },
         isIndexNotFoundError: (_, event) => {
@@ -779,7 +779,6 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
-  isServerless: boolean;
 }
 
 export const createDatasetQualityDetailsControllerStateMachine = ({
@@ -788,7 +787,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   toasts,
   dataStreamStatsClient,
   dataStreamDetailsClient,
-  isServerless,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
   createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
     actions: {
@@ -853,14 +851,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return false;
       },
       loadFailedDocsDetails: (context) => {
-        if (isServerless) {
-          const unsupportedError = {
-            message: 'Failure store is not available in serverless mode',
-            type: 'unsupported',
-          };
-          return Promise.reject(unsupportedError);
-        }
-
         const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 
         return dataStreamDetailsClient.getFailedDocsDetails({
@@ -915,14 +905,6 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
         return Promise.resolve();
       },
       loadfailedDocsErrors: (context) => {
-        if (isServerless) {
-          const unsupportedError = {
-            message: 'Failure store is not available in serverless mode',
-            type: 'unsupported',
-          };
-          return Promise.reject(unsupportedError);
-        }
-
         if ('expandedQualityIssue' in context && context.expandedQualityIssue) {
           const { startDate: start, endDate: end } = getDateISORange(context.timeRange);
 

@@ -54,23 +54,20 @@ export async function getFailedDocsErrors({
 function extractAndDeduplicateValues(
   searchHits: SearchHit[]
 ): Array<{ type: string; message: string }> {
-  const values: Record<string, string[]> = {};
+  const values: Record<string, Set<string>> = {};
 
   searchHits.forEach((hit: any) => {
     const fieldKey = hit._source?.error?.type;
     const fieldValue = hit._source?.error?.message;
-    if (values[fieldKey]) {
-      values[fieldKey].push(fieldValue);
-    } else {
-      values[fieldKey] = [fieldValue];
+    if (!values[fieldKey]) {
+      // Here we will create a set if not already present
+      values[fieldKey] = new Set();
     }
+    // here set.add will take care of dedupe
+    values[fieldKey].add(fieldValue);
   });
 
-  Object.keys(values).forEach((key) => {
-    values[key] = Array.from(new Set(values[key]));
-  });
-
-  return Object.entries(values)
-    .map(([key, messages]) => messages.map((message) => ({ type: key, message })))
-    .flat();
+  return Object.entries(values).flatMap(([key, messages]) =>
+    Array.from(messages).map((message) => ({ type: key, message }))
+  );
 }

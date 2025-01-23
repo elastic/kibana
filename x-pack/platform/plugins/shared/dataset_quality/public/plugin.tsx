@@ -56,7 +56,6 @@ export class DatasetQualityPlugin
     const createDatasetQualityController = createDatasetQualityControllerLazyFactory({
       core,
       dataStreamStatsService,
-      isServerless: this.isServerless,
     });
 
     const DatasetQualityDetails = createDatasetQualityDetails({
@@ -71,7 +70,6 @@ export class DatasetQualityPlugin
       plugins,
       dataStreamStatsService,
       dataStreamDetailsService,
-      isServerless: this.isServerless,
     });
 
     return {

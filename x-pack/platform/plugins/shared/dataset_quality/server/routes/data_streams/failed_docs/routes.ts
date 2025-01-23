@@ -5,9 +5,13 @@
  * 2.0.
  */
 
-import * as t from 'io-ts';
 import { notImplemented } from '@hapi/boom';
-import { DataStreamDocsStat, FailedDocsDetails } from '../../../../common/api_types';
+import * as t from 'io-ts';
+import {
+  DataStreamDocsStat,
+  FailedDocsDetails,
+  FailedDocsErrorsResponse,
+} from '../../../../common/api_types';
 import { rangeRt, typesRt } from '../../../types/default_api_types';
 import { createDatasetQualityServerRoute } from '../../create_datasets_quality_server_route';
 import { getFailedDocsPaginated } from './get_failed_docs';
@@ -102,7 +106,7 @@ const failedDocsErrorsRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
-  async handler(resources): Promise<{ errors: Array<{ type: string; message: string }> }> {
+  async handler(resources): Promise<FailedDocsErrorsResponse> {
     const { context, params, getEsCapabilities } = resources;
     const coreContext = await context.core;
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
