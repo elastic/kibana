@@ -57,7 +57,7 @@ export type PackagePolicyValidationResults = {
   inputs: Record<PackagePolicyInput['type'], PackagePolicyInputValidationResults> | null;
 } & PackagePolicyConfigValidationResults;
 
-const validateConditionalRequiredVars = (
+const validatePackageRequiredVars = (
   stream: NewPackagePolicyInputStream,
   requiredVars?: RegistryRequiredVars
 ) => {
@@ -262,7 +262,7 @@ export const validatePackagePolicy = (
         }
 
         if (stream.vars && stream.enabled) {
-          const requiredVars = validateConditionalRequiredVars(
+          const requiredVars = validatePackageRequiredVars(
             stream,
             streamRequiredVarsDefsByDataAndInput[`${stream.data_stream.dataset}-${input.type}`]
           );
