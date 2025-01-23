@@ -406,7 +406,7 @@ describe('createManagedConfiguration()', () => {
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
-          'Poll interval configuration changing from 100 to 120 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
+          'Poll interval configuration changing from 100 to 120 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
         );
       });
 
@@ -506,7 +506,7 @@ describe('createManagedConfiguration()', () => {
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
         expect(logger.warn).toHaveBeenCalledWith(
-          'Poll interval configuration changing from 100 to 120 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
+          'Poll interval configuration changing from 100 to 120 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
         );
       });
 

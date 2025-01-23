@@ -150,7 +150,7 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
+        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3600ms');
     });
@@ -174,7 +174,7 @@ describe('managed configuration', () => {
       clock.tick(100000);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 3000 to 61000 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
+        'Poll interval configuration changing from 3000 to 61000 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 61000ms');
     });
@@ -192,7 +192,7 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
+        'Poll interval configuration changing from 3000 to 3600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3600ms');
     });
@@ -246,7 +246,7 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 500 to 600 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
+        'Poll interval configuration changing from 500 to 600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 600ms');
     });
@@ -264,7 +264,7 @@ describe('managed configuration', () => {
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
       expect(logger.warn).toHaveBeenCalledWith(
-        'Poll interval configuration changing from 500 to 600 after seeing 1 "too many request" and/or "execute [inline] script" error(s).'
+        'Poll interval configuration changing from 500 to 600 after seeing 1 "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 600ms');
     });

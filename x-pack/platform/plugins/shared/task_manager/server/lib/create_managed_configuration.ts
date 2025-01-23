@@ -171,7 +171,7 @@ export function createPollIntervalScan(
             `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after ${
               updatedForCapacity
                 ? `a change in the average task load: ${avgTmUtilization}.`
-                : `seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s).`
+                : `seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).`
             }`
           );
         }
@@ -296,7 +296,8 @@ function getAverageUtilization(
   window.push({ timestamp: currentTime, utilization });
 
   // Remove utilizations outside the 15s window
-  while (window.length > 0 && window[0].timestamp < currentTime - TM_UTILIZATION_WINDOW) {
+  // Added window.length > 1 to ensure there is at least one entry in the window
+  while (window.length > 1 && window[0].timestamp < currentTime - TM_UTILIZATION_WINDOW) {
     window.shift();
   }
 
