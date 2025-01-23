@@ -502,6 +502,24 @@ const otherDefinitions: FunctionDefinition[] = [
     ],
   },
   {
+    type: 'builtin' as const,
+    name: 'where',
+    description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.whereDoc', {
+      defaultMessage: 'WHERE operator',
+    }),
+    supportedCommands: ['stats', 'inlinestats', 'metrics'],
+    supportedOptions: [],
+    signatures: [
+      {
+        params: [
+          { name: 'left', type: 'any' },
+          { name: 'right', type: 'any' },
+        ],
+        returnType: 'unknown',
+      },
+    ],
+  },
+  {
     // TODO — this shouldn't be a function or an operator...
     name: 'info',
     type: 'builtin',

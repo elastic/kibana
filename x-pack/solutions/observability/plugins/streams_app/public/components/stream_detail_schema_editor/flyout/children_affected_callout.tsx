@@ -6,15 +6,25 @@
  */
 
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiCallOut, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { StreamConfigDefinition } from '@kbn/streams-schema';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { RoutingDefinition } from '@kbn/streams-schema';
+import { useStreamsAppRouter } from '../../../hooks/use_streams_app_router';
 
 export const ChildrenAffectedCallout = ({
   childStreams,
 }: {
-  childStreams: StreamConfigDefinition['ingest']['routing'];
+  childStreams: RoutingDefinition[];
 }) => {
+  const router = useStreamsAppRouter();
+  const childStreamLinks = childStreams.map((stream) => {
+    return (
+      <EuiLink href={router.link('/{key}', { path: { key: stream.destination } })}>
+        {stream.destination}
+      </EuiLink>
+    );
+  });
   return (
     <EuiCallOut
       color="warning"
@@ -22,12 +32,13 @@ export const ChildrenAffectedCallout = ({
         defaultMessage: 'Field changes',
       })}
     >
-      {i18n.translate('xpack.streams.childStreamsWarning.text', {
-        defaultMessage: "Editing this field will affect it's dependant streams: {affectedStreams} ",
-        values: {
-          affectedStreams: childStreams.map((stream) => stream.name).join(', '),
-        },
-      })}
+      <FormattedMessage
+        id="xpack.streams.childStreamsWarning.text"
+        defaultMessage="Editing this field will affect it's dependant streams: {affectedStreams}"
+        values={{
+          affectedStreams: childStreamLinks.map((link, i) => [i > 0 && ', ', link]),
+        }}
+      />
     </EuiCallOut>
   );
 };
