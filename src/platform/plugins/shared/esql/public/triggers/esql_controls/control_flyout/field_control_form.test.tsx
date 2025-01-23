@@ -13,7 +13,7 @@ import { monaco } from '@kbn/monaco';
 import { dataPluginMock } from '@kbn/data-plugin/public/mocks';
 import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { FieldControlForm } from './field_control_form';
-import { EsqlControlType } from '../types';
+import { ESQLControlState, EsqlControlType } from '../types';
 
 jest.mock('@kbn/esql-utils', () => ({
   getESQLQueryColumnsRaw: jest.fn().mockResolvedValue([{ name: 'column1' }, { name: 'column2' }]),
@@ -125,7 +125,7 @@ describe('FieldControlForm', () => {
       variableType: ESQLVariableType.FIELDS,
       esqlQuery: 'FROM foo | STATS BY',
       controlType: EsqlControlType.STATIC_VALUES,
-    };
+    } as ESQLControlState;
     const { findByTestId } = render(
       <FieldControlForm
         variableType={ESQLVariableType.FIELDS}
@@ -172,7 +172,7 @@ describe('FieldControlForm', () => {
       variableType: ESQLVariableType.FIELDS,
       esqlQuery: 'FROM foo | STATS BY',
       controlType: EsqlControlType.STATIC_VALUES,
-    };
+    } as ESQLControlState;
     const onEditControlSpy = jest.fn();
     const { findByTestId, findByTitle } = render(
       <FieldControlForm

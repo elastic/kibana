@@ -16,7 +16,7 @@ import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { ValueControlForm } from './value_control_form';
-import { EsqlControlType } from '../types';
+import { EsqlControlType, ESQLControlState } from '../types';
 
 jest.mock('@kbn/esql-utils', () => {
   return {
@@ -158,7 +158,7 @@ describe('ValueControlForm', () => {
         variableType: ESQLVariableType.TIME_LITERAL,
         esqlQuery: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
         controlType: EsqlControlType.STATIC_VALUES,
-      };
+      } as ESQLControlState;
       const { findByTestId } = render(
         <ValueControlForm
           variableType={ESQLVariableType.TIME_LITERAL}
@@ -206,7 +206,7 @@ describe('ValueControlForm', () => {
         variableType: ESQLVariableType.TIME_LITERAL,
         esqlQuery: 'FROM foo | STATS BY BUCKET(@timestamp,)"',
         controlType: EsqlControlType.STATIC_VALUES,
-      };
+      } as ESQLControlState;
       const onEditControlSpy = jest.fn();
       const { findByTestId } = render(
         <ValueControlForm
