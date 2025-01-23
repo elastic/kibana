@@ -5,9 +5,6 @@
  * 2.0.
  */
 
-import { map } from 'rxjs';
-import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { AppStatus } from '@kbn/core-application-browser';
 import {
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
@@ -20,6 +17,9 @@ import { getRouterLinkProps } from '@kbn/router-utils';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs';
 import { BasicDataStream, DataStreamSelector, TimeRangeConfig } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
 import { SendTelemetryFn } from './use_redirect_link_telemetry';
@@ -110,15 +110,16 @@ export const useRedirectLink = <T extends BasicDataStream>({
       isLogsExplorerAvailable,
     };
   }, [
-    breakdownField,
+    isLogsExplorerAppAccessible,
+    logsExplorerLocator,
     dataStreamStat,
+    query,
     from,
     to,
-    logsExplorerLocator,
-    query,
-    sendTelemetry,
+    breakdownField,
     share.url.locators,
-    isLogsExplorerAppAccessible,
+    selector,
+    sendTelemetry,
   ]);
 };
 
