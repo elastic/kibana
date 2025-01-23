@@ -109,7 +109,6 @@ export const RemoteClusterWizard = ({
       {currentStep === SETUP_TRUST && (
         <RemoteClusterSetupTrust
           next={completeTrustStep}
-          onCancel={onCancel}
           currentSecurityModel={securityModel}
           onSecurityChange={onSecurityUpdate}
         />

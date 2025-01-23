@@ -77,9 +77,6 @@ export interface RemoteClustersActions {
       click: () => void;
       isDisabled: () => boolean;
     };
-    backButton: {
-      click: () => void;
-    };
     isOnTrustStep: () => boolean;
   };
 
@@ -305,9 +302,6 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
         button: {
           click: () => click(trustButtonSelector),
           isDisabled: () => find(trustButtonSelector).props().disabled,
-        },
-        backButton: {
-          click: () => click('remoteClusterTrustBackButton'),
         },
         isOnTrustStep: () => exists(trustButtonSelector),
       },

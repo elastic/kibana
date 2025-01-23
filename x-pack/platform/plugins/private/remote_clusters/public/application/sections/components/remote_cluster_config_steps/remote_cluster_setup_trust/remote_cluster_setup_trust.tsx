@@ -50,12 +50,10 @@ const i18nTexts = {
 interface Props {
   next: (model: string) => void;
   onSecurityChange: (model: string) => void;
-  onCancel?: () => void;
   currentSecurityModel: string;
 }
 
 export const RemoteClusterSetupTrust = ({
-  onCancel,
   next,
   currentSecurityModel,
   onSecurityChange,
@@ -162,21 +160,13 @@ export const RemoteClusterSetupTrust = ({
         handleNext={() => {
           next(securityModel);
         }}
-        onBack={onCancel}
         confirmFormText={
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.nextButtonLabel"
             defaultMessage="Next"
           />
         }
-        backFormText={
-          <FormattedMessage
-            id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
-            defaultMessage="Cancel"
-          />
-        }
         nextButtonTestSubj={'remoteClusterTrustNextButton'}
-        backButtonTestSubj={'remoteClusterTrustBackButton'}
       />
     </div>
   );

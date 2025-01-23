@@ -22,10 +22,10 @@ interface Props {
   handleNext: () => void;
   onBack?: () => void;
   confirmFormText: ReactNode;
-  backFormText: ReactNode;
+  backFormText?: ReactNode;
   cluster?: ClusterPayload;
   nextButtonTestSubj: string;
-  backButtonTestSubj: string;
+  backButtonTestSubj?: string;
 }
 
 export const ActionButtons: React.FC<Props> = ({
@@ -62,9 +62,11 @@ export const ActionButtons: React.FC<Props> = ({
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="primary" onClick={onBack} data-test-subj={backButtonTestSubj}>
-              {backFormText}
-            </EuiButtonEmpty>
+            {onBack && (
+              <EuiButtonEmpty color="primary" onClick={onBack} data-test-subj={backButtonTestSubj}>
+                {backFormText}
+              </EuiButtonEmpty>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
