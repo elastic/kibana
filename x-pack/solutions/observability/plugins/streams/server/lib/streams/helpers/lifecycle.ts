@@ -10,7 +10,7 @@ import {
   WiredStreamDefinition,
   isChildOf,
   isDescendantOf,
-  isInheritLifecycleSchema,
+  isInheritLifecycle,
 } from '@kbn/streams-schema';
 import { orderBy } from 'lodash';
 
@@ -22,7 +22,7 @@ export function findInheritedLifecycle(
     [...ancestors, definition],
     (parent) => parent.name.split('.').length,
     'asc'
-  ).findLast(({ ingest }) => !isInheritLifecycleSchema(ingest.lifecycle));
+  ).findLast(({ ingest }) => !isInheritLifecycle(ingest.lifecycle));
 
   if (!originDefinition) {
     throw new Error('Unable to find inherited lifecycle');
@@ -43,7 +43,7 @@ export function findInheritingStreams(
 
     if (
       isDescendantOf(root.name, definition.name) &&
-      !isInheritLifecycleSchema(definition.ingest.lifecycle)
+      !isInheritLifecycle(definition.ingest.lifecycle)
     ) {
       // ignore subtrees with a lifecycle override
       continue;

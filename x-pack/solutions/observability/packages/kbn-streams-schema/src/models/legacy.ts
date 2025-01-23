@@ -8,21 +8,18 @@
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import {
+  IngestStreamLifecycle,
   InheritedFieldDefinition,
+  InheritedIngestStreamLifecycle,
   UnwiredStreamDefinition,
   WiredStreamDefinition,
+  ingestStreamLifecycleSchema,
   inheritedFieldDefinitionSchema,
+  inheritedIngestStreamLifecycleSchema,
   unwiredStreamDefinitionSchema,
   wiredStreamDefinitionSchema,
 } from './ingest';
-import {
-  ElasticsearchAsset,
-  IngestStreamLifecycle,
-  InheritedIngestStreamLifecycle,
-  elasticsearchAssetSchema,
-  ingestStreamLifecycleSchema,
-  inheritedIngestStreamLifecycleSchema,
-} from './ingest/common';
+import { ElasticsearchAsset, elasticsearchAssetSchema } from './ingest/common';
 import { createIsNarrowSchema } from '../helpers';
 
 /**
@@ -38,12 +35,12 @@ interface ReadStreamDefinitionBase {
 
 interface WiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: WiredStreamDefinition;
-  effective_lifecycle?: InheritedIngestStreamLifecycle;
+  effective_lifecycle: InheritedIngestStreamLifecycle;
 }
 
 interface UnwiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: UnwiredStreamDefinition;
-  effective_lifecycle?: IngestStreamLifecycle;
+  effective_lifecycle: IngestStreamLifecycle;
 }
 
 type ReadStreamDefinition = WiredReadStreamDefinition | UnwiredReadStreamDefinition;

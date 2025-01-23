@@ -64,7 +64,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     }
   }
 
-  describe.only('Lifecycle', () => {
+  describe('Lifecycle', () => {
     const wiredPutBody: IngestStreamUpsertRequest = {
       stream: {
         ingest: { lifecycle: { inherit: {} }, routing: [], processing: [], wired: { fields: {} } },
@@ -102,6 +102,25 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         dsl: { data_retention: '999d' },
         from: 'logs',
       });
+    });
+
+    it('does not allow inherit lifecycle on root', async () => {
+      const rootDefinition = await getStream(apiClient, 'logs');
+
+      await putStream(
+        apiClient,
+        'logs',
+        {
+          dashboards: [],
+          stream: {
+            ingest: {
+              ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
+              lifecycle: { inherit: {} },
+            },
+          },
+        },
+        400
+      );
     });
 
     it('inherits dlm', async () => {
