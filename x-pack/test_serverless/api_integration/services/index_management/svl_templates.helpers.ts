@@ -52,7 +52,7 @@ export function SvlTemplatesHelpers({ getService }: FtrProviderContext) {
     indexPatterns: string[] = INDEX_PATTERNS,
     isLegacy: boolean = false,
     isMappingsSourceFieldEnabled: boolean = true,
-    indexMode?: string,
+    indexMode?: string
   ) => {
     const baseTemplate: TemplateDeserialized = {
       name,

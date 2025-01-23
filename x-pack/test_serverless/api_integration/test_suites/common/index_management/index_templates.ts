@@ -130,9 +130,12 @@ export default function ({ getService }: FtrProviderContext) {
         describe('with logs-*-* index pattern', () => {
           const logsdbTemplateName = 'test-logsdb-template';
           before(async () => {
-            const template = svlTemplatesHelpers.getTemplatePayload(logsdbTemplateName, [
-              'logs-*-*',
-            ], false, false);
+            const template = svlTemplatesHelpers.getTemplatePayload(
+              logsdbTemplateName,
+              ['logs-*-*'],
+              false,
+              false
+            );
             await svlTemplatesApi.createTemplate(template, roleAuthc).expect(200);
           });
 
