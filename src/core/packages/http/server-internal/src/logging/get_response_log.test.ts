@@ -27,7 +27,7 @@ interface RequestFixtureOptions {
   mime?: string;
   path?: string;
   query?: Record<string, any>;
-  response?: Record<string, any> | Boom.Boom;
+  response?: Record<string, any> | Boom.Boom | null;
   app?: Record<string, any>;
 }
 
@@ -344,5 +344,14 @@ describe('getEcsResponseLog', () => {
         }
       `);
     });
+  });
+
+  test('does not return response in meta object if response is not in the request', () => {
+    const req = createMockHapiRequest({
+      response: null,
+    });
+    const result = getEcsResponseLog(req, logger);
+    expect(result.message).toMatchInlineSnapshot(`"GET /path"`);
+    expect(result.meta.http?.response).toBeUndefined();
   });
 });

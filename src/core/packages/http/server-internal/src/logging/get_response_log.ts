@@ -85,6 +85,10 @@ export function getEcsResponseLog(request: Request, log: Logger) {
       }
     : {};
 
+  const message = response
+    ? `${method} ${pathWithQuery} ${responseLogObj.response?.status_code}${responseTimeMsg}${bytesMsg}`
+    : `${method} ${pathWithQuery}`;
+
   const meta: LogMeta = {
     client: {
       ip: request.info.remoteAddress,
@@ -109,9 +113,8 @@ export function getEcsResponseLog(request: Request, log: Logger) {
     trace: traceId ? { id: traceId } : undefined,
   };
 
-  const statusCodeIfResponseExists = response ? responseLogObj.response?.status_code : '';
   return {
-    message: `${method} ${pathWithQuery} ${statusCodeIfResponseExists}${responseTimeMsg}${bytesMsg}`,
+    message,
     meta,
   };
 }
