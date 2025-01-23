@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { act, fireEvent, render, screen, waitFor } from '@testing-library/react';
-import userEvent, { PointerEventsCheckLevel } from '@testing-library/user-event';
+import { act, fireEvent, render, screen } from '@testing-library/react';
 
 import { AssistantHeader } from '.';
 import { TestProviders } from '../../mock/test_providers/test_providers';
@@ -16,8 +15,6 @@ import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { mockConnectors } from '../../mock/connectors';
 import {
   CLOSE,
-  SHOW_ANONYMIZED,
-  SHOW_REAL_VALUES,
 } from './translations';
 
 const onConversationSelected = jest.fn();
