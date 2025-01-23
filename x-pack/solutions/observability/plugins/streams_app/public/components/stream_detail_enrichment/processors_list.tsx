@@ -22,6 +22,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
 import { EditProcessorFlyout, EditProcessorFlyoutProps } from './flyout';
 import { EnrichmentUIProcessorDefinition, isDissectProcessor, isGrokProcessor } from './types';
+import { EditProcessorPanel } from './processor_panels';
 
 export const DraggableProcessorListItem = ({
   processor,
@@ -38,9 +39,7 @@ export const DraggableProcessorListItem = ({
       paddingRight: 0,
     }}
   >
-    {(_provided, state) => (
-      <ProcessorListItem processor={processor} hasShadow={state.isDragging} {...props} />
-    )}
+    {() => <EditProcessorPanel processor={processor} {...props} />}
   </EuiDraggable>
 );
 

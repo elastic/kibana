@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React, { useEffect } from 'react';
+import React from 'react';
 import {
   DragDropContextProps,
-  EuiButton,
   EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiIcon,
   EuiPanel,
-  EuiPanelProps,
   EuiResizableContainer,
   EuiSpacer,
   EuiSplitPanel,
@@ -32,10 +28,10 @@ import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
 import { useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../hooks/use_kibana';
 import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
-import { AddProcessorButton } from './add_processor_button';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
+import { AddProcessorPanel } from './processor_panels';
 
 interface StreamDetailEnrichmentContentProps {
   definition: ReadStreamDefinition;
@@ -143,19 +139,12 @@ export function StreamDetailEnrichmentContent({
                     ))}
                   </SortableList>
                   <EuiSpacer size="s" />
-                  <EuiPanel onClick={openAddProcessor} hasBorder hasShadow={false} paddingSize="s">
-                    <EuiButtonEmpty
-                      iconType="plus"
-                      onClick={openAddProcessor}
-                      size="s"
-                      color="text"
-                    >
-                      {i18n.translate(
-                        'xpack.streams.streamDetailView.managementTab.enrichmentEmptyPrompt.addProcessorAction',
-                        { defaultMessage: 'Add a processor' }
-                      )}
-                    </EuiButtonEmpty>
-                  </EuiPanel>
+                  <AddProcessorPanel
+                    isInitiallyOpen={isAddProcessorOpen}
+                    definition={definition}
+                    onAddProcessor={addProcessor}
+                    onClose={closeAddProcessor}
+                  />
                 </EuiPanel>
               </EuiResizablePanel>
 
