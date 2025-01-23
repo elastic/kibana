@@ -7,7 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const getVisualizeEmbeddableFactoryLazy = async () => {
-  const { getVisualizeEmbeddableFactory } = await import('./visualize_embeddable');
-  return getVisualizeEmbeddableFactory;
-};
+export const ADD_AGG_VIS_ACTION_ID = 'ADD_AGG_VIS';
+export const ACTION_EDIT_IN_LENS = 'ACTION_EDIT_IN_LENS';
