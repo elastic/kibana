@@ -12,8 +12,8 @@ import {
   createLazyPageObject,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
-  ScoutParallelRunTestFixtures,
-  ScoutParallelRunWorkerFixtures,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
 } from '@kbn/scout';
 import { DemoPage } from './page_objects';
 
@@ -43,7 +43,7 @@ export const test = baseTest.extend<ExtScoutTestFixtures, ScoutWorkerFixtures>({
   },
 });
 
-export interface ExtParallelRunTestFixtures extends ScoutParallelRunTestFixtures {
+export interface ExtParallelRunTestFixtures extends ScoutParallelTestFixtures {
   pageObjects: PageObjects & {
     demo: DemoPage;
   };
@@ -51,7 +51,7 @@ export interface ExtParallelRunTestFixtures extends ScoutParallelRunTestFixtures
 
 export const spaceTest = spaceBaseTest.extend<
   ExtParallelRunTestFixtures,
-  ScoutParallelRunWorkerFixtures
+  ScoutParallelWorkerFixtures
 >({
   pageObjects: async (
     {

@@ -7,13 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { scoutFixtures, scoutParallelRunFixtures } from './fixtures';
+import { scoutFixtures, scoutParallelFixtures } from './fixtures';
 
 // Scout core fixtures: worker & test scope
 export const test = scoutFixtures;
 
 // Scout core 'space aware' fixtures: worker & test scope
-export const spaceTest = scoutParallelRunFixtures;
+export const spaceTest = scoutParallelFixtures;
 
 export { createPlaywrightConfig } from './config';
 export { createLazyPageObject } from './page_objects/utils';
@@ -23,8 +23,8 @@ export type { ScoutPlaywrightOptions, ScoutTestOptions } from './types';
 export type {
   ScoutTestFixtures,
   ScoutWorkerFixtures,
-  ScoutParallelRunTestFixtures,
-  ScoutParallelRunWorkerFixtures,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
   ScoutPage,
   PageObjects,
 } from './fixtures';

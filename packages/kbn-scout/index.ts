@@ -24,8 +24,8 @@ export type {
   PageObjects,
   ScoutTestFixtures,
   ScoutWorkerFixtures,
-  ScoutParallelRunTestFixtures,
-  ScoutParallelRunWorkerFixtures,
+  ScoutParallelTestFixtures,
+  ScoutParallelWorkerFixtures,
 } from './src/playwright';
 
 export type { Client, KbnClient, KibanaUrl, SamlSessionManager, ToolingLog } from './src/types';
