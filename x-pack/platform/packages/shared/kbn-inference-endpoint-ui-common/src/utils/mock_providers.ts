@@ -21,6 +21,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: [],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -30,6 +31,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: [],
       },
       url: {
         default_value: 'https://api.openai.com/v1/embeddings',
@@ -39,6 +41,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: [],
       },
     },
   },
@@ -55,6 +58,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: [],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -64,6 +68,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: [],
       },
     },
   },
@@ -80,6 +85,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: [],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -90,6 +96,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: [],
       },
       model_id: {
         default_value: null,
@@ -99,6 +106,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: [],
       },
     },
   },
@@ -116,6 +124,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: [],
       },
       num_threads: {
         default_value: 2,
@@ -125,6 +134,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: [],
       },
       model_id: {
         default_value: '.elser_model_2',
@@ -134,6 +144,7 @@ export const mockProviders: InferenceProvider[] = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: [],
       },
     },
   },
