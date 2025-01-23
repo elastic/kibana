@@ -442,16 +442,18 @@ describe('Alerts Client', () => {
           );
 
           expect(clusterClient.search).toHaveBeenCalledWith({
-            query: {
-              bool: {
-                filter: [
-                  { term: { 'kibana.alert.rule.uuid': '1' } },
-                  { terms: { 'kibana.alert.uuid': ['abc', 'def', 'xyz'] } },
-                ],
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.alert.rule.uuid': '1' } },
+                    { terms: { 'kibana.alert.uuid': ['abc', 'def', 'xyz'] } },
+                  ],
+                },
               },
+              seq_no_primary_term: true,
+              size: 3,
             },
-            seq_no_primary_term: true,
-            size: 3,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
@@ -514,16 +516,18 @@ describe('Alerts Client', () => {
           );
 
           expect(clusterClient.search).toHaveBeenCalledWith({
-            query: {
-              bool: {
-                filter: [
-                  { term: { 'kibana.alert.rule.uuid': '1' } },
-                  { terms: { 'kibana.alert.uuid': ['abc'] } },
-                ],
+            body: {
+              query: {
+                bool: {
+                  filter: [
+                    { term: { 'kibana.alert.rule.uuid': '1' } },
+                    { terms: { 'kibana.alert.uuid': ['abc'] } },
+                  ],
+                },
               },
+              size: 1,
+              seq_no_primary_term: true,
             },
-            size: 1,
-            seq_no_primary_term: true,
             index: useDataStreamForAlerts
               ? '.alerts-test.alerts-default'
               : '.internal.alerts-test.alerts-default-*',
@@ -566,7 +570,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 create: { _id: uuid1, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
               },
@@ -613,7 +617,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: true,
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 create: { _id: uuid1, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
               },
@@ -706,7 +710,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 index: {
                   _id: 'abc',
@@ -779,7 +783,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 index: {
                   _id: 'abc',
@@ -914,7 +918,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 create: {
                   _id: 'abc',
@@ -987,7 +991,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 index: {
                   _id: 'def',
@@ -1086,7 +1090,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 index: {
                   _id: 'def',
@@ -1243,7 +1247,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 index: {
                   _id: 'def',
@@ -1361,7 +1365,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 index: {
                   _id: 'def',
@@ -1565,7 +1569,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 index: {
                   _id: 'def',
@@ -2536,7 +2540,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 create: { _id: uuid1, ...(useDataStreamForAlerts ? {} : { require_alias: true }) },
               },
@@ -2810,7 +2814,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 create: {
                   _id: expect.any(String),
@@ -2911,7 +2915,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 create: {
                   _id: 'abc',
@@ -3008,7 +3012,7 @@ describe('Alerts Client', () => {
             index: '.alerts-test.alerts-default',
             refresh: 'wait_for',
             require_alias: !useDataStreamForAlerts,
-            operations: [
+            body: [
               {
                 index: {
                   _id: 'abc',
