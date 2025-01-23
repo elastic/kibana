@@ -132,10 +132,6 @@ The 8.17.0 release includes the following known issues.
 
 include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
-[float]
-[[known-issues-8.17.0]]
-=== Known issues
-
 // tag::known-issue-206400[]
 .Upgrade Assistant displays configured source mode in mappings as critical deprecation issue.
 [%collapsible]
