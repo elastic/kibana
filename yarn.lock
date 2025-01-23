@@ -6214,12 +6214,10 @@
   resolved "https://registry.yarnpkg.com/@types/numeral/-/numeral-0.0.28.tgz#e43928f0bda10b169b6f7ecf99e3ddf836b8ebe4"
   integrity sha512-Sjsy10w6XFHDktJJdXzBJmoondAKW+LcGpRFH+9+zXEDj0cOH8BxJuZA9vUDSMAzU1YRJlsPKmZEEiTYDlICLw==
 
-"@types/object-hash@^1.3.0":
-  version "1.3.0"
-  resolved "https://registry.yarnpkg.com/@types/object-hash/-/object-hash-1.3.0.tgz#b20db2074129f71829d61ff404e618c4ac3d73cf"
-  integrity sha512-il4NIe4jTx4lfhkKaksmmGHw5EsVkO8sHWkpJHM9m59r1dtsVadLSrJqdE8zU74NENDAsR3oLIOlooRAXlPLNA==
-  dependencies:
-    "@types/node" "*"
+"@types/object-hash@^3.0.6":
+  version "3.0.6"
+  resolved "https://registry.yarnpkg.com/@types/object-hash/-/object-hash-3.0.6.tgz#25c052428199d374ef723b7b0ed44b5bfe1b3029"
+  integrity sha512-fOBV8C1FIu2ELinoILQ+ApxcUKz4ngq+IWUYrxSGjXzzjUALijilampwkMgEtJ+h2njAW3pi853QpzNVCHB73w==
 
 "@types/opn@^5.1.0":
   version "5.1.0"
@@ -19742,10 +19740,15 @@ object-filter-sequence@^1.0.0:
   resolved "https://registry.yarnpkg.com/object-filter-sequence/-/object-filter-sequence-1.0.0.tgz#10bb05402fff100082b80d7e83991b10db411692"
   integrity sha512-CsubGNxhIEChNY4cXYuA6KXafztzHqzLLZ/y3Kasf3A+sa3lL9thq3z+7o0pZqzEinjXT6lXDPAfVWI59dUyzQ==
 
-object-hash@^1.3.0, object-hash@^1.3.1:
+object-hash@^1.3.0:
   version "1.3.1"
   resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-1.3.1.tgz#fde452098a951cb145f039bb7d455449ddc126df"
   integrity sha512-OSuu/pU4ENM9kmREg0BdNrUDIl1heYa4mBZacJc+vVWz4GtAwu7jO8s4AIt2aGRUTqxykpWzI3Oqnsm13tTMDA==
+
+object-hash@^3.0.0:
+  version "3.0.0"
+  resolved "https://registry.yarnpkg.com/object-hash/-/object-hash-3.0.0.tgz#73f97f753e7baffc0e2cc9d6e079079744ac82e9"
+  integrity sha512-RSn9F68PjH9HqtltsSnqYC1XXoWe9Bju5+213R98cNGttag9q9yAOTzdbsqvIa7aNm5WffBZFpWYr2aWrklWAw==
 
 object-identity-map@^1.0.2:
   version "1.0.2"
