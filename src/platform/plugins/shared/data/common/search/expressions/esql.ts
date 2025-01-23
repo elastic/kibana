@@ -332,7 +332,7 @@ export const getEsqlFn = ({ getStartDependencies }: EsqlFnArguments) => {
           const appliedTimeRange = input?.timeRange
             ? {
                 from: DateMath.parse(input.timeRange.from),
-                to: DateMath.parse(input.timeRange.to),
+                to: DateMath.parse(input.timeRange.to, { roundUp: true }),
               }
             : undefined;
 
