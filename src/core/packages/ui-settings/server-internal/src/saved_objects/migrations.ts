@@ -20,7 +20,12 @@ import type {
  * is good practice. For example: `ml:<setting-name>`.
  */
 
-export const modelVersions: SavedObjectsModelVersionMap = {};
+export const modelVersions: SavedObjectsModelVersionMap = {
+  /** First model version picksup from the last legacy migration in 8.9.0 */
+  1: {
+    changes: [],
+  },
+};
 
 /**
  * Migrations using legacy upgrade mechanism, do not add to or remove from this map.
