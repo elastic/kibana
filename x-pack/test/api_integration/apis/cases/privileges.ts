@@ -78,6 +78,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesV3AllUser, owner: CASES_APP_ID },
       { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can create a case`, async () => {
         await createCase(supertestWithoutAuth, getPostCaseRequest({ owner }), 200, {
@@ -101,6 +102,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesV3AllUser, owner: CASES_APP_ID },
       { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can get a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -166,6 +168,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesV3AllUser, owner: CASES_APP_ID },
       { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can delete a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -210,6 +213,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesV3AllUser, owner: CASES_APP_ID },
       { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can reopen a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -275,6 +279,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesV3AllUser, owner: CASES_APP_ID },
       { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can add comments`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -301,6 +306,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secReadUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
       { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${
         user.username
