@@ -161,8 +161,16 @@ export const configValidator = (configObject: Config, validatorServices: Validat
       );
     }
 
+    if (taskType === 'chat_completion' && !Object.keys(SUB_ACTION).includes('UNIFIED_COMPLETION')) {
+      throw new Error(
+        `Task type is not supported${
+          taskType && taskType.length ? `: ${taskType}` : ``
+        } by Inference Endpoint.`
+      );
+    }
+
     if (
-      !taskType.includes('completion') &&
+      taskType !== 'chat_completion' &&
       !Object.keys(SUB_ACTION).includes(taskType.toUpperCase())
     ) {
       throw new Error(

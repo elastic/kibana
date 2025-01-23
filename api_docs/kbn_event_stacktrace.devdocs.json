@@ -1,0 +1,340 @@
+{
+  "id": "@kbn/event-stacktrace",
+  "client": {
+    "classes": [],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/event-stacktrace",
+        "id": "def-public.CauseStacktrace",
+        "type": "Function",
+        "tags": [],
+        "label": "CauseStacktrace",
+        "description": [],
+        "signature": [
+          "({\n  codeLanguage,\n  id,\n  message = '…',\n  stackframes = [],\n}: CauseStacktraceProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/cause_stacktrace.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-stacktrace",
+            "id": "def-public.CauseStacktrace.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  codeLanguage,\n  id,\n  message = '…',\n  stackframes = [],\n}",
+            "description": [],
+            "signature": [
+              "CauseStacktraceProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/cause_stacktrace.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-stacktrace",
+        "id": "def-public.ExceptionStacktrace",
+        "type": "Function",
+        "tags": [],
+        "label": "ExceptionStacktrace",
+        "description": [],
+        "signature": [
+          "({ codeLanguage, exceptions }: ExceptionStacktraceProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/exception/exception_stacktrace.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-stacktrace",
+            "id": "def-public.ExceptionStacktrace.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ codeLanguage, exceptions }",
+            "description": [],
+            "signature": [
+              "ExceptionStacktraceProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/exception/exception_stacktrace.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-stacktrace",
+        "id": "def-public.FrameHeading",
+        "type": "Function",
+        "tags": [],
+        "label": "FrameHeading",
+        "description": [],
+        "signature": [
+          "({ codeLanguage, stackframe, isLibraryFrame, idx }: Props) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/frame_heading.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-stacktrace",
+            "id": "def-public.FrameHeading.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ codeLanguage, stackframe, isLibraryFrame, idx }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/frame_heading.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-stacktrace",
+        "id": "def-public.getGroupedStackframes",
+        "type": "Function",
+        "tags": [],
+        "label": "getGroupedStackframes",
+        "description": [],
+        "signature": [
+          "(stackframes: ",
+          {
+            "pluginId": "@kbn/apm-types",
+            "scope": "common",
+            "docId": "kibKbnApmTypesPluginApi",
+            "section": "def-common.Stackframe",
+            "text": "Stackframe"
+          },
+          "[]) => StackframesGroup[]"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-stacktrace",
+            "id": "def-public.getGroupedStackframes.$1",
+            "type": "Array",
+            "tags": [],
+            "label": "stackframes",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/apm-types",
+                "scope": "common",
+                "docId": "kibKbnApmTypesPluginApi",
+                "section": "def-common.Stackframe",
+                "text": "Stackframe"
+              },
+              "[]"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-stacktrace",
+        "id": "def-public.LibraryStacktrace",
+        "type": "Function",
+        "tags": [],
+        "label": "LibraryStacktrace",
+        "description": [],
+        "signature": [
+          "({ codeLanguage, id, stackframes }: Props) => React.JSX.Element | null"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/library_stacktrace.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-stacktrace",
+            "id": "def-public.LibraryStacktrace.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ codeLanguage, id, stackframes }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/library_stacktrace.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-stacktrace",
+        "id": "def-public.PlaintextStacktrace",
+        "type": "Function",
+        "tags": [],
+        "label": "PlaintextStacktrace",
+        "description": [],
+        "signature": [
+          "({\n  codeLanguage,\n  message,\n  stacktrace,\n  type,\n}: PlaintextStacktraceProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/plain/plaintext_stacktrace.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-stacktrace",
+            "id": "def-public.PlaintextStacktrace.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  codeLanguage,\n  message,\n  stacktrace,\n  type,\n}",
+            "description": [],
+            "signature": [
+              "PlaintextStacktraceProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/plain/plaintext_stacktrace.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-stacktrace",
+        "id": "def-public.Stackframe",
+        "type": "Function",
+        "tags": [],
+        "label": "Stackframe",
+        "description": [],
+        "signature": [
+          "({\n  stackframe,\n  codeLanguage,\n  id,\n  initialIsOpen = false,\n  isLibraryFrame = false,\n}: Props) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/stackframe.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-stacktrace",
+            "id": "def-public.Stackframe.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  stackframe,\n  codeLanguage,\n  id,\n  initialIsOpen = false,\n  isLibraryFrame = false,\n}",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/stackframe.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-stacktrace",
+        "id": "def-public.Stacktrace",
+        "type": "Function",
+        "tags": [],
+        "label": "Stacktrace",
+        "description": [],
+        "signature": [
+          "({ stackframes = [], codeLanguage }: Props) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-stacktrace",
+            "id": "def-public.Stacktrace.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ stackframes = [], codeLanguage }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/event-stacktrace",
+        "id": "def-public.Variables",
+        "type": "Function",
+        "tags": [],
+        "label": "Variables",
+        "description": [],
+        "signature": [
+          "({ vars }: Props) => React.JSX.Element | null"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/variables.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/event-stacktrace",
+            "id": "def-public.Variables.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ vars }",
+            "description": [],
+            "signature": [
+              "Props"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-event-stacktrace/src/components/stacktrace/variables.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

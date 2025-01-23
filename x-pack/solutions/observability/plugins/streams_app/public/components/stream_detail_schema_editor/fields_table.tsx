@@ -17,17 +17,23 @@ import {
 import type {
   EuiContextMenuPanelDescriptor,
   EuiContextMenuPanelItemDescriptor,
+  EuiDataGridColumnSortingConfig,
   EuiDataGridProps,
   Query,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import useToggle from 'react-use/lib/useToggle';
-import { isRootStream, isWiredReadStream, ReadStreamDefinition } from '@kbn/streams-schema';
+import {
+  isRootStreamDefinition,
+  isWiredReadStream,
+  ReadStreamDefinition,
+} from '@kbn/streams-schema';
 import { FieldType } from './field_type';
-import { FieldStatus } from './field_status';
+import { FieldStatusBadge } from './field_status';
 import { FieldEntry, SchemaEditorEditingState } from './hooks/use_editing_state';
 import { SchemaEditorUnpromotingState } from './hooks/use_unpromoting_state';
 import { FieldParent } from './field_parent';
+import { SchemaEditorQueryAndFiltersState } from './hooks/use_query_and_filters';
 
 interface FieldsTableContainerProps {
   definition: ReadStreamDefinition;
@@ -36,6 +42,7 @@ interface FieldsTableContainerProps {
   query?: Query;
   editingState: SchemaEditorEditingState;
   unpromotingState: SchemaEditorUnpromotingState;
+  queryAndFiltersState: SchemaEditorQueryAndFiltersState;
 }
 
 const COLUMNS = {
@@ -74,6 +81,7 @@ export const FieldsTableContainer = ({
   query,
   editingState,
   unpromotingState,
+  queryAndFiltersState,
 }: FieldsTableContainerProps) => {
   const inheritedFields = useMemo(() => {
     return Object.entries(definition.inherited_fields).map(([name, field]) => ({
@@ -134,9 +142,28 @@ export const FieldsTableContainer = ({
     return [...filteredInheritedFields, ...filteredMappedFields, ...filteredUnmappedFields];
   }, [filteredInheritedFields, filteredMappedFields, filteredUnmappedFields]);
 
+  const filteredFieldsWithFilterGroupsApplied = useMemo(() => {
+    const filterGroups = queryAndFiltersState.filterGroups;
+    let fieldsWithFilterGroupsApplied = allFilteredFields;
+
+    if (filterGroups.type && filterGroups.type.length > 0) {
+      fieldsWithFilterGroupsApplied = fieldsWithFilterGroupsApplied.filter(
+        (field) => 'type' in field && filterGroups.type.includes(field.type)
+      );
+    }
+
+    if (filterGroups.status && filterGroups.status.length > 0) {
+      fieldsWithFilterGroupsApplied = fieldsWithFilterGroupsApplied.filter(
+        (field) => 'status' in field && filterGroups.status.includes(field.status)
+      );
+    }
+
+    return fieldsWithFilterGroupsApplied;
+  }, [allFilteredFields, queryAndFiltersState.filterGroups]);
+
   return (
     <FieldsTable
-      fields={allFilteredFields}
+      fields={filteredFieldsWithFilterGroupsApplied}
       editingState={editingState}
       unpromotingState={unpromotingState}
       definition={definition}
@@ -152,10 +179,14 @@ interface FieldsTableProps {
 }
 
 const FieldsTable = ({ definition, fields, editingState, unpromotingState }: FieldsTableProps) => {
+  // Column visibility
   const [visibleColumns, setVisibleColumns] = useState(Object.keys(COLUMNS));
 
+  // Column sorting
+  const [sortingColumns, setSortingColumns] = useState<EuiDataGridColumnSortingConfig[]>([]);
+
   const trailingColumns = useMemo(() => {
-    return !isRootStream(definition)
+    return !isRootStreamDefinition(definition.stream)
       ? ([
           {
             id: 'actions',
@@ -163,6 +194,8 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
             headerCellRender: () => null,
             rowCellRender: ({ rowIndex }) => {
               const field = fields[rowIndex];
+
+              if (!field) return null;
 
               let actions: ActionsCellActionsDescriptor[] = [];
 
@@ -271,19 +304,22 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
           defaultMessage: 'Preview',
         }
       )}
-      columns={visibleColumns.map((columnId) => ({
+      columns={Object.entries(COLUMNS).map(([columnId, value]) => ({
         id: columnId,
-        ...COLUMNS[columnId as keyof typeof COLUMNS],
+        ...value,
       }))}
       columnVisibility={{
         visibleColumns,
         setVisibleColumns,
         canDragAndDropColumns: false,
       }}
-      toolbarVisibility={false}
+      sorting={{ columns: sortingColumns, onSort: setSortingColumns }}
+      toolbarVisibility={true}
       rowCount={fields.length}
       renderCellValue={({ rowIndex, columnId }) => {
         const field = fields[rowIndex];
+        if (!field) return null;
+
         if (columnId === 'type') {
           const fieldType = field.type;
           if (!fieldType) return EMPTY_CONTENT;
@@ -293,7 +329,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
             <FieldParent parent={field.parent} linkEnabled={field.parent !== definition.name} />
           );
         } else if (columnId === 'status') {
-          return <FieldStatus status={field.status} />;
+          return <FieldStatusBadge status={field.status} />;
         } else {
           return field[columnId as keyof FieldEntry] || EMPTY_CONTENT;
         }
@@ -304,6 +340,7 @@ const FieldsTable = ({ definition, fields, editingState, unpromotingState }: Fie
         rowHover: 'none',
         header: 'underline',
       }}
+      inMemory={{ level: 'sorting' }}
     />
   );
 };
