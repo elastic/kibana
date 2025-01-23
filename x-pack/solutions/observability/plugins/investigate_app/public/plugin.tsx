@@ -29,7 +29,7 @@ import type {
   InvestigateAppStartDependencies,
 } from './types';
 import { createInvestigateAppRepositoryClient, InvestigateAppRepositoryClient } from './api';
-import { registerCaseFileKinds } from './files';
+import { registerInvestigateFileKinds } from './files';
 
 const getCreateEsqlService = once(() => import('./services/esql').then((m) => m.createEsqlService));
 
@@ -56,7 +56,7 @@ export class InvestigateAppPlugin
     pluginsSetup: InvestigateAppSetupDependencies
   ): InvestigateAppPublicSetup {
     this.repositoryClient = createInvestigateAppRepositoryClient(coreSetup);
-    registerCaseFileKinds(pluginsSetup.files);
+    registerInvestigateFileKinds(pluginsSetup.files);
 
     coreSetup.application.register({
       id: INVESTIGATE_APP_ID,

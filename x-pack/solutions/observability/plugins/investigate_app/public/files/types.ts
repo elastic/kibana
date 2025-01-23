@@ -6,19 +6,19 @@
  */
 
 import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
-import { Owner } from '.';
+import { Owner } from '../../common/files';
 
 export interface InvestigateUiConfigType {
-    markdownPlugins: {
-        lens: boolean;
-    };
-    files: {
-        maxSize?: number;
-        allowedMimeTypes: string[];
-    };
-    stack: {
-        enabled: boolean;
-    };
+  markdownPlugins: {
+    lens: boolean;
+  };
+  files: {
+    maxSize?: number;
+    allowedMimeTypes: string[];
+  };
+  stack: {
+    enabled: boolean;
+  };
 }
 export type FilesConfig = InvestigateUiConfigType['files'];
 

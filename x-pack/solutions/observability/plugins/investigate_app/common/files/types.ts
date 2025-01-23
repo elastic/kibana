@@ -5,11 +5,7 @@
  * 2.0.
  */
 
-export const paths = {
-  investigations: `/app/investigations`,
-  create: `/app/investigations/new`,
-  investigationDetails: (id: string) => {
-    return `/app/investigations/${encodeURIComponent(id)}`;
-  },
-};
-export * from './files';
+import type { FileKindBrowser } from '@kbn/shared-ux-file-types';
+import { Owner } from '.';
+
+export type InvestigateFileKinds = Map<Owner, FileKindBrowser>;

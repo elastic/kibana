@@ -29,6 +29,7 @@ import {
 } from '@kbn/investigation-shared';
 import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 
+import { Readable } from 'stream';
 import { createEntitiesESClient } from '../clients/create_entities_es_client';
 import { createInvestigation } from '../services/create_investigation';
 import { createInvestigationItem } from '../services/create_investigation_item';
@@ -395,9 +396,22 @@ const postAttacheFileRoute = createInvestigateAppServerRoute({
     tags: [],
   },
   params: attacheFileParamsSchema,
-  handler: async ({ params, context, request }): Promise<{ ok: boolean }> => {
-    const core = await context.core;
-    return { ok: true };
+  handler: async ({
+    params,
+    context,
+    request,
+    plugins,
+  }): Promise<{ ok: boolean; file: Record<string, any> }> => {
+    const filesStarted = await plugins.files.start(); // TODO: move to setup
+    const tes = await filesStarted.fileServiceFactory.asScoped(request).create({
+      name: 'test',
+      meta: {
+        owner: 'investigation',
+      },
+      fileKind: 'observabilityFilesInvestigateApp',
+    });
+    const fileUpdated = await tes.uploadContent(Readable.from([Buffer.from('test')]));
+    return { ok: true, file: fileUpdated };
   },
 });
 

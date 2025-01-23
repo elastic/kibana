@@ -92,6 +92,7 @@ export const registerCaseFileKinds = (
   isFipsMode = false
 ) => {
   const fileKinds = createFileKinds(config, isFipsMode);
+  // console.log('CASES -SERVER - registerCaseFileKinds - ', fileKinds);
 
   for (const fileKind of Object.values(fileKinds)) {
     filesSetupPlugin.registerFileKind(fileKind);

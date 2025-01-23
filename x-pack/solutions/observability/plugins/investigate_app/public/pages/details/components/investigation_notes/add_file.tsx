@@ -19,8 +19,7 @@ import React, { useState } from 'react';
 
 // import { FILE_SO_TYPE } from '@kbn/files-plugin/common';
 import { FileUpload } from '@kbn/shared-ux-file-upload';
-
-import { constructFileKindIdByOwner, OWNERS } from '../../../../files';
+import { OWNERS, constructFileKindIdByOwner } from '../../../../../common/files';
 
 interface AddFileProps {
   investigationId: string;
