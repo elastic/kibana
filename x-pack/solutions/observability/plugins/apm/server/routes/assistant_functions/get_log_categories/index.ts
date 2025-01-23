@@ -9,10 +9,10 @@ import datemath from '@elastic/datemath';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { LogSourcesService } from '@kbn/logs-data-access-plugin/common/types';
 import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { getFlattenedKeyValuePairs } from '@kbn/key-value-metadata-table';
+import type { KeyValuePair } from '@kbn/key-value-metadata-table';
 import { maybe } from '../../../../common/utils/maybe';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
-import type { KeyValuePair } from '../../../../common/utils/flatten_object';
-import { flattenObject } from '../../../../common/utils/flatten_object';
 import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { PROCESSOR_EVENT, TRACE_ID } from '../../../../common/es_fields/apm';
 import { getTypedSearch } from '../../../utils/create_typed_es_client';
@@ -153,6 +153,6 @@ export async function getLogCategories({
 
   return {
     logCategories: await Promise.all(promises ?? []),
-    entities: flattenObject(sampleDoc),
+    entities: getFlattenedKeyValuePairs(sampleDoc),
   };
 }

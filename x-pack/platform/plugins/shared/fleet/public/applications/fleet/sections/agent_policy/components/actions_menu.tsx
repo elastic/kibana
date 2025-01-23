@@ -18,7 +18,7 @@ import {
 } from '../../../components';
 import { FLEET_SERVER_PACKAGE } from '../../../constants';
 
-import { policyHasFleetServer } from '../../../services';
+import { ExperimentalFeaturesService, policyHasFleetServer } from '../../../services';
 
 import { AgentUpgradeAgentModal } from '../../agents/components';
 
@@ -54,6 +54,7 @@ export const AgentPolicyActionMenu = memo<{
     const [isManageAutoUpgradeAgentsModalOpen, setIsManageAutoUpgradeAgentsModalOpen] =
       useState<boolean>(false);
     const refreshAgentPolicy = useAgentPolicyRefresh();
+    const { enableAutomaticAgentUpgrades } = ExperimentalFeaturesService.get();
 
     const isFleetServerPolicy = useMemo(
       () =>
@@ -209,7 +210,7 @@ export const AgentPolicyActionMenu = memo<{
               )}
             </EuiContextMenuItem>,
             viewPolicyItem,
-            manageAutoUpgradeAgentsItem,
+            ...(enableAutomaticAgentUpgrades ? [manageAutoUpgradeAgentsItem] : []),
             copyPolicyItem,
             deletePolicyItem,
           ];
@@ -238,6 +239,7 @@ export const AgentPolicyActionMenu = memo<{
                 }}
                 key="upgradeAgents"
                 data-test-subj="agentPolicyActionMenuUpgradeAgentsButton"
+                disabled={(agentPolicy.agents || 0) === 0}
               >
                 <FormattedMessage
                   id="xpack.fleet.agentPolicyActionMenu.upgradeAgentsActionText"
@@ -261,6 +263,7 @@ export const AgentPolicyActionMenu = memo<{
                 }}
                 key="getUninstallCommand"
                 data-test-subj="uninstall-agents-command-menu-item"
+                disabled={(agentPolicy.agents || 0) === 0}
               >
                 <FormattedMessage
                   id="xpack.fleet.agentPolicyActionMenu.getUninstallCommand"

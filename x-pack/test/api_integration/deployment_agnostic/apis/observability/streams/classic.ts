@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { asUnwiredStreamGetResponse } from '@kbn/streams-schema';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
 import {
   StreamsSupertestRepositoryClient,
@@ -33,7 +34,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       await disableStreams(apiClient);
     });
 
-    it('Shows non-wired data streams', async () => {
+    it('non-wired data streams', async () => {
       const doc = {
         message: '2023-01-01T00:00:10.000Z error test',
       };
@@ -51,11 +52,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(classicStream).to.eql({
         name: TEST_STREAM_NAME,
-        stream: {
-          ingest: {
-            processing: [],
-            routing: [],
-          },
+        ingest: {
+          processing: [],
+          routing: [],
+          unwired: {},
         },
       });
     });
@@ -67,20 +67,23 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             id: TEST_STREAM_NAME,
           },
           body: {
-            ingest: {
-              routing: [],
-              processing: [
-                {
-                  config: {
+            dashboards: [],
+            stream: {
+              ingest: {
+                routing: [],
+                processing: [
+                  {
                     grok: {
+                      if: { always: {} },
                       field: 'message',
                       patterns: [
                         '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                       ],
                     },
                   },
-                },
-              ],
+                ],
+                unwired: {},
+              },
             },
           },
         },
@@ -96,34 +99,66 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(getResponse.status).to.eql(200);
 
-      expect(getResponse.body).to.eql({
-        name: TEST_STREAM_NAME,
-        dashboards: [],
-        inherited_fields: {},
-        lifecycle: isServerless
+      const body = asUnwiredStreamGetResponse(getResponse.body);
+
+      const { dashboards, stream, lifecycle, elasticsearch_assets: elasticsearchAssets } = body;
+
+      expect(dashboards).to.eql([]);
+
+      expect(stream).to.eql({
+        ingest: {
+          processing: [
+            {
+              grok: {
+                field: 'message',
+                patterns: [
+                  '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
+                ],
+                if: { always: {} },
+              },
+            },
+          ],
+          routing: [],
+          unwired: {},
+        },
+      });
+
+      expect(lifecycle).to.eql(
+        isServerless
           ? { type: 'dlm' }
           : {
               policy: 'logs',
               type: 'ilm',
-            },
-        stream: {
-          ingest: {
-            processing: [
-              {
-                config: {
-                  grok: {
-                    field: 'message',
-                    patterns: [
-                      '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
-                    ],
-                  },
-                },
-              },
-            ],
-            routing: [],
-          },
+            }
+      );
+
+      expect(elasticsearchAssets).to.eql([
+        {
+          type: 'ingest_pipeline',
+          id: 'logs@default-pipeline',
         },
-      });
+        {
+          type: 'component_template',
+          id: 'logs@mappings',
+        },
+        {
+          type: 'component_template',
+          id: 'logs@settings',
+        },
+        {
+          type: 'component_template',
+          id: 'logs@custom',
+        },
+        { type: 'component_template', id: 'ecs@mappings' },
+        {
+          type: 'index_template',
+          id: 'logs',
+        },
+        {
+          type: 'data_stream',
+          id: 'logs-test-default',
+        },
+      ]);
     });
 
     it('Executes processing on classic streams', async () => {
@@ -151,9 +186,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         params: {
           path: { id: TEST_STREAM_NAME },
           body: {
-            ingest: {
-              processing: [],
-              routing: [],
+            dashboards: [],
+            stream: {
+              ingest: {
+                processing: [],
+                routing: [],
+                unwired: {},
+              },
             },
           },
         },

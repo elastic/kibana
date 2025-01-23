@@ -14,3 +14,4 @@ export {
 export { chunksIntoMessage } from './chunks_into_message';
 export { streamToResponse } from './stream_to_response';
 export { handleCancellation } from './handle_cancellation';
+export { mergeChunks } from './merge_chunks';
