@@ -1,8 +1,13 @@
 # -----
-# Source: https://github.com/elastic/project-controller/blob/main/internal/project/security/config/roles.yml
+# Source: elasticsearch-controller/blob/main/helm/values.yaml
+# The project-specific roles are defined under config.project-settings.security.elasticsearch.predefined-roles.
+# -----
 
 # modeled after the t1_analyst minus osquery run saved queries privilege
 viewer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -64,6 +69,9 @@ viewer:
 
 # modeled after t3_analyst
 editor:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: []
   indices:
     - names:
@@ -145,7 +153,10 @@ editor:
   run_as: []
 
 t1_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - ".alerts-security*"
@@ -199,7 +210,10 @@ t1_analyst:
       resources: "*"
 
 t2_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - .alerts-security*
@@ -257,7 +271,10 @@ t2_analyst:
       resources: "*"
 
 t3_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -331,7 +348,10 @@ t3_analyst:
       resources: "*"
 
 threat_intelligence_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -391,7 +411,10 @@ threat_intelligence_analyst:
       resources: "*"
 
 rule_author:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -464,7 +487,10 @@ rule_author:
       resources: "*"
 
 soc_manager:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - apm-*-transaction*
@@ -545,6 +571,9 @@ soc_manager:
       resources: "*"
 
 detections_admin:
+  metadata:
+    _public: true
+    _reserved: true
   cluster: ["manage_index_templates", "manage_transform"]
   indices:
     - names:
@@ -607,6 +636,9 @@ detections_admin:
       resources: "*"
 
 platform_engineer:
+  metadata:
+    _public: true
+    _reserved: true
   cluster:
     - manage
   indices:
@@ -673,7 +705,10 @@ platform_engineer:
       resources: "*"
 
 endpoint_operations_analyst:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
@@ -749,7 +784,10 @@ endpoint_operations_analyst:
       resources: "*"
 
 endpoint_policy_manager:
-  cluster:
+  metadata:
+    _public: true
+    _reserved: true
+  cluster: []
   indices:
     - names:
         - metrics-endpoint.metadata_current_*
