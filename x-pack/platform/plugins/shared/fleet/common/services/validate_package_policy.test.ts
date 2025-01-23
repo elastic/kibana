@@ -49,6 +49,7 @@ describe('Fleet - validatePackagePolicy()', () => {
           dataset: 'foo',
           streams: [
             {
+              input: 'foo',
               title: 'Foo',
               vars: [{ name: 'var-name', type: 'yaml' }],
             },

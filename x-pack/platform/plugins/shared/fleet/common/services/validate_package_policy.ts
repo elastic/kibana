@@ -277,11 +277,7 @@ export const validatePackagePolicy = (
       delete inputValidationResults.streams;
     }
 
-    if (
-      inputValidationResults.vars ||
-      inputValidationResults.streams ||
-      inputValidationResults.required_vars
-    ) {
+    if (inputValidationResults.vars || inputValidationResults.streams) {
       validationResults.inputs![inputKey] = inputValidationResults;
     }
   });
