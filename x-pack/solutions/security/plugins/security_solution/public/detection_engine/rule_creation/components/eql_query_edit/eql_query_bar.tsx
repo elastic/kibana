@@ -8,7 +8,7 @@
 import type { FC, ChangeEvent } from 'react';
 import React, { useCallback, useEffect, useRef, useMemo } from 'react';
 import { Subscription } from 'rxjs';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import deepEqual from 'fast-deep-equal';
 import { EuiFormRow, EuiSpacer, EuiTextArea, useEuiTheme } from '@elastic/eui';
 import type { DataViewBase } from '@kbn/es-query';
@@ -166,7 +166,7 @@ export const EqlQueryBar: FC<EqlQueryBarProps> = ({
       <>
         <EuiTextArea
           data-test-subj="eqlQueryBarTextInput"
-          className={textAreaStyles}
+          css={textAreaStyles}
           fullWidth
           isInvalid={!isValid && !isValidating}
           value={fieldValue.query.query as string}

@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import type { EuiSelectProps, EuiFieldNumberProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
@@ -134,7 +134,7 @@ export function ScheduleItemField({
 
   return (
     <EuiFormRow
-      className={formRowStyles}
+      css={formRowStyles}
       label={label}
       helpText={field.helpText}
       error={errorMessage}
@@ -146,7 +146,7 @@ export function ScheduleItemField({
       <EuiFieldNumber
         append={
           <EuiSelect
-            className={timeUnitSelectStyles}
+            css={timeUnitSelectStyles}
             fullWidth
             options={timeTypeOptions.filter((type) => timeTypes.includes(type.value))}
             value={timeType}

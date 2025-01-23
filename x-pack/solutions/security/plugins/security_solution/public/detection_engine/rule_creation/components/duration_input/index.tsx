@@ -6,7 +6,7 @@
  */
 
 import React, { memo, useCallback } from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { EuiFieldNumber, EuiFormRow, EuiSelect, useEuiTheme } from '@elastic/eui';
 import type { FieldHook } from '../../../../shared_imports';
 import { getFieldValidityAndErrorMessage } from '../../../../shared_imports';
@@ -89,16 +89,16 @@ export const DurationInput = memo(function DurationInputComponent({
 
   return (
     <EuiFormRow
-      className={durationFormRowStyle}
+      css={durationFormRowStyle}
       error={errorMessage}
       isInvalid={isInvalid}
       isDisabled={isDisabled}
     >
       <EuiFieldNumber
-        className={durationInputStyle}
+        css={durationInputStyle}
         append={
           <EuiSelect
-            className={durationUnitSelectStyle}
+            css={durationUnitSelectStyle}
             options={durationUnitOptions}
             onChange={onChangeTimeType}
             value={durationUnit}

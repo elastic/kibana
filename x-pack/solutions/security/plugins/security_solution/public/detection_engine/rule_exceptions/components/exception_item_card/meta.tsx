@@ -7,7 +7,7 @@
 
 import React, { memo, useMemo, useState } from 'react';
 import type { EuiContextMenuPanelProps } from '@elastic/eui';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import {
   EuiBadge,
   EuiContextMenuItem,
@@ -74,7 +74,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
       if (listAndReferences == null) return <></>;
 
       return (
-        <EuiFlexItem className={metaInfoItemStyles} grow={false}>
+        <EuiFlexItem css={metaInfoItemStyles} grow={false}>
           <EuiPopover
             button={
               <EuiButtonEmpty
@@ -152,7 +152,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         gutterSize="s"
         data-test-subj={dataTestSubj}
       >
-        <EuiFlexItem className={metaInfoItemStyles} grow={false}>
+        <EuiFlexItem css={metaInfoItemStyles} grow={false}>
           <MetaInfoDetails
             fieldName="created_by"
             label={i18n.EXCEPTION_ITEM_CREATED_LABEL}
@@ -161,7 +161,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
             dataTestSubj={`${dataTestSubj}-createdBy`}
           />
         </EuiFlexItem>
-        <EuiFlexItem className={metaInfoItemStyles} grow={false}>
+        <EuiFlexItem css={metaInfoItemStyles} grow={false}>
           <MetaInfoDetails
             fieldName="updated_by"
             label={i18n.EXCEPTION_ITEM_UPDATED_LABEL}
@@ -172,7 +172,7 @@ export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
         </EuiFlexItem>
         {item.expire_time != null && (
           <>
-            <EuiFlexItem className={metaInfoItemStyles} grow={false}>
+            <EuiFlexItem css={metaInfoItemStyles} grow={false}>
               <MetaInfoDetails
                 fieldName="expire_time"
                 label={
