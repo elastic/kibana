@@ -13,9 +13,7 @@ import { TestProviders } from '../../mock/test_providers/test_providers';
 import { alertConvo, welcomeConvo } from '../../mock/conversation';
 import { useLoadConnectors } from '../../connectorland/use_load_connectors';
 import { mockConnectors } from '../../mock/connectors';
-import {
-  CLOSE,
-} from './translations';
+import { CLOSE } from './translations';
 
 const onConversationSelected = jest.fn();
 const mockConversations = {
