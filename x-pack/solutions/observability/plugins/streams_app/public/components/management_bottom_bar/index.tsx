@@ -28,27 +28,30 @@ export function ManagementBottomBar({
   const handleCancel = useDiscardConfirm(onCancel);
 
   return (
-    <EuiBottomBar>
-      <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} gutterSize="s">
-        <EuiButtonEmpty color="text" size="s" iconType="cross" onClick={handleCancel}>
-          {i18n.translate('xpack.streams.streamDetailView.managementTab.bottomBar.cancel', {
-            defaultMessage: 'Cancel changes',
-          })}
-        </EuiButtonEmpty>
-
-        <EuiButton
-          disabled={disabled}
-          color="primary"
-          fill
-          size="s"
-          iconType="check"
-          onClick={onConfirm}
-          isLoading={isLoading}
-        >
-          {confirmButtonText}
-        </EuiButton>
-      </EuiFlexGroup>
-    </EuiBottomBar>
+    <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} gutterSize="s">
+      <EuiButtonEmpty
+        color="text"
+        size="s"
+        iconType="cross"
+        onClick={handleCancel}
+        disabled={disabled}
+      >
+        {i18n.translate('xpack.streams.streamDetailView.managementTab.bottomBar.cancel', {
+          defaultMessage: 'Cancel changes',
+        })}
+      </EuiButtonEmpty>
+      <EuiButton
+        disabled={disabled}
+        color="primary"
+        fill
+        size="s"
+        iconType="check"
+        onClick={onConfirm}
+        isLoading={isLoading}
+      >
+        {confirmButtonText}
+      </EuiButton>
+    </EuiFlexGroup>
   );
 }
 

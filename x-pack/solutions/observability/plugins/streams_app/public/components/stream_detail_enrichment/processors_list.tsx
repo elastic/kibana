@@ -68,8 +68,8 @@ const ProcessorListItem = ({
     <EuiPanel hasBorder hasShadow={hasShadow} paddingSize="s">
       <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
         <EuiIcon type="grab" />
-        <EuiText component="span" size="s">
-          {type.toUpperCase()}
+        <EuiText size="s">
+          <strong>{type.toUpperCase()}</strong>
         </EuiText>
         <EuiFlexItem
           /* Allow text to overflow in flex child nodes */
