@@ -15,14 +15,14 @@ describe('Lifecycle helpers', () => {
         name: 'one.two',
         ingest: { lifecycle: { type: 'dlm', data_retention: '1d' } },
       } as WiredStreamDefinition;
-      const ascendants = [
+      const ancestors = [
         {
           name: 'one',
           ingest: { lifecycle: { type: 'ilm', policy: 'policy' } },
         } as WiredStreamDefinition,
       ] as WiredStreamDefinition[];
 
-      const lifecycle = findInheritedLifecycle(definition, ascendants);
+      const lifecycle = findInheritedLifecycle(definition, ancestors);
 
       expect(lifecycle).toEqual({
         from: 'one.two',
@@ -36,7 +36,7 @@ describe('Lifecycle helpers', () => {
         name: 'one.two.three.four',
         ingest: {},
       } as WiredStreamDefinition;
-      const ascendants = [
+      const ancestors = [
         {
           name: 'one',
           ingest: { lifecycle: { type: 'ilm', policy: 'one' } },
@@ -51,7 +51,7 @@ describe('Lifecycle helpers', () => {
         } as WiredStreamDefinition,
       ] as WiredStreamDefinition[];
 
-      const lifecycle = findInheritedLifecycle(definition, ascendants);
+      const lifecycle = findInheritedLifecycle(definition, ancestors);
 
       expect(lifecycle).toEqual({
         from: 'one.two',
@@ -62,12 +62,12 @@ describe('Lifecycle helpers', () => {
 
     it('returns undefined if no lifecycle defined in the chain', () => {
       const definition = { name: 'one.two.three', ingest: {} } as WiredStreamDefinition;
-      const ascendants = [
+      const ancestors = [
         { name: 'one.two', ingest: {} } as WiredStreamDefinition,
         { name: 'one', ingest: {} } as WiredStreamDefinition,
       ] as WiredStreamDefinition[];
 
-      const lifecycle = findInheritedLifecycle(definition, ascendants);
+      const lifecycle = findInheritedLifecycle(definition, ancestors);
 
       expect(lifecycle).toEqual(undefined);
     });
