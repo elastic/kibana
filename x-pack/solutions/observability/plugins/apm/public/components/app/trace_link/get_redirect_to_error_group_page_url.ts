@@ -12,20 +12,20 @@ export const getRedirectToErrorGroupPageUrl = ({
   rangeFrom,
   rangeTo,
   serviceName,
-  errorId,
+  kuery,
 }: {
   errorGroupId: string;
   rangeFrom: string;
   rangeTo: string;
   serviceName: string;
-  errorId?: string;
+  kuery?: string;
 }) => {
   return format({
     pathname: `/services/${serviceName}/errors/${errorGroupId}`,
     query: {
       rangeFrom,
       rangeTo,
-      errorId,
+      kuery,
     },
   });
 };

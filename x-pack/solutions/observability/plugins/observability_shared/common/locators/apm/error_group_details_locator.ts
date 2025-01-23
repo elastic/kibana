@@ -25,8 +25,10 @@ export class ErrorGroupDetailsLocatorDefinition
     rangeTo,
     serviceName,
     errorGroupId,
+    errorId,
   }: ErrorGroupDetailsLocatorParams) => {
-    const params = { rangeFrom, rangeTo, serviceName };
+    const kuery = errorId ? `error.id:"${errorId}"` : '';
+    const params = { rangeFrom, rangeTo, serviceName, kuery };
     return {
       app: 'apm',
       path: `/link-to/error_group/${encodeURIComponent(errorGroupId)}?${qs.stringify(params)}`,
