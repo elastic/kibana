@@ -26,7 +26,7 @@ import { docLinks } from '../../../common/doc_links';
 import { useKibana } from '../../hooks/use_kibana';
 import { CreateIndexViewMode } from '../../types';
 
-const MAX_WIDTH = '650px';
+const MAX_WIDTH = '980px';
 
 export interface CreateIndexPanelProps {
   children: React.ReactNode | React.ReactNode[];

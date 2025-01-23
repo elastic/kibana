@@ -75,7 +75,6 @@ export const AddDocumentsCodeExample = ({
       apiKey: apiKey || undefined,
     };
   }, [indexName, elasticsearchUrl, sampleDocuments, codeSampleMappings, indexHasMappings, apiKey]);
-  const [panelRef, setPanelRef] = useState<HTMLDivElement | null>(null);
 
   return (
     <EuiPanel
@@ -83,41 +82,60 @@ export const AddDocumentsCodeExample = ({
       hasShadow={false}
       paddingSize="m"
       data-test-subj="SearchIndicesAddDocumentsCode"
-      panelRef={setPanelRef}
+
     >
       <EuiFlexGroup direction="column">
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
+        <EuiFlexGroup justifyContent={indexHasMappings ? "flexEnd" : "spaceBetween"} alignItems="center">
           {!indexHasMappings && (
-            <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
+            <EuiFlexItem grow={false}>
+              <EuiTitle size="xs"><h5>{i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', { defaultMessage: "Select a workflow guide" })}</h5></EuiTitle>
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup justifyContent="center" alignItems="center" gutterSize="s">
+              <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
+                <LanguageSelector
+                  options={LanguageOptions}
+                  selectedLanguage={selectedLanguage}
+                  onSelectLanguage={onSelectLanguage}
+                  showLabel
+                />
+
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <TryInConsoleButton
+                  request={
+                    !indexHasMappings
+                      ? `${ingestExamples.sense.updateMappingsCommand(
+                        codeParams
+                      )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
+                      : ingestExamples.sense.ingestCommand(codeParams)
+                  }
+                  application={application}
+                  sharePlugin={share}
+                  consolePlugin={consolePlugin}
+                />
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiFlexItem>
+          {!indexHasMappings && (
+            <EuiFlexItem grow={false}>
               <GuideSelector
                 selectedWorkflowId={selectedWorkflowId}
                 onChange={(workflowId: WorkflowId) => {
                   setSelectedWorkflowId(workflowId);
                   usageTracker.click([
-                    AnalyticsEvents.indexDetailsCodeLanguageSelect,
-                    `${AnalyticsEvents.indexDetailsCodeLanguageSelect}_${workflowId}`,
+                    AnalyticsEvents.indexDetailsWorkflowSelect,
+                    `${AnalyticsEvents.indexDetailsWorkflowSelect}_${workflowId}`,
                   ]);
                 }}
                 showTour
-                container={panelRef}
               />
             </EuiFlexItem>
           )}
-          <EuiFlexItem grow={false}>
-            <TryInConsoleButton
-              request={
-                !indexHasMappings
-                  ? `${ingestExamples.sense.updateMappingsCommand(
-                      codeParams
-                    )}\n\n${ingestExamples.sense.ingestCommand(codeParams)}`
-                  : ingestExamples.sense.ingestCommand(codeParams)
-              }
-              application={application}
-              sharePlugin={share}
-              consolePlugin={consolePlugin}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        </EuiFlexItem>
         {!!workflow && (
           <EuiFlexItem>
             <EuiTitle>
@@ -129,14 +147,6 @@ export const AddDocumentsCodeExample = ({
             </EuiText>
           </EuiFlexItem>
         )}
-        <EuiFlexItem css={{ maxWidth: '300px' }} grow={false}>
-          <LanguageSelector
-            options={LanguageOptions}
-            selectedLanguage={selectedLanguage}
-            onSelectLanguage={onSelectLanguage}
-            showLabel
-          />
-        </EuiFlexItem>
         {selectedCodeExamples.installCommand && (
           <EuiFlexItem>
             <CodeSample

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiSpacer, EuiText, EuiTitle } from '@elastic/eui';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
 import { useSearchApiKey } from '@kbn/search-api-keys-components';
@@ -17,10 +17,11 @@ import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 import { APIKeyCallout } from './api_key_callout';
 import { CodeSample } from './code_sample';
-import { useWorkflow } from './hooks/use_workflow';
 import { LanguageSelector } from './language_selector';
 import { GuideSelector } from './guide_selector';
 import { Workflow, WorkflowId } from '../../code_examples/workflows';
+import { CreateIndexCodeExamples } from '../../types';
+import { i18n } from '@kbn/i18n';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;
@@ -34,6 +35,7 @@ export interface CreateIndexCodeViewProps {
     installCommands: string;
     createIndex: string;
   };
+  selectedCodeExamples: CreateIndexCodeExamples;
 }
 
 export const CreateIndexCodeView = ({
@@ -44,10 +46,10 @@ export const CreateIndexCodeView = ({
   selectedWorkflow,
   indexName,
   selectedLanguage,
+  selectedCodeExamples,
 }: CreateIndexCodeViewProps) => {
   const { application, share, console: consolePlugin } = useKibana().services;
   const usageTracker = useUsageTracker();
-  const { createIndexExamples: selectedCodeExamples } = useWorkflow();
 
   const elasticsearchUrl = useElasticsearchUrl();
   const { apiKey } = useSearchApiKey();
@@ -71,30 +73,16 @@ export const CreateIndexCodeView = ({
         </EuiFlexItem>
       )}
       <EuiFlexItem>
-        <EuiFlexGroup justifyContent="spaceBetween" alignItems="flexStart">
-          <EuiFlexItem grow={false}>
-            <GuideSelector
-              selectedWorkflowId={selectedWorkflow?.id || 'default'}
-              onChange={changeWorkflowId}
-              showTour={false}
-            />
-          </EuiFlexItem>
-          <EuiFlexItem grow={false}>
-            <TryInConsoleButton
-              request={selectedCodeExamples.sense.createIndex(codeParams)}
-              application={application}
-              sharePlugin={share}
-              consolePlugin={consolePlugin}
-              telemetryId={`${selectedLanguage}_create_index`}
-              onClick={() => {
-                usageTracker.click([
-                  analyticsEvents.runInConsole,
-                  `${analyticsEvents.runInConsole}_${selectedLanguage}`,
-                ]);
-              }}
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
+        <EuiHorizontalRule />
+      </EuiFlexItem>
+      <EuiFlexItem>
+        <EuiTitle size="xs"><h5>{i18n.translate('xpack.searchIndices.guideSelectors.selectGuideTitle', { defaultMessage: "Select a workflow guide" })}</h5></EuiTitle>
+        <EuiSpacer />
+        <GuideSelector
+          selectedWorkflowId={selectedWorkflow?.id || 'default'}
+          onChange={changeWorkflowId}
+          showTour={false}
+        />
       </EuiFlexItem>
       {!!selectedWorkflow && (
         <>
@@ -109,13 +97,30 @@ export const CreateIndexCodeView = ({
           </EuiFlexItem>
         </>
       )}
-      <EuiFlexItem css={{ maxWidth: '300px' }}>
-        <LanguageSelector
-          options={LanguageOptions}
-          selectedLanguage={selectedLanguage}
-          onSelectLanguage={changeCodingLanguage}
-        />
-      </EuiFlexItem>
+      <EuiFlexGroup>
+        <EuiFlexItem grow={false} css={{ maxWidth: '300px' }}>
+          <LanguageSelector
+            options={LanguageOptions}
+            selectedLanguage={selectedLanguage}
+            onSelectLanguage={changeCodingLanguage}
+          />
+        </EuiFlexItem>
+        <EuiFlexItem grow={false}>
+          <TryInConsoleButton
+            request={selectedCodeExamples.sense.createIndex(codeParams)}
+            application={application}
+            sharePlugin={share}
+            consolePlugin={consolePlugin}
+            telemetryId={`${selectedLanguage}_create_index`}
+            onClick={() => {
+              usageTracker.click([
+                analyticsEvents.runInConsole,
+                `${analyticsEvents.runInConsole}_${selectedLanguage}`,
+              ]);
+            }}
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
       {selectedCodeExample.installCommand && (
         <CodeSample
           title={selectedCodeExamples.installTitle}
