@@ -6,7 +6,7 @@
  */
 import { elasticsearchServiceMock, loggingSystemMock } from '@kbn/core/server/mocks';
 import { errors as EsErrors } from '@elastic/elasticsearch';
-import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/types';
+import { IndicesGetDataStreamResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { createConcreteWriteIndex, setConcreteWriteIndex } from './create_concrete_write_index';
 import { getDataStreamAdapter } from './data_stream_adapter';
 
@@ -95,9 +95,11 @@ describe('createConcreteWriteIndex', () => {
         } else {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
               },
             },
           });
@@ -307,9 +309,11 @@ describe('createConcreteWriteIndex', () => {
         } else {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
               },
             },
           });
@@ -355,9 +359,11 @@ describe('createConcreteWriteIndex', () => {
         if (!useDataStream) {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
               },
             },
           });
@@ -393,9 +399,11 @@ describe('createConcreteWriteIndex', () => {
         if (!useDataStream) {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
               },
             },
           });
@@ -623,9 +631,11 @@ describe('createConcreteWriteIndex', () => {
         } else {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
               },
             },
           });
@@ -660,9 +670,11 @@ describe('createConcreteWriteIndex', () => {
         } else {
           expect(clusterClient.indices.create).toHaveBeenCalledWith({
             index: '.internal.alerts-test.alerts-default-000001',
-            aliases: {
-              '.alerts-test.alerts-default': {
-                is_write_index: true,
+            body: {
+              aliases: {
+                '.alerts-test.alerts-default': {
+                  is_write_index: true,
+                },
               },
             },
           });
@@ -744,21 +756,23 @@ describe('setConcreteWriteIndex', () => {
       'Attempting to set index: .internal.alerts-test.alerts-default-000004 as the write index for alias: .alerts-test.alerts-default.'
     );
     expect(clusterClient.indices.updateAliases).toHaveBeenCalledWith({
-      actions: [
-        {
-          remove: {
-            alias: '.alerts-test.alerts-default',
-            index: '.internal.alerts-test.alerts-default-000004',
+      body: {
+        actions: [
+          {
+            remove: {
+              alias: '.alerts-test.alerts-default',
+              index: '.internal.alerts-test.alerts-default-000004',
+            },
           },
-        },
-        {
-          add: {
-            alias: '.alerts-test.alerts-default',
-            index: '.internal.alerts-test.alerts-default-000004',
-            is_write_index: true,
+          {
+            add: {
+              alias: '.alerts-test.alerts-default',
+              index: '.internal.alerts-test.alerts-default-000004',
+              is_write_index: true,
+            },
           },
-        },
-      ],
+        ],
+      },
     });
     expect(logger.info).toHaveBeenCalledWith(
       'Successfully set index: .internal.alerts-test.alerts-default-000004 as the write index for alias: .alerts-test.alerts-default.'

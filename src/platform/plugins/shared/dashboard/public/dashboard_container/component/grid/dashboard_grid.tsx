@@ -28,10 +28,10 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.expandedPanelId,
+    dashboardApi.expandedPanelId$,
     dashboardApi.panels$,
     dashboardApi.settings.useMargins$,
-    dashboardApi.viewMode
+    dashboardApi.viewMode$
   );
 
   const appFixedViewport = useAppFixedViewport();

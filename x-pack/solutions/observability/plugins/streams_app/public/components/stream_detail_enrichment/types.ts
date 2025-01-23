@@ -6,13 +6,26 @@
  */
 
 import {
-  DissectProcessingDefinition,
+  Condition,
+  DissectProcessorConfig,
   FieldDefinitionConfig,
-  GrokProcessingDefinition,
-  ProcessingDefinition,
+  GrokProcessorConfig,
 } from '@kbn/streams-schema';
 
-export interface ProcessorDefinition extends ProcessingDefinition {
+export interface DissectProcessingDefinition {
+  dissect: Omit<DissectProcessorConfig, 'if'>;
+}
+
+export interface GrokProcessingDefinition {
+  grok: Omit<GrokProcessorConfig, 'if'>;
+}
+
+export interface ProcessingDefinition {
+  condition: Condition;
+  config: DissectProcessingDefinition | GrokProcessingDefinition;
+}
+
+export interface EnrichmentUIProcessorDefinition extends ProcessingDefinition {
   id: string;
 }
 
@@ -42,4 +55,16 @@ export type ProcessorFormState = GrokFormState | DissectFormState;
 export interface DetectedField {
   name: string;
   type: FieldDefinitionConfig['type'] | 'unmapped';
+}
+
+export function isGrokProcessor(
+  config: ProcessingDefinition['config']
+): config is GrokProcessingDefinition {
+  return 'grok' in config;
+}
+
+export function isDissectProcessor(
+  config: ProcessingDefinition['config']
+): config is DissectProcessingDefinition {
+  return 'dissect' in config;
 }
