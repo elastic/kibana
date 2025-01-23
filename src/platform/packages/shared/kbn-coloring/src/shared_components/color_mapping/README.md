@@ -15,7 +15,7 @@ const DEFAULT_COLOR_MAPPING_CONFIG: ColorMapping.Config = {
   assignments: [
     {
         rule: {
-            type: 'matchExactly',
+            type: 'match',
             values: [''];
         },
         color: {

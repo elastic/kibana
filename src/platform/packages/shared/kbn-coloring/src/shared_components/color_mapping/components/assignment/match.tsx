@@ -8,68 +8,116 @@
  */
 
 import React from 'react';
-import { EuiComboBox, EuiFlexItem, EuiIcon, EuiToolTip } from '@elastic/eui';
+import {
+  EuiComboBox,
+  EuiComboBoxOptionOption,
+  EuiFlexItem,
+  EuiIcon,
+  EuiToolTip,
+} from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { MULTI_FIELD_KEY_SEPARATOR } from '@kbn/data-plugin/common';
+import { RawValue, SerializedValue, deserializeField } from '@kbn/data-plugin/common';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { ColorMapping } from '../../config';
+import { ColorRule, RuleMatch, RuleMatchRaw } from '../../config/types';
+import { ruleMatchFn } from '../../color/rule_matching';
+
+export const isNotNull = <T,>(value: T | null): value is NonNullable<T> => value !== null;
+const duplicateWarning = i18n.translate(
+  'coloring.colorMapping.assignments.duplicateCategoryWarning',
+  {
+    defaultMessage:
+      'This category has already been assigned a different color. Only the first matching assignment will be used.',
+  }
+);
 
 export const Match: React.FC<{
   index: number;
-  rule:
-    | ColorMapping.RuleAuto
-    | ColorMapping.RuleMatchExactly
-    | ColorMapping.RuleMatchExactlyCI
-    | ColorMapping.RuleRegExp;
-  updateValue: (values: Array<string | string[]>) => void;
-  options: Array<string | string[]>;
+  rules: ColorMapping.ColorRule[];
+  updateRules: (rule: ColorMapping.ColorRule[]) => void;
+  categories: SerializedValue[];
   specialTokens: Map<unknown, string>;
-  assignmentValuesCounter: Map<string | string[], number>;
-}> = ({ index, rule, updateValue, options, specialTokens, assignmentValuesCounter }) => {
-  const duplicateWarning = i18n.translate(
-    'coloring.colorMapping.assignments.duplicateCategoryWarning',
-    {
-      defaultMessage:
-        'This category has already been assigned a different color. Only the first matching assignment will be used.',
-    }
-  );
-  const selectedOptions =
-    rule.type === 'auto'
-      ? []
-      : typeof rule.values === 'string'
-      ? [
-          {
-            label: rule.values,
-            value: rule.values,
-            append:
-              (assignmentValuesCounter.get(rule.values) ?? 0) > 1 ? (
-                <EuiToolTip position="bottom" content={duplicateWarning}>
-                  <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-                </EuiToolTip>
-              ) : undefined,
-          },
-        ]
-      : rule.values.map((value) => {
-          const ruleValues = Array.isArray(value) ? value : [value];
-          return {
-            label: ruleValues.map((v) => specialTokens.get(v) ?? v).join(MULTI_FIELD_KEY_SEPARATOR),
-            value,
-            append:
-              (assignmentValuesCounter.get(value) ?? 0) > 1 ? (
-                <EuiToolTip position="bottom" content={duplicateWarning}>
-                  <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
-                </EuiToolTip>
-              ) : undefined,
-          };
-        });
+  assignments: ColorMapping.Assignment[];
+  formatter?: IFieldFormat;
+  allowCustomMatch?: boolean;
+}> = ({
+  index,
+  rules,
+  updateRules,
+  categories,
+  specialTokens,
+  assignments,
+  formatter,
+  allowCustomMatch = false,
+}) => {
+  const getOptionForRawValue = getOptionForRawValueFn(formatter);
+  const availableOptions: Array<EuiComboBoxOptionOption<string>> = [];
 
-  const convertedOptions = options.map((value) => {
-    const ruleValues = Array.isArray(value) ? value : [value];
-    return {
-      label: ruleValues.map((v) => specialTokens.get(v) ?? v).join(MULTI_FIELD_KEY_SEPARATOR),
-      value,
-    };
-  });
+  // Map option key to their raw value
+  const rawCategoryValueMap = categories.reduce<Map<string, RawValue>>(
+    (acc, value: SerializedValue) => {
+      const option = getOptionForRawValue(value);
+      availableOptions.push(option);
+      acc.set(option.key, value);
+      return acc;
+    },
+    new Map()
+  );
+  const selectedOptions = rules
+    .map<EuiComboBoxOptionOption<string> | null>((rule, ruleIndex) => {
+      const previousRules = assignments
+        .slice(0, index)
+        .flatMap((a) => a.rules)
+        .concat(rules.slice(0, ruleIndex));
+
+      switch (rule.type) {
+        case 'raw': {
+          const rawValue = deserializeField(rule.value);
+          const hasPreviousMatch = previousRules.some(ruleMatchFn(rawValue));
+          const option = getOptionForRawValue(rule.value);
+          rawCategoryValueMap.set(option.key, rule.value);
+          return {
+            ...option,
+            append: hasPreviousMatch && (
+              <EuiToolTip position="bottom" content={duplicateWarning}>
+                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+              </EuiToolTip>
+            ),
+          };
+        }
+        case 'match': {
+          const hasPreviousMatch = previousRules.some(ruleMatchFn(rule.pattern));
+
+          return {
+            label: specialTokens.get(rule.pattern) ?? rule.pattern,
+            key: rule.pattern,
+            append: hasPreviousMatch && (
+              <EuiToolTip position="bottom" content={duplicateWarning}>
+                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+              </EuiToolTip>
+            ),
+          };
+        }
+        case 'regex': {
+          // Note: Only basic placeholder logic, not used or fully tested
+          const hasPreviousMatch = previousRules.some(ruleMatchFn(rule.pattern));
+
+          return {
+            label: rule.pattern,
+            key: rule.pattern,
+            append: hasPreviousMatch && (
+              <EuiToolTip position="bottom" content={duplicateWarning}>
+                <EuiIcon size="s" type="warning" color={euiThemeVars.euiColorWarningText} />
+              </EuiToolTip>
+            ),
+          };
+        }
+        default:
+          return null;
+      }
+    })
+    .filter(isNotNull);
 
   return (
     <EuiFlexItem style={{ minWidth: 1, width: 1 }}>
@@ -87,26 +135,57 @@ export const Match: React.FC<{
             defaultMessage: 'Auto assigning term',
           }
         )}
-        options={convertedOptions}
+        options={availableOptions}
         selectedOptions={selectedOptions}
-        onChange={(changedOptions) => {
-          updateValue(
-            changedOptions.reduce<Array<string | string[]>>((acc, option) => {
-              if (option.value !== undefined) {
-                acc.push(option.value);
+        onChange={(newOptions) => {
+          updateRules(
+            newOptions.reduce<ColorRule[]>((acc, { key = null }) => {
+              if (key !== null) {
+                if (rawCategoryValueMap.has(key)) {
+                  acc.push({
+                    type: 'raw',
+                    value: rawCategoryValueMap.get(key),
+                  } satisfies RuleMatchRaw);
+                } else {
+                  acc.push({
+                    type: 'match',
+                    pattern: key,
+                  } satisfies RuleMatch);
+                  // TODO: handle remaining rule types
+                }
               }
               return acc;
             }, [])
           );
         }}
-        onCreateOption={(label) => {
-          if (selectedOptions.findIndex((option) => option.label === label) === -1) {
-            updateValue([...selectedOptions, { label, value: label }].map((d) => d.value));
-          }
-        }}
+        onCreateOption={
+          allowCustomMatch
+            ? (label) => {
+                return updateRules([
+                  ...rules,
+                  {
+                    type: 'match',
+                    pattern: label,
+                  } satisfies RuleMatch,
+                ]);
+              }
+            : undefined
+        }
         isCaseSensitive
         compressed
       />
     </EuiFlexItem>
   );
 };
+
+function getOptionForRawValueFn(fieldFormat?: IFieldFormat) {
+  const formatter = fieldFormat?.convert.bind(fieldFormat) ?? String;
+  return (serializedValue: unknown) => {
+    const rawValue = deserializeField(serializedValue);
+    const key = String(rawValue);
+    return {
+      key,
+      label: formatter(rawValue),
+    } satisfies EuiComboBoxOptionOption<string>;
+  };
+}

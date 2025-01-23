@@ -27,6 +27,8 @@ import {
 } from '@kbn/coloring';
 import { i18n } from '@kbn/i18n';
 import { KbnPalettes } from '@kbn/palettes';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import { SerializedValue } from '@kbn/data-plugin/common';
 import { trackUiCounterEvents } from '../../lens_ui_telemetry';
 import { PalettePicker } from '../palette_picker';
 import { PalettePanelContainer } from './palette_panel_container';
@@ -42,7 +44,9 @@ interface ColorMappingByTermsProps {
   setColorMapping: (colorMapping?: ColorMapping.Config) => void;
   paletteService: PaletteRegistry;
   panelRef: MutableRefObject<HTMLDivElement | null>;
-  categories: Array<string | string[]>;
+  categories: SerializedValue[];
+  formatter?: IFieldFormat;
+  allowCustomMatch?: boolean;
 }
 
 export function ColorMappingByTerms({
@@ -56,6 +60,8 @@ export function ColorMappingByTerms({
   paletteService,
   panelRef,
   categories,
+  formatter,
+  allowCustomMatch,
 }: ColorMappingByTermsProps) {
   const [useNewColorMapping, setUseNewColorMapping] = useState(Boolean(colorMapping));
 
@@ -128,6 +134,8 @@ export function ColorMappingByTerms({
                   onModelUpdate={setColorMapping}
                   specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                   palettes={palettes}
+                  formatter={formatter}
+                  allowCustomMatch={allowCustomMatch}
                   data={{
                     type: 'categories',
                     categories,

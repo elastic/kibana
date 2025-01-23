@@ -12,7 +12,14 @@ import { getKbnPalettes } from '@kbn/palettes';
 import { EuiFlyout, EuiForm, EuiPage, isColorDark } from '@elastic/eui';
 import { ComponentStory } from '@storybook/react';
 import { css } from '@emotion/react';
-import { RawValue, deserializeField } from '@kbn/data-plugin/common';
+import {
+  MultiFieldKey,
+  RawValue,
+  SerializedValue,
+  deserializeField,
+} from '@kbn/data-plugin/common';
+import { getColorCategories } from '@kbn/chart-expressions-common';
+import { IFieldFormat } from '@kbn/field-formats-plugin/common';
 import { CategoricalColorMapping, ColorMappingProps } from '../categorical_color_mapping';
 import { DEFAULT_COLOR_MAPPING_CONFIG } from '../config/default_color_mapping';
 import { ColorMapping } from '../config';
@@ -21,12 +28,16 @@ import { assignmentMatchFn } from '../color/rule_matching';
 import { getValidColor } from '../color/color_math';
 
 export default {
-  title: 'Color Mapping',
+  title: 'Raw Color Mapping',
   component: CategoricalColorMapping,
   decorators: [(story: Function) => story()],
 };
 
-const formatter = (value: unknown) => String(value);
+const formatter = {
+  convert: (value: MultiFieldKey) => {
+    return value.keys.join(' - ');
+  },
+} as IFieldFormat;
 
 const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
   const [updatedModel, setUpdateModel] = useState<ColorMapping.Config>(
@@ -40,7 +51,7 @@ const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
     <EuiPage>
       <ol>
         {args.data.type === 'categories' &&
-          args.data.categories.map((category, i) => {
+          args.data.categories.map((category: SerializedValue, i) => {
             const value: RawValue = deserializeField(category);
             const match = updatedModel.assignments.some(assignmentMatchFn(value));
             const color = colorFactory(value);
@@ -60,7 +71,7 @@ const Template: ComponentStory<FC<ColorMappingProps>> = (args) => {
                   font-weight: ${match ? 'bold' : 'normal'};
                 `}
               >
-                {formatter(value)}
+                {formatter.convert(value)}
               </li>
             );
           })}
@@ -104,23 +115,25 @@ Default.args = {
     assignments: [],
   },
   isDarkMode: false,
+  formatter,
   data: {
     type: 'categories',
-    categories: [
-      'US',
-      'Mexico',
-      'Brasil',
-      'Canada',
-      'Italy',
-      'Germany',
-      'France',
-      'Spain',
-      'UK',
-      'Portugal',
-      'Greece',
-      'Sweden',
-      'Finland',
-    ],
+    categories: getColorCategories(
+      [
+        { value: new MultiFieldKey({ key: ['US', 'Canada'] }) },
+        { value: new MultiFieldKey({ key: ['Mexico'] }) },
+        { value: new MultiFieldKey({ key: ['Brasil'] }) },
+        { value: new MultiFieldKey({ key: ['Canada'] }) },
+        { value: new MultiFieldKey({ key: ['Canada', 'US'] }) },
+        { value: new MultiFieldKey({ key: ['Italy', 'Germany'] }) },
+        { value: new MultiFieldKey({ key: ['France'] }) },
+        { value: new MultiFieldKey({ key: ['Spain', 'Portugal'] }) },
+        { value: new MultiFieldKey({ key: ['UK'] }) },
+        { value: new MultiFieldKey({ key: ['Sweden'] }) },
+        { value: new MultiFieldKey({ key: ['Sweden', 'Finland'] }) },
+      ],
+      'value'
+    ),
   },
 
   specialTokens: new Map(),

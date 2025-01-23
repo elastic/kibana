@@ -39,3 +39,11 @@ export function getFieldMetaFromDatatable(table: Datatable | undefined, accessor
   return table?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor)
     ?.meta;
 }
+
+export function getFieldTypeFromDatatable(table: Datatable | undefined, accessor: string) {
+  return getDatatableColumn(table, accessor)?.meta.type;
+}
+
+export function getDatatableColumn(table: Datatable | undefined, accessor: string) {
+  return table?.columns.find((col) => col.id === accessor || getOriginalId(col.id) === accessor);
+}

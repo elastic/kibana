@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-const id = Symbol('id');
+import { SerializableField } from '../../../serializable_field';
+import { SerializableType } from '../../../serialize_utils';
 
 type Ranges = Array<
   Partial<{
@@ -17,37 +18,85 @@ type Ranges = Array<
   }>
 >;
 
-export class RangeKey {
-  [id]: string;
+type RangeValue = string | number | undefined | null;
+interface BucketLike {
+  from?: RangeValue;
+  to?: RangeValue;
+}
+
+/**
+ * Serialized form of {@link @kbn/data-plugin/common.RangeKey}
+ */
+export interface SerializedRangeKey {
+  type: typeof SerializableType.RangeKey;
+  from: string | number;
+  to: string | number;
+  ranges: Ranges;
+}
+
+function findCustomLabel(from: RangeValue, to: RangeValue, ranges?: Ranges) {
+  return (ranges || []).find(
+    (range) =>
+      ((from == null && range.from == null) || range.from === from) &&
+      ((to == null && range.to == null) || range.to === to)
+  )?.label;
+}
+
+const getRangeValue = (bucket: unknown, key: string): RangeValue => {
+  const value = bucket && typeof bucket === 'object' && key in bucket && (bucket as any)[key];
+  return value == null || ['string', 'number'].includes(value) ? value : null;
+};
+
+const getRangeFromBucket = (bucket: unknown): BucketLike => {
+  return {
+    from: getRangeValue(bucket, 'from'),
+    to: getRangeValue(bucket, 'to'),
+  };
+};
+
+export class RangeKey extends SerializableField<SerializedRangeKey> {
+  static isInstance(field: unknown): field is RangeKey {
+    return field instanceof RangeKey;
+  }
+
+  static deserialize(value: SerializedRangeKey): RangeKey {
+    const { to, from, ranges } = value;
+    return new RangeKey({ to, from }, ranges);
+  }
+
+  static idBucket(bucket: unknown): string {
+    const { from, to } = getRangeFromBucket(bucket);
+    return `from:${from},to:${to}`;
+  }
+
   gte: string | number;
   lt: string | number;
   label?: string;
 
-  private findCustomLabel(
-    from: string | number | undefined | null,
-    to: string | number | undefined | null,
-    ranges?: Ranges
-  ) {
-    return (ranges || []).find(
-      (range) =>
-        ((from == null && range.from == null) || range.from === from) &&
-        ((to == null && range.to == null) || range.to === to)
-    )?.label;
+  constructor(bucket: unknown, allRanges?: Ranges) {
+    super();
+    const { from, to } = getRangeFromBucket(bucket);
+    this.gte = from == null ? -Infinity : from;
+    this.lt = to == null ? +Infinity : to;
+    this.label = findCustomLabel(from, to, allRanges);
   }
 
-  constructor(bucket: any, allRanges?: Ranges) {
-    this.gte = bucket.from == null ? -Infinity : bucket.from;
-    this.lt = bucket.to == null ? +Infinity : bucket.to;
-    this.label = this.findCustomLabel(bucket.from, bucket.to, allRanges);
-
-    this[id] = RangeKey.idBucket(bucket);
+  toString(): string {
+    return `from:${this.gte},to:${this.lt}`;
   }
 
-  static idBucket(bucket: any) {
-    return `from:${bucket.from},to:${bucket.to}`;
-  }
-
-  toString() {
-    return this[id];
+  serialize(): SerializedRangeKey {
+    return {
+      type: SerializableType.RangeKey,
+      from: this.gte,
+      to: this.lt,
+      ranges: [
+        {
+          from: this.gte,
+          to: this.lt,
+          label: this.label,
+        },
+      ],
+    };
   }
 }
