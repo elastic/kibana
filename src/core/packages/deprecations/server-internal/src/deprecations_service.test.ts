@@ -10,6 +10,7 @@
 import {
   DeprecationsFactoryMock,
   registerConfigDeprecationsInfoMock,
+  loggingMock,
 } from './deprecations_service.test.mocks';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import { httpServerMock, httpServiceMock } from '@kbn/core-http-server-mocks';
@@ -35,7 +36,7 @@ describe('DeprecationsService', () => {
     coreUsageData = coreUsageDataServiceMock.createSetupContract();
     router = httpServiceMock.createRouter();
     http.createRouter.mockReturnValue(router);
-    deprecationsCoreSetupDeps = { http, coreUsageData };
+    deprecationsCoreSetupDeps = { http, coreUsageData, logging: loggingMock };
   });
 
   afterEach(() => {
@@ -62,6 +63,12 @@ describe('DeprecationsService', () => {
       const deprecationsService = new DeprecationsService(coreContext);
       await deprecationsService.setup(deprecationsCoreSetupDeps);
       expect(registerConfigDeprecationsInfoMock).toBeCalledTimes(1);
+    });
+
+    it('calls logging.configure once', async () => {
+      const deprecationsService = new DeprecationsService(coreContext);
+      await deprecationsService.setup(deprecationsCoreSetupDeps);
+      expect(loggingMock.configure).toBeCalledTimes(1);
     });
 
     it('creates DeprecationsFactory with the correct parameters', async () => {
