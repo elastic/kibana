@@ -7,7 +7,7 @@
 import type {
   AggregationsKeyedPercentiles,
   AggregationsPercentilesAggregateBase,
-} from '@elastic/elasticsearch/lib/api/types';
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { MonitoringCollectionSetup } from '@kbn/monitoring-collection-plugin/server';
 import { aggregateTaskOverduePercentilesForType } from '@kbn/task-manager-plugin/server';
 import { CoreSetup } from '@kbn/core/server';

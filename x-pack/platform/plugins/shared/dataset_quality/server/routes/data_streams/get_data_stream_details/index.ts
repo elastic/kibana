@@ -13,6 +13,7 @@ import { _IGNORED } from '../../../../common/es_fields';
 import { datasetQualityPrivileges } from '../../../services';
 import { createDatasetQualityESClient } from '../../../utils';
 import { rangeQuery } from '../../../utils/queries';
+import { getFailedDocsPaginated } from '../failed_docs/get_failed_docs';
 import { getDataStreams } from '../get_data_streams';
 import { getDataStreamsMeteringStats } from '../get_data_streams_metering_stats';
 
@@ -60,6 +61,18 @@ export async function getDataStreamDetails({
       end
     );
 
+    const failedDocs = isServerless
+      ? undefined
+      : (
+          await getFailedDocsPaginated({
+            esClient: esClientAsCurrentUser,
+            types: [],
+            datasetQuery: dataStream,
+            start,
+            end,
+          })
+        )?.[0];
+
     const avgDocSizeInBytes =
       hasAccessToDataStream && dataStreamSummaryStats.docsCount > 0
         ? isServerless
@@ -71,6 +84,7 @@ export async function getDataStreamDetails({
 
     return {
       ...dataStreamSummaryStats,
+      failedDocsCount: failedDocs?.count,
       sizeBytes,
       lastActivity: esDataStream?.lastActivity,
       userPrivileges: {
