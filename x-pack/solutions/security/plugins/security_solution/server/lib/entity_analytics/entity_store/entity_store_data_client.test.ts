@@ -272,7 +272,7 @@ describe('EntityStoreDataClient', () => {
           installed: true,
         },
         {
-          id: 'security_host_test',
+          id: 'indexTemplates_id',
           installed: true,
           resource: 'index_template',
         },
