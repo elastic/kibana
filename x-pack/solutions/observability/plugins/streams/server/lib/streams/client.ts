@@ -457,7 +457,7 @@ export class StreamsClient {
     name: string;
     if: Condition;
   }): Promise<ForkStreamResponse> {
-    const parentDefinition = await this.getStream(parent);
+    const parentDefinition = (await this.getStream(parent)) as WiredStreamDefinition;
 
     const childDefinition: WiredStreamDefinition = {
       name,

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import { StreamDefinition, isRoot } from '@kbn/streams-schema';
+import { IngestStreamDefinition, isRoot } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsDefaultPipelineProcessors } from './logs_default_pipeline';
 import { getProcessingPipelineName } from './name';
 import { formatToIngestProcessors } from '../helpers/processing';
 
-export function generateIngestPipeline(id: string, definition: StreamDefinition) {
+export function generateIngestPipeline(id: string, definition: IngestStreamDefinition) {
   return {
     id: getProcessingPipelineName(id),
     processors: [
@@ -32,7 +32,7 @@ export function generateIngestPipeline(id: string, definition: StreamDefinition)
   };
 }
 
-export function generateClassicIngestPipelineBody(definition: StreamDefinition) {
+export function generateClassicIngestPipelineBody(definition: IngestStreamDefinition) {
   return {
     processors: formatToIngestProcessors(definition.ingest.processing),
     _meta: {
