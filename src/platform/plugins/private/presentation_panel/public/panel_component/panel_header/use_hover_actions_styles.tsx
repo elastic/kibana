@@ -12,11 +12,34 @@ import { css } from '@emotion/react';
 
 import { useMemo } from 'react';
 
-export const useHoverActionStyles = () => {
+export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) => {
   const { euiTheme } = useEuiTheme();
 
   const containerStyles = useMemo(() => {
+    const editModeOutline = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
+    const viewModeOutline = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
+
     return css`
+      // the border style can be overwritten by parents who define --hoverActionsBorderStyle; otherwise, default to either
+      // editModeOutline or viewModeOutline depending on view mode
+      --internalBorderStyle: var(
+        --hoverActionsBorderStyle,
+        ${isEditMode ? editModeOutline : viewModeOutline}
+      );
+
+      ${showBorder
+        ? css`
+            .embPanel {
+              outline: var(--internalBorderStyle);
+            }
+          `
+        : css`
+            &:hover .embPanel {
+              outline: var(--internalBorderStyle);
+              z-index: ${euiTheme.levels.menu};
+            }
+          `}
+      v
       container: hoverActionsAnchor / size;
       border-radius: ${euiTheme.border.radius.medium};
       position: relative;
@@ -48,17 +71,8 @@ export const useHoverActionStyles = () => {
         visibility: visible;
         transition: none; // apply transition delay on hover out only
       }
-
-      // for dashboards with no controls, increase the z-index of the hover actions in the
-      // top row so that they overlap the sticky nav in Dashboard
-      .dshDashboardViewportWrapper:not(:has(.dshDashboardViewport-controls))
-        .dshDashboardGrid__item[data-grid-row='0']
-        &
-        .embPanel__hoverActions {
-        z-index: ${euiTheme.levels.toast};
-      }
     `;
-  }, [euiTheme]);
+  }, [euiTheme, showBorder, isEditMode]);
 
   const hoverActionStyles = useMemo(() => {
     const singleWrapperStyles = css`
@@ -68,7 +82,7 @@ export const useHoverActionStyles = () => {
       padding: var(--paddingAroundAction);
 
       border-radius: ${euiTheme.border.radius.medium};
-      border: var(--borderStyle);
+      border: var(--internalBorderStyle);
       background-color: ${euiTheme.colors.backgroundBasePlain};
       grid-template-columns: max-content;
 
@@ -101,7 +115,7 @@ export const useHoverActionStyles = () => {
           flex: 0; // do not grow
           pointer-events: all; // re-enable pointer events for non-breakpoint children
           // style children that are **not** the breakpoint
-          border-top: var(--borderStyle);
+          border-top: var(--internalBorderStyle);
           border-radius: 0px;
           background-color: ${euiTheme.colors.backgroundBasePlain};
           padding: var(--paddingAroundAction) 0px;
@@ -115,7 +129,7 @@ export const useHoverActionStyles = () => {
       // start of action group
       & > *:first-child:not(.breakpoint),
       & > .breakpoint + * {
-        border-left: var(--borderStyle);
+        border-left: var(--internalBorderStyle);
         border-top-left-radius: ${euiTheme.border.radius.medium};
         padding-left: var(--paddingAroundAction);
       }
@@ -123,18 +137,18 @@ export const useHoverActionStyles = () => {
       // end of action group
       & > *:has(+ .breakpoint),
       & > *:last-child {
-        border-right: var(--borderStyle);
+        border-right: var(--internalBorderStyle);
         border-top-right-radius: ${euiTheme.border.radius.medium};
         padding-right: var(--paddingAroundAction);
       }
 
+      // shrink down to single wrapped element with no breakpoint when panel gets small
       @container hoverActionsAnchor (width < 250px) {
-        // shrink down to single wrapped element with no breakpoint when panel gets small
         ${singleWrapperStyles}
       }
 
+      // when in fullscreen mode, combine all floating actions on first row and nudge them down
       .dshDashboardViewportWrapper--isFullscreen .dshDashboardGrid__item[data-grid-row='0'] & {
-        // when in fullscreen mode, combine all floating actions on first row and nudge them down
         ${singleWrapperStyles}
         top: -${euiTheme.size.s} !important;
       }

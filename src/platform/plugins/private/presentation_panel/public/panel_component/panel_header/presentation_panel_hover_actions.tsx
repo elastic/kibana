@@ -135,39 +135,22 @@ export const PresentationPanelHoverActions = ({
 
   const { euiTheme } = useEuiTheme();
 
-  const EDIT_MODE_OUTLINE = `${euiTheme.border.width.thin} dashed ${euiTheme.colors.borderBaseFormsControl}`;
-  const VIEW_MODE_OUTLINE = `${euiTheme.border.width.thin} solid ${euiTheme.colors.borderBasePlain}`;
-
-  const [
-    defaultTitle,
-    title,
-    description,
-    hidePanelTitle,
-    hasLockedHoverActions,
-    parentHideTitle,
-    parentViewMode,
-  ] = useBatchedOptionalPublishingSubjects(
-    api?.defaultTitle$,
-    api?.title$,
-    api?.description$,
-    api?.hideTitle$,
-    api?.hasLockedHoverActions$,
-    api?.parentApi?.hideTitle$,
-    /**
-     * View mode changes often have the biggest influence over which actions will be compatible,
-     * so we build and update all actions when the view mode changes. This is temporary, as these
-     * actions should eventually all be Frequent Compatibility Change Actions which can track their
-     * own dependencies.
-     */
-    getViewModeSubject(api ?? undefined)
-  );
+  const [defaultTitle, title, description, hidePanelTitle, hasLockedHoverActions, parentHideTitle] =
+    useBatchedOptionalPublishingSubjects(
+      api?.defaultTitle$,
+      api?.title$,
+      api?.description$,
+      api?.hideTitle$,
+      api?.hasLockedHoverActions$,
+      api?.parentApi?.hideTitle$
+    );
 
   const hideTitle = hidePanelTitle || parentHideTitle;
   const showDescription = description && (!title || hideTitle);
 
   const quickActionIds = useMemo(
-    () => QUICK_ACTION_IDS[parentViewMode === 'edit' ? 'edit' : 'view'],
-    [parentViewMode]
+    () => QUICK_ACTION_IDS[viewMode === 'edit' ? 'edit' : 'view'],
+    [viewMode]
   );
 
   const onClose = useCallback(() => {
@@ -307,15 +290,7 @@ export const PresentationPanelHoverActions = ({
     return () => {
       canceled = true;
     };
-  }, [
-    actionPredicate,
-    api,
-    getActions,
-    isContextMenuOpen,
-    onClose,
-    parentViewMode,
-    quickActionIds,
-  ]);
+  }, [actionPredicate, api, getActions, isContextMenuOpen, onClose, viewMode, quickActionIds]);
 
   const quickActionElements = useMemo(() => {
     if (!api || quickActions.length < 1) return [];
@@ -443,7 +418,10 @@ export const PresentationPanelHoverActions = ({
   );
 
   const hasHoverActions = quickActionElements.length || contextMenuPanels.lastIndexOf.length;
-  const { containerStyles, hoverActionStyles } = useHoverActionStyles();
+  const { containerStyles, hoverActionStyles } = useHoverActionStyles(
+    viewMode === 'edit',
+    showBorder
+  );
 
   return (
     <div
@@ -456,28 +434,7 @@ export const PresentationPanelHoverActions = ({
         /\s/g,
         ''
       )}`}
-      css={css`
-        --borderStyle: ${viewMode === 'edit' ? EDIT_MODE_OUTLINE : VIEW_MODE_OUTLINE};
-
-        .kbnGridPanel--active & {
-          --borderStyle: var(--dashboardActivePanelBorderStyle);
-        }
-
-        ${showBorder
-          ? css`
-              .embPanel {
-                outline: var(--borderStyle);
-              }
-            `
-          : css`
-              &:hover .embPanel {
-                outline: var(--borderStyle);
-                z-index: ${euiTheme.levels.menu};
-              }
-            `}
-
-        ${containerStyles}
-      `}
+      css={containerStyles}
     >
       {children}
       {api && hasHoverActions && (
@@ -542,7 +499,6 @@ export const PresentationPanelHoverActions = ({
             </EuiPopover>
           ) : null}
         </div>
-        // </div>
       )}
     </div>
   );

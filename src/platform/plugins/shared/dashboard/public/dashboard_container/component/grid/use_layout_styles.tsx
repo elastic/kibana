@@ -58,7 +58,7 @@ export const useLayoutStyles = () => {
       }
 
       .kbnGridPanel--resizeHandle {
-        z-index: ${euiTheme.levels.mask};
+        z-index: ${euiTheme.levels.maskBelowHeader};
 
         // applying mask via ::after allows for focus borders to show
         &:after {
@@ -82,9 +82,8 @@ export const useLayoutStyles = () => {
       }
 
       .kbnGridPanel--active {
-        .embPanel {
-          outline: var(--dashboardActivePanelBorderStyle) !important;
-        }
+        // overwrite the border style on panels + hover actions for active panels
+        --hoverActionsBorderStyle: var(--dashboardActivePanelBorderStyle);
       }
     `;
   }, [euiTheme]);
