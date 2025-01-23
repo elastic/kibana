@@ -19,7 +19,7 @@ import {
   apiHasExecutionContext,
   fetch$,
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useBatchedPublishingSubjects,
   useFetchContext,
 } from '@kbn/presentation-publishing';
@@ -139,13 +139,8 @@ export const getFieldStatsChartEmbeddableFactory = (
         fieldFormats,
         ...startServices,
       };
-      const {
-        api: timeRangeApi,
-        comparators: timeRangeComparators,
-        serialize: serializeTimeRange,
-      } = initializeTimeRange(state);
-
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const timeRangeManager = initializeTimeRange(state);
+      const titleManager = initializeTitleManager(state);
 
       const {
         fieldStatsControlsApi,
@@ -155,7 +150,7 @@ export const getFieldStatsChartEmbeddableFactory = (
         onFieldStatsTableDestroy,
         resetData$,
       } = initializeFieldStatsControls(state, deps.uiSettings);
-      const { onError, dataLoading, blockingError } = dataLoadingApi;
+      const { onError, dataLoading$, blockingError$ } = dataLoadingApi;
 
       const validDataViewId: string | undefined =
         isDefined(state.dataViewId) && state.dataViewId !== '' ? state.dataViewId : undefined;
@@ -205,13 +200,13 @@ export const getFieldStatsChartEmbeddableFactory = (
 
       const api = buildApi(
         {
-          ...timeRangeApi,
-          ...titlesApi,
+          ...timeRangeManager.api,
+          ...titleManager.api,
           ...fieldStatsControlsApi,
           // PublishesDataLoading
-          dataLoading,
+          dataLoading$,
           // PublishesBlockingError
-          blockingError,
+          blockingError$,
           getTypeDisplayName: () =>
             i18n.translate('xpack.dataVisualizer.fieldStats.typeDisplayName', {
               defaultMessage: 'field statistics',
@@ -237,7 +232,7 @@ export const getFieldStatsChartEmbeddableFactory = (
               toasts.addError(e, { title: ERROR_MSG.UPDATE_CONFIG_ERROR });
             }
           },
-          dataViews: dataViews$,
+          dataViews$,
           serializeState: () => {
             const dataViewId = fieldStatsControlsApi.dataViewId$?.getValue();
             const references: Reference[] = dataViewId
@@ -251,8 +246,8 @@ export const getFieldStatsChartEmbeddableFactory = (
               : [];
             return {
               rawState: {
-                ...serializeTitles(),
-                ...serializeTimeRange(),
+                ...titleManager.serialize(),
+                ...timeRangeManager.serialize(),
                 ...serializeFieldStatsChartState(),
               },
               references,
@@ -260,8 +255,8 @@ export const getFieldStatsChartEmbeddableFactory = (
           },
         },
         {
-          ...timeRangeComparators,
-          ...titleComparators,
+          ...timeRangeManager.comparators,
+          ...titleManager.comparators,
           ...fieldStatsControlsComparators,
         }
       );
@@ -324,7 +319,7 @@ export const getFieldStatsChartEmbeddableFactory = (
           const { filters: globalFilters, query: globalQuery, timeRange } = useFetchContext(api);
           const [dataViews, esqlQuery, viewType, showPreviewByDefault] =
             useBatchedPublishingSubjects(
-              api.dataViews,
+              api.dataViews$,
               api.query$,
               api.viewType$,
               api.showDistributions$
