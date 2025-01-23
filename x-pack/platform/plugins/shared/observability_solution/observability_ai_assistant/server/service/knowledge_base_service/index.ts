@@ -17,7 +17,7 @@ import {
   KnowledgeBaseEntryRole,
   KnowledgeBaseType,
 } from '../../../common/types';
-import { getAccessQuery } from '../util/get_access_query';
+import { getAccessQuery, getUserAccessFilters } from '../util/get_access_query';
 import { getCategoryQuery } from '../util/get_category_query';
 import {
   createInferenceEndpoint,
@@ -342,7 +342,13 @@ export class KnowledgeBaseService {
           filter: [
             { term: { type: KnowledgeBaseType.UserInstruction } },
             { term: { public: isPublic } },
-            ...getAccessQuery({ user, namespace }),
+            { term: { namespace } },
+            {
+              bool: {
+                should: [...getUserAccessFilters(user)],
+                minimum_should_match: 1,
+              },
+            },
           ],
         },
       },
@@ -393,7 +399,7 @@ export class KnowledgeBaseService {
   }: {
     entry: Omit<KnowledgeBaseEntry, '@timestamp'>;
     user?: { name: string; id?: string };
-    namespace?: string;
+    namespace: string;
   }): Promise<void> => {
     if (!this.dependencies.config.enableKnowledgeBase) {
       return;

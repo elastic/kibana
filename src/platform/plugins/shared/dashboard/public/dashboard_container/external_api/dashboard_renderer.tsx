@@ -157,7 +157,7 @@ const ParentClassController = ({
   dashboardApi: DashboardApi;
   viewportRef: HTMLDivElement;
 }) => {
-  const maximizedPanelId = useStateFromPublishingSubject(dashboardApi.expandedPanelId);
+  const maximizedPanelId = useStateFromPublishingSubject(dashboardApi.expandedPanelId$);
 
   useLayoutEffect(() => {
     const parentDiv = viewportRef.parentElement;
