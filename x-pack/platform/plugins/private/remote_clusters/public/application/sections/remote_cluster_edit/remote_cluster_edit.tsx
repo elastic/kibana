@@ -19,6 +19,7 @@ import {
 
 import { reactRouterNavigate } from '@kbn/kibana-react-plugin/public';
 import { useRouteMatch } from 'react-router-dom';
+import { RequestError } from '../../../types';
 import { Cluster, ClusterPayload } from '../../../../common/lib';
 import { extractQueryParams, SectionLoading } from '../../../shared_imports';
 import { getRouter, redirect } from '../../services';
@@ -32,7 +33,7 @@ interface Props {
   stopEditingCluster: () => void;
   editCluster: (cluster: ClusterPayload) => void;
   isEditingCluster: boolean;
-  getEditClusterError?: object;
+  getEditClusterError?: RequestError;
   clearEditClusterErrors: () => void;
   openDetailPanel: (clusterName: string) => void;
 }
@@ -164,9 +165,15 @@ export const RemoteClusterEdit: React.FC<Props> = ({
           isSaving={isEditingCluster}
           saveError={getEditClusterError}
           confirmFormAction={editCluster}
-          cancel={cancel}
+          onBack={cancel}
           confirmFormText={
             <FormattedMessage id="xpack.remoteClusters.edit.save" defaultMessage="Save" />
+          }
+          backFormText={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
+              defaultMessage="Cancel"
+            />
           }
         />
       </EuiPageSection>

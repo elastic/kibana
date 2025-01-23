@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PROXY_MODE } from '../constants';
+import { PROXY_MODE, SECURITY_MODEL } from '../constants';
 
 // Values returned from ES GET /_remote/info
 /**
@@ -48,7 +48,7 @@ export interface Cluster {
   initialConnectTimeout?: string | number;
   connectedSocketsCount?: number;
   hasDeprecatedProxySetting?: boolean;
-  securityModel: 'certificate' | 'api_key';
+  securityModel: SECURITY_MODEL.CERTIFICATE | SECURITY_MODEL.API;
 }
 
 export type ClusterPayload = Omit<Cluster, 'securityModel'>;
@@ -113,7 +113,7 @@ export function deserializeCluster(
     proxySocketConnections,
     connectedSocketsCount,
     serverName,
-    securityModel: clusterCredentials ? 'api_key' : 'certificate',
+    securityModel: clusterCredentials ? SECURITY_MODEL.API : SECURITY_MODEL.CERTIFICATE,
   };
 
   if (transport) {

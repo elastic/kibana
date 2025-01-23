@@ -109,7 +109,7 @@ export const RemoteClusterWizard = ({
       {currentStep === SETUP_TRUST && (
         <RemoteClusterSetupTrust
           next={completeTrustStep}
-          cancel={onCancel}
+          onCancel={onCancel}
           currentSecurityModel={securityModel}
           onSecurityChange={onSecurityUpdate}
         />
@@ -118,20 +118,26 @@ export const RemoteClusterWizard = ({
       <div style={{ display: currentStep === CONFIGURE_CONNECTION ? 'block' : 'none' }}>
         <RemoteClusterForm
           confirmFormAction={completeConfigStep}
-          cancel={onCancel}
+          onBack={() => setCurrentStep(SETUP_TRUST)}
+          onConfigChange={onConfigUpdate}
           confirmFormText={
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.nextButtonLabel"
               defaultMessage="Next"
             />
           }
-          onConfigChange={onConfigUpdate}
+          backFormText={
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.backButtonLabel"
+              defaultMessage="Back"
+            />
+          }
         />
       </div>
       <div style={{ display: currentStep === REVIEW ? 'block' : 'none' }}>
         {formState && (
           <RemoteClusterReview
-            cancel={onCancel}
+            onBack={() => setCurrentStep(CONFIGURE_CONNECTION)}
             isSaving={isSaving}
             saveError={addClusterError}
             onSubmit={completeReviewStep}

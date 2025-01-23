@@ -8,6 +8,7 @@
 import React from 'react';
 
 import '@kbn/code-editor-mock/jest_helper';
+import { SECURITY_MODEL } from '@kbn/remote-clusters-plugin/common/constants';
 import { shallowWithIntl } from '@kbn/test-jest-helpers';
 
 import { RemoteClusterComboBox } from './remote_clusters_combo_box';
@@ -28,7 +29,7 @@ test('it renders without crashing', () => {
           proxySocketConnections: 18,
           connectedSocketsCount: 0,
           serverName: 'localhost',
-          securityModel: 'certificate',
+          securityModel: SECURITY_MODEL.CERTIFICATE,
         },
         {
           name: 'test2',
@@ -40,7 +41,7 @@ test('it renders without crashing', () => {
           proxySocketConnections: 18,
           connectedSocketsCount: 0,
           serverName: 'localhost',
-          securityModel: 'api_key',
+          securityModel: SECURITY_MODEL.API,
         },
         {
           name: 'test3',
@@ -52,7 +53,7 @@ test('it renders without crashing', () => {
           proxySocketConnections: 18,
           connectedSocketsCount: 0,
           serverName: 'localhost',
-          securityModel: 'api_key',
+          securityModel: SECURITY_MODEL.API,
         },
       ]}
     />
@@ -76,7 +77,7 @@ test('should render clusters field', () => {
           proxySocketConnections: 18,
           connectedSocketsCount: 0,
           serverName: 'localhost',
-          securityModel: 'certificate',
+          securityModel: SECURITY_MODEL.CERTIFICATE,
         },
         {
           name: 'test2',
@@ -88,7 +89,7 @@ test('should render clusters field', () => {
           proxySocketConnections: 18,
           connectedSocketsCount: 0,
           serverName: 'localhost',
-          securityModel: 'api_key',
+          securityModel: SECURITY_MODEL.API,
         },
       ]}
     />

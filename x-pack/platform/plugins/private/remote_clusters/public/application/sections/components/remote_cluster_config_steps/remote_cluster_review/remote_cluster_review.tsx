@@ -17,6 +17,8 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { RequestError } from '../../../../../types';
+import { SECURITY_MODEL } from '../../../../../../common/constants';
 import {
   apiKeys,
   cloudCreateApiKey,
@@ -31,16 +33,16 @@ import { AppContext } from '../../../../app_context';
 import { ActionButtons, SaveError } from '../components';
 
 interface Props {
-  cancel?: () => void;
+  onBack?: () => void;
   onSubmit: () => void;
   isSaving?: boolean;
-  saveError?: any;
+  saveError?: RequestError;
   cluster: ClusterPayload;
   securityModel: string;
 }
 
 export const RemoteClusterReview = ({
-  cancel,
+  onBack,
   onSubmit,
   isSaving,
   saveError,
@@ -65,7 +67,7 @@ export const RemoteClusterReview = ({
               documentationLink: (
                 <EuiLink
                   href={
-                    securityModel === 'api_key'
+                    securityModel === SECURITY_MODEL.API
                       ? onPremPrerequisitesApiKey
                       : onPremPrerequisitesCert
                   }
@@ -99,7 +101,9 @@ export const RemoteClusterReview = ({
             values={{
               documentationLink: (
                 <EuiLink
-                  href={securityModel === 'api_key' ? onPremSecurityApiKey : onPremSecurityCert}
+                  href={
+                    securityModel === SECURITY_MODEL.API ? onPremSecurityApiKey : onPremSecurityCert
+                  }
                   external={true}
                   target="_blank"
                   data-test-subj="remoteClusterReviewOnPremStep2"
@@ -246,7 +250,7 @@ export const RemoteClusterReview = ({
 
   const getCloudInfo = () => {
     const cloudInfoSteps =
-      securityModel === 'api_key' ? (
+      securityModel === SECURITY_MODEL.API ? (
         <>
           <EuiText size="s">
             <FormattedMessage
@@ -330,15 +334,22 @@ export const RemoteClusterReview = ({
         showRequest={true}
         isSaving={isSaving}
         handleNext={onSubmit}
-        cancel={cancel}
+        onBack={onBack}
         confirmFormText={
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.addClusterButtonLabel"
             defaultMessage="Add remote cluster"
           />
         }
+        backFormText={
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterForm.backButtonLabel"
+            defaultMessage="Back"
+          />
+        }
         cluster={cluster}
         nextButtonTestSubj={'remoteClusterReviewtNextButton'}
+        backButtonTestSubj={'remoteClusterReviewtBackButton'}
       />
     </>
   );

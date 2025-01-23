@@ -17,6 +17,7 @@ import {
   REMOTE_CLUSTER_EDIT_NAME,
 } from './remote_clusters_edit.helpers';
 import { Cluster } from '../../../common/lib';
+import { SECURITY_MODEL } from '../../../common/constants';
 
 let component: TestBed['component'];
 let actions: RemoteClustersActions;
@@ -85,7 +86,7 @@ describe('Edit Remote cluster', () => {
         mode: 'proxy',
         proxyAddress: `${cloudUrl}:${defaultCloudPort}`,
         serverName: cloudUrl,
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       };
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
@@ -106,7 +107,7 @@ describe('Edit Remote cluster', () => {
         name: REMOTE_CLUSTER_EDIT_NAME,
         mode: 'proxy',
         proxyAddress: `${cloudUrl}:9500`,
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       };
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 
@@ -126,7 +127,7 @@ describe('Edit Remote cluster', () => {
         mode: 'proxy',
         proxyAddress: `${cloudUrl}:${defaultCloudPort}`,
         serverName: 'another-value',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       };
       httpRequestsMockHelpers.setLoadRemoteClustersResponse([cluster]);
 

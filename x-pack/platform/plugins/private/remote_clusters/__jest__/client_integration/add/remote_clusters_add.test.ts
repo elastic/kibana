@@ -97,6 +97,11 @@ describe('Create Remote cluster', () => {
         expect(actions.formStep.skipUnavailableSwitch.isChecked()).toBe(false);
       });
 
+      test('back button goes to first step', async () => {
+        await actions.formStep.backButton.click();
+        expect(actions.setupTrustStep.isOnTrustStep()).toBe(true);
+      });
+
       describe('on prem', () => {
         beforeEach(async () => {
           await act(async () => {
@@ -313,6 +318,18 @@ describe('Create Remote cluster', () => {
           });
 
           component.update();
+        });
+
+        test('back button goes to second step', async () => {
+          await actions.setupTrustStep.selectApiKeyTrustMode();
+          await actions.setupTrustStep.button.click();
+
+          await actions.formStep.nameInput.setValue('remote_cluster_apiKey_cloud');
+          await actions.formStep.cloudRemoteAddressInput.setValue('1:1');
+          await actions.formStep.button.click();
+
+          await actions.reviewStep.backButton.click();
+          expect(actions.formStep.isOnFormStep()).toBe(true);
         });
 
         test('shows expected documentation when api_key is selected', async () => {

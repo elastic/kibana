@@ -62,6 +62,10 @@ export interface RemoteClustersActions {
       click: () => void;
       isDisabled: () => boolean;
     };
+    backButton: {
+      click: () => void;
+    };
+    isOnFormStep: () => boolean;
   };
 
   setupTrustStep: {
@@ -73,6 +77,10 @@ export interface RemoteClustersActions {
       click: () => void;
       isDisabled: () => boolean;
     };
+    backButton: {
+      click: () => void;
+    };
+    isOnTrustStep: () => boolean;
   };
 
   reviewStep: {
@@ -89,6 +97,9 @@ export interface RemoteClustersActions {
     };
     clickAddCluster: () => void;
     errorBannerExists: () => boolean;
+    backButton: {
+      click: () => void;
+    };
   };
 
   getErrorMessages: () => string[];
@@ -106,6 +117,7 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
   };
 
   const docsButtonExists = () => exists('remoteClusterDocsButton');
+
   const createPageTitleActions = () => {
     const pageTitleSelector = 'remoteClusterPageTitle';
     return {
@@ -217,6 +229,18 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
       };
     };
 
+    const formBackButtonActions = () => {
+      return {
+        backButton: {
+          click: () => click('remoteClusterFormBackButton'),
+        },
+      };
+    };
+
+    const isOnFormStepActions = () => {
+      return { isOnFormStep: () => exists('remoteClusterFormNextButton') };
+    };
+
     const createServerNameActions = () => {
       const serverNameSelector = 'remoteClusterFormServerNameFormRow';
       return {
@@ -259,6 +283,8 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
         ...createNodeConnectionsInputActions(),
         ...createProxyAddressActions(),
         ...formButtonsActions(),
+        ...formBackButtonActions(),
+        ...isOnFormStepActions(),
         ...createServerNameActions(),
         ...createTlsServerNameActions(),
         ...createCloudRemoteAddressInputActions(),
@@ -280,6 +306,10 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
           click: () => click(trustButtonSelector),
           isDisabled: () => find(trustButtonSelector).props().disabled,
         },
+        backButton: {
+          click: () => click('remoteClusterTrustBackButton'),
+        },
+        isOnTrustStep: () => exists(trustButtonSelector),
       },
     };
   };
@@ -303,6 +333,9 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
         },
         clickAddCluster: () => click('remoteClusterReviewtNextButton'),
         errorBannerExists: () => exists('saveErrorBanner'),
+        backButton: {
+          click: () => click('remoteClusterReviewtBackButton'),
+        },
       },
     };
   };

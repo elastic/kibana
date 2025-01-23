@@ -4,9 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React, { ReactNode, useCallback, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  EuiButton,
+  EuiButtonEmpty,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '../../../../../shared_imports';
 import { ClusterPayload } from '../../../../../../common/lib';
 import { RequestFlyout } from './request_flyout';
 
@@ -15,11 +20,12 @@ interface Props {
   disabled?: boolean;
   isSaving?: boolean;
   handleNext: () => void;
-  cancel?: () => void;
+  onBack?: () => void;
   confirmFormText: ReactNode;
+  backFormText: ReactNode;
   cluster?: ClusterPayload;
   nextButtonTestSubj: string;
-  maxWidith?: number;
+  backButtonTestSubj: string;
 }
 
 export const ActionButtons: React.FC<Props> = ({
@@ -27,11 +33,12 @@ export const ActionButtons: React.FC<Props> = ({
   handleNext,
   disabled,
   isSaving,
-  cancel,
+  onBack,
   confirmFormText,
+  backFormText,
   cluster,
   nextButtonTestSubj,
-  maxWidith,
+  backButtonTestSubj,
 }) => {
   const [isRequestVisible, setIsRequestVisible] = useState(false);
   const toggleRequest = useCallback(() => {
@@ -40,7 +47,7 @@ export const ActionButtons: React.FC<Props> = ({
 
   return (
     <EuiFlexGroup wrap justifyContent="center">
-      <EuiFlexItem style={{ maxWidth: maxWidith }}>
+      <EuiFlexItem>
         <EuiFlexGroup>
           <EuiFlexItem grow={false}>
             <EuiButton
@@ -55,16 +62,13 @@ export const ActionButtons: React.FC<Props> = ({
             </EuiButton>
           </EuiFlexItem>
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty color="primary" onClick={cancel}>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
-                defaultMessage="Cancel"
-              />
+            <EuiButtonEmpty color="primary" onClick={onBack} data-test-subj={backButtonTestSubj}>
+              {backFormText}
             </EuiButtonEmpty>
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlexItem>
-      <EuiFlexItem style={{ maxWidth: maxWidith }}>
+      <EuiFlexItem>
         {showRequest && (
           <EuiFlexGroup justifyContent="flexEnd">
             <EuiFlexItem grow={false}>

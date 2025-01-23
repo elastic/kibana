@@ -10,9 +10,8 @@ import { EuiComboBox, EuiIconTip } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SECURITY_MODEL } from '@kbn/remote-clusters-plugin/common/constants';
 import type { Cluster } from '@kbn/remote-clusters-plugin/public';
-
-const API_KEY_SECURITY_MODEL = 'api_key';
 
 interface Props extends Omit<EuiComboBoxProps<string | number | string[] | undefined>, 'options'> {
   remoteClusters: Cluster[];
@@ -30,7 +29,7 @@ export const RemoteClusterComboBox: React.FunctionComponent<Props> = ({
       incompatible: EuiComboBoxOptionOption[];
     }>(
       (data, item) => {
-        const disabled = item.securityModel !== API_KEY_SECURITY_MODEL;
+        const disabled = item.securityModel !== SECURITY_MODEL.API;
 
         if (!disabled) {
           data.remote.push({ label: item.name });

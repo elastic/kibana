@@ -52,12 +52,13 @@ const ERROR_TITLE_ID = 'removeClustersErrorTitle';
 const ERROR_LIST_ID = 'removeClustersErrorList';
 interface Props {
   confirmFormAction: (cluster: ClusterPayload) => void;
-  cancel?: () => void;
+  onBack?: () => void;
   isSaving?: boolean;
   saveError?: any;
   cluster?: Cluster;
-  confirmFormText: ReactNode;
   onConfigChange?: (cluster: ClusterPayload, hasErrors: boolean) => void;
+  confirmFormText: ReactNode;
+  backFormText: ReactNode;
 }
 export type FormFields = ClusterPayload & {
   cloudRemoteAddress?: string;
@@ -65,12 +66,13 @@ export type FormFields = ClusterPayload & {
 };
 export const RemoteClusterForm: React.FC<Props> = ({
   confirmFormAction,
-  cancel,
+  onBack,
   isSaving,
   saveError,
   cluster,
-  confirmFormText,
   onConfigChange,
+  confirmFormText,
+  backFormText,
 }) => {
   const context = useContext(AppContext);
   const { euiTheme } = useEuiTheme();
@@ -437,10 +439,12 @@ export const RemoteClusterForm: React.FC<Props> = ({
         disabled={areErrorsVisible && hasErrors()}
         isSaving={isSaving}
         handleNext={handleNext}
-        cancel={cancel}
+        onBack={onBack}
         confirmFormText={confirmFormText}
+        backFormText={backFormText}
         cluster={getCluster()}
         nextButtonTestSubj={'remoteClusterFormNextButton'}
+        backButtonTestSubj={'remoteClusterFormBackButton'}
       />
     </>
   );

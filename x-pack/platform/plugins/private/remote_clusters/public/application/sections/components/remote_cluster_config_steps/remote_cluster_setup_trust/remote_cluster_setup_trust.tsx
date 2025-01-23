@@ -8,7 +8,14 @@
 import React, { useContext, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiCard, EuiFlexGroup, EuiFlexItem, EuiText, EuiButton } from '@elastic/eui';
+import {
+  EuiSpacer,
+  EuiCard,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiText,
+  EuiButton,
+} from '../../../../../shared_imports';
 
 import { SECURITY_MODEL } from '../../../../../../common/constants';
 import { AppContext } from '../../../../app_context';
@@ -43,12 +50,12 @@ const i18nTexts = {
 interface Props {
   next: (model: string) => void;
   onSecurityChange: (model: string) => void;
-  cancel?: () => void;
+  onCancel?: () => void;
   currentSecurityModel: string;
 }
 
 export const RemoteClusterSetupTrust = ({
-  cancel,
+  onCancel,
   next,
   currentSecurityModel,
   onSecurityChange,
@@ -57,36 +64,29 @@ export const RemoteClusterSetupTrust = ({
   const [securityModel, setSecurityModel] = useState<string>(currentSecurityModel);
 
   const selectModeButton = (securityModelType: string, testSubj: string) => {
-    return securityModel === securityModelType ? (
+    const isSelected = securityModel === securityModelType;
+    const buttonProps = {
+      onClick: () => {
+        setSecurityModel(securityModelType);
+        onSecurityChange(securityModelType);
+      },
+      fullWidth: true,
+      'data-test-subj': testSubj,
+    };
+    return (
       <EuiButton
-        onClick={() => {
-          setSecurityModel(securityModelType);
-          onSecurityChange(securityModelType);
-        }}
-        color="success"
-        iconType="check"
-        iconSide="left"
-        fullWidth
-        data-test-subj={testSubj}
+        {...buttonProps}
+        iconSide={isSelected ? 'left' : undefined}
+        iconType={isSelected ? 'check' : undefined}
+        color={isSelected ? 'success' : 'text'}
       >
         <FormattedMessage
-          id="xpack.remoteClusters.clusterWizard.trustStep.selected"
-          defaultMessage="Selected"
-        />
-      </EuiButton>
-    ) : (
-      <EuiButton
-        onClick={() => {
-          setSecurityModel(securityModelType);
-          onSecurityChange(securityModelType);
-        }}
-        color="text"
-        fullWidth
-        data-test-subj={testSubj}
-      >
-        <FormattedMessage
-          id="xpack.remoteClusters.clusterWizard.trustStep.docs"
-          defaultMessage="Select"
+          id={
+            isSelected
+              ? 'xpack.remoteClusters.clusterWizard.trustStep.selected'
+              : 'xpack.remoteClusters.clusterWizard.trustStep.docs'
+          }
+          defaultMessage={isSelected ? 'Selected' : 'Select'}
         />
       </EuiButton>
     );
@@ -162,15 +162,21 @@ export const RemoteClusterSetupTrust = ({
         handleNext={() => {
           next(securityModel);
         }}
-        cancel={cancel}
+        onBack={onCancel}
         confirmFormText={
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.nextButtonLabel"
             defaultMessage="Next"
           />
         }
+        backFormText={
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterForm.cancelButtonLabel"
+            defaultMessage="Cancel"
+          />
+        }
         nextButtonTestSubj={'remoteClusterTrustNextButton'}
-        maxWidith={CARD_MAX_WIDTH}
+        backButtonTestSubj={'remoteClusterTrustBackButton'}
       />
     </div>
   );

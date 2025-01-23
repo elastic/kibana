@@ -6,12 +6,10 @@
  */
 import React from 'react';
 import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { RequestError } from '../../../../../types';
 
 interface Props {
-  saveError: {
-    message: string;
-    cause?: string[];
-  };
+  saveError: RequestError;
 }
 export const SaveError: React.FC<Props> = ({ saveError }) => {
   const { message, cause } = saveError;
