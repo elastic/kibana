@@ -28,7 +28,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
   let apiClient: StreamsSupertestRepositoryClient;
 
-  describe('Forking classic streams', () => {
+  describe.only('Forking classic streams', () => {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
@@ -380,6 +380,43 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           unwired: {},
         },
       });
+    });
+
+    it('should fail when trying to fork a stream into an existing unwired stream', async () => {
+      const resp = await apiClient.fetch('POST /api/streams/{id}/_fork', {
+        params: {
+          path: {
+            id: 'logs-shared-default',
+          },
+          body: {
+            stream: { name: 'logs-shared.prefix-default' },
+            if: {
+              never: {},
+            },
+          },
+        },
+      });
+      expect(resp.status).to.eql(400);
+    });
+
+    it('should fail when trying to PUT a stream into an existing unwired stream', async () => {
+      await putStream(
+        apiClient,
+        'logs-shared.prefix-default',
+        {
+          dashboards: [],
+          stream: {
+            ingest: {
+              processing: [],
+              routing: [],
+              wired: {
+                fields: {},
+              },
+            },
+          },
+        },
+        400
+      );
     });
   });
 }
