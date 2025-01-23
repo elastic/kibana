@@ -8,6 +8,7 @@
 import type { KibanaResponseFactory } from '@kbn/core/server';
 import {
   coreMock,
+  docLinksServiceMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
@@ -127,13 +128,13 @@ describe('Action Log API', () => {
     let havingErrors: () => void;
 
     beforeEach(() => {
+      const docLinks = docLinksServiceMock.createSetupContract();
       const esClientMock = elasticsearchServiceMock.createScopedClusterClient();
       const routerMock = httpServiceMock.createRouter();
       endpointAppContextService = new EndpointAppContextService();
       endpointAppContextService.setup(createMockEndpointAppContextServiceSetupContract());
       endpointAppContextService.start(createMockEndpointAppContextServiceStartContract());
-
-      registerActionAuditLogRoutes(routerMock, createMockEndpointAppContext());
+      registerActionAuditLogRoutes(routerMock, createMockEndpointAppContext(), docLinks);
 
       getActivityLog = async (
         params: { agent_id: string },
