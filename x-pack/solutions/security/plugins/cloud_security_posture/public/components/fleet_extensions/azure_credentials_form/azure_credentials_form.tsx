@@ -289,7 +289,9 @@ export const AzureInputVarFields = ({
     <div>
       {fields.map((field, index) => {
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
-        const invalidError = `${field.label} is required`;
+        const invalidError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
+          defaultMessage: `${field.label} is required`,
+        });
         return (
           <div key={index}>
             {field.type === 'password' && field.isSecret === true && (

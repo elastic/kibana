@@ -10,6 +10,7 @@ import { EuiFieldText, EuiFormRow, EuiSpacer, EuiLoadingSpinner } from '@elastic
 import { PackageInfo } from '@kbn/fleet-plugin/common';
 import { css } from '@emotion/react';
 import { LazyPackagePolicyInputVarField } from '@kbn/fleet-plugin/public';
+import { i18n } from '@kbn/i18n';
 import { AwsOptions } from './get_aws_credentials_form_options';
 import { findVariableDef, fieldIsInvalid } from '../utils';
 
@@ -34,7 +35,9 @@ export const AwsInputVarFields = ({
     <div>
       {fields.map((field, index) => {
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
-        const invalidError = `${field.label} is required`;
+        const invalidError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
+          defaultMessage: `${field.label} is required`,
+        });
         return (
           <div key={index}>
             {field.type === 'password' && field.isSecret === true && (

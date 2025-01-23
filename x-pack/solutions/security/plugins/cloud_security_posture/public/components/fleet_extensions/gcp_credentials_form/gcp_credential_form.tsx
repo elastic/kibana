@@ -590,11 +590,18 @@ export const GcpInputVarFields = ({
     organizationIdFields?.value,
     hasInvalidRequiredVars
   );
-  const organizationIdError = `${organizationIdFields?.label} is required`;
+  const organizationIdError = i18n.translate(
+    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    {
+      defaultMessage: `${organizationIdFields?.label} is required`,
+    }
+  );
 
   const projectIdFields = getFieldById('gcp.project_id');
   const projectIdValueInvalid = fieldIsInvalid(projectIdFields?.value, hasInvalidRequiredVars);
-  const projectIdError = `${projectIdFields?.label} is required`;
+  const projectIdError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
+    defaultMessage: `${projectIdFields?.label} is required`,
+  });
 
   const credentialsTypeFields = getFieldById('gcp.credentials.type');
 
@@ -603,14 +610,24 @@ export const GcpInputVarFields = ({
     credentialFilesFields?.value,
     hasInvalidRequiredVars
   );
-  const credentialFilesError = `${credentialFilesFields?.label} is required`;
+  const credentialFilesError = i18n.translate(
+    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    {
+      defaultMessage: `${credentialFilesFields?.label} is required`,
+    }
+  );
 
   const credentialJSONFields = getFieldById('gcp.credentials.json');
   const credentialJSONFieldsInvalid = fieldIsInvalid(
     credentialJSONFields?.value,
     hasInvalidRequiredVars
   );
-  const credentialJSONError = `${credentialJSONFields?.label} is required`;
+  const credentialJSONError = i18n.translate(
+    'xpack.csp.cspmIntegration.integration.fieldRequired',
+    {
+      defaultMessage: `${credentialJSONFields?.label} is required`,
+    }
+  );
 
   const credentialFieldValue = credentialOptionsList[0].value;
   const credentialJSONValue = credentialOptionsList[1].value;
