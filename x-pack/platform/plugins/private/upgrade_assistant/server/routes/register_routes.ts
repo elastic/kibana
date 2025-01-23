@@ -16,14 +16,20 @@ import { registerDeprecationLoggingRoutes } from './deprecation_logging';
 import { registerReindexIndicesRoutes, registerBatchReindexIndicesRoutes } from './reindex_indices';
 import { registerUpdateSettingsRoute } from './update_index_settings';
 import { registerMlSnapshotRoutes } from './ml_snapshots';
-import { ReindexWorker } from '../lib/reindexing';
+import { DataStreamReindexWorker, ReindexWorker } from '../lib/reindexing';
 import { registerUpgradeStatusRoute } from './status';
 import { registerRemoteClustersRoute } from './remote_clusters';
 import { registerNodeDiskSpaceRoute } from './node_disk_space';
 import { registerClusterSettingsRoute } from './cluster_settings';
+import { registerReindexDataStreamRoutes } from './reindex_data_streams';
 
-export function registerRoutes(dependencies: RouteDependencies, getWorker: () => ReindexWorker) {
+export function registerRoutes(
+  dependencies: RouteDependencies,
+  getWorker: () => ReindexWorker,
+  getDataStreamWorker: () => DataStreamReindexWorker
+) {
   registerAppRoutes(dependencies);
+
   registerCloudBackupStatusRoutes(dependencies);
   registerClusterUpgradeStatusRoutes(dependencies);
   registerSystemIndicesMigrationRoutes(dependencies);
@@ -38,4 +44,7 @@ export function registerRoutes(dependencies: RouteDependencies, getWorker: () =>
   registerRemoteClustersRoute(dependencies);
   registerNodeDiskSpaceRoute(dependencies);
   registerClusterSettingsRoute(dependencies);
+
+  // Data streams reindexing
+  registerReindexDataStreamRoutes(dependencies, getDataStreamWorker);
 }

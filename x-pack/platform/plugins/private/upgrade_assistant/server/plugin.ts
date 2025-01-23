@@ -24,15 +24,17 @@ import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { DEPRECATION_LOGS_SOURCE_ID, DEPRECATION_LOGS_INDEX } from '../common/constants';
 
 import { CredentialStore, credentialStoreFactory } from './lib/reindexing/credential_store';
-import { ReindexWorker } from './lib/reindexing';
+import { DataStreamReindexWorker, ReindexWorker } from './lib/reindexing';
 import { registerUpgradeAssistantUsageCollector } from './lib/telemetry';
 import { versionService } from './lib/version';
 import { createReindexWorker } from './routes/reindex_indices';
+import { createDataStreamReindexWorker } from './routes/reindex_data_streams';
 import { registerRoutes } from './routes/register_routes';
 import {
   reindexOperationSavedObjectType,
   mlSavedObjectType,
   hiddenTypes,
+  dataStreamReindexOperationSavedObjectType,
 } from './saved_object_types';
 import { handleEsError } from './shared_imports';
 import { RouteDependencies } from './types';
@@ -64,6 +66,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
   private savedObjectsServiceStart?: SavedObjectsServiceStart;
   private securityPluginStart?: SecurityPluginStart;
   private worker?: ReindexWorker;
+  private dataStreamWorker?: DataStreamReindexWorker;
 
   constructor({ logger, env, config }: PluginInitializerContext<UpgradeAssistantConfig>) {
     this.logger = logger.get();
@@ -81,6 +84,13 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     return this.worker;
   }
 
+  private getDataStreamWorker() {
+    if (!this.dataStreamWorker) {
+      throw new Error('Data Stream Worker unavailable');
+    }
+    return this.dataStreamWorker;
+  }
+
   setup(
     { http, getStartServices, savedObjects }: CoreSetup,
     { usageCollection, features, licensing, logsShared, security }: PluginsSetup
@@ -88,6 +98,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     this.licensing = licensing;
 
     savedObjects.registerType(reindexOperationSavedObjectType);
+    savedObjects.registerType(dataStreamReindexOperationSavedObjectType);
     savedObjects.registerType(mlSavedObjectType);
 
     features.registerElasticsearchFeature({
@@ -144,7 +155,7 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     // Initialize version service with current kibana version
     versionService.setup(this.kibanaVersion);
 
-    registerRoutes(dependencies, this.getWorker.bind(this));
+    registerRoutes(dependencies, this.getWorker.bind(this), this.getDataStreamWorker.bind(this));
 
     if (usageCollection) {
       void getStartServices().then(([{ elasticsearch }]) => {
@@ -179,11 +190,29 @@ export class UpgradeAssistantServerPlugin implements Plugin {
     });
 
     this.worker.start();
+
+    this.dataStreamWorker = createDataStreamReindexWorker({
+      credentialStore: this.credentialStore,
+      licensing: this.licensing!,
+      elasticsearchService: elasticsearch,
+      logger: this.logger,
+      savedObjects: new SavedObjectsClient(
+        this.savedObjectsServiceStart.createInternalRepository(hiddenTypes)
+      ),
+      security: this.securityPluginStart,
+    });
+    console.log('starting data stream worker');
+
+    this.dataStreamWorker.start();
   }
 
   stop(): void {
     if (this.worker) {
       this.worker.stop();
+    }
+
+    if (this.dataStreamWorker) {
+      this.dataStreamWorker.stop();
     }
   }
 }

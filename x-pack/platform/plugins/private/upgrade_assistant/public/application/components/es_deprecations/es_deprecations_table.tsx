@@ -34,6 +34,7 @@ import {
   ReindexTableRow,
   ClusterSettingsTableRow,
   HealthIndicatorTableRow,
+  DataStreamTableRow,
 } from './deprecation_types';
 import { DeprecationTableColumns } from '../types';
 import { DEPRECATION_TYPE_MAP, PAGINATION_CONFIG } from '../constants';
@@ -129,6 +130,9 @@ const renderTableRowCells = (
 
     case 'healthIndicator':
       return <HealthIndicatorTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
+
+    case 'dataStream':
+      return <DataStreamTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;
 
     default:
       return <DefaultTableRow deprecation={deprecation} rowFieldNames={cellTypes} />;

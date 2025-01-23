@@ -7,7 +7,10 @@
 
 import { HealthReportImpact } from '@elastic/elasticsearch/lib/api/types';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
-import { SavedObject } from '@kbn/core/types';
+import { SavedObject } from '@kbn/core/server';
+import type { DataStreamsAction } from './data_stream_types';
+
+export * from './data_stream_types';
 
 export type DeprecationSource = 'Kibana' | 'Elasticsearch';
 
@@ -233,6 +236,7 @@ export interface EnrichedDeprecationInfo
     | MlAction
     | IndexSettingAction
     | ClusterSettingAction
+    | DataStreamsAction
     | HealthIndicatorAction;
   resolveDuringUpgrade: boolean;
 }

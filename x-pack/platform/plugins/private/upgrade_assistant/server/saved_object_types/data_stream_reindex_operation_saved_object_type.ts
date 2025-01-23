@@ -1,0 +1,27 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { SavedObjectsType } from '@kbn/core/server';
+
+import { DATA_STREAM_REINDEX_OP_TYPE } from '../../common/types';
+
+export const dataStreamReindexOperationSavedObjectType: SavedObjectsType = {
+  name: DATA_STREAM_REINDEX_OP_TYPE,
+  hidden: true,
+  namespaceType: 'agnostic',
+  mappings: {
+    dynamic: false,
+    properties: {
+      indexName: {
+        type: 'keyword',
+      },
+      status: {
+        type: 'integer',
+      },
+    },
+  },
+};
