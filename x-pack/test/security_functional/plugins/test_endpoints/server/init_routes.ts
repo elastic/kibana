@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { errors } from '@elastic/elasticsearch';
+import { DiagnosticResult, errors } from '@elastic/elasticsearch';
+import type { OpenPointInTimeResponse } from '@elastic/elasticsearch/lib/api/types';
 
 import { schema } from '@kbn/config-schema';
 import type { CoreSetup, CoreStart, PluginInitializerContext } from '@kbn/core/server';
@@ -286,6 +287,39 @@ export function initRoutes(
           request.body.enabled
         }, enable/disable response: ${JSON.stringify(bulkEnableDisableResult)}).`
       );
+
+      return response.ok();
+    }
+  );
+
+  router.post(
+    {
+      path: '/simulate_point_in_time',
+      validate: { body: schema.object({ simulateOpenPointInTime: schema.boolean() }) },
+      options: { authRequired: false, xsrfRequired: false },
+    },
+    async (context, request, response) => {
+      const esClient = (await context.core).elasticsearch.client.asInternalUser;
+      const originalOpenPointInTime = esClient.openPointInTime;
+
+      if (request.body.simulateOpenPointInTime) {
+        // @ts-expect-error
+        esClient.openPointInTime = async function (params, options) {
+          const { index } = params;
+          console.log('params', params);
+          if (index.includes('kibana_security_session')) {
+            console.log('We are overriding the openPointInTime function');
+            return Promise.reject(
+              new errors.ResponseError({
+                statusCode: 503,
+              } as unknown as DiagnosticResult)
+            );
+          }
+          return originalOpenPointInTime.call(this, params, options);
+        };
+      } else {
+        esClient.openPointInTime = originalOpenPointInTime;
+      }
 
       return response.ok();
     }

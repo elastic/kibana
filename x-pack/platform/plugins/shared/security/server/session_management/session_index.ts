@@ -497,6 +497,7 @@ export class SessionIndex {
       }
     } catch (err) {
       if (err.statusCode === 503) {
+        console.log('IS ERROR', { shardMissingCounter });
         shardMissingCounter = shardMissingCounter + 1;
         if (shardMissingCounter < 10) {
           logger.debug(

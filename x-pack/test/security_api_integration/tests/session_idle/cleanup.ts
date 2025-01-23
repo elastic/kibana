@@ -107,18 +107,13 @@ export default function ({ getService }: FtrProviderContext) {
   }
 
   async function rerouteIndexCluster() {
-    const res = await esSupertest.post(' /_cluster/reroute').send({
-      commands: [
-        {
-          allocate_replica: {
-            index: '.kibana_security_session*',
-            shard: 0,
-            from_node: 'node1',
-            to_node: 'node2',
-          },
-        },
-      ],
+    const res = await es.cluster.putSettings({
+      body: {
+        transient: { 'cluster.routing.allocation.enable': 'none' },
+      },
     });
+
+    console.log('res2', JSON.stringify(res, null, 2));
   }
 
   describe('Session Idle cleanup', () => {
@@ -266,15 +261,16 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await getNumberOfSessionDocuments()).to.be(1);
     });
 
-    it.only('quietly fails if shards are unavailable', async () => {
-      // test that does the following:
-      // 1. login session
-      // 2. reroute the index to a node that doesn't exist
-      // 3. run the cleanup task
-      // expect no failure
+    it.only('quietly fails if shards are unavailable', async function () {
+      this.timeout(100000);
+
+      await supertest
+        .post('/simulate_point_in_time')
+        .send({ simulateOpenPointInTime: true })
+        .expect(200);
 
       log.debug(`Log in as ${basicUsername} using ${basicPassword} password.`);
-      const response = await supertest
+      await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
         .send({
@@ -285,19 +281,62 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      const sessionCookie = parseCookie(response.headers['set-cookie'][0])!;
-      await checkSessionCookie(sessionCookie, basicUsername, { type: 'basic', name: 'basic1' });
-      expect(await getNumberOfSessionDocuments()).to.be(1);
-      await rerouteIndexCluster();
-
-      // Poke the background task to run
       await runCleanupTaskSoon();
+
       log.debug('Waiting for cleanup job to run...');
+
       await setTimeoutAsync(40000);
       await retry.tryForTime(20000, async () => {
-        // Session info is removed from the index and cookie isn't valid anymore
-        expect(await getNumberOfSessionDocuments()).to.be(0);
+        // Session does not clean up but the cleanup task has not failed either
+        expect(await getNumberOfSessionDocuments()).to.be(1);
       });
+
+      await supertest
+        .post('/simulate_point_in_time')
+        .send({ simulateOpenPointInTime: false })
+        .expect(200);
+    });
+
+    it('fails if shards are unavailable more than 10 times', async function () {
+      this.timeout(100000);
+
+      await supertest
+        .post('/simulate_point_in_time')
+        .send({ simulateOpenPointInTime: true })
+        .expect(200);
+
+      log.debug(`Log in as ${basicUsername} using ${basicPassword} password.`);
+      await supertest
+        .post('/internal/security/login')
+        .set('kbn-xsrf', 'xxx')
+        .send({
+          providerType: 'basic',
+          providerName: 'basic1',
+          currentURL: '/',
+          params: { username: basicUsername, password: basicPassword },
+        })
+        .expect(200);
+
+      // run cleanup tasks 10 times in a loop and expect failure
+      const cleanupTaskRunPromises = Array.from(
+        { length: 10 },
+        async () => await runCleanupTaskSoon()
+      );
+
+      await Promise.all(cleanupTaskRunPromises);
+
+      log.debug('Waiting for cleanup job to run...');
+
+      await setTimeoutAsync(40000);
+      await retry.tryForTime(20000, async () => {
+        // Session does not clean up but the cleanup task has not failed either
+        expect(await getNumberOfSessionDocuments()).to.be(1);
+      });
+
+      await supertest
+        .post('/simulate_point_in_time')
+        .send({ simulateOpenPointInTime: false })
+        .expect(200);
     });
   });
 }
