@@ -164,6 +164,25 @@ export class FileManager {
     }
   }
 
+  public async removeClashingFiles() {
+    const fileClashes = this.uploadStatus$.getValue().fileClashes;
+    const filesToDestroy: FileWrapper[] = [];
+    const files = this.getFiles();
+    const newFiles = files.filter((file, i) => {
+      if (fileClashes[i].clash) {
+        filesToDestroy.push(files[i]);
+        return false;
+      }
+      return true;
+    });
+
+    this.files$.next(newFiles);
+
+    filesToDestroy.forEach((file) => {
+      file.destroy();
+    });
+  }
+
   public getFiles() {
     return this.files$.getValue();
   }

@@ -22,6 +22,7 @@ import {
   EuiFlyoutHeader,
   EuiLoadingSpinner,
   EuiSpacer,
+  EuiText,
   EuiTitle,
 } from '@elastic/eui';
 import type {
@@ -153,6 +154,17 @@ export const FileUploadLiteView: FC<Props> = ({
           <>
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED ? (
               <>
+                <EuiText>
+                  <p>
+                    <FormattedMessage
+                      id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.title"
+                      defaultMessage="Upload your file, analyze its data, and optionally import the data into an index. The data can also be automatically vectorized using semantic text."
+                    />
+                  </p>
+                </EuiText>
+
+                <EuiSpacer />
+
                 <EuiFilePicker
                   ref={filePickerRef as React.Ref<Omit<EuiFilePickerProps, 'stylesMemoizer'>>}
                   id="filePicker"
@@ -185,7 +197,11 @@ export const FileUploadLiteView: FC<Props> = ({
                 ))}
 
                 {fileClashes ? (
-                  <FileClashWarning uploadStatus={uploadStatus} filesStatus={filesStatus} />
+                  <FileClashWarning
+                    uploadStatus={uploadStatus}
+                    filesStatus={filesStatus}
+                    removeClashingFiles={() => fm.removeClashingFiles()}
+                  />
                 ) : null}
                 <EuiSpacer />
               </>

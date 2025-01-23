@@ -84,7 +84,7 @@ export function createFlyout(
             'data-test-subj': 'mlFlyoutLayerSelector',
             ownFocus: true,
             onClose: onFlyoutClose,
-            size: '600px',
+            size: '500px',
           }
         );
 

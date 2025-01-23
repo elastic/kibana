@@ -6,8 +6,9 @@
  */
 import type { FC } from 'react';
 import React from 'react';
-import { EuiCallOut } from '@elastic/eui';
+import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { AnalyzedFile } from './file_manager/file_wrapper';
 import type { UploadStatus } from './file_manager/file_manager';
 import { CLASH_TYPE } from './file_manager/merge_tools';
@@ -15,9 +16,10 @@ import { CLASH_TYPE } from './file_manager/merge_tools';
 interface Props {
   uploadStatus: UploadStatus;
   filesStatus: AnalyzedFile[];
+  removeClashingFiles: () => void;
 }
 
-export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus }) => {
+export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeClashingFiles }) => {
   const fileClashes = uploadStatus.fileClashes;
 
   const clashType = fileClashes.some((fileClash) => fileClash.clashType === CLASH_TYPE.FORMAT)
@@ -77,6 +79,12 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus }) => {
     <>
       <EuiCallOut title={title} color="danger">
         <p>{description}</p>
+        <EuiButton onClick={() => removeClashingFiles()} color="danger" size="s" fill>
+          <FormattedMessage
+            id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.closeButton"
+            defaultMessage="Delete all"
+          />
+        </EuiButton>
       </EuiCallOut>
     </>
   );

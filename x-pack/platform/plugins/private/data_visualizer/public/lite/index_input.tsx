@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EuiFieldText, EuiFormRow } from '@elastic/eui';
+import { EuiFieldText, EuiFormRow, EuiSpacer, EuiTitle } from '@elastic/eui';
 import type { FC } from 'react';
 import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -50,23 +50,43 @@ export const IndexInput: FC<Props> = ({ setIndexName, setIndexValidationStatus, 
   );
 
   return (
-    <EuiFormRow
-      label="Index name"
-      isInvalid={indexNameError !== ''}
-      error={indexNameError}
-      fullWidth
-    >
-      <EuiFieldText
+    <>
+      <EuiTitle size="s">
+        <h3>Create new index</h3>
+      </EuiTitle>
+
+      <EuiSpacer size="xs" />
+
+      <EuiFormRow
+        label="Index name"
+        isInvalid={indexNameError !== ''}
+        error={indexNameError}
         fullWidth
-        value={indexNameLocal}
-        // disabled={
-        //   uploadStatus.overallImportStatus === STATUS.STARTED ||
-        //   uploadStatus.overallImportStatus === STATUS.COMPLETED
-        // }
-        onChange={(e) => setIndexNameLocal(e.target.value)}
-        placeholder="Index name"
-      />
-    </EuiFormRow>
+        helpText={i18n.translate(
+          'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
+          {
+            defaultMessage:
+              'Index names must be lowercase and can only contain hyphens and numbers.',
+          }
+        )}
+      >
+        <EuiFieldText
+          fullWidth
+          value={indexNameLocal}
+          // disabled={
+          //   uploadStatus.overallImportStatus === STATUS.STARTED ||
+          //   uploadStatus.overallImportStatus === STATUS.COMPLETED
+          // }
+          onChange={(e) => setIndexNameLocal(e.target.value)}
+          placeholder={i18n.translate(
+            'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
+            {
+              defaultMessage: 'Add name to index',
+            }
+          )}
+        />
+      </EuiFormRow>
+    </>
   );
 };
 
