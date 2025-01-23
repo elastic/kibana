@@ -13,7 +13,10 @@ import { DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS } from '@kbn/presentation-util-plug
 import { createEvent, fireEvent, render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 
-import { LINKS_VERTICAL_LAYOUT } from '../../../common/content_management';
+import {
+  LINKS_VERTICAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
+} from '../../../common/content_management';
 import { DashboardLinkComponent } from './dashboard_link_component';
 import { DashboardLinkStrings } from './dashboard_link_strings';
 import { getMockLinksParentApi } from '../../mocks';
@@ -66,6 +69,7 @@ describe('Dashboard link component', () => {
       <DashboardLinkComponent
         link={resolvedLink}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -97,6 +101,7 @@ describe('Dashboard link component', () => {
       <DashboardLinkComponent
         link={resolvedLink}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -116,6 +121,7 @@ describe('Dashboard link component', () => {
           options: { ...DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS, openInNewTab: true },
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -156,6 +162,7 @@ describe('Dashboard link component', () => {
           options: DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -195,6 +202,7 @@ describe('Dashboard link component', () => {
           },
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -233,6 +241,7 @@ describe('Dashboard link component', () => {
           },
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -254,6 +263,7 @@ describe('Dashboard link component', () => {
           error: new Error('not found'),
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -274,6 +284,7 @@ describe('Dashboard link component', () => {
           id: 'bar',
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -296,6 +307,7 @@ describe('Dashboard link component', () => {
           description: 'something awesome',
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -323,6 +335,7 @@ describe('Dashboard link component', () => {
           id: 'bar',
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -338,6 +351,7 @@ describe('Dashboard link component', () => {
           label: undefined,
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -354,6 +368,7 @@ describe('Dashboard link component', () => {
           label,
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );
@@ -378,6 +393,7 @@ describe('Dashboard link component', () => {
           label: customLabel,
         }}
         layout={LINKS_VERTICAL_LAYOUT}
+        textOverflow={LINK_TEXT_OVERFLOW_ELLIPSIS}
         parentApi={parentApi}
       />
     );

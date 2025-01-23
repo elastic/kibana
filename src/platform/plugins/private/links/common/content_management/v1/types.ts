@@ -21,6 +21,8 @@ import {
   EXTERNAL_LINK_TYPE,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
+  LINK_TEXT_OVERFLOW_WRAP,
 } from './constants';
 
 export type LinksCrudTypes = ContentManagementCrudTypes<
@@ -59,10 +61,15 @@ export type Link = DashboardLink | ExternalLink;
 
 export type LinksLayoutType = typeof LINKS_HORIZONTAL_LAYOUT | typeof LINKS_VERTICAL_LAYOUT;
 
+export type LinksTextOverflowType =
+  | typeof LINK_TEXT_OVERFLOW_ELLIPSIS
+  | typeof LINK_TEXT_OVERFLOW_WRAP;
+
 // eslint-disable-next-line @typescript-eslint/consistent-type-definitions
 export type LinksAttributes = {
   title?: string;
   description?: string;
   links?: Link[];
   layout?: LinksLayoutType;
+  textOverflow?: LinksTextOverflowType;
 };

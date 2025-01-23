@@ -33,8 +33,11 @@ import {
 
 import {
   LinksLayoutType,
+  LinksTextOverflowType,
   LINKS_HORIZONTAL_LAYOUT,
   LINKS_VERTICAL_LAYOUT,
+  LINK_TEXT_OVERFLOW_WRAP,
+  LINK_TEXT_OVERFLOW_ELLIPSIS,
 } from '../../../common/content_management';
 import { focusMainFlyout } from '../../editor/links_editor_tools';
 import { openLinkEditorFlyout } from '../../editor/open_link_editor_flyout';
@@ -61,6 +64,18 @@ const layoutOptions: EuiButtonGroupOptionProps[] = [
     'data-test-subj': `links--panelEditor--${LINKS_HORIZONTAL_LAYOUT}LayoutBtn`,
   },
 ];
+const toggleTextOverflowOptions = [
+  {
+    id: 'textOverflowEllipsis',
+    label: LinksStrings.editor.linkEditor.getTextOverflowEllipsisLabel(),
+    'data-test-subj': `links--panelEditor--${LINK_TEXT_OVERFLOW_ELLIPSIS}`,
+  },
+  {
+    id: 'textOverflowWrap',
+    label: LinksStrings.editor.linkEditor.getTextOverflowWrapLabel(),
+    'data-test-subj': `links--panelEditor--${LINK_TEXT_OVERFLOW_WRAP}`,
+  },
+];
 
 const LinksEditor = ({
   onSaveToLibrary,
@@ -68,15 +83,25 @@ const LinksEditor = ({
   onClose,
   initialLinks,
   initialLayout,
+  initialTextOverflow,
   parentDashboardId,
   isByReference,
   flyoutId,
 }: {
-  onSaveToLibrary: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => Promise<void>;
-  onAddToDashboard: (newLinks: ResolvedLink[], newLayout: LinksLayoutType) => void;
+  onSaveToLibrary: (
+    newLinks: ResolvedLink[],
+    newLayout: LinksLayoutType,
+    newTextOverflow: LinksTextOverflowType
+  ) => Promise<void>;
+  onAddToDashboard: (
+    newLinks: ResolvedLink[],
+    newLayout: LinksLayoutType,
+    newTextOverflow: LinksTextOverflowType
+  ) => void;
   onClose: () => void;
   initialLinks?: ResolvedLink[];
   initialLayout?: LinksLayoutType;
+  initialTextOverflow?: LinksTextOverflowType;
   parentDashboardId?: string;
   isByReference: boolean;
   flyoutId: string; // used to manage the focus of this flyout after individual link editor flyout is closed
@@ -91,9 +116,11 @@ const LinksEditor = ({
   const [isSaving, setIsSaving] = useState(false);
   const [orderedLinks, setOrderedLinks] = useState<ResolvedLink[]>([]);
   const [saveByReference, setSaveByReference] = useState(isByReference);
+  const [currentTextOverflow, setCurrentTextOverflow] = useState<LinksTextOverflowType>(
+    initialTextOverflow ?? 'textOverflowEllipsis'
+  );
 
   const isEditingExisting = initialLinks || isByReference;
-
   useEffect(() => {
     if (!initialLinks) {
       setOrderedLinks([]);
@@ -195,6 +222,16 @@ const LinksEditor = ({
               legend={LinksStrings.editor.panelEditor.getLayoutSettingsLegend()}
             />
           </EuiFormRow>
+          <EuiFormRow label={LinksStrings.editor.linkEditor.getLinkTextOverflowLabel()}>
+            <EuiButtonGroup
+              legend={LinksStrings.editor.linkEditor.getLinkTextOverflowLegend()}
+              type="single"
+              options={toggleTextOverflowOptions}
+              idSelected={currentTextOverflow}
+              buttonSize="compressed"
+              onChange={(id) => setCurrentTextOverflow(id as LinksTextOverflowType)}
+            />
+          </EuiFormRow>
           <EuiFormRow label={LinksStrings.editor.panelEditor.getLinksTitle()}>
             {/* Needs to be surrounded by a div rather than a fragment so the EuiFormRow can respond
                 to the focus of the inner elements */}
@@ -291,7 +328,7 @@ const LinksEditor = ({
                     onClick={async () => {
                       if (saveByReference) {
                         setIsSaving(true);
-                        onSaveToLibrary(orderedLinks, currentLayout)
+                        onSaveToLibrary(orderedLinks, currentLayout, currentTextOverflow)
                           .catch((e) => {
                             toasts.addError(e, {
                               title: LinksStrings.editor.panelEditor.getErrorDuringSaveToastTitle(),
@@ -303,7 +340,7 @@ const LinksEditor = ({
                             }
                           });
                       } else {
-                        onAddToDashboard(orderedLinks, currentLayout);
+                        onAddToDashboard(orderedLinks, currentLayout, currentTextOverflow);
                       }
                     }}
                   >

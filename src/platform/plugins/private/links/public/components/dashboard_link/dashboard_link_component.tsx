@@ -23,6 +23,7 @@ import { isFilterPinned, Query } from '@kbn/es-query';
 import {
   DASHBOARD_LINK_TYPE,
   LinksLayoutType,
+  LinksTextOverflowType,
   LINKS_VERTICAL_LAYOUT,
 } from '../../../common/content_management';
 import { trackUiMetric } from '../../services/kibana_services';
@@ -32,10 +33,12 @@ import { LinksParentApi, ResolvedLink } from '../../types';
 export const DashboardLinkComponent = ({
   link,
   layout,
+  textOverflow,
   parentApi,
 }: {
   link: ResolvedLink;
   layout: LinksLayoutType;
+  textOverflow: LinksTextOverflowType;
   parentApi: LinksParentApi;
 }) => {
   const [
@@ -152,6 +155,7 @@ export const DashboardLinkComponent = ({
   return (
     <EuiListGroupItem
       size="s"
+      wrapText={textOverflow === 'textOverflowWrap'}
       color="text"
       {...onClickProps}
       id={id}
