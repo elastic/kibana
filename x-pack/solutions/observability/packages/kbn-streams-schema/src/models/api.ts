@@ -15,7 +15,7 @@ import {
   GroupedStreamGetResponse,
   GroupedStreamUpsertRequest,
   groupedStreamUpsertRequestSchema,
-} from './grouped/api';
+} from './grouped';
 
 export const streamUpsertRequestSchema: z.Schema<StreamUpsertRequest> = z.union([
   ingestStreamUpsertRequestSchema,
