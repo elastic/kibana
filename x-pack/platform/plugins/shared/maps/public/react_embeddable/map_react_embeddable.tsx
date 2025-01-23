@@ -198,7 +198,6 @@ export const mapEmbeddableFactory: ReactEmbeddableFactory<
     return {
       api,
       Component: () => {
-        const { euiTheme } = useEuiTheme();
         const [defaultTitle, title, defaultDescription, description] = useBatchedPublishingSubjects(
           defaultTitle$,
           titleManager.api.title$,
