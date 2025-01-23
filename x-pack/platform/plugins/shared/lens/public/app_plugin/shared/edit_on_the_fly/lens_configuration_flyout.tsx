@@ -120,11 +120,6 @@ export function LensEditConfigurationFlyout({
     [activeDatasource, datasourceState]
   );
 
-  const attributesNeedRefresh = useMemo(
-    () => Boolean(attributes.state.needsRefresh),
-    [attributes.state.needsRefresh]
-  );
-
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
 
@@ -400,7 +395,7 @@ export function LensEditConfigurationFlyout({
     const initializeChart = async () => {
       if (isOfAggregateQueryType(query) && !dataGridAttrs) {
         try {
-          await runQuery(query, abortController, attributesNeedRefresh);
+          await runQuery(query, abortController, Boolean(attributes.state.needsRefresh));
         } catch (e) {
           setErrors([e]);
           prevQuery.current = query;
@@ -415,7 +410,7 @@ export function LensEditConfigurationFlyout({
     query,
     startDependencies,
     dataGridAttrs,
-    attributesNeedRefresh,
+    attributes.state.needsRefresh,
   ]);
 
   const isSaveable = useMemo(() => {

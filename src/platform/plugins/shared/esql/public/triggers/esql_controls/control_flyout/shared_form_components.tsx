@@ -11,6 +11,7 @@ import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
 import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { TooltipWrapper } from '@kbn/visualization-utils';
 import {
   EuiFieldText,
   EuiFormRow,
@@ -33,7 +34,6 @@ import {
   EuiTextColor,
 } from '@elastic/eui';
 import { EsqlControlType } from '../types';
-import { TooltipWrapper } from './tooltip_wrapper';
 
 const controlTypeOptions = [
   {

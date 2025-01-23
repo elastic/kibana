@@ -63,7 +63,7 @@ function getSearchContext(parentApi: unknown) {
       };
 
   const esqlVariables = apiPublishesESQLVariables(parentApi)
-    ? parentApi.esqlVariables$.value
+    ? parentApi.esqlVariables$.getValue()
     : ([] as ESQLControlVariable[]);
 
   return {

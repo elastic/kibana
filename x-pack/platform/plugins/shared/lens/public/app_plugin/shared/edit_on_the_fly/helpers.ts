@@ -113,36 +113,38 @@ export const getSuggestions = async (
       columns: updatedWithVariablesColumns,
     });
 
-    if (shouldUpdateAttrs) {
-      const context = {
-        dataViewSpec: dataView?.toSpec(false),
-        fieldName: '',
-        textBasedColumns: updatedWithVariablesColumns,
-        query,
-      };
-
-      const allSuggestions =
-        suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
-
-      // Lens might not return suggestions for some cases, i.e. in case of errors
-      if (!allSuggestions.length) return undefined;
-
-      const firstSuggestion = allSuggestions[0];
-
-      const attrs = getLensAttributesFromSuggestion({
-        filters: [],
-        query,
-        suggestion: firstSuggestion,
-        dataView,
-      }) as TypedLensSerializedState['attributes'];
-      return {
-        ...attrs,
-        state: {
-          ...attrs.state,
-          needsRefresh: false,
-        },
-      };
+    if (!shouldUpdateAttrs) {
+      return;
     }
+
+    const context = {
+      dataViewSpec: dataView?.toSpec(false),
+      fieldName: '',
+      textBasedColumns: updatedWithVariablesColumns,
+      query,
+    };
+
+    const allSuggestions =
+      suggestionsApi({ context, dataView, datasourceMap, visualizationMap }) ?? [];
+
+    // Lens might not return suggestions for some cases, i.e. in case of errors
+    if (!allSuggestions.length) return undefined;
+
+    const firstSuggestion = allSuggestions[0];
+
+    const attrs = getLensAttributesFromSuggestion({
+      filters: [],
+      query,
+      suggestion: firstSuggestion,
+      dataView,
+    }) as TypedLensSerializedState['attributes'];
+    return {
+      ...attrs,
+      state: {
+        ...attrs.state,
+        needsRefresh: false,
+      },
+    };
   } catch (e) {
     setErrors?.([e]);
   }
