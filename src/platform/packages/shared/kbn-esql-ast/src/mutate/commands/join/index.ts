@@ -7,8 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { WalkerAstNode } from '../../../walker/walker';
+import { isAsExpression } from '../../../ast/helpers';
 import { Walker } from '../../../walker';
 import type {
+  ESQLAstExpression,
   ESQLAstJoinCommand,
   ESQLAstQueryExpression,
   ESQLCommand,
@@ -40,6 +43,11 @@ export const byIndex = (ast: ESQLAstQueryExpression, index: number): ESQLCommand
   return [...list(ast)][index];
 };
 
+const getIdentifier = (node: WalkerAstNode): ESQLIdentifier =>
+  Walker.match(node, {
+    type: 'identifier',
+  }) as ESQLIdentifier;
+
 /**
  * Summarizes all JOIN commands in the query.
  *
@@ -52,15 +60,28 @@ export const summarize = (query: ESQLAstQueryExpression): JoinCommandSummary[] =
 
   for (const command of list(query)) {
     const firstArg = command.args[0];
-    const firstIdentifier = Walker.match(firstArg, {
-      type: 'identifier',
-    }) as ESQLIdentifier;
+    let index: ESQLIdentifier | undefined;
+    let alias: ESQLIdentifier | undefined;
+    const conditions: ESQLAstExpression[] = [];
+
+    if (isAsExpression(firstArg)) {
+      index = getIdentifier(firstArg.args[0]);
+      alias = getIdentifier(firstArg.args[1]);
+    } else {
+      index = getIdentifier(firstArg);
+    }
+
+    const on = generic.commands.options.find(command, ({ name }) => name === 'on');
+
+    conditions.push(...((on?.args || []) as ESQLAstExpression[]));
+
     const target: JoinCommandTarget = {
-      index: firstIdentifier,
-      // TODO: add support for `alias` field.
+      index: index!,
+      alias,
     };
     const summary: JoinCommandSummary = {
       target,
+      conditions,
     };
 
     summaries.push(summary);
@@ -71,6 +92,7 @@ export const summarize = (query: ESQLAstQueryExpression): JoinCommandSummary[] =
 
 export interface JoinCommandSummary {
   target: JoinCommandTarget;
+  conditions: ESQLAstExpression[];
 }
 
 export interface JoinCommandTarget {
