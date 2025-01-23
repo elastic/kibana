@@ -18,6 +18,8 @@ import merge from 'lodash/merge';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
+import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import { getFlattenedObject } from '@kbn/std';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
@@ -43,8 +45,6 @@ import {
 } from './aws_credentials_form/get_aws_credentials_form_options';
 import { GCP_CREDENTIALS_TYPE, GCP_SETUP_ACCESS } from './gcp_credentials_form/gcp_credential_form';
 import { AZURE_CREDENTIALS_TYPE } from './azure_credentials_form/azure_credentials_form';
-import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
-import { getFlattenedObject } from '@kbn/std';
 
 // Posture policies only support the default namespace
 export const POSTURE_NAMESPACE = 'default';
