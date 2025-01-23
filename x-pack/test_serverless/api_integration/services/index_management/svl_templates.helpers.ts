@@ -51,12 +51,13 @@ export function SvlTemplatesHelpers({ getService }: FtrProviderContext) {
     name: string,
     indexPatterns: string[] = INDEX_PATTERNS,
     isLegacy: boolean = false,
-    isMappingsSourceFieldEnabled: boolean = true
+    isMappingsSourceFieldEnabled: boolean = true,
+    indexMode?: string,
   ) => {
     const baseTemplate: TemplateDeserialized = {
       name,
       indexPatterns,
-      indexMode: 'standard',
+      indexMode,
       version: 1,
       template: { ...getTemplateMock(isMappingsSourceFieldEnabled) },
       _kbnMeta: {

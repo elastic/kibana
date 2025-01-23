@@ -132,7 +132,7 @@ export default function ({ getService }: FtrProviderContext) {
           before(async () => {
             const template = svlTemplatesHelpers.getTemplatePayload(logsdbTemplateName, [
               'logs-*-*',
-            ]);
+            ], false, false);
             await svlTemplatesApi.createTemplate(template, roleAuthc).expect(200);
           });
 
@@ -178,7 +178,8 @@ export default function ({ getService }: FtrProviderContext) {
           `template-${getRandomString()}`,
           [getRandomString()],
           undefined,
-          false
+          false,
+          'logsdb'
         );
 
         const { status } = await svlTemplatesApi.createTemplate(payload, roleAuthc);
