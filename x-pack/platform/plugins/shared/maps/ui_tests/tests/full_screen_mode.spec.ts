@@ -15,31 +15,25 @@ import {
 
 test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer(); // add layer button not there when logged in as viewer
+    await browserAuth.loginAsViewer();
     await pageObjects.maps.goto();
     await pageObjects.maps.waitForRender();
   });
 
-  const steps = [
-    'Full screen button and layer control should be visible',
-    'should hide the kbn app wrapper when clicked',
-    'displays exit full screen logo button & exits when clicked',
-  ];
-
-  test(steps.join(' AND '), async ({ page }) => {
+  test('Full screen button ...', async ({ page }) => {
     const fullScreenBtn = page.testSubj.locator(FULL_SCREEN_MODE);
     const visibleChrome = page.testSubj.locator(VISIBLE_CHROME);
     const hiddenChrome = page.testSubj.locator(HIDDEN_CHROME);
     const exitFullScreenBtn = page.testSubj.locator(EXIT_FULL_SCREEN);
 
-    await expect(fullScreenBtn, steps[0]).toBeVisible();
+    expect(fullScreenBtn);
     expect(await visibleChrome.waitFor());
     await fullScreenBtn.click();
-    expect(await hiddenChrome.waitFor(), steps[1]);
-    await expect(exitFullScreenBtn, steps[2]).toBeVisible();
-    await expect(fullScreenBtn).not.toBeVisible();
+    expect(await hiddenChrome.waitFor());
+    await expect(exitFullScreenBtn).toBeVisible();
+    expect(fullScreenBtn).not.toBeVisible();
     await exitFullScreenBtn.click();
     expect(await visibleChrome.waitFor());
-    await expect(fullScreenBtn).toBeVisible();
+    expect(fullScreenBtn);
   });
 });
