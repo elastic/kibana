@@ -1378,6 +1378,66 @@ const dateDiffDefinition: FunctionDefinition = {
       params: [
         {
           name: 'unit',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
           type: 'text',
           optional: false,
         },
@@ -1389,6 +1449,66 @@ const dateDiffDefinition: FunctionDefinition = {
         {
           name: 'endTimestamp',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
           optional: false,
         },
       ],
