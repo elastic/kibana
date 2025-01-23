@@ -19,7 +19,7 @@ import type { PluginStart as DataViewsPluginStart } from '@kbn/data-views-plugin
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import type { VisTypeTimeseriesSetup } from '@kbn/vis-type-timeseries-plugin/server';
 import type { FeaturesPluginSetup } from '@kbn/features-plugin/server';
-import type { SpacesPluginSetup } from '@kbn/spaces-plugin/server';
+import type { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import type { AlertingServerSetup } from '@kbn/alerting-plugin/server';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type {
@@ -74,6 +74,8 @@ export interface InfraServerPluginStartDeps {
   apmDataAccess: ApmDataAccessPluginStart;
   logsDataAccess: LogsDataAccessPluginStart;
   entityManager: EntityManagerServerPluginStart;
+  metricsDataAccess: MetricsDataPluginSetup;
+  spaces: SpacesPluginStart;
 }
 
 export interface CallWithRequestParams extends estypes.RequestBase {
