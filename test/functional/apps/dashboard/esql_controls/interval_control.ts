@@ -16,7 +16,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
   const { dashboard, timePicker, common } = getPageObjects(['dashboard', 'timePicker', 'common']);
   const testSubjects = getService('testSubjects');
-  const monacoEditor = getService('monacoEditor');
+  const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
@@ -51,11 +51,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(panelCount).to.eql(1);
       });
 
-      await monacoEditor.waitCodeEditorReady('InlineEditingESQLEditor');
+      await esql.waitESQLEditorLoaded('InlineEditingESQLEditor');
 
       await retry.waitFor('control flyout to open', async () => {
-        await monacoEditor.setCodeEditorValue(''); // clear the default query
-        await monacoEditor.typeCodeEditorValue(
+        await esql.typeEsqlEditorQuery(
           'FROM logstash* | STATS COUNT(*) BY BUCKET(@timestamp, )',
           'InlineEditingESQLEditor'
         );
@@ -82,7 +81,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // Check Lens editor has been updated accordingly
-      const editorValue = await monacoEditor.getCodeEditorValue();
+      const editorValue = await esql.getEsqlEditorQuery();
       expect(editorValue).to.contain(
         'FROM logstash* | STATS COUNT(*) BY BUCKET(@timestamp,  ?interval)'
       );

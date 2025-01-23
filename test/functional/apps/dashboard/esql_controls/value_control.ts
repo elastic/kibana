@@ -22,7 +22,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   ]);
   const find = getService('find');
   const testSubjects = getService('testSubjects');
-  const monacoEditor = getService('monacoEditor');
+  const esql = getService('esql');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const browser = getService('browser');
   const comboBox = getService('comboBox');
@@ -57,11 +57,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(panelCount).to.eql(1);
       });
 
-      await monacoEditor.waitCodeEditorReady('InlineEditingESQLEditor');
-
+      await esql.waitESQLEditorLoaded('InlineEditingESQLEditor');
       await retry.waitFor('control flyout to open', async () => {
-        await monacoEditor.setCodeEditorValue(''); // clear the default query
-        await monacoEditor.typeCodeEditorValue(
+        await esql.typeEsqlEditorQuery(
           'FROM logstash-* | WHERE geo.dest == ',
           'InlineEditingESQLEditor'
         );
@@ -73,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         return await testSubjects.exists('create_esql_control_flyout');
       });
 
-      const valuesQueryEditorValue = await monacoEditor.getCodeEditorValue();
+      const valuesQueryEditorValue = await esql.getEsqlEditorQuery();
       expect(valuesQueryEditorValue).to.contain('FROM logstash-* | STATS BY geo.dest');
 
       // create the control
@@ -86,11 +84,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
 
       // Check Lens editor has been updated accordingly
-      const editorValue = await monacoEditor.getCodeEditorValue();
+      const editorValue = await esql.getEsqlEditorQuery();
       expect(editorValue).to.contain('FROM logstash-* | WHERE geo.dest == ?geo_dest');
 
       // change the table to keep only the column with the control
-      await monacoEditor.setCodeEditorValue(
+      await esql.setEsqlEditorQuery(
         'FROM logstash-* | WHERE geo.dest == ?geo_dest | KEEP geo.dest'
       );
       // run the query
@@ -113,7 +111,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       const firstId = (await dashboardControls.getAllControlIds())[0];
       await dashboardControls.editExistingControl(firstId);
 
-      await monacoEditor.setCodeEditorValue('FROM logstash-*');
+      await esql.setEsqlEditorQuery('FROM logstash-*');
       // run the query
       await testSubjects.click('ESQLEditor-run-query-button');
       expect(await testSubjects.exists('esqlMoreThanOneColumnCallout')).to.be(true);
@@ -125,7 +123,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await common.sleep(1000);
 
-      const editorValue = await monacoEditor.getCodeEditorValue();
+      const editorValue = await esql.getEsqlEditorQuery();
       expect(editorValue).to.contain('FROM logstash-*\n| STATS BY geo.dest');
     });
   });
