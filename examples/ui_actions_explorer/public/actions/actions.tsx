@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import type { CoreStart } from '@kbn/core/public';
 import { EuiFieldText, EuiModalBody, EuiButton } from '@elastic/eui';
-import { useState } from 'react';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { ActionExecutionContext, UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { createAction } from '@kbn/ui-actions-plugin/public';

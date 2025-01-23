@@ -18,9 +18,9 @@ import type {
   PluginOrPackage,
   ReferencedDeprecationsByPlugin,
   UnreferencedDeprecationsByPlugin,
+  AdoptionTrackedAPIStats,
 } from './types';
 import { removeBrokenLinks } from './utils';
-import type { AdoptionTrackedAPIStats } from './types';
 
 export function getPluginApiMap(
   project: Project,

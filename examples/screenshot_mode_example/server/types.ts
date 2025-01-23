@@ -8,8 +8,10 @@
  */
 
 import type { IRouter, Logger } from '@kbn/core/server';
-import type { ScreenshotModeRequestHandlerContext } from '@kbn/screenshot-mode-plugin/server';
-import type { ScreenshotModePluginSetup } from '@kbn/screenshot-mode-plugin/server';
+import type {
+  ScreenshotModeRequestHandlerContext,
+  ScreenshotModePluginSetup,
+} from '@kbn/screenshot-mode-plugin/server';
 
 export type ScreenshotModeExampleRouter = IRouter<ScreenshotModeRequestHandlerContext>;
 

@@ -8,8 +8,7 @@
  */
 
 import type { Observable, Subscription } from 'rxjs';
-import { combineLatest, firstValueFrom, of, mergeMap } from 'rxjs';
-import { map } from 'rxjs';
+import { combineLatest, firstValueFrom, of, mergeMap, map } from 'rxjs';
 import type { TypeOf } from '@kbn/config-schema';
 import { schema } from '@kbn/config-schema';
 

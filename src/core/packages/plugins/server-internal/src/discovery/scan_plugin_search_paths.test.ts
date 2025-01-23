@@ -9,11 +9,10 @@
 
 import mockFs from 'mock-fs';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
-import { toArray } from 'rxjs';
+import { toArray, firstValueFrom } from 'rxjs';
 import { resolve } from 'path';
 import { scanPluginSearchPaths } from './scan_plugin_search_paths';
 import type { PluginDiscoveryError } from './plugin_discovery_error';
-import { firstValueFrom } from 'rxjs';
 
 const KIBANA_ROOT = process.cwd();
 

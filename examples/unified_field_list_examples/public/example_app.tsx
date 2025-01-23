@@ -18,9 +18,8 @@ import {
   EuiLoadingLogo,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { DataView } from '@kbn/data-views-plugin/public';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
 import { RootDragDropProvider } from '@kbn/dom-drag-drop';
-import type { DataViewField } from '@kbn/data-views-plugin/public';
 import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 import type { FieldListSidebarProps } from './field_list_sidebar';
 import { FieldListSidebar } from './field_list_sidebar';

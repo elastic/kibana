@@ -7,9 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { map, shareReplay } from 'rxjs';
+import { map, shareReplay, combineLatest } from 'rxjs';
 import type { Observable } from 'rxjs';
-import { combineLatest } from 'rxjs';
 import type { PathConfigType } from '@kbn/utils';
 import { config as pathConfig } from '@kbn/utils';
 import { pick, deepFreeze } from '@kbn/std';

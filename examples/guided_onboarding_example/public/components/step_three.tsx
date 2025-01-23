@@ -9,11 +9,18 @@
 
 import React, { useEffect, useState } from 'react';
 
-import { EuiButton, EuiSpacer, EuiText, EuiTitle, EuiTourStep } from '@elastic/eui';
+import {
+  EuiButton,
+  EuiSpacer,
+  EuiText,
+  EuiTitle,
+  EuiTourStep,
+  EuiPageHeader,
+  EuiPageSection,
+} from '@elastic/eui';
 
 import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public/types';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiPageHeader, EuiPageSection } from '@elastic/eui';
 
 interface StepThreeProps {
   guidedOnboarding: GuidedOnboardingPluginStart;

@@ -43,9 +43,9 @@ import { SecurityService } from '@kbn/core-security-browser-internal';
 import { UserProfileService } from '@kbn/core-user-profile-browser-internal';
 import { version as REACT_VERSION } from 'react';
 import { muteLegacyRootWarning } from '@kbn/react-mute-legacy-root-warning';
-import { KBN_LOAD_MARKS } from './events';
 import { fetchOptionalMemoryInfo } from './fetch_optional_memory_info';
 import {
+  KBN_LOAD_MARKS,
   LOAD_SETUP_DONE,
   LOAD_START_DONE,
   KIBANA_LOADED_EVENT,

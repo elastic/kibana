@@ -8,9 +8,7 @@
  */
 
 import React, { Fragment, useMemo, useState } from 'react';
-import { EuiButtonEmpty } from '@elastic/eui';
-import { EuiText } from '@elastic/eui';
-import { EuiDataGrid } from '@elastic/eui';
+import { EuiButtonEmpty, EuiText, EuiDataGrid } from '@elastic/eui';
 import type { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import type { User } from './actions/actions';

@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { take } from 'rxjs';
-import { Subject, of } from 'rxjs';
+import { take, Subject, of } from 'rxjs';
 
 import type { ServiceStatusLevel, ServiceStatus } from '@kbn/core-status-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';

@@ -11,9 +11,8 @@ import type { NodesInfo } from './ensure_es_version';
 import { mapNodesVersionCompatibility, pollEsNodesVersion } from './ensure_es_version';
 import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import { elasticsearchClientMock } from '@kbn/core-elasticsearch-client-server-mocks';
-import { take, delay } from 'rxjs';
+import { take, delay, of } from 'rxjs';
 import { TestScheduler } from 'rxjs/testing';
-import { of } from 'rxjs';
 
 const mockLoggerFactory = loggingSystemMock.create();
 const mockLogger = mockLoggerFactory.get('mock logger');

@@ -11,8 +11,7 @@ import type { PathLike, Stats } from 'fs';
 import { readdir, stat } from 'fs';
 import { resolve } from 'path';
 import type { Observable } from 'rxjs';
-import { bindNodeCallback, from } from 'rxjs';
-import { catchError, mergeMap } from 'rxjs';
+import { bindNodeCallback, from, catchError, mergeMap } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { PluginDiscoveryError } from './plugin_discovery_error';
 

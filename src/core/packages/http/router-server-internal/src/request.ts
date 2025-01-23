@@ -11,8 +11,7 @@ import { URL } from 'url';
 import { v4 as uuidv4 } from 'uuid';
 import { inspect } from 'util';
 import type { Request, RouteOptions } from '@hapi/hapi';
-import { fromEvent, NEVER } from 'rxjs';
-import { shareReplay, first, filter } from 'rxjs';
+import { fromEvent, NEVER, shareReplay, first, filter } from 'rxjs';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import { deepFreeze } from '@kbn/std';
 import type {

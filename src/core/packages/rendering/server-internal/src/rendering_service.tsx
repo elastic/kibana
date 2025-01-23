@@ -9,8 +9,7 @@
 
 import React from 'react';
 import { renderToStaticMarkup } from 'react-dom/server';
-import { firstValueFrom, of } from 'rxjs';
-import { catchError, take, timeout } from 'rxjs';
+import { firstValueFrom, of, catchError, take, timeout } from 'rxjs';
 import { i18n as i18nLib } from '@kbn/i18n';
 import type { ThemeVersion } from '@kbn/ui-shared-deps-npm';
 

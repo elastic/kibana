@@ -16,8 +16,7 @@ import type {
   OnPostAuthResult,
   OnPostAuthHandler,
 } from '@kbn/core-http-server';
-import { isKibanaResponse } from '@kbn/core-http-server';
-import { OnPostAuthResultType } from '@kbn/core-http-server';
+import { isKibanaResponse, OnPostAuthResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,

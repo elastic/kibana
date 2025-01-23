@@ -24,7 +24,7 @@ import { METRIC_TYPE } from '@kbn/analytics';
 import { i18n } from '@kbn/i18n';
 import type { SeparatorLinkCategory } from '@kbn/security-solution-navigation';
 import { SolutionSideNavPanel } from './solution_side_nav_panel';
-import { SolutionSideNavItemPosition, SolutionSideNavItem } from './types';
+import { SolutionSideNavItemPosition, type SolutionSideNavItem } from './types';
 import type { Tracker } from './types';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { TelemetryContextProvider, useTelemetryContext } from './telemetry/telemetry_context';

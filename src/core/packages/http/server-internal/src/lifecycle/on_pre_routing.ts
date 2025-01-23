@@ -17,8 +17,7 @@ import type {
   OnPreRoutingResult,
   OnPreRoutingHandler,
 } from '@kbn/core-http-server';
-import { isKibanaResponse } from '@kbn/core-http-server';
-import { OnPreRoutingResultType } from '@kbn/core-http-server';
+import { isKibanaResponse, OnPreRoutingResultType } from '@kbn/core-http-server';
 import {
   HapiResponseAdapter,
   CoreKibanaRequest,

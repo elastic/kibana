@@ -18,7 +18,6 @@ import {
   parseLogLevel,
 } from '@kbn/tooling-log';
 import * as Rx from 'rxjs';
-import { ignoreElements } from 'rxjs';
 import type { OptimizerUpdate } from '@kbn/optimizer';
 import {
   runOptimizer,
@@ -122,7 +121,7 @@ export class Optimizer {
               this.phase$.next(state.phase);
               this.ready$.next(state.phase === 'success' || state.phase === 'issue');
             }),
-            ignoreElements()
+            Rx.ignoreElements()
           )
           .subscribe(subscriber)
       );

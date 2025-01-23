@@ -8,8 +8,11 @@
  */
 
 import { Client } from '@elastic/elasticsearch';
-import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import type { SearchRequest, MsearchRequestItem } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  QueryDslQueryContainer,
+  SearchRequest,
+  MsearchRequestItem,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 
 interface ClientOptions {

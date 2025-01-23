@@ -24,8 +24,7 @@ import {
 } from './elasticsearch_service.test.mocks';
 
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
-import { BehaviorSubject, firstValueFrom, of } from 'rxjs';
-import { first, concatMap } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, of, first, concatMap } from 'rxjs';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { Env } from '@kbn/config';
 import { configServiceMock, getEnvOptions } from '@kbn/config-mocks';

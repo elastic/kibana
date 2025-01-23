@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { OpsMetrics } from '@kbn/core-metrics-server';
-import type { ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
+import type { OpsMetrics, ElasticsearchClientsMetrics } from '@kbn/core-metrics-server';
 import { getEcsOpsMetricsLog } from './get_ops_metrics_log';
 import { collectorMock } from '@kbn/core-metrics-collectors-server-mocks';
 

@@ -7,9 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PropertySignature } from 'ts-morph';
-
-import type { FunctionTypeNode } from 'ts-morph';
+import type { PropertySignature, FunctionTypeNode } from 'ts-morph';
 import { buildApiDecsForParameters } from './build_parameter_decs';
 import type { ApiDeclaration } from '../types';
 import { TypeKind } from '../types';

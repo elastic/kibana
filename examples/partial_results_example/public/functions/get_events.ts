@@ -8,8 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { fromEvent, merge } from 'rxjs';
-import { distinct, map, pluck, scan, take } from 'rxjs';
+import { fromEvent, merge, distinct, map, pluck, scan, take } from 'rxjs';
 import type { Datatable, ExpressionFunctionDefinition } from '@kbn/expressions-plugin/common';
 
 const EVENTS: Array<keyof WindowEventMap> = [

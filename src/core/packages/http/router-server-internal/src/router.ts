@@ -26,8 +26,8 @@ import type {
   RouteRegistrar,
   PostValidationMetadata,
   IKibanaResponse,
+  RouteSecurityGetter,
 } from '@kbn/core-http-server';
-import type { RouteSecurityGetter } from '@kbn/core-http-server';
 import type { Env } from '@kbn/config';
 import { CoreVersionedRouter } from './versioned_router';
 import type { CoreKibanaRequest } from './request';

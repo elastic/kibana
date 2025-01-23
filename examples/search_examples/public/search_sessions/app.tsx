@@ -27,8 +27,7 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { catchError, map, tap } from 'rxjs';
-import { lastValueFrom, of } from 'rxjs';
+import { catchError, map, tap, lastValueFrom, of } from 'rxjs';
 
 import type { CoreStart } from '@kbn/core/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';

@@ -18,6 +18,10 @@ import type {
   SolutionNavigationDefinitions,
   CloudLinks,
   SolutionId,
+  AppDeepLinkId,
+  ChromeNavLink,
+  CloudURLs,
+  NavigationTreeDefinitionUI,
 } from '@kbn/core-chrome-browser';
 import type { InternalHttpStart } from '@kbn/core-http-browser-internal';
 import {
@@ -39,12 +43,6 @@ import {
 import { type Location, createLocation } from 'history';
 import deepEqual from 'react-fast-compare';
 
-import type {
-  AppDeepLinkId,
-  ChromeNavLink,
-  CloudURLs,
-  NavigationTreeDefinitionUI,
-} from '@kbn/core-chrome-browser';
 import type { Logger } from '@kbn/logging';
 
 import { findActiveNodes, flattenNav, parseNavigationTree, stripQueryParams } from './utils';

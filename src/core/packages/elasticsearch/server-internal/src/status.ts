@@ -8,8 +8,7 @@
  */
 
 import type { Observable } from 'rxjs';
-import { merge, of } from 'rxjs';
-import { map } from 'rxjs';
+import { merge, of, map } from 'rxjs';
 import type { ServiceStatus } from '@kbn/core-status-common';
 import { ServiceStatusLevels } from '@kbn/core-status-common';
 import type { ElasticsearchStatusMeta } from './types';

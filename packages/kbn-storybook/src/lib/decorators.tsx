@@ -7,14 +7,13 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { of, Subject } from 'rxjs';
+import { of, Subject, BehaviorSubject } from 'rxjs';
 import React, { useEffect } from 'react';
 import { action } from '@storybook/addon-actions';
 import type { DecoratorFn } from '@storybook/react';
 import { I18nProvider } from '@kbn/i18n-react';
 
 import 'core_styles';
-import { BehaviorSubject } from 'rxjs';
 import type { CoreTheme } from '@kbn/core-theme-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';

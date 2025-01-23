@@ -10,7 +10,7 @@
 import { mockDiscover, mockPackage } from './plugins_service.test.mocks';
 
 import { resolve, join } from 'path';
-import { BehaviorSubject, from } from 'rxjs';
+import { BehaviorSubject, from, take } from 'rxjs';
 import { createAbsolutePathSerializer } from '@kbn/jest-serializers';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { schema } from '@kbn/config-schema';
@@ -28,7 +28,6 @@ import { PluginsService } from './plugins_service';
 import { PluginsSystem } from './plugins_system';
 import type { PluginsConfigType } from './plugins_config';
 import { config } from './plugins_config';
-import { take } from 'rxjs';
 import type { PluginConfigDescriptor } from '@kbn/core-plugins-server';
 import type { DiscoveredPlugin } from '@kbn/core-base-common';
 import { PluginType } from '@kbn/core-base-common';

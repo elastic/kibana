@@ -8,7 +8,7 @@
  */
 
 import * as Rx from 'rxjs';
-import { toArray, takeUntil } from 'rxjs';
+import { toArray, takeUntil, lastValueFrom } from 'rxjs';
 
 import { createStripAnsiSerializer } from '@kbn/jest-serializers';
 
@@ -16,7 +16,6 @@ import { ToolingLog } from './tooling_log';
 import type { Writer } from './writer';
 import { ToolingLogTextWriter } from './tooling_log_text_writer';
 import { ToolingLogCollectingWriter } from './tooling_log_collecting_writer';
-import { lastValueFrom } from 'rxjs';
 
 expect.addSnapshotSerializer(createStripAnsiSerializer());
 

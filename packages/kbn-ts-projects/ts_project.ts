@@ -12,9 +12,13 @@ import Fs from 'fs';
 
 import { REPO_ROOT } from '@kbn/repo-info';
 import { makeMatcher } from '@kbn/picomatcher';
-import { type Package, findPackageForPath, getRepoRelsSync } from '@kbn/repo-packages';
+import {
+  type Package,
+  findPackageForPath,
+  getRepoRelsSync,
+  readPackageJson,
+} from '@kbn/repo-packages';
 import { createFailError } from '@kbn/dev-cli-errors';
-import { readPackageJson } from '@kbn/repo-packages';
 
 import type { TsConfig } from './ts_configfile';
 import { readTsConfig, parseTsConfig } from './ts_configfile';

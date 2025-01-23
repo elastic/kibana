@@ -9,8 +9,7 @@
 
 import type { Command } from '@kbn/dev-cli-runner';
 import { initLogsDir } from '@kbn/test';
-import { TEST_FLAG_OPTIONS } from '../playwright/runner';
-import { parseTestFlags, runTests as runTestsFn } from '../playwright/runner';
+import { TEST_FLAG_OPTIONS, parseTestFlags, runTests as runTestsFn } from '../playwright/runner';
 
 /**
  * Start servers and run the tests

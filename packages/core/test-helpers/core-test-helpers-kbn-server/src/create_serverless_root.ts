@@ -14,10 +14,9 @@ import type { ServerlessProjectType } from '@kbn/es';
 import { Cluster } from '@kbn/es';
 import { REPO_ROOT } from '@kbn/repo-info';
 import { ToolingLog } from '@kbn/tooling-log';
-import { esTestConfig } from '@kbn/test';
+import { esTestConfig, systemIndicesSuperuser } from '@kbn/test';
 import type { CliArgs } from '@kbn/config';
 import { kibanaDevServiceAccount } from '@kbn/dev-utils';
-import { systemIndicesSuperuser } from '@kbn/test';
 import { createRoot, type TestElasticsearchUtils, type TestKibanaUtils } from './create_root';
 
 export type TestServerlessESUtils = Pick<TestElasticsearchUtils, 'stop' | 'es'> & {

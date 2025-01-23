@@ -8,8 +8,7 @@
  */
 
 import React from 'react';
-import { BehaviorSubject, type Observable } from 'rxjs';
-import { map } from 'rxjs';
+import { BehaviorSubject, type Observable, map } from 'rxjs';
 
 import type { AnalyticsServiceStart } from '@kbn/core-analytics-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';

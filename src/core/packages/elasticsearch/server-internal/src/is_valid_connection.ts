@@ -7,10 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { filter } from 'rxjs';
+import { filter, firstValueFrom } from 'rxjs';
 import { errors } from '@elastic/elasticsearch';
 import type { Observable } from 'rxjs';
-import { firstValueFrom } from 'rxjs';
 import type { NodesVersionCompatibility } from './version_check/ensure_es_version';
 
 /**

@@ -16,8 +16,7 @@ import {
 } from './application_service.test.mocks';
 
 import { createElement } from 'react';
-import { BehaviorSubject, firstValueFrom, Subject } from 'rxjs';
-import { bufferCount, takeUntil } from 'rxjs';
+import { BehaviorSubject, firstValueFrom, Subject, bufferCount, takeUntil } from 'rxjs';
 import { mount, shallow } from 'enzyme';
 import { createBrowserHistory } from 'history';
 

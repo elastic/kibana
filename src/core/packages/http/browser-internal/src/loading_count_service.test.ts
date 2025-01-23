@@ -7,8 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Observable, throwError, of, Subject } from 'rxjs';
-import { toArray } from 'rxjs';
+import { Observable, throwError, of, Subject, toArray } from 'rxjs';
 
 import { fatalErrorsServiceMock } from '@kbn/core-fatal-errors-browser-mocks';
 import { LoadingCountService } from './loading_count_service';

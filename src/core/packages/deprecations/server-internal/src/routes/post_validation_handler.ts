@@ -11,8 +11,11 @@ import type { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-server-int
 import type { CoreKibanaRequest } from '@kbn/core-http-router-server-internal';
 import type { InternalHttpServiceSetup } from '@kbn/core-http-server-internal';
 import type { PostValidationMetadata } from '@kbn/core-http-server';
-import { buildApiDeprecationId } from '../deprecations';
-import { getIsRouteApiDeprecation, getIsAccessApiDeprecation } from '../deprecations';
+import {
+  buildApiDeprecationId,
+  getIsRouteApiDeprecation,
+  getIsAccessApiDeprecation,
+} from '../deprecations';
 
 interface Dependencies {
   coreUsageData: InternalCoreUsageDataSetup;

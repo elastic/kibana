@@ -9,8 +9,18 @@
 
 import React, { useMemo } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { BehaviorSubject, combineLatest, merge, type Observable, of, ReplaySubject } from 'rxjs';
-import { mergeMap, map, takeUntil, filter } from 'rxjs';
+import {
+  BehaviorSubject,
+  combineLatest,
+  merge,
+  type Observable,
+  of,
+  ReplaySubject,
+  mergeMap,
+  map,
+  takeUntil,
+  filter,
+} from 'rxjs';
 import { parse } from 'url';
 import { setEuiDevProviderWarning } from '@elastic/eui';
 import useObservable from 'react-use/lib/useObservable';
@@ -41,12 +51,10 @@ import type {
   NavigationTreeDefinition,
   AppDeepLinkId,
   SolutionId,
-} from '@kbn/core-chrome-browser';
-import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
-import type {
   SideNavComponent as ISideNavComponent,
   ChromeHelpMenuLink,
 } from '@kbn/core-chrome-browser';
+import type { CustomBrandingStart } from '@kbn/core-custom-branding-browser';
 import { RecentlyAccessedService } from '@kbn/recently-accessed';
 
 import type { Logger } from '@kbn/logging';
