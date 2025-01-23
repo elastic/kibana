@@ -31,7 +31,7 @@ describe('ESQLControlApi', () => {
       ...api,
       uuid,
       parentApi: controlGroupApi,
-      unsavedChanges: new BehaviorSubject<Partial<ESQLControlState> | undefined>(undefined),
+      unsavedChanges$: new BehaviorSubject<Partial<ESQLControlState> | undefined>(undefined),
       resetUnsavedChanges: () => {
         return true;
       },
@@ -39,7 +39,7 @@ describe('ESQLControlApi', () => {
     };
   }
 
-  test('Should add a new variable to the ES|QL service derived from state', async () => {
+  test('Should publish ES|QL variable', async () => {
     const initialState = {
       selectedOptions: ['option1'],
       availableOptions: ['option1', 'option2'],
@@ -56,7 +56,7 @@ describe('ESQLControlApi', () => {
     });
   });
 
-  test('Should get the serialized state correctly', async () => {
+  test('Should serialize state', async () => {
     const initialState = {
       selectedOptions: ['option1'],
       availableOptions: ['option1', 'option2'],
@@ -82,7 +82,7 @@ describe('ESQLControlApi', () => {
     });
   });
 
-  test('changing the dropdown should update the corresponding variable from the ES|QL service ', async () => {
+  test('changing the dropdown should publish new ES|QL variable', async () => {
     const initialState = {
       selectedOptions: ['option1'],
       availableOptions: ['option1', 'option2'],
