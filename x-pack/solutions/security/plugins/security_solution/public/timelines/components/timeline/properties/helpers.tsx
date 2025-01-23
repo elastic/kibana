@@ -71,6 +71,7 @@ const SmallNotesButton = React.memo<SmallNotesButtonProps>(
             onClick={onClick}
             size="s"
             isDisabled={isTemplate}
+            color="text"
           />
         </EuiFlexItem>
       </NotesButtonContainer>

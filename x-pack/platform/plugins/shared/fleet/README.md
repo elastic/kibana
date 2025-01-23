@@ -130,13 +130,18 @@ Note: if you need to do simultaneous Kibana and Fleet Server development, refer 
 Kibana primarily uses Jest for unit testing. Each plugin or package defines a `jest.config.js` that extends a preset provided by the `@kbn/test` package. Unless you intend to run all unit tests within the project, you should provide the Jest configuration for Fleet. The following command runs all Fleet unit tests:
 
 ```sh
-yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.js
+yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js
 ```
 
 You can also run a specific test by passing the filepath as an argument, e.g.:
 
 ```sh
-yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.js x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
+yarn jest --config x-pack/platform/plugins/shared/fleet/jest.config.dev.js x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
+```
+
+Or alternatively:
+```sh
+yarn test:jest x-pack/platform/plugins/shared/fleet/common/services/validate_package_policy.test.ts
 ```
 
 #### API integration tests (stateful)

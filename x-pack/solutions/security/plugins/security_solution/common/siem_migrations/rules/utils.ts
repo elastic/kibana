@@ -6,14 +6,24 @@
  */
 
 import type { Severity } from '../../api/detection_engine';
-import { DEFAULT_TRANSLATION_FIELDS, DEFAULT_TRANSLATION_SEVERITY } from '../constants';
+import { DEFAULT_TRANSLATION_FIELDS } from '../constants';
 import type { ElasticRule, ElasticRulePartial } from '../model/rule_migration.gen';
 
 export type MigrationPrebuiltRule = ElasticRulePartial &
-  Required<Pick<ElasticRulePartial, 'title' | 'description' | 'prebuilt_rule_id'>>;
+  Required<
+    Pick<
+      ElasticRulePartial,
+      'title' | 'description' | 'prebuilt_rule_id' | 'severity' | 'risk_score'
+    >
+  >;
 
 export type MigrationCustomRule = ElasticRulePartial &
-  Required<Pick<ElasticRulePartial, 'title' | 'description' | 'query' | 'query_language'>>;
+  Required<
+    Pick<
+      ElasticRulePartial,
+      'title' | 'description' | 'query' | 'query_language' | 'severity' | 'risk_score'
+    >
+  >;
 
 export const isMigrationPrebuiltRule = (rule?: ElasticRule): rule is MigrationPrebuiltRule =>
   !!(rule?.title && rule?.description && rule?.prebuilt_rule_id);
@@ -33,8 +43,8 @@ export const convertMigrationCustomRuleToSecurityRulePayload = (
     name: rule.title,
     description: rule.description,
     enabled,
-
+    severity: rule.severity as Severity,
+    risk_score: rule.risk_score,
     ...DEFAULT_TRANSLATION_FIELDS,
-    severity: (rule.severity as Severity) ?? DEFAULT_TRANSLATION_SEVERITY,
   };
 };

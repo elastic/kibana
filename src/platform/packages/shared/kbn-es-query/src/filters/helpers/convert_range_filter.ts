@@ -13,7 +13,7 @@ import type { RangeFilter } from '../build_filters';
 import type { TimeRange } from './types';
 
 const isRelativeTime = (value: string | number | undefined): boolean => {
-  return typeof value === 'string' && value.includes('now');
+  return typeof value === 'string' && !moment(value).isValid();
 };
 
 export function convertRangeFilterToTimeRange(filter: RangeFilter) {
