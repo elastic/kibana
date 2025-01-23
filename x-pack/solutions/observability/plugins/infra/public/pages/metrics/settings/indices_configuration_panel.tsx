@@ -18,7 +18,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common';
 import { METRICS_INDEX_PATTERN } from '../../../../common/constants';
 import type { InputFieldProps } from './input_fields';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
@@ -64,12 +65,22 @@ export const IndicesConfigurationPanel = ({
   numberOfInfraRules,
 }: IndicesConfigurationPanelProps) => {
   const {
-    services: { http },
+    services: { http, spaces },
   } = useKibanaContextForPlugin();
 
-  const viewDataViewLink = http.basePath.prepend(
-    '/app/management/kibana/dataViews/dataView/infra_rules_data_view'
-  );
+  const [viewDataViewLink, setViewDataViewLink] = useState<string>();
+
+  useEffect(() => {
+    const getDataViewLinkWithSpace = async () => {
+      const spaceId = spaces ? (await spaces.getActiveSpace()).id : DEFAULT_SPACE_ID;
+      const dataViewId = `infra_rules_data_view_${spaceId}`;
+      const dataViewLink = http.basePath.prepend(
+        `/app/management/kibana/dataViews/dataView/${dataViewId}`
+      );
+      setViewDataViewLink(dataViewLink);
+    };
+    getDataViewLinkWithSpace();
+  }, [http, spaces]);
 
   return (
     <EuiForm>
