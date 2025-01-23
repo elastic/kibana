@@ -622,7 +622,7 @@ function validateFunction({
   let relevantFuncSignatures = matchingSignatures;
   const enrichedArgs = fn.args;
 
-  if (fn.name === 'in') {
+  if (fn.name === 'in' || fn.name === 'not_in') {
     for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
       relevantFuncSignatures = fnDefinition.signatures.filter(
         (s) =>

@@ -7277,6 +7277,21 @@ const roundDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'integer',
           optional: false,
         },
@@ -7302,6 +7317,21 @@ const roundDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'long',
           optional: false,
         },
@@ -7318,6 +7348,21 @@ const roundDefinition: FunctionDefinition = {
         {
           name: 'decimals',
           type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
           optional: true,
         },
       ],
@@ -7329,6 +7374,36 @@ const roundDefinition: FunctionDefinition = {
           name: 'number',
           type: 'unsigned_long',
           optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
+          optional: true,
         },
       ],
       returnType: 'unsigned_long',

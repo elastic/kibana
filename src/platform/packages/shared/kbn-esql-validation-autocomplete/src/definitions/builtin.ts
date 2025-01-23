@@ -8,7 +8,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
+import { isNumericType } from '../shared/esql_types';
 import type { FunctionDefinition, FunctionParameterType, FunctionReturnType } from './types';
 import { operatorsFunctionDefinitions } from './generated/operators';
 type MathFunctionSignature = [FunctionParameterType, FunctionParameterType, FunctionReturnType];
@@ -384,131 +384,6 @@ export const comparisonFunctions: FunctionDefinition[] = [
   },
 ].map((op): FunctionDefinition => createComparisonDefinition(op));
 
-const notLikeFunctions: FunctionDefinition[] = [
-  // Skip the insensitive case equality until it gets restored back
-  // new special comparison operator for strings only
-  // {
-  //   name: '=~',
-  //   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definition.equalToCaseInsensitiveDoc', {
-  //     defaultMessage: 'Case insensitive equality',
-  //   }),
-  // },
-  { name: 'not_like', description: '' },
-  { name: 'not_rlike', description: '' },
-].map(({ name, description }) => {
-  const def: FunctionDefinition = {
-    type: 'builtin' as const,
-    ignoreAsSuggestion: true,
-    name,
-    description,
-    supportedCommands: ['eval', 'where', 'row', 'sort'],
-    supportedOptions: ['by'],
-    signatures: [
-      {
-        params: [
-          { name: 'left', type: 'text' as const },
-          { name: 'right', type: 'text' as const },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'text' as const },
-          { name: 'right', type: 'keyword' as const },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'keyword' as const },
-          { name: 'right', type: 'text' as const },
-        ],
-        returnType: 'boolean',
-      },
-      {
-        params: [
-          { name: 'left', type: 'keyword' as const },
-          { name: 'right', type: 'keyword' as const },
-        ],
-        returnType: 'boolean',
-      },
-    ],
-  };
-
-  return def;
-});
-
-const notInFunctions: FunctionDefinition[] = [
-  { name: 'not_in', description: '' },
-].map<FunctionDefinition>(({ name, description }) => ({
-  // set all arrays to type "any" for now
-  // this only applies to the "in" operator
-  // e.g. "foo" in ( "foo", "bar" )
-  //
-  // we did this because the "in" operator now supports
-  // mixed-type arrays like ( "1.2.3", versionVar )
-  // because of implicit casting.
-  //
-  // we need to revisit with more robust validation
-  type: 'builtin',
-  ignoreAsSuggestion: /not/.test(name),
-  name,
-  description,
-  supportedCommands: ['eval', 'where', 'row', 'sort'],
-  signatures: [
-    ...ESQL_NUMBER_TYPES.map((type) => ({
-      params: [
-        { name: 'left', type: type as FunctionParameterType },
-
-        { name: 'right', type: 'any[]' as FunctionParameterType },
-      ],
-      returnType: 'boolean' as FunctionReturnType,
-    })),
-    {
-      params: [
-        { name: 'left', type: 'keyword' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'text' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'boolean' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'date' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'version' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-    {
-      params: [
-        { name: 'left', type: 'ip' },
-        { name: 'right', type: 'any[]' },
-      ],
-      returnType: 'boolean',
-    },
-  ],
-}));
-
 export const logicalOperators: FunctionDefinition[] = [
   {
     name: 'and',
@@ -645,8 +520,6 @@ const otherDefinitions: FunctionDefinition[] = [
 
 export const builtinFunctions: FunctionDefinition[] = [
   ...operatorsFunctionDefinitions,
-  ...notInFunctions,
-  ...notLikeFunctions,
   ...logicalOperators,
   ...nullFunctions,
   ...otherDefinitions,

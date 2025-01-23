@@ -619,8 +619,10 @@ const enrichOperators = (
     const isComparisonOperator =
       Object.hasOwn(operatorsMeta, op.name) && operatorsMeta[op.name]?.isComparisonOperator;
 
-    const isInOperator = op.name === 'in';
+    const isInOperator = op.name === 'in' || op.name === 'not_in';
     const isLikeOperator = /like/i.test(op.name);
+    const isNotOperator =
+      op.name?.toLowerCase()?.startsWith('not_') && (isInOperator || isInOperator);
 
     let signatures = op.signatures.map((s) => ({
       ...s,
@@ -645,8 +647,8 @@ const enrichOperators = (
       ]);
       supportedOptions = ['by'];
     }
-    if (isInOperator || isLikeOperator) {
-      supportedCommands = _.uniq([...op.supportedCommands, 'eval', 'where', 'row', 'sort']);
+    if (isInOperator || isLikeOperator || isNotOperator) {
+      supportedCommands = ['eval', 'where', 'row', 'sort'];
     }
     if (isInOperator) {
       // Override the signatures to be array types instead of singular
@@ -660,18 +662,6 @@ const enrichOperators = (
         })),
       }));
     }
-
-    // if (isMatchOperator) {
-    //   // for "match" and ":", the first param should be fieldsOnly, second should be constantOnly
-    //   signatures = signatures.map((s) => ({
-    //     ...s,
-    //     params: s.params.map((p, idx) => ({
-    //       ...p,
-    //       ...(idx === 1 ? { constantOnly: true } : { fieldsOnly: true }),
-    //     })),
-    //   }));
-    // }
-
     if (
       Object.hasOwn(operatorsMeta, op.name) &&
       Array.isArray(operatorsMeta[op.name]?.extraSignatures)
@@ -689,6 +679,7 @@ const enrichOperators = (
       // @TODO: change to operator type
       type: 'builtin' as const,
       validate: validators[op.name],
+      ...(isNotOperator ? { ignoreAsSuggestion: true } : {}),
     };
   });
 };
@@ -740,6 +731,9 @@ function printGeneratedFunctionsFile(
     const { type, name, description, alias, signatures, operator } = functionDefinition;
 
     let functionName = operator?.toLowerCase() ?? name.toLowerCase();
+    if (functionName.includes('not')) {
+      functionName = name;
+    }
     if (name.toLowerCase() === 'match') {
       functionName = 'match';
     }
