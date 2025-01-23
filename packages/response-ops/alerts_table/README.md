@@ -11,7 +11,8 @@ The `id` prop is used to persist the table state in `localStorage`.
 ```tsx
 <AlertsTable
   id="my-alerts-table"
-  featureIds={featureIds}
+  ruleTypeIds={ruleTypeIds}
+  consumers={consumers}
   query={esQuery}
   initialSort={defaultAlertsTableSort}
   renderCellValue={renderCellValue}

@@ -126,15 +126,16 @@ const initialBulkActionsState = {
  * An `EuiDataGrid` abstraction to render alert documents
  *
  * It manages the paginated and cached fetching of alerts based on the
- * provided `featureIds` (the final query can be refined through the
- * `query` and `initialSort` props). The `id` prop is required in order
+ * provided `ruleTypeIds` and `consumers` (the final query can be refined
+ * through the `query` and `initialSort` props). The `id` prop is required in order
  * to persist the table state in `localStorage`
  *
  * @example
  * ```tsx
  * <AlertsTable
  *   id="my-alerts-table"
- *   featureIds={featureIds}
+ *   ruleTypeIds={ruleTypeIds}
+ *   consumers={consumers}
  *   query={esQuery}
  *   initialSort={defaultAlertsTableSort}
  *   renderCellValue={CellValue}

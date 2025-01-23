@@ -25,7 +25,6 @@ import {
   ALERT_CASE_IDS,
   ALERT_STATUS,
   ALERT_MAINTENANCE_WINDOW_IDS,
-  type ValidFeatureId,
 } from '@kbn/rule-data-utils';
 import type { HttpStart } from '@kbn/core-http-browser';
 import type { EsQuerySnapshot, LegacyField } from '@kbn/alerting-types';
@@ -437,7 +436,6 @@ export interface AlertsDataGridProps<AC extends AdditionalContext = AdditionalCo
    * Enable when rows may have variable heights (disables virtualization)
    */
   dynamicRowHeight?: boolean;
-  featureIds?: ValidFeatureId[];
   sort: SortCombinations[];
   alertsQuerySnapshot?: EsQuerySnapshot;
   onSortChange: (sort: EuiDataGridSorting['columns']) => void;
