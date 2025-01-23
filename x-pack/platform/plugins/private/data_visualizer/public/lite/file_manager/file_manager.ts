@@ -48,7 +48,6 @@ export interface UploadStatus {
   dataViewCreated: STATUS;
   fileImport: STATUS;
   filesStatus: AnalyzedFile[];
-  // mappingClashes: MappingClash[];
   fileClashes: FileClash[];
   formatMix: boolean;
 }
@@ -63,7 +62,7 @@ export class FileManager {
         : combineLatest(files.map((file) => file.fileStatus$));
     })
   );
-  public readonly analysisOk$ = new BehaviorSubject<boolean>(false); // can this be removed in favour of uploadStatus?
+  public readonly analysisOk$ = new BehaviorSubject<boolean>(false); // can this be removed in favour of uploadStatus?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   private mappingsCheckSubscription: Subscription;
   private settings = {};
   private mappings: MappingTypeMapping | null = null;
@@ -81,7 +80,6 @@ export class FileManager {
     dataViewCreated: STATUS.NA,
     fileImport: STATUS.NOT_STARTED,
     filesStatus: [],
-    // mappingClashes: [],
     fileClashes: [],
     formatMix: false,
   });
@@ -92,17 +90,7 @@ export class FileManager {
     private dataViewsContract: DataViewsServicePublic,
     private autoAddSemanticTextField: boolean = false
   ) {
-    // eslint-disable-next-line no-console
-    console.log('FileManager constructor');
-
-    // this.files$.subscribe((files) => {
-    //   console.log('files', files);
-    // });
-
-    // this.files = new Map<string, FileWrapper>();
     this.mappingsCheckSubscription = this.analysisStatus$.subscribe((statuses) => {
-      // console.log('statuses', statuses);
-
       const allFilesAnalyzed = statuses.every((status) => status.loaded);
       if (allFilesAnalyzed) {
         this.analysisValid$.next(true);
@@ -129,12 +117,10 @@ export class FileManager {
           this.pipeline = this.createMergedPipeline();
           this.addSemanticTextField();
           this.setStatus({
-            // mappingClashes: [],
             fileClashes: [],
           });
         } else {
           this.setStatus({
-            // mappingClashes,
             fileClashes: getMappingClashInfo(mappingClashes, statuses),
           });
         }
@@ -158,8 +144,6 @@ export class FileManager {
     this.analysisOk$.next(false);
     const promises = Array.from(fileList).map((file) => this.addFile(file));
     await Promise.all(promises);
-
-    // console.log(this.files.length);
   }
 
   async addFile(file: File) {
@@ -188,7 +172,6 @@ export class FileManager {
     formatsOk: boolean;
     fileClashes: FileClash[];
   } {
-    // console.log('checkFormat');
     const files = this.getFiles();
     const fileClashes = getFormatClashes(files);
     const formatsOk = fileClashes.every((file) => file.clash === false);
@@ -218,7 +201,7 @@ export class FileManager {
   ): Promise<FileUploadResults | null> {
     if (this.mappings === null || this.pipeline === null || this.commonFileFormat === null) {
       return null;
-      // should throw an error here
+      // should throw an error here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
 
     this.setStatus({
@@ -277,23 +260,12 @@ export class FileManager {
           this.mappings,
           this.pipeline
         );
-        // check importResp.success
       })
     );
     this.setStatus({
       fileImport: STATUS.COMPLETED,
     });
 
-    // for (const file of files) {
-    //   const importResp = await file.import(
-    //     initializeImportResp.id,
-    //     indexName,
-    //     initializeImportResp.pipelineId!,
-    //     this.mappings,
-    //     this.pipeline
-    //   );
-    //   // check importResp.success
-    // }
     const dataView = '';
     let dataViewResp;
     if (createDataView) {
@@ -315,7 +287,6 @@ export class FileManager {
       overallImportStatus: STATUS.COMPLETED,
     });
 
-    // FileUploadResults
     return {
       index: indexName,
       dataView: dataViewResp ? { id: dataViewResp.id!, title: dataView! } : undefined,
@@ -338,7 +309,7 @@ export class FileManager {
       return;
     }
     const autoDeploy = new AutoDeploy(this.http, this.inferenceId);
-    // put inside try catch
+    // put inside try catch !!!!!!!!!!!!!!!!!!!!!!!!!!!!
     await autoDeploy.deploy();
   }
 

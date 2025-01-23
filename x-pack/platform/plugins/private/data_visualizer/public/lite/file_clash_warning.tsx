@@ -1,0 +1,83 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+import type { FC } from 'react';
+import React from 'react';
+import { EuiCallOut } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import type { AnalyzedFile } from './file_manager/file_wrapper';
+import type { UploadStatus } from './file_manager/file_manager';
+import { CLASH_TYPE } from './file_manager/merge_tools';
+
+interface Props {
+  uploadStatus: UploadStatus;
+  filesStatus: AnalyzedFile[];
+}
+
+export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus }) => {
+  const fileClashes = uploadStatus.fileClashes;
+
+  const clashType = fileClashes.some((fileClash) => fileClash.clashType === CLASH_TYPE.FORMAT)
+    ? CLASH_TYPE.FORMAT
+    : fileClashes.some((fileClash) => fileClash.clashType === CLASH_TYPE.MAPPING)
+    ? CLASH_TYPE.MAPPING
+    : CLASH_TYPE.UNSUPPORTED;
+
+  const { title, description } =
+    clashType === CLASH_TYPE.MAPPING
+      ? {
+          title: i18n.translate(
+            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+            {
+              defaultMessage: 'Incompatible mapping',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+            {
+              defaultMessage: 'Mappings in the selected files are not compatible with each other',
+            }
+          ),
+        }
+      : clashType === CLASH_TYPE.FORMAT
+      ? {
+          title: i18n.translate(
+            'xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedDescription',
+            {
+              defaultMessage: 'Incompatible file formats',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+            {
+              defaultMessage:
+                'The selected files must have the same format. e.g. all CSV or all log files',
+            }
+          ),
+        }
+      : {
+          title: i18n.translate(
+            'xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedDescription',
+            {
+              defaultMessage: 'File format not supported',
+            }
+          ),
+          description: i18n.translate(
+            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+            {
+              defaultMessage: 'Some of the selected files are not supported for upload.',
+            }
+          ),
+        };
+
+  return (
+    <>
+      <EuiCallOut title={title} color="danger">
+        <p>{description}</p>
+      </EuiCallOut>
+    </>
+  );
+};
