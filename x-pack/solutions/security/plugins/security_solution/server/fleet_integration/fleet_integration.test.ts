@@ -169,15 +169,15 @@ describe('Fleet integrations', () => {
         integration_config: {},
         policy: {
           value: disableProtections(
-            policyFactory(
+            policyFactory({
               license,
               cloud,
               licenseUuid,
               clusterUuid,
               clusterName,
-              isServerlessEnabled,
-              isTelemetryEnabled
-            )
+              serverless: isServerlessEnabled,
+              isGlobalTelemetryEnabled: isTelemetryEnabled,
+            })
           ),
         },
         artifact_manifest: { value: manifest },

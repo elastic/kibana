@@ -13,19 +13,19 @@ import { isBillablePolicy } from './policy_config_helpers';
 /**
  * Return a new default `PolicyConfig` for platinum and above licenses
  */
-export const policyFactory = (
+export const policyFactory = ({
   license = '',
   cloud = false,
-  licenseUid = '',
+  licenseUuid = '',
   clusterUuid = '',
   clusterName = '',
   serverless = false,
-  isGlobalTelemetryEnabled = false
-): PolicyConfig => {
+  isGlobalTelemetryEnabled = false,
+} = {}): PolicyConfig => {
   const policy: PolicyConfig = {
     meta: {
       license,
-      license_uuid: licenseUid,
+      license_uuid: licenseUuid,
       cluster_uuid: clusterUuid,
       cluster_name: clusterName,
       cloud,

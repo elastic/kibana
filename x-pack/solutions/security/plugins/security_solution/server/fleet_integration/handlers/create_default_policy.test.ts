@@ -211,11 +211,15 @@ describe('Create Default Policy tests ', () => {
     it('Should return the default config when preset is EDR Complete', async () => {
       const config = createEndpointConfig({ preset: 'EDRComplete' });
       const policy = await createDefaultPolicyCallback(config);
-      const licenseType = 'platinum';
+      const license = 'platinum';
       const isCloud = true;
-      const defaultPolicy = policyFactory(licenseType, isCloud, '', '', '', undefined, true);
+      const defaultPolicy = policyFactory({
+        license,
+        cloud: isCloud,
+        isGlobalTelemetryEnabled: true,
+      });
       // update defaultPolicy w/ platinum license & cloud info
-      defaultPolicy.meta.license = licenseType;
+      defaultPolicy.meta.license = license;
       defaultPolicy.meta.cloud = isCloud;
       expect(policy).toMatchObject(defaultPolicy);
     });

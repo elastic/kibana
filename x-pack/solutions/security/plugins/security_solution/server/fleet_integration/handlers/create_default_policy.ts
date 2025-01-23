@@ -41,15 +41,15 @@ export const createDefaultPolicy = (
   telemetryConfigProvider: TelemetryConfigProvider
 ): PolicyConfig => {
   // Pass license and cloud information to use in Policy creation
-  const factoryPolicy = policyConfigFactory(
-    licenseService.getLicenseType(),
-    cloud?.isCloudEnabled,
-    licenseService.getLicenseUID(),
-    esClientInfo?.cluster_uuid,
-    esClientInfo?.cluster_name,
-    cloud?.isServerlessEnabled,
-    telemetryConfigProvider.getIsOptedIn()
-  );
+  const factoryPolicy = policyConfigFactory({
+    license: licenseService.getLicenseType(),
+    cloud: cloud?.isCloudEnabled,
+    licenseUuid: licenseService.getLicenseUID(),
+    clusterUuid: esClientInfo?.cluster_uuid,
+    clusterName: esClientInfo?.cluster_name,
+    serverless: cloud?.isServerlessEnabled,
+    isGlobalTelemetryEnabled: telemetryConfigProvider.getIsOptedIn(),
+  });
 
   let defaultPolicyPerType: PolicyConfig =
     config?.type === 'cloud'
