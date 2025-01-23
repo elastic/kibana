@@ -12,7 +12,7 @@ import { EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 
-interface ErrorGroupLinkProps {
+interface ErrorLinkProps {
   errorId: string;
   errorMessage: string;
 
@@ -20,12 +20,12 @@ interface ErrorGroupLinkProps {
   serviceName: string;
 }
 
-export const ErrorLink: React.FC<ErrorGroupLinkProps> = ({
+export const ErrorLink: React.FC<ErrorLinkProps> = ({
   errorGroupId,
   errorMessage,
   errorId,
   serviceName,
-}: ErrorGroupLinkProps) => {
+}: ErrorLinkProps) => {
   const { share, data } = useDiscoverServices();
   const timeFilter = data.query.timefilter.timefilter.getTime();
   const errorGroupLocator = share?.url.locators.get<{
