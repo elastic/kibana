@@ -15,7 +15,7 @@ export class SimulationFailedError extends StatusError {
         error.body?.error?.caused_by?.reason ||
         error.message ||
         'Unknown error',
-      400
+      error.statusCode ?? 500
     );
     this.name = 'SimulationFailedError';
   }
