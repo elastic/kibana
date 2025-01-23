@@ -84,6 +84,8 @@ export const useInTableSearchMatches = (
       return;
     }
 
+    // const startTime = window.performance.now();
+
     const numberOfRuns = numberOfRunsRef.current;
 
     const onFinish: AllCellsProps['onFinish'] = ({
@@ -112,6 +114,9 @@ export const useInTableSearchMatches = (
           onScrollToActiveMatch,
         });
       }
+
+      // const duration = window.performance.now() - startTime;
+      // console.log(duration);
     };
 
     const RenderCellsShadowPortal: UseInTableSearchMatchesState['renderCellsShadowPortal'] = () => (
@@ -297,13 +302,19 @@ function AllCellsHighlightsCounter(props: AllCellsProps) {
   return createPortal(<AllCells {...props} />, container);
 }
 
-const ROWS_CHUNK_SIZE = 10; // process 10 rows at the time
+// Process rows in chunks:
+// - to don't block the main thread for too long
+// - and to let users continue interacting with the input which would cancel the processing and start a new one.
+const INITIAL_ROWS_CHUNK_SIZE = 10;
+// Increases the chunk size by 10 each time. This will increase the speed of processing with each iteration as we get more certain that user is waiting for its completion.
+const ROWS_CHUNK_SIZE_INCREMENT = 10;
+const ROWS_CHUNK_SIZE_MAX = 300;
 
 function AllCells(props: AllCellsProps) {
   const { inTableSearchTerm, visibleColumns, renderCellValue, rowsCount, onFinish } = props;
   const matchesListRef = useRef<RowMatches[]>([]);
   const totalMatchesCountRef = useRef<number>(0);
-  const initialChunkSize = Math.min(ROWS_CHUNK_SIZE, rowsCount);
+  const initialChunkSize = Math.min(INITIAL_ROWS_CHUNK_SIZE, rowsCount);
   const [{ chunkStartRowIndex, chunkSize }, setChunk] = useState<{
     chunkStartRowIndex: number;
     chunkSize: number;
@@ -334,10 +345,14 @@ function AllCells(props: AllCellsProps) {
         });
 
       // moving to the next chunk if there are more rows to process
-      const nextRowIndex = chunkStartRowIndex + ROWS_CHUNK_SIZE;
+      const nextRowIndex = chunkStartRowIndex + chunkSize;
 
       if (nextRowIndex < rowsCount) {
-        const nextChunkSize = Math.min(ROWS_CHUNK_SIZE, rowsCount - nextRowIndex);
+        const increasedChunkSize = Math.min(
+          ROWS_CHUNK_SIZE_MAX,
+          chunkSize + ROWS_CHUNK_SIZE_INCREMENT
+        );
+        const nextChunkSize = Math.min(increasedChunkSize, rowsCount - nextRowIndex);
         chunkRowResultsMapRef.current = {};
         chunkRemainingRowsCountRef.current = nextChunkSize;
         setChunk({ chunkStartRowIndex: nextRowIndex, chunkSize: nextChunkSize });
@@ -348,7 +363,7 @@ function AllCells(props: AllCellsProps) {
         });
       }
     },
-    [setChunk, chunkStartRowIndex, rowsCount, onFinish]
+    [setChunk, chunkStartRowIndex, chunkSize, rowsCount, onFinish]
   );
 
   // Iterating through rows one chunk at the time to avoid blocking the main thread.
