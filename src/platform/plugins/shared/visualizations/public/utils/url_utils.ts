@@ -7,5 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { getVisualizeEmbeddableFactoryLazy } from './get_visualize_embeddable_factory_lazy';
-export { VIS_EVENT_TO_TRIGGER } from './events';
+export function getFullPath(id: string) {
+  return `/app/visualize#/edit/${id}`;
+}
+
+export function urlFor(id: string) {
+  return `#/edit/${encodeURIComponent(id)}`;
+}
