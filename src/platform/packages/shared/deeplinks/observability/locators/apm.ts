@@ -36,3 +36,11 @@ export interface ErrorGroupDetailsLocatorParams extends SerializableRecord {
   errorGroupId: string;
   serviceName: string;
 }
+
+export const TRACES_EXPLORER_WATERFALL_LOCATOR = 'TRACES_EXPLORER_WATERFALL_LOCATOR';
+
+export interface TracesExplorerWaterfallLocatorParams extends SerializableRecord {
+  rangeFrom?: string;
+  rangeTo?: string;
+  errorId: string;
+}

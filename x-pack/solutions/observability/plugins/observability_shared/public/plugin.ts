@@ -55,6 +55,10 @@ import {
   SpanDetailsBySpanIdAndTraceIdLocator,
   SpanDetailsBySpanIdAndTraceIdLocatorDefinition,
 } from '../common/locators/apm/span_details_by_span_id_locator';
+import {
+  TracesExplorerWaterfallLocator,
+  TracesExplorerWaterfallLocatorDefinition,
+} from '../common/locators/apm/traces_explorer_waterfall_locator';
 export interface ObservabilitySharedSetup {
   share: SharePluginSetup;
 }
@@ -90,6 +94,7 @@ interface ObservabilitySharedLocators {
     transactionDetailsByTraceId: TransactionDetailsByTraceIdLocator;
     spanDetailsBySpanIdAndTraceIdLocator: SpanDetailsBySpanIdAndTraceIdLocator;
     errorGroupDetailsLocator: ErrorGroupDetailsLocator;
+    tracesExplorerWaterfallLocator: TracesExplorerWaterfallLocator;
     serviceEntity: ServiceEntityLocator;
   };
   entitiesInventory: EntitiesInventoryLocator;
@@ -173,6 +178,9 @@ export class ObservabilitySharedPlugin implements Plugin {
         ),
         errorGroupDetailsLocator: urlService.locators.create(
           new ErrorGroupDetailsLocatorDefinition()
+        ),
+        tracesExplorerWaterfallLocator: urlService.locators.create(
+          new TracesExplorerWaterfallLocatorDefinition()
         ),
         serviceEntity: urlService.locators.create(new ServiceEntityLocatorDefinition()),
       },

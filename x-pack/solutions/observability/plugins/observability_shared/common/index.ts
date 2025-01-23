@@ -193,6 +193,8 @@ export type {
   SpanDetailsBySpanIdAndTraceIdLocatorParams,
   ErrorGroupDetailsLocator,
   ErrorGroupDetailsLocatorParams,
+  TracesExplorerWaterfallLocator,
+  TracesExplorerWaterfallLocatorParams,
   EntitiesInventoryLocator,
 } from './locators';
 
@@ -222,6 +224,8 @@ export {
   SPAN_DETAILS_BY_SPAN_ID_AND_TRACE_ID_LOCATOR,
   ErrorGroupDetailsLocatorDefinition,
   ERROR_GROUP_DETAILS_LOCATOR,
+  TracesExplorerWaterfallLocatorDefinition,
+  TRACES_EXPLORER_WATERFALL_LOCATOR,
   EntitiesInventoryLocatorDefinition,
   ENTITIES_INVENTORY_LOCATOR_ID,
 } from './locators';

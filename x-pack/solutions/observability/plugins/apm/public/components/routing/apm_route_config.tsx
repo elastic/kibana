@@ -26,6 +26,7 @@ import { diagnosticsRoute } from '../app/diagnostics';
 import { TransactionDetailsByNameLink } from '../app/transaction_details_link';
 import { EntityLink } from '../app/entities/entity_link';
 import { ErrorGroupLink } from '../app/error_group_link';
+import { TracesExplorerWaterfallLink } from '../app/traces_explorer_waterfall_link';
 
 const ServiceGroupsTitle = i18n.translate('xpack.apm.views.serviceGroups.title', {
   defaultMessage: 'Services',
@@ -108,6 +109,22 @@ const apmRoutes = {
           rangeTo: t.string,
           serviceName: t.string,
           kuery: t.string,
+        }),
+      }),
+    ]),
+  },
+  '/link-to/traces/explorer/waterfall': {
+    element: <TracesExplorerWaterfallLink />,
+    params: t.intersection([
+      t.type({
+        path: t.type({}),
+      }),
+      t.partial({
+        query: t.partial({
+          rangeFrom: t.string,
+          rangeTo: t.string,
+          serviceName: t.string,
+          query: t.string,
         }),
       }),
     ]),

@@ -10,6 +10,7 @@ export * from './apm/transaction_details_by_name_locator';
 export * from './apm/transaction_details_by_trace_id_locator';
 export * from './apm/span_details_by_span_id_locator';
 export * from './apm/error_group_details_locator';
+export * from './apm/traces_explorer_waterfall_locator';
 export * from './apm/service_entity_locator';
 export * from './infra/asset_details_flyout_locator';
 export * from './infra/asset_details_locator';
