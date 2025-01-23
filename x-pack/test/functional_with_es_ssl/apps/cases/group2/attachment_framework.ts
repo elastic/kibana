@@ -19,7 +19,6 @@ import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findCases,
-  getCase,
   getAllComments,
 } from '../../../../cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -208,13 +207,12 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       const TOTAL_OWNERS = ['cases', 'securitySolution', 'observability'];
 
       const ensureFirstCommentOwner = async (caseId: string, owner: string) => {
-        const theCase = await getCase({
+        const attachments = await getAllComments({
           supertest,
           caseId,
-          includeComments: true,
         });
 
-        const comment = theCase.comments![0].owner;
+        const comment = attachments[0].owner;
         expect(comment).toBe(owner);
       };
 

@@ -518,22 +518,16 @@ export const getCaseMetrics = async ({
 export const resolveCase = async ({
   supertest,
   caseId,
-  includeComments = false,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  includeComments?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<CaseResolveResponse> => {
   const { body: theResolvedCase } = await supertest
-    .get(
-      `${getSpaceUrlPrefix(
-        auth?.space
-      )}${CASES_URL}/${caseId}/resolve?includeComments=${includeComments}`
-    )
+    .get(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}/resolve`)
     .set('kbn-xsrf', 'true')
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
