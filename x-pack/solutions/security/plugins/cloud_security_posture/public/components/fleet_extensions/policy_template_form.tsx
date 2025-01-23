@@ -764,7 +764,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     const validationResultsNonNullFields = Object.keys(validationResults?.vars || {}).filter(
       (key) => (validationResults?.vars || {})[key] !== null
     );
-    const hasInvalidRequiredVars = hasErrors(validationResults);
+    const hasInvalidRequiredVars = !!hasErrors(validationResults);
 
     const [isLoading, setIsLoading] = useState(validationResultsNonNullFields.length > 0);
     const [canFetchIntegration, setCanFetchIntegration] = useState(true);
