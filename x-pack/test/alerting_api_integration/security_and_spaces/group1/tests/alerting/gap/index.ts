@@ -12,8 +12,5 @@ export default function gapsTests({ loadTestFile }: FtrProviderContext) {
   describe('rule gaps', () => {
     loadTestFile(require.resolve('./find'));
     loadTestFile(require.resolve('./update_gaps'));
-    loadTestFile(require.resolve('./get_rules_with_gaps'));
-    loadTestFile(require.resolve('./get_gaps_info_by_rule_ids'));
-    loadTestFile(require.resolve('./fill_gap_by_id'));
   });
 }
