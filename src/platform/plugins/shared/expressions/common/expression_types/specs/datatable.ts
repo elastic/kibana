@@ -94,7 +94,7 @@ interface SourceParamsESQL extends Record<string, unknown> {
   indexPattern: string;
   sourceField: string;
   operationType: string;
-  interval: number;
+  interval?: number;
 }
 
 export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceParamsESQL {
@@ -103,7 +103,7 @@ export function isSourceParamsESQL(obj: Record<string, unknown>): obj is SourceP
     typeof obj.indexPattern === 'string' &&
     typeof obj.sourceField === 'string' &&
     typeof obj.operationType === 'string' &&
-    typeof obj.interval === 'number'
+    (typeof obj.interval === 'number' || !obj.interval)
   );
 }
 

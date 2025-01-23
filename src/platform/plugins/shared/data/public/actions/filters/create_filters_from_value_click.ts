@@ -164,7 +164,7 @@ export const createFilterESQL = async (
         sourceField,
         {
           gte: value,
-          lt: value + interval,
+          lt: value + (interval || 0),
           ...(operationType === 'date_hisotgram' ? { format: 'strict_date_optional_time' } : {}),
         },
         value,
