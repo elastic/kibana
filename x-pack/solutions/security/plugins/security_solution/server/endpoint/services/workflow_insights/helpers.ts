@@ -178,7 +178,7 @@ export const generateTrustedAppsFilter = (insight: SecurityWorkflowInsight): str
           (entry.field === 'process.Ext.code_signature' && typeof entry.value === 'string')
         ) {
           const sanitizedValue = (entry.value as string)
-            .replace(/[\)\(\<\>\}\{\"\:\\,]/gm, '')
+            .replace(/[)(<>}{":\\]/gm, '\\$&')
             .replace(/\s/gm, '*');
           return `exception-list-agnostic.attributes.entries.entries.value:(*${sanitizedValue}*)`;
         }

@@ -311,7 +311,7 @@ describe('helpers', () => {
       const filter = generateTrustedAppsFilter(insight);
 
       expect(filter).toContain(
-        'exception-list-agnostic.attributes.entries.entries.value:(*Example*Inc.*)'
+        'exception-list-agnostic.attributes.entries.entries.value:(*Example,*Inc.*)'
       );
     });
 
@@ -342,7 +342,7 @@ describe('helpers', () => {
       const filter = generateTrustedAppsFilter(insight);
 
       expect(filter).toContain(
-        'exception-list-agnostic.attributes.entries.entries.value:(*Example*Inc.*http//example.com*[example]*) AND exception-list-agnostic.attributes.entries.value:"example-value"'
+        'exception-list-agnostic.attributes.entries.entries.value:(*Example,*\\(Inc.\\)*http\\://example.com*[example]*) AND exception-list-agnostic.attributes.entries.value:"example-value"'
       );
     });
 
