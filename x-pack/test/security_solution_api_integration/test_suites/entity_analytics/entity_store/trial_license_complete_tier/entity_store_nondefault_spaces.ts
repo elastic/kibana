@@ -77,6 +77,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
             type: 'host',
             filter: '',
             fieldHistoryLength: 10,
+            lookbackPeriod: '24h',
             indexPattern: '',
           });
         });
