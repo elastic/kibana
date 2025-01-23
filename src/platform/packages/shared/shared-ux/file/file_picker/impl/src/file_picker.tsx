@@ -92,7 +92,6 @@ const Component: FunctionComponent<InnerProps> = ({ onClose, onDone, onUpload, m
   const modal = (
     <EuiModal
       data-test-subj="filePickerModal"
-      className="filesFilePicker filesFilePicker--fixed"
       maxWidth="75vw"
       onClose={onClose}
       css={css`
