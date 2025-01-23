@@ -307,7 +307,6 @@ export function useOnSubmit({
     useSetupTechnology({
       newAgentPolicy,
       setNewAgentPolicy,
-      updateAgentPolicies,
       updatePackagePolicy,
       setSelectedPolicyTab,
       packageInfo,
