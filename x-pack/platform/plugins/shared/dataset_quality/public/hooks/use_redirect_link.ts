@@ -80,14 +80,14 @@ export const useRedirectLink = <T extends BasicDataStream>({
           breakdownField,
         })
       : buildDiscoverConfig({
-        locatorClient: share.url.locators,
-        dataStreamStat,
-        query,
-        from,
-        to,
-        breakdownField,
-        selector,
-      });
+          locatorClient: share.url.locators,
+          dataStreamStat,
+          query,
+          from,
+          to,
+          breakdownField,
+          selector,
+        });
 
     const onClickWithTelemetry = (event: Parameters<RouterLinkProps['onClick']>[0]) => {
       sendTelemetry();
