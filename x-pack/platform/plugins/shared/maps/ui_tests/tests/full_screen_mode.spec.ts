@@ -13,27 +13,28 @@ import {
   EXIT_FULL_SCREEN,
 } from '../fixtures/constants';
 
-test.describe('Maps full screen mode', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
+test.describe('Maps', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
   test.beforeEach(async ({ browserAuth, pageObjects }) => {
     await browserAuth.loginAsViewer();
     await pageObjects.maps.goto();
     await pageObjects.maps.waitForRender();
   });
 
-  test('Full screen button ...', async ({ page }) => {
+  test('Full screen mode', async ({ page }) => {
     const fullScreenBtn = page.testSubj.locator(FULL_SCREEN_MODE);
     const visibleChrome = page.testSubj.locator(VISIBLE_CHROME);
     const hiddenChrome = page.testSubj.locator(HIDDEN_CHROME);
     const exitFullScreenBtn = page.testSubj.locator(EXIT_FULL_SCREEN);
+    const baseMapBtn = page.getByRole('button', { name: 'Basemap' });
 
     expect(fullScreenBtn);
-    expect(await visibleChrome.waitFor());
+    expect(baseMapBtn);
+    expect(visibleChrome);
     await fullScreenBtn.click();
-    expect(await hiddenChrome.waitFor());
+    expect(hiddenChrome);
     await expect(exitFullScreenBtn).toBeVisible();
     expect(fullScreenBtn).not.toBeVisible();
     await exitFullScreenBtn.click();
-    expect(await visibleChrome.waitFor());
     expect(fullScreenBtn);
   });
 });
