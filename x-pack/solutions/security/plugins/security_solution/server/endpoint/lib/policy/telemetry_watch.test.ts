@@ -20,7 +20,9 @@ import type { PolicyConfig } from '../../../../common/endpoint/types';
 import { TelemetryConfigWatcher } from './telemetry_watch';
 import { TelemetryConfigProvider } from '../../../../common/telemetry_config/telemetry_config_provider';
 
-const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): PackagePolicy => {
+const MockPackagePolicyWithEndpointPolicy = (
+  cb?: (p: PolicyConfig) => PolicyConfig
+): PackagePolicy => {
   const packagePolicy = createPackagePolicyMock();
   if (!cb) {
     // eslint-disable-next-line no-param-reassign
@@ -28,6 +30,7 @@ const MockPPWithEndpointPolicy = (cb?: (p: PolicyConfig) => PolicyConfig): Packa
   }
   const policyConfig = cb(policyFactory());
   packagePolicy.inputs[0].config = { policy: { value: policyConfig } };
+
   return packagePolicy;
 };
 
@@ -45,7 +48,7 @@ describe('Telemetry config watcher', () => {
   }) => {
     packagePolicySvcMock.list.mockResolvedValueOnce({
       items: [
-        MockPPWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
+        MockPackagePolicyWithEndpointPolicy((pc: PolicyConfig): PolicyConfig => {
           pc.global_telemetry_enabled = isGlobalTelemetryEnabled;
           return pc;
         }),
@@ -93,19 +96,19 @@ describe('Telemetry config watcher', () => {
     // set up the mocked package policy service to return and do what we want
     packagePolicySvcMock.list
       .mockResolvedValueOnce({
-        items: Array.from({ length: 100 }, () => MockPPWithEndpointPolicy()),
+        items: Array.from({ length: 100 }, () => MockPackagePolicyWithEndpointPolicy()),
         total: TOTAL,
         page: 1,
         perPage: 100,
       })
       .mockResolvedValueOnce({
-        items: Array.from({ length: 100 }, () => MockPPWithEndpointPolicy()),
+        items: Array.from({ length: 100 }, () => MockPackagePolicyWithEndpointPolicy()),
         total: TOTAL,
         page: 2,
         perPage: 100,
       })
       .mockResolvedValueOnce({
-        items: Array.from({ length: TOTAL - 200 }, () => MockPPWithEndpointPolicy()),
+        items: Array.from({ length: TOTAL - 200 }, () => MockPackagePolicyWithEndpointPolicy()),
         total: TOTAL,
         page: 3,
         perPage: 100,
