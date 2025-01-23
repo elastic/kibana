@@ -8,9 +8,9 @@
 import { WiredStreamDefinition } from '@kbn/streams-schema';
 import { findInheritedLifecycle, findInheritingStreams } from './lifecycle';
 
-describe(__filename, () => {
+describe('Lifecycle helpers', () => {
   describe('findInheritedLifecycle', () => {
-    describe('picks the definition lifecycle', () => {
+    it('picks the definition lifecycle', () => {
       const definition = {
         name: 'one.two',
         ingest: { lifecycle: { type: 'dlm', data_retention: '1d' } },
@@ -31,7 +31,7 @@ describe(__filename, () => {
       });
     });
 
-    describe('picks the nearest parent lifecycle', () => {
+    it('picks the nearest parent lifecycle', () => {
       const definition = {
         name: 'one.two.three.four',
         ingest: {},
@@ -60,7 +60,7 @@ describe(__filename, () => {
       });
     });
 
-    describe('return undefined', () => {
+    it('returns undefined if no lifecycle defined in the chain', () => {
       const definition = { name: 'one.two.three', ingest: {} } as WiredStreamDefinition;
       const ascendants = [
         { name: 'one.two', ingest: {} } as WiredStreamDefinition,
