@@ -13,10 +13,12 @@ export enum EsqlControlType {
   VALUES_FROM_QUERY = 'VALUES_FROM_QUERY',
 }
 
+export type ControlWidthOptions = 'small' | 'medium' | 'large';
+
 export interface ESQLControlState {
   grow?: boolean;
-  width?: string;
-  title?: string;
+  width?: ControlWidthOptions;
+  title: string;
   availableOptions: string[];
   selectedOptions: string[];
   variableName: string;

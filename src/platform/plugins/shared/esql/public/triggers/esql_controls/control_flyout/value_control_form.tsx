@@ -24,7 +24,7 @@ import type { ISearchGeneric } from '@kbn/search-types';
 import ESQLEditor from '@kbn/esql-editor';
 import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { getIndexPatternFromESQLQuery, getESQLResults } from '@kbn/esql-utils';
-import type { ESQLControlState } from '../types';
+import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
   Header,
   Footer,
@@ -223,7 +223,9 @@ export function ValueControlForm({
   }, []);
 
   const onMinimumSizeChange = useCallback((optionId: string) => {
-    setMinimumWidth(optionId);
+    if (optionId) {
+      setMinimumWidth(optionId as ControlWidthOptions);
+    }
   }, []);
 
   const onGrowChange = useCallback((e: EuiSwitchEvent) => {

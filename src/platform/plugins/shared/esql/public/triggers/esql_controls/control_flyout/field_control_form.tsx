@@ -21,7 +21,7 @@ import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
 import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
-import type { ESQLControlState } from '../types';
+import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
   Header,
   Footer,
@@ -140,7 +140,9 @@ export function FieldControlForm({
   }, []);
 
   const onMinimumSizeChange = useCallback((optionId: string) => {
-    setMinimumWidth(optionId);
+    if (optionId) {
+      setMinimumWidth(optionId as ControlWidthOptions);
+    }
   }, []);
 
   const onGrowChange = useCallback((e: EuiSwitchEvent) => {

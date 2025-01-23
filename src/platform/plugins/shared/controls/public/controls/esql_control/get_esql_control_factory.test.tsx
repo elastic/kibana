@@ -11,10 +11,11 @@ import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { StateComparators } from '@kbn/presentation-publishing';
 import { fireEvent, render, waitFor } from '@testing-library/react';
+import type { ESQLControlState } from '@kbn/esql/public';
 import { getMockedControlGroupApi } from '../mocks/control_mocks';
 import type { ControlApiRegistration } from '../types';
 import { getESQLControlFactory } from './get_esql_control_factory';
-import type { ESQLControlApi, ESQLControlState } from './types';
+import type { ESQLControlApi } from './types';
 
 describe('ESQLControlApi', () => {
   const uuid = 'myESQLControl';
