@@ -15,7 +15,12 @@ import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { getKibanaUpgradeStatus } from '../lib/kibana_status';
 import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
 import type { FeatureSet } from '../../common/types';
+// import { getMockVersionInfo } from '__fixtures__/version';
+import { versionService } from '../lib/version';
+import { getMockVersionInfo } from '../lib/__fixtures__/version';
+import { SemVer } from 'semver';
 
+const { currentVersion, nextMajor } = getMockVersionInfo();
 jest.mock('../lib/es_version_precheck', () => ({
   versionCheckHandlerWrapper: (a: any) => a,
 }));
@@ -88,6 +93,9 @@ const systemIndicesNoMigrationResponse = {
 
 // @TINA see x-pack/platform/plugins/private/upgrade_assistant/server/lib/es_version_precheck.test.ts for using versionService in tests
 describe('Status API', () => {
+  beforeEach(() => {
+    versionService.setup('8.17.0');
+  });
   const registerRoutes = (featureSetOverrides: Partial<FeatureSet> = {}) => {
     const mockRouter = createMockRouter();
     const routeDependencies: any = {
@@ -101,7 +109,8 @@ describe('Status API', () => {
       },
       router: mockRouter,
       lib: { handleEsError },
-      // versionService:
+      current: currentVersion,
+      defaultTarget: `${new SemVer('9.0.0')}`,
     };
 
     registerUpgradeStatusRoute(routeDependencies);

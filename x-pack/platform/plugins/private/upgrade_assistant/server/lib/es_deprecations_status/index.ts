@@ -74,6 +74,6 @@ export async function getESUpgradeStatus(
     totalCriticalHealthIssues: enrichedHealthIndicators.filter(
       ({ isCritical }) => isCritical === true
     ).length,
-    enrichedHealthIndicators, //
+    enrichedHealthIndicators,
   };
 }

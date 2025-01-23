@@ -63,10 +63,10 @@ export function registerUpgradeStatusRoute({
           deprecations: { client: deprecationsClient },
         } = await core;
         // Fetch ES upgrade status
-        const { totalCriticalDeprecations: esTotalCriticalDeps, totalNotHealthy } =
-          await getESUpgradeStatus(esClient, featureSet); // returns {totalCriticalDeprecations, deprecations}
-        // where deprecations = [ ...enrichedHealthIndicators, ...toggleMigrationsDeprecations ]
-        // we want to split out the health indicators.
+        const {
+          totalCriticalDeprecations, // critical deprecations
+          totalCriticalHealthIssues, // critical health issues
+        } = await getESUpgradeStatus(esClient, featureSet);
 
         const getSystemIndicesMigrationStatus = async () => {
           /**
@@ -96,25 +96,19 @@ export function registerUpgradeStatusRoute({
         const { totalCriticalDeprecations: kibanaTotalCriticalDeps } = await getKibanaUpgradeStatus(
           deprecationsClient
         );
-        // @Tina todo: DETERMINE IF READY FOR UPGRADE
-        // should depend on the upgradeType:
-        // isMajor || isMinor || isPatch || !null -> any notHealthy blocks (readyForUpgrade false)
-        // isMajor -> any critical deprecations (es || kibana) block (readyForUpgrade is false)
-        // isMinor => critical deprecations (es && kibana) don't block (readyForUpgrade[deprecations] true)
+        // @Tina: DETERMINE IF READY FOR UPGRADE
+        // minor and patch upgrades only blocked on health issues (status !== green)
         const upgradeTypeBasedReadyForUpgrade = (ut: ReleaseType) => {
           if (ut === 'major') {
             return (
-              totalNotHealthy === 0 && // should be none if ready for upgrade
-              esTotalCriticalDeps === 0 &&
-              kibanaTotalCriticalDeps === 0 &&
+              totalCriticalHealthIssues === 0 && // should be none if ready for upgrade
+              totalCriticalDeprecations === 0 && // es critical deprecations
+              kibanaTotalCriticalDeps === 0 && // kbn critical deprecations
               systemIndicesMigrationStatus === 'NO_MIGRATION_NEEDED'
             );
           }
-          // minor and patch upgrades we don't block when there are critical deprecations. those only come into effect for major upgrades.
-          return (
-            totalNotHealthy === 0 && // should be none if ready for upgrade
-            systemIndicesMigrationStatus === 'NO_MIGRATION_NEEDED'
-          );
+
+          return totalCriticalHealthIssues === 0;
         };
 
         const readyForUpgrade = upgradeTypeBasedReadyForUpgrade(upgradeType!);
@@ -127,21 +121,13 @@ export function registerUpgradeStatusRoute({
           }
 
           const upgradeIssues: string[] = [];
-          // @TINA Added entry for health-related issues
-          if (totalNotHealthy !== 0) {
-            upgradeIssues.push(
-              i18n.translate('xpack.upgradeAssistant.status.systemHealthMessage', {
-                defaultMessage:
-                  '{totalNotHealthy} cluster health {totalNotHealthy, plural, one {issue} other {issues}}',
-                values: { totalNotHealthy },
-              })
-            );
-          }
+          const esTotalCriticalDeps = totalCriticalDeprecations + totalCriticalHealthIssues;
+
           if (notMigratedSystemIndices) {
             upgradeIssues.push(
               i18n.translate('xpack.upgradeAssistant.status.systemIndicesMessage', {
                 defaultMessage:
-                  '{notMigratedSystemIndices} unmigrated system {notMigratedSystemIndices, plural, one {index} other {indices}}',
+                  '{notMigratedSystemIndices} unmigrated system {notMigratedSystemIndices, plural, one {index} othezr {indices}}',
                 values: { notMigratedSystemIndices },
               })
             );
