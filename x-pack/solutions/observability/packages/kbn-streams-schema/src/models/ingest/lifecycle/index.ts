@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { createIsNarrowSchema } from '@kbn/streams-schema/src/helpers';
 import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
+import { createIsNarrowSchema } from '../../../helpers';
 
 export interface IngestStreamLifecycleDSL {
   dsl: {

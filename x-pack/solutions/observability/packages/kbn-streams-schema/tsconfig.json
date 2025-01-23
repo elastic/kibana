@@ -12,8 +12,7 @@
   ],
   "kbn_references": [
     "@kbn/zod",
-    "@kbn/zod-helpers",
-    "@kbn/streams-schema"
+    "@kbn/zod-helpers"
   ],
   "exclude": [
     "target/**/*"
