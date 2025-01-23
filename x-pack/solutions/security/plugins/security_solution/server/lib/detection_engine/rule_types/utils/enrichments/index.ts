@@ -11,6 +11,7 @@ import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
 
 import {
   createHostAssetCriticalityEnrichments,
+  createServiceAssetCriticalityEnrichments,
   createUserAssetCriticalityEnrichments,
 } from './enrichment_by_type/asset_criticality';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
@@ -22,6 +23,7 @@ import type {
 import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
 import { getRiskIndex } from '../../../../../../common/search_strategy';
+import { createServiceRiskEnrichments } from './enrichment_by_type/service_risk';
 
 export const enrichEvents: EnrichEventsFunction = async ({
   services,
@@ -35,18 +37,12 @@ export const enrichEvents: EnrichEventsFunction = async ({
 
     logger.debug('Alert enrichments started');
 
-    const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
-      isIndexExist({
-        services,
-        index: getRiskIndex(spaceId, true),
-      }),
-      isIndexExist({
-        services,
-        index: getRiskIndex(spaceId, true),
-      }),
-    ]);
+    const isRiskScoreIndexExist = await isIndexExist({
+      services,
+      index: getRiskIndex(spaceId, true),
+    });
 
-    if (isHostRiskScoreIndexExist) {
+    if (isRiskScoreIndexExist) {
       enrichments.push(
         createHostRiskEnrichments({
           services,
@@ -55,11 +51,18 @@ export const enrichEvents: EnrichEventsFunction = async ({
           spaceId,
         })
       );
-    }
 
-    if (isUserRiskScoreIndexExist) {
       enrichments.push(
         createUserRiskEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+        })
+      );
+
+      enrichments.push(
+        createServiceRiskEnrichments({
           services,
           logger,
           events,
@@ -83,6 +86,14 @@ export const enrichEvents: EnrichEventsFunction = async ({
       );
       enrichments.push(
         createHostAssetCriticalityEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+        })
+      );
+      enrichments.push(
+        createServiceAssetCriticalityEnrichments({
           services,
           logger,
           events,

@@ -26,19 +26,29 @@ export function getColorForAgentStatus(
   agentStatus: SimplifiedAgentStatus,
   euiTheme: EuiThemeComputed<{}>
 ): string {
+  const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
+
   switch (agentStatus) {
     case 'healthy':
-      return euiTheme.colors.backgroundFilledSuccess;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText0
+        : euiTheme.colors.backgroundFilledSuccess;
     case 'offline':
       return euiTheme.colors.lightShade;
     case 'inactive':
       return euiTheme.colors.darkShade;
     case 'unhealthy':
-      return euiTheme.colors.backgroundFilledWarning;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText5
+        : euiTheme.colors.backgroundFilledWarning;
     case 'orphaned':
-      return euiTheme.colors.backgroundFilledWarning;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText5
+        : euiTheme.colors.backgroundFilledWarning;
     case 'updating':
-      return euiTheme.colors.backgroundFilledPrimary;
+      return isAmsterdam
+        ? euiTheme.colors.vis.euiColorVisBehindText1
+        : euiTheme.colors.backgroundFilledPrimary;
     case 'unenrolled':
       return euiTheme.colors.backgroundBaseDisabled;
     case 'uninstalled':

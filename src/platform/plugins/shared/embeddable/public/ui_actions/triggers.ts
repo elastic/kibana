@@ -75,17 +75,6 @@ export const contextMenuTrigger: Trigger = {
   }),
 };
 
-export const PANEL_HOVER_TRIGGER = 'PANEL_HOVER_TRIGGER';
-export const panelHoverTrigger: Trigger = {
-  id: PANEL_HOVER_TRIGGER,
-  title: i18n.translate('embeddableApi.panelHoverTrigger.title', {
-    defaultMessage: 'Panel hover',
-  }),
-  description: i18n.translate('embeddableApi.panelHoverTrigger.description', {
-    defaultMessage: "A new action will be added to the panel's hover menu",
-  }),
-};
-
 export const PANEL_BADGE_TRIGGER = 'PANEL_BADGE_TRIGGER';
 export const panelBadgeTrigger: Trigger = {
   id: PANEL_BADGE_TRIGGER,
