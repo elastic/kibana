@@ -5974,6 +5974,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-endpoint-plugin@link:x-pack/platform/plugins/shared/inference_endpoint":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-endpoint-ui-common@link:x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common":
   version "0.0.0"
   uid ""
