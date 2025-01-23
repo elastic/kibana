@@ -13,6 +13,7 @@ import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
+import { long } from '@elastic/elasticsearch/lib/api/types';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
@@ -23,9 +24,17 @@ export const EVENT_BUFFER_LENGTH = 100;
 
 export type IClusterClientAdapter = PublicMethodsOf<ClusterClientAdapter>;
 
+export interface InternalFields {
+  _id: string;
+  _index: string;
+  _seq_no: number;
+  _primary_term: number;
+}
+
 export interface Doc {
   index: string;
   body: IEvent;
+  internalFields?: InternalFields;
 }
 
 type Wait = () => Promise<boolean>;
@@ -37,11 +46,18 @@ export interface ConstructorOpts {
   wait: Wait;
 }
 
+export type IValidatedEventInternalDocInfo = IValidatedEvent & {
+  _id: estypes.Id;
+  _index: estypes.IndexName;
+  _seq_no: estypes.SequenceNumber;
+  _primary_term: long;
+};
+
 export interface QueryEventsBySavedObjectResult {
   page: number;
   per_page: number;
   total: number;
-  data: IValidatedEvent[];
+  data: IValidatedEventInternalDocInfo[];
 }
 
 interface QueryOptionsEventsBySavedObjectFilter {
@@ -97,7 +113,13 @@ type AliasAny = any;
 
 const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
 
-export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string } = Doc> {
+export class ClusterClientAdapter<
+  TDoc extends {
+    body: AliasAny;
+    index: string;
+    internalFields?: InternalFields;
+  } = Doc
+> {
   private readonly logger: Logger;
   private readonly elasticsearchClientPromise: Promise<ElasticsearchClient>;
   private readonly docBuffer$: Subject<TDoc>;
@@ -133,6 +155,26 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
   public async shutdown(): Promise<void> {
     this.docBuffer$.complete();
     await this.docsBufferedFlushed;
+  }
+
+  public async updateDocument(doc: Required<TDoc>) {
+    const esClient = await this.elasticsearchClientPromise;
+    try {
+      if (!doc.internalFields) {
+        throw new Error('Internal fields are required');
+      }
+      await esClient.update({
+        doc: doc.body,
+        id: doc.internalFields._id,
+        index: doc.internalFields._index,
+        if_primary_term: doc.internalFields._primary_term,
+        if_seq_no: doc.internalFields._seq_no,
+        refresh: 'wait_for',
+      });
+    } catch (e) {
+      this.logger.error(`error updating event: "${e.message}"; docs: ${JSON.stringify(doc)}`);
+      throw e;
+    }
   }
 
   public indexDocument(doc: TDoc): void {
@@ -407,20 +449,27 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
         ? { sort: sort.map((s) => ({ [s.sort_field]: { order: s.sort_order } })) as estypes.Sort }
         : {}),
     };
-
     try {
       const {
         hits: { hits, total },
-      } = await esClient.search<IValidatedEvent>({
+      } = await esClient.search<IValidatedEventInternalDocInfo>({
         index,
         track_total_hits: true,
+        seq_no_primary_term: true,
         body,
       });
+
       return {
         page,
         per_page: perPage,
         total: isNumber(total) ? total : total!.value,
-        data: hits.map((hit) => hit._source),
+        data: hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id!,
+          _index: hit._index,
+          _seq_no: hit._seq_no!,
+          _primary_term: hit._primary_term!,
+        })),
       };
     } catch (err) {
       throw new Error(
@@ -455,16 +504,23 @@ export class ClusterClientAdapter<TDoc extends { body: AliasAny; index: string }
     try {
       const {
         hits: { hits, total },
-      } = await esClient.search<IValidatedEvent>({
+      } = await esClient.search<IValidatedEventInternalDocInfo>({
         index,
         track_total_hits: true,
         body,
+        seq_no_primary_term: true,
       });
       return {
         page,
         per_page: perPage,
         total: isNumber(total) ? total : total!.value,
-        data: hits.map((hit) => hit._source),
+        data: hits.map((hit) => ({
+          ...hit._source,
+          _id: hit._id!,
+          _index: hit._index,
+          _seq_no: hit._seq_no!,
+          _primary_term: hit._primary_term!,
+        })),
       };
     } catch (err) {
       throw new Error(

@@ -76,6 +76,8 @@ import { deleteBackfill } from '../application/backfill/methods/delete';
 import { FindBackfillParams } from '../application/backfill/methods/find/types';
 import { DisableRuleParams } from '../application/rule/methods/disable';
 import { EnableRuleParams } from '../application/rule/methods/enable_rule';
+import { findGaps } from '../application/rule/methods/find_gaps';
+import { FindGapsParams } from '../lib/rule_gaps/types';
 
 export type ConstructorOptions = Omit<
   RulesClientContext,
@@ -207,4 +209,6 @@ export class RulesClient {
   public getTags = (params: RuleTagsParams) => getRuleTags(this.context, params);
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
+
+  public findGaps = (params: FindGapsParams) => findGaps(this.context, params);
 }

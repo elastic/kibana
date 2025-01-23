@@ -503,6 +503,7 @@ describe('create()', () => {
               "metrics": Object {
                 "duration": 0,
                 "gap_duration_s": null,
+                "gap_range": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
                 "total_indexing_duration_ms": null,
@@ -733,6 +734,7 @@ describe('create()', () => {
               "metrics": Object {
                 "duration": 0,
                 "gap_duration_s": null,
+                "gap_range": null,
                 "total_alerts_created": null,
                 "total_alerts_detected": null,
                 "total_indexing_duration_ms": null,
@@ -1470,6 +1472,7 @@ describe('create()', () => {
               metrics: {
                 duration: 0,
                 gap_duration_s: null,
+                gap_range: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,
@@ -2549,6 +2552,7 @@ describe('create()', () => {
               metrics: {
                 duration: 0,
                 gap_duration_s: null,
+                gap_range: null,
                 total_alerts_created: null,
                 total_alerts_detected: null,
                 total_indexing_duration_ms: null,

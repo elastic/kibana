@@ -15,6 +15,7 @@ import {
   AggregateEventsOptionsBySavedObjectFilter,
   AggregateEventsWithAuthFilter,
   getQueryBodyWithAuthFilter,
+  Doc,
 } from './cluster_client_adapter';
 import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
@@ -733,7 +734,15 @@ describe('queryEventsBySavedObject', () => {
   test('should call cluster with correct options', async () => {
     clusterClient.search.mockResponse({
       hits: {
-        hits: [{ _index: 'index-name-00001', _id: '1', _source: { foo: 'bar' } }],
+        hits: [
+          {
+            _index: 'index-name-00001',
+            _id: '1',
+            _source: { foo: 'bar' },
+            _seq_no: 1,
+            _primary_term: 1,
+          },
+        ],
         total: { relation: 'eq', value: 1 },
       },
       took: 0,
@@ -766,6 +775,7 @@ describe('queryEventsBySavedObject', () => {
     expect(query).toEqual({
       index: 'index-name',
       track_total_hits: true,
+      seq_no_primary_term: true,
       body: {
         size: 6,
         from: 12,
@@ -777,7 +787,7 @@ describe('queryEventsBySavedObject', () => {
       page: 3,
       per_page: 6,
       total: 1,
-      data: [{ foo: 'bar' }],
+      data: [{ foo: 'bar', _id: '1', _index: 'index-name-00001', _seq_no: 1, _primary_term: 1 }],
     });
   });
 });
@@ -2288,6 +2298,85 @@ describe('getQueryBodyWithAuthFilter', () => {
         ],
       },
     });
+  });
+});
+
+describe('updateDocument', () => {
+  test('should successfully update document with meta information', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+      internalFields: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _seq_no: 1,
+        _primary_term: 1,
+      },
+    };
+
+    clusterClient.update.mockResponse({
+      _index: 'test-index',
+      _id: 'test-id',
+      _version: 2,
+      result: 'updated',
+      _shards: {
+        total: 2,
+        successful: 1,
+        failed: 0,
+      },
+      _seq_no: 2,
+      _primary_term: 1,
+    });
+
+    await clusterClientAdapter.updateDocument(doc as unknown as Required<Doc>);
+
+    expect(clusterClient.update).toHaveBeenCalledWith({
+      doc: doc.body,
+      id: doc.internalFields._id,
+      index: doc.internalFields._index,
+      if_primary_term: doc.internalFields._primary_term,
+      if_seq_no: doc.internalFields._seq_no,
+      refresh: 'wait_for',
+    });
+  });
+
+  test('should throw error if internal fields information is missing', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+    };
+
+    await expect(
+      clusterClientAdapter.updateDocument(doc as unknown as Required<Doc>)
+    ).rejects.toThrowErrorMatchingInlineSnapshot('"Internal fields are required"');
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `error updating event: "Internal fields are required"; docs: ${JSON.stringify(doc)}`
+    );
+  });
+
+  test('should throw error when update fails', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+      internalFields: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _seq_no: 1,
+        _primary_term: 1,
+      },
+    };
+
+    const error = new Error('Update failed');
+    clusterClient.update.mockRejectedValue(error);
+
+    await expect(
+      clusterClientAdapter.updateDocument(doc as unknown as Required<Doc>)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(`"Update failed"`);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      `error updating event: "Update failed"; docs: ${JSON.stringify(doc)}`
+    );
   });
 });
 

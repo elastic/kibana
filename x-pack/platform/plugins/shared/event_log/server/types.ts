@@ -16,11 +16,14 @@ import { AggregateOptionsType, FindOptionsType } from './event_log_client';
 import {
   AggregateEventsBySavedObjectResult,
   QueryEventsBySavedObjectResult,
+  InternalFields,
 } from './es/cluster_client_adapter';
 
 export type {
   QueryEventsBySavedObjectResult,
   AggregateEventsBySavedObjectResult,
+  InternalFields,
+  IValidatedEventInternalDocInfo,
 } from './es/cluster_client_adapter';
 import { SavedObjectProvider } from './saved_object_provider_registry';
 
@@ -47,7 +50,7 @@ export interface IEventLogService {
 }
 
 export interface IEventLogClientService {
-  getClient(request: KibanaRequest): IEventLogClient;
+  getClient(request: KibanaRequest | string): IEventLogClient;
 }
 
 export interface IEventLogClient {
@@ -83,4 +86,5 @@ export interface IEventLogger {
   logEvent(properties: IEvent): void;
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
+  updateEvent(internalFields: InternalFields, event: IEvent): Promise<void>;
 }
