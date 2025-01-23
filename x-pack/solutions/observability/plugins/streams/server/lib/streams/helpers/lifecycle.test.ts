@@ -13,63 +13,67 @@ describe('Lifecycle helpers', () => {
     it('picks the definition lifecycle', () => {
       const definition = {
         name: 'one.two',
-        ingest: { lifecycle: { type: 'dlm', data_retention: '1d' } },
+        ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
       } as WiredStreamDefinition;
       const ancestors = [
         {
           name: 'one',
-          ingest: { lifecycle: { type: 'ilm', policy: 'policy' } },
-        } as WiredStreamDefinition,
+          ingest: { lifecycle: { ilm: { policy: 'policy' } } },
+        },
       ] as WiredStreamDefinition[];
 
       const lifecycle = findInheritedLifecycle(definition, ancestors);
 
       expect(lifecycle).toEqual({
         from: 'one.two',
-        type: 'dlm',
-        data_retention: '1d',
+        dsl: { data_retention: '1d' },
       });
     });
 
     it('picks the nearest parent lifecycle', () => {
       const definition = {
         name: 'one.two.three.four',
-        ingest: {},
+        ingest: { lifecycle: { inherit: {} } },
       } as WiredStreamDefinition;
       const ancestors = [
         {
           name: 'one',
-          ingest: { lifecycle: { type: 'ilm', policy: 'one' } },
-        } as WiredStreamDefinition,
+          ingest: { lifecycle: { ilm: { policy: 'one' } } },
+        },
         {
           name: 'one.two.three',
-          ingest: {},
-        } as WiredStreamDefinition,
+          ingest: { lifecycle: { inherit: {} } },
+        },
         {
           name: 'one.two',
-          ingest: { lifecycle: { type: 'dlm', data_retention: '1d' } },
-        } as WiredStreamDefinition,
+          ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
+        },
       ] as WiredStreamDefinition[];
 
       const lifecycle = findInheritedLifecycle(definition, ancestors);
 
       expect(lifecycle).toEqual({
         from: 'one.two',
-        type: 'dlm',
-        data_retention: '1d',
+        dsl: { data_retention: '1d' },
       });
     });
 
     it('returns undefined if no lifecycle defined in the chain', () => {
-      const definition = { name: 'one.two.three', ingest: {} } as WiredStreamDefinition;
+      const definition = {
+        name: 'one.two.three',
+        ingest: { lifecycle: { inherit: {} } },
+      } as WiredStreamDefinition;
       const ancestors = [
-        { name: 'one.two', ingest: {} } as WiredStreamDefinition,
-        { name: 'one', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.two', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one', ingest: { lifecycle: { disabled: {} } } },
       ] as WiredStreamDefinition[];
 
       const lifecycle = findInheritedLifecycle(definition, ancestors);
 
-      expect(lifecycle).toEqual(undefined);
+      expect(lifecycle).toEqual({
+        from: 'one',
+        disabled: {},
+      });
     });
   });
 
@@ -77,16 +81,14 @@ describe('Lifecycle helpers', () => {
     it('returns all streams', () => {
       const definition = {
         name: 'one',
-        ingest: {
-          lifecycle: { type: 'dlm', data_retention: '1d' },
-        },
+        ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
       } as WiredStreamDefinition;
       const descendants = [
-        { name: 'one.two.three', ingest: {} } as WiredStreamDefinition,
-        { name: 'one.two2', ingest: {} } as WiredStreamDefinition,
-        { name: 'one.two', ingest: {} } as WiredStreamDefinition,
-        { name: 'one.two2.three', ingest: {} } as WiredStreamDefinition,
-        { name: 'one.two2.three.four', ingest: {} } as WiredStreamDefinition,
+        { name: 'one.two.three', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one.two2', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one.two', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one.two2.three', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one.two2.three.four', ingest: { lifecycle: { inherit: {} } } },
       ] as WiredStreamDefinition[];
 
       const inheritingStreams = findInheritingStreams(definition, descendants);
@@ -106,24 +108,19 @@ describe('Lifecycle helpers', () => {
     it('ignores subtrees with overrides', () => {
       const definition = {
         name: 'one',
-        ingest: {
-          lifecycle: { type: 'dlm', data_retention: '1d' },
-        },
+        ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
       } as WiredStreamDefinition;
       const descendants = [
         {
           name: 'one.override',
-          ingest: { lifecycle: { type: 'ilm', policy: 'policy ' } },
+          ingest: { lifecycle: { ilm: { policy: 'policy' } } },
         } as WiredStreamDefinition,
-        { name: 'one.override.deeply', ingest: {} } as WiredStreamDefinition,
-        { name: 'one.override.deeply.nested', ingest: {} } as WiredStreamDefinition,
-        { name: 'one.inheriting', ingest: {} } as WiredStreamDefinition,
-        { name: 'one.inheriting.deeply', ingest: {} } as WiredStreamDefinition,
-        { name: 'one.inheriting.deeply.nested', ingest: {} } as WiredStreamDefinition,
-        {
-          name: 'one.override2',
-          ingest: { lifecycle: { type: 'dlm', data_retention: '10d' } },
-        } as WiredStreamDefinition,
+        { name: 'one.override.deeply', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one.override.deeply.nested', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one.inheriting', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one.inheriting.deeply', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one.inheriting.deeply.nested', ingest: { lifecycle: { inherit: {} } } },
+        { name: 'one.override2', ingest: { lifecycle: { dsl: { data_retention: '10d' } } } },
       ] as WiredStreamDefinition[];
 
       const inheritingStreams = findInheritingStreams(definition, descendants);
@@ -141,9 +138,7 @@ describe('Lifecycle helpers', () => {
     it('handles leaf node', () => {
       const definition = {
         name: 'one',
-        ingest: {
-          lifecycle: { type: 'dlm', data_retention: '1d' },
-        },
+        ingest: { lifecycle: { dsl: { data_retention: '1d' } } },
       } as WiredStreamDefinition;
       const descendants = [] as WiredStreamDefinition[];
 

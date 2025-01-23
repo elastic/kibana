@@ -8,6 +8,7 @@
 import {
   StreamDefinition,
   WiredStreamDefinition,
+  isInheritLifecycleSchema,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
@@ -19,6 +20,7 @@ import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_
 /*
  * Changes to mappings (fields) and processing rules are not allowed on the root stream.
  * Changes to routing rules are allowed.
+ * Root stream cannot inherit a lifecycle.
  */
 export function validateRootStreamChanges(
   currentStreamDefinition: WiredStreamDefinition,
@@ -40,6 +42,10 @@ export function validateRootStreamChanges(
 
   if (hasProcessingChanges) {
     throw new RootStreamImmutabilityError('Root stream processing rules cannot be changed');
+  }
+
+  if (isInheritLifecycleSchema(nextStreamDefinition.ingest.lifecycle)) {
+    throw new MalformedStreamError('Root stream cannot inherit lifecycle');
   }
 }
 

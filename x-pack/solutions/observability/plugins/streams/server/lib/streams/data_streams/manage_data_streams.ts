@@ -7,7 +7,11 @@
 
 import { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
-import { IngestStreamLifecycle } from '@kbn/streams-schema';
+import {
+  IngestStreamLifecycle,
+  isDslLifecycleSchema,
+  isIlmLifecycleSchema,
+} from '@kbn/streams-schema';
 import { retryTransientEsErrors } from '../helpers/retry';
 
 interface DataStreamManagementOptions {
@@ -104,7 +108,7 @@ export async function updateDataStreamsLifecycle({
   esClient: ElasticsearchClient;
   logger: Logger;
   names: string[];
-  lifecycle?: IngestStreamLifecycle;
+  lifecycle: IngestStreamLifecycle;
   isServerless: boolean;
 }) {
   try {
@@ -112,7 +116,9 @@ export async function updateDataStreamsLifecycle({
       () =>
         esClient.indices.putDataLifecycle({
           name: names,
-          data_retention: lifecycle?.type === 'dlm' ? lifecycle.data_retention : undefined,
+          data_retention: isDslLifecycleSchema(lifecycle)
+            ? lifecycle.dsl.data_retention
+            : undefined,
         }),
       { logger }
     );
@@ -126,6 +132,8 @@ export async function updateDataStreamsLifecycle({
     }
 
     const dataStreams = await esClient.indices.getDataStream({ name: names });
+    const isIlm = isIlmLifecycleSchema(lifecycle);
+
     for (const dataStream of dataStreams.data_streams) {
       logger.debug(`updating settings for data stream ${dataStream.name} backing indices`);
       await retryTransientEsErrors(
@@ -133,8 +141,8 @@ export async function updateDataStreamsLifecycle({
           esClient.indices.putSettings({
             index: dataStream.indices.map((index) => index.index_name),
             settings: {
-              'lifecycle.prefer_ilm': lifecycle?.type === 'ilm',
-              'lifecycle.name': lifecycle?.type === 'ilm' ? lifecycle.policy : null,
+              'lifecycle.prefer_ilm': isIlm,
+              'lifecycle.name': isIlm ? lifecycle.ilm.policy : null,
             },
           }),
         { logger }

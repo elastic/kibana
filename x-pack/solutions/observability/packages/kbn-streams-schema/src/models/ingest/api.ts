@@ -23,15 +23,14 @@ import {
   wiredIngestSchema,
   wiredStreamDefinitionSchemaBase,
 } from './base';
+import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
+import { createIsNarrowSchema, createAsSchemaOrThrow } from '../../helpers';
 import {
-  ElasticsearchAsset,
   IngestStreamLifecycle,
   InheritedIngestStreamLifecycle,
-  elasticsearchAssetSchema,
   ingestStreamLifecycleSchema,
   inheritedIngestStreamLifecycleSchema,
-} from './common';
-import { createIsNarrowSchema, createAsSchemaOrThrow } from '../../helpers';
+} from './lifecycle';
 
 /**
  * Ingest get response
@@ -76,13 +75,13 @@ const ingestUpsertRequestSchema: z.Schema<IngestUpsertRequest> = z.union([
 interface WiredStreamGetResponse extends StreamGetResponseBase {
   stream: Omit<WiredStreamDefinition, 'name'>;
   inherited_fields: InheritedFieldDefinition;
-  effective_lifecycle?: InheritedIngestStreamLifecycle;
+  effective_lifecycle: InheritedIngestStreamLifecycle;
 }
 
 interface UnwiredStreamGetResponse extends StreamGetResponseBase {
   stream: Omit<UnwiredStreamDefinition, 'name'>;
   elasticsearch_assets: ElasticsearchAsset[];
-  effective_lifecycle?: IngestStreamLifecycle;
+  effective_lifecycle: IngestStreamLifecycle;
 }
 
 type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
@@ -125,7 +124,7 @@ const wiredStreamGetResponseSchema: z.Schema<WiredStreamGetResponse> = z.interse
   z.object({
     stream: wiredStreamDefinitionSchemaBase,
     inherited_fields: inheritedFieldDefinitionSchema,
-    effective_lifecycle: z.optional(inheritedIngestStreamLifecycleSchema),
+    effective_lifecycle: inheritedIngestStreamLifecycleSchema,
   })
 );
 
@@ -134,7 +133,7 @@ const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.int
   z.object({
     stream: unwiredStreamDefinitionSchemaBase,
     elasticsearch_assets: z.array(elasticsearchAssetSchema),
-    effective_lifecycle: z.optional(ingestStreamLifecycleSchema),
+    effective_lifecycle: ingestStreamLifecycleSchema,
   })
 );
 

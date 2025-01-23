@@ -10,7 +10,13 @@ import {
   MappingDateProperty,
   MappingProperty,
 } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamDefinition, isRoot } from '@kbn/streams-schema';
+import {
+  WiredStreamDefinition,
+  isDisabledLifecycleSchema,
+  isDslLifecycleSchema,
+  isIlmLifecycleSchema,
+  isRoot,
+} from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { logsSettings } from './logs_layer';
 import { getComponentTemplateName } from './name';
@@ -55,41 +61,52 @@ export function generateLayer(
 }
 
 function getTemplateLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
+  const lifecycle = definition.ingest.lifecycle;
   if (isServerless) {
     // dlm cannot be disabled in serverless
-    const lifecycle = definition.ingest.lifecycle;
-    return { data_retention: lifecycle?.type === 'dlm' ? lifecycle.data_retention : undefined };
+    return {
+      data_retention: isDslLifecycleSchema(lifecycle) ? lifecycle.dsl.data_retention : undefined,
+    };
   }
 
-  if (!definition.ingest.lifecycle || definition.ingest.lifecycle.type === 'ilm') {
+  if (isIlmLifecycleSchema(lifecycle)) {
     return { enabled: false };
   }
 
-  return { enabled: true, data_retention: definition.ingest.lifecycle.data_retention };
+  if (isDslLifecycleSchema(lifecycle)) {
+    return {
+      enabled: true,
+      data_retention: lifecycle.dsl.data_retention,
+    };
+  }
+
+  return undefined;
 }
 
 function getTemplateSettings(definition: WiredStreamDefinition, isServerless: boolean) {
   const baseSettings = isRoot(definition.name) ? logsSettings : {};
+  const lifecycle = definition.ingest.lifecycle;
 
   if (isServerless) {
     return baseSettings;
   }
 
-  if (!definition.ingest.lifecycle) {
-    return baseSettings;
-  }
-
-  if (definition.ingest.lifecycle.type === 'ilm') {
+  if (isIlmLifecycleSchema(lifecycle)) {
     return {
       ...baseSettings,
       'index.lifecycle.prefer_ilm': true,
-      'index.lifecycle.name': definition.ingest.lifecycle.policy,
+      'index.lifecycle.name': lifecycle.ilm.policy,
     };
   }
 
-  return {
-    ...baseSettings,
-    'index.lifecycle.prefer_ilm': false,
-    'index.lifecycle.name': undefined,
-  };
+  if (isDslLifecycleSchema(lifecycle)) {
+    return {
+      ...baseSettings,
+      'index.lifecycle.prefer_ilm': false,
+      'index.lifecycle.name': undefined,
+    };
+  }
+
+  // don't specify any lifecycle property when lifecyle is disabled or inherited
+  return baseSettings;
 }

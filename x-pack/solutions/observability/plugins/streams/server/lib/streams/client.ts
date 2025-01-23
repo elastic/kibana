@@ -24,6 +24,8 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
+  isIlmLifecycleSchema,
+  isInheritLifecycleSchema,
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
@@ -196,7 +198,9 @@ export class StreamsClient {
 
       const effectiveLifecycle = findInheritedLifecycle(
         definition,
-        definition.ingest.lifecycle ? [] : await this.getAncestors(definition.name)
+        isInheritLifecycleSchema(definition.ingest.lifecycle)
+          ? await this.getAncestors(definition.name)
+          : []
       );
       await this.updateStreamLifecycle(definition, effectiveLifecycle);
     } else if (isUnwiredStreamDefinition(definition)) {
@@ -255,6 +259,7 @@ export class StreamsClient {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 processing: [],
                 routing: [
                   {
@@ -316,7 +321,7 @@ export class StreamsClient {
     }
 
     if (isWiredStreamDefinition(definition)) {
-      if (this.dependencies.isServerless && definition.ingest.lifecycle?.type === 'ilm') {
+      if (this.dependencies.isServerless && isIlmLifecycleSchema(definition.ingest.lifecycle)) {
         throw new MalformedStreamError('ILM lifecycle is not supported in serverless environments');
       }
 
@@ -407,6 +412,7 @@ export class StreamsClient {
         definition: {
           name: item.destination,
           ingest: {
+            lifecycle: { inherit: {} },
             processing: [],
             routing: [],
             wired: {
@@ -445,7 +451,7 @@ export class StreamsClient {
 
     const childDefinition: WiredStreamDefinition = {
       name,
-      ingest: { processing: [], routing: [], wired: { fields: {} } },
+      ingest: { lifecycle: { inherit: {} }, processing: [], routing: [], wired: { fields: {} } },
     };
 
     // check whether root stream has a child of the given name already
@@ -798,7 +804,7 @@ export class StreamsClient {
    */
   private async updateStreamLifecycle(
     root: WiredStreamDefinition,
-    lifecycle?: IngestStreamLifecycle
+    lifecycle: IngestStreamLifecycle
   ) {
     const { logger, scopedClusterClient } = this.dependencies;
     const descendants = await this.getDescendants(root.name);
