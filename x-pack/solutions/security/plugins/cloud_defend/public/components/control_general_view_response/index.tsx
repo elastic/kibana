@@ -25,7 +25,6 @@ import {
   EuiCheckbox,
   EuiComboBoxOptionOption,
   EuiSpacer,
-  euiPaletteColorBlindBehindText,
   useEuiTheme,
 } from '@elastic/eui';
 import { useStyles } from './styles';
@@ -61,7 +60,6 @@ export const ControlGeneralViewResponse = ({
   const [isPopoverOpen, setPopoverOpen] = useState(false);
   const styles = useStyles();
   const selectorStyles = useSelectorStyles();
-  const visColorsBehindText = euiPaletteColorBlindBehindText();
   const [accordionState, setAccordionState] = useState<'open' | 'closed'>(
     responses.length - 1 === index ? 'open' : 'closed'
   );
@@ -178,9 +176,9 @@ export const ControlGeneralViewResponse = ({
       response.match.map((selector) => ({
         label: selector as unknown as string,
         value: selector as unknown as string,
-        color: visColorsBehindText[0],
+        color: colors.backgroundLightSuccess,
       })),
-    [response.match, visColorsBehindText]
+    [response.match, colors]
   );
 
   const selectedExcludes = useMemo(
@@ -189,9 +187,9 @@ export const ControlGeneralViewResponse = ({
       response.exclude.map((selector) => ({
         label: selector as unknown as string,
         value: selector as unknown as string,
-        color: visColorsBehindText[5],
+        color: colors.backgroundLightWarning,
       })),
-    [response.exclude, visColorsBehindText]
+    [response.exclude, colors]
   );
 
   const onShowExclude = useCallback(() => {

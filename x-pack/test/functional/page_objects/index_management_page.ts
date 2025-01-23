@@ -38,6 +38,17 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
       await policyDetailsLinks[indexOfRow].click();
     },
 
+    async clickIndexTemplate(name: string): Promise<void> {
+      const indexTemplateLinks = await testSubjects.findAll('templateDetailsLink');
+
+      for (const link of indexTemplateLinks) {
+        if ((await link.getVisibleText()).includes(name)) {
+          await link.click();
+          return;
+        }
+      }
+    },
+
     async clickBulkEditDataRetention(dataStreamNames: string[]): Promise<void> {
       for (const dsName of dataStreamNames) {
         const checkbox = await testSubjects.find(`checkboxSelectRow-${dsName}`);

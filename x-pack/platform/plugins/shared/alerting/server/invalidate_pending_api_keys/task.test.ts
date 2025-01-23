@@ -17,6 +17,7 @@ import {
   invalidateApiKeysAndDeletePendingApiKeySavedObject,
   runInvalidate,
 } from './task';
+import { ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE } from '@kbn/actions-plugin/server/constants/saved_objects';
 
 let fakeTimer: sinon.SinonFakeTimers;
 const encryptedSavedObjectsClient = encryptedSavedObjectsMock.createClient();
@@ -92,17 +93,24 @@ describe('Invalidate API Keys Task', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         mockInvalidatePendingApiKeyObject2
       );
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
       internalSavedObjectsRepository.find.mockResolvedValueOnce({
         saved_objects: [],
         total: 2,
         page: 1,
         per_page: 10,
         aggregations: {
-          apiKeyId: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
+      });
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 1,
+        page: 1,
+        per_page: 10,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
         },
       });
 
@@ -166,13 +174,114 @@ describe('Invalidate API Keys Task', () => {
       });
     });
 
-    test('should get decrypted api key pending invalidation saved object when some api keys are still in use', async () => {
+    test('should get decrypted api key pending invalidation saved object when some api keys are still in use by AD_HOC_RUN_SAVED_OBJECT_TYPE', async () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         mockInvalidatePendingApiKeyObject1
       );
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         mockInvalidatePendingApiKeyObject2
       );
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 2,
+        page: 1,
+        per_page: 10,
+        aggregations: {
+          apiKeyId: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [{ key: 'abcd====!', doc_count: 1 }],
+          },
+        },
+      });
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 1,
+        page: 1,
+        per_page: 10,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
+      });
+
+      const result = await getApiKeyIdsToInvalidate({
+        apiKeySOsPendingInvalidation: {
+          saved_objects: [
+            {
+              id: '1',
+              type: API_KEY_PENDING_INVALIDATION_TYPE,
+              score: 0,
+              attributes: { apiKeyId: 'encryptedencrypted', createdAt: '2024-04-11T17:08:44.035Z' },
+              references: [],
+            },
+            {
+              id: '2',
+              type: API_KEY_PENDING_INVALIDATION_TYPE,
+              score: 0,
+              attributes: { apiKeyId: 'encryptedencrypted', createdAt: '2024-04-11T17:08:44.035Z' },
+              references: [],
+            },
+          ],
+          total: 2,
+          per_page: 10,
+          page: 1,
+        },
+        encryptedSavedObjectsClient,
+        savedObjectsClient: internalSavedObjectsRepository,
+      });
+
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenNthCalledWith(
+        1,
+        API_KEY_PENDING_INVALIDATION_TYPE,
+        '1'
+      );
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenNthCalledWith(
+        2,
+        API_KEY_PENDING_INVALIDATION_TYPE,
+        '2'
+      );
+      expect(internalSavedObjectsRepository.find).toHaveBeenCalledWith({
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `ad_hoc_run_params.attributes.apiKeyId: "abcd====!" OR ad_hoc_run_params.attributes.apiKeyId: "xyz!==!"`,
+        namespaces: ['*'],
+        aggs: {
+          apiKeyId: {
+            terms: {
+              field: `ad_hoc_run_params.attributes.apiKeyId`,
+              size: 100,
+            },
+          },
+        },
+      });
+      expect(result).toEqual({
+        apiKeyIdsToInvalidate: [{ id: '2', apiKeyId: 'xyz!==!' }],
+        apiKeyIdsToExclude: [{ id: '1', apiKeyId: 'abcd====!' }],
+      });
+    });
+
+    test('should get decrypted api key pending invalidation saved object when some api keys are still in use by ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE', async () => {
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        mockInvalidatePendingApiKeyObject1
+      );
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        mockInvalidatePendingApiKeyObject2
+      );
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 1,
+        page: 1,
+        per_page: 10,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
+      });
+
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
       internalSavedObjectsRepository.find.mockResolvedValueOnce({
         saved_objects: [],
         total: 2,
@@ -298,6 +407,15 @@ describe('Invalidate API Keys Task', () => {
         page: 1,
         per_page: 10,
         // missing aggregations
+      });
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 1,
+        page: 1,
+        per_page: 10,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
       });
 
       const result = await getApiKeyIdsToInvalidate({
@@ -547,19 +665,28 @@ describe('Invalidate API Keys Task', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         mockInvalidatePendingApiKeyObject2
       );
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 1,
+        page: 1,
+        per_page: 10,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
+      });
+
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
       internalSavedObjectsRepository.find.mockResolvedValueOnce({
         saved_objects: [],
         total: 2,
         page: 1,
-        per_page: 0,
+        per_page: 10,
         aggregations: {
-          apiKeyId: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
         },
       });
+
       securityMockStart.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
         invalidated_api_keys: ['1', '2'],
         previously_invalidated_api_keys: [],
@@ -576,7 +703,7 @@ describe('Invalidate API Keys Task', () => {
       });
       expect(result).toEqual(2);
 
-      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(2);
+      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(3);
       expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(1, {
         type: API_KEY_PENDING_INVALIDATION_TYPE,
         filter: `api_key_pending_invalidation.attributes.createdAt <= "1969-12-31T23:00:00.000Z"`,
@@ -610,6 +737,20 @@ describe('Invalidate API Keys Task', () => {
           },
         },
       });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(3, {
+        type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `action_task_params.attributes.apiKeyId: "abcd====!" OR action_task_params.attributes.apiKeyId: "xyz!==!"`,
+        namespaces: ['*'],
+        aggs: {
+          apiKeyId: {
+            terms: {
+              field: `action_task_params.attributes.apiKeyId`,
+              size: 100,
+            },
+          },
+        },
+      });
       expect(securityMockStart.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledTimes(1);
       expect(securityMockStart.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
         ids: ['abcd====!', 'xyz!==!'],
@@ -628,7 +769,7 @@ describe('Invalidate API Keys Task', () => {
       expect(logger.debug).toHaveBeenCalledWith(`Total invalidated API keys "2"`);
     });
 
-    test('should succeed when there are API keys to invalidate and API keys to exclude', async () => {
+    test('should succeed when there are API keys to invalidate and API keys to exclude (AD_HOC_RUN_SAVED_OBJECT_TYPE using apiKeyId)', async () => {
       internalSavedObjectsRepository.find.mockResolvedValueOnce({
         saved_objects: [
           {
@@ -656,6 +797,8 @@ describe('Invalidate API Keys Task', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         mockInvalidatePendingApiKeyObject2
       );
+
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
       internalSavedObjectsRepository.find.mockResolvedValueOnce({
         saved_objects: [],
         total: 2,
@@ -669,6 +812,18 @@ describe('Invalidate API Keys Task', () => {
           },
         },
       });
+
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 2,
+        page: 1,
+        per_page: 10,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
+      });
+
       securityMockStart.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
         invalidated_api_keys: ['1'],
         previously_invalidated_api_keys: [],
@@ -685,7 +840,7 @@ describe('Invalidate API Keys Task', () => {
       });
       expect(result).toEqual(1);
 
-      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(2);
+      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(3);
       expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(1, {
         type: API_KEY_PENDING_INVALIDATION_TYPE,
         filter: `api_key_pending_invalidation.attributes.createdAt <= "1969-12-31T23:00:00.000Z"`,
@@ -714,6 +869,152 @@ describe('Invalidate API Keys Task', () => {
           apiKeyId: {
             terms: {
               field: `ad_hoc_run_params.attributes.apiKeyId`,
+              size: 100,
+            },
+          },
+        },
+      });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(3, {
+        type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `action_task_params.attributes.apiKeyId: "abcd====!" OR action_task_params.attributes.apiKeyId: "xyz!==!"`,
+        namespaces: ['*'],
+        aggs: {
+          apiKeyId: {
+            terms: {
+              field: `action_task_params.attributes.apiKeyId`,
+              size: 100,
+            },
+          },
+        },
+      });
+      expect(securityMockStart.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledTimes(1);
+      expect(securityMockStart.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledWith({
+        ids: ['xyz!==!'],
+      });
+      expect(internalSavedObjectsRepository.delete).toHaveBeenCalledTimes(1);
+      expect(internalSavedObjectsRepository.delete).toHaveBeenNthCalledWith(
+        1,
+        API_KEY_PENDING_INVALIDATION_TYPE,
+        '2'
+      );
+      expect(logger.debug).toHaveBeenCalledWith(`Total invalidated API keys "1"`);
+    });
+
+    test('should succeed when there are API keys to invalidate and API keys to exclude (ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE using apiKeyId)', async () => {
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [
+          {
+            id: '1',
+            type: API_KEY_PENDING_INVALIDATION_TYPE,
+            score: 0,
+            attributes: { apiKeyId: 'encryptedencrypted', createdAt: '2024-04-11T17:08:44.035Z' },
+            references: [],
+          },
+          {
+            id: '2',
+            type: API_KEY_PENDING_INVALIDATION_TYPE,
+            score: 0,
+            attributes: { apiKeyId: 'encryptedencrypted', createdAt: '2024-04-11T17:08:44.035Z' },
+            references: [],
+          },
+        ],
+        total: 2,
+        per_page: 100,
+        page: 1,
+      });
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        mockInvalidatePendingApiKeyObject1
+      );
+      encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
+        mockInvalidatePendingApiKeyObject2
+      );
+
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 2,
+        page: 1,
+        per_page: 10,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
+      });
+
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 2,
+        page: 1,
+        per_page: 0,
+        aggregations: {
+          apiKeyId: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [{ key: 'abcd====!', doc_count: 1 }],
+          },
+        },
+      });
+
+      securityMockStart.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
+        invalidated_api_keys: ['1'],
+        previously_invalidated_api_keys: [],
+        error_count: 0,
+      });
+
+      const result = await runInvalidate({
+        // @ts-expect-error
+        config: { invalidateApiKeysTask: { interval: '1m', removalDelay: '1h' } },
+        encryptedSavedObjectsClient,
+        logger,
+        savedObjectsClient: internalSavedObjectsRepository,
+        security: securityMockStart,
+      });
+      expect(result).toEqual(1);
+
+      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(3);
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(1, {
+        type: API_KEY_PENDING_INVALIDATION_TYPE,
+        filter: `api_key_pending_invalidation.attributes.createdAt <= "1969-12-31T23:00:00.000Z"`,
+        page: 1,
+        sortField: 'createdAt',
+        sortOrder: 'asc',
+        perPage: 100,
+      });
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenNthCalledWith(
+        1,
+        API_KEY_PENDING_INVALIDATION_TYPE,
+        '1'
+      );
+      expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenNthCalledWith(
+        2,
+        API_KEY_PENDING_INVALIDATION_TYPE,
+        '2'
+      );
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(2, {
+        type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `ad_hoc_run_params.attributes.apiKeyId: "abcd====!" OR ad_hoc_run_params.attributes.apiKeyId: "xyz!==!"`,
+        namespaces: ['*'],
+        aggs: {
+          apiKeyId: {
+            terms: {
+              field: `ad_hoc_run_params.attributes.apiKeyId`,
+              size: 100,
+            },
+          },
+        },
+      });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(3, {
+        type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `action_task_params.attributes.apiKeyId: "abcd====!" OR action_task_params.attributes.apiKeyId: "xyz!==!"`,
+        namespaces: ['*'],
+        aggs: {
+          apiKeyId: {
+            terms: {
+              field: `action_task_params.attributes.apiKeyId`,
               size: 100,
             },
           },
@@ -760,6 +1061,8 @@ describe('Invalidate API Keys Task', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         mockInvalidatePendingApiKeyObject2
       );
+
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
       internalSavedObjectsRepository.find.mockResolvedValueOnce({
         saved_objects: [],
         total: 2,
@@ -777,6 +1080,21 @@ describe('Invalidate API Keys Task', () => {
         },
       });
 
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 2,
+        page: 1,
+        per_page: 0,
+        aggregations: {
+          apiKeyId: {
+            doc_count_error_upper_bound: 0,
+            sum_other_doc_count: 0,
+            buckets: [{ key: 'abcd====!', doc_count: 3 }],
+          },
+        },
+      });
+
       const result = await runInvalidate({
         // @ts-expect-error
         config: { invalidateApiKeysTask: { interval: '1m', removalDelay: '1h' } },
@@ -787,8 +1105,8 @@ describe('Invalidate API Keys Task', () => {
       });
       expect(result).toEqual(0);
 
-      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(2);
-      expect(internalSavedObjectsRepository.find).toHaveBeenCalledWith({
+      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(3);
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(1, {
         type: API_KEY_PENDING_INVALIDATION_TYPE,
         filter: `api_key_pending_invalidation.attributes.createdAt <= "1969-12-31T23:00:00.000Z"`,
         page: 1,
@@ -807,7 +1125,7 @@ describe('Invalidate API Keys Task', () => {
         API_KEY_PENDING_INVALIDATION_TYPE,
         '2'
       );
-      expect(internalSavedObjectsRepository.find).toHaveBeenCalledWith({
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(2, {
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
         perPage: 0,
         filter: `ad_hoc_run_params.attributes.apiKeyId: "abcd====!" OR ad_hoc_run_params.attributes.apiKeyId: "xyz!==!"`,
@@ -816,6 +1134,20 @@ describe('Invalidate API Keys Task', () => {
           apiKeyId: {
             terms: {
               field: `ad_hoc_run_params.attributes.apiKeyId`,
+              size: 100,
+            },
+          },
+        },
+      });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(3, {
+        type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `action_task_params.attributes.apiKeyId: "abcd====!" OR action_task_params.attributes.apiKeyId: "xyz!==!"`,
+        namespaces: ['*'],
+        aggs: {
+          apiKeyId: {
+            terms: {
+              field: `action_task_params.attributes.apiKeyId`,
               size: 100,
             },
           },
@@ -844,19 +1176,29 @@ describe('Invalidate API Keys Task', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         mockInvalidatePendingApiKeyObject1
       );
+
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
       internalSavedObjectsRepository.find.mockResolvedValueOnce({
         saved_objects: [],
         total: 2,
         page: 1,
         per_page: 0,
         aggregations: {
-          apiKeyId: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
         },
       });
+
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 2,
+        page: 1,
+        per_page: 0,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
+      });
+
       securityMockStart.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
         invalidated_api_keys: ['1'],
         previously_invalidated_api_keys: [],
@@ -880,17 +1222,25 @@ describe('Invalidate API Keys Task', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         mockInvalidatePendingApiKeyObject2
       );
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
       internalSavedObjectsRepository.find.mockResolvedValueOnce({
         saved_objects: [],
         total: 2,
         page: 1,
         per_page: 0,
         aggregations: {
-          apiKeyId: {
-            doc_count_error_upper_bound: 0,
-            sum_other_doc_count: 0,
-            buckets: [],
-          },
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
+      });
+
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 2,
+        page: 1,
+        per_page: 0,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
         },
       });
       securityMockStart.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
@@ -909,7 +1259,7 @@ describe('Invalidate API Keys Task', () => {
       });
       expect(result).toEqual(2);
 
-      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(4);
+      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(6);
       expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
       expect(securityMockStart.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledTimes(2);
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledTimes(2);
@@ -943,6 +1293,20 @@ describe('Invalidate API Keys Task', () => {
           },
         },
       });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(3, {
+        type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `action_task_params.attributes.apiKeyId: "abcd====!"`,
+        namespaces: ['*'],
+        aggs: {
+          apiKeyId: {
+            terms: {
+              field: `action_task_params.attributes.apiKeyId`,
+              size: 100,
+            },
+          },
+        },
+      });
       expect(securityMockStart.authc.apiKeys.invalidateAsInternalUser).toHaveBeenNthCalledWith(1, {
         ids: ['abcd====!'],
       });
@@ -954,7 +1318,7 @@ describe('Invalidate API Keys Task', () => {
       expect(logger.debug).toHaveBeenNthCalledWith(1, `Total invalidated API keys "1"`);
 
       // second iteration
-      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(3, {
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(4, {
         type: API_KEY_PENDING_INVALIDATION_TYPE,
         filter: `api_key_pending_invalidation.attributes.createdAt <= "1969-12-31T23:00:00.000Z"`,
         page: 1,
@@ -967,7 +1331,7 @@ describe('Invalidate API Keys Task', () => {
         API_KEY_PENDING_INVALIDATION_TYPE,
         '2'
       );
-      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(4, {
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(5, {
         type: AD_HOC_RUN_SAVED_OBJECT_TYPE,
         perPage: 0,
         filter: `ad_hoc_run_params.attributes.apiKeyId: "xyz!==!"`,
@@ -976,6 +1340,20 @@ describe('Invalidate API Keys Task', () => {
           apiKeyId: {
             terms: {
               field: `ad_hoc_run_params.attributes.apiKeyId`,
+              size: 100,
+            },
+          },
+        },
+      });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(6, {
+        type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `action_task_params.attributes.apiKeyId: "xyz!==!"`,
+        namespaces: ['*'],
+        aggs: {
+          apiKeyId: {
+            terms: {
+              field: `action_task_params.attributes.apiKeyId`,
               size: 100,
             },
           },
@@ -1021,6 +1399,7 @@ describe('Invalidate API Keys Task', () => {
       encryptedSavedObjectsClient.getDecryptedAsInternalUser.mockResolvedValueOnce(
         mockInvalidatePendingApiKeyObject2
       );
+      // first call to find aggregates any AD_HOC_RUN_SAVED_OBJECT_TYPE SOs by apiKeyId
       internalSavedObjectsRepository.find.mockResolvedValueOnce({
         saved_objects: [],
         total: 2,
@@ -1034,6 +1413,18 @@ describe('Invalidate API Keys Task', () => {
           },
         },
       });
+
+      // second call to find aggregates any ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE SOs by apiKeyId
+      internalSavedObjectsRepository.find.mockResolvedValueOnce({
+        saved_objects: [],
+        total: 2,
+        page: 1,
+        per_page: 0,
+        aggregations: {
+          apiKeyId: { doc_count_error_upper_bound: 0, sum_other_doc_count: 0, buckets: [] },
+        },
+      });
+
       securityMockStart.authc.apiKeys.invalidateAsInternalUser.mockResolvedValue({
         invalidated_api_keys: ['1'],
         previously_invalidated_api_keys: [],
@@ -1057,7 +1448,7 @@ describe('Invalidate API Keys Task', () => {
       });
       expect(result).toEqual(1);
 
-      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(3);
+      expect(internalSavedObjectsRepository.find).toHaveBeenCalledTimes(4);
       expect(encryptedSavedObjectsClient.getDecryptedAsInternalUser).toHaveBeenCalledTimes(2);
       expect(securityMockStart.authc.apiKeys.invalidateAsInternalUser).toHaveBeenCalledTimes(1);
       expect(internalSavedObjectsRepository.delete).toHaveBeenCalledTimes(1);
@@ -1096,6 +1487,20 @@ describe('Invalidate API Keys Task', () => {
           },
         },
       });
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(3, {
+        type: ACTION_TASK_PARAMS_SAVED_OBJECT_TYPE,
+        perPage: 0,
+        filter: `action_task_params.attributes.apiKeyId: "abcd====!" OR action_task_params.attributes.apiKeyId: "xyz!==!"`,
+        namespaces: ['*'],
+        aggs: {
+          apiKeyId: {
+            terms: {
+              field: `action_task_params.attributes.apiKeyId`,
+              size: 100,
+            },
+          },
+        },
+      });
       expect(securityMockStart.authc.apiKeys.invalidateAsInternalUser).toHaveBeenNthCalledWith(1, {
         ids: ['xyz!==!'],
       });
@@ -1107,7 +1512,7 @@ describe('Invalidate API Keys Task', () => {
       expect(logger.debug).toHaveBeenNthCalledWith(1, `Total invalidated API keys "1"`);
 
       // second iteration
-      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(3, {
+      expect(internalSavedObjectsRepository.find).toHaveBeenNthCalledWith(4, {
         type: API_KEY_PENDING_INVALIDATION_TYPE,
         filter: `api_key_pending_invalidation.attributes.createdAt <= "1969-12-31T23:00:00.000Z" AND NOT api_key_pending_invalidation.id: "api_key_pending_invalidation:1"`,
         page: 1,
