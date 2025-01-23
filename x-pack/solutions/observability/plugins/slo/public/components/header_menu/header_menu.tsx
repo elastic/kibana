@@ -36,7 +36,7 @@ export function HeaderMenu(): React.ReactElement | null {
               target="_blank"
             >
               {i18n.translate('xpack.slo.headerMenu.documentation', {
-                defaultMessage: 'SLO Documentation',
+                defaultMessage: 'SLO documentation',
               })}
             </EuiHeaderLink>
             <EuiHeaderLink
