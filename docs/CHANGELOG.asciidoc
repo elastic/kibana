@@ -123,9 +123,13 @@ coming::[8.17.0]
 
 For information about the {kib} 8.17.0 release, review the following information.
 
+The 8.17.0 release includes the following known issues.
+
 [float]
 [[known-issues-8.17.0]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
 // tag::known-issue-206400[]
 .Upgrade Assistant displays configured source mode in mappings as critical deprecation issue.
@@ -371,6 +375,8 @@ The 8.16.0 release includes the following known issues.
 [float]
 [[known-issues-8.16.0]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
 [discrete]
 [[known-199902]]
@@ -964,6 +970,8 @@ The 8.15.0 release includes the following known issues.
 [[known-issues-8.15.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 [discrete]
 [[known-178114]]
 .Kibana fails to start when processing YAML configuration keys that contain dotted notation in objects in arrays
@@ -1407,6 +1415,8 @@ For information about the {kib} 8.14.0 release, review the following information
 [float]
 [[known-issues-8.14.0]]
 === Known issues
+
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
 
 // tag::known-issue-186969[]
 .Creating or editing APM, {observability} and {stack-monitor-app} rules fails
@@ -1881,6 +1891,8 @@ For information about the {kib} 8.13.0 release, review the following information
 [[known-issues-8.13.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 [discrete]
 [[known-179457]]
 .In Canvas, an empty text element incorrectly triggers a toast notification
@@ -2288,6 +2300,8 @@ For information about the {kib} 8.12.0 release, review the following information
 [[known-issues-8.12.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 [discrete]
 [[known-177938-8.12]]
 .Index templates UI incorrectly sets the `allow_auto_create` field to `false` by default.
@@ -2686,6 +2700,8 @@ For information about the {kib} 8.11.0 release, review the following information
 [[known-issues-8.11.0]]
 === Known issues
 
+include::CHANGELOG.asciidoc[tag=known-issue-187254]
+
 // tag::known-issue-169170[]
 [discrete]
 .Gatekeeper error on macOS
@@ -3030,6 +3046,35 @@ Presentation::
 IMPORTANT: {kib} 8.10.0 has been withdrawn.
 
 For information about the {kib} 8.10.0 release, review the following information.
+[float]
+[[known-issues-8.10.0]]
+=== Known issues
+
+// tag::known-issue-187254[]
+.Errors appear when loading Observability Infrastructure inventory views after upgrading to version 8.10.0 or higher.
+[%collapsible]
+====
+*Details* +
+After upgrading to version 8.10.0 or higher, you may encounter errors when loading inventory views. 
+
+For more information, refer to https://github.com/elastic/kibana/issues/187254[#187254].
+
+*Workaround* +
+You can mitigate the issue by completing the following steps:
+
+. Search the `.kibana_*` index for `type: inventory_view`.
+
+. Copy the `_id` field, which will be formatted as `inventory-view:<id>`. For example, `inventory-view:3d3d06b0-f873-4373-8446-f6a8341cd8b1`. Omit the `inventory-view:` portion and copy only the string of `_id` characters.
+
+. The offending documents are those with fields `inventory-view.legend.steps` > 18. Delete these documents by running the following in *Console*:
+
+[source,js]
+----------------------------------
+DELETE kbn:/api/infra/inventory-views/<id> 
+----------------------------------
+====
+// end::known-issue-187254[]
+
 
 [float]
 [[security-updates-v8.10.0]]
