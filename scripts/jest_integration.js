@@ -8,5 +8,4 @@
  */
 
 require('../src/setup_node_env');
-process.argv.push('--runInBand');
 require('@kbn/test').runJest('jest.integration.config.js');
