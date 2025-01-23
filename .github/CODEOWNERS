@@ -884,6 +884,7 @@ src/platform/packages/shared/shared-ux/file/image/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/image/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/mocks @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/file_picker/impl @elastic/appex-sharedux
+x-pack/platform/plugins/shared/inference_endpoint @elastic/ml-ui
 src/platform/packages/shared/shared-ux/file/types @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/file_upload/impl @elastic/appex-sharedux
 src/platform/packages/shared/shared-ux/file/util @elastic/appex-sharedux
