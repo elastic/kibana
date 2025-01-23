@@ -10,6 +10,7 @@
 import React from 'react';
 import { EuiLink } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { castArray } from 'lodash';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 
 interface ErrorGroupLinkProps {
@@ -46,7 +47,7 @@ export const ErrorGroupLink: React.FC<ErrorGroupLinkProps> = ({
         line-break: anywhere;
       `}
     >
-      {errorGroupName}
+      {castArray(errorGroupName)[0].slice(0, 5)}
     </EuiLink>
   );
 };
