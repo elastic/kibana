@@ -173,22 +173,22 @@ export const uiReducer = createReducer(initialUiState, (builder) => {
       state,
       { payload: { rightOverlay, leftOverlay, previewOverlay, rightPush, leftPush, previewPush } }
     ) => {
-      state.defaultOverlayWidths.rightWidth = rightOverlay;
-      state.defaultOverlayWidths.leftWidth = leftOverlay;
-      state.defaultOverlayWidths.previewWidth = previewOverlay;
-      state.defaultOverlayWidths.rightPercentage =
+      state.defaultWidths.overlay.rightWidth = rightOverlay;
+      state.defaultWidths.overlay.leftWidth = leftOverlay;
+      state.defaultWidths.overlay.previewWidth = previewOverlay;
+      state.defaultWidths.overlay.rightPercentage =
         (rightOverlay / (rightOverlay + leftOverlay)) * 100;
-      state.defaultOverlayWidths.leftPercentage =
+      state.defaultWidths.overlay.leftPercentage =
         (leftOverlay / (rightOverlay + leftOverlay)) * 100;
-      state.defaultOverlayWidths.previewPercentage =
+      state.defaultWidths.overlay.previewPercentage =
         (rightOverlay / (rightOverlay + leftOverlay)) * 100;
 
-      state.defaultPushWidths.rightWidth = rightPush;
-      state.defaultPushWidths.leftWidth = leftPush;
-      state.defaultPushWidths.previewWidth = previewPush;
-      state.defaultPushWidths.rightPercentage = (rightPush / (rightPush + leftPush)) * 100;
-      state.defaultPushWidths.leftPercentage = (leftPush / (rightPush + leftPush)) * 100;
-      state.defaultPushWidths.previewPercentage = (rightPush / (rightPush + leftPush)) * 100;
+      state.defaultWidths.push.rightWidth = rightPush;
+      state.defaultWidths.push.leftWidth = leftPush;
+      state.defaultWidths.push.previewWidth = previewPush;
+      state.defaultWidths.push.rightPercentage = (rightPush / (rightPush + leftPush)) * 100;
+      state.defaultWidths.push.leftPercentage = (leftPush / (rightPush + leftPush)) * 100;
+      state.defaultWidths.push.previewPercentage = (rightPush / (rightPush + leftPush)) * 100;
     }
   );
 

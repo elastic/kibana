@@ -9,25 +9,150 @@ import { useLayoutEffect, useState } from 'react';
 import { useDispatch } from '../store/redux';
 import { setDefaultWidthsAction } from '../store/actions';
 
-export const MIN_RESOLUTION_BREAKPOINT = 992;
-export const MAX_RESOLUTION_BREAKPOINT = 1920;
-export const BIG_RESOLUTION_BREAKPOINT = 2560;
-const FULL_WIDTH_BREAKPOINT = 1600;
-
-export const RIGHT_SECTION_MIN_WIDTH_OVERLAY_MODE = 380;
-export const RIGHT_SECTION_MAX_WIDTH_OVERLAY_MODE = 750;
-
-export const RIGHT_SECTION_MIN_WIDTH_PUSH_MODE = 380;
-export const RIGHT_SECTION_MAX_WIDTH_PUSH_MODE = 600;
-
-export const LEFT_SECTION_MIN_WIDTH_PUSH_MODE = 380;
-export const LEFT_SECTION_MAX_WIDTH_PUSH_MODE = 750;
-const LEFT_SECTION_MAX_WIDTH = 1500;
-
+export const RESOLUTION_BREAKPOINTS = {
+  RIGHT_SECTION: {
+    MIN: 992, // resolution below which the width is fixed to its SECTION_WIDTHS.RIGHT.MIN value
+    OVERLAY_MAX: 1920, // resolution above which the overlay width is fixed to its SECTION_WIDTHS.RIGHT.MAX_OVERLAY value
+    PUSH_MIN: 1600, // resolution below which the push width is fixed to its SECTION_WIDTHS.RIGHT.MIN value
+    PUSH_MAX: 2560, // resolution above which the push width is fixed to its SECTION_WIDTHS.RIGHT.MAX_PUSH value
+  },
+  LEFT_SECTION: {
+    MIN: 1600, // resolution below which the overlay width goes full width (minus the padding) and the push width goes to its fixed SECTION_WIDTHS.LEFT.PUSH.MIN value
+  },
+};
 export const FULL_WIDTH_PADDING = 48;
+export const NAVIGATION_WIDTH = 200;
+
+export const SECTION_WIDTHS = {
+  RIGHT: {
+    MIN: 380,
+    MAX_OVERLAY: 750,
+    MAX_PUSH: 600,
+  },
+  LEFT: {
+    OVERLAY: {
+      MAX: 1500,
+    },
+    PUSH: {
+      MIN: 380,
+      MAX: 1000,
+    },
+  },
+};
 
 /**
- * Hook that returns the browser window width
+ * Calculates the default widths for the right section of the expandable flyout in push and overlay modes.
+ *
+ * For overlay mode, the flyout right section scales as follows:
+ *  - for window widths below 380px, we make sure that the width is identical to the window width
+ *  - for window widths below 992px, the width is fixed at 380px
+ *  - for window widths between 992px and 1920px, the width scales linearly between 380px and 750px
+ *  - for window widths above 1920px, the width is fixed at 750px
+ *
+ *  For push mode, the flyout right section scales as follows:
+ *  - for window widths below 380px, we make sure that the flyout width is identical to the window width (also, EUI actually automatically switches the flyout to overlay mode)
+ *  - for window widths below 1600px, the width is fixed at 380px
+ *  - for window widths between 1600x and 2560px, the width scales linearly between 380px and 600px
+ *  - for window widths above 2560px, the width is fixed at 600px
+ */
+const calculateRightSectionDefaultWidths = (
+  windowWidth: number
+): {
+  overlay: number;
+  push: number;
+} => {
+  // for tiny window widths (less than 380px), we want to make sure the flyout will not go outside the window width
+  if (windowWidth < SECTION_WIDTHS.RIGHT.MIN) {
+    return {
+      overlay: windowWidth,
+      push: windowWidth,
+    };
+  }
+
+  // for window widths between 380px and 992px, the width is fixed to the 380px
+  // EUI automatically switches a push flyout to overlay below 992px, so the push value here is actually a bit unnecessary but we return it anyway to ensure the redux store is always populated with a value
+  if (windowWidth < RESOLUTION_BREAKPOINTS.RIGHT_SECTION.MIN) {
+    return {
+      overlay: SECTION_WIDTHS.RIGHT.MIN,
+      push: SECTION_WIDTHS.RIGHT.MIN,
+    };
+  }
+
+  // in overlay mode, the width will linearly scale from 380px (at 992px resolution) to 750px (at 1920px resolution)
+  const ratioWidthOverlayMode =
+    (SECTION_WIDTHS.RIGHT.MAX_OVERLAY - SECTION_WIDTHS.RIGHT.MIN) *
+    ((windowWidth - RESOLUTION_BREAKPOINTS.RIGHT_SECTION.MIN) /
+      (RESOLUTION_BREAKPOINTS.RIGHT_SECTION.OVERLAY_MAX -
+        RESOLUTION_BREAKPOINTS.RIGHT_SECTION.MIN));
+  // this will ensure that in push in mode the width will never go bigger than 750px in higher resolutions
+  const overlayWidth = Math.min(
+    SECTION_WIDTHS.RIGHT.MIN + ratioWidthOverlayMode,
+    SECTION_WIDTHS.RIGHT.MAX_OVERLAY
+  );
+
+  // in push mode, the width will linearly scale from 380px (at 1600px resolution) to 600px (at 2560px resolution)
+  const ratioWidthPushMode =
+    (SECTION_WIDTHS.RIGHT.MAX_PUSH - SECTION_WIDTHS.RIGHT.MIN) *
+    ((windowWidth - RESOLUTION_BREAKPOINTS.RIGHT_SECTION.PUSH_MIN) /
+      (RESOLUTION_BREAKPOINTS.RIGHT_SECTION.PUSH_MAX -
+        RESOLUTION_BREAKPOINTS.RIGHT_SECTION.PUSH_MIN));
+  // this will ensure that in push mode the width will never go bigger than 600px in higher resolutions
+  const pushWidth = Math.min(
+    SECTION_WIDTHS.RIGHT.MIN + ratioWidthPushMode,
+    SECTION_WIDTHS.RIGHT.MAX_PUSH
+  );
+
+  return {
+    overlay: overlayWidth,
+    push: pushWidth,
+  };
+};
+
+/**
+ * Calculates the default widths for the left section of the expandable flyout in push and overlay modes.
+ *
+ * For overlay mode, the flyout left section scales as follows:
+ *  - for window widths below 1600px, the width is taking the full screen minus a 48px padding
+ *  - for window widths above 1600px, the width corresponds to 80% of the remaining space
+ *
+ *  For push mode, the flyout left section scales as follows:
+ *  - for window widths below 1600px, the width is fixed at 380px
+ *  - for window widths above 1600px, the width corresponds to 40% of the remaining space
+ */
+const calculateLeftSectionDefaultWidths = (
+  windowWidth: number,
+  rightSectionWidthOverlayMode: number,
+  rightSectionWidthPushMode: number
+): {
+  overlay: number;
+  push: number;
+} => {
+  // for window widths below 1600px, the overlay width will use the remaining space (minus a small padding)
+  // for window widths above 1600px, the overlay width will use 80% of the remaining space, while never going bigger than 1500px
+  const overlayWidth =
+    windowWidth <= RESOLUTION_BREAKPOINTS.LEFT_SECTION.MIN
+      ? windowWidth - rightSectionWidthOverlayMode - FULL_WIDTH_PADDING
+      : Math.min(
+          ((windowWidth - rightSectionWidthOverlayMode) * 80) / 100,
+          SECTION_WIDTHS.LEFT.OVERLAY.MAX
+        );
+
+  // for window widths below 1600px, the push width will be fixed to 380px
+  // for window widths above 1600px, the push width will use 40% of the remaining space (excluding the navigation width)
+  const pushWidth =
+    windowWidth <= RESOLUTION_BREAKPOINTS.LEFT_SECTION.MIN
+      ? SECTION_WIDTHS.LEFT.PUSH.MIN
+      : ((windowWidth - rightSectionWidthPushMode - NAVIGATION_WIDTH) * 40) / 100;
+
+  return {
+    overlay: overlayWidth,
+    push: pushWidth,
+  };
+};
+
+/**
+ * Hook that returns the browser window width.
+ * It also calculates all the default widths values for the flyout to render in overlay and push modes then stores them in Redux.
  */
 export const useWindowWidth = (): number => {
   const dispatch = useDispatch();
@@ -39,63 +164,18 @@ export const useWindowWidth = (): number => {
       setWidth(window.innerWidth);
 
       const windowWidth = window.innerWidth;
+
+      // if the browser's window width is 0 (which should only happen the very first time this hook is called) there is no point in calculating all the default flyout's widths
       if (windowWidth !== 0) {
-        let rightSectionWidthOverlayMode: number;
-        let rightSectionWidthPushMode: number;
-        if (windowWidth < MIN_RESOLUTION_BREAKPOINT) {
-          // the right section's width will grow from 380px (at 992px resolution) while handling tiny screens by not going smaller than the window width
-          rightSectionWidthOverlayMode = Math.min(
-            RIGHT_SECTION_MIN_WIDTH_OVERLAY_MODE,
-            windowWidth
+        const { overlay: rightSectionWidthOverlayMode, push: rightSectionWidthPushMode } =
+          calculateRightSectionDefaultWidths(windowWidth);
+
+        const { overlay: leftSectionWidthOverlayMode, push: leftSectionWidthPushMode } =
+          calculateLeftSectionDefaultWidths(
+            windowWidth,
+            rightSectionWidthOverlayMode,
+            rightSectionWidthPushMode
           );
-          rightSectionWidthPushMode = Math.min(RIGHT_SECTION_MIN_WIDTH_PUSH_MODE, windowWidth);
-        } else {
-          const ratioWidthOverlayMode =
-            (RIGHT_SECTION_MAX_WIDTH_OVERLAY_MODE - RIGHT_SECTION_MIN_WIDTH_OVERLAY_MODE) *
-            ((windowWidth - MIN_RESOLUTION_BREAKPOINT) /
-              (MAX_RESOLUTION_BREAKPOINT - MIN_RESOLUTION_BREAKPOINT));
-
-          // the right section's width will grow to 750px (at 1920px resolution) and will never go bigger than 750px in higher resolutions
-          rightSectionWidthOverlayMode = Math.min(
-            RIGHT_SECTION_MIN_WIDTH_OVERLAY_MODE + ratioWidthOverlayMode,
-            RIGHT_SECTION_MAX_WIDTH_OVERLAY_MODE
-          );
-
-          const ratioWidthPushMode =
-            (RIGHT_SECTION_MAX_WIDTH_PUSH_MODE - RIGHT_SECTION_MIN_WIDTH_PUSH_MODE) *
-            ((windowWidth - FULL_WIDTH_BREAKPOINT) /
-              (BIG_RESOLUTION_BREAKPOINT - FULL_WIDTH_BREAKPOINT));
-
-          // the right section's width will grow to 750px (at 1920px resolution) and will never go bigger than 750px in higher resolutions
-          rightSectionWidthPushMode = Math.min(
-            RIGHT_SECTION_MIN_WIDTH_PUSH_MODE + ratioWidthPushMode,
-            RIGHT_SECTION_MAX_WIDTH_PUSH_MODE
-          );
-        }
-
-        let leftSectionWidthOverlayMode: number;
-        // the left section's width will be nearly the remaining space for resolution lower than 1600px
-        if (windowWidth <= FULL_WIDTH_BREAKPOINT) {
-          leftSectionWidthOverlayMode =
-            windowWidth - rightSectionWidthOverlayMode - FULL_WIDTH_PADDING;
-        } else {
-          // the left section's width will be taking 80% of the remaining space for resolution higher than 1600px, while never going bigger than 1500px
-          leftSectionWidthOverlayMode = Math.min(
-            ((windowWidth - rightSectionWidthOverlayMode) * 80) / 100,
-            LEFT_SECTION_MAX_WIDTH
-          );
-        }
-
-        const ratioWidthPushMode =
-          (LEFT_SECTION_MAX_WIDTH_PUSH_MODE - LEFT_SECTION_MIN_WIDTH_PUSH_MODE) *
-          ((windowWidth - FULL_WIDTH_BREAKPOINT) /
-            (BIG_RESOLUTION_BREAKPOINT - FULL_WIDTH_BREAKPOINT));
-
-        // the right section's width will grow to 750px (at 1920px resolution) and will never go bigger than 750px in higher resolutions
-        const leftSectionWidthPushMode = Math.min(
-          LEFT_SECTION_MIN_WIDTH_PUSH_MODE + ratioWidthPushMode,
-          LEFT_SECTION_MAX_WIDTH_PUSH_MODE
-        );
 
         const previewSectionWidthOverlayMode: number = rightSectionWidthOverlayMode;
         const previewSectionWidthPushMode: number = rightSectionWidthPushMode;

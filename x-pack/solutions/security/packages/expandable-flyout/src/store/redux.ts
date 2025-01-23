@@ -51,14 +51,7 @@ export const selectHistoryById = (id: string) =>
 
 const uiSelector = createSelector(stateSelector, (state) => state.ui);
 export const selectPushVsOverlay = createSelector(uiSelector, (state) => state.pushVsOverlay);
-export const selectDefaultOverlayWidths = createSelector(
-  uiSelector,
-  (state) => state.defaultOverlayWidths
-);
-export const selectDefaultPushWidths = createSelector(
-  uiSelector,
-  (state) => state.defaultPushWidths
-);
+export const selectDefaultWidths = createSelector(uiSelector, (state) => state.defaultWidths);
 export const selectUserFlyoutWidths = createSelector(uiSelector, (state) => state.userFlyoutWidths);
 export const selectUserSectionWidths = createSelector(
   uiSelector,

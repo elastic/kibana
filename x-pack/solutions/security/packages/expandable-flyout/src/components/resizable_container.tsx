@@ -10,8 +10,7 @@ import React, { memo, useCallback, useMemo } from 'react';
 import { css } from '@emotion/react';
 import { changeUserSectionWidthsAction } from '../store/actions';
 import {
-  selectDefaultOverlayWidths,
-  selectDefaultPushWidths,
+  selectDefaultWidths,
   selectPushVsOverlay,
   selectUserSectionWidths,
   useDispatch,
@@ -55,19 +54,15 @@ export const ResizableContainer: React.FC<ResizableContainerProps> = memo(
 
     const { leftPercentage, rightPercentage } = useSelector(selectUserSectionWidths);
     const type = useSelector(selectPushVsOverlay);
-    const defaultOverlayPercentages = useSelector(selectDefaultOverlayWidths);
-    const defaultPushPercentages = useSelector(selectDefaultPushWidths);
-
-    const defaultPercentages =
-      type === 'overlay' ? defaultOverlayPercentages : defaultPushPercentages;
+    const defaultPercentages = useSelector(selectDefaultWidths);
 
     const initialLeftPercentage = useMemo(
-      () => leftPercentage || defaultPercentages.leftPercentage,
-      [defaultPercentages.leftPercentage, leftPercentage]
+      () => leftPercentage || defaultPercentages[type].leftPercentage,
+      [defaultPercentages, leftPercentage, type]
     );
     const initialRightPercentage = useMemo(
-      () => rightPercentage || defaultPercentages.rightPercentage,
-      [defaultPercentages.rightPercentage, rightPercentage]
+      () => rightPercentage || defaultPercentages[type].rightPercentage,
+      [defaultPercentages, rightPercentage, type]
     );
 
     const onWidthChange = useCallback(

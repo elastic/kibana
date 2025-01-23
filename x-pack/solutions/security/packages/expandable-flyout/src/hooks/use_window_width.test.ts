@@ -6,14 +6,13 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useWindowWidth } from './use_window_width';
 import {
   FULL_WIDTH_PADDING,
   MAX_RESOLUTION_BREAKPOINT,
   MIN_RESOLUTION_BREAKPOINT,
-  RIGHT_SECTION_MAX_WIDTH_OVERLAY_MODE,
-  RIGHT_SECTION_MIN_WIDTH_OVERLAY_MODE,
-} from '../utils/calculate_default_widths';
+  SECTION_WIDTHS,
+  useWindowWidth,
+} from './use_window_width';
 import { useDispatch } from '../store/redux';
 import { setDefaultWidthsAction } from '../store/actions';
 
@@ -93,8 +92,8 @@ describe('useWindowWidth', () => {
     const hookResult = renderHook(() => useWindowWidth());
 
     const right =
-      RIGHT_SECTION_MIN_WIDTH_OVERLAY_MODE +
-      (RIGHT_SECTION_MAX_WIDTH_OVERLAY_MODE - RIGHT_SECTION_MIN_WIDTH_OVERLAY_MODE) *
+      SECTION_WIDTHS.RIGHT.OVERLAY.MIN +
+      (SECTION_WIDTHS.RIGHT.OVERLAY.MAX - SECTION_WIDTHS.RIGHT.OVERLAY.MIN) *
         ((1300 - MIN_RESOLUTION_BREAKPOINT) /
           (MAX_RESOLUTION_BREAKPOINT - MIN_RESOLUTION_BREAKPOINT));
     const left = 1300 - right - FULL_WIDTH_PADDING;
