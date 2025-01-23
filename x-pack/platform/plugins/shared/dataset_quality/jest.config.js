@@ -7,7 +7,7 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../../../..',
+  rootDir: '../../../../..',
   roots: ['<rootDir>/x-pack/platform/plugins/shared/dataset_quality'],
   coverageDirectory:
     '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/dataset_quality',
