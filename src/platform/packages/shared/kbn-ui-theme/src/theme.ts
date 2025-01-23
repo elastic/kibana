@@ -69,11 +69,8 @@ export const euiThemeVars: Theme = new Proxy(
 );
 
 export function getEuiThemeVars(theme: { name: string; darkMode: boolean }) {
-  return theme.name === 'borealis'
-    ? theme.darkMode
-      ? borealisDark
-      : borealisLight
-    : theme.darkMode
-    ? v8Dark
-    : v8Light;
+  if (theme.name === `borealis`) {
+    return theme.darkMode ? borealisDark : borealisLight;
+  }
+  return theme.darkMode ? v8Dark : v8Light;
 }
