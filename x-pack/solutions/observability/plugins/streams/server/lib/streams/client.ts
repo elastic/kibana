@@ -410,11 +410,7 @@ export class StreamsClient {
       if (descendantsById[item.destination]) {
         continue;
       }
-      if (!isChildOf(definition.name, item.destination)) {
-        throw new MalformedStreamId(
-          `The ID (${item.destination}) from the child stream must start with the parent's id (${definition.name}), followed by a dot and a name`
-        );
-      }
+      this.validateIsChildOf(definition.name, item.destination);
       await this.validateAndUpsertStream({
         definition: {
           name: item.destination,
@@ -427,6 +423,21 @@ export class StreamsClient {
           },
         },
       });
+    }
+  }
+
+  private validateIsChildOf(parent: string, destination: string) {
+    if (!isChildOf(parent, destination)) {
+      const parentStreamName = parseStreamName(parent);
+      if (parentStreamName.type === 'dsns') {
+        throw new MalformedStreamId(
+          `The ID (${destination}) from the child stream must extend the parent dataset ${parentStreamName.datastreamDataset} with a dot and a name and keep the same type ${parentStreamName.datastreamType} and namespace ${parentStreamName.datastreamNamespace}.`
+        );
+      }
+
+      throw new MalformedStreamId(
+        `The ID (${destination}) from the child stream must start with the parent's id (${parent}), followed by a dot and a name`
+      );
     }
   }
 
@@ -467,11 +478,7 @@ export class StreamsClient {
     if (!isWiredStreamDefinition(parentDefinition) && !isDSNS(parentDefinition.name)) {
       throw new MalformedStreamId('Only streams following the DSNS can be forked');
     }
-    if (!isChildOf(parentDefinition.name, childDefinition.name)) {
-      throw new MalformedStreamId(
-        `The ID (${name}) from the new stream must start with the parent's id (${parentDefinition.name}), followed by a dot and a name`
-      );
-    }
+    this.validateIsChildOf(parentDefinition.name, childDefinition.name);
 
     const { parentDefinition: updatedParentDefinition } = await this.validateAndUpsertStream({
       definition: childDefinition,
