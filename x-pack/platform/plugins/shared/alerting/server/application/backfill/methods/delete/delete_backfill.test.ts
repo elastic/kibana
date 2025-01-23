@@ -90,8 +90,8 @@ const mockAdHocRunSO: SavedObject<AdHocRunSO> = {
       name: fakeRuleName,
       tags: ['foo'],
       alertTypeId: 'myType',
-      // @ts-expect-error
       params: {},
+      actions: [],
       apiKeyOwner: 'user',
       apiKeyCreatedByUser: false,
       consumer: 'myApp',

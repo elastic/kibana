@@ -15246,6 +15246,7 @@
                                 "monitoring": {
                                   "additionalProperties": false,
                                   "properties": {
+                                    "apm": {},
                                     "enabled": {
                                       "type": "boolean"
                                     },
@@ -15269,7 +15270,8 @@
                                     "enabled",
                                     "metrics",
                                     "logs",
-                                    "traces"
+                                    "traces",
+                                    "apm"
                                   ],
                                   "type": "object"
                                 },

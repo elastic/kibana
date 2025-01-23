@@ -114,6 +114,7 @@ export interface ActionProps {
   toggleShowNotes?: () => void;
   width?: number;
   disablePinAction?: boolean;
+  disableTimelineAction?: boolean;
 }
 
 interface AdditionalControlColumnProps {

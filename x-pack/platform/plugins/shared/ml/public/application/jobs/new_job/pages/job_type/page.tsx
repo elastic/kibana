@@ -25,10 +25,7 @@ import { useDataSource } from '../../../../contexts/ml';
 import { DataRecognizer } from '../../../../components/data_recognizer';
 import { addItemToRecentlyAccessed } from '../../../../util/recently_accessed';
 import { LinkCard } from '../../../../components/link_card';
-import { CategorizationIcon } from './categorization_job_icon';
 import { ML_APP_LOCATOR, ML_PAGES } from '../../../../../../common/constants/locator';
-import { RareIcon } from './rare_job_icon';
-import { GeoIcon } from './geo_job_icon';
 import { useCreateAndNavigateToMlLink } from '../../../../contexts/kibana/use_create_url';
 import { MlPageHeader } from '../../../../components/page_header';
 
@@ -214,7 +211,7 @@ export const Page: FC = () => {
     {
       onClick: () => navigateToPath(`/jobs/new_job/categorization${getUrlParams()}`),
       icon: {
-        type: CategorizationIcon,
+        type: 'createGenericJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.categorizationAriaLabel', {
           defaultMessage: 'Categorization job',
         }),
@@ -230,7 +227,7 @@ export const Page: FC = () => {
     {
       onClick: () => navigateToPath(`/jobs/new_job/rare${getUrlParams()}`),
       icon: {
-        type: RareIcon,
+        type: 'createGenericJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.rareAriaLabel', {
           defaultMessage: 'Rare job',
         }),
@@ -249,7 +246,7 @@ export const Page: FC = () => {
     jobTypes.push({
       onClick: () => navigateToPath(`/jobs/new_job/geo${getUrlParams()}`),
       icon: {
-        type: GeoIcon,
+        type: 'createGeoJob',
         ariaLabel: i18n.translate('xpack.ml.newJob.wizard.jobType.geoAriaLabel', {
           defaultMessage: 'Geo job',
         }),

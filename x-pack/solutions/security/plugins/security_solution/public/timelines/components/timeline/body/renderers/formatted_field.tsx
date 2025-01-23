@@ -17,6 +17,7 @@ import { EntityTypeToIdentifierField } from '../../../../../../common/entity_ana
 import { getAgentTypeForAgentIdField } from '../../../../../common/lib/endpoint/utils/get_agent_type_for_agent_id_field';
 import {
   ALERT_HOST_CRITICALITY,
+  ALERT_SERVICE_CRITICALITY,
   ALERT_USER_CRITICALITY,
 } from '../../../../../../common/field_maps/field_names';
 import { AgentStatus } from '../../../../../common/components/endpoint/agents/agent_status';
@@ -283,7 +284,11 @@ const FormattedFieldValueComponent: React.FC<{
         iconSide={isButton ? 'right' : undefined}
       />
     );
-  } else if (fieldName === ALERT_HOST_CRITICALITY || fieldName === ALERT_USER_CRITICALITY) {
+  } else if (
+    fieldName === ALERT_HOST_CRITICALITY ||
+    fieldName === ALERT_USER_CRITICALITY ||
+    fieldName === ALERT_SERVICE_CRITICALITY
+  ) {
     return (
       <AssetCriticalityLevel
         contextId={contextId}
