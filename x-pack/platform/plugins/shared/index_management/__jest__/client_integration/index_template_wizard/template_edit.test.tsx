@@ -167,7 +167,6 @@ describe('<TemplateEdit />', () => {
           body: JSON.stringify({
             name: 'test',
             indexPatterns: ['myPattern*'],
-            indexMode: 'standard',
             version: 1,
             allowAutoCreate: 'NO_OVERWRITE',
             indexMode: 'standard',

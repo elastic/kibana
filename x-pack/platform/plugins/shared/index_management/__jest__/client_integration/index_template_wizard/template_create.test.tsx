@@ -622,7 +622,6 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
-            indexMode: 'standard',
             allowAutoCreate: 'TRUE',
             indexMode: 'time_series',
             dataStream: {},

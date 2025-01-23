@@ -45,7 +45,7 @@ export interface IndicesTestBed extends TestBed<TestSubjects> {
     clickCreateIndexButton: () => Promise<void>;
     clickCreateIndexCancelButton: () => Promise<void>;
     clickCreateIndexSaveButton: () => Promise<void>;
-    selectIndexMode: () => Promise<void>;
+    selectIndexMode: (indexModeTestSubj: string) => Promise<void>;
   };
   findDataStreamDetailPanel: () => ReactWrapper;
   findDataStreamDetailPanelTitle: () => string;
