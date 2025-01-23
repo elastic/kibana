@@ -8,9 +8,13 @@
  */
 
 import { EuiFlyout, EuiPortal } from '@elastic/eui';
-import React from 'react';
+import React, { useState, useCallback, useMemo } from 'react';
 import type { RuleFormData } from '../types';
+import { RuleFormStepId } from '../constants';
 import { RuleFlyoutBody } from './rule_flyout_body';
+import { RuleFlyoutShowRequest } from './rule_flyout_show_request';
+import { useRuleFormScreenContext } from '../hooks';
+import { RuleFlyoutSelectConnector } from './rule_flyout_select_connector';
 
 interface RuleFlyoutProps {
   isEdit?: boolean;
@@ -19,10 +23,39 @@ interface RuleFlyoutProps {
   onSave: (formData: RuleFormData) => void;
 }
 
-// Wrapper component for the rule flyout. Currently only displays RuleFlyoutBody, but will be extended to conditionally
-// display the Show Request UI or the Action Connector UI. These UIs take over the entire flyout, so we need to swap out
-// their body elements entirely to avoid adding another EuiFlyout element to the DOM
-export const RuleFlyout = ({ onSave, isEdit, isSaving, onCancel = () => {} }: RuleFlyoutProps) => {
+export const RuleFlyout = ({
+  onSave,
+  isEdit = false,
+  isSaving = false,
+  onCancel = () => {},
+}: RuleFlyoutProps) => {
+  const [initialStep, setInitialStep] = useState<RuleFormStepId | undefined>(undefined);
+
+  const {
+    isConnectorsScreenVisible,
+    isShowRequestScreenVisible,
+    setIsShowRequestScreenVisible,
+    setIsConnectorsScreenVisible,
+  } = useRuleFormScreenContext();
+  const onCloseConnectorsScreen = useCallback(() => {
+    setInitialStep(RuleFormStepId.ACTIONS);
+    setIsConnectorsScreenVisible(false);
+  }, [setIsConnectorsScreenVisible]);
+
+  const onOpenShowRequest = useCallback(
+    () => setIsShowRequestScreenVisible(true),
+    [setIsShowRequestScreenVisible]
+  );
+  const onCloseShowRequest = useCallback(() => {
+    setInitialStep(RuleFormStepId.DETAILS);
+    setIsShowRequestScreenVisible(false);
+  }, [setIsShowRequestScreenVisible]);
+
+  const hideCloseButton = useMemo(
+    () => isShowRequestScreenVisible || isConnectorsScreenVisible,
+    [isConnectorsScreenVisible, isShowRequestScreenVisible]
+  );
+
   return (
     <EuiPortal>
       <EuiFlyout
@@ -32,8 +65,22 @@ export const RuleFlyout = ({ onSave, isEdit, isSaving, onCancel = () => {} }: Ru
         size="m"
         maxWidth={500}
         className="ruleFormFlyout__container"
+        hideCloseButton={hideCloseButton}
       >
-        <RuleFlyoutBody onSave={onSave} onCancel={onCancel} isEdit={isEdit} isSaving={isSaving} />
+        {isShowRequestScreenVisible ? (
+          <RuleFlyoutShowRequest isEdit={isEdit} onClose={onCloseShowRequest} />
+        ) : isConnectorsScreenVisible ? (
+          <RuleFlyoutSelectConnector onClose={onCloseConnectorsScreen} />
+        ) : (
+          <RuleFlyoutBody
+            onSave={onSave}
+            onCancel={onCancel}
+            isEdit={isEdit}
+            isSaving={isSaving}
+            onShowRequest={onOpenShowRequest}
+            initialStep={initialStep}
+          />
+        )}
       </EuiFlyout>
     </EuiPortal>
   );
