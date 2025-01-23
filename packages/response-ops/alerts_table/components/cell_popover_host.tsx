@@ -16,7 +16,7 @@ import { ErrorCell } from './error_cell';
 /**
  * Entry point for rendering cell popovers
  *
- * Wraps the provided `CellPopover` with an `ErrorBoundary` to catch any errors that occur
+ * Wraps the provided `CellPopover` with an `ErrorBoundary` to catch any errors
  */
 export const CellPopoverHost = (props: EuiDataGridCellPopoverElementProps) => {
   const { rowIndex, DefaultCellPopover } = props;
