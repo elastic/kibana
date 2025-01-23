@@ -69,14 +69,14 @@ describe('layers', () => {
       const dataName = 'mimikatz process started';
       expect(
         getLayersOneDimension({ colorPalette, maxRiskSubAggregations })[0].shape.fillColor(dataName)
-      ).toEqual('#e7664c');
+      ).toEqual('#E7664C');
     });
 
     it('return the default fill color when dataName is not found in the maxRiskSubAggregations', () => {
       const dataName = 'this does not exist';
       expect(
         getLayersOneDimension({ colorPalette, maxRiskSubAggregations })[0].shape.fillColor(dataName)
-      ).toEqual('#54b399');
+      ).toEqual('#54B399');
     });
   });
 
@@ -165,7 +165,7 @@ describe('layers', () => {
             { index: 0, value: 'Host-k8iyfzraq9' },
           ],
         })
-      ).toEqual('#e7664c');
+      ).toEqual('#E7664C');
     });
 
     it('returns the default fillColor for layer 1 when the group from path is not found', () => {
@@ -188,7 +188,7 @@ describe('layers', () => {
             { index: 0, value: 'nope' },
           ],
         })
-      ).toEqual('#54b399');
+      ).toEqual('#54B399');
     });
   });
 });
