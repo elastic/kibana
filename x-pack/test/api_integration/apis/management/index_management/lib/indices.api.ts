@@ -7,7 +7,6 @@
 
 import { API_BASE_PATH } from '../constants';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
-import { getRandomString } from "@kbn/test-suites-xpack/api_integration/apis/management/index_management/lib/random";
 
 export function indicesApi(getService: FtrProviderContext['getService']) {
   const supertest = getService('supertest');
