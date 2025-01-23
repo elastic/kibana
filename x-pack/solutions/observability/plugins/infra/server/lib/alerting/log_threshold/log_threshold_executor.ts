@@ -216,7 +216,7 @@ export const createLogThresholdExecutor =
         const initialSearchSource = await searchSourceClient.create(params.searchConfiguration);
         dataView = initialSearchSource.getField('index')!;
       } else {
-        dataView = await (await getDataViews()).get('log_rules_data_view');
+        dataView = await (await getDataViews()).get(`log_rules_data_view_${spaceId}`);
       }
 
       const { timeFieldName: timestampField } = dataView;

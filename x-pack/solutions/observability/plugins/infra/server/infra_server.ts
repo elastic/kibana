@@ -35,6 +35,7 @@ import { initServicesRoute } from './routes/services';
 import { initCustomDashboardsRoutes } from './routes/custom_dashboards/custom_dashboards';
 import type { InfraBackendLibs } from './lib/infra_types';
 import { initEntitiesConfigurationRoutes } from './routes/entities';
+import { initMigrateRuleDataSourceSettingsRoute } from './routes/deprecations/migrate_rule_data_source_settings';
 
 export const registerRoutes = (libs: InfraBackendLibs) => {
   initIpToHostName(libs);
@@ -65,4 +66,5 @@ export const registerRoutes = (libs: InfraBackendLibs) => {
   initServicesRoute(libs);
   initCustomDashboardsRoutes(libs.framework);
   initEntitiesConfigurationRoutes(libs);
+  initMigrateRuleDataSourceSettingsRoute(libs);
 };

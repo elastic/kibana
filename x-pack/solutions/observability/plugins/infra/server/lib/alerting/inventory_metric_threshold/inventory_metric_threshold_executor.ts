@@ -137,8 +137,8 @@ export const createInventoryMetricThresholdExecutor =
         throw new Error('The selected data view does not have a timestamp field');
       }
     } else {
-      metricDataView = await (await getDataViews()).get('infra_rules_data_view');
-      logDataView = await (await getDataViews()).get('log_rules_data_view');
+      metricDataView = await (await getDataViews()).get(`infra_rules_data_view_${spaceId}`);
+      logDataView = await (await getDataViews()).get(`log_rules_data_view_${spaceId}`);
     }
 
     const metricIndices = ruleDataView

@@ -58,7 +58,7 @@ interface AppSectionProps {
 }
 
 export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
-  const { charts } = useKibanaContextForPlugin().services;
+  const { charts, spaces } = useKibanaContextForPlugin().services;
   const { euiTheme } = useEuiTheme();
   const { data } = useKibanaContextForPlugin().services;
   const [dataView, setDataView] = useState<DataView>();
@@ -101,10 +101,12 @@ export function AlertDetailsAppSection({ alert, rule }: AppSectionProps) {
   useEffect(() => {
     const initDataView = async () => {
       if (!rule.params.searchConfiguration || !rule.params.searchConfiguration.index) {
+        const spaceId = (await spaces.getActiveSpace()).id;
+
         let metricsDataView;
 
         try {
-          metricsDataView = await data.dataViews.get('infra_rules_data_view');
+          metricsDataView = await data.dataViews.get(`infra_rules_data_view_${spaceId}`);
         } catch (error) {
           setDataViewError(error);
         }

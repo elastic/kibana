@@ -101,7 +101,7 @@ type Props = RuleTypeParamsExpressionProps<PartialRuleParams, LogsContextMeta>;
 
 export const ExpressionEditor: React.FC<Props> = (props) => {
   const {
-    services: { data, dataViews, dataViewEditor },
+    services: { data, dataViews, dataViewEditor, spaces },
   } = useKibanaContextForPlugin(); // injected during alert registration
 
   const { setRuleParams, ruleParams, onChangeMetaData } = props;
@@ -120,10 +120,12 @@ export const ExpressionEditor: React.FC<Props> = (props) => {
         const newSearchSource = data.search.searchSource.createEmpty();
         newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
+        const spaceId = (await spaces.getActiveSpace()).id;
+
         let logsDataView;
 
         try {
-          logsDataView = await data.dataViews.get('log_rules_data_view');
+          logsDataView = await data.dataViews.get(`log_rules_data_view_${spaceId}`);
         } catch (error) {
           setParamsError(error);
         }

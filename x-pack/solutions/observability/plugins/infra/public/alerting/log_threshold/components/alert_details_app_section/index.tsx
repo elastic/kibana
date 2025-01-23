@@ -37,7 +37,7 @@ import { useLicense } from '../../../../hooks/use_license';
 const formatThreshold = (threshold: number) => String(threshold);
 
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
-  const { data } = useKibanaContextForPlugin().services;
+  const { data, spaces } = useKibanaContextForPlugin().services;
   const [dataView, setDataView] = useState<DataView>();
   const [, setDataViewError] = useState<Error>();
   const baseTheme = useElasticChartsTheme();
@@ -62,10 +62,12 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
   useEffect(() => {
     const initDataView = async () => {
       if (!rule.params.searchConfiguration || !rule.params.searchConfiguration.index) {
+        const spaceId = (await spaces.getActiveSpace()).id;
+
         let logsDataView;
 
         try {
-          logsDataView = await data.dataViews.get('log_rules_data_view');
+          logsDataView = await data.dataViews.get(`log_rules_data_view_${spaceId}`);
         } catch (error) {
           setDataViewError(error);
         }

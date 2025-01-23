@@ -68,7 +68,7 @@ export { defaultExpression };
 export const Expressions: React.FC<Props> = (props) => {
   const { setRuleParams, ruleParams, errors, metadata, onChangeMetaData } = props;
   const { services } = useKibanaContextForPlugin();
-  const { data, dataViews, dataViewEditor } = services;
+  const { data, dataViews, dataViewEditor, spaces } = services;
 
   const [timeSize, setTimeSize] = useState<number | undefined>(1);
   const [timeUnit, setTimeUnit] = useState<TimeUnitChar | undefined>('m');
@@ -104,10 +104,12 @@ export const Expressions: React.FC<Props> = (props) => {
           const newSearchSource = data.search.searchSource.createEmpty();
           newSearchSource.setField('query', data.query.queryString.getDefaultQuery());
 
+          const spaceId = (await spaces.getActiveSpace()).id;
+
           let metricsDataView;
 
           try {
-            metricsDataView = await data.dataViews.get('infra_rules_data_view');
+            metricsDataView = await data.dataViews.get(`infra_rules_data_view_${spaceId}`);
           } catch (error: any) {
             setParamsError(error);
           }

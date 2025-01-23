@@ -69,8 +69,8 @@ export const SearchSourceExpression = ({
         const defaultDataView = await data.dataViews.getDefaultDataView();
         if (
           defaultDataView &&
-          defaultDataView.id !== 'log_rules_data_view' &&
-          defaultDataView.id !== 'infra_rules_data_view'
+          !defaultDataView.id?.includes('log_rules_data_view') &&
+          !defaultDataView.id?.includes('infra_rules_data_view')
         ) {
           newSearchSource.setField('index', defaultDataView);
         }

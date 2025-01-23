@@ -19,10 +19,6 @@ import {
 } from '@kbn/observability-shared-plugin/common';
 import { type AlertsLocatorParams, alertsLocatorID } from '@kbn/observability-plugin/common';
 import { mapValues } from 'lodash';
-import type { DataViewsServerPluginStart } from '@kbn/data-plugin/server';
-import type { LogsSharedPluginStart } from '@kbn/logs-shared-plugin/server';
-import type { LogsDataAccessPluginStart } from '@kbn/logs-data-access-plugin/server';
-import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
 import { LOGS_FEATURE_ID, METRICS_FEATURE_ID } from '../common/constants';
 import { LOGS_FEATURE, METRICS_FEATURE } from './features';
 import { registerRoutes } from './infra_server';
@@ -59,6 +55,7 @@ import type {
 } from './types';
 import { UsageCollector } from './usage/usage_collector';
 import { mapSourceToLogView } from './utils/map_source_to_log_view';
+import { registerDeprecations } from './routes/deprecations';
 
 export interface KbnServer extends Server {
   usage: any;
@@ -105,86 +102,6 @@ export class InfraServerPlugin
     this.metricsExplorerViews = this.config.featureFlags.metricsExplorerEnabled
       ? new MetricsExplorerViewsService(this.logger.get('metricsExplorerViews'))
       : undefined;
-  }
-
-  private async createDefaultDataViewsForObsRules(
-    core: CoreStart,
-    dataViews: DataViewsServerPluginStart,
-    logsShared: LogsSharedPluginStart,
-    logsDataAccess: LogsDataAccessPluginStart
-  ) {
-    const LOG_RULES_DATA_VIEW_ID = 'log_rules_data_view';
-    const METRIC_RULES_DATA_VIEW_ID = 'infra_rules_data_view';
-
-    const LOG_RULES_DATA_VIEW_NAME = 'Log Threshold Alerting Rule Source';
-    const METRIC_RULES_DATA_VIEW_NAME = 'Metric AND Inventory Threshold Alerting Rule Source';
-
-    const override = false;
-    const skipFetchFields = false;
-    const displayErrors = true;
-    const setAsDefault = false;
-
-    const savedObjectsClient = core.savedObjects.createInternalRepository();
-    const esClient = core.elasticsearch.client.asInternalUser;
-
-    const dataViewsService = await dataViews.dataViewsServiceFactory(
-      savedObjectsClient,
-      esClient,
-      undefined,
-      true
-    );
-
-    // get log indices
-    const logSourcesService =
-      logsDataAccess.services.logSourcesServiceFactory.getLogSourcesService(savedObjectsClient);
-
-    const { indices: logIndices, timestampField } = await logsShared.logViews
-      .getClient(savedObjectsClient, core.elasticsearch.client.asInternalUser, logSourcesService)
-      .getResolvedLogView(DEFAULT_LOG_VIEW);
-
-    // create default data view for Log threshold rules
-    const logDataViewExists = await dataViewsService.get(LOG_RULES_DATA_VIEW_ID).catch(() => false);
-
-    if (!logDataViewExists) {
-      await dataViewsService.createAndSave(
-        {
-          allowNoIndex: false,
-          name: LOG_RULES_DATA_VIEW_NAME,
-          title: logIndices,
-          id: LOG_RULES_DATA_VIEW_ID,
-          timeFieldName: timestampField,
-        },
-        override,
-        skipFetchFields,
-        displayErrors,
-        setAsDefault
-      );
-    }
-
-    // get metric indices
-    const metricsClient = this.libs.plugins.metricsDataAccess.setup.client;
-    const metricIndices = await metricsClient.getMetricIndices({ savedObjectsClient });
-
-    // create default data view for Metric and Inventory threshold rules
-    const metricDataViewExists = await dataViewsService
-      .get(METRIC_RULES_DATA_VIEW_ID)
-      .catch(() => false);
-
-    if (!metricDataViewExists) {
-      await dataViewsService.createAndSave(
-        {
-          allowNoIndex: false,
-          name: METRIC_RULES_DATA_VIEW_NAME,
-          title: metricIndices,
-          id: METRIC_RULES_DATA_VIEW_ID,
-          timeFieldName: '@timestamp',
-        },
-        override,
-        skipFetchFields,
-        displayErrors,
-        setAsDefault
-      );
-    }
   }
 
   setup(core: InfraPluginCoreSetup, plugins: InfraServerPluginSetupDeps) {
@@ -332,6 +249,8 @@ export class InfraServerPlugin
       }
     );
 
+    registerDeprecations({ core });
+
     // Telemetry
     UsageCollector.registerUsageCollector(plugins.usageCollection);
 
@@ -351,10 +270,6 @@ export class InfraServerPlugin
       infraSources: this.libs.sources,
       savedObjects: core.savedObjects,
     });
-
-    this.createDefaultDataViewsForObsRules(core, dataViews, logsShared, logsDataAccess).catch(
-      () => {}
-    );
 
     registerRoutes(this.libs);
 
