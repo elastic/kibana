@@ -199,6 +199,33 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
     });
 
+    it('handles no retention dsl', async () => {
+      await putStream(apiClient, 'logs.no', {
+        dashboards: [],
+        stream: {
+          ingest: {
+            ...wiredPutBody.stream.ingest,
+            lifecycle: { dsl: { data_retention: '2d' } },
+          },
+        },
+      });
+
+      await putStream(apiClient, 'logs.no.retention', {
+        dashboards: [],
+        stream: {
+          ingest: {
+            ...wiredPutBody.stream.ingest,
+            lifecycle: { dsl: {} },
+          },
+        },
+      });
+
+      await expectLifecycle(['logs.no.retention'], {
+        dsl: {},
+        from: 'logs.no.retention',
+      });
+    });
+
     if (isServerless) {
       it('does not support ilm', async () => {
         await putStream(
