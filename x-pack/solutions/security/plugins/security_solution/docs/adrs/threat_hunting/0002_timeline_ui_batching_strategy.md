@@ -161,7 +161,7 @@ Any changes in `filterQuery` should trigger a completely new fetch of Batch 0 fr
 ```
 
 ### Batch Size
-Any changes in `filterQuery` should trigger a completely new fetch of Batch 0 from the start ir-respective of the current batch user is on.
+Any changes in `limit/batchSize/sampleSize` should trigger a completely new fetch of Batch 0 from the start ir-respective of the current batch user is on.
 
 ```js
 {
