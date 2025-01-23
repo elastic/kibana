@@ -812,18 +812,18 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelDescription",
-            "text": "PublishesPanelDescription"
+            "section": "def-public.PublishesDescription",
+            "text": "PublishesDescription"
           },
           " & Pick<",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          ", \"panelTitle\"> & ",
+          ", \"title$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -964,7 +964,13 @@
             "text": "DashboardAttributes"
           },
           "; references: ",
-          "SavedObjectReference",
+          {
+            "pluginId": "@kbn/content-management-utils",
+            "scope": "server",
+            "docId": "kibKbnContentManagementUtilsPluginApi",
+            "section": "def-server.Reference",
+            "text": "Reference"
+          },
           "[]; }; getDashboardPanelFromId: (id: string) => ",
           {
             "pluginId": "dashboard",
