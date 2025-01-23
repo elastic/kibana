@@ -23,6 +23,7 @@ import { getEnvOptions } from '@kbn/config-mocks';
 import { LogRecord } from '@kbn/logging';
 import { retryAsync } from '@kbn/core-saved-objects-migration-server-mocks';
 import { delay } from '../test_utils';
+import { EsVersion } from '@kbn/test';
 
 const kibanaVersion = Env.createDefault(REPO_ROOT, getEnvOptions()).packageInfo.version;
 const targetIndex = `.kibana_${kibanaVersion}_001`;
@@ -61,8 +62,18 @@ describe('migration v2', () => {
   let esServer: TestElasticsearchUtils;
   let root: Root;
   let startES: () => Promise<TestElasticsearchUtils>;
+  let dataArchive: string;
 
   beforeAll(async () => {
+    const willRunESv9 = EsVersion.getDefault({ integrationTest: true }).matchRange('9');
+    dataArchive = Path.join(
+      __dirname,
+      '..',
+      'archives',
+      willRunESv9
+        ? '8.18.0_xpack_sample_saved_objects.zip'
+        : '7.14.0_xpack_sample_saved_objects.zip'
+    );
     await removeLogFile();
   });
 
@@ -72,12 +83,7 @@ describe('migration v2', () => {
       settings: {
         es: {
           license: 'basic',
-          dataArchive: Path.join(
-            __dirname,
-            '..',
-            'archives',
-            '7.14.0_xpack_sample_saved_objects.zip'
-          ),
+          dataArchive,
           esArgs: ['http.max_content_length=1715329b'],
         },
       },

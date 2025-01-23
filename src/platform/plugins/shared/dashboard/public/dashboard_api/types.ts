@@ -7,6 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import type { Reference } from '@kbn/content-management-utils';
+import {
+  ControlGroupApi,
+  ControlGroupRuntimeState,
+  ControlGroupSerializedState,
+} from '@kbn/controls-plugin/public';
+import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
+import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
+import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import {
   CanExpandPanels,
   HasRuntimeChildState,
@@ -14,11 +24,11 @@ import {
   HasSerializedChildState,
   PresentationContainer,
   PublishesSettings,
-  SerializedPanelState,
   TrackContentfulRender,
   TracksOverlays,
 } from '@kbn/presentation-containers';
 import {
+  SerializedPanelState,
   EmbeddableAppContext,
   HasAppContext,
   HasExecutionContext,
@@ -26,8 +36,8 @@ import {
   HasUniqueId,
   PublishesDataLoading,
   PublishesDataViews,
-  PublishesPanelDescription,
-  PublishesPanelTitle,
+  PublishesDescription,
+  PublishesTitle,
   PublishesSavedObjectId,
   PublishesUnifiedSearch,
   PublishesViewMode,
@@ -35,27 +45,17 @@ import {
   PublishingSubject,
   ViewMode,
 } from '@kbn/presentation-publishing';
-import {
-  ControlGroupApi,
-  ControlGroupRuntimeState,
-  ControlGroupSerializedState,
-} from '@kbn/controls-plugin/public';
-import { Filter, Query, TimeRange } from '@kbn/es-query';
-import type { DefaultEmbeddableApi, EmbeddablePackageState } from '@kbn/embeddable-plugin/public';
-import { Observable, Subject } from 'rxjs';
-import { RefreshInterval, SearchSessionInfoProvider } from '@kbn/data-plugin/public';
-import { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
 import { PublishesReload } from '@kbn/presentation-publishing/interfaces/fetch/publishes_reload';
 import { PublishesSearchSession } from '@kbn/presentation-publishing/interfaces/fetch/publishes_search_session';
 import { LocatorPublic } from '@kbn/share-plugin/common';
-import type { SavedObjectReference } from '@kbn/core-saved-objects-api-server';
+import { Observable, Subject } from 'rxjs';
 import { DashboardPanelMap, DashboardPanelState } from '../../common';
 import type { DashboardAttributes, DashboardOptions } from '../../server/content_management';
+import { DashboardLocatorParams } from '../dashboard_container/types';
 import {
   LoadDashboardReturn,
   SaveDashboardReturn,
 } from '../services/dashboard_content_management_service/types';
-import { DashboardLocatorParams } from '../dashboard_container/types';
 
 export const DASHBOARD_API_TYPE = 'dashboard';
 
@@ -102,6 +102,12 @@ export interface DashboardState extends DashboardSettings {
   panels: DashboardPanelMap;
 
   /**
+   * Temporary. Currently Dashboards are in charge of providing references to all of their children.
+   * Eventually this will be removed in favour of the Dashboard injecting references serverside.
+   */
+  references?: Reference[];
+
+  /**
    * Serialized control group state.
    * Contains state loaded from dashboard saved object
    */
@@ -125,8 +131,8 @@ export type DashboardApi = CanExpandPanels &
   PresentationContainer &
   PublishesDataLoading &
   PublishesDataViews &
-  PublishesPanelDescription &
-  Pick<PublishesPanelTitle, 'panelTitle'> &
+  PublishesDescription &
+  Pick<PublishesTitle, 'title$'> &
   PublishesReload &
   PublishesSavedObjectId &
   PublishesSearchSession &
@@ -140,11 +146,12 @@ export type DashboardApi = CanExpandPanels &
     controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
     fullScreenMode$: PublishingSubject<boolean>;
     focusedPanelId$: PublishingSubject<string | undefined>;
+    setFocusedPanelId: (id: string | undefined) => void;
     forceRefresh: () => void;
     getSettings: () => DashboardSettings;
     getSerializedState: () => {
       attributes: DashboardAttributes;
-      references: SavedObjectReference[];
+      references: Reference[];
     };
     getDashboardPanelFromId: (id: string) => DashboardPanelState;
     hasOverlays$: PublishingSubject<boolean>;
@@ -174,7 +181,6 @@ export type DashboardApi = CanExpandPanels &
   };
 
 export interface DashboardInternalApi {
-  animatePanelTransforms$: PublishingSubject<boolean>;
   controlGroupReload$: Subject<void>;
   panelsReload$: Subject<void>;
   getRuntimeStateForControlGroup: () => object | undefined;

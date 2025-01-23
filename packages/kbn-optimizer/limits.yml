@@ -19,11 +19,11 @@ pageLoadAssetSize:
   cloudSecurityPosture: 19109
   console: 46091
   contentManagement: 16254
-  controls: 60000
+  controls: 12000
   core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
-  dashboard: 68015
+  dashboard: 19000
   dashboardEnhanced: 65646
   data: 454087
   dataQuality: 19384
@@ -38,7 +38,7 @@ pageLoadAssetSize:
   discover: 99999
   discoverEnhanced: 42730
   discoverShared: 17111
-  embeddable: 87309
+  embeddable: 24000
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
@@ -123,8 +123,8 @@ pageLoadAssetSize:
   observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
-  presentationPanel: 55463
-  presentationUtil: 58834
+  presentationPanel: 12000
+  presentationUtil: 25000
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327

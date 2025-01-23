@@ -28,7 +28,9 @@ export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const riskEngineRoutes = riskEngineRouteHelpersFactory(supertest);
+  const customSpaceName = 'ea-customspace-it';
   const log = getService('log');
+  const riskEngineRoutesWithNamespace = riskEngineRouteHelpersFactory(supertest, customSpaceName);
 
   // Failing: See https://github.com/elastic/kibana/issues/191637
   describe.skip('@ess @serverless @serverlessQA init_and_status_apis', () => {
@@ -62,6 +64,8 @@ export default ({ getService }: FtrProviderContext) => {
         const dataStreamName = 'risk-score.risk-score-default';
         const latestIndexName = 'risk-score.risk-score-latest-default';
         const transformId = 'risk_score_latest_transform_default';
+        const defaultPipeline =
+          'entity_analytics_create_eventIngest_from_timestamp-pipeline-default';
 
         await riskEngineRoutes.init();
 
@@ -79,6 +83,13 @@ export default ({ getService }: FtrProviderContext) => {
             '@timestamp': {
               ignore_malformed: false,
               type: 'date',
+            },
+            event: {
+              properties: {
+                ingested: {
+                  type: 'date',
+                },
+              },
             },
             host: {
               properties: {
@@ -279,6 +290,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         expect(indexTemplate.index_template.template!.settings).to.eql({
           index: {
+            default_pipeline: defaultPipeline,
             mapping: {
               total_fields: {
                 limit: '1000',
@@ -326,6 +338,289 @@ export default ({ getService }: FtrProviderContext) => {
         expect(transformStats.transforms[0].state).to.eql('stopped');
       });
 
+      it('should install resources on init call in the custom namespace', async () => {
+        const componentTemplateName = `.risk-score-mappings-${customSpaceName}`;
+        const indexTemplateName = `.risk-score.risk-score-${customSpaceName}-index-template`;
+        const dataStreamName = `risk-score.risk-score-${customSpaceName}`;
+        const latestIndexName = `risk-score.risk-score-latest-${customSpaceName}`;
+        const transformId = `risk_score_latest_transform_${customSpaceName}`;
+        const defaultPipeline = `entity_analytics_create_eventIngest_from_timestamp-pipeline-${customSpaceName}`;
+
+        await riskEngineRoutesWithNamespace.init();
+
+        const { component_templates: componentTemplates1 } = await es.cluster.getComponentTemplate({
+          name: componentTemplateName,
+        });
+
+        expect(componentTemplates1.length).to.eql(1);
+        const componentTemplate = componentTemplates1[0];
+
+        expect(componentTemplate.name).to.eql(componentTemplateName);
+        expect(componentTemplate.component_template.template.mappings).to.eql({
+          dynamic: 'strict',
+          properties: {
+            '@timestamp': {
+              ignore_malformed: false,
+              type: 'date',
+            },
+            event: {
+              properties: {
+                ingested: {
+                  type: 'date',
+                },
+              },
+            },
+            host: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+                risk: {
+                  properties: {
+                    calculated_level: {
+                      type: 'keyword',
+                    },
+                    calculated_score: {
+                      type: 'float',
+                    },
+                    calculated_score_norm: {
+                      type: 'float',
+                    },
+                    category_1_count: {
+                      type: 'long',
+                    },
+                    category_1_score: {
+                      type: 'float',
+                    },
+                    id_field: {
+                      type: 'keyword',
+                    },
+                    id_value: {
+                      type: 'keyword',
+                    },
+                    notes: {
+                      type: 'keyword',
+                    },
+                    inputs: {
+                      properties: {
+                        id: {
+                          type: 'keyword',
+                        },
+                        index: {
+                          type: 'keyword',
+                        },
+                        category: {
+                          type: 'keyword',
+                        },
+                        description: {
+                          type: 'keyword',
+                        },
+                        risk_score: {
+                          type: 'float',
+                        },
+                        timestamp: {
+                          type: 'date',
+                        },
+                      },
+                      type: 'object',
+                    },
+                  },
+                  type: 'object',
+                },
+              },
+            },
+            service: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+                risk: {
+                  properties: {
+                    calculated_level: {
+                      type: 'keyword',
+                    },
+                    calculated_score: {
+                      type: 'float',
+                    },
+                    calculated_score_norm: {
+                      type: 'float',
+                    },
+                    category_1_count: {
+                      type: 'long',
+                    },
+                    category_1_score: {
+                      type: 'float',
+                    },
+                    id_field: {
+                      type: 'keyword',
+                    },
+                    id_value: {
+                      type: 'keyword',
+                    },
+                    inputs: {
+                      properties: {
+                        category: {
+                          type: 'keyword',
+                        },
+                        description: {
+                          type: 'keyword',
+                        },
+                        id: {
+                          type: 'keyword',
+                        },
+                        index: {
+                          type: 'keyword',
+                        },
+                        risk_score: {
+                          type: 'float',
+                        },
+                        timestamp: {
+                          type: 'date',
+                        },
+                      },
+                      type: 'object',
+                    },
+                    notes: {
+                      type: 'keyword',
+                    },
+                  },
+                  type: 'object',
+                },
+              },
+            },
+            user: {
+              properties: {
+                name: {
+                  type: 'keyword',
+                },
+                risk: {
+                  properties: {
+                    calculated_level: {
+                      type: 'keyword',
+                    },
+                    calculated_score: {
+                      type: 'float',
+                    },
+                    calculated_score_norm: {
+                      type: 'float',
+                    },
+                    category_1_count: {
+                      type: 'long',
+                    },
+                    category_1_score: {
+                      type: 'float',
+                    },
+                    id_field: {
+                      type: 'keyword',
+                    },
+                    id_value: {
+                      type: 'keyword',
+                    },
+                    notes: {
+                      type: 'keyword',
+                    },
+                    inputs: {
+                      properties: {
+                        id: {
+                          type: 'keyword',
+                        },
+                        index: {
+                          type: 'keyword',
+                        },
+                        category: {
+                          type: 'keyword',
+                        },
+                        description: {
+                          type: 'keyword',
+                        },
+                        risk_score: {
+                          type: 'float',
+                        },
+                        timestamp: {
+                          type: 'date',
+                        },
+                      },
+                      type: 'object',
+                    },
+                  },
+                  type: 'object',
+                },
+              },
+            },
+          },
+        });
+
+        const { index_templates: indexTemplates } = await es.indices.getIndexTemplate({
+          name: indexTemplateName,
+        });
+        expect(indexTemplates.length).to.eql(1);
+        const indexTemplate = indexTemplates[0];
+        expect(indexTemplate.name).to.eql(indexTemplateName);
+        expect(indexTemplate.index_template.index_patterns).to.eql([
+          `risk-score.risk-score-${customSpaceName}`,
+        ]);
+        expect(indexTemplate.index_template.composed_of).to.eql([
+          `.risk-score-mappings-${customSpaceName}`,
+        ]);
+        expect(indexTemplate.index_template.template!.mappings?.dynamic).to.eql(false);
+        expect(indexTemplate.index_template.template!.mappings?._meta?.managed).to.eql(true);
+        expect(indexTemplate.index_template.template!.mappings?._meta?.namespace).to.eql(
+          customSpaceName
+        );
+        expect(indexTemplate.index_template.template!.mappings?._meta?.kibana?.version).to.be.a(
+          'string'
+        );
+
+        expect(indexTemplate.index_template.template!.settings).to.eql({
+          index: {
+            default_pipeline: defaultPipeline,
+            mapping: {
+              total_fields: {
+                limit: '1000',
+              },
+            },
+          },
+        });
+
+        expect(indexTemplate.index_template.template!.lifecycle).to.eql({
+          enabled: true,
+        });
+
+        const dsResponse = await es.indices.get({
+          index: dataStreamName,
+        });
+
+        const dataStream = Object.values(dsResponse).find(
+          (ds) => ds.data_stream === dataStreamName
+        );
+
+        expect(dataStream?.mappings?._meta?.managed).to.eql(true);
+        expect(dataStream?.mappings?._meta?.namespace).to.eql(customSpaceName);
+        expect(dataStream?.mappings?._meta?.kibana?.version).to.be.a('string');
+        expect(dataStream?.mappings?.dynamic).to.eql('false');
+
+        expect(dataStream?.settings?.index?.mapping).to.eql({
+          total_fields: {
+            limit: '1000',
+          },
+        });
+
+        expect(dataStream?.settings?.index?.hidden).to.eql('true');
+        expect(dataStream?.settings?.index?.number_of_shards).to.eql(1);
+
+        const indexExist = await es.indices.exists({
+          index: latestIndexName,
+        });
+
+        expect(indexExist).to.eql(true);
+
+        const transformStats = await es.transform.getTransformStats({
+          transform_id: transformId,
+        });
+
+        expect(transformStats.transforms[0].state).to.eql('stopped');
+      });
+
       it('should create configuration saved object', async () => {
         await riskEngineRoutes.init();
         const response = await kibanaServer.savedObjects.find({
@@ -343,7 +638,7 @@ export default ({ getService }: FtrProviderContext) => {
             start: 'now-30d',
           },
           _meta: {
-            mappingsVersion: 2,
+            mappingsVersion: 3,
           },
         });
       });

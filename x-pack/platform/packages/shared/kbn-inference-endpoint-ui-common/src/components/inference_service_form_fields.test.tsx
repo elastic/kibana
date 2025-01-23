@@ -12,8 +12,10 @@ import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import { I18nProvider } from '@kbn/i18n-react';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
+import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
 
-const providers = [
+const mockProviders = [
   {
     service: 'hugging_face',
     name: 'Hugging Face',
@@ -27,6 +29,7 @@ const providers = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -36,6 +39,7 @@ const providers = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
       url: {
         default_value: 'https://api.openai.com/v1/embeddings',
@@ -45,6 +49,7 @@ const providers = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'sparse_embedding'],
       },
     },
   },
@@ -61,6 +66,7 @@ const providers = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['text_embedding', 'rerank', 'completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -70,6 +76,7 @@ const providers = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['text_embedding', 'completion'],
       },
     },
   },
@@ -86,6 +93,7 @@ const providers = [
         sensitive: true,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['completion'],
       },
       'rate_limit.requests_per_minute': {
         default_value: null,
@@ -96,6 +104,7 @@ const providers = [
         sensitive: false,
         updatable: true,
         type: FieldType.INTEGER,
+        supported_task_types: ['completion'],
       },
       model_id: {
         default_value: null,
@@ -105,10 +114,20 @@ const providers = [
         sensitive: false,
         updatable: true,
         type: FieldType.STRING,
+        supported_task_types: ['completion'],
       },
     },
   },
 ] as InferenceProvider[];
+
+jest.mock('../hooks/use_providers', () => ({
+  useProviders: jest.fn(() => ({
+    data: mockProviders,
+  })),
+}));
+
+const httpMock = httpServiceMock.createStartContract();
+const notificationsMock = notificationServiceMock.createStartContract();
 
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const { form } = useForm();
@@ -124,7 +143,7 @@ describe('Inference Services', () => {
   it('renders', () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields providers={providers} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
       </MockFormProvider>
     );
 
@@ -134,7 +153,7 @@ describe('Inference Services', () => {
   it('renders Selectable', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields providers={providers} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
       </MockFormProvider>
     );
 
@@ -145,7 +164,7 @@ describe('Inference Services', () => {
   it('renders selected provider fields - hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields providers={providers} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
       </MockFormProvider>
     );
 
@@ -165,7 +184,7 @@ describe('Inference Services', () => {
   it('re-renders fields when selected to anthropic from hugging_face', async () => {
     render(
       <MockFormProvider>
-        <InferenceServiceFormFields providers={providers} />
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
       </MockFormProvider>
     );
 

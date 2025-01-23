@@ -261,6 +261,16 @@ export const allowedExperimentalValues = Object.freeze({
    * Allows initializing the Universal Entity Store via the API.
    */
   assetInventoryStoreEnabled: false,
+
+  /**
+   * Enables the Asset Inventory feature
+   */
+  assetInventoryUXEnabled: false,
+
+  /**
+   * Enabled Microsoft Defender for  Endpoint actions client
+   */
+  responseActionsMSDefenderEndpointEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
