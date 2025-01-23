@@ -8,6 +8,7 @@
 import type { SavedObjectsModelVersion } from '@kbn/core-saved-objects-server';
 import { SECURITY_SOLUTION_SAVED_OBJECT_INDEX } from '@kbn/core-saved-objects-server';
 import type { SavedObjectsType } from '@kbn/core/server';
+import { defaultOptions } from '../constants';
 
 export const entityEngineDescriptorTypeName = 'entity-engine-status';
 
@@ -29,6 +30,21 @@ export const entityEngineDescriptorTypeMappings: SavedObjectsType['mappings'] = 
     fieldHistoryLength: {
       type: 'integer',
       index: false,
+    },
+    delay: {
+      type: 'keyword',
+    },
+    timeout: {
+      type: 'keyword',
+    },
+    frequency: {
+      type: 'keyword',
+    },
+    docsPerSecond: {
+      type: 'float',
+    },
+    lookbackPeriod: {
+      type: 'keyword',
     },
   },
 };
@@ -55,11 +71,37 @@ const version1: SavedObjectsModelVersion = {
   ],
 };
 
+const version2: SavedObjectsModelVersion = {
+  changes: [
+    {
+      type: 'mappings_addition',
+      addedMappings: {
+        delay: { type: 'keyword' },
+        timeout: { type: 'keyword' },
+        frequency: { type: 'keyword' },
+        docsPerSecond: { type: 'float' },
+        lookbackPeriod: { type: 'keyword' },
+      },
+    },
+    {
+      type: 'data_backfill',
+      backfillFn: (document) => {
+        return {
+          attributes: {
+            ...defaultOptions,
+            ...document.attributes,
+          },
+        };
+      },
+    },
+  ],
+};
+
 export const entityEngineDescriptorType: SavedObjectsType = {
   name: entityEngineDescriptorTypeName,
   indexPattern: SECURITY_SOLUTION_SAVED_OBJECT_INDEX,
   hidden: false,
   namespaceType: 'multiple-isolated',
   mappings: entityEngineDescriptorTypeMappings,
-  modelVersions: { 1: version1 },
+  modelVersions: { 1: version1, 2: version2 },
 };

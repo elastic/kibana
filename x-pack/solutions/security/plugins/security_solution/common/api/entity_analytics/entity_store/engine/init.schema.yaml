@@ -35,6 +35,19 @@ paths:
                   type: string
                 enrichPolicyExecutionInterval:
                   $ref: '../common.schema.yaml#/components/schemas/Interval'
+                timeout:
+                  type: string
+                  description: The timeout for initializing the aggregating transform.
+                frequency:
+                  type: string
+                  description: The frequency at which the transform will run.
+                delay:
+                  type: string
+                  description: The delay before the transform will run.
+                docsPerSecond:
+                  type: integer
+                  description: The number of documents per second to process.
+   
       responses:
         '200':
           description: Successful response

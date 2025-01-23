@@ -23,6 +23,7 @@ import moment from 'moment';
 import type { EntityDefinitionWithState } from '@kbn/entityManager-plugin/server/lib/entities/types';
 import type { EntityDefinition } from '@kbn/entities-schema';
 import type { estypes } from '@elastic/elasticsearch';
+import { merge } from '../../../../common/utils/objects/merge';
 import { getEnabledStoreEntityTypes } from '../../../../common/entity_analytics/entity_store/utils';
 import { EntityType } from '../../../../common/entity_analytics/types';
 import type { ExperimentalFeatures } from '../../../../common';
@@ -47,7 +48,12 @@ import type {
   EngineComponentResource,
 } from '../../../../common/api/entity_analytics';
 import { EngineDescriptorClient } from './saved_object/engine_descriptor';
-import { ENGINE_STATUS, ENTITY_STORE_STATUS, MAX_SEARCH_RESPONSE_SIZE } from './constants';
+import {
+  ENGINE_STATUS,
+  ENTITY_STORE_STATUS,
+  MAX_SEARCH_RESPONSE_SIZE,
+  defaultOptions,
+} from './constants';
 import { AssetCriticalityMigrationClient } from '../asset_criticality/asset_criticality_migration_client';
 import {
   startEntityStoreFieldRetentionEnrichTask,
@@ -318,6 +324,7 @@ export class EntityStoreDataClient {
   public async init(
     entityType: EntityType,
     InitEntityEngineRequestBodyOverrides: Partial<typeof DEFAULT_ENTITY_ENGINE> = {},
+    requestBody: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     const mergedRequest = {
@@ -376,23 +383,15 @@ export class EntityStoreDataClient {
       'Initializing entity engine'
     );
 
-    const descriptor = await this.engineClient.init(entityType, {
-      filter,
-      fieldHistoryLength,
-      lookbackPeriod,
-      indexPattern,
-    });
+    const descriptor = await this.engineClient.init(entityType, requestBody);
     this.log('debug', entityType, `Initialized engine saved object`);
 
     this.asyncSetup(
       entityType,
-      fieldHistoryLength,
-      lookbackPeriod,
       enrichPolicyExecutionInterval,
       this.options.taskManager,
-      indexPattern,
-      filter,
       config,
+      requestBody,
       pipelineDebugMode
     ).catch((e) =>
       this.log('error', entityType, `Error during async setup of entity store: ${e.message}`)
@@ -403,24 +402,22 @@ export class EntityStoreDataClient {
 
   private async asyncSetup(
     entityType: EntityType,
-    fieldHistoryLength: number,
-    lookbackPeriod: string,
     enrichPolicyExecutionInterval: string,
     taskManager: TaskManagerStartContract,
-    indexPattern: string,
-    filter: string,
     config: EntityStoreConfig,
+    requestParams: InitEntityEngineRequestBody,
     pipelineDebugMode: boolean
   ) {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
     try {
       const defaultIndexPatterns = await buildIndexPatterns(namespace, appClient, dataViewsService);
+      const options = merge(defaultOptions, requestParams);
 
       const description = createEngineDescription({
         entityType,
         namespace,
-        requestParams: { indexPattern, fieldHistoryLength, lookbackPeriod },
+        requestParams,
         defaultIndexPatterns,
         config,
       });
@@ -431,7 +428,7 @@ export class EntityStoreDataClient {
       // set up the entity manager definition
       const definition = convertToEntityManagerDefinition(description, {
         namespace,
-        filter,
+        filter: options.filter,
       });
 
       await this.entityClient.createEntityDefinition({

@@ -41,6 +41,10 @@ export const EngineDescriptor = z.object({
     .regex(/[smdh]$/)
     .optional()
     .default('24h'),
+  timeout: z.string().optional(),
+  frequency: z.string().optional(),
+  delay: z.string().optional(),
+  docsPerSecond: z.number().int().optional(),
   error: z.object({}).optional(),
 });
 

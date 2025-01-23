@@ -35,7 +35,26 @@ export const InitEntityEngineRequestBody = z.object({
   fieldHistoryLength: z.number().int().optional().default(10),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
+<<<<<<< HEAD
   enrichPolicyExecutionInterval: Interval.optional(),
+=======
+  /**
+   * The timeout for initializing the aggregating transform.
+   */
+  timeout: z.string().optional(),
+  /**
+   * The frequency at which the transform will run.
+   */
+  frequency: z.string().optional(),
+  /**
+   * The delay before the transform will run.
+   */
+  delay: z.string().optional(),
+  /**
+   * The number of documents per second to process.
+   */
+  docsPerSecond: z.number().int().optional(),
+>>>>>>> bde891b7463 (adding ability to configure transform via API)
 });
 export type InitEntityEngineRequestBodyInput = z.input<typeof InitEntityEngineRequestBody>;
 
