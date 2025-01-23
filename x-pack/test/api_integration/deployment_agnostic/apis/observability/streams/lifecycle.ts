@@ -11,6 +11,8 @@ import {
   InheritedIngestStreamLifecycle,
   WiredReadStreamDefinition,
   WiredStreamGetResponse,
+  isDslLifecycleSchema,
+  isIlmLifecycleSchema,
 } from '@kbn/streams-schema';
 import { disableStreams, enableStreams, putStream, getStream } from './helpers/requests';
 import { DeploymentAgnosticFtrProviderContext } from '../../../ftr_provider_context';
@@ -37,8 +39,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     const dataStreams = await esClient.indices.getDataStream({ name: streams });
     for (const dataStream of dataStreams.data_streams) {
-      if (expectedLifecycle.type === 'dlm') {
-        expect(dataStream.lifecycle?.data_retention).to.eql(expectedLifecycle.data_retention);
+      if (isDslLifecycleSchema(expectedLifecycle)) {
+        expect(dataStream.lifecycle?.data_retention).to.eql(expectedLifecycle.dsl.data_retention);
         expect(dataStream.indices.every((index) => !index.ilm_policy)).to.eql(
           true,
           'backing indices should not specify an ilm_policy'
@@ -50,22 +52,22 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             'backing indices should not specify prefer_ilm'
           );
         }
-      } else if (expectedLifecycle.type === 'ilm') {
+      } else if (isIlmLifecycleSchema(expectedLifecycle)) {
         expect(dataStream.prefer_ilm).to.eql(true, 'data stream should specify prefer_ilm');
-        expect(dataStream.ilm_policy).to.eql(expectedLifecycle.policy);
+        expect(dataStream.ilm_policy).to.eql(expectedLifecycle.ilm.policy);
         expect(
           dataStream.indices.every(
-            (index) => index.prefer_ilm && index.ilm_policy === expectedLifecycle.policy
+            (index) => index.prefer_ilm && index.ilm_policy === expectedLifecycle.ilm.policy
           )
         ).to.eql(true, 'backing indices should specify prefer_ilm and ilm_policy');
       }
     }
   }
 
-  describe('Lifecycle', () => {
+  describe.only('Lifecycle', () => {
     const wiredPutBody: IngestStreamUpsertRequest = {
       stream: {
-        ingest: { routing: [], processing: [], wired: { fields: {} } },
+        ingest: { lifecycle: { inherit: {} }, routing: [], processing: [], wired: { fields: {} } },
       },
       dashboards: [],
     };
@@ -86,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           ingest: {
             ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
-            lifecycle: { type: 'dlm', data_retention: '999d' },
+            lifecycle: { dsl: { data_retention: '999d' } },
           },
         },
       });
@@ -94,12 +96,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const updatedRootDefinition = await getStream(apiClient, 'logs');
       expect((updatedRootDefinition as WiredReadStreamDefinition).stream.ingest.lifecycle).to.eql({
-        type: 'dlm',
-        data_retention: '999d',
+        dsl: { data_retention: '999d' },
       });
       expect(updatedRootDefinition.effective_lifecycle).to.eql({
-        type: 'dlm',
-        data_retention: '999d',
+        dsl: { data_retention: '999d' },
         from: 'logs',
       });
     });
@@ -116,7 +116,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           ingest: {
             ...(rootDefinition as WiredStreamGetResponse).stream.ingest,
-            lifecycle: { type: 'dlm', data_retention: '10m' },
+            lifecycle: { dsl: { data_retention: '10m' } },
           },
         },
       });
@@ -126,20 +126,18 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ingest: {
             ...wiredPutBody.stream.ingest,
             routing: [{ destination: 'logs.overrides.lifecycle', if: { never: {} } }],
-            lifecycle: { type: 'dlm', data_retention: '1d' },
+            lifecycle: { dsl: { data_retention: '1d' } },
           },
         },
       });
 
       await expectLifecycle(['logs.inherits', 'logs.inherits.lifecycle'], {
-        type: 'dlm',
-        data_retention: '10m',
+        dsl: { data_retention: '10m' },
         from: 'logs',
       });
 
       await expectLifecycle(['logs.overrides', 'logs.overrides.lifecycle'], {
-        type: 'dlm',
-        data_retention: '1d',
+        dsl: { data_retention: '1d' },
         from: 'logs.overrides',
       });
     });
@@ -150,7 +148,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           ingest: {
             ...wiredPutBody.stream.ingest,
-            lifecycle: { type: 'dlm', data_retention: '10d' },
+            lifecycle: { dsl: { data_retention: '10d' } },
           },
         },
       });
@@ -159,7 +157,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           ingest: {
             ...wiredPutBody.stream.ingest,
-            lifecycle: { type: 'dlm', data_retention: '20d' },
+            lifecycle: { dsl: { data_retention: '20d' } },
           },
         },
       });
@@ -177,8 +175,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       await expectLifecycle(['logs.10d', 'logs.10d.20d', 'logs.10d.20d.inherits'], {
-        type: 'dlm',
-        data_retention: '10d',
+        dsl: { data_retention: '10d' },
         from: 'logs.10d',
       });
     });
@@ -193,7 +190,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             stream: {
               ingest: {
                 ...wiredPutBody.stream.ingest,
-                lifecycle: { type: 'ilm', policy: 'my-policy' },
+                lifecycle: { ilm: { policy: 'my-policy' } },
               },
             },
           },
@@ -209,14 +206,13 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...wiredPutBody.stream.ingest,
               routing: [{ destination: 'logs.ilm.stream', if: { never: {} } }],
-              lifecycle: { type: 'ilm', policy: 'my-policy' },
+              lifecycle: { ilm: { policy: 'my-policy' } },
             },
           },
         });
 
         await expectLifecycle(['logs.ilm', 'logs.ilm.stream'], {
-          type: 'ilm',
-          policy: 'my-policy',
+          ilm: { policy: 'my-policy' },
           from: 'logs.ilm',
         });
       });
@@ -229,7 +225,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...wiredPutBody.stream.ingest,
               routing: [],
-              lifecycle: { type: 'ilm', policy: 'my-policy' },
+              lifecycle: { ilm: { policy: 'my-policy' } },
             },
           },
         });
@@ -243,16 +239,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...wiredPutBody.stream.ingest,
               routing: [],
-              lifecycle: { type: 'dlm', data_retention: '7d' },
+              lifecycle: { dsl: { data_retention: '7d' } },
             },
           },
         });
 
-        await expectLifecycle([name], {
-          type: 'dlm',
-          data_retention: '7d',
-          from: name,
-        });
+        await expectLifecycle([name], { dsl: { data_retention: '7d' }, from: name });
       });
 
       it('updates when transitioning from dlm to ilm', async () => {
@@ -263,7 +255,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...wiredPutBody.stream.ingest,
               routing: [],
-              lifecycle: { type: 'dlm', data_retention: '7d' },
+              lifecycle: { dsl: { data_retention: '7d' } },
             },
           },
         });
@@ -277,16 +269,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ingest: {
               ...wiredPutBody.stream.ingest,
               routing: [],
-              lifecycle: { type: 'ilm', policy: 'my-policy' },
+              lifecycle: { ilm: { policy: 'my-policy' } },
             },
           },
         });
 
-        await expectLifecycle([name], {
-          type: 'ilm',
-          policy: 'my-policy',
-          from: name,
-        });
+        await expectLifecycle([name], { ilm: { policy: 'my-policy' }, from: name });
       });
     }
   });
