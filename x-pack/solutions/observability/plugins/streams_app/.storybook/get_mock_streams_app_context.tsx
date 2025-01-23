@@ -14,6 +14,7 @@ import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/
 import type { SharePublicStart } from '@kbn/share-plugin/public/plugin';
 import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
+import { fieldsMetadataPluginPublicMock } from '@kbn/fields-metadata-plugin/public/mocks';
 import type { StreamsAppKibanaContext } from '../public/hooks/use_kibana';
 
 export function getMockStreamsAppContext(): StreamsAppKibanaContext {
@@ -33,6 +34,7 @@ export function getMockStreamsAppContext(): StreamsAppKibanaContext {
         share: {} as unknown as SharePublicStart,
         navigation: {} as unknown as NavigationPublicStart,
         savedObjectsTagging: {} as unknown as SavedObjectTaggingPluginStart,
+        fieldsMetadata: fieldsMetadataPluginPublicMock.createStartContract(),
       },
     },
     services: {

@@ -8501,7 +8501,7 @@
         "label": "isCollapseFunction",
         "description": [],
         "signature": [
-          "(candidate: string | undefined) => candidate is \"min\" | \"sum\" | \"avg\" | \"max\""
+          "(candidate: string | undefined) => candidate is \"min\" | \"max\" | \"sum\" | \"avg\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/utils.ts",
         "deprecated": false,
@@ -9411,7 +9411,7 @@
             "label": "summaryRow",
             "description": [],
             "signature": [
-              "\"min\" | \"none\" | \"sum\" | \"avg\" | \"max\" | \"count\" | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | \"none\" | \"count\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -9439,7 +9439,7 @@
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "\"min\" | \"sum\" | \"avg\" | \"max\" | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11103,7 +11103,7 @@
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "\"min\" | \"sum\" | \"avg\" | \"max\" | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11574,7 +11574,7 @@
             "label": "collapseFns",
             "description": [],
             "signature": [
-              "Record<string, \"min\" | \"sum\" | \"avg\" | \"max\"> | undefined"
+              "Record<string, \"min\" | \"max\" | \"sum\" | \"avg\"> | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13741,7 +13741,7 @@
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "\"min\" | \"sum\" | \"avg\" | \"max\" | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14404,7 +14404,7 @@
         "label": "CollapseFunction",
         "description": [],
         "signature": [
-          "\"min\" | \"sum\" | \"avg\" | \"max\""
+          "\"min\" | \"max\" | \"sum\" | \"avg\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15439,7 +15439,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"sum\" | \"max\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -15469,7 +15469,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"sum\" | \"max\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,

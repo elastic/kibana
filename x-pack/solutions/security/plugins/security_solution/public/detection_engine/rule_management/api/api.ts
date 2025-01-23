@@ -40,6 +40,7 @@ import {
 import type { BulkActionsDryRunErrCode } from '../../../../common/constants';
 import {
   DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_IMPORT_URL,
   DETECTION_ENGINE_RULES_PREVIEW,
   DETECTION_ENGINE_RULES_URL,
   DETECTION_ENGINE_RULES_URL_FIND,
@@ -455,21 +456,18 @@ export const importRules = async ({
   const formData = new FormData();
   formData.append('file', fileToImport);
 
-  return KibanaServices.get().http.fetch<ImportDataResponse>(
-    `${DETECTION_ENGINE_RULES_URL}/_import`,
-    {
-      method: 'POST',
-      version: '2023-10-31',
-      headers: { 'Content-Type': undefined },
-      query: {
-        overwrite,
-        overwrite_exceptions: overwriteExceptions,
-        overwrite_action_connectors: overwriteActionConnectors,
-      },
-      body: formData,
-      signal,
-    }
-  );
+  return KibanaServices.get().http.fetch<ImportDataResponse>(DETECTION_ENGINE_RULES_IMPORT_URL, {
+    method: 'POST',
+    version: '2023-10-31',
+    headers: { 'Content-Type': undefined },
+    query: {
+      overwrite,
+      overwrite_exceptions: overwriteExceptions,
+      overwrite_action_connectors: overwriteActionConnectors,
+    },
+    body: formData,
+    signal,
+  });
 };
 
 /**

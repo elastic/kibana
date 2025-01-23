@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type OpenAI from 'openai';
 import { from, identity, switchMap, throwError } from 'rxjs';
 import { isReadable, Readable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
@@ -15,8 +14,10 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
 import { processOpenAIStream } from './process_openai_stream';
+import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -33,7 +34,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
   }) => {
     const simulatedFunctionCalling = functionCalling === 'simulated';
 
-    let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
+    let request: OpenAIRequest;
     if (simulatedFunctionCalling) {
       const wrapped = wrapWithSimulatedFunctionCalling({
         system,
@@ -84,6 +85,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         );
       }),
       processOpenAIStream(),
+      emitTokenCountEstimateIfMissing({ request }),
       simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
