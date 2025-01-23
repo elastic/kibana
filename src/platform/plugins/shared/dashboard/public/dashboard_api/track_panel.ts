@@ -25,7 +25,7 @@ export function initializeTrackPanel(untilEmbeddableLoaded: (id: string) => Prom
   }
 
   return {
-    expandedPanelId: expandedPanelId$,
+    expandedPanelId$,
     expandPanel: (panelId: string) => {
       const isPanelExpanded = panelId === expandedPanelId$.value;
 

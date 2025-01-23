@@ -32,6 +32,7 @@ import { urlForwardingPluginMock } from '@kbn/url-forwarding-plugin/public/mocks
 import { visualizationsPluginMock } from '@kbn/visualizations-plugin/public/mocks';
 
 import { setKibanaServices } from './kibana_services';
+import { setLogger } from './logger';
 import { DashboardAttributes } from '../../server/content_management';
 import { DashboardCapabilities } from '../../common';
 import { LoadDashboardReturn } from './dashboard_content_management_service/types';
@@ -74,6 +75,10 @@ export const setStubKibanaServices = () => {
     usageCollection: usageCollectionPluginMock.createSetupContract(),
     visualizations: visualizationsPluginMock.createStartContract(),
   });
+};
+
+export const setStubLogger = () => {
+  setLogger(coreMock.createCoreContext().logger);
 };
 
 export const mockDashboardContentManagementService = {

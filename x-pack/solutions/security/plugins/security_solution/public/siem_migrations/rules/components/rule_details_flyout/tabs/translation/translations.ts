@@ -85,6 +85,14 @@ export const CALLOUT_TRANSLATED_RULE_TITLE = i18n.translate(
   }
 );
 
+export const CALLOUT_MAPPED_TRANSLATED_RULE_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.mappedTranslatedRuleCalloutTitle',
+  {
+    defaultMessage:
+      'This rule was mapped to an Elastic authored rule. Click Install & enable rule to complete migration. You can fine-tune it later.',
+  }
+);
+
 export const CALLOUT_PARTIALLY_TRANSLATED_RULE_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutTitle',
   {
@@ -96,7 +104,7 @@ export const CALLOUT_PARTIALLY_TRANSLATED_RULE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutDescription',
   {
     defaultMessage:
-      'To save this rule, finish the query and define its severity. If you need help, please contact Elastic support.',
+      'To save this rule, finish writing the query. If you need help, please contact Elastic support.',
   }
 );
 
@@ -112,5 +120,20 @@ export const CALLOUT_NOT_TRANSLATED_RULE_DESCRIPTION = i18n.translate(
   {
     defaultMessage:
       'This might be caused by feature differences between SIEM products. If possible, update the rule manually.',
+  }
+);
+
+export const CALLOUT_TRANSLATED_RULE_INFO_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutTitle',
+  {
+    defaultMessage: 'Translation successful. Install the rule to customize it.',
+  }
+);
+
+export const CALLOUT_TRANSLATED_RULE_INFO_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutDescription',
+  {
+    defaultMessage:
+      'After you install the rule, you can modify or update it with full access to all features.',
   }
 );

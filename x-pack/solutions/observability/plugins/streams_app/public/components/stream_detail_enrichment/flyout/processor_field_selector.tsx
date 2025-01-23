@@ -9,9 +9,10 @@ import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { useController } from 'react-hook-form';
+import { ProcessorFormState } from '../types';
 
 export const ProcessorFieldSelector = () => {
-  const { field, fieldState } = useController({
+  const { field, fieldState } = useController<ProcessorFormState, 'field'>({
     name: 'field',
     rules: {
       required: i18n.translate(

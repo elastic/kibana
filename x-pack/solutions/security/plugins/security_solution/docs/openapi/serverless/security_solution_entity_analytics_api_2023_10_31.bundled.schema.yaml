@@ -17,6 +17,7 @@ paths:
       operationId: DeleteAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
+          example: my_host
           in: query
           name: id_value
           required: true
@@ -65,6 +66,7 @@ paths:
       operationId: GetAssetCriticalityRecord
       parameters:
         - description: The ID value of the asset.
+          example: my_host
           in: query
           name: id_value
           required: true
@@ -115,6 +117,10 @@ paths:
                       enum:
                         - wait_for
                       type: string
+              example:
+                criticality_level: high_impact
+                id_field: host.name
+                id_value: my_host
         required: true
       responses:
         '200':
@@ -242,6 +248,31 @@ paths:
           content:
             application/json:
               schema:
+                example:
+                  page: 1
+                  per_page: 10
+                  records:
+                    - '@timestamp': '2024-08-02T14:40:35.705Z'
+                      asset:
+                        criticality: medium_impact
+                      criticality_level: medium_impact
+                      host:
+                        asset:
+                          criticality: medium_impact
+                        name: my_other_host
+                      id_field: host.name
+                      id_value: my_other_host
+                    - '@timestamp': '2024-08-02T11:15:34.290Z'
+                      asset:
+                        criticality: high_impact
+                      criticality_level: high_impact
+                      host:
+                        asset:
+                          criticality: high_impact
+                        name: my_host
+                      id_field: host.name
+                      id_value: my_host
+                  total: 2
                 type: object
                 properties:
                   page:
@@ -263,7 +294,7 @@ paths:
                   - page
                   - per_page
                   - total
-          description: Bulk upload successful
+          description: Successfully retrieved asset criticality records
       summary: List asset criticality records
       tags:
         - Security Entity Analytics API
@@ -276,6 +307,10 @@ paths:
             schema:
               type: object
               properties:
+                entityTypes:
+                  items:
+                    $ref: '#/components/schemas/EntityType'
+                  type: array
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.
@@ -776,6 +811,17 @@ components:
               type: string
           required:
             - '@timestamp'
+      example:
+        '@timestamp': '2024-08-02T11:15:34.290Z'
+        asset:
+          criticality: high_impact
+        criticality_level: high_impact
+        host:
+          asset:
+            criticality: high_impact
+          name: my_host
+        id_field: host.name
+        id_value: my_host
     AssetCriticalityRecordEcsParts:
       type: object
       properties:
