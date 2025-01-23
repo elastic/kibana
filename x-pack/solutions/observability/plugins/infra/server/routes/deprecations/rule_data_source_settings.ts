@@ -50,7 +50,7 @@ export const getRuleDataSourceDeprecationInfo = async (
             values: { count: offendingSpaces.length, shortList },
           }
         ),
-        level: 'warning',
+        level: 'critical',
         deprecationType: 'feature',
         message: i18n.translate(
           'xpack.infra.deprecations.migrateInfraRuleDataSourceSetttings.message',
@@ -107,7 +107,7 @@ export const getRuleDataSourceDeprecationInfoForSpaceFactory = ({
       .get(`infra_rules_data_view_${space.id}`)
       .catch(() => false);
 
-    if (!logRulesDataViewExists && !infraRulesDataViewExists) {
+    if (!logRulesDataViewExists || !infraRulesDataViewExists) {
       return space.name;
     }
   };
