@@ -124,6 +124,7 @@ jest.mock('../content_management', () => {
               description: 'some links',
               links: getLinks(),
               layout: 'vertical',
+              textOverflow: 'textOverflowEllipsis',
             },
             references,
           },
@@ -161,6 +162,7 @@ describe('getLinksEmbeddableFactory', () => {
       defaultPanelTitle: 'links 001',
       defaultPanelDescription: 'some links',
       layout: 'vertical',
+      textOverflow: 'textOverflowEllipsis',
       links: getResolvedLinks(),
       description: 'just a few links',
       title: 'my links',
@@ -246,6 +248,7 @@ describe('getLinksEmbeddableFactory', () => {
               title: 'links 001',
               links: getLinks(),
               layout: 'vertical',
+              // textOverflow: 'textOverflowEllipsis',
             },
           },
           references,
@@ -259,6 +262,7 @@ describe('getLinksEmbeddableFactory', () => {
       attributes: {
         links: getLinks(),
         layout: 'horizontal',
+        // textOverflow: 'textOverflowEllipsis',
       },
       description: 'just a few links',
       title: 'my links',
@@ -269,6 +273,7 @@ describe('getLinksEmbeddableFactory', () => {
       defaultPanelTitle: undefined,
       defaultPanelDescription: undefined,
       layout: 'horizontal',
+      // textOverflow: 'textOverflowEllipsis',
       links: getResolvedLinks(),
       description: 'just a few links',
       title: 'my links',
@@ -287,7 +292,11 @@ describe('getLinksEmbeddableFactory', () => {
         rawState,
         references,
       });
-      expect(deserializedState).toEqual({ ...expectedRuntimeState, layout: 'horizontal' });
+      expect(deserializedState).toEqual({
+        ...expectedRuntimeState,
+        layout: 'horizontal',
+        // textOverflow: 'textOverflowEllipsis',
+      });
     });
 
     test('component renders', async () => {
@@ -349,6 +358,7 @@ describe('getLinksEmbeddableFactory', () => {
             title: 'some new title',
             links: getLinks(),
             layout: 'horizontal',
+            // textOverflow: 'textOverflowEllipsis',
           },
           options: { references },
         });
