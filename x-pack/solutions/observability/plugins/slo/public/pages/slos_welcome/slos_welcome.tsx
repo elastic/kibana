@@ -17,6 +17,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useEffect } from 'react';
+import { SLO_DOCUMENTATION_URL } from '../../../common/constants';
 import { paths } from '../../../common/locators/paths';
 import { HeaderMenu } from '../../components/header_menu/header_menu';
 import { SloOutdatedCallout } from '../../components/slo/slo_outdated_callout';
@@ -179,7 +180,7 @@ export function SlosWelcomePage() {
             &nbsp;
             <EuiLink
               data-test-subj="o11ySloListWelcomePromptReadTheDocsLink"
-              href="https://www.elastic.co/guide/en/observability/current/slo.html"
+              href={SLO_DOCUMENTATION_URL}
               target="_blank"
             >
               {i18n.translate('xpack.slo.sloList.welcomePrompt.learnMoreLink', {

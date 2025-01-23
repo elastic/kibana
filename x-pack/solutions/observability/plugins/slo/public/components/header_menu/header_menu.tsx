@@ -9,6 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiHeaderLink, EuiHeaderLinks } from '@elastic/eui';
 import { HeaderMenuPortal } from '@kbn/observability-shared-plugin/public';
+import { SLO_DOCUMENTATION_URL } from '../../../common/constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { SLOS_BASE_PATH, SLO_SETTINGS_PATH } from '../../../common/locators/paths';
@@ -25,6 +26,16 @@ export function HeaderMenu(): React.ReactElement | null {
       <EuiFlexGroup responsive={false} gutterSize="s">
         <EuiFlexItem>
           <EuiHeaderLinks>
+            <EuiHeaderLink
+              color="primary"
+              href={SLO_DOCUMENTATION_URL}
+              iconType="documentation"
+              target="_blank"
+            >
+              {i18n.translate('xpack.slo.headerMenu.documentation', {
+                defaultMessage: 'SLO Documentation',
+              })}
+            </EuiHeaderLink>
             <EuiHeaderLink
               color="primary"
               href={http.basePath.prepend('/app/observabilityOnboarding')}
