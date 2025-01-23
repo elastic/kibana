@@ -122,7 +122,7 @@ describe('AddToCaseAction', function () {
           settings: false,
           createComment: false,
           reopenCase: false,
-          assignCase: false,
+          assign: false,
         },
       })
     );
