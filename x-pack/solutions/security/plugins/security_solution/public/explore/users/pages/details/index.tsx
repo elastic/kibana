@@ -183,7 +183,7 @@ const UsersDetailsComponent: React.FC<UsersDetailsProps> = ({
     [detailName]
   );
 
-  const entity = useMemo(() => ({ type: 'user' as const, name: detailName }), [detailName]);
+  const entity = useMemo(() => ({ type: EntityType.user, name: detailName }), [detailName]);
   const privileges = useAssetCriticalityPrivileges(entity.name);
 
   const refetchRiskScore = useRefetchOverviewPageRiskScore(USER_OVERVIEW_RISK_SCORE_QUERY_ID);

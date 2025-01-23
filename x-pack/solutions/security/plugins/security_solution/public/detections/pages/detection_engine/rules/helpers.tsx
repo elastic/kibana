@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import dateMath from '@kbn/datemath';
-import moment from 'moment';
 import memoizeOne from 'memoize-one';
 import { useLocation } from 'react-router-dom';
 
@@ -22,6 +20,7 @@ import { ENDPOINT_LIST_ID } from '@kbn/securitysolution-list-constants';
 import type { Filter } from '@kbn/es-query';
 import type { ActionVariables } from '@kbn/triggers-actions-ui-plugin/public';
 import { requiredOptional } from '@kbn/zod-helpers';
+import { toSimpleRuleSchedule } from '../../../../../common/api/detection_engine/model/rule_schema/to_simple_rule_schedule';
 import {
   ALERT_SUPPRESSION_FIELDS_FIELD_NAME,
   ALERT_SUPPRESSION_DURATION_TYPE_FIELD_NAME,
@@ -191,43 +190,21 @@ export const getDefineStepsData = (rule: RuleResponse): DefineStepRule => ({
 });
 
 export const getScheduleStepsData = (rule: RuleResponse): ScheduleStepRule => {
-  const { interval, from } = rule;
-  const fromHumanizedValue = getHumanizedDuration(from, interval);
+  const simpleRuleSchedule = toSimpleRuleSchedule(rule);
+
+  if (simpleRuleSchedule) {
+    return {
+      interval: simpleRuleSchedule.interval,
+      from: simpleRuleSchedule.lookback,
+    };
+  }
 
   return {
-    interval,
-    from: fromHumanizedValue,
+    interval: rule.interval,
+    // Fallback to zero look-back since UI isn't able to handle negative
+    // look-back
+    from: '0s',
   };
-};
-
-/**
- * Converts seconds to duration string, like "1h", "30m" or "15s"
- */
-export const secondsToDurationString = (seconds: number): string => {
-  if (seconds === 0) {
-    return `0s`;
-  }
-
-  if (seconds % 3600 === 0) {
-    return `${seconds / 3600}h`;
-  } else if (seconds % 60 === 0) {
-    return `${seconds / 60}m`;
-  } else {
-    return `${seconds}s`;
-  }
-};
-
-export const getHumanizedDuration = (from: string, interval: string): string => {
-  const fromValue = dateMath.parse(from) ?? moment();
-  const intervalValue = dateMath.parse(`now-${interval}`) ?? moment();
-
-  const fromDuration = moment.duration(intervalValue.diff(fromValue));
-
-  // Basing calculations off floored seconds count as moment durations weren't precise
-  const intervalDuration = Math.floor(fromDuration.asSeconds());
-  // For consistency of display value
-
-  return secondsToDurationString(intervalDuration);
 };
 
 export const getAboutStepsData = (rule: RuleResponse, detailsView: boolean): AboutStepRule => {

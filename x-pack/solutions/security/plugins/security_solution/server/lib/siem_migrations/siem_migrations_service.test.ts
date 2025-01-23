@@ -18,6 +18,7 @@ import {
   mockStop,
 } from './rules/__mocks__/mocks';
 import type { ConfigType } from '../../config';
+import type { SiemRuleMigrationsClientDependencies } from './rules/types';
 
 jest.mock('./rules/siem_rule_migrations_service');
 
@@ -26,6 +27,8 @@ jest.mock('rxjs', () => ({
   ...jest.requireActual('rxjs'),
   ReplaySubject: jest.fn().mockImplementation(() => mockReplaySubject$),
 }));
+
+const dependencies = {} as SiemRuleMigrationsClientDependencies;
 
 describe('SiemMigrationsService', () => {
   let siemMigrationsService: SiemMigrationsService;
@@ -70,6 +73,7 @@ describe('SiemMigrationsService', () => {
           spaceId: 'default',
           request: httpServerMock.createKibanaRequest(),
           currentUser,
+          dependencies,
         };
         siemMigrationsService.createRulesClient(createRulesClientParams);
         expect(mockCreateClient).toHaveBeenCalledWith(createRulesClientParams);

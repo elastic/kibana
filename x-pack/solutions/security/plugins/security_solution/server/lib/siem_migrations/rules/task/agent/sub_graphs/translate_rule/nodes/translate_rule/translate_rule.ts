@@ -10,7 +10,7 @@ import type { InferenceClient } from '@kbn/inference-plugin/server';
 import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
 import type { GraphNode } from '../../types';
 import { ESQL_SYNTAX_TRANSLATION_PROMPT } from './prompts';
-import { cleanMarkdown } from '../../../../../util/comments';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
 interface GetTranslateRuleNodeParams {
   inferenceClient: InferenceClient;
@@ -47,9 +47,9 @@ export const getTranslateRuleNode = ({
 
     return {
       response,
-      comments: [cleanMarkdown(translationSummary)],
+      comments: [generateAssistantComment(cleanMarkdown(translationSummary))],
       elastic_rule: {
-        integration_id: integrationId,
+        integration_ids: [integrationId],
         query: esqlQuery,
         query_language: 'esql',
       },

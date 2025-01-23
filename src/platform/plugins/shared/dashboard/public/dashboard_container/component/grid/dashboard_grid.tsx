@@ -12,27 +12,26 @@ import React, { useCallback, useMemo, useRef } from 'react';
 
 import { useAppFixedViewport } from '@kbn/core-rendering-browser';
 import { GridLayout, type GridLayoutData } from '@kbn/grid-layout';
-
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+
 import { DashboardPanelState } from '../../../../common';
+import { DASHBOARD_GRID_COLUMN_COUNT } from '../../../../common/content_management/constants';
 import { arePanelLayoutsEqual } from '../../../dashboard_api/are_panel_layouts_equal';
 import { useDashboardApi } from '../../../dashboard_api/use_dashboard_api';
-import {
-  DASHBOARD_GRID_COLUMN_COUNT,
-  DASHBOARD_GRID_HEIGHT,
-  DASHBOARD_MARGIN_SIZE,
-} from '../../../dashboard_constants';
+import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
+import { useLayoutStyles } from './use_layout_styles';
 
 export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
   const dashboardApi = useDashboardApi();
+  const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.expandedPanelId,
+    dashboardApi.expandedPanelId$,
     dashboardApi.panels$,
     dashboardApi.settings.useMargins$,
-    dashboardApi.viewMode
+    dashboardApi.viewMode$
   );
 
   const appFixedViewport = useAppFixedViewport();
@@ -115,6 +114,7 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
     // memoizing this component reduces the number of times it gets re-rendered to a minimum
     return (
       <GridLayout
+        css={layoutStyles}
         layout={currentLayout}
         gridSettings={{
           gutterSize: useMargins ? DASHBOARD_MARGIN_SIZE : 0,
@@ -127,7 +127,15 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
         accessMode={viewMode === 'edit' ? 'EDIT' : 'VIEW'}
       />
     );
-  }, [currentLayout, useMargins, renderPanelContents, onLayoutChange, expandedPanelId, viewMode]);
+  }, [
+    layoutStyles,
+    currentLayout,
+    useMargins,
+    renderPanelContents,
+    onLayoutChange,
+    expandedPanelId,
+    viewMode,
+  ]);
 
   const classes = classNames({
     'dshLayout-withoutMargins': !useMargins,

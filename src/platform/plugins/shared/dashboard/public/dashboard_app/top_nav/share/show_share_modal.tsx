@@ -20,7 +20,7 @@ import { getStateFromKbnUrl, setStateToKbnUrl, unhashUrl } from '@kbn/kibana-uti
 
 import { FormattedMessage } from '@kbn/i18n-react';
 import { convertPanelMapToPanelsArray, DashboardPanelMap } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container';
+import { DashboardLocatorParams } from '../../../dashboard_container/types';
 import {
   getDashboardBackupService,
   PANELS_CONTROL_GROUP_KEY,
