@@ -10,24 +10,14 @@ import { useEuiTheme } from '@elastic/eui';
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 import { useMemo } from 'react';
 
-export const getRiskSeverityColors = (euiTheme: EuiThemeComputed) => {
-  if (euiTheme.themeName === 'EUI_THEME_AMSTERDAM') {
-    return {
-      low: euiTheme.colors.vis.euiColorVis0,
-      medium: euiTheme.colors.vis.euiColorVis5,
-      high: euiTheme.colors.vis.euiColorVis7,
-      critical: euiTheme.colors.vis.euiColorVis9,
-    };
-  }
+export const SEVERITY_COLOR = {
+  low: '#54B399',
+  medium: '#D6BF57',
+  high: '#DA8B45',
+  critical: '#E7664C',
+} as const;
 
-  // Borealis
-  return {
-    low: euiTheme.colors.vis.euiColorVisSuccess0,
-    medium: euiTheme.colors.vis.euiColorSeverity7,
-    high: euiTheme.colors.vis.euiColorSeverity10,
-    critical: euiTheme.colors.vis.euiColorSeverity14,
-  };
-};
+export const getRiskSeverityColors = (_: EuiThemeComputed) => SEVERITY_COLOR;
 
 export const useRiskSeverityColors = (): Record<Severity, string> => {
   const { euiTheme } = useEuiTheme();
