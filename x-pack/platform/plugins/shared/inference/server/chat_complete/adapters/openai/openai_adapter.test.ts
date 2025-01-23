@@ -9,10 +9,14 @@ import OpenAI from 'openai';
 import { v4 } from 'uuid';
 import { PassThrough } from 'stream';
 import { pick } from 'lodash';
-import { lastValueFrom, Subject, toArray } from 'rxjs';
+import { lastValueFrom, Subject, toArray, filter } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import { loggerMock } from '@kbn/logging-mocks';
-import { ChatCompletionEventType, MessageRole } from '@kbn/inference-common';
+import {
+  ChatCompletionEventType,
+  isChatCompletionChunkEvent,
+  MessageRole,
+} from '@kbn/inference-common';
 import { observableIntoEventSourceStream } from '../../../util/observable_into_event_source_stream';
 import { InferenceExecutor } from '../../utils/inference_executor';
 import { openAIAdapter } from './openai_adapter';
@@ -448,7 +452,9 @@ describe('openAIAdapter', () => {
 
       source$.complete();
 
-      const allChunks = await lastValueFrom(response$.pipe(toArray()));
+      const allChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
 
       expect(allChunks).toEqual([
         {
@@ -502,7 +508,9 @@ describe('openAIAdapter', () => {
 
       source$.complete();
 
-      const allChunks = await lastValueFrom(response$.pipe(toArray()));
+      const allChunks = await lastValueFrom(
+        response$.pipe(filter(isChatCompletionChunkEvent), toArray())
+      );
 
       expect(allChunks).toEqual([
         {
@@ -572,6 +580,46 @@ describe('openAIAdapter', () => {
             prompt: 50,
             completion: 100,
             total: 150,
+          },
+        },
+      ]);
+    });
+
+    it('emits token count event when not provided by the response', async () => {
+      const response$ = openAIAdapter.chatComplete({
+        ...defaultArgs,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'Hello',
+          },
+        ],
+      });
+
+      source$.next(
+        createOpenAIChunk({
+          delta: {
+            content: 'chunk',
+          },
+        })
+      );
+
+      source$.complete();
+
+      const allChunks = await lastValueFrom(response$.pipe(toArray()));
+
+      expect(allChunks).toEqual([
+        {
+          type: ChatCompletionEventType.ChatCompletionChunk,
+          content: 'chunk',
+          tool_calls: [],
+        },
+        {
+          type: ChatCompletionEventType.ChatCompletionTokenCount,
+          tokens: {
+            completion: expect.any(Number),
+            prompt: expect.any(Number),
+            total: expect.any(Number),
           },
         },
       ]);
