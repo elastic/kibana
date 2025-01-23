@@ -72,14 +72,16 @@ export function getEcsResponseLog(request: Request, log: Logger) {
 
   const responseLogObj = response
     ? {
-        body: {
-          bytes,
+        response: {
+          body: {
+            bytes,
+          },
+          status_code: isBoom(response) ? response.output.statusCode : response.statusCode,
+          headers: cloneAndFilterHeaders(
+            isBoom(response) ? (response.output.headers as HapiHeaders) : response.headers
+          ),
+          responseTime: !isNaN(responseTime) ? responseTime : undefined,
         },
-        status_code: isBoom(response) ? response.output.statusCode : response.statusCode,
-        headers: cloneAndFilterHeaders(
-          isBoom(response) ? (response.output.headers as HapiHeaders) : response.headers
-        ),
-        responseTime: !isNaN(responseTime) ? responseTime : undefined,
       }
     : {};
 
@@ -95,7 +97,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
         // @ts-expect-error ECS custom field: https://github.com/elastic/ecs/issues/232.
         headers: requestHeaders,
       },
-      response: responseLogObj,
+      ...responseLogObj,
     },
     url: {
       path,
@@ -107,7 +109,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
     trace: traceId ? { id: traceId } : undefined,
   };
 
-  const statusCodeIfResponseExists = response ? responseLogObj.status_code : '';
+  const statusCodeIfResponseExists = response ? responseLogObj.response?.status_code : '';
   return {
     message: `${method} ${pathWithQuery} ${statusCodeIfResponseExists}${responseTimeMsg}${bytesMsg}`,
     meta,
