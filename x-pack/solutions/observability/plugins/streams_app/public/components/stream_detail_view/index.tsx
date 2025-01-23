@@ -54,6 +54,7 @@ export function StreamDetailView() {
               elasticsearch_assets: [],
               lifecycle: response.lifecycle,
               name: key,
+              root: response.root,
               stream: {
                 name: key,
                 ...response.stream,
