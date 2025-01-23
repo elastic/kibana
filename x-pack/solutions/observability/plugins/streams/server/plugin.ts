@@ -86,7 +86,12 @@ export class StreamsPlugin
           const scopedClusterClient = coreStart.elasticsearch.client.asScoped(request);
           const soClient = coreStart.savedObjects.getScopedClient(request);
 
-          return { scopedClusterClient, soClient, assetClient, streamsClient };
+          return {
+            scopedClusterClient,
+            soClient,
+            assetClient,
+            streamsClient,
+          };
         },
       },
       core,

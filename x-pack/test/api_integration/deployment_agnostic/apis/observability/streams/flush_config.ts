@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import {
-  StreamUpsertRequest,
+  isGroupedStreamDefinitionBase,
   StreamGetResponse,
   WiredReadStreamDefinition,
 } from '@kbn/streams-schema';
@@ -17,117 +17,7 @@ import {
   createStreamsRepositoryAdminClient,
 } from './helpers/repository_client';
 import { disableStreams, enableStreams, indexDocument } from './helpers/requests';
-
-type StreamPutItem = Omit<StreamUpsertRequest, 'dashboards'> & { name: string };
-
-const streams: StreamPutItem[] = [
-  {
-    name: 'logs',
-    stream: {
-      ingest: {
-        processing: [],
-        wired: {
-          fields: {
-            '@timestamp': {
-              type: 'date',
-            },
-            message: {
-              type: 'match_only_text',
-            },
-            'host.name': {
-              type: 'keyword',
-            },
-            'log.level': {
-              type: 'keyword',
-            },
-          },
-        },
-        routing: [
-          {
-            destination: 'logs.test',
-            if: {
-              and: [
-                {
-                  field: 'numberfield',
-                  operator: 'gt',
-                  value: 15,
-                },
-              ],
-            },
-          },
-          {
-            destination: 'logs.test2',
-            if: {
-              and: [
-                {
-                  field: 'field2',
-                  operator: 'eq',
-                  value: 'abc',
-                },
-              ],
-            },
-          },
-        ],
-      },
-    },
-  },
-  {
-    name: 'logs.test',
-    stream: {
-      ingest: {
-        routing: [],
-        processing: [],
-        wired: {
-          fields: {
-            numberfield: {
-              type: 'long',
-            },
-          },
-        },
-      },
-    },
-  },
-  {
-    name: 'logs.test2',
-    stream: {
-      ingest: {
-        processing: [
-          {
-            grok: {
-              field: 'message',
-              patterns: ['%{NUMBER:numberfield}'],
-              if: { always: {} },
-            },
-          },
-        ],
-        wired: {
-          fields: {
-            field2: {
-              type: 'keyword',
-            },
-          },
-        },
-        routing: [],
-      },
-    },
-  },
-  {
-    name: 'logs.deeply.nested.streamname',
-    stream: {
-      ingest: {
-        processing: [],
-        wired: {
-          fields: {
-            field2: {
-              type: 'keyword',
-            },
-          },
-        },
-        routing: [],
-      },
-    },
-  },
-];
+import { createStreams } from './helpers/create_streams';
 
 export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   const roleScopedSupertest = getService('roleScopedSupertest');
@@ -140,7 +30,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     before(async () => {
       apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
       await enableStreams(apiClient);
-      await createStreams();
+      await createStreams(apiClient);
       await indexDocuments();
     });
 
@@ -149,7 +39,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('checks whether deeply nested stream is created correctly', async () => {
-      function getChildNames(stream: StreamGetResponse['stream']) {
+      function getChildNames(stream: StreamGetResponse['stream']): string[] {
+        if (isGroupedStreamDefinitionBase(stream)) return [];
         return stream.ingest.routing.map((r) => r.destination);
       }
       const logs = await apiClient.fetch('GET /api/streams/{id}', {
@@ -216,23 +107,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(logsTest2Response.hits.total).to.eql({ value: 1, relation: 'eq' });
     });
-
-    async function createStreams() {
-      for (const { name: streamId, ...stream } of streams) {
-        await apiClient
-          .fetch('PUT /api/streams/{id}', {
-            params: {
-              body: {
-                ...stream,
-                dashboards: [],
-              } as StreamUpsertRequest,
-              path: { id: streamId },
-            },
-          })
-          .expect(200)
-          .then((response) => expect(response.body.acknowledged).to.eql(true));
-      }
-    }
 
     async function indexDocuments() {
       // send data that stays in logs

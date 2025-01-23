@@ -8,9 +8,13 @@
 import { z } from '@kbn/zod';
 import { createIsNarrowSchema } from '../helpers';
 import { IngestStreamDefinition, ingestStreamDefinitionSchema } from './ingest';
+import { GroupedStreamDefinition, groupedStreamDefinitionSchema } from './grouped';
 
-export type StreamDefinition = IngestStreamDefinition;
+export type StreamDefinition = IngestStreamDefinition | GroupedStreamDefinition;
 
-export const streamDefinitionSchema: z.Schema<StreamDefinition> = ingestStreamDefinitionSchema;
+export const streamDefinitionSchema: z.Schema<StreamDefinition> = z.union([
+  ingestStreamDefinitionSchema,
+  groupedStreamDefinitionSchema,
+]);
 
 export const isStreamDefinition = createIsNarrowSchema(z.unknown(), streamDefinitionSchema);

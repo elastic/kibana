@@ -11,9 +11,16 @@ import {
   type IngestStreamGetResponse,
   type IngestStreamUpsertRequest,
 } from './ingest';
+import {
+  GroupedStreamGetResponse,
+  GroupedStreamUpsertRequest,
+  groupedStreamUpsertRequestSchema,
+} from './grouped/api';
 
-export const streamUpsertRequestSchema: z.Schema<StreamUpsertRequest> =
-  ingestStreamUpsertRequestSchema;
+export const streamUpsertRequestSchema: z.Schema<StreamUpsertRequest> = z.union([
+  ingestStreamUpsertRequestSchema,
+  groupedStreamUpsertRequestSchema,
+]);
 
-export type StreamGetResponse = IngestStreamGetResponse;
-export type StreamUpsertRequest = IngestStreamUpsertRequest;
+export type StreamGetResponse = IngestStreamGetResponse | GroupedStreamGetResponse;
+export type StreamUpsertRequest = IngestStreamUpsertRequest | GroupedStreamUpsertRequest;

@@ -15,6 +15,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   Condition,
+  GroupedStreamDefinition,
   StreamDefinition,
   StreamUpsertRequest,
   UnwiredStreamDefinition,
@@ -23,6 +24,7 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
+  isGroupedStreamDefinition,
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
@@ -30,7 +32,7 @@ import {
 } from '@kbn/streams-schema';
 import { cloneDeep, keyBy, omit, orderBy } from 'lodash';
 import { AssetClient } from './assets/asset_client';
-import { DefinitionNotFound, SecurityException } from './errors';
+import { DefinitionNotFound, ForbiddenMemberType, SecurityException } from './errors';
 import { MalformedStreamId } from './errors/malformed_stream_id';
 import {
   syncUnwiredStreamDefinitionObjects,
@@ -293,6 +295,10 @@ export class StreamsClient {
       validateStreamTypeChanges(existingDefinition, definition);
     }
 
+    if (isGroupedStreamDefinition(definition)) {
+      await this.validateGroupedStream({ definition });
+    }
+
     if (isRootStreamDefinition(definition)) {
       // only allow selective updates to a root stream
       validateRootStreamChanges(
@@ -403,6 +409,29 @@ export class StreamsClient {
   }
 
   /**
+   * Validates the members of the group streams to ensure they are NOT
+   * GroupedStreamDefinitions
+   */
+  async validateGroupedStream({ definition }: { definition: GroupedStreamDefinition }) {
+    const { members } = definition.grouped;
+
+    if (members.includes(definition.name)) {
+      throw new ForbiddenMemberType('The same stream can not be part of the group');
+    }
+
+    await Promise.all(
+      members.map(async (name) => {
+        const memberStream = await this.getStream(name);
+        if (isGroupedStreamDefinition(memberStream)) {
+          throw new ForbiddenMemberType(
+            `Grouped streams can not be apart of a group, please remove [${name}]`
+          );
+        }
+      })
+    );
+  }
+
+  /**
    * Forks a stream into a child with a specific condition.
    * It mostly defers to `upsertStream` for its validations,
    * except for two things:
@@ -463,30 +492,33 @@ export class StreamsClient {
    * Returns a stream definition for the given name:
    * - if a wired stream definition exists
    * - if an ingest stream definition exists
-   * - if a data stream exists (creates an ingest
-   * definition on the fly)
+   * - if a data stream exists (creates an ingest definition on the fly)
+   * - if a grouped stream definition exists
    *
    * Throws when:
    * - no definition is found
    * - the user does not have access to the stream
    */
   async getStream(name: string): Promise<StreamDefinition> {
-    const definition = await Promise.all([
-      this.dependencies.storageClient.get({ id: name }).then((response) => {
+    const definition = this.dependencies.storageClient
+      .get({ id: name })
+      .then((response) => {
         const source = response._source;
         assertsSchema(streamDefinitionSchema, source);
         return source;
-      }),
-      checkAccess({ id: name, scopedClusterClient: this.dependencies.scopedClusterClient }).then(
-        (privileges) => {
-          if (!privileges.read) {
-            throw new DefinitionNotFound(`Stream definition for ${name} not found`);
-          }
+      })
+      .then((streamDefinition) => {
+        if (isWiredStreamDefinition(streamDefinition)) {
+          checkAccess({
+            id: name,
+            scopedClusterClient: this.dependencies.scopedClusterClient,
+          }).then((privileges) => {
+            if (!privileges.read) {
+              throw new DefinitionNotFound(`Stream definition for ${name} not found`);
+            }
+          });
         }
-      ),
-    ])
-      .then(([wiredDefinition]) => {
-        return wiredDefinition;
+        return streamDefinition;
       })
       .catch(async (error) => {
         if (isElasticsearch404(error)) {
@@ -612,11 +644,14 @@ export class StreamsClient {
     });
 
     const privileges = await checkAccessBulk({
-      ids: streams.map((stream) => stream.name),
+      ids: streams
+        .filter((stream) => !isGroupedStreamDefinition(stream))
+        .map((stream) => stream.name),
       scopedClusterClient,
     });
 
     return streams.filter((stream) => {
+      if (isGroupedStreamDefinition(stream)) return true;
       return privileges[stream.name]?.read === true;
     });
   }
@@ -629,13 +664,13 @@ export class StreamsClient {
   private async deleteStreamFromDefinition(definition: StreamDefinition): Promise<void> {
     const { assetClient, logger, scopedClusterClient } = this.dependencies;
 
-    if (!isWiredStreamDefinition(definition)) {
+    if (isUnwiredStreamDefinition(definition)) {
       await deleteUnmanagedStreamObjects({
         scopedClusterClient,
         id: definition.name,
         logger,
       });
-    } else {
+    } else if (isWiredStreamDefinition(definition)) {
       const parentId = getParentId(definition.name);
 
       // need to update parent first to cut off documents streaming down
@@ -697,15 +732,20 @@ export class StreamsClient {
    * Also verifies whether the user has access to the stream.
    */
   async deleteStream(name: string): Promise<DeleteStreamResponse> {
-    const [definition, access] = await Promise.all([
-      this.getStream(name).catch((error) => {
-        if (isDefinitionNotFoundError(error)) {
-          return undefined;
-        }
-        throw error;
-      }),
-      checkAccess({ id: name, scopedClusterClient: this.dependencies.scopedClusterClient }),
-    ]);
+    const definition = await this.getStream(name).catch((error) => {
+      if (isDefinitionNotFoundError(error)) {
+        return undefined;
+      }
+      throw error;
+    });
+
+    const access =
+      definition && isGroupedStreamDefinition(definition)
+        ? { write: true, read: true }
+        : await checkAccess({
+            id: name,
+            scopedClusterClient: this.dependencies.scopedClusterClient,
+          });
 
     if (!access.write) {
       throw new SecurityException(`Cannot delete stream, insufficient privileges`);
@@ -715,9 +755,11 @@ export class StreamsClient {
       return { acknowledged: true, result: 'noop' };
     }
 
-    const parentId = getParentId(name);
-    if (isWiredStreamDefinition(definition) && !parentId) {
-      throw new MalformedStreamId('Cannot delete root stream');
+    if (isWiredStreamDefinition(definition)) {
+      const parentId = getParentId(name);
+      if (!parentId) {
+        throw new MalformedStreamId('Cannot delete root stream');
+      }
     }
 
     await this.deleteStreamFromDefinition(definition);

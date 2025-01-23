@@ -7,9 +7,10 @@
 
 import { omit } from 'lodash';
 import {
-  IngestStreamGetResponse,
   InheritedFieldDefinition,
+  StreamGetResponse,
   WiredStreamGetResponse,
+  isGroupedStreamDefinition,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
@@ -30,14 +31,25 @@ export async function readStream({
   assetClient: AssetClient;
   streamsClient: StreamsClient;
   scopedClusterClient: IScopedClusterClient;
-}): Promise<IngestStreamGetResponse> {
-  const [streamDefinition, dashboards, ancestors, dataStream] = await Promise.all([
+}): Promise<StreamGetResponse> {
+  const [streamDefinition, dashboards] = await Promise.all([
     streamsClient.getStream(name),
     assetClient.getAssetIds({
       entityId: name,
       entityType: 'stream',
       assetType: 'dashboard',
     }),
+  ]);
+
+  if (isGroupedStreamDefinition(streamDefinition)) {
+    return {
+      stream: omit(streamDefinition, 'name'),
+      dashboards,
+    };
+  }
+
+  // These queries are only relavate for IngestStreams
+  const [ancestors, dataStream] = await Promise.all([
     streamsClient.getAncestors(name),
     streamsClient.getDataStream(name),
   ]);

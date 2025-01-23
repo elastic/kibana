@@ -155,7 +155,7 @@ const isWiredStreamGetResponse = createIsNarrowSchema(
 
 const isUnWiredStreamGetResponse = createIsNarrowSchema(
   ingestStreamGetResponseSchema,
-  wiredStreamGetResponseSchema
+  unwiredStreamGetResponseSchema
 );
 
 const asWiredStreamGetResponse = createAsSchemaOrThrow(

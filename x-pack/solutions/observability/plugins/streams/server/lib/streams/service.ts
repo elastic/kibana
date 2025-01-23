@@ -22,6 +22,7 @@ export const streamsStorageSettings = {
     properties: {
       name: types.keyword(),
       ingest: types.object({ enabled: false }),
+      grouped: types.object({ enabled: false }),
     },
   },
 } satisfies StorageSettings;

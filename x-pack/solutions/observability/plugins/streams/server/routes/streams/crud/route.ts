@@ -9,6 +9,7 @@ import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import { badRequest, internal, notFound } from '@hapi/boom';
 import { isResponseError } from '@kbn/es-errors';
 import {
+  isGroupedStreamDefinition,
   StreamDefinition,
   StreamGetResponse,
   streamUpsertRequestSchema,
@@ -16,6 +17,7 @@ import {
 import { z } from '@kbn/zod';
 import {
   DefinitionNotFound,
+  ForbiddenMemberType,
   ForkConditionMissing,
   IndexTemplateNotFound,
   RootStreamImmutabilityException,
@@ -94,9 +96,13 @@ export const streamDetailRoute = createServerRoute({
       const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
       const streamEntity = await streamsClient.getStream(params.path.id);
 
+      const indexPattern = isGroupedStreamDefinition(streamEntity)
+        ? streamEntity.grouped.members.join(',')
+        : streamEntity.name;
+
       // check doc count
       const docCountResponse = await scopedClusterClient.asCurrentUser.search({
-        index: streamEntity.name,
+        index: indexPattern,
         body: {
           track_total_hits: true,
           query: {
@@ -192,7 +198,8 @@ export const editStreamRoute = createServerRoute({
         e instanceof SecurityException ||
         e instanceof ForkConditionMissing ||
         e instanceof MalformedStreamId ||
-        e instanceof RootStreamImmutabilityException
+        e instanceof RootStreamImmutabilityException ||
+        e instanceof ForbiddenMemberType
       ) {
         throw badRequest(e);
       }

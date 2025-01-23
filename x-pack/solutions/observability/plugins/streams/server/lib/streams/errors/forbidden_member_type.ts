@@ -5,10 +5,9 @@
  * 2.0.
  */
 
-export * from './ingest';
-export * from './legacy';
-
-export * from './api';
-export * from './core';
-export * from './helpers';
-export * from './grouped';
+export class ForbiddenMemberType extends Error {
+  constructor(message: string) {
+    super(message);
+    this.name = 'ForbiddenMemberType';
+  }
+}
