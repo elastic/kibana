@@ -7,19 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test as base } from '@playwright/test';
 import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
-import { ScoutWorkerFixtures } from '../types';
-import { isValidUTCDate, formatTime } from '../../utils';
+import { isValidUTCDate, formatTime, serviceLoadedMsg } from '../../../utils';
+import { coreWorkerFixtures } from '../core_fixtures';
+import { UiSettingsFixture } from '.';
 
 /**
  * This fixture provides a way to interact with Kibana UI settings.
  */
-export const uiSettingsFixture = base.extend<{}, ScoutWorkerFixtures>({
+export const uiSettingsFixture = coreWorkerFixtures.extend<{}, { uiSettings: UiSettingsFixture }>({
   uiSettings: [
-    ({ kbnClient }, use) => {
+    async ({ kbnClient, log }, use) => {
       const kbnClientUiSettings = {
-        set: async (values: UiSettingValues) => kbnClient.uiSettings.update(values),
+        set: async (values: UiSettingValues) => {
+          await kbnClient.uiSettings.update(values);
+        },
 
         unset: async (...keys: string[]) =>
           Promise.all(keys.map((key) => kbnClient.uiSettings.unset(key))),
@@ -33,7 +35,8 @@ export const uiSettingsFixture = base.extend<{}, ScoutWorkerFixtures>({
         },
       };
 
-      use(kbnClientUiSettings);
+      log.debug(serviceLoadedMsg(`uiSettings`));
+      await use(kbnClientUiSettings);
     },
     { scope: 'worker' },
   ],

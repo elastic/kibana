@@ -6,34 +6,34 @@
  */
 
 import { expect, tags } from '@kbn/scout';
-import { test, testData, assertionMessages } from '../fixtures';
+import { spaceTest, testData, assertionMessages } from '../fixtures';
 
-test.describe(
+spaceTest.describe(
   'Discover app - value suggestions: useTimeRange disabled',
   { tag: tags.DEPLOYMENT_AGNOSTIC },
   () => {
-    test.beforeAll(async ({ esArchiver, kbnClient, uiSettings }) => {
-      await esArchiver.loadIfNeeded(testData.ES_ARCHIVES.LOGSTASH);
-      await kbnClient.importExport.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
-      await uiSettings.set({
-        defaultIndex: testData.DATA_VIEW_ID.LOGSTASH, // TODO: investigate why it is required for `node scripts/playwright_test.js` run
-        'timepicker:timeDefaults': `{ "from": "${testData.LOGSTASH_DEFAULT_START_TIME}", "to": "${testData.LOGSTASH_DEFAULT_END_TIME}"}`,
-        'autocomplete:useTimeRange': false,
+    spaceTest.beforeAll(async ({ scoutSpace }) => {
+      await scoutSpace.savedObjects.load(testData.KBN_ARCHIVES.DASHBOARD_DRILLDOWNS);
+      await scoutSpace.uiSettings.setDefaultIndex(testData.DATA_VIEW_NAME.LOGSTASH);
+      await scoutSpace.uiSettings.setDefaultTime({
+        from: testData.LOGSTASH_DEFAULT_START_TIME,
+        to: testData.LOGSTASH_DEFAULT_END_TIME,
       });
+      await scoutSpace.uiSettings.set({ 'autocomplete:useTimeRange': false });
     });
 
-    test.afterAll(async ({ uiSettings, kbnClient }) => {
-      await uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
-      await uiSettings.set({ 'autocomplete:useTimeRange': true });
-      await kbnClient.savedObjects.cleanStandardList();
+    spaceTest.afterAll(async ({ scoutSpace }) => {
+      await scoutSpace.uiSettings.unset('defaultIndex', 'timepicker:timeDefaults');
+      await scoutSpace.uiSettings.set({ 'autocomplete:useTimeRange': true });
+      await scoutSpace.savedObjects.cleanStandardList();
     });
 
-    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+    spaceTest.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.discover.goto();
     });
 
-    test('show up if outside of range', async ({ page, pageObjects }) => {
+    spaceTest('show up if outside of range', async ({ page, pageObjects }) => {
       await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_OUT_OF_RANGE_DATES);
       await page.testSubj.fill('queryInput', 'extension.raw : ');
       await expect(
@@ -46,7 +46,7 @@ test.describe(
       expect(actualSuggestions.join(',')).toContain('jpg');
     });
 
-    test('show up if in range', async ({ page, pageObjects }) => {
+    spaceTest('show up if in range', async ({ page, pageObjects }) => {
       await pageObjects.datePicker.setAbsoluteRange(testData.LOGSTASH_IN_RANGE_DATES);
       await page.testSubj.fill('queryInput', 'extension.raw : ');
       await expect(
