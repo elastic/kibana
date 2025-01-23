@@ -18,20 +18,6 @@ import { configServiceMock } from '@kbn/config-mocks';
 import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
 import { DeprecationsService, DeprecationsSetupDeps } from './deprecations_service';
-import { type ILoggingSystem, LoggingService } from '@kbn/core-logging-server-internal';
-import { loggerMock } from '@kbn/logging-mocks';
-
-const createLoggingSystemMock = () => {
-  const mocked: jest.Mocked<ILoggingSystem> = {
-    get: jest.fn().mockImplementation(() => loggerMock.create()),
-    asLoggerFactory: jest.fn().mockImplementation(() => loggerMock.create()),
-    setContextConfig: jest.fn(),
-    setGlobalContext: jest.fn(),
-    upgrade: jest.fn(),
-    stop: jest.fn(),
-  };
-  return mocked;
-};
 
 describe('DeprecationsService', () => {
   let coreContext: ReturnType<typeof mockCoreContext.create>;
@@ -39,8 +25,6 @@ describe('DeprecationsService', () => {
   let router: ReturnType<typeof httpServiceMock.createRouter>;
   let deprecationsCoreSetupDeps: DeprecationsSetupDeps;
   let coreUsageData: ReturnType<typeof coreUsageDataServiceMock.createSetupContract>;
-  let loggingSystem: jest.Mocked<ILoggingSystem>;
-  let service: LoggingService;
 
   beforeEach(() => {
     const configService = configServiceMock.create({
@@ -51,10 +35,7 @@ describe('DeprecationsService', () => {
     coreUsageData = coreUsageDataServiceMock.createSetupContract();
     router = httpServiceMock.createRouter();
     http.createRouter.mockReturnValue(router);
-    loggingSystem = createLoggingSystemMock();
-    service = new LoggingService({ logger: loggingSystem.asLoggerFactory() } as any);
-    service.preboot({ loggingSystem });
-    deprecationsCoreSetupDeps = { http, coreUsageData, logging: service.setup() };
+    deprecationsCoreSetupDeps = { http, coreUsageData };
   });
 
   afterEach(() => {
