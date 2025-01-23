@@ -38,7 +38,6 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import { CaseRt } from '../../../common/types/domain';
-
 /**
  * Parameters for finding cases IDs using an alert ID
  */
@@ -167,12 +166,9 @@ export interface GetParams {
  *
  * @ignore
  */
-export const get = async (
-  { id, includeComments }: GetParams,
-  clientArgs: CasesClientArgs
-): Promise<Case> => {
+export const get = async ({ id }: GetParams, clientArgs: CasesClientArgs): Promise<Case> => {
   const {
-    services: { caseService },
+    services: { caseService, attachmentService },
     logger,
     authorization,
   } = clientArgs;
@@ -187,30 +183,21 @@ export const get = async (
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
-    if (!includeComments) {
-      return decodeOrThrow(CaseRt)(
-        flattenCaseSavedObject({
-          savedObject: theCase,
-        })
-      );
-    }
-
-    const theComments = await caseService.getAllCaseComments({
-      id,
-      options: {
-        sortField: 'created_at',
-        sortOrder: 'asc',
-      },
+    const commentStats = await attachmentService.getter.getCaseCommentStats({
+      caseIds: [theCase.id],
     });
 
-    const res = flattenCaseSavedObject({
-      savedObject: theCase,
-      comments: theComments.saved_objects,
-      totalComment: countUserAttachments(theComments.saved_objects),
-      totalAlerts: countAlertsForID({ comments: theComments, id }),
-    });
-
-    return decodeOrThrow(CaseRt)(res);
+    return decodeOrThrow(CaseRt)(
+      flattenCaseSavedObject({
+        savedObject: theCase,
+        ...(commentStats.has(theCase.id)
+          ? {
+              totalAlerts: commentStats.get(theCase.id)?.alerts,
+              totalComment: commentStats.get(theCase.id)?.userComments,
+            }
+          : {}),
+      })
+    );
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }

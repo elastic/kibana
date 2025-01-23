@@ -473,19 +473,15 @@ export const getAllCasesStatuses = async ({
 export const getCase = async ({
   supertest,
   caseId,
-  includeComments,
   expectedHttpCode = 200,
   auth = { user: superUser, space: null },
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  includeComments?: boolean;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }): Promise<Case> => {
-  const basePath = `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}`;
-  const path =
-    includeComments != null ? `${basePath}?includeComments=${includeComments}` : basePath;
+  const path = `${getSpaceUrlPrefix(auth?.space)}${CASES_URL}/${caseId}`;
 
   const { body: theCase } = await supertest
     .get(path)

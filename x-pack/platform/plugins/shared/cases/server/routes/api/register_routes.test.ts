@@ -37,9 +37,6 @@ describe('registerRoutes', () => {
         params: schema.object({
           case_id: schema.string(),
         }),
-        query: schema.object({
-          includeComments: schema.boolean(),
-        }),
       },
       handler,
     }),
