@@ -147,7 +147,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx',
           },
-          condition: {
+          if: {
             field: 'log.logger',
             operator: 'eq' as const,
             value: 'nginx',
@@ -184,7 +184,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.access',
           },
-          condition: { field: 'log.level', operator: 'eq' as const, value: 'info' },
+          if: { field: 'log.level', operator: 'eq' as const, value: 'info' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -217,7 +217,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.nginx.error',
           },
-          condition: { field: 'log', operator: 'eq' as const, value: 'error' },
+          if: { field: 'log', operator: 'eq' as const, value: 'error' },
         };
         const response = await forkStream(apiClient, 'logs.nginx', body);
         expect(response).to.have.property('acknowledged', true);
@@ -250,7 +250,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.number-test',
           },
-          condition: { field: 'code', operator: 'gte' as const, value: '500' },
+          if: { field: 'code', operator: 'gte' as const, value: '500' },
         };
         const response = await forkStream(apiClient, 'logs', body);
         expect(response).to.have.property('acknowledged', true);
@@ -282,7 +282,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           stream: {
             name: 'logs.string-test',
           },
-          condition: {
+          if: {
             or: [
               { field: 'message', operator: 'contains' as const, value: '500' },
               { field: 'message', operator: 'contains' as const, value: 400 },

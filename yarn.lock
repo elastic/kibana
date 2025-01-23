@@ -4034,7 +4034,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-types@link:x-pack/solutions/observability/packages/kbn-apm-types":
+"@kbn/apm-types@link:x-pack/platform/packages/shared/kbn-apm-types":
   version "0.0.0"
   uid ""
 
@@ -5634,6 +5634,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/event-stacktrace@link:x-pack/platform/packages/shared/kbn-event-stacktrace":
+  version "0.0.0"
+  uid ""
+
 "@kbn/expandable-flyout@link:x-pack/solutions/security/packages/expandable-flyout":
   version "0.0.0"
   uid ""
@@ -5970,6 +5974,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/inference-endpoint-plugin@link:x-pack/platform/plugins/shared/inference_endpoint":
+  version "0.0.0"
+  uid ""
+
 "@kbn/inference-endpoint-ui-common@link:x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common":
   version "0.0.0"
   uid ""
@@ -6083,6 +6091,10 @@
   uid ""
 
 "@kbn/kbn-tp-run-pipeline-plugin@link:test/interpreter_functional/plugins/kbn_tp_run_pipeline":
+  version "0.0.0"
+  uid ""
+
+"@kbn/key-value-metadata-table@link:x-pack/platform/packages/shared/kbn-key-value-metadata-table":
   version "0.0.0"
   uid ""
 
@@ -9113,7 +9125,7 @@
   resolved "https://registry.yarnpkg.com/@polka/url/-/url-1.0.0-next.21.tgz#5de5a2385a35309427f6011992b544514d559aa1"
   integrity sha512-a5Sab1C4/icpTZVzZc5Ghpz88yQtGOyNqYXcZgOssB2uuAr+wF/MvN6bgtW32q7HHrvBki+BsZ0OuNv6EV3K9g==
 
-"@popperjs/core@^2.11.8", "@popperjs/core@^2.5.4":
+"@popperjs/core@^2.11.5", "@popperjs/core@^2.11.8":
   version "2.11.8"
   resolved "https://registry.yarnpkg.com/@popperjs/core/-/core-2.11.8.tgz#6b79032e760a0899cd4204710beede972a3a185f"
   integrity sha512-P1st0aksCrn9sGZhp8GMYwBnQsbvAWsZAX44oXNNvLHGqAOcoVxmjZiohstwQ7SqKnbR47akdNi+uleWD8+g6A==
@@ -9227,12 +9239,12 @@
     require-from-string "^2.0.2"
     uri-js-replace "^1.0.1"
 
-"@redocly/cli@^1.27.1":
-  version "1.27.1"
-  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.27.1.tgz#7ae671615c2f6e6d049fce1affe3aa19f308b5a6"
-  integrity sha512-IgFzIKgWDaGY8jOlWYVp7VyIwElIjqrVLvZWzdDS/vdQlJ0DdISQ1nRy/YSh0Rqw69hJOpgn5cXMH/SS/qO33Q==
+"@redocly/cli@^1.27.2":
+  version "1.27.2"
+  resolved "https://registry.yarnpkg.com/@redocly/cli/-/cli-1.27.2.tgz#3158df763ef8bbb2dfea312e0840ddf02196fa2c"
+  integrity sha512-bJi3Hb3eaTo7lnMXAJ3HQwQS45vrNXwaqNwh/nbgjkzeb4/5p7GXgB6nWkakwKUDiPVMX2rBoa8MCodNaaQ3Yg==
   dependencies:
-    "@redocly/openapi-core" "1.27.1"
+    "@redocly/openapi-core" "1.27.2"
     abort-controller "^3.0.0"
     chokidar "^3.5.1"
     colorette "^1.2.0"
@@ -9252,18 +9264,18 @@
     styled-components "^6.0.7"
     yargs "17.0.1"
 
-"@redocly/config@^0.17.0":
-  version "0.17.1"
-  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.17.1.tgz#2def04cecf440dd78c0f102f53f3444fac050768"
-  integrity sha512-CEmvaJuG7pm2ylQg53emPmtgm4nW2nxBgwXzbVEHpGas/lGnMyN8Zlkgiz6rPw0unASg6VW3wlz27SOL5XFHYQ==
+"@redocly/config@^0.20.1":
+  version "0.20.1"
+  resolved "https://registry.yarnpkg.com/@redocly/config/-/config-0.20.1.tgz#867e187d8113d0646eab7859c7835ed0656d8315"
+  integrity sha512-TYiTDtuItiv95YMsrRxyCs1HKLrDPtTvpaD3+kDKXBnFDeJuYKZ+eHXpCr6YeN4inxfVBs7DLhHsQcs9srddyQ==
 
-"@redocly/openapi-core@1.27.1", "@redocly/openapi-core@^1.4.0":
-  version "1.27.1"
-  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.27.1.tgz#53b6b6be0ffecf696a1da5aee84fe989cdf6d764"
-  integrity sha512-zQ47/A+Drk2Y75/af69MD3Oad4H9LxkUDzcm7XBkyLNDKIWQrDKDnS5476oDq77+zciymNxgMVtxxVXlnGS8kw==
+"@redocly/openapi-core@1.27.2", "@redocly/openapi-core@^1.4.0":
+  version "1.27.2"
+  resolved "https://registry.yarnpkg.com/@redocly/openapi-core/-/openapi-core-1.27.2.tgz#109163901fd8a2853e805877fe234b65e3c5753a"
+  integrity sha512-qVrDc27DHpeO2NRCMeRdb4299nijKQE3BY0wrA+WUHlOLScorIi/y7JzammLk22IaTvjR9Mv9aTAdjE1aUwJnA==
   dependencies:
     "@redocly/ajv" "^8.11.2"
-    "@redocly/config" "^0.17.0"
+    "@redocly/config" "^0.20.1"
     colorette "^1.2.0"
     https-proxy-agent "^7.0.4"
     js-levenshtein "^1.1.6"
@@ -11207,10 +11219,10 @@
   resolved "https://registry.yarnpkg.com/@types/aria-query/-/aria-query-5.0.4.tgz#1a31c3d378850d2778dabb6374d036dcba4ba708"
   integrity sha512-rfT93uj5s0PRL7EzccGMs3brplhcrghnDoV26NqKhCAS1hVo+WdNsPvE/yb6ilfr5hi2MEk6d5EWJTKdxg8jVw==
 
-"@types/async@^3.2.3":
-  version "3.2.15"
-  resolved "https://registry.yarnpkg.com/@types/async/-/async-3.2.15.tgz#26d4768fdda0e466f18d6c9918ca28cc89a4e1fe"
-  integrity sha512-PAmPfzvFA31mRoqZyTVsgJMsvbynR429UTTxhmfsUCrWGh3/fxOrzqBtaTPJsn4UtzTv4Vb0+/O7CARWb69N4g==
+"@types/async@^3.2.24":
+  version "3.2.24"
+  resolved "https://registry.yarnpkg.com/@types/async/-/async-3.2.24.tgz#3a96351047575bbcf2340541b2d955a35339608f"
+  integrity sha512-8iHVLHsCCOBKjCF2KwFe0p9Z3rfM9mL+sSP8btyR5vTjJRAqpBYD28/ZLgXPf0pjG1VxOvtCV/BgXkQbpSe8Hw==
 
 "@types/aws4@^1.5.0":
   version "1.11.3"
@@ -11696,10 +11708,10 @@
   dependencies:
     "@types/unist" "*"
 
-"@types/he@^1.1.1":
-  version "1.1.1"
-  resolved "https://registry.yarnpkg.com/@types/he/-/he-1.1.1.tgz#19e14033c4ee8f1a702c74dcc6182664839ac2b7"
-  integrity sha512-jpzrsR1ns0n3kyWt92QfOUQhIuJGQ9+QGa7M62rO6toe98woQjnsnzjdMtsQXCdvjjmqjS2ZBCC7xKw0cdzU+Q==
+"@types/he@^1.2.3":
+  version "1.2.3"
+  resolved "https://registry.yarnpkg.com/@types/he/-/he-1.2.3.tgz#c33ca3096f30cbd5d68d78211572de3f9adff75a"
+  integrity sha512-q67/qwlxblDzEDvzHhVkwc1gzVWxaNxeyHUBF4xElrvjL11O+Ytze+1fGpBHlr/H9myiBUaUXNnNPmBHxxfAcA==
 
 "@types/history@^4.7.11", "@types/history@^4.7.9":
   version "4.7.11"
@@ -13942,7 +13954,7 @@ async@^1.4.2:
   resolved "https://registry.yarnpkg.com/async/-/async-1.5.2.tgz#ec6a61ae56480c0c3cb241c95618e20892f9672a"
   integrity sha1-7GphrlZIDAw8skHJVhjiCJL5Zyo=
 
-async@^3.2.0, async@^3.2.3, async@^3.2.4:
+async@^3.2.0, async@^3.2.3, async@^3.2.4, async@^3.2.6:
   version "3.2.6"
   resolved "https://registry.yarnpkg.com/async/-/async-3.2.6.tgz#1b0728e14929d51b85b449b7f06e27c1145e38ce"
   integrity sha512-htCUDlxyyCLMgaM3xXg0C0LW2xqfuQ6p05pCEIsXuyQ+a1koYKTuBMzRNwmybfLgvJDMd0r1LTn4+E0Ti6C2AA==
@@ -17695,10 +17707,10 @@ ejs@^3.1.10:
   dependencies:
     jake "^10.8.5"
 
-elastic-apm-node@^4.10.0:
-  version "4.10.0"
-  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.10.0.tgz#b0560f1f49ac4f7633a810d4d7f727e45f8ebe20"
-  integrity sha512-QmnKLArA84lJ4mNoUTi9qMUfLE1nUeFLB+VO/7iG6UOTiAdR5Wxk0nu3SpcgFe+tr+4GkyXM2xXdmL2XYfQ1Qg==
+elastic-apm-node@^4.10.0, elastic-apm-node@^4.11.0:
+  version "4.11.0"
+  resolved "https://registry.yarnpkg.com/elastic-apm-node/-/elastic-apm-node-4.11.0.tgz#55ba8a08a653b17ce8120f6a4e690d191d0450aa"
+  integrity sha512-QXYjOysgjjASJewDK40iUq8W4fdn/QsJtvl4wsxbSncRfcJCSYPaqfWbxN6YAMpOU0vLp5kBj6tdWPBMTaYrMg==
   dependencies:
     "@elastic/ecs-pino-format" "^1.5.0"
     "@opentelemetry/api" "^1.4.1"
@@ -17718,7 +17730,7 @@ elastic-apm-node@^4.10.0:
     fast-safe-stringify "^2.0.7"
     fast-stream-to-buffer "^1.0.0"
     http-headers "^3.0.2"
-    import-in-the-middle "1.11.3"
+    import-in-the-middle "1.12.0"
     json-bigint "^1.0.0"
     lru-cache "10.2.0"
     measured-reporting "^1.51.1"
@@ -21035,10 +21047,10 @@ import-fresh@^3.1.0, import-fresh@^3.2.1, import-fresh@^3.3.0:
     parent-module "^1.0.0"
     resolve-from "^4.0.0"
 
-import-in-the-middle@1.11.3:
-  version "1.11.3"
-  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.11.3.tgz#08559f2c05fd65ba7062e747af056ed18a80120c"
-  integrity sha512-tNpKEb4AjZrCyrxi+Eyu43h5ig0O8ZRFSXPHh/00/o+4P4pKzVEW/m5lsVtsAT7fCIgmQOAPjdqecGDsBXRxsw==
+import-in-the-middle@1.12.0:
+  version "1.12.0"
+  resolved "https://registry.yarnpkg.com/import-in-the-middle/-/import-in-the-middle-1.12.0.tgz#80d6536a01d0708a6f119f30d22447d4eb9e5c63"
+  integrity sha512-yAgSE7GmtRcu4ZUSFX/4v69UGXwugFFSdIQJ14LHPOPPQrWv8Y7O9PHsw8Ovk7bKCLe4sjXMbZFqGFcLHpZ89w==
   dependencies:
     acorn "^8.8.2"
     acorn-import-attributes "^1.9.5"
@@ -27657,19 +27669,19 @@ react-markdown@^6.0.3:
     unist-util-visit "^2.0.0"
     vfile "^4.0.0"
 
-react-popper-tooltip@^3.1.1:
-  version "3.1.1"
-  resolved "https://registry.yarnpkg.com/react-popper-tooltip/-/react-popper-tooltip-3.1.1.tgz#329569eb7b287008f04fcbddb6370452ad3f9eac"
-  integrity sha512-EnERAnnKRptQBJyaee5GJScWNUKQPDD2ywvzZyUjst/wj5U64C8/CnSYLNEmP2hG0IJ3ZhtDxE8oDN+KOyavXQ==
+react-popper-tooltip@^4.4.2:
+  version "4.4.2"
+  resolved "https://registry.yarnpkg.com/react-popper-tooltip/-/react-popper-tooltip-4.4.2.tgz#0dc4894b8e00ba731f89bd2d30584f6032ec6163"
+  integrity sha512-y48r0mpzysRTZAIh8m2kpZ8S1YPNqGtQPDrlXYSGvDS1c1GpG/NUXbsbIdfbhXfmSaRJuTcaT6N1q3CKuHRVbg==
   dependencies:
-    "@babel/runtime" "^7.12.5"
-    "@popperjs/core" "^2.5.4"
-    react-popper "^2.2.4"
+    "@babel/runtime" "^7.18.3"
+    "@popperjs/core" "^2.11.5"
+    react-popper "^2.3.0"
 
-react-popper@^2.2.4:
-  version "2.2.4"
-  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-2.2.4.tgz#d2ad3d2474ac9f1abf93df3099d408e5aa6a2e22"
-  integrity sha512-NacOu4zWupdQjVXq02XpTD3yFPSfg5a7fex0wa3uGKVkFK7UN6LvVxgcb+xYr56UCuWiNPMH20tntdVdJRwYew==
+react-popper@^2.3.0:
+  version "2.3.0"
+  resolved "https://registry.yarnpkg.com/react-popper/-/react-popper-2.3.0.tgz#17891c620e1320dce318bad9fede46a5f71c70ba"
+  integrity sha512-e1hj8lL3uM+sgSR4Lxzn5h1GxBlpa4CQz0XLF8kx4MDrDRWY0Ena4c97PUeSX9i5W3UAfDP0z0FXCTQkoXUl3Q==
   dependencies:
     react-fast-compare "^3.0.1"
     warning "^4.0.2"

@@ -87,6 +87,10 @@ import {
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 import { createEngineDescription } from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
+import {
+  createKeywordBuilderPipeline,
+  deleteKeywordBuilderPipeline,
+} from '../../asset_inventory/ingest_pipelines';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -379,6 +383,14 @@ export class EntityStoreDataClient {
       });
       this.log(`debug`, entityType, `Created entity definition`);
 
+      if (entityType === EntityType.universal) {
+        logger.debug('creating keyword builder pipeline');
+        await createKeywordBuilderPipeline({
+          logger,
+          esClient: this.esClient,
+        });
+      }
+
       // the index must be in place with the correct mapping before the enrich policy is created
       // this is because the enrich policy will fail if the index does not exist with the correct fields
       await createEntityIndexComponentTemplate(description, this.esClient);
@@ -654,6 +666,15 @@ export class EntityStoreDataClient {
         logger,
       });
       this.log('debug', entityType, `Deleted field retention enrich policy`);
+
+      if (entityType === EntityType.universal) {
+        logger.debug(`Deleting asset inventory keyword builder pipeline`);
+
+        await deleteKeywordBuilderPipeline({
+          logger,
+          esClient: this.esClient,
+        });
+      }
 
       if (deleteData) {
         await deleteEntityIndex({
