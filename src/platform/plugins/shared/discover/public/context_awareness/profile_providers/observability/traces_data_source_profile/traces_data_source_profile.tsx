@@ -13,6 +13,7 @@ import { DataSourceCategory, DataSourceProfileProvider } from '../../../profiles
 import { ServiceLink } from './components/service_link';
 import { SpanLink } from './components/span_link';
 import { TransactionLink } from './components/transaction_link';
+import { ErrorGroupLink } from './components/error_group_link';
 
 export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvider<{
   category: DataSourceCategory;
@@ -73,7 +74,8 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                 const transactionName = params.record.flattened['transaction.name'];
 
                 if (isError) {
-                  const errorId = params.record.flattened['error.id'];
+                  const errorGroupKey = params.record.flattened['error.grouping_key'];
+                  const errorGroupName = params.record.flattened['error.grouping_name'];
                   const errorMessage = params.record.flattened.message;
                   return (
                     <EuiPanel color="transparent" hasShadow={false}>
@@ -83,6 +85,16 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                             Message (TODO ADD LINK)
                           </EuiText>
                           <p>{errorMessage as string}</p>
+                        </EuiFlexItem>
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            Error group
+                          </EuiText>
+                          <ErrorGroupLink
+                            serviceName={serviceName as string}
+                            errorGroupId={errorGroupKey as string}
+                            errorGroupName={errorGroupName as string}
+                          />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                       <EuiSpacer size="l" />
