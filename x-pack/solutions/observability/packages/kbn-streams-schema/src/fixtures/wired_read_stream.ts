@@ -9,7 +9,7 @@ import { wiredStream } from './wired_stream';
 
 export const wiredReadStream = {
   ...wiredStream,
-  effective_lifecycle: { type: 'dlm', from: 'logs' },
+  effective_lifecycle: { dsl: { data_retention: '7d' }, from: 'logs.nginx' },
   inherited_fields: {
     '@timestamp': {
       type: 'date',
