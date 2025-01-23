@@ -146,6 +146,12 @@ export const validationStatsCommandTestSuite = (setup: helpers.Setup) => {
               `Aggregate function's parameters must be an attribute, literal or a non-aggregation function; found [count(*)] of type [long]`,
             ]);
           });
+
+          test('allows WHERE clause', async () => {
+            const { expectErrors } = await setup();
+
+            await expectErrors('FROM a_index | STATS var0 = avg(doubleField) WHERE 123', []);
+          });
         });
 
         describe('... BY <grouping>', () => {
