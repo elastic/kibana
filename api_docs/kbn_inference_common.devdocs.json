@@ -1581,6 +1581,22 @@
           },
           {
             "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.OutputOptions.modelName",
+            "type": "string",
+            "tags": [],
+            "label": "modelName",
+            "description": [
+              "\nThe model name identifier to use. Can be defined to use another model than the\ndefault one, when using connectors / providers exposing multiple models.\n\nDefaults to the default model as defined by the used connector."
+            ],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/output/api.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
             "id": "def-common.OutputOptions.functionCalling",
             "type": "CompoundType",
             "tags": [],
@@ -2162,7 +2178,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ [P in \"abortSignal\" | \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+              "{ [P in \"abortSignal\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2257,7 +2273,7 @@
             "label": "options",
             "description": [],
             "signature": [
-              "{ id: TId; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; abortSignal?: AbortSignal | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
+              "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2364,7 +2380,7 @@
                 "section": "def-common.Message",
                 "text": "Message"
               },
-              "[]; functionCalling?: ",
+              "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
               {
                 "pluginId": "@kbn/inference-common",
                 "scope": "common",
@@ -2432,7 +2448,7 @@
             "section": "def-common.Message",
             "text": "Message"
           },
-          "[]; functionCalling?: ",
+          "[]; temperature?: number | undefined; modelName?: string | undefined; functionCalling?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3455,7 +3471,7 @@
           "\nOptions used to call the {@link BoundChatCompleteAPI}"
         ],
         "signature": [
-          "{ [P in \"abortSignal\" | \"system\" | \"stream\" | \"messages\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
+          "{ [P in \"abortSignal\" | \"temperature\" | \"system\" | \"stream\" | \"messages\" | \"modelName\" | Exclude<keyof TToolOptions, \"connectorId\" | \"functionCalling\">]: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3480,7 +3496,7 @@
           "\nOptions used to call the {@link BoundOutputAPI}"
         ],
         "signature": [
-          "{ id: TId; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; abortSignal?: AbortSignal | undefined; system?: string | undefined; stream?: TStream | undefined; previousMessages?: ",
+          "{ id: TId; abortSignal?: AbortSignal | undefined; input: string; schema?: TOutputSchema | undefined; retry?: { onValidationError?: number | boolean | undefined; } | undefined; system?: string | undefined; stream?: TStream | undefined; modelName?: string | undefined; previousMessages?: ",
           {
             "pluginId": "@kbn/inference-common",
             "scope": "common",
@@ -3529,6 +3545,45 @@
         "initialIsOpen": false
       }
     ],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/inference-common",
+        "id": "def-common.defaultInferenceEndpoints",
+        "type": "Object",
+        "tags": [],
+        "label": "defaultInferenceEndpoints",
+        "description": [
+          "\nConstants for all default (preconfigured) inference endpoints."
+        ],
+        "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.defaultInferenceEndpoints.ELSER",
+            "type": "string",
+            "tags": [],
+            "label": "ELSER",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-common",
+            "id": "def-common.defaultInferenceEndpoints.MULTILINGUAL_E5_SMALL",
+            "type": "string",
+            "tags": [],
+            "label": "MULTILINGUAL_E5_SMALL",
+            "description": [],
+            "path": "x-pack/platform/packages/shared/ai-infra/inference-common/src/inference_endpoints.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ]
   }
 }

@@ -16,7 +16,6 @@
     ],
     "requiredPlugins": [
       "actions",
-      "assetInventory",
       "alerting",
       "cases",
       "cloud",
@@ -59,7 +58,9 @@
       "charts",
       "entityManager",
       "inference",
-      "discoverShared"
+      "discoverShared",
+      "productDocBase",
+      "telemetry"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -71,7 +72,6 @@
       "lists",
       "home",
       "management",
-      "telemetry",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
@@ -87,7 +87,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

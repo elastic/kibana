@@ -28,6 +28,7 @@ import { useAssetDetailsRenderPropsContext } from './use_asset_details_render_pr
 import { useTabSwitcherContext } from './use_tab_switcher';
 import { useEntitySummary } from './use_entity_summary';
 import { isMetricsSignal } from '../utils/get_data_stream_types';
+import { useDatePickerContext } from './use_date_picker';
 
 type TabItem = NonNullable<Pick<EuiPageHeaderProps, 'tabs'>['tabs']>[number];
 
@@ -144,9 +145,12 @@ const useFeatureFlagTabs = () => {
 
 const useMetricsTabs = () => {
   const { asset } = useAssetDetailsRenderPropsContext();
+  const { dateRange } = useDatePickerContext();
   const { dataStreams } = useEntitySummary({
     entityType: asset.type,
     entityId: asset.id,
+    from: dateRange.from,
+    to: dateRange.to,
   });
 
   const isMetrics = isMetricsSignal(dataStreams);

@@ -60,6 +60,8 @@ export const Processes = () => {
   const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
     entityType: BUILT_IN_ENTITY_TYPES.HOST,
     entityId: asset.name,
+    from: new Date(getDateRangeInTimestamp().from).toISOString(),
+    to: new Date(getDateRangeInTimestamp().to).toISOString(),
   });
   const addMetricsCalloutId: AddMetricsCalloutKey = 'hostProcesses';
   const [dismissedAddMetricsCallout, setDismissedAddMetricsCallout] = useLocalStorage(

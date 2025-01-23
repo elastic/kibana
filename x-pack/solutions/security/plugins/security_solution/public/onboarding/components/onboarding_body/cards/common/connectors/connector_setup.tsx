@@ -33,7 +33,7 @@ const usePanelCss = () => {
     .connectorSelectorPanel {
       height: 160px;
       &.euiPanel:hover {
-        background-color: ${euiTheme.colors.lightestShade};
+        background-color: ${euiTheme.colors.backgroundBaseSubdued};
       }
     }
   `;

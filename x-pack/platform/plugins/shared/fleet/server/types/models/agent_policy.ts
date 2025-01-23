@@ -39,6 +39,20 @@ function isInteger(n: number) {
   }
 }
 
+const memoryRegex = /^\d+(Mi|Gi)$/;
+function validateMemory(s: string) {
+  if (!memoryRegex.test(s)) {
+    return 'Invalid memory format';
+  }
+}
+
+const cpuRegex = /^(\d+m|\d+(\.\d+)?)$/;
+function validateCPU(s: string) {
+  if (!cpuRegex.test(s)) {
+    return 'Invalid CPU format';
+  }
+}
+
 export const AgentPolicyBaseSchema = {
   id: schema.maybe(schema.string()),
   space_ids: schema.maybe(schema.arrayOf(schema.string())),
@@ -132,6 +146,20 @@ export const AgentPolicyBaseSchema = {
       }
     )
   ),
+  agentless: schema.maybe(
+    schema.object({
+      resources: schema.maybe(
+        schema.object({
+          requests: schema.maybe(
+            schema.object({
+              memory: schema.maybe(schema.string({ validate: validateMemory })),
+              cpu: schema.maybe(schema.string({ validate: validateCPU })),
+            })
+          ),
+        })
+      ),
+    })
+  ),
   monitoring_pprof_enabled: schema.maybe(schema.boolean()),
   monitoring_http: schema.maybe(
     schema.object({
@@ -157,6 +185,27 @@ export const AgentPolicyBaseSchema = {
         })
       ),
     })
+  ),
+  required_versions: schema.maybe(
+    schema.oneOf([
+      schema.literal(null),
+      schema.arrayOf(
+        schema.object({
+          version: schema.string({
+            meta: {
+              description: 'Target version for automatic agent upgrade',
+            },
+          }),
+          percentage: schema.number({
+            min: 0,
+            max: 100,
+            meta: {
+              description: 'Target percentage of agents to auto upgrade',
+            },
+          }),
+        })
+      ),
+    ])
   ),
 };
 
@@ -360,6 +409,7 @@ export const FullAgentPolicyResponseSchema = schema.object({
         metrics: schema.boolean(),
         logs: schema.boolean(),
         traces: schema.boolean(),
+        apm: schema.maybe(schema.any()),
       }),
       download: schema.object({
         sourceURI: schema.string(),

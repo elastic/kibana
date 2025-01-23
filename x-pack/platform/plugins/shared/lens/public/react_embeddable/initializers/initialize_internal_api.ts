@@ -6,7 +6,7 @@
  */
 
 import { BehaviorSubject } from 'rxjs';
-import { initializeTitles } from '@kbn/presentation-publishing';
+import { initializeTitleManager } from '@kbn/presentation-publishing';
 import type { DataView } from '@kbn/data-views-plugin/common';
 import { buildObservableVariable, createEmptyLensState } from '../helper';
 import type {
@@ -23,9 +23,9 @@ import type { UserMessage } from '../../types';
 export function initializeInternalApi(
   initialState: LensRuntimeState,
   parentApi: unknown,
+  titleManager: ReturnType<typeof initializeTitleManager>,
   { visualizationMap }: LensEmbeddableStartServices
 ): LensInternalApi {
-  const { titlesApi } = initializeTitles(initialState);
   const [hasRenderCompleted$] = buildObservableVariable<boolean>(false);
   const [expressionParams$] = buildObservableVariable<ExpressionWrapperProps | null>(null);
   const expressionAbortController$ = new BehaviorSubject<AbortController | undefined>(undefined);
@@ -53,6 +53,7 @@ export function initializeInternalApi(
   // the isNewPanel won't be serialized so it will be always false after the edit panel closes applying the changes
   const isNewlyCreated$ = new BehaviorSubject<boolean>(initialState.isNewPanel || false);
 
+  const blockingError$ = new BehaviorSubject<Error | undefined>(undefined);
   const visualizationContext$ = new BehaviorSubject<VisualizationContext>({
     // doc can point to a different set of attributes for the visualization
     // i.e. when inline editing or applying a suggestion
@@ -77,7 +78,8 @@ export function initializeInternalApi(
     expressionAbortController$,
     renderCount$,
     isNewlyCreated$,
-    dataViews: dataViews$,
+    dataViews$,
+    blockingError$,
     messages$,
     validationMessages$,
     dispatchError: () => {
@@ -103,6 +105,7 @@ export function initializeInternalApi(
       messages$.next([]);
       validationMessages$.next([]);
     },
+    updateBlockingError: (blockingError: Error | undefined) => blockingError$.next(blockingError),
     setAsCreated: () => isNewlyCreated$.next(false),
     getDisplayOptions: () => {
       const latestAttributes = attributes$.getValue();
@@ -120,7 +123,7 @@ export function initializeInternalApi(
         };
       }
 
-      if (displayOptions.noPanelTitle == null && titlesApi.hidePanelTitle?.getValue()) {
+      if (displayOptions.noPanelTitle == null && titleManager.api.hideTitle$?.getValue()) {
         displayOptions = {
           ...displayOptions,
           noPanelTitle: true,

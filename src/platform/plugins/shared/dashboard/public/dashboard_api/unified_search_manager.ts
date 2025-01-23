@@ -45,7 +45,8 @@ import moment, { Moment } from 'moment';
 import { cleanFiltersForSerialize } from '../utils/clean_filters_for_serialize';
 import { dataService } from '../services/kibana_services';
 import { DashboardCreationOptions, DashboardState } from './types';
-import { DEFAULT_DASHBOARD_INPUT, GLOBAL_STATE_STORAGE_KEY } from '../dashboard_constants';
+import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
+import { GLOBAL_STATE_STORAGE_KEY } from '../utils/urls';
 
 export function initializeUnifiedSearchManager(
   initialState: DashboardState,

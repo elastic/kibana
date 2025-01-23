@@ -30,6 +30,20 @@ export type {
   ESQLAstNode,
 } from './src/types';
 
+export {
+  isColumn,
+  isDoubleLiteral,
+  isFunctionExpression,
+  isBinaryExpression,
+  isWhereExpression,
+  isFieldExpression,
+  isIdentifier,
+  isIntegerLiteral,
+  isLiteral,
+  isParamLiteral,
+  isProperNode,
+} from './src/ast/helpers';
+
 export { Builder, type AstNodeParserFields, type AstNodeTemplate } from './src/builder';
 
 export {

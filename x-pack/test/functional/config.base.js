@@ -6,16 +6,8 @@
  */
 
 import { resolve } from 'path';
-
 import { services } from './services';
 import { pageObjects } from './page_objects';
-
-// Docker image to use for Fleet API integration tests.
-// This image comes from the latest successful build of https://buildkite.com/elastic/kibana-package-registry-promote
-// which is promoted after acceptance tests succeed against docker.elastic.co/package-registry/distribution:lite
-export const dockerImage =
-  process.env.FLEET_PACKAGE_REGISTRY_DOCKER_IMAGE ||
-  'docker.elastic.co/kibana-ci/package-registry-distribution:lite';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -199,6 +191,12 @@ export default async function ({ readConfigFile }) {
       },
       enterpriseSearch: {
         pathname: '/app/elasticsearch/overview',
+      },
+      elasticsearchStart: {
+        pathname: '/app/elasticsearch/start',
+      },
+      elasticsearchIndices: {
+        pathname: '/app/elasticsearch/indices',
       },
     },
 
@@ -625,6 +623,13 @@ export default async function ({ readConfigFile }) {
               'manage_slm',
               'cluster:admin/snapshot',
               'cluster:admin/repository',
+              'manage_index_templates',
+            ],
+            indices: [
+              {
+                names: ['*'],
+                privileges: ['all'],
+              },
             ],
           },
           kibana: [

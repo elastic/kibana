@@ -26,47 +26,60 @@ export const createListRoute = (
   appLinksMap: Map<string, AppLinkData[]>,
   logger: Logger
 ) => {
-  router.get({ path: '/api/sample_data', validate: false }, async (context, _req, res) => {
-    const allExistingObjects = await findExistingSampleObjects(context, logger, sampleDatasets);
+  router.get(
+    {
+      path: '/api/sample_data',
+      security: {
+        authz: {
+          enabled: false,
+          reason:
+            'This route is opted out from authorization because the data retrieved is derived and fetched from the saved objects client',
+        },
+      },
+      validate: false,
+    },
+    async (context, _req, res) => {
+      const allExistingObjects = await findExistingSampleObjects(context, logger, sampleDatasets);
 
-    const registeredSampleDatasets = await Promise.all(
-      sampleDatasets.map(async (sampleDataset) => {
-        const existingObjects = allExistingObjects.get(sampleDataset.id)!;
-        const findObjectId = (type: string, id: string) =>
-          existingObjects.find((object) => object.type === type && object.id === id)
-            ?.foundObjectId ?? id;
+      const registeredSampleDatasets = await Promise.all(
+        sampleDatasets.map(async (sampleDataset) => {
+          const existingObjects = allExistingObjects.get(sampleDataset.id)!;
+          const findObjectId = (type: string, id: string) =>
+            existingObjects.find((object) => object.type === type && object.id === id)
+              ?.foundObjectId ?? id;
 
-        const appLinks = (appLinksMap.get(sampleDataset.id) ?? []).map((data) => {
-          const { sampleObject, getPath, label, icon, order } = data;
-          if (sampleObject === null) {
-            return { path: getPath(''), label, icon, order };
-          }
-          const objectId = findObjectId(sampleObject.type, sampleObject.id);
-          return { path: getPath(objectId), label, icon, order };
-        });
-        const sampleDataStatus = await getSampleDatasetStatus(
-          context,
-          allExistingObjects,
-          sampleDataset
-        );
+          const appLinks = (appLinksMap.get(sampleDataset.id) ?? []).map((data) => {
+            const { sampleObject, getPath, label, icon, order } = data;
+            if (sampleObject === null) {
+              return { path: getPath(''), label, icon, order };
+            }
+            const objectId = findObjectId(sampleObject.type, sampleObject.id);
+            return { path: getPath(objectId), label, icon, order };
+          });
+          const sampleDataStatus = await getSampleDatasetStatus(
+            context,
+            allExistingObjects,
+            sampleDataset
+          );
 
-        return {
-          id: sampleDataset.id,
-          name: sampleDataset.name,
-          description: sampleDataset.description,
-          previewImagePath: sampleDataset.previewImagePath,
-          darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
-          overviewDashboard: findObjectId('dashboard', sampleDataset.overviewDashboard),
-          appLinks: sortBy(appLinks, 'order'),
-          defaultIndex: findObjectId('index-pattern', sampleDataset.defaultIndex),
-          dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
-          ...sampleDataStatus,
-        };
-      })
-    );
+          return {
+            id: sampleDataset.id,
+            name: sampleDataset.name,
+            description: sampleDataset.description,
+            previewImagePath: sampleDataset.previewImagePath,
+            darkPreviewImagePath: sampleDataset.darkPreviewImagePath,
+            overviewDashboard: findObjectId('dashboard', sampleDataset.overviewDashboard),
+            appLinks: sortBy(appLinks, 'order'),
+            defaultIndex: findObjectId('index-pattern', sampleDataset.defaultIndex),
+            dataIndices: sampleDataset.dataIndices.map(({ id }) => ({ id })),
+            ...sampleDataStatus,
+          };
+        })
+      );
 
-    return res.ok({ body: registeredSampleDatasets });
-  });
+      return res.ok({ body: registeredSampleDatasets });
+    }
+  );
 };
 
 type ExistingSampleObjects = Map<string, FindSampleObjectsResponseObject[]>;

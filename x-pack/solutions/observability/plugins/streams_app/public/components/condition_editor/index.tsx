@@ -7,6 +7,7 @@
 
 import {
   EuiBadge,
+  EuiButton,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,6 +15,7 @@ import {
   EuiSelect,
   EuiSwitch,
   EuiText,
+  EuiToolTip,
 } from '@elastic/eui';
 import {
   AndCondition,
@@ -26,15 +28,13 @@ import React, { useEffect } from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/css';
 import { CodeEditor } from '@kbn/code-editor';
+import { EMPTY_EQUALS_CONDITION } from '../../util/condition';
 
 export function ConditionEditor(props: {
   condition: Condition;
   readonly?: boolean;
   onConditionChange?: (condition: Condition) => void;
 }) {
-  if (!props.condition) {
-    return null;
-  }
   if (props.readonly) {
     return (
       <EuiPanel color="subdued" borderRadius="none" hasShadow={false} paddingSize="xs">
@@ -67,7 +67,7 @@ export function ConditionForm(props: {
   }, [syntaxEditor, props.condition]);
   return (
     <EuiFlexGroup direction="column" gutterSize="xs">
-      <EuiFlexGroup>
+      <EuiFlexGroup alignItems="center" gutterSize="xs">
         <EuiFlexItem grow>
           <EuiText
             className={css`
@@ -78,6 +78,22 @@ export function ConditionForm(props: {
             {i18n.translate('xpack.streams.conditionEditor.title', { defaultMessage: 'Condition' })}
           </EuiText>
         </EuiFlexItem>
+        <EuiToolTip
+          content={i18n.translate('xpack.streams.conditionEditor.disableTooltip', {
+            defaultMessage: 'Route no documents to this stream without deleting existing data',
+          })}
+        >
+          <EuiButton
+            size={'xs' as 's'} // TODO: remove this cast when EUI is updated - EuiButton takes xs, but the type is wrong
+            onClick={() => props.onConditionChange({ never: {} })}
+            disabled={props.condition === undefined}
+          >
+            {i18n.translate('xpack.streams.conditionEditor.disable', {
+              defaultMessage: 'Disable routing',
+            })}
+          </EuiButton>
+        </EuiToolTip>
+
         <EuiSwitch
           label={i18n.translate('xpack.streams.conditionEditor.switch', {
             defaultMessage: 'Syntax editor',
@@ -102,16 +118,13 @@ export function ConditionForm(props: {
             }
           }}
         />
+      ) : !props.condition || 'operator' in props.condition ? (
+        <FilterForm
+          condition={(props.condition as FilterCondition) || EMPTY_EQUALS_CONDITION}
+          onConditionChange={props.onConditionChange}
+        />
       ) : (
-        props.condition &&
-        ('operator' in props.condition ? (
-          <FilterForm
-            condition={props.condition as FilterCondition}
-            onConditionChange={props.onConditionChange}
-          />
-        ) : (
-          <pre>{JSON.stringify(props.condition, null, 2)}</pre>
-        ))
+        <pre>{JSON.stringify(props.condition, null, 2)}</pre>
       )}
     </EuiFlexGroup>
   );
@@ -175,11 +188,8 @@ function FilterForm(props: {
             };
 
             const newOperator = e.target.value as FilterCondition['operator'];
-            if (
-              'value' in newCondition &&
-              (newOperator === 'exists' || newOperator === 'notExists')
-            ) {
-              delete newCondition.value;
+            if (newOperator === 'exists' || newOperator === 'notExists') {
+              if ('value' in newCondition) delete newCondition.value;
             } else if (!('value' in newCondition)) {
               (newCondition as BinaryFilterCondition).value = '';
             }
@@ -216,7 +226,13 @@ function FilterForm(props: {
 
 export function ConditionDisplay(props: { condition: Condition }) {
   if (!props.condition) {
-    return null;
+    return (
+      <>
+        {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
+          defaultMessage: 'No condition, no documents will be routed',
+        })}
+      </>
+    );
   }
   return (
     <>

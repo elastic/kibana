@@ -7,5 +7,7 @@
 
 export { InferenceServiceFormFields } from './src/components/inference_service_form_fields';
 export { useProviders } from './src/hooks/use_providers';
+export { SERVICE_PROVIDERS } from './src/components/providers/render_service_provider/service_provider';
 
 export * from './src/types/types';
+export * from './src/constants';

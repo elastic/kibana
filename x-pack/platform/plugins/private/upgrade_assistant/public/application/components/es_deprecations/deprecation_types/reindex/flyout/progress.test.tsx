@@ -107,6 +107,23 @@ describe('ReindexProgress', () => {
               Object {
                 "status": "incomplete",
                 "title": <Memo(MemoizedFormattedMessage)
+                  defaultMessage="Copy original index settings from {indexName} to {reindexName}."
+                  id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.indexSettingsRestoredStepTitle"
+                  values={
+                    Object {
+                      "indexName": <EuiCode>
+                        foo
+                      </EuiCode>,
+                      "reindexName": <EuiCode>
+                        reindexed-foo
+                      </EuiCode>,
+                    }
+                  }
+                />,
+              },
+              Object {
+                "status": "incomplete",
+                "title": <Memo(MemoizedFormattedMessage)
                   defaultMessage="Create {indexName} alias for {reindexName} index."
                   id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexingChecklist.aliasCreatedStepTitle"
                   values={

@@ -62,7 +62,7 @@ export interface Props {
   mbMap: MbMap;
   openOnClickTooltip: (tooltipState: TooltipState) => void;
   openOnHoverTooltip: (tooltipState: TooltipState) => void;
-  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => void;
+  onSingleValueTrigger?: (actionId: string, key: string, value: RawValue) => Promise<void>;
   openTooltips: TooltipState[];
   renderTooltipContent?: RenderToolTipContent;
   updateOpenTooltips: (openTooltips: TooltipState[]) => void;

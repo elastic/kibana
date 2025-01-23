@@ -1,6 +1,6 @@
 # DATE_PARSE
 
-The DATE_PARSE function is used to convert a date string into a date format based on the provided pattern.
+The DATE_PARSE function is used to convert a date string into a date based on the provided format pattern.
 
 ## Syntax
 
@@ -23,6 +23,7 @@ ROW date_string = "2022-05-06"
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 ```
 
-ROW date_string = "2023-12-25"
+```esql
+FROM logs
 | EVAL date = DATE_PARSE("yyyy-MM-dd", date_string)
 ```

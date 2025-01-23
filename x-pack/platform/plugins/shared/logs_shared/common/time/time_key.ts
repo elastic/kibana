@@ -6,7 +6,7 @@
  */
 
 import type { TimeKey } from '@kbn/io-ts-utils';
-import { ascending, bisector } from 'd3-array';
+import { ascending } from 'd3-array';
 
 export type Comparator = (firstValue: any, secondValue: any) => number;
 
@@ -38,25 +38,3 @@ export const compareToTimeKey =
   <Value>(keyAccessor: (value: Value) => TimeKey, compareValues?: Comparator) =>
   (value: Value, key: TimeKey) =>
     compareTimeKeys(keyAccessor(value), key, compareValues);
-
-export const getIndexAtTimeKey = <Value>(
-  keyAccessor: (value: Value) => TimeKey,
-  compareValues?: Comparator
-) => {
-  const comparator = compareToTimeKey(keyAccessor, compareValues);
-  const collectionBisector = bisector(comparator);
-
-  return (collection: Value[], key: TimeKey): number | null => {
-    const index = collectionBisector.left(collection, key);
-
-    if (index >= collection.length) {
-      return null;
-    }
-
-    if (comparator(collection[index], key) !== 0) {
-      return null;
-    }
-
-    return index;
-  };
-};

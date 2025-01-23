@@ -291,15 +291,20 @@ export const validatePackagePolicyConfig = (
       );
       return errors;
     }
-    if (varDef.required && Array.isArray(parsedValue) && parsedValue.length === 0) {
-      errors.push(
-        i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
-          defaultMessage: '{fieldName} is required',
-          values: {
-            fieldName: varDef.title || varDef.name,
-          },
-        })
-      );
+    if (varDef.required && Array.isArray(parsedValue)) {
+      const hasEmptyString =
+        varDef.type === 'text' && parsedValue.some((item) => item.trim() === '');
+
+      if (hasEmptyString || parsedValue.length === 0) {
+        errors.push(
+          i18n.translate('xpack.fleet.packagePolicyValidation.requiredErrorMessage', {
+            defaultMessage: '{fieldName} is required',
+            values: {
+              fieldName: varDef.title || varDef.name,
+            },
+          })
+        );
+      }
     }
     if (varDef.type === 'text' && parsedValue) {
       const invalidStrings = parsedValue.filter((cand: any) => /^[*&]/.test(cand));

@@ -245,7 +245,7 @@ const bulkDashboardsRoute = createServerRoute({
     );
 
     if (result.errors) {
-      logger.error(`Error indexing ${result.errors.length} items`);
+      logger.error(`Error indexing some items`);
       throw internal(`Could not index all items`, { errors: result.errors });
     }
 

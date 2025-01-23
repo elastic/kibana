@@ -10,36 +10,32 @@
  * valid deprecations
  */
 
-import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { IndicesCreateRequest } from '@elastic/elasticsearch/lib/api/types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const translogSettingsIndexDeprecation: IndicesCreateRequest = {
   index: 'deprecated_settings',
-  body: {
-    settings: {
-      'translog.retention.size': '1b',
-      'translog.retention.age': '5m',
-      'index.soft_deletes.enabled': true,
-    },
+  settings: {
+    'translog.retention.size': '1b',
+    'translog.retention.age': '5m',
+    'index.soft_deletes.enabled': true,
   },
 };
 
 const multiFieldsIndexDeprecation: IndicesCreateRequest = {
   index: 'nested_multi_fields',
-  body: {
-    mappings: {
-      properties: {
-        text: {
-          type: 'text',
-          fields: {
-            english: {
-              type: 'text',
-              analyzer: 'english',
-              fields: {
-                english: {
-                  type: 'text',
-                  analyzer: 'english',
-                },
+  mappings: {
+    properties: {
+      text: {
+        type: 'text',
+        fields: {
+          english: {
+            type: 'text',
+            analyzer: 'english',
+            fields: {
+              english: {
+                type: 'text',
+                analyzer: 'english',
               },
             },
           },
