@@ -40,10 +40,9 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
   hideEditButton = false,
   filteredRuleTypes = [],
   useNewRuleForm = false,
-  ruleEditBasePath,
 }) => {
   const {
-    application: { capabilities, navigateToApp, navigateToUrl },
+    application: { capabilities, navigateToApp },
   } = useKibana().services;
 
   const isUsingRuleCreateFlyout = getIsExperimentalFeatureEnabled('isUsingRuleCreateFlyout');
@@ -112,17 +111,13 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const onEditRuleClick = () => {
     if (!isUsingRuleCreateFlyout && useNewRuleForm) {
-      if (ruleEditBasePath) {
-        navigateToUrl(`${ruleEditBasePath}${getEditRuleRoute(rule.id)}`);
-      } else {
-        navigateToApp('management', {
-          path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
-          state: {
-            returnApp: 'management',
-            returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
-          },
-        });
-      }
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(rule.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/${getRuleDetailsRoute(rule.id)}`,
+        },
+      });
     } else {
       setEditFlyoutVisible(true);
     }

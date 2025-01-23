@@ -66,9 +66,9 @@ export function HeaderActions({
     cases: {
       hooks: { useCasesAddToExistingCaseModal },
     },
-    triggersActionsUi: { getRuleSnoozeModal: RuleSnoozeModal },
+    triggersActionsUi: { getEditRuleFlyout: EditRuleFlyout, getRuleSnoozeModal: RuleSnoozeModal },
     http,
-    application: { navigateToApp, navigateToUrl },
+    application: { navigateToApp },
     investigate: investigatePlugin,
   } = useKibana().services;
 
@@ -81,6 +81,7 @@ export function HeaderActions({
   });
 
   const [isPopoverOpen, setIsPopoverOpen] = useState<boolean>(false);
+  const [ruleConditionsFlyoutOpen, setRuleConditionsFlyoutOpen] = useState<boolean>(false);
   const [snoozeModalOpen, setSnoozeModalOpen] = useState<boolean>(false);
 
   const selectCaseModal = useCasesAddToExistingCaseModal();
@@ -122,8 +123,7 @@ export function HeaderActions({
 
   const handleEditRuleDetails = () => {
     setIsPopoverOpen(false);
-    const editRuleLink = http.basePath.prepend(paths.observability.editRule(rule?.id ?? ''));
-    return navigateToUrl(editRuleLink);
+    setRuleConditionsFlyoutOpen(true);
   };
 
   const handleOpenSnoozeModal = () => {
@@ -342,6 +342,18 @@ export function HeaderActions({
           </EuiPopover>
         </EuiFlexItem>
       </EuiFlexGroup>
+
+      {rule && ruleConditionsFlyoutOpen ? (
+        <EditRuleFlyout
+          initialRule={rule}
+          onClose={() => {
+            setRuleConditionsFlyoutOpen(false);
+          }}
+          onSave={async () => {
+            refetch();
+          }}
+        />
+      ) : null}
 
       {rule && snoozeModalOpen ? (
         <RuleSnoozeModal

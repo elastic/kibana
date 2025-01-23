@@ -14,7 +14,6 @@ import { OBSERVABILITY_RULE_TYPE_IDS_WITH_SUPPORTED_STACK_RULE_TYPES } from '../
 import { observabilityAlertFeatureIds } from '../../../common';
 import { useKibana } from '../../utils/kibana_react';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
-import { paths } from '../../../common/locators/paths';
 
 interface RulesTabProps {
   setRefresh: React.Dispatch<React.SetStateAction<Date>>;
@@ -23,7 +22,6 @@ interface RulesTabProps {
 
 export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
   const {
-    http: { basePath },
     triggersActionsUi: { getRulesList: RuleList },
   } = useKibana().services;
   const history = useHistory();
@@ -90,8 +88,6 @@ export function RulesTab({ setRefresh, stateRefresh }: RulesTabProps) {
       statusFilter={stateStatus}
       searchFilter={stateSearch}
       typeFilter={stateType}
-      useNewRuleForm={true}
-      ruleEditBasePath={basePath.prepend(paths.observability.alerts)}
       visibleColumns={[
         'ruleName',
         'ruleExecutionStatusLastDate',

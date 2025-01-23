@@ -9,13 +9,11 @@ import { mount, ReactWrapper } from 'enzyme';
 import { act } from 'react-dom/test-utils';
 import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { nextTick } from '@kbn/test-jest-helpers';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { RuleDefinition } from './rule_definition';
-import { getIsExperimentalFeatureEnabled } from '../../../../common/get_experimental_features';
 import { actionTypeRegistryMock } from '../../../action_type_registry.mock';
 import { ActionTypeModel, Rule, RuleTypeModel } from '../../../../types';
 import { ruleTypeRegistryMock } from '../../../rule_type_registry.mock';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 
 jest.mock('./rule_actions', () => ({
   RuleActions: () => {
@@ -23,7 +21,9 @@ jest.mock('./rule_actions', () => ({
   },
 }));
 
-jest.mock('../../../../common/get_experimental_features');
+jest.mock('../../../../common/get_experimental_features', () => ({
+  getIsExperimentalFeatureEnabled: jest.fn().mockReturnValue(true),
+}));
 
 jest.mock('../../../lib/capabilities', () => ({
   hasAllPrivilege: jest.fn(() => true),
@@ -32,18 +32,11 @@ jest.mock('../../../lib/capabilities', () => ({
   hasExecuteActionsCapability: jest.fn(() => true),
   hasManageApiKeysCapability: jest.fn(() => true),
 }));
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: jest.fn(),
-}));
+jest.mock('../../../../common/lib/kibana');
 jest.mock('../../../hooks/use_load_rule_types_query', () => ({
   useLoadRuleTypesQuery: jest.fn(),
 }));
 const { useLoadRuleTypesQuery } = jest.requireMock('../../../hooks/use_load_rule_types_query');
-const { useKibana } = jest.requireMock('../../../../common/lib/kibana');
-const mockApplication = {
-  mockNavigateToApp: jest.fn(),
-  mockNavigateToUrl: jest.fn(),
-};
 
 const mockedRuleTypeIndex = new Map(
   Object.entries({
@@ -101,19 +94,10 @@ interface SetupProps {
 
 describe('Rule Definition', () => {
   let wrapper: ReactWrapper;
-  const actionTypeRegistry = actionTypeRegistryMock.create();
-  const ruleTypeRegistry = ruleTypeRegistryMock.create();
   async function setup({ ruleOverwrite }: SetupProps = {}) {
+    const actionTypeRegistry = actionTypeRegistryMock.create();
+    const ruleTypeRegistry = ruleTypeRegistryMock.create();
     const mockedRule = mockRule(ruleOverwrite);
-    (getIsExperimentalFeatureEnabled as jest.Mock<any, any>).mockImplementation(() => true);
-    useKibana.mockReturnValue({
-      services: {
-        application: {
-          navigateToApp: mockApplication.mockNavigateToApp,
-          navigateToUrl: mockApplication.mockNavigateToUrl,
-        },
-      },
-    });
     jest.mock('../../../lib/capabilities', () => ({
       hasAllPrivilege: jest.fn(() => true),
       hasSaveRulesCapability: jest.fn(() => true),
@@ -154,14 +138,12 @@ describe('Rule Definition', () => {
 
     wrapper = mount(
       <QueryClientProvider client={new QueryClient()}>
-        <IntlProvider locale="en">
-          <RuleDefinition
-            rule={mockedRule}
-            actionTypeRegistry={actionTypeRegistry}
-            onEditRule={jest.fn()}
-            ruleTypeRegistry={ruleTypeRegistry}
-          />
-        </IntlProvider>
+        <RuleDefinition
+          rule={mockedRule}
+          actionTypeRegistry={actionTypeRegistry}
+          onEditRule={jest.fn()}
+          ruleTypeRegistry={ruleTypeRegistry}
+        />
       </QueryClientProvider>
     );
     await act(async () => {
@@ -221,29 +203,6 @@ describe('Rule Definition', () => {
   it('show edit button when user has permissions', async () => {
     const editButton = wrapper.find('[data-test-subj="ruleDetailsEditButton"]');
     expect(editButton).toBeTruthy();
-  });
-
-  it('navigates correctly on edit action', async () => {
-    (getIsExperimentalFeatureEnabled as jest.Mock).mockImplementation(() => false);
-    wrapper = mount(
-      <QueryClientProvider client={new QueryClient()}>
-        <IntlProvider locale="en">
-          <RuleDefinition
-            rule={mockRule()}
-            actionTypeRegistry={actionTypeRegistry}
-            onEditRule={jest.fn()}
-            ruleTypeRegistry={ruleTypeRegistry}
-            ruleEditBasePath="/app/observability/alerts"
-            useNewRuleForm={true}
-          />
-        </IntlProvider>
-      </QueryClientProvider>
-    );
-
-    wrapper.find('[data-test-subj="ruleDetailsEditButton"]').first().simulate('click');
-    expect(mockApplication.mockNavigateToUrl).toHaveBeenCalledWith(
-      '/app/observability/alerts/rules/edit/1'
-    );
   });
 
   it('hide edit button when user DOES NOT have permissions', async () => {

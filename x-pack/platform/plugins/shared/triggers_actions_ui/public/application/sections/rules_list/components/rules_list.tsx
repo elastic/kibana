@@ -143,7 +143,6 @@ export interface RulesListProps {
   setHeaderActions?: (components?: React.ReactNode[]) => void;
   initialSelectedConsumer?: RuleCreationValidConsumer | null;
   useNewRuleForm?: boolean;
-  ruleEditBasePath?: string;
 }
 
 export const percentileFields = {
@@ -187,13 +186,12 @@ export const RulesList = ({
   setHeaderActions,
   initialSelectedConsumer = STACK_ALERTS_FEATURE_ID,
   useNewRuleForm = false,
-  ruleEditBasePath,
 }: RulesListProps) => {
   const history = useHistory();
   const kibanaServices = useKibana().services;
   const {
     actionTypeRegistry,
-    application: { capabilities, navigateToApp, navigateToUrl },
+    application: { capabilities, navigateToApp },
     http,
     kibanaFeatures,
     notifications: { toasts },
@@ -324,17 +322,13 @@ export const RulesList = ({
 
   const onRuleEdit = (ruleItem: RuleTableItem) => {
     if (!isUsingRuleCreateFlyout && useNewRuleForm) {
-      if (ruleEditBasePath) {
-        navigateToUrl(`${ruleEditBasePath}/${getEditRuleRoute(ruleItem.id)}`);
-      } else {
-        navigateToApp('management', {
-          path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
-          state: {
-            returnApp: 'management',
-            returnPath: `insightsAndAlerting/triggersActions/rules`,
-          },
-        });
-      }
+      navigateToApp('management', {
+        path: `insightsAndAlerting/triggersActions/${getEditRuleRoute(ruleItem.id)}`,
+        state: {
+          returnApp: 'management',
+          returnPath: `insightsAndAlerting/triggersActions/rules`,
+        },
+      });
     } else {
       setEditFlyoutVisibility(true);
       setCurrentRuleToEdit(ruleItem);

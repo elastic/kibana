@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { fireEvent, waitFor } from '@testing-library/react';
+import { fireEvent } from '@testing-library/react';
 import { triggersActionsUiMock } from '@kbn/triggers-actions-ui-plugin/public/mocks';
 import { casesPluginMock } from '@kbn/cases-plugin/public/mocks';
 
@@ -34,10 +34,13 @@ const mockHttp = {
   },
 };
 
-const mockApplication = {
+const mockNavigateToApp = {
   mockNavigateToApp: jest.fn(),
-  mockNavigateToUrl: jest.fn(),
 };
+
+const mockGetEditRuleFlyout = jest.fn(() => (
+  <div data-test-subj="edit-rule-flyout">mocked component</div>
+));
 
 const mockKibana = () => {
   useKibanaMock.mockReturnValue({
@@ -45,13 +48,11 @@ const mockKibana = () => {
       ...kibanaStartMock.startContract(),
       triggersActionsUi: {
         ...triggersActionsUiMock.createStart(),
+        getEditRuleFlyout: mockGetEditRuleFlyout,
       },
       cases: mockCases,
       http: mockHttp,
-      application: {
-        navigateToApp: mockApplication.mockNavigateToApp,
-        navigateToUrl: mockApplication.mockNavigateToUrl,
-      },
+      application: mockNavigateToApp,
     },
   });
 };
@@ -137,8 +138,8 @@ describe('Header Actions', () => {
         ]);
       });
 
-      it('should offer a "Edit rule" button which navigates to rule form', async () => {
-        const { findByTestId } = render(
+      it('should offer a "Edit rule" button which opens the edit rule flyout', async () => {
+        const { getByTestId, findByTestId } = render(
           <HeaderActions
             alert={alertWithGroupsAndTags}
             alertStatus={alertWithGroupsAndTags.fields[ALERT_STATUS] as AlertStatus}
@@ -147,13 +148,7 @@ describe('Header Actions', () => {
         );
 
         fireEvent.click(await findByTestId('alert-details-header-actions-menu-button'));
-        fireEvent.click(await findByTestId('edit-rule-button'));
-
-        await waitFor(() => {
-          expect(mockApplication.mockNavigateToUrl).toHaveBeenCalledWith(
-            'wow/app/observability/alerts/rules/edit/123'
-          );
-        });
+        expect(getByTestId('edit-rule-flyout')).toBeDefined();
       });
 
       it('should offer a "Mark as untracked" button which is enabled', async () => {

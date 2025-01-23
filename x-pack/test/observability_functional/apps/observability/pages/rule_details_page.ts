@@ -113,28 +113,6 @@ export default ({ getService }: FtrProviderContext) => {
           async () => await testSubjects.exists('ruleDetails')
         );
       });
-
-      it('should navigate to the edit rule form on edit click', async () => {
-        await testSubjects.click('ruleDetailsEditButton');
-        await retry.waitFor(
-          'Edit rule form to be visible',
-          async () => await testSubjects.exists('editRuleForm')
-        );
-      });
-
-      it('should navigate to the edit rule form on edit click of header actions', async () => {
-        await observability.alerts.common.navigateToRuleDetailsByRuleId(uptimeRuleId);
-        await testSubjects.click('actions');
-
-        await testSubjects.existOrFail('editRuleButton');
-        await testSubjects.existOrFail('deleteRuleButton');
-
-        await testSubjects.click('editRuleButton');
-        await retry.waitFor(
-          'Edit rule form to be visible',
-          async () => await testSubjects.exists('editRuleForm')
-        );
-      });
     });
 
     describe('Page components', () => {

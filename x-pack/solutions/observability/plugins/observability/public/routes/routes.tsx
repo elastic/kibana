@@ -36,7 +36,6 @@ import {
   OLD_SLO_DETAIL_PATH,
   OLD_SLO_EDIT_PATH,
   CREATE_RULE_PATH,
-  EDIT_RULE_PATH,
 } from '../../common/locators/paths';
 import { HasDataContextProvider } from '../context/has_data_context/has_data_context';
 
@@ -137,13 +136,6 @@ export const routes = {
     exact: true,
   },
   [CREATE_RULE_PATH]: {
-    handler: () => {
-      return <RulePage />;
-    },
-    params: {},
-    exact: true,
-  },
-  [EDIT_RULE_PATH]: {
     handler: () => {
       return <RulePage />;
     },
