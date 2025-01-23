@@ -25,6 +25,7 @@ describe('getUnitedEntityDefinition', () => {
         developer: { pipelineDebugMode: false },
       },
     });
+    description.settings.timestampField = 'event.ingested';
 
     it('mapping', () => {
       expect(description.indexMappings).toMatchInlineSnapshot(`
@@ -46,6 +47,9 @@ describe('getUnitedEntityDefinition', () => {
             },
             "entity.source": Object {
               "type": "keyword",
+            },
+            "event.ingested": Object {
+              "type": "date",
             },
             "host.architecture": Object {
               "type": "keyword",
@@ -124,7 +128,7 @@ describe('getUnitedEntityDefinition', () => {
             "lookbackPeriod": "1d",
             "settings": Object {
               "frequency": "60s",
-              "syncDelay": "60s",
+              "syncDelay": "1s",
               "syncField": "event.ingested",
             },
             "timestampField": "event.ingested",
@@ -275,6 +279,7 @@ describe('getUnitedEntityDefinition', () => {
         developer: { pipelineDebugMode: false },
       },
     });
+    description.settings.timestampField = 'event.ingested';
 
     it('mapping', () => {
       expect(description.indexMappings).toMatchInlineSnapshot(`
@@ -296,6 +301,9 @@ describe('getUnitedEntityDefinition', () => {
             },
             "entity.source": Object {
               "type": "keyword",
+            },
+            "event.ingested": Object {
+              "type": "date",
             },
             "user.domain": Object {
               "type": "keyword",
@@ -491,6 +499,7 @@ describe('getUnitedEntityDefinition', () => {
         developer: { pipelineDebugMode: false },
       },
     });
+    description.settings.timestampField = 'event.ingested';
 
     it('mapping', () => {
       expect(description.indexMappings).toMatchInlineSnapshot(`
@@ -512,6 +521,9 @@ describe('getUnitedEntityDefinition', () => {
             },
             "entity.source": Object {
               "type": "keyword",
+            },
+            "event.ingested": Object {
+              "type": "date",
             },
             "service.address": Object {
               "type": "keyword",

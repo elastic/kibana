@@ -48,7 +48,7 @@ export interface EntityEngineInstallationDescriptor {
     syncDelay: string;
     frequency: string;
     lookbackPeriod: string;
-    timestampField: string;
+    timestampField: string | Date;
   };
 
   /**

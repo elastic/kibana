@@ -94,6 +94,9 @@ export const BASE_ENTITY_INDEX_MAPPING: MappingProperties = {
   '@timestamp': {
     type: 'date',
   },
+  'event.ingested': {
+    type: 'date',
+  },
   'asset.criticality': {
     type: 'keyword',
   },
