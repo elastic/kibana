@@ -414,8 +414,10 @@ export const PresentationPanelHoverActions = ({
         css={css`
           cursor: move;
           visibility: hidden; // default for every mode **except** edit mode
+          width: 0px;
 
           .embPanel__hoverActionsAnchor--editMode & {
+            width: auto;
             visibility: visible; // overwrite visibility in edit mode
           }
         `}
