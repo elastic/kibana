@@ -38,7 +38,7 @@ while read -r config; do
   # prevent non-zero exit code from breaking the loop
   set +e
   NODE_OPTIONS="--max-old-space-size=14336" node ./scripts/jest \
-    --config="$config" --runInBand --ci --coverage \
+    --config="$config" --ci --coverage \
     --coverageReporters json --passWithNoTests \
     --coverageDirectory target/kibana-coverage/jest
   lastCode=$?
