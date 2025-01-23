@@ -97,6 +97,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
             type: 'user',
             filter: '',
             fieldHistoryLength: 10,
+            lookbackPeriod: '24h',
             indexPattern: '',
           });
         });
