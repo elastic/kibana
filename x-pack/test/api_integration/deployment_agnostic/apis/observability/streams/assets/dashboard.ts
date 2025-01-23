@@ -241,6 +241,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       });
 
       describe('after creating multiple dashboards', () => {
+        // see details: https://github.com/elastic/kibana/issues/208016
+        this.tags(['failsOnMKI']);
         it('suggests dashboards to link', async () => {
           const response = await apiClient.fetch('POST /api/streams/{id}/dashboards/_suggestions', {
             params: { path: { id: 'logs' }, body: { tags: [] }, query: { query: '' } },
