@@ -5,23 +5,23 @@
  * 2.0.
  */
 
-import { map } from 'rxjs';
-import { useMemo } from 'react';
-import useObservable from 'react-use/lib/useObservable';
 import { AppStatus } from '@kbn/core-application-browser';
 import {
   OBSERVABILITY_LOGS_EXPLORER_APP_ID,
   SINGLE_DATASET_LOCATOR_ID,
   SingleDatasetLocatorParams,
 } from '@kbn/deeplinks-observability';
-import { DiscoverAppLocatorParams, DISCOVER_APP_LOCATOR } from '@kbn/discover-plugin/common';
-import { Query, AggregateQuery, buildPhraseFilter } from '@kbn/es-query';
+import { DISCOVER_APP_LOCATOR, DiscoverAppLocatorParams } from '@kbn/discover-plugin/common';
+import { AggregateQuery, Query, buildPhraseFilter } from '@kbn/es-query';
 import { getRouterLinkProps } from '@kbn/router-utils';
 import { RouterLinkProps } from '@kbn/router-utils/src/get_router_link_props';
 import { LocatorPublic } from '@kbn/share-plugin/common';
 import { LocatorClient } from '@kbn/shared-ux-prompt-no-data-views-types';
+import { useMemo } from 'react';
+import useObservable from 'react-use/lib/useObservable';
+import { map } from 'rxjs';
+import { BasicDataStream, DataStreamSelector, TimeRangeConfig } from '../../common/types';
 import { useKibanaContextForPlugin } from '../utils';
-import { BasicDataStream, TimeRangeConfig } from '../../common/types';
 import { SendTelemetryFn } from './use_redirect_link_telemetry';
 
 export const useRedirectLink = <T extends BasicDataStream>({
@@ -30,12 +30,14 @@ export const useRedirectLink = <T extends BasicDataStream>({
   timeRangeConfig,
   breakdownField,
   sendTelemetry,
+  selector,
 }: {
   dataStreamStat: T;
   query?: Query | AggregateQuery;
   timeRangeConfig: TimeRangeConfig;
   breakdownField?: string;
   sendTelemetry: SendTelemetryFn;
+  selector?: DataStreamSelector;
 }) => {
   const {
     services: { share, application },
@@ -84,6 +86,7 @@ export const useRedirectLink = <T extends BasicDataStream>({
           from,
           to,
           breakdownField,
+          selector,
         });
 
     const onClickWithTelemetry = (event: Parameters<RouterLinkProps['onClick']>[0]) => {
@@ -107,15 +110,16 @@ export const useRedirectLink = <T extends BasicDataStream>({
       isLogsExplorerAvailable,
     };
   }, [
-    breakdownField,
+    isLogsExplorerAppAccessible,
+    logsExplorerLocator,
     dataStreamStat,
+    query,
     from,
     to,
-    logsExplorerLocator,
-    query,
-    sendTelemetry,
+    breakdownField,
     share.url.locators,
-    isLogsExplorerAppAccessible,
+    selector,
+    sendTelemetry,
   ]);
 };
 
@@ -175,6 +179,7 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
   from,
   to,
   breakdownField,
+  selector,
 }: {
   locatorClient: LocatorClient;
   dataStreamStat: T;
@@ -182,14 +187,33 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
   from: string;
   to: string;
   breakdownField?: string;
+  selector?: DataStreamSelector;
 }): {
   navigate: () => void;
   routerLinkProps: RouterLinkProps;
 } => {
-  const dataViewId = `${dataStreamStat.type}-${dataStreamStat.name}-*`;
+  const dataViewNamespace = `${selector ? dataStreamStat.namespace : '*'}`;
+  const dataViewSelector = selector ? `${selector}` : '';
+  const dataViewId = `${dataStreamStat.type}-${dataStreamStat.name}-${dataViewNamespace}${dataViewSelector}`;
   const dataViewTitle = dataStreamStat.integration
-    ? `[${dataStreamStat.integration.title}] ${dataStreamStat.name}`
+    ? `[${dataStreamStat.integration.title}] ${dataStreamStat.name}-${dataViewNamespace}${dataViewSelector}`
     : `${dataViewId}`;
+
+  const filters = selector
+    ? []
+    : [
+        buildPhraseFilter(
+          {
+            name: 'data_stream.namespace',
+            type: 'string',
+          },
+          dataStreamStat.namespace,
+          {
+            id: dataViewId,
+            title: dataViewTitle,
+          }
+        ),
+      ];
 
   const params: DiscoverAppLocatorParams = {
     timeRange: {
@@ -209,19 +233,7 @@ const buildDiscoverConfig = <T extends BasicDataStream>({
     query,
     breakdownField,
     columns: [],
-    filters: [
-      buildPhraseFilter(
-        {
-          name: 'data_stream.namespace',
-          type: 'string',
-        },
-        dataStreamStat.namespace,
-        {
-          id: dataViewId,
-          title: dataViewTitle,
-        }
-      ),
-    ],
+    filters,
     interval: 'auto',
     sort: [['@timestamp', 'desc']],
   };

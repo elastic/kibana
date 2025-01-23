@@ -6,7 +6,15 @@
  */
 
 import React from 'react';
-import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSkeletonTitle, EuiText } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiIcon,
+  EuiPanel,
+  EuiSkeletonTitle,
+  EuiText,
+  EuiToolTip,
+} from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { PrivilegesWarningIconWrapper } from '../../../common';
@@ -71,11 +79,13 @@ export function Panel({
 export function PanelIndicator({
   label,
   value,
+  tooltip,
   isLoading,
   userHasPrivilege = true,
 }: {
   label: string;
   value: string | number;
+  tooltip?: React.ReactElement;
   isLoading: boolean;
   userHasPrivilege?: boolean;
 }) {
@@ -85,9 +95,23 @@ export function PanelIndicator({
         <EuiSkeletonTitle size="m" />
       ) : (
         <>
-          <EuiText size="xs" color="subdued">
-            {label}
-          </EuiText>
+          {tooltip ? (
+            <EuiToolTip content={tooltip}>
+              <EuiText size="xs" color="subdued">
+                {`${label} `}
+                <EuiIcon
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                />
+              </EuiText>
+            </EuiToolTip>
+          ) : (
+            <EuiText size="xs" color="subdued">
+              {label}
+            </EuiText>
+          )}
           <PrivilegesWarningIconWrapper
             hasPrivileges={userHasPrivilege}
             title={label}
