@@ -61,8 +61,6 @@ export {
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
 } from './dashboard_drilldown_options/types';
 
-export { FloatingActions } from './floating_actions/floating_actions';
-
 /**
  * A lazily-loaded ExpressionInput component.
  */
