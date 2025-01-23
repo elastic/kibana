@@ -13,12 +13,13 @@ import { Instruction } from '@kbn/observability-ai-assistant-plugin/common/types
 import pRetry from 'p-retry';
 import type { DeploymentAgnosticFtrProviderContext } from '../../../../ftr_provider_context';
 import {
-  TINY_ELSER,
   clearConversations,
   clearKnowledgeBase,
-  createKnowledgeBaseModel,
+  importTinyElserModel,
   deleteInferenceEndpoint,
   deleteKnowledgeBaseModel,
+  setupKnowledgeBase,
+  waitForKnowledgeBaseReady,
 } from './helpers';
 import { getConversationCreatedEvent } from '../helpers';
 import {
@@ -36,19 +37,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   const retry = getService('retry');
 
   describe('Knowledge base user instructions', function () {
-    // Fails on MKI: https://github.com/elastic/kibana/issues/205581
-    this.tags(['failsOnMKI']);
     before(async () => {
-      await createKnowledgeBaseModel(ml);
-      const { status } = await observabilityAIAssistantAPIClient.admin({
-        endpoint: 'POST /internal/observability_ai_assistant/kb/setup',
-        params: {
-          query: {
-            model_id: TINY_ELSER.id,
-          },
-        },
-      });
-      expect(status).to.be(200);
+      await importTinyElserModel(ml);
+      await setupKnowledgeBase(observabilityAIAssistantAPIClient);
+      await waitForKnowledgeBaseReady({ observabilityAIAssistantAPIClient, log, retry });
     });
 
     after(async () => {
@@ -181,6 +173,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           endpoint: 'PUT /internal/observability_ai_assistant/kb/user_instructions',
           params: { body: adminInstruction },
         });
+
         expect(statusAdmin).to.be(200);
 
         // wait for the public instruction to be indexed before proceeding
@@ -264,6 +257,9 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     });
 
     describe('when a user instruction exist and a conversation is created', () => {
+      // Fails on MKI because the LLM Proxy does not yet work there: https://github.com/elastic/obs-ai-assistant-team/issues/199
+      this.tags(['failsOnMKI']);
+
       let proxy: LlmProxy;
       let connectorId: string;
 
