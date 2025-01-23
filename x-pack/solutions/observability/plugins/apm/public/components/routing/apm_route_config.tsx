@@ -107,6 +107,7 @@ const apmRoutes = {
           rangeFrom: t.string,
           rangeTo: t.string,
           serviceName: t.string,
+          errorId: t.string,
         }),
       }),
     ]),

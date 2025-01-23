@@ -27,7 +27,7 @@ export function ErrorGroupLink() {
 
   const {
     path: { errorGroupId },
-    query: { rangeFrom = timeRange.from, rangeTo = timeRange.to, serviceName },
+    query: { rangeFrom = timeRange.from, rangeTo = timeRange.to, serviceName, errorId },
   } = useApmParams('/link-to/error_group/{errorGroupId}');
 
   if (errorGroupId) {
@@ -38,6 +38,7 @@ export function ErrorGroupLink() {
           rangeFrom,
           rangeTo,
           serviceName: serviceName ?? '', // TODO make sure this is always defined, maybe querying from the errorGroupId
+          errorId,
         })}
       />
     );
