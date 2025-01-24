@@ -21,7 +21,7 @@ import { addPanelMenuTrigger } from '@kbn/ui-actions-plugin/public';
 import type { HasAppContext } from '@kbn/presentation-publishing';
 import { uiActionsService, visualizationsService } from '../../../services/kibana_services';
 import { navigateToVisEditor } from './navigate_to_vis_editor';
-import type { MenuItemGroup } from './types';
+import type { MenuItem, MenuItemGroup } from './types';
 
 const VIS_GROUP_TO_ADD_PANEL_GROUP: Record<VisGroups, undefined | PresentableGroup> = {
   [VisGroups.AGGBASED]: undefined,
@@ -38,14 +38,17 @@ export async function getMenuItemGroups(
     embeddable: api,
     trigger: addPanelMenuTrigger,
   };
-  function addGroup(group: PresentableGroup) {
-    groups[group.id] = {
-      id: group.id,
-      title: group.getDisplayName?.(addPanelContext) ?? '',
-      'data-test-subj': `dashboardEditorMenu-${group.id}Group`,
-      order: group.order ?? 0,
-      items: [],
-    };
+  function pushItem(group: PresentableGroup, item: MenuItem) {
+    if (!groups[group.id]) {
+      groups[group.id] = {
+        id: group.id,
+        title: group.getDisplayName?.(addPanelContext) ?? '',
+        'data-test-subj': `dashboardEditorMenu-${group.id}Group`,
+        order: group.order ?? 0,
+        items: [],
+      };
+    }
+    groups[group.id].items.push(item);
   }
 
   // add menu items from vis types
@@ -54,10 +57,7 @@ export async function getMenuItemGroups(
 
     const group = VIS_GROUP_TO_ADD_PANEL_GROUP[visType.group];
     if (!group) return;
-    if (!groups[group.id]) {
-      addGroup(group);
-    }
-    groups[group.id]?.items?.push({
+    pushItem(group, {
       id: visType.name,
       name: visType.titleInWizard || visType.title,
       isDeprecated: visType.isDeprecated,
@@ -75,10 +75,7 @@ export async function getMenuItemGroups(
   // add menu items from vis alias
   visualizationsService.getAliases().forEach((visTypeAlias) => {
     if (visTypeAlias.disableCreate) return;
-    if (!groups[ADD_PANEL_VISUALIZATION_GROUP.id]) {
-      addGroup(ADD_PANEL_VISUALIZATION_GROUP);
-    }
-    groups[ADD_PANEL_VISUALIZATION_GROUP.id]?.items?.push({
+    pushItem(ADD_PANEL_VISUALIZATION_GROUP, {
       id: visTypeAlias.name,
       name: visTypeAlias.title,
       icon: visTypeAlias.icon ?? 'empty',
@@ -98,12 +95,8 @@ export async function getMenuItemGroups(
   ).forEach((action) => {
     const actionGroups = Array.isArray(action.grouping) ? action.grouping : [ADD_PANEL_OTHER_GROUP];
     actionGroups.forEach((group) => {
-      if (!groups[group.id]) {
-        addGroup(group);
-      }
-
       const actionName = action.getDisplayName(addPanelContext);
-      groups[group.id]?.items?.push({
+      pushItem(group, {
         id: action.id,
         name: actionName,
         icon: action.getIconType?.(addPanelContext) ?? 'empty',
