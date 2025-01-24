@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { GetRuleIdsWithGapsResponse } from '../../../../../../application/rule/methods/get_rules_with_gaps/types';
+import { GetRuleIdsWithGapsResponse } from '../../../../../../application/rule/methods/get_rule_ids_with_gaps/types';
 import { GetRuleIdsWithGapResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_rules_with_gaps';
 
 export const transformResponse = (
