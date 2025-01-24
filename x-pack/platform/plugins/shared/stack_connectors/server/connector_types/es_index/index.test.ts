@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { validateConfig, validateParams } from '@kbn/actions-plugin/server/lib';
 import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { actionsMock } from '@kbn/actions-plugin/server/mocks';
@@ -202,24 +202,24 @@ describe('execute()', () => {
     });
 
     expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "index": "index-value",
-            "operations": Array [
+          Array [
+            Array [
               Object {
-                "index": Object {
-                  "op_type": "create",
-                },
-              },
-              Object {
-                "jim": "bob",
+                "body": Array [
+                  Object {
+                    "index": Object {
+                      "op_type": "create",
+                    },
+                  },
+                  Object {
+                    "jim": "bob",
+                  },
+                ],
+                "index": "index-value",
+                "refresh": false,
               },
             ],
-            "refresh": false,
-          },
-        ],
-      ]
+          ]
     `);
 
     // full params
@@ -247,30 +247,30 @@ describe('execute()', () => {
 
     const calls = scopedClusterClient.bulk.mock.calls;
     const timeValue = (
-      (calls[0][0] as estypes.BulkRequest)?.operations?.[1] as Record<string, unknown>
+      ((calls[0][0] as estypes.BulkRequest)?.body as unknown[])[1] as Record<string, unknown>
     ).field_to_use_for_time;
     expect(timeValue).toBeInstanceOf(Date);
-    delete ((calls[0][0] as estypes.BulkRequest)?.operations?.[1] as Record<string, unknown>)
+    delete (((calls[0][0] as estypes.BulkRequest)?.body as unknown[])[1] as Record<string, unknown>)
       .field_to_use_for_time;
     expect(calls).toMatchInlineSnapshot(`
-      Array [
         Array [
-          Object {
-            "index": "index-value",
-            "operations": Array [
-              Object {
-                "index": Object {
-                  "op_type": "create",
+          Array [
+            Object {
+              "body": Array [
+                Object {
+                  "index": Object {
+                    "op_type": "create",
+                  },
                 },
-              },
-              Object {
-                "jimbob": "jr",
-              },
-            ],
-            "refresh": true,
-          },
-        ],
-      ]
+                Object {
+                  "jimbob": "jr",
+                },
+              ],
+              "index": "index-value",
+              "refresh": true,
+            },
+          ],
+        ]
     `);
 
     // minimal params
@@ -301,8 +301,7 @@ describe('execute()', () => {
       Array [
         Array [
           Object {
-            "index": "index-value",
-            "operations": Array [
+            "body": Array [
               Object {
                 "index": Object {
                   "op_type": "create",
@@ -312,6 +311,7 @@ describe('execute()', () => {
                 "jim": "bob",
               },
             ],
+            "index": "index-value",
             "refresh": false,
           },
         ],
@@ -342,32 +342,32 @@ describe('execute()', () => {
     });
 
     expect(scopedClusterClient.bulk.mock.calls).toMatchInlineSnapshot(`
-      Array [
-        Array [
-          Object {
-            "index": "index-value",
-            "operations": Array [
+          Array [
+            Array [
               Object {
-                "index": Object {
-                  "op_type": "create",
-                },
-              },
-              Object {
-                "a": 1,
-              },
-              Object {
-                "index": Object {
-                  "op_type": "create",
-                },
-              },
-              Object {
-                "b": 2,
+                "body": Array [
+                  Object {
+                    "index": Object {
+                      "op_type": "create",
+                    },
+                  },
+                  Object {
+                    "a": 1,
+                  },
+                  Object {
+                    "index": Object {
+                      "op_type": "create",
+                    },
+                  },
+                  Object {
+                    "b": 2,
+                  },
+                ],
+                "index": "index-value",
+                "refresh": false,
               },
             ],
-            "refresh": false,
-          },
-        ],
-      ]
+          ]
     `);
   });
 

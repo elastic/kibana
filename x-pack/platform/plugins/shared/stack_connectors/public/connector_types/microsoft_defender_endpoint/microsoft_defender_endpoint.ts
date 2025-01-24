@@ -35,7 +35,7 @@ export function getConnectorType(): ConnectorTypeModel<
     id: MICROSOFT_DEFENDER_ENDPOINT_CONNECTOR_ID,
     actionTypeTitle: MICROSOFT_DEFENDER_ENDPOINT_TITLE,
     iconClass: lazy(() => import('./logo')),
-    isExperimental: true,
+    isExperimental: false,
     selectMessage: i18n.translate(
       'xpack.stackConnectors.security.MicrosoftDefenderEndpointSecrets.config.selectMessageText',
       {

@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import type { Sort, FieldSort, SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  Sort,
+  FieldSort,
+  SortCombinations,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 
 const getFormattedSort = (sort: SortCombinations) => {
   if (typeof sort === 'string') {
