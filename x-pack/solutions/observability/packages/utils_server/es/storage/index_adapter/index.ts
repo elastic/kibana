@@ -292,7 +292,6 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
     const writeIndex = await this.getCurrentWriteIndexName();
     this.logger.fatal('Write index: ' + writeIndex);
 
-
     if (writeIndex) {
       const danglingItemsResponse = await this.search({
         track_total_hits: false,
