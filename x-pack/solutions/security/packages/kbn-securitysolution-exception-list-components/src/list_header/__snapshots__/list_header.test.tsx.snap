@@ -4,11 +4,11 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
 <div>
   <div>
     <header
-      class="euiPageHeader emotion-euiPageHeader"
+      class="euiPageHeader emotion-euiPageHeader-border"
       data-test-subj="PageHeader"
     >
       <div
-        class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+        class="euiPageHeaderContent emotion-euiPageHeaderContent"
       >
         <nav
           aria-label="Breadcrumbs"
@@ -224,11 +224,11 @@ exports[`ExceptionListHeader should render the List Header with name, default de
 <div>
   <div>
     <header
-      class="euiPageHeader emotion-euiPageHeader"
+      class="euiPageHeader emotion-euiPageHeader-border"
       data-test-subj="PageHeader"
     >
       <div
-        class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+        class="euiPageHeaderContent emotion-euiPageHeaderContent"
       >
         <nav
           aria-label="Breadcrumbs"
@@ -444,11 +444,11 @@ exports[`ExceptionListHeader should render the List Header with name, default de
 <div>
   <div>
     <header
-      class="euiPageHeader emotion-euiPageHeader"
+      class="euiPageHeader emotion-euiPageHeader-border"
       data-test-subj="PageHeader"
     >
       <div
-        class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+        class="euiPageHeaderContent emotion-euiPageHeaderContent"
       >
         <nav
           aria-label="Breadcrumbs"
@@ -637,11 +637,11 @@ exports[`ExceptionListHeader should render the List Header with name, default de
 <div>
   <div>
     <header
-      class="euiPageHeader emotion-euiPageHeader"
+      class="euiPageHeader emotion-euiPageHeader-border"
       data-test-subj="PageHeader"
     >
       <div
-        class="euiPageHeaderContent emotion-euiPageHeaderContent-border-l"
+        class="euiPageHeaderContent emotion-euiPageHeaderContent"
       >
         <nav
           aria-label="Breadcrumbs"
