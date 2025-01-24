@@ -37,6 +37,7 @@ import type { FileUploadResults } from './flyout/create_flyout';
 import { IndexInput } from './index_input';
 import { OverallUploadStatus } from './overall_upload_status';
 import { ImportErrors } from './import_errors';
+import { DataViewIllustration } from './data_view_illustration';
 
 interface Props {
   dataStart: DataPublicPluginStart;
@@ -172,6 +173,16 @@ export const FileUploadLiteView: FC<Props> = ({
             ) : null}
             {uploadInProgress ? (
               <>
+                <EuiFlexGroup>
+                  <EuiFlexItem />
+                  <EuiFlexItem grow={false}>
+                    <DataViewIllustration />
+                  </EuiFlexItem>
+                  <EuiFlexItem />
+                </EuiFlexGroup>
+
+                <EuiSpacer size="xl" />
+
                 <OverallUploadStatus uploadStatus={uploadStatus} filesStatus={filesStatus} />
 
                 {uploadStatus.overallImportStatus === STATUS.FAILED ? (
