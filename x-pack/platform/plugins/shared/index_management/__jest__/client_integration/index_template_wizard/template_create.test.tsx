@@ -622,8 +622,8 @@ describe('<TemplateCreate />', () => {
           body: JSON.stringify({
             name: TEMPLATE_NAME,
             indexPatterns: DEFAULT_INDEX_PATTERNS,
-            allowAutoCreate: 'TRUE',
             indexMode: 'time_series',
+            allowAutoCreate: 'TRUE',
             dataStream: {},
             _kbnMeta: {
               type: 'default',
