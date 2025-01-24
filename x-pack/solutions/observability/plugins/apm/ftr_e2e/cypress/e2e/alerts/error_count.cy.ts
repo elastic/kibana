@@ -82,10 +82,10 @@ describe('Alerts', () => {
 
       // Navigate to Rule Details step
       cy.getByTestSubj('ruleFormStep-details').click();
-      cy.contains('Save').should('not.be.disabled');
+      cy.contains('Create rule').should('not.be.disabled');
 
       // Save, with no actions
-      cy.contains('Save').click();
+      cy.contains('Create rule').click();
       cy.get(confirmModalButtonSelector).click();
 
       cy.contains(`Created rule "${ruleName}`);
