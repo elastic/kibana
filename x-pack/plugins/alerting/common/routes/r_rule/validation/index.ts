@@ -7,8 +7,17 @@
 
 export { validateStartDate } from './validate_start_date/latest';
 export { validateEndDate } from './validate_end_date/latest';
+<<<<<<< HEAD:x-pack/plugins/alerting/common/routes/r_rule/validation/index.ts
 export { createValidateRecurrenceBy } from './validate_recurrence_by/latest';
 
 export { validateStartDate as validateStartDateV1 } from './validate_start_date/v1';
 export { validateEndDate as validateEndDateV1 } from './validate_end_date/v1';
 export { createValidateRecurrenceBy as createValidateRecurrenceByV1 } from './validate_recurrence_by/v1';
+=======
+
+export { validateRecurrenceByWeekday } from './validate_recurrence_by_weekday/latest';
+
+export { validateStartDate as validateStartDateV1 } from './validate_start_date/v1';
+export { validateEndDate as validateEndDateV1 } from './validate_end_date/v1';
+export { validateRecurrenceByWeekday as validateRecurrenceByWeekdayV1 } from './validate_recurrence_by_weekday/v1';
+>>>>>>> 9a3fc89629e ([ResponseOps][Rules] Validate timezone in rule routes (#201508)):x-pack/platform/plugins/shared/alerting/common/routes/r_rule/validation/index.ts

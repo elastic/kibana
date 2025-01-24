@@ -28,6 +28,27 @@ export const SNOOZE_FAILED_MESSAGE = i18n.translate(
   }
 );
 
+export const INVALID_SNOOZE = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.invalidSnooze',
+  {
+    defaultMessage: 'Invalid',
+  }
+);
+
+export const INVALID_SNOOZE_TOOLTIP_CONTENT = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.invalidSnoozeTooltipContent',
+  {
+    defaultMessage: 'Click to remove',
+  }
+);
+
+export const INVALID_SNOOZE_TOOLTIP_TITLE = i18n.translate(
+  'xpack.triggersActionsUI.sections.rulesList.rulesListSnoozePanel.invalidSnoozeTooltipTitle',
+  {
+    defaultMessage: 'Invalid snooze settings',
+  }
+);
+
 export const OPEN_SNOOZE_PANEL_ARIA_LABEL = (name: string) =>
   i18n.translate(
     'xpack.triggersActionsUI.sections.rulesList.rulesListNotifyBadge.openSnoozePanel',
