@@ -76,7 +76,7 @@ const RiskScoreBadge: React.FC<{
   // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
   return (
     <RiskBadge
-      color={euiTheme.colors.backgroundLightDanger}
+      color={euiTheme.colors.backgroundBaseDanger}
       $severity={severity}
       $hideBackgroundColor={hideBackgroundColor}
       data-test-subj={dataTestSubj ?? 'risk-score'}
