@@ -7,19 +7,17 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { ProcessorType, conditionSchema, createIsNarrowSchema } from '@kbn/streams-schema';
-import { isEmpty } from 'lodash';
-import { z } from '@kbn/zod';
+import {
+  ProcessorDefinition,
+  ProcessorType,
+  isDissectProcessorDefinition,
+  isGrokProcessorDefinition,
+} from '@kbn/streams-schema';
 import {
   DissectFormState,
-  DissectProcessingDefinition,
-  EnrichmentUIProcessorDefinition,
+  ProcessorDefinitionWithId,
   GrokFormState,
-  GrokProcessingDefinition,
-  ProcessingDefinition,
   ProcessorFormState,
-  isDissectProcessor,
-  isGrokProcessor,
 } from './types';
 import { EMPTY_EQUALS_CONDITION } from '../../util/condition';
 
@@ -30,7 +28,7 @@ const defaultGrokProcessorFormState: GrokFormState = {
   pattern_definitions: {},
   ignore_failure: true,
   ignore_missing: true,
-  condition: EMPTY_EQUALS_CONDITION,
+  if: EMPTY_EQUALS_CONDITION,
 };
 
 const defaultDissectProcessorFormState: DissectFormState = {
@@ -39,7 +37,7 @@ const defaultDissectProcessorFormState: DissectFormState = {
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
-  condition: EMPTY_EQUALS_CONDITION,
+  if: EMPTY_EQUALS_CONDITION,
 };
 
 const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
@@ -49,95 +47,62 @@ const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState>
 
 export const getDefaultFormState = (
   type: ProcessorType,
-  processor?: EnrichmentUIProcessorDefinition
+  processor?: ProcessorDefinitionWithId
 ): ProcessorFormState => {
   if (!processor) return defaultProcessorFormStateByType[type];
 
-  if (isGrokProcessor(processor.config)) {
-    const { grok } = processor.config;
+  if (isGrokProcessorDefinition(processor)) {
+    const { grok } = processor;
 
     return structuredClone({
       ...grok,
-      condition: processor.condition,
       type: 'grok',
       patterns: grok.patterns.map((pattern) => ({ value: pattern })),
     });
   }
 
-  const { dissect } = processor.config;
+  if (isDissectProcessorDefinition(processor)) {
+    const { dissect } = processor;
 
-  return structuredClone({
-    ...dissect,
-    condition: processor.condition,
-    type: 'dissect',
-  });
+    return structuredClone({
+      ...dissect,
+      type: 'dissect',
+    });
+  }
+
+  throw new Error(`Default state not found for unsupported processor type: ${type}`);
 };
 
-export const convertFormStateToProcessing = (
-  formState: ProcessorFormState
-): ProcessingDefinition => {
+export const convertFormStateToProcessor = (formState: ProcessorFormState): ProcessorDefinition => {
   if (formState.type === 'grok') {
-    const { condition, patterns, field, pattern_definitions, ignore_failure, ignore_missing } =
-      formState;
+    const { patterns, field, pattern_definitions, ignore_failure, ignore_missing } = formState;
 
     return {
-      condition,
-      config: {
-        grok: {
-          patterns: patterns
-            .filter(({ value }) => value.trim().length > 0)
-            .map(({ value }) => value),
-          field,
-          pattern_definitions,
-          ignore_failure,
-          ignore_missing,
-        },
+      grok: {
+        if: formState.if,
+        patterns: patterns.filter(({ value }) => value.trim().length > 0).map(({ value }) => value),
+        field,
+        pattern_definitions,
+        ignore_failure,
+        ignore_missing,
       },
     };
   }
 
   if (formState.type === 'dissect') {
-    const { condition, field, pattern, append_separator, ignore_failure, ignore_missing } =
-      formState;
+    const { field, pattern, append_separator, ignore_failure, ignore_missing } = formState;
 
     return {
-      condition,
-      config: {
-        dissect: {
-          field,
-          pattern,
-          append_separator,
-          ignore_failure,
-          ignore_missing,
-        },
+      dissect: {
+        if: formState.if,
+        field,
+        pattern,
+        append_separator,
+        ignore_failure,
+        ignore_missing,
       },
     };
   }
 
   throw new Error('Cannot convert form state to processing: unknown type.');
-};
-
-export const isCompleteCondition = createIsNarrowSchema(z.unknown(), conditionSchema);
-
-export const isCompleteGrokDefinition = (processing: GrokProcessingDefinition) => {
-  const { patterns } = processing.grok;
-
-  return !isEmpty(patterns);
-};
-
-export const isCompleteDissectDefinition = (processing: DissectProcessingDefinition) => {
-  const { pattern } = processing.dissect;
-
-  return !isEmpty(pattern);
-};
-
-export const isCompleteProcessingDefinition = (processing: ProcessingDefinition) => {
-  if (isGrokProcessor(processing.config)) {
-    return isCompleteGrokDefinition(processing.config);
-  }
-  if (isDissectProcessor(processing.config)) {
-    return isCompleteDissectDefinition(processing.config);
-  }
-
-  return false;
 };

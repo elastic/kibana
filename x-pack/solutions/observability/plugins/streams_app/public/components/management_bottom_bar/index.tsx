@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiBottomBar, EuiButton, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
 

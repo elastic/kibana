@@ -20,17 +20,15 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ReadStreamDefinition, isRootStreamDefinition } from '@kbn/streams-schema';
-import { useBoolean } from '@kbn/react-hooks';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
-import { EnrichmentEmptyPrompt } from './enrichment_empty_prompt';
 import { useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../hooks/use_kibana';
 import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
 import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
-import { AddProcessorPanel } from './processor_panels';
+import { AddProcessorPanel } from './processors';
 
 interface StreamDetailEnrichmentContentProps {
   definition: ReadStreamDefinition;
@@ -42,8 +40,6 @@ export function StreamDetailEnrichmentContent({
   refreshDefinition,
 }: StreamDetailEnrichmentContentProps) {
   const { appParams, core } = useKibana();
-
-  const [isAddProcessorOpen, { on: openAddProcessor, off: closeAddProcessor }] = useBoolean();
 
   const {
     processors,
@@ -72,14 +68,8 @@ export function StreamDetailEnrichmentContent({
     openConfirm: core.overlays.openConfirm,
   });
 
-  const hasProcessors = processors.length > 0;
-
   if (isRootStreamDefinition(definition.stream)) {
     return <RootStreamEmptyPrompt />;
-  }
-
-  if (!hasProcessors && !isAddProcessorOpen) {
-    return <EnrichmentEmptyPrompt onAddProcessor={openAddProcessor} />;
   }
 
   return (
@@ -129,12 +119,7 @@ export function StreamDetailEnrichmentContent({
                     ))}
                   </SortableList>
                   <EuiSpacer size="s" />
-                  <AddProcessorPanel
-                    isInitiallyOpen={isAddProcessorOpen}
-                    definition={definition}
-                    onAddProcessor={addProcessor}
-                    onClose={closeAddProcessor}
-                  />
+                  <AddProcessorPanel definition={definition} onAddProcessor={addProcessor} />
                 </EuiPanel>
               </EuiResizablePanel>
 

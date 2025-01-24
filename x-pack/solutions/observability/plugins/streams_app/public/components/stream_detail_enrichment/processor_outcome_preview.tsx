@@ -35,12 +35,12 @@ import { UseControllerProps, useController, useFieldArray } from 'react-hook-for
 import { css } from '@emotion/react';
 import { flattenObject } from '@kbn/object-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { useKibana } from '../../../hooks/use_kibana';
-import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
-import { PreviewTable } from '../../preview_table';
-import { convertFormStateToProcessing } from '../utils';
-import { DetectedField, ProcessorFormState } from '../types';
-import { UseProcessingSimulatorReturnType } from '../hooks/use_processing_simulator';
+import { useKibana } from '../../hooks/use_kibana';
+import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
+import { PreviewTable } from '../preview_table';
+import { convertFormStateToProcessor } from './utils';
+import { DetectedField, ProcessorFormState } from './types';
+import { UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
 
 interface ProcessorOutcomePreviewProps {
   definition: ReadStreamDefinition;
@@ -128,7 +128,7 @@ export const ProcessorOutcomePreview = ({
           color="accentSecondary"
           size="s"
           onClick={() => {
-            onSimulate(convertFormStateToProcessing(formFields), formFields.detected_fields);
+            onSimulate(convertFormStateToProcessor(formFields), formFields.detected_fields);
           }}
           isLoading={isLoading}
         >

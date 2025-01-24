@@ -8,20 +8,14 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import {
-  DissectProcessorDefinition,
-  ReadStreamDefinition,
-  Condition,
-  ProcessorDefinition,
-  GrokProcessorDefinition,
-} from '@kbn/streams-schema';
+import { ReadStreamDefinition, Condition, ProcessorDefinition } from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType, StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ProcessingDefinition } from '../types';
+
 import { DetectedField } from '../types';
 import { emptyEqualsToAlways } from '../../../util/condition';
 
@@ -35,7 +29,7 @@ export interface UseProcessingSimulatorReturnType {
   refreshSamples: () => void;
   samples: Array<Record<PropertyKey, unknown>>;
   simulate: (
-    processing: ProcessingDefinition,
+    processing: ProcessorDefinition,
     detectedFields?: DetectedField[]
   ) => Promise<Simulation | null>;
   simulation?: Simulation | null;
@@ -92,33 +86,15 @@ export const useProcessingSimulator = ({
   const sampleDocs = (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
 
   const [{ loading: isLoadingSimulation, error, value }, simulate] = useAsyncFn(
-    (processingDefinition: ProcessingDefinition, detectedFields?: DetectedField[]) => {
+    (processingDefinition: ProcessorDefinition, detectedFields?: DetectedField[]) => {
       if (!definition) {
         return Promise.resolve(null);
       }
 
       const processorDefinition: ProcessorDefinition =
-        'grok' in processingDefinition.config
-          ? ({
-              grok: {
-                field: processingDefinition.config.grok.field,
-                ignore_failure: processingDefinition.config.grok.ignore_failure,
-                ignore_missing: processingDefinition.config.grok.ignore_missing,
-                if: emptyEqualsToAlways(processingDefinition.condition),
-                patterns: processingDefinition.config.grok.patterns,
-                pattern_definitions: processingDefinition.config.grok.pattern_definitions,
-              },
-            } satisfies GrokProcessorDefinition)
-          : ({
-              dissect: {
-                field: processingDefinition.config.dissect.field,
-                ignore_failure: processingDefinition.config.dissect.ignore_failure,
-                ignore_missing: processingDefinition.config.dissect.ignore_missing,
-                if: emptyEqualsToAlways(processingDefinition.condition),
-                pattern: processingDefinition.config.dissect.pattern,
-                append_separator: processingDefinition.config.dissect.append_separator,
-              },
-            } satisfies DissectProcessorDefinition);
+        'grok' in processingDefinition
+          ? { grok: processingDefinition.grok }
+          : { dissect: processingDefinition.dissect };
 
       const detected_fields = detectedFields
         ? (detectedFields.filter(

@@ -14,15 +14,13 @@ import {
   isWiredReadStream,
   FieldDefinition,
   WiredReadStreamDefinition,
-  ProcessorDefinition,
-  getProcessorConfig,
   IngestUpsertRequest,
+  ProcessorDefinition,
 } from '@kbn/streams-schema';
 import { htmlIdGenerator } from '@elastic/eui';
-import { isEqual, omit } from 'lodash';
-import { DetectedField, EnrichmentUIProcessorDefinition, ProcessingDefinition } from '../types';
+import { isEqual } from 'lodash';
+import { DetectedField, ProcessorDefinitionWithId } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
-import { alwaysToEmptyEquals, emptyEqualsToAlways } from '../../../util/condition';
 
 export const useDefinition = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
   const { core, dependencies } = useKibana();
@@ -56,7 +54,7 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
     [existingProcessorDefinitions, nextProcessorDefinitions]
   );
 
-  const addProcessor = (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => {
+  const addProcessor = (newProcessing: ProcessorDefinition, newFields?: DetectedField[]) => {
     setProcessors((prevProcs) => prevProcs.concat({ ...newProcessing, id: createId() }));
 
     if (isWiredReadStream(definition) && newFields) {
@@ -64,7 +62,7 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
     }
   };
 
-  const updateProcessor = (id: string, processorUpdate: EnrichmentUIProcessorDefinition) => {
+  const updateProcessor = (id: string, processorUpdate: ProcessorDefinitionWithId) => {
     setProcessors((prevProcs) =>
       prevProcs.map((proc) => (proc.id === id ? processorUpdate : proc))
     );
@@ -135,41 +133,19 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
 };
 
 const createId = htmlIdGenerator();
-const createProcessorsList = (
-  processors: ProcessorDefinition[]
-): EnrichmentUIProcessorDefinition[] => processors.map(createProcessorWithId);
+const createProcessorsList = (processors: ProcessorDefinition[]): ProcessorDefinitionWithId[] =>
+  processors.map(createProcessorWithId);
 
-const createProcessorWithId = (
-  processor: ProcessorDefinition
-): EnrichmentUIProcessorDefinition => ({
-  condition: alwaysToEmptyEquals(getProcessorConfig(processor).if),
-  config: {
-    ...('grok' in processor
-      ? { grok: omit(processor.grok, 'if') }
-      : { dissect: omit(processor.dissect, 'if') }),
-  },
+const createProcessorWithId = (processor: ProcessorDefinition): ProcessorDefinitionWithId => ({
   id: createId(),
+  ...processor,
 });
 
 const convertUiDefinitionIntoApiDefinition = (
-  processor: EnrichmentUIProcessorDefinition
+  processor: ProcessorDefinitionWithId
 ): ProcessorDefinition => {
-  const { id: _id, config, condition } = processor;
-
-  if ('grok' in config) {
-    return {
-      grok: {
-        ...config.grok,
-        if: emptyEqualsToAlways(condition),
-      },
-    };
-  }
-  return {
-    dissect: {
-      ...config.dissect,
-      if: emptyEqualsToAlways(condition),
-    },
-  };
+  const { id, ...processorConfig } = processor;
+  return processorConfig;
 };
 
 const mergeFields = (

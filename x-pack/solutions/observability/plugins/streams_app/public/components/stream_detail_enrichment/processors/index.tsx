@@ -16,30 +16,28 @@ import {
   EuiHorizontalRule,
   EuiAccordion,
   EuiButtonIcon,
-  EuiFlexItem,
   EuiIcon,
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
+import {
+  ProcessorDefinition,
+  ReadStreamDefinition,
+  getProcessorType,
+  isDissectProcessorDefinition,
+  isGrokProcessorDefinition,
+} from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import React, { useMemo } from 'react';
 import { useForm, SubmitHandler, FormProvider } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
-import { DissectProcessorForm } from './flyout/dissect';
-import { GrokProcessorForm } from './flyout/grok';
-import { ProcessorTypeSelector } from './flyout/processor_type_selector';
-import {
-  ProcessingDefinition,
-  DetectedField,
-  ProcessorFormState,
-  EnrichmentUIProcessorDefinition,
-  isDissectProcessor,
-  isGrokProcessor,
-} from './types';
-import { getDefaultFormState, convertFormStateToProcessing } from './utils';
-import { useDiscardConfirm } from '../../hooks/use_discard_confirm';
+import { DissectProcessorForm } from './dissect';
+import { GrokProcessorForm } from './grok';
+import { ProcessorTypeSelector } from './processor_type_selector';
+import { DetectedField, ProcessorFormState, ProcessorDefinitionWithId } from '../types';
+import { getDefaultFormState, convertFormStateToProcessor } from '../utils';
+import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 
 export interface ProcessorPanelProps {
   definition: ReadStreamDefinition;
@@ -47,22 +45,18 @@ export interface ProcessorPanelProps {
 
 export interface AddProcessorPanelProps extends ProcessorPanelProps {
   isInitiallyOpen?: boolean;
-  onAddProcessor: (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => void;
+  onAddProcessor: (newProcessing: ProcessorDefinition, newFields?: DetectedField[]) => void;
 }
 
 export interface EditProcessorPanelProps extends ProcessorPanelProps {
-  processor: EnrichmentUIProcessorDefinition;
+  processor: ProcessorDefinitionWithId;
   onDeleteProcessor: (id: string) => void;
-  onUpdateProcessor: (id: string, processor: EnrichmentUIProcessorDefinition) => void;
+  onUpdateProcessor: (id: string, processor: ProcessorDefinitionWithId) => void;
 }
 
-export function AddProcessorPanel({
-  definition,
-  isInitiallyOpen = false,
-  onAddProcessor,
-}: AddProcessorPanelProps) {
+export function AddProcessorPanel({ onAddProcessor }: AddProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
-  const [isOpen, { on: openPanel, off: closePanel }] = useBoolean(isInitiallyOpen);
+  const [isOpen, { on: openPanel, off: closePanel }] = useBoolean(false);
   const defaultValues = useMemo(() => getDefaultFormState('grok'), []);
 
   const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
@@ -75,7 +69,7 @@ export function AddProcessorPanel({
   );
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
-    const processingDefinition = convertFormStateToProcessing(data);
+    const processingDefinition = convertFormStateToProcessor(data);
 
     onAddProcessor(processingDefinition, data.detected_fields);
     closePanel();
@@ -166,7 +160,7 @@ export function EditProcessorPanel({
   const { euiTheme } = useEuiTheme();
   const [isOpen, { on: openPanel, off: closePanel }] = useBoolean();
 
-  const processorType = 'grok' in processor.config ? 'grok' : 'dissect';
+  const processorType = getProcessorType(processor);
   const processorDescription = getProcessorDescription(processor);
 
   const defaultValues = useMemo(
@@ -184,7 +178,7 @@ export function EditProcessorPanel({
   );
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
-    const processingDefinition = convertFormStateToProcessing(data);
+    const processingDefinition = convertFormStateToProcessor(data);
 
     onUpdateProcessor(processor.id, { id: processor.id, ...processingDefinition });
     closePanel();
@@ -314,11 +308,11 @@ const deleteProcessorMessage = i18n.translate(
   { defaultMessage: 'Deleting this processor will permanently impact the field configuration.' }
 );
 
-const getProcessorDescription = (processor: EnrichmentUIProcessorDefinition) => {
-  if (isGrokProcessor(processor.config)) {
-    return processor.config.grok.patterns.join(' • ');
-  } else if (isDissectProcessor(processor.config)) {
-    return processor.config.dissect.pattern;
+const getProcessorDescription = (processor: ProcessorDefinitionWithId) => {
+  if (isGrokProcessorDefinition(processor)) {
+    return processor.grok.patterns.join(' • ');
+  } else if (isDissectProcessorDefinition(processor)) {
+    return processor.dissect.pattern;
   }
 
   return '';

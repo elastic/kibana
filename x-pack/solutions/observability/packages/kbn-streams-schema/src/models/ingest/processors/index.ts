@@ -102,9 +102,10 @@ export function getProcessorType<TProcessorDefinition extends ProcessorDefinitio
   return Object.keys(processor)[0] as ProcessorTypeOf<TProcessorDefinition>;
 }
 
-export function getProcessorConfig(processor: ProcessorDefinition): ProcessorConfig {
-  if ('grok' in processor) {
-    return processor.grok;
-  }
-  return processor.dissect;
+export function getProcessorConfig<TProcessorDefinition extends ProcessorDefinition>(
+  processor: TProcessorDefinition
+): ProcessorConfig {
+  const type = getProcessorType(processor);
+
+  return processor[type as keyof TProcessorDefinition];
 }
