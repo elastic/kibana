@@ -94,7 +94,7 @@ These happen in deployments that use token-based authentication (SAML tokens) wh
 
 The thing to note about this type of error is that the deployment is stable, it's just the size of a requested report is too large to complete within the time allowed by the authentication token available to the Reporting task.
 
-==== Avoiding token expiration
+=== Avoiding token expiration
 
 * You can work around this error by creating smaller reports: instead of one report covering a large time range, create multiple reports that cover segmented time ranges.
 * Another workaround would be to increase `xpack.security.authc.token.timeout`, which is set to `20m` by default.
