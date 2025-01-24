@@ -27,26 +27,22 @@ export const createSearchSessionsDeprecationsConfig: (
   core: CoreSetup
 ) => RegisterDeprecationsConfig = (core: CoreSetup) => ({
   getDeprecations: async (context: GetDeprecationsContext): Promise<DeprecationsDetails[]> => {
+    const searchSessionsLink = core.http.basePath.prepend('/app/management/kibana/search_sessions');
     const [coreStart] = await core.getStartServices();
     const savedObjectsClient = coreStart.savedObjects.getScopedClient(context.request, {
       includedHiddenTypes: [SEARCH_SESSION_TYPE],
     });
-    const finder = savedObjectsClient.createPointInTimeFinder<SearchSessionAttributes>({
+    const results = await savedObjectsClient.find<SearchSessionAttributes>({
       type: 'search-session',
       perPage: 1000,
       fields: ['name', 'username', 'expires'],
+      sortField: 'created',
+      sortOrder: 'desc',
       namespaces: ['*'],
     });
 
-    const searchSessions: Array<SavedObjectsFindResult<SearchSessionAttributes>> = [];
-
-    for await (const response of finder.find()) {
-      searchSessions.push(
-        ...response.saved_objects.filter(
-          (so) => new Date(so.attributes.expires).getTime() > Date.now()
-        )
-      );
-    }
+    const searchSessions: Array<SavedObjectsFindResult<SearchSessionAttributes>> =
+      results.saved_objects.filter((so) => new Date(so.attributes.expires).getTime() > Date.now());
 
     if (!searchSessions.length) {
       return [];
@@ -55,22 +51,22 @@ export const createSearchSessionsDeprecationsConfig: (
     return [
       {
         title: i18n.translate('data.deprecations.searchSessionsTitle', {
-          defaultMessage: 'Found active search sessions',
+          defaultMessage: 'Search sessions has been disabled by default',
         }),
-        message: buildMessage({ searchSessions }),
+        message: buildMessage({ searchSessions, searchSessionsLink }),
         deprecationType: 'feature',
         level: 'warning',
         correctiveActions: {
           manualSteps: [
             i18n.translate('data.deprecations.searchSessions.manualStepOneMessage', {
-              defaultMessage: 'Open the kibana.yml config file.',
+              defaultMessage: 'Navigate to Stack Management > Kibana > Search Sessions',
             }),
             i18n.translate('data.deprecations.searchSessions.manualStepTwoMessage', {
-              defaultMessage: 'Add the following: "data.search.sessions.enabled: true"',
+              defaultMessage: 'Delete search sessions that have not expired',
             }),
             i18n.translate('data.deprecations.searchSessions.manualStepTwoMessage', {
               defaultMessage:
-                'Alternatively, if you do not want to keep these search sessions after upgrade, navigate to Stack Management > Search Sessions and delete any sessions that have not expired.',
+                'Alternatively, to continue using search sessions, open the kibana.yml config file and add the following: "data.search.sessions.enabled: true"',
             }),
           ],
         },
@@ -79,54 +75,19 @@ export const createSearchSessionsDeprecationsConfig: (
   },
 });
 
-const searchSessionIdLabel = i18n.translate(
-  'data.deprecations.searchSessions.searchSessionIdLabel',
-  {
-    defaultMessage: 'ID',
-  }
-);
-
-const searchSessionNameLabel = i18n.translate(
-  'data.deprecations.searchSessions.searchSessionNameLabel',
-  {
-    defaultMessage: 'Name',
-  }
-);
-
-const searchSessionUserLabel = i18n.translate(
-  'data.deprecations.searchSessions.searchSessionUserLabel',
-  {
-    defaultMessage: 'User',
-  }
-);
-
-const searchSessionSpacesLabel = i18n.translate(
-  'data.deprecations.searchSessions.searchSessionSpacesLabel',
-  {
-    defaultMessage: 'Spaces',
-  }
-);
-
-const buildSearchSessionsListEntry = (
-  so: SavedObjectsFindResult<SearchSessionAttributes>
-) => `- **${searchSessionIdLabel}:** ${so.id}
-  - **${searchSessionNameLabel}:** ${so.attributes.name}
-  - **${searchSessionUserLabel}:** ${so.attributes.username}
-  - **${searchSessionSpacesLabel}:** ${so.namespaces?.join(', ')}`;
-
 const buildMessage = ({
   searchSessions,
+  searchSessionsLink,
 }: {
   searchSessions: Array<SavedObjectsFindResult<SearchSessionAttributes>>;
+  searchSessionsLink: string;
 }): DeprecationDetailsMessage => ({
   type: 'markdown',
   content: i18n.translate('data.deprecations.scriptedFieldsMessage', {
-    defaultMessage: `The search sessions feature is deprecated and will be disabled by default in 9.0. You currently have {numberOfSearchSessions} active search session(s). If you would like to continue using, managing, and restoring search sessions in 9.0, you'll need to re-enable them in your kibana.yml configuration file. If not, no action is necessary.
-The following is a list of all active search sessions and their associated spaces:
-{searchSessionsList}`,
+    defaultMessage: `The search sessions feature is deprecated and is disabled by default in 9.0. You currently have {numberOfSearchSessions} active search session(s): [Manage Search Sessions]({searchSessionsLink})`,
     values: {
       numberOfSearchSessions: searchSessions.length,
-      searchSessionsList: searchSessions.map(buildSearchSessionsListEntry).join('\n'),
+      searchSessionsLink,
     },
   }),
 });

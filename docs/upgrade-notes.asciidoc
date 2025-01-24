@@ -335,7 +335,7 @@ Starting from version 9.0.0, search sessions has been disabled by default. To vi
 Search sessions will be disabled unless they are explicitly enabled in config.yml.
 
 *Action* +
-If you would like to continue using, managing, and restoring search sessions in 9.0, you'll need to re-enable them in your kibana.yml configuration file. If not, no action is necessary.
+If you would like to continue using, managing, and restoring search sessions in 9.0, you'll need to re-enable the feature in your kibana.yml configuration file. If not, no action is necessary.
 
 To re-enable search sessions, add the following in your config.yml:
 
