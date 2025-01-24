@@ -41,7 +41,7 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
 
   return {
     /**
-     * Create a new list.
+     * Create a new value list.
      */
     createList(props: CreateListProps, kibanaSpace: string = 'default') {
       return supertest
@@ -62,9 +62,9 @@ export function SecuritySolutionApiProvider({ getService }: FtrProviderContext) 
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-      * Create a list item and associate it with the specified list.
+      * Create a value list item and associate it with the specified value list.
 
-All list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
+All value list items in the same list must be the same type. For example, each list item in an `ip` list must define a specific IP address.
 > info
 > Before creating a list item, you must create a list.
 
@@ -78,7 +78,7 @@ All list items in the same list must be the same type. For example, each list it
         .send(props.body as object);
     },
     /**
-      * Delete a list using the list ID.
+      * Delete a value list using the list ID.
 > info
 > When you delete a list, all of its list items are also deleted.
 
@@ -102,7 +102,7 @@ All list items in the same list must be the same type. For example, each list it
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Delete a list item using its `id`, or its `list_id` and `value` fields.
+     * Delete a value list item using its `id`, or its `list_id` and `value` fields.
      */
     deleteListItem(props: DeleteListItemProps, kibanaSpace: string = 'default') {
       return supertest
@@ -113,7 +113,7 @@ All list items in the same list must be the same type. For example, each list it
         .query(props.query);
     },
     /**
-     * Export list item values from the specified list.
+     * Export list item values from the specified value list.
      */
     exportListItems(props: ExportListItemsProps, kibanaSpace: string = 'default') {
       return supertest
@@ -124,7 +124,7 @@ All list items in the same list must be the same type. For example, each list it
         .query(props.query);
     },
     /**
-     * Get all list items in the specified list.
+     * Get all value list items in the specified list.
      */
     findListItems(props: FindListItemsProps, kibanaSpace: string = 'default') {
       return supertest
@@ -135,7 +135,7 @@ All list items in the same list must be the same type. For example, each list it
         .query(props.query);
     },
     /**
-     * Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
+     * Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.
      */
     findLists(props: FindListsProps, kibanaSpace: string = 'default') {
       return supertest
@@ -146,7 +146,7 @@ All list items in the same list must be the same type. For example, each list it
         .query(props.query);
     },
     /**
-      * Import list items from a TXT or CSV file. The maximum file size is 9 million bytes.
+      * Import value list items from a TXT or CSV file. The maximum file size is 9 million bytes.
 
 You can import items to a new or existing list.
 
@@ -160,7 +160,7 @@ You can import items to a new or existing list.
         .query(props.query);
     },
     /**
-     * Update specific fields of an existing list using the list ID.
+     * Update specific fields of an existing list using the list `id`.
      */
     patchList(props: PatchListProps, kibanaSpace: string = 'default') {
       return supertest
@@ -171,7 +171,7 @@ You can import items to a new or existing list.
         .send(props.body as object);
     },
     /**
-     * Update specific fields of an existing list item using the list item ID.
+     * Update specific fields of an existing value list item using the item `id`.
      */
     patchListItem(props: PatchListItemProps, kibanaSpace: string = 'default') {
       return supertest
@@ -182,7 +182,7 @@ You can import items to a new or existing list.
         .send(props.body as object);
     },
     /**
-     * Get the details of a list using the list ID.
+     * Get the details of a value list using the list ID.
      */
     readList(props: ReadListProps, kibanaSpace: string = 'default') {
       return supertest
@@ -203,7 +203,7 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-     * Get the details of a list item.
+     * Get the details of a value list item.
      */
     readListItem(props: ReadListItemProps, kibanaSpace: string = 'default') {
       return supertest
@@ -221,7 +221,7 @@ You can import items to a new or existing list.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
     },
     /**
-      * Update a list using the list ID. The original list is replaced, and all unspecified fields are deleted.
+      * Update a value list using the list `id`. The original list is replaced, and all unspecified fields are deleted.
 > info
 > You cannot modify the `id` value.
 
@@ -235,7 +235,7 @@ You can import items to a new or existing list.
         .send(props.body as object);
     },
     /**
-      * Update a list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
+      * Update a value list item using the list item ID. The original list item is replaced, and all unspecified fields are deleted.
 > info
 > You cannot modify the `id` value.
 

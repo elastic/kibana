@@ -884,6 +884,7 @@ x-pack/platform/plugins/shared/fleet @elastic/fleet
 x-pack/platform/plugins/shared/global_search @elastic/appex-sharedux
 x-pack/platform/plugins/shared/index_management @elastic/kibana-management
 x-pack/platform/plugins/shared/inference @elastic/appex-ai-infra
+x-pack/platform/plugins/shared/inference_endpoint @elastic/ml-ui
 x-pack/platform/plugins/shared/ingest_pipelines @elastic/kibana-management
 x-pack/platform/plugins/shared/integration_assistant @elastic/security-scalability
 x-pack/platform/plugins/shared/lens @elastic/kibana-visualizations
@@ -1258,6 +1259,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 # Observability AI Assistant
 /x-pack/test_serverless/api_integration/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/test_serverless/functional/test_suites/common/data_usage @elastic/obs-ai-assistant @elastic/security-solution
+/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/obs-ai-assistant @elastic/security-solution
 /x-pack/test/observability_ai_assistant_api_integration @elastic/obs-ai-assistant
 /x-pack/test/observability_ai_assistant_functional @elastic/obs-ai-assistant
 /x-pack/test_serverless/**/test_suites/observability/ai_assistant @elastic/obs-ai-assistant
@@ -1921,6 +1923,18 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 /x-pack/test_serverless/**/test_suites/security/platform_security/ @elastic/kibana-security
 /x-pack/test_serverless/**/test_suites/observability/platform_security/ @elastic/kibana-security
 /src/core/packages/http/server-internal/src/cdn_config/ @elastic/kibana-security @elastic/kibana-core
+/x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/kibana-security @elastic/appex-qa
+/x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts @elastic/kibana-security @elastic/appex-qa
+/x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elastic/kibana-security @elastic/appex-qa @elastic/kibana-cloud-security-posture
+/x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/kibana-security @elastic/kibana-cloud-security-posture
+/x-pack/test_serverless/functional/test_suites/security/constants.ts @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/kibana-security
+/x-pack/test_serverless/functional/test_suites/common/spaces/multiple_spaces_enabled.ts @elastic/kibana-security
+/x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/kibana-security
+/x-pack/test_serverless/api_integration/test_suites/security @elastic/kibana-security
+
+/x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/kibana-security
+/x-pack/test_serverless/functional/test_suites/security/index.ts @elastic/kibana-security
 #CC# /x-pack/platform/plugins/shared/security/ @elastic/kibana-security
 
 # Response Ops team
@@ -2121,25 +2135,13 @@ x-pack/test/api_integration/apis/management/index_management/inference_endpoints
 /x-pack/test/common/services/security_solution @elastic/security-solution
 /x-pack/test/api_integration/services/security_solution_*.gen.ts @elastic/security-solution
 /x-pack/test/accessibility/apps/group3/security_solution.ts @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/security/config.ts @elastic/security-solution @elastic/appex-qa
-x-pack/test_serverless/functional/test_suites/security/config.mki_only.ts @elastic/security-solution @elastic/appex-qa
-x-pack/test_serverless/functional/test_suites/security/index.mki_only.ts @elastic/security-solution @elastic/appex-qa @elastic/kibana-cloud-security-posture
-/x-pack/test_serverless/functional/test_suites/security/config.feature_flags.ts @elastic/security-solution @elastic/kibana-cloud-security-posture
-/x-pack/test_serverless/functional/test_suites/security/constants.ts @elastic/security-solution
-/x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/common/spaces/multiple_spaces_enabled.ts @elastic/security-solution
 /x-pack/test/functional/es_archives/endpoint/ @elastic/security-solution
 /x-pack/test/plugin_functional/test_suites/resolver/ @elastic/security-solution
 /x-pack/test/security_solution_api_integration @elastic/security-solution
 /x-pack/test/api_integration/apis/security_solution @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/default @elastic/security-solution
 /x-pack/test/functional/es_archives/auditbeat/hosts @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_management_page.ts @elastic/security-solution
-/x-pack/test_serverless/functional/page_objects/svl_data_usage.ts @elastic/security-solution @elastic/obs-ai-assistant
-/x-pack/test_serverless/api_integration/test_suites/security @elastic/security-solution
 
-/x-pack/test_serverless/functional/test_suites/security/index.feature_flags.ts @elastic/security-solution
-/x-pack/test_serverless/functional/test_suites/security/index.ts @elastic/security-solution
 #CC# /x-pack/solutions/security/plugins/security_solution/ @elastic/security-solution
 /x-pack/test/functional/es_archives/cases/signals/duplicate_ids @elastic/response-ops
 
