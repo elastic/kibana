@@ -286,12 +286,15 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
 
   useEffect(() => {
     if (providers) {
+      // Ensure the Elastic Inference Service (EIS) appears at the top of the providers list
       const elasticServiceIndex = providers.findIndex((provider) => provider.service === 'elastic');
-      console.log('service index', elasticServiceIndex);
-      const elasticService: InferenceProvider = providers?.splice(elasticServiceIndex, 1);
-      console.log('service', elasticService);
-
-      setUpdatedProviders([]);
+      if (elasticServiceIndex !== -1) {
+        const elasticService = providers[elasticServiceIndex];
+        const remainingProviders = providers.filter((_, index) => index !== elasticServiceIndex);
+        setUpdatedProviders([elasticService, ...remainingProviders]);
+      } else {
+        setUpdatedProviders(providers);
+      }
     }
   }, [providers]);
 
@@ -321,32 +324,32 @@ export const InferenceServiceFormFields: React.FC<InferenceServicesProps> = ({
     // Set values from the provider secrets and config to the schema
     const existingConfiguration = providerSchema
       ? providerSchema.map((item: ConfigEntryView) => {
-        const itemValue: ConfigEntryView = item;
-        itemValue.isValid = true;
-        if (item.sensitive && secrets?.providerSecrets) {
-          const secretValue = secrets.providerSecrets[item.key];
-          if (
-            typeof secretValue === 'string' ||
-            typeof secretValue === 'number' ||
-            typeof secretValue === 'boolean' ||
-            secretValue === null
-          ) {
-            itemValue.value = secretValue;
+          const itemValue: ConfigEntryView = item;
+          itemValue.isValid = true;
+          if (item.sensitive && secrets?.providerSecrets) {
+            const secretValue = secrets.providerSecrets[item.key];
+            if (
+              typeof secretValue === 'string' ||
+              typeof secretValue === 'number' ||
+              typeof secretValue === 'boolean' ||
+              secretValue === null
+            ) {
+              itemValue.value = secretValue;
+            }
+          } else if (config?.providerConfig) {
+            const configValue = config.providerConfig[item.key];
+            if (
+              typeof configValue === 'string' ||
+              typeof configValue === 'number' ||
+              typeof configValue === 'boolean' ||
+              configValue === null ||
+              configValue === undefined
+            ) {
+              itemValue.value = configValue ?? null;
+            }
           }
-        } else if (config?.providerConfig) {
-          const configValue = config.providerConfig[item.key];
-          if (
-            typeof configValue === 'string' ||
-            typeof configValue === 'number' ||
-            typeof configValue === 'boolean' ||
-            configValue === null ||
-            configValue === undefined
-          ) {
-            itemValue.value = configValue ?? null;
-          }
-        }
-        return itemValue;
-      })
+          return itemValue;
+        })
       : [];
 
     setOptionalProviderFormFields(existingConfiguration.filter((p) => !p.required && !p.sensitive));
