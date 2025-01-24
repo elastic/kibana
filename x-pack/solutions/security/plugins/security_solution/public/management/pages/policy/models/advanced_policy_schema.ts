@@ -100,7 +100,7 @@ export const AdvancedPolicySchema: AdvancedPolicySchemaType[] = [
     documentation: i18n.translate(
       'xpack.securitySolution.endpoint.policy.advanced.linux.advanced.allow_cloud_features',
       {
-        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Endpoint functionality. It's meant only for telemetry extra-avoidant users, especially for FedRAMP High users.`,
+        defaultMessage: `Advanced option to selectively choose which external services are allowed, valid keywords are "sample-collection,reputation-lookup,malware-lookup,artifacts-update,staged-artifacts-rollout". Everything is allowed by default, but if any comma separated value(s) are provided all other features are disabled. To disallow all a special keyword "none" can be used. The option imposes severe limitation on Defend functionality. It's meant only for telemetry extra-avoidant users users.`,
       }
     ),
   },
