@@ -8,6 +8,7 @@
 import {
   InheritedIngestStreamLifecycle,
   WiredStreamDefinition,
+  getSegments,
   isChildOf,
   isDescendantOf,
   isInheritLifecycle,
@@ -20,7 +21,7 @@ export function findInheritedLifecycle(
 ): InheritedIngestStreamLifecycle {
   const originDefinition = orderBy(
     [...ancestors, definition],
-    (parent) => parent.name.split('.').length,
+    (parent) => getSegments(parent.name).length,
     'asc'
   ).findLast(({ ingest }) => !isInheritLifecycle(ingest.lifecycle));
 
