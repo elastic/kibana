@@ -10,7 +10,7 @@
 const ts = require('typescript');
 const path = require('path');
 
-function getImportedVariableValue(importedName, context) {
+function getImportedVariableValue(context, name, propertyName) {
   try {
     const parent = context
       .getAncestors()
@@ -21,7 +21,7 @@ function getImportedVariableValue(importedName, context) {
     const importDeclaration = parent.body.find(
       (statement) =>
         statement.type === 'ImportDeclaration' &&
-        statement.specifiers.some((specifier) => specifier.local.name === importedName)
+        statement.specifiers.some((specifier) => specifier.local.name === name)
     );
 
     if (!importDeclaration) return;
@@ -37,20 +37,102 @@ function getImportedVariableValue(importedName, context) {
 
     const checker = program.getTypeChecker();
     const symbols = checker.getExportsOfModule(sourceFile.symbol);
-    const symbol = symbols.find((s) => s.name === importedName);
+    const symbol = symbols.find((s) => s.name === name);
 
-    if (!symbol || !symbol?.valueDeclaration) return null;
+    if (!symbol) return null;
 
-    const valueDeclaration = symbol.valueDeclaration;
+    if (propertyName) {
+      const currentSymbol = checker.getTypeOfSymbolAtLocation(symbol, sourceFile);
+      const property = currentSymbol.getProperty(propertyName);
 
-    if (valueDeclaration.initializer && ts.isStringLiteral(valueDeclaration.initializer)) {
-      return valueDeclaration.initializer.text;
+      if (ts.isStringLiteral(property.valueDeclaration.initializer)) {
+        return property.valueDeclaration.initializer.text;
+      }
+
+      return null;
+    }
+
+    const initializer = symbol?.valueDeclaration?.initializer;
+
+    if (ts.isStringLiteral(initializer)) {
+      return initializer.text;
     }
 
     return null;
   } catch (e) {
     return null;
   }
+}
+
+function validatePrivilegesNode(context, privilegesNode, scopedVariables) {
+  ['all', 'read'].forEach((privilegeType) => {
+    const privilege = privilegesNode.value.properties.find(
+      (prop) =>
+        prop.key && prop.key.name === privilegeType && prop.value.type === 'ObjectExpression'
+    );
+
+    if (!privilege) return;
+
+    const apiProperty = privilege.value.properties.find(
+      (prop) => prop.key && prop.key.name === 'api' && prop.value.type === 'ArrayExpression'
+    );
+
+    if (!apiProperty) return;
+
+    apiProperty.value.elements.forEach((element) => {
+      let valueToCheck = null;
+
+      if (element.type === 'Literal' && typeof element.value === 'string') {
+        valueToCheck = element.value;
+      } else if (element.type === 'Identifier') {
+        valueToCheck = scopedVariables.has(element.name)
+          ? scopedVariables.get(element.name)
+          : getImportedVariableValue(context, element.name);
+      } else if (element.type === 'MemberExpression') {
+        valueToCheck = getImportedVariableValue(
+          context,
+          element.object.name,
+          element.property.name
+        );
+      }
+
+      if (valueToCheck) {
+        const isValid = /^(manage|create|update|delete|read)/.test(valueToCheck);
+        const usesValidSeparator = /^[a-z0-9_]+$/.test(valueToCheck);
+        let method = 'manage';
+
+        if (valueToCheck.includes('read')) {
+          method = 'read';
+        }
+
+        if (valueToCheck.includes('create') || valueToCheck.includes('copy')) {
+          method = 'create';
+        }
+
+        if (valueToCheck.includes('delete')) {
+          method = 'delete';
+        }
+
+        if (valueToCheck.includes('update')) {
+          method = 'update';
+        }
+
+        if (!isValid) {
+          return context.report({
+            node: element,
+            message: `API privilege '${valueToCheck}' should start with [manage|create|update|delete|read] or use ApiPrivileges.${method} instead`,
+          });
+        }
+
+        if (!usesValidSeparator) {
+          return context.report({
+            node: element,
+            message: `API privilege '${valueToCheck}' should use '_' as a separator`,
+          });
+        }
+      }
+    });
+  });
 }
 
 module.exports = {
@@ -110,71 +192,35 @@ module.exports = {
 
           if (!privilegesProperty) return;
 
-          ['all', 'read'].forEach((privilegeType) => {
-            const privilege = privilegesProperty.value.properties.find(
-              (prop) =>
-                prop.key &&
-                prop.key.name === privilegeType &&
-                prop.value.type === 'ObjectExpression'
-            );
-
-            if (!privilege) return;
-
-            const apiProperty = privilege.value.properties.find(
-              (prop) => prop.key && prop.key.name === 'api' && prop.value.type === 'ArrayExpression'
-            );
-
-            if (!apiProperty) return;
-
-            apiProperty.value.elements.forEach((element) => {
-              let valueToCheck = null;
-
-              if (element.type === 'Literal' && typeof element.value === 'string') {
-                valueToCheck = element.value;
-              } else if (element.type === 'Identifier') {
-                valueToCheck = scopedVariables.has(element.name)
-                  ? scopedVariables.get(element.name)
-                  : getImportedVariableValue(element.name, context);
-              }
-
-              if (valueToCheck) {
-                const isValid = /^(manage|create|update|delete|read)/.test(valueToCheck);
-                const usesValidSeparator = /^[a-z0-9_]+$/.test(valueToCheck);
-                let method = 'manage';
-
-                if (valueToCheck.includes('read')) {
-                  method = 'read';
-                }
-
-                if (valueToCheck.includes('create') || valueToCheck.includes('copy')) {
-                  method = 'create';
-                }
-
-                if (valueToCheck.includes('delete')) {
-                  method = 'delete';
-                }
-
-                if (valueToCheck.includes('update')) {
-                  method = 'update';
-                }
-
-                if (!isValid) {
-                  return context.report({
-                    node: element,
-                    message: `API privilege '${valueToCheck}' should start with [manage|create|update|delete|read] or use ApiPrivileges.${method} instead`,
-                  });
-                }
-
-                if (!usesValidSeparator) {
-                  return context.report({
-                    node: element,
-                    message: `API privilege '${valueToCheck}' should use '_' as a separator`,
-                  });
-                }
-              }
-            });
-          });
+          return validatePrivilegesNode(context, privilegesProperty, scopedVariables);
         }
+      },
+      ExportNamedDeclaration(node) {
+        if (
+          node.declaration?.type !== 'VariableDeclaration' ||
+          !node.declaration.declarations?.length
+        ) {
+          return;
+        }
+
+        node.declaration.declarations.forEach((declaration) => {
+          if (declaration.init && declaration.init.type === 'ObjectExpression') {
+            if (
+              !['id', 'name', 'privileges', 'scope', 'category'].every((key) =>
+                declaration.init.properties.find((prop) => prop.key?.name === key)
+              )
+            ) {
+              return;
+            }
+
+            const privilegesProperty = declaration.init.properties.find(
+              (prop) =>
+                prop.key && prop.key.name === 'privileges' && prop.value.type === 'ObjectExpression'
+            );
+
+            validatePrivilegesNode(context, privilegesProperty, new Map());
+          }
+        });
       },
     };
   },
