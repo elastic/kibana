@@ -233,6 +233,7 @@ export const SnapshotDetails: React.FunctionComponent<Props> = ({
                     snapshotDetails.state !== SNAPSHOT_STATE.SUCCESS &&
                     snapshotDetails.state !== SNAPSHOT_STATE.PARTIAL
                   }
+                  data-test-subj="restoreSnapshotButton"
                 >
                   <FormattedMessage
                     id="xpack.snapshotRestore.snapshotDetails.restoreButtonLabel"

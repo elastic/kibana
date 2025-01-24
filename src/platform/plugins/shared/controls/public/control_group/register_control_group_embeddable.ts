@@ -14,7 +14,7 @@ import { untilPluginStartServicesReady } from '../services/kibana_services';
 export function registerControlGroupEmbeddable(embeddableSetup: EmbeddableSetup) {
   embeddableSetup.registerReactEmbeddableFactory(CONTROL_GROUP_TYPE, async () => {
     const [{ getControlGroupEmbeddableFactory }] = await Promise.all([
-      import('./get_control_group_factory'),
+      import('../controls_module'),
       untilPluginStartServicesReady(),
     ]);
     return getControlGroupEmbeddableFactory();

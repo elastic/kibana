@@ -60,5 +60,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/dataset-quality-plugin",
     "@kbn/observability-utils-common",
+    "@kbn/discover-plugin",
   ]
 }

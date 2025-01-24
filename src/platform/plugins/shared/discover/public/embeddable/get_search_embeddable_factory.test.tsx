@@ -137,10 +137,10 @@ describe('saved search embeddable', () => {
       const discoverComponent = render(<Component />);
 
       // wait for data fetching
-      expect(api.dataLoading.getValue()).toBe(true);
+      expect(api.dataLoading$.getValue()).toBe(true);
       resolveSearch();
       await waitOneTick();
-      expect(api.dataLoading.getValue()).toBe(false);
+      expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('embeddedSavedSearchDocTable')).toBeInTheDocument();
       await waitFor(() =>
@@ -173,10 +173,10 @@ describe('saved search embeddable', () => {
       const discoverComponent = render(<Component />);
 
       // wait for data fetching
-      expect(api.dataLoading.getValue()).toBe(true);
+      expect(api.dataLoading$.getValue()).toBe(true);
       resolveSearch();
       await waitOneTick();
-      expect(api.dataLoading.getValue()).toBe(false);
+      expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(discoverComponent.queryByTestId('dscFieldStatsEmbeddedContent')).toBeInTheDocument();
     });
@@ -200,13 +200,13 @@ describe('saved search embeddable', () => {
       await waitOneTick(); // wait for build to complete
 
       // wait for data fetching
-      expect(api.dataLoading.getValue()).toBe(true);
+      expect(api.dataLoading$.getValue()).toBe(true);
       resolveSearch();
       await waitOneTick();
-      expect(api.dataLoading.getValue()).toBe(false);
+      expect(api.dataLoading$.getValue()).toBe(false);
 
       expect(search).toHaveBeenCalledTimes(1);
-      api.setPanelTitle('custom title');
+      api.setTitle('custom title');
       await waitOneTick();
       expect(search).toHaveBeenCalledTimes(1);
     });
@@ -318,10 +318,10 @@ describe('saved search embeddable', () => {
       const discoverComponent = render(<Component />);
 
       // wait for data fetching
-      expect(api.dataLoading.getValue()).toBe(true);
+      expect(api.dataLoading$.getValue()).toBe(true);
       resolveSearch();
       await waitOneTick();
-      expect(api.dataLoading.getValue()).toBe(false);
+      expect(api.dataLoading$.getValue()).toBe(false);
 
       const discoverGridComponent = discoverComponent.queryByTestId('discoverDocTable');
       expect(discoverGridComponent).toBeInTheDocument();
