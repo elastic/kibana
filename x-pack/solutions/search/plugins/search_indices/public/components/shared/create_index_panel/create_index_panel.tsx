@@ -22,9 +22,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { docLinks } from '../../../common/doc_links';
-import { useKibana } from '../../hooks/use_kibana';
-import { CreateIndexViewMode } from '../../types';
+import { docLinks } from '../../../../common/doc_links';
+import { useKibana } from '../../../hooks/use_kibana';
+import { CreateIndexViewMode } from '../../../types';
+import { CreateIndexCalloutBrowseIntegrationBtn } from './callout_browse_integration_stack';
+import { CreateIndexPanelCreateO11ySpaceBtn } from './callout_create_o11y_space_stack';
 
 const WIDTH = '980px';
 
@@ -33,7 +35,6 @@ export interface CreateIndexPanelProps {
   createIndexView: CreateIndexViewMode;
   onChangeView: (id: string) => void;
   onClose: () => void;
-  showCallouts?: boolean;
   showSkip?: boolean;
   title?: React.ReactNode;
 }
@@ -43,12 +44,13 @@ export const CreateIndexPanel = ({
   createIndexView,
   onChangeView,
   onClose,
-  showCallouts,
   showSkip,
   title,
 }: CreateIndexPanelProps) => {
   const { cloud, http } = useKibana().services;
   const { euiTheme } = useEuiTheme();
+
+  const isServerless: boolean = cloud?.isServerlessEnabled ?? false;
 
   const o11yTrialLink = useMemo(() => {
     if (cloud && cloud.isServerlessEnabled) {
@@ -174,85 +176,91 @@ export const CreateIndexPanel = ({
             {children}
           </EuiFlexGroup>
         </EuiPanel>
-        {showCallouts && (
-          <>
-            <EuiSpacer />
-            <EuiPanel color="transparent">
-              <EuiTextAlign textAlign="center">
-                <EuiTitle size="xs">
-                  <h5>
-                    {i18n.translate(
-                      'xpack.searchIndices.shared.createIndex.observabilityCallout.title',
-                      {
-                        defaultMessage: 'Looking to store your logs or metrics data?',
-                      }
-                    )}
-                  </h5>
-                </EuiTitle>
-              </EuiTextAlign>
-              <EuiSpacer size="m" />
-              <EuiFlexGroup alignItems="center" justifyContent="center">
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    color="text"
-                    iconSide="right"
-                    iconType="popout"
-                    data-test-subj="analyzeLogsBtn"
-                    href={docLinks.analyzeLogs}
-                    target="_blank"
-                  >
-                    {i18n.translate(
-                      'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.button',
-                      {
-                        defaultMessage: 'Collect and analyze logs',
-                      }
-                    )}
-                  </EuiButtonEmpty>
-                  <EuiText color="subdued" size="s" textAlign="center">
-                    <small>
-                      {i18n.translate(
-                        'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.subTitle',
-                        {
-                          defaultMessage: 'Explore Logstash and Beats',
-                        }
-                      )}
-                    </small>
-                  </EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiText>or</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiButtonEmpty
-                    color="text"
-                    iconSide="right"
-                    iconType="popout"
-                    data-test-subj="startO11yTrialBtn"
-                    href={o11yTrialLink}
-                    target="_blank"
-                  >
-                    {i18n.translate(
-                      'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.button',
-                      {
-                        defaultMessage: 'Start an Observability trial',
-                      }
-                    )}
-                  </EuiButtonEmpty>
-                  <EuiText color="subdued" size="s" textAlign="center">
-                    <small>
-                      {i18n.translate(
-                        'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.subTitle',
-                        {
-                          defaultMessage: 'Powerful performance monitoring',
-                        }
-                      )}
-                    </small>
-                  </EuiText>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </>
-        )}
+
+        <EuiSpacer />
+        <EuiPanel color="transparent">
+          <EuiTextAlign textAlign="center">
+            <EuiTitle size="xs">
+              <h5>
+                {i18n.translate(
+                  'xpack.searchIndices.shared.createIndex.observabilityCallout.title',
+                  {
+                    defaultMessage: 'Looking to store your logs or metrics data?',
+                  }
+                )}
+              </h5>
+            </EuiTitle>
+          </EuiTextAlign>
+          <EuiSpacer size="m" />
+          <EuiFlexGroup alignItems="center" justifyContent="center">
+            <EuiFlexItem grow={false}>
+              {isServerless ? (
+                <EuiButtonEmpty
+                  color="text"
+                  iconSide="right"
+                  iconType="popout"
+                  data-test-subj="analyzeLogsBtn"
+                  href={docLinks.analyzeLogs}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.button',
+                    {
+                      defaultMessage: 'Collect and analyze logs',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              ) : (
+                <CreateIndexCalloutBrowseIntegrationBtn />
+              )}
+
+              <EuiText color="subdued" size="s" textAlign="center">
+                <small>
+                  {i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.logs.subTitle',
+                    {
+                      defaultMessage: 'Explore Logstash and Beats',
+                    }
+                  )}
+                </small>
+              </EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              <EuiText>or</EuiText>
+            </EuiFlexItem>
+            <EuiFlexItem grow={false}>
+              {isServerless ? (
+                <EuiButtonEmpty
+                  color="text"
+                  iconSide="right"
+                  iconType="popout"
+                  data-test-subj="startO11yTrialBtn"
+                  href={o11yTrialLink}
+                  target="_blank"
+                >
+                  {i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.button',
+                    {
+                      defaultMessage: 'Start an Observability trial',
+                    }
+                  )}
+                </EuiButtonEmpty>
+              ) : (
+                <CreateIndexPanelCreateO11ySpaceBtn />
+              )}
+              <EuiText color="subdued" size="s" textAlign="center">
+                <small>
+                  {i18n.translate(
+                    'xpack.searchIndices.shared.createIndex.observabilityCallout.o11yTrial.subTitle',
+                    {
+                      defaultMessage: 'Powerful performance monitoring',
+                    }
+                  )}
+                </small>
+              </EuiText>
+            </EuiFlexItem>
+          </EuiFlexGroup>
+        </EuiPanel>
       </EuiPanel>
       {showSkip === true && (
         <>
