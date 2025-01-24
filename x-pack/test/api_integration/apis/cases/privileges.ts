@@ -368,23 +368,44 @@ export default ({ getService }: FtrProviderContext): void => {
       });
     }
 
-    for (const { user, owner } of [
-      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
-      { user: casesV2NoCreateCommentWithReopenUser, owner: CASES_APP_ID },
-      { user: obsCasesV2NoCreateCommentWithReopenUser, owner: OBSERVABILITY_APP_ID },
-      { user: secCasesV2NoCreateCommentWithReopenUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: secReadUser, owner: SECURITY_SOLUTION_APP_ID },
-      { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
-      { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
+    for (const { user, owner, userWithFullPerms } of [
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID, userWithFullPerms: casesV3AllUser },
+      {
+        user: casesV2NoCreateCommentWithReopenUser,
+        owner: CASES_APP_ID,
+        userWithFullPerms: casesV3AllUser,
+      },
+      {
+        user: obsCasesV2NoCreateCommentWithReopenUser,
+        owner: OBSERVABILITY_APP_ID,
+        userWithFullPerms: obsCasesV3AllUser,
+      },
+      {
+        user: secCasesV2NoCreateCommentWithReopenUser,
+        owner: SECURITY_SOLUTION_APP_ID,
+        userWithFullPerms: secCasesV3AllUser,
+      },
+      { user: secReadUser, owner: SECURITY_SOLUTION_APP_ID, userWithFullPerms: secAllUser },
+      { user: casesOnlyDeleteUser, owner: CASES_APP_ID, userWithFullPerms: casesAllUser },
+      {
+        user: obsCasesOnlyDeleteUser,
+        owner: OBSERVABILITY_APP_ID,
+        userWithFullPerms: obsCasesAllUser,
+      },
     ]) {
       it(`User ${
         user.username
       } with role(s) ${user.roles.join()} CANNOT change assignee`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
+        const [{ uid: assigneeId }] = await suggestUserProfiles({
+          supertest: supertestWithoutAuth,
+          req: { name: userWithFullPerms.username, owners: [owner], size: 1 },
+          auth: { user: userWithFullPerms, space: null },
+        });
         await updateCaseAssignee({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
-          assigneeId: caseInfo.created_by.profile_uid ?? '',
+          assigneeId,
           expectedHttpCode: 403,
           auth: { user, space: null },
           version: caseInfo.version,
@@ -413,18 +434,12 @@ export default ({ getService }: FtrProviderContext): void => {
           req: { name: user.username, owners: [owner], size: 1 },
           auth: { user, space: null },
         });
-        const wtf = await updateCaseAssignee({
+        await updateCaseAssignee({
           supertest: supertestWithoutAuth,
           caseId: caseInfo.id,
           assigneeId,
           expectedHttpCode: 200,
           version: caseInfo.version,
-          auth: { user, space: null },
-        });
-        const userId2 = await getCase({
-          supertest: supertestWithoutAuth,
-          caseId: caseInfo.id,
-          expectedHttpCode: 200,
           auth: { user, space: null },
         });
       });

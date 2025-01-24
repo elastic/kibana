@@ -38,7 +38,6 @@ export const getCasesFeatureV3 = (
         push: [observabilityFeatureId],
         createComment: [observabilityFeatureId],
         reopenCase: [observabilityFeatureId],
-        assign: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],
@@ -201,7 +200,7 @@ export const getCasesFeatureV3 = (
               cases: {
                 assign: [observabilityFeatureId],
               },
-              ui: casesCapabilities.assign,
+              ui: casesCapabilities.assignCase,
             },
           ],
         },

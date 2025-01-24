@@ -187,7 +187,7 @@ export const getCasesSubFeaturesMapV3 = ({
             cases: {
               assign: [APP_ID],
             },
-            ui: uiCapabilities.assign,
+            ui: uiCapabilities.assignCase,
           },
         ],
       },

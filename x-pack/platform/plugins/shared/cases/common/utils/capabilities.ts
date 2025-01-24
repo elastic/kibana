@@ -25,7 +25,7 @@ export interface CasesUiCapabilities {
   settings: readonly string[];
   reopenCase: readonly string[];
   createComment: readonly string[];
-  assign: readonly string[];
+  assignCase: readonly string[];
 }
 /**
  * Return the UI capabilities for each type of operation. These strings must match the values defined in the UI
@@ -44,5 +44,5 @@ export const createUICapabilities = (): CasesUiCapabilities => ({
   settings: [CASES_SETTINGS_CAPABILITY] as const,
   reopenCase: [CASES_REOPEN_CAPABILITY] as const,
   createComment: [CREATE_COMMENT_CAPABILITY] as const,
-  assign: [ASSIGN_CASE_CAPABILITY] as const,
+  assignCase: [ASSIGN_CASE_CAPABILITY] as const,
 });
