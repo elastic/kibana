@@ -11,7 +11,6 @@ import { TestProviders } from '../../../../common/mock';
 import { AlertCountInsight, getFormattedAlertStats } from './alert_count_insight';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
 import { useEuiTheme } from '@elastic/eui';
 import {
   INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
