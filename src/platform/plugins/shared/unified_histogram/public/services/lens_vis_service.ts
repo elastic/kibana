@@ -501,7 +501,7 @@ export class LensVisService {
         fieldName: '',
         textBasedColumns: [
           {
-            id: `timestamp`,
+            id: 'timestamp',
             name: `${dataView.timeFieldName} every ${interval}`,
             meta: {
               type: 'date',
