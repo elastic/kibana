@@ -1,6 +1,6 @@
 # Exploratory view component
 
-This component is used in observability plugin to show lens embeddable based observability visualizations.
+This component is used in observability plugin to show lens embeddable based observability visualizations. 
 The view is populated using configs stored as json within the view for each data type.
 
 This readme file contains few of the concepts being used in the component.
@@ -15,7 +15,7 @@ Basic workflow for how exploratory view works, it looks like this
 
 The exploratory view report type controls how the data is visualized in the lens embeddable. The report type defines a set of constraints over the x and y axis. For example, the `kpi-over-time` report type is a time series chart type that plots key performance indicators over time, while the `data-distribution` chart plots the percentage of documents over key performance indicators. Current available data types can be found at `exploratory_view/configurations/constants`.
 
-Each report type has one or more available visualizations to plot data from one or more data types.
+Each report type has one or more available visualizations to plot data from one or more data types. 
 
 ## Data Types
 
@@ -37,11 +37,11 @@ Each data type may have one or more visualization configurations. The data type 
 
 Each visualization configuration is mapped to a single report type.
 
-Visualization configurations are used to define the UI we display for each report type and data type combination in the series builder.
+Visualization configurations are used to define the UI we display for each report type and data type combination in the series builder. 
 Visualization configuration define UI options and display, including available `metrics`, available `filters`, available `breakdown` options, definitions for human-readable `labels`, and more.
 The configuration also defines any custom base filters, which usually get pushed to a query, but are not displayed on the UI. You can also set more custom options on the configuration like colors which get used while rendering the chart.
 
-Visualization configuration can be found at [`exploratory_view/configurations`](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability/public/components/shared/exploratory_view/configurations), where each data type typically has a folder that holds one or more visualization configurations.
+Visualization configuration can be found at [`exploratory_view/configurations`](https://github.com/elastic/kibana/tree/main/x-pack/plugins/observability/public/components/shared/exploratory_view/configurations), where each data type typically has a folder that holds one or more visualization configurations. 
 
 The configuration defined ultimately influences the lens embeddable attributes which get pushed to lens embeddable, rendering the chart.
 
@@ -127,7 +127,7 @@ usage looks like this
 `const ExploratoryViewComponent = props.plugins.observability.ExploratoryViewEmbeddable;
 `
 
-```
+```            
             <ExploratoryViewComponent
               attributes={[
                 {

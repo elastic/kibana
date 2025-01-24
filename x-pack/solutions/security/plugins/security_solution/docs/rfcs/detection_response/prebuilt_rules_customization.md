@@ -23,63 +23,62 @@ You can create it by navigating to the directory of the markdown file and runnin
 pandoc prebuilt_rules_customization_rfc.md --toc --toc-depth=6 --wrap=none  -s -o output.md
 ```
 
-- [RFC: Prebuilt Rules Customization](#rfc-prebuilt-rules-customization)
-  - [Table of Contents](#table-of-contents)
-  - [Note about scope of RFC](#note-about-scope-of-rfc)
-  - [Necessary rule schema changes](#necessary-rule-schema-changes)
-    - [`rule_source` field](#rule_source-field)
-    - [`immutable` field](#immutable-field)
-    - [Changes needed in rule schema](#changes-needed-in-rule-schema)
-      - [API request and response rule schema](#api-request-and-response-rule-schema)
-      - [Rule Import request schema](#rule-import-request-schema)
-      - [Internal rule schema](#internal-rule-schema)
-      - [Prebuilt Rule asset schema](#prebuilt-rule-asset-schema)
-    - [Deprecating the `immutable` field](#deprecating-the-immutable-field)
-  - [Mapping changes](#mapping-changes)
-  - [Plan for carrying out migrations of rule SOs](#plan-for-carrying-out-migrations-of-rule-sos)
-    - [Context](#context)
-    - [Problem with tightly coupled logic in our endpoints](#problem-with-tightly-coupled-logic-in-our-endpoints)
-    - [Migration strategy](#migration-strategy)
-      - [Normalization on read](#normalization-on-read)
-      - [Migration on write](#migration-on-write)
-    - [Technical implementation of migration-on-write](#technical-implementation-of-migration-on-write)
-      - [Updating and upgrading rules](#updating-and-upgrading-rules)
-      - [Bulk editing rules](#bulk-editing-rules)
-  - [Endpoints and utilities that will need to be adapted to the new schema](#endpoints-and-utilities-that-will-need-to-be-adapted-to-the-new-schema)
-    - [Utilities](#utilities)
-      - [KQL filters and the `convertRulesFilterToKQL` method](#kql-filters-and-the-convertrulesfiltertokql-method)
-    - [Rule Management endpoints](#rule-management-endpoints)
-    - [Prebuilt Rules endpoints](#prebuilt-rules-endpoints)
-    - [Rule monitoring endpoints](#rule-monitoring-endpoints)
-    - [Rule Execution Logs](#rule-execution-logs)
-  - [Exporting and importing rules](#exporting-and-importing-rules)
-    - [Exporting rules](#exporting-rules)
-    - [Importing rules](#importing-rules)
-    - [Handling the `version` parameter](#handling-the-version-parameter)
-  - [Customizing Prebuilt Rules](#customizing-prebuilt-rules)
-    - [Endpoints](#endpoints)
-      - [Changes needed to endpoints](#changes-needed-to-endpoints)
-      - [Updating the `is_customized` field](#updating-the-is_customized-field)
-    - [In the UI](#in-the-ui)
-      - [Via the Rule Edit Page](#via-the-rule-edit-page)
-      - [Via the Rule Management page](#via-the-rule-management-page)
-      - [Via Bulk Actions](#via-bulk-actions)
-      - [Via the Rules Details Page](#via-the-rules-details-page)
-      - [Via the Shared Exception Lists page](#via-the-shared-exception-lists-page)
-      - [Via the Stack Management \> Rules UI](#via-the-stack-management--rules-ui)
-  - [Design Discussion link](#design-discussion-link)
-  - [Upgrading Prebuilt Rules](#upgrading-prebuilt-rules)
-    - [Changes to `/upgrade/_perform` endpoint](#changes-to-upgrade_perform-endpoint)
-    - [Changes to `/upgrade/_review` endpoint](#changes-to-upgrade_review-endpoint)
-    - [Concrete field diff algorithms by type](#concrete-field-diff-algorithms-by-type)
-      - [Single-line string fields](#single-line-string-fields)
-      - [Multi-line string fields](#multi-line-string-fields)
-      - [Number fields](#number-fields)
-      - [Array of scalar value (strings/numbers) fields](#array-of-scalar-value-stringsnumbers-fields)
-      - [Array of objects fields](#array-of-objects-fields)
-    - [Changes to Rule Upgrade UX/UI flow](#changes-to-rule-upgrade-uxui-flow)
-      - [Bulk accepting upgrades with no conflicts](#bulk-accepting-upgrades-with-no-conflicts)
-      - [Upgrading rules with conflicts](#upgrading-rules-with-conflicts)
+-   [Table of Contents](#table-of-contents)
+-   [Note about scope of RFC](#note-about-scope-of-rfc)
+-   [Necessary rule schema changes](#necessary-rule-schema-changes)
+    -   [`rule_source` field](#rule_source-field)
+    -   [`immutable` field](#immutable-field)
+    -   [Changes needed in rule schema](#changes-needed-in-rule-schema)
+        -   [API request and response rule schema](#api-request-and-response-rule-schema)
+        -   [Rule Import request schema](#rule-import-request-schema)
+        -   [Internal rule schema](#internal-rule-schema)
+        -   [Prebuilt Rule asset schema](#prebuilt-rule-asset-schema)
+    -   [Deprecating the `immutable` field](#deprecating-the-immutable-field)
+-   [Mapping changes](#mapping-changes)
+-   [Plan for carrying out migrations of rule SOs](#plan-for-carrying-out-migrations-of-rule-sos)
+    -   [Context](#context)
+    -   [Problem with tightly coupled logic in our endpoints](#problem-with-tightly-coupled-logic-in-our-endpoints)
+    -   [Migration strategy](#migration-strategy)
+        -   [Normalization on read](#normalization-on-read)
+        -   [Migration on write](#migration-on-write)
+    -   [Technical implementation of migration-on-write](#technical-implementation-of-migration-on-write)
+        -   [Updating and upgrading rules](#updating-and-upgrading-rules)
+        -   [Bulk editing rules](#bulk-editing-rules)
+-   [Endpoints and utilities that will need to be adapted to the new schema](#endpoints-and-utilities-that-will-need-to-be-adapted-to-the-new-schema)
+    -   [Utilities](#utilities)
+        -   [KQL filters and the `convertRulesFilterToKQL` method](#kql-filters-and-the-convertrulesfiltertokql-method)
+    -   [Rule Management endpoints](#rule-management-endpoints)
+    -   [Prebuilt Rules endpoints](#prebuilt-rules-endpoints)
+    -   [Rule monitoring endpoints](#rule-monitoring-endpoints)
+    -   [Rule Execution Logs](#rule-execution-logs)
+-   [Exporting and importing rules](#exporting-and-importing-rules)
+    -   [Exporting rules](#exporting-rules)
+    -   [Importing rules](#importing-rules)
+    -   [Handling the `version` parameter](#handling-the-version-parameter)
+-   [Customizing Prebuilt Rules](#customizing-prebuilt-rules)
+    -   [Endpoints](#endpoints)
+        -   [Changes needed to endpoints](#changes-needed-to-endpoints)
+        -   [Updating the `is_customized` field](#updating-the-is_customized-field)
+    -   [In the UI](#in-the-ui)
+        -   [Via the Rule Edit Page](#via-the-rule-edit-page)
+        -   [Via Rules Table page](#via-rules-table-page)
+        -   [Via Bulk Actions](#via-bulk-actions)
+        -   [Via the Rules Details Page](#via-the-rules-details-page)
+        -   [Via the Shared Exception Lists page](#via-the-shared-exception-lists-page)
+        -   [Via the Stack Management \> Rules UI](#via-the-stack-management-rules-ui)
+-   [Design Discussion link](#design-discussion-link)
+-   [Upgrading Prebuilt Rules](#upgrading-prebuilt-rules)
+    -   [Changes to `/upgrade/_perform` endpoint](#changes-to-upgrade_perform-endpoint)
+    -   [Changes to `/upgrade/_review` endpoint](#changes-to-upgrade_review-endpoint)
+    -   [Concrete field diff algorithms by type](#concrete-field-diff-algorithms-by-type)
+        -   [Single-line string fields](#single-line-string-fields)
+        -   [Multi-line string fields](#multi-line-string-fields)
+        -   [Number fields](#number-fields)
+        -   [Array of scalar value (strings/numbers) fields](#array-of-scalar-value-stringsnumbers-fields)
+        -   [Array of objects fields](#array-of-objects-fields)
+    -   [Changes to Rule Upgrade UX/UI flow](#changes-to-rule-upgrade-uxui-flow)
+        -   [Bulk accepting upgrades with no conflicts](#bulk-accepting-upgrades-with-no-conflicts)
+        -   [Upgrading rules with conflicts](#upgrading-rules-with-conflicts)
 
 ## Note about scope of RFC
 
@@ -122,52 +121,52 @@ This also means that a rule with this type of `rule_source` will determine that 
 Prebuilt rules will have:
 
 ```ts
-{
-  rule_source: {
-    /**
-     * The discriminant of the discriminated union type of the `rule_source` field.
-     */
-    type: 'external';
+{  
+  rule_source: {  
+    /**  
+     * The discriminant of the discriminated union type of the `rule_source` field.  
+     */  
+    type: 'external';  
 
-    /**
-     * Determines whether the rule (which is prebuilt/external) has been customized by the user,
-     * i.e. if any of its fields have been modified and diverged from the base version of the rule,
-     * which is the version that is installed from the `security_detection_engine` Fleet package.
-     * The value will be initially set to `false` when a brand new prebuilt rule is installed,
-     * but will be rewritten to `true` if a rule's field is edited and diverges from the value
-     * from the base version of the rule.
-     * See section "Updating the `isCustomized` flag"
-     */
-    is_customized: boolean;
+    /**  
+     * Determines whether the rule (which is prebuilt/external) has been customized by the user,  
+     * i.e. if any of its fields have been modified and diverged from the base version of the rule,  
+     * which is the version that is installed from the `security_detection_engine` Fleet package.  
+     * The value will be initially set to `false` when a brand new prebuilt rule is installed,  
+     * but will be rewritten to `true` if a rule's field is edited and diverges from the value  
+     * from the base version of the rule.  
+     * See section "Updating the `isCustomized` flag"  
+     */  
+    is_customized: boolean;  
 
-    /**
-     * A date in ISO 8601 format which describes the last time that this prebuilt rule was created
-     * and subsequently updated by the TRaDE team, the team responsible for creating prebuilt rules.
-     * Its usage is detailed in https://github.com/elastic/detection-rules/issues/2826.
-     * This field will be optional in both the API schema and the internal rule schema, since
-     * this value will not exist for prebuilt rules until a new version of each rule which includes
-     * this field in the prebuilt rule asset is published by the TRaDE team, and the user installs
+    /**  
+     * A date in ISO 8601 format which describes the last time that this prebuilt rule was created  
+     * and subsequently updated by the TRaDE team, the team responsible for creating prebuilt rules.  
+     * Its usage is detailed in https://github.com/elastic/detection-rules/issues/2826.  
+     * This field will be optional in both the API schema and the internal rule schema, since  
+     * this value will not exist for prebuilt rules until a new version of each rule which includes  
+     * this field in the prebuilt rule asset is published by the TRaDE team, and the user installs  
      * it or updates to it.
-     * NOTE: the field will not be included in first iteration of the implementation. There is a
-     * dependency with the TRaDE team that has blocked the inclusion of this field in the `security-rule` SO,
-     * and the change has therefore been postponed.
+     * NOTE: the field will not be included in first iteration of the implementation. There is a 
+     * dependency with the TRaDE team that has blocked the inclusion of this field in the `security-rule` SO, 
+     * and the change has therefore been postponed. 
      * See ticket https://github.com/elastic/detection-rules/issues/2826 for details.
-     */
-    source_updated_at?: Date;
-  };
-}
+     */  
+    source_updated_at?: Date;  
+  };  
+} 
 ```
 
 Custom rules will have:
 ```ts
-{
-  rule_source: {
-    /**
-     * The discriminant of the discriminated union type of the `rule_source` field.
-     */
-    type: 'internal';
-  };
-}
+{  
+  rule_source: {  
+    /**  
+     * The discriminant of the discriminated union type of the `rule_source` field.  
+     */  
+    type: 'internal';  
+  };  
+}  
 ```
 ### `immutable` field
 
@@ -277,7 +276,7 @@ ResponseFields:
 
 We also need to modify the `RuleToImport` schema, since now we will be allowing the importing of both custom rules and prebuilt rules.
 
-Currently, `RuleToImport` optionally accepts the `immutable` param, but rejects validation if its value is set to anything else than `false` - since we don't currently support importing prebuilt rules.
+Currently, `RuleToImport` optionally accepts the `immutable` param, but rejects validation if its value is set to anything else than `false` - since we don't currently support importing prebuilt rules. 
 
 We will be changing the mechanism for importing rules so that onlt the `rule_id` is required parameter. This parameters will be used to determine if the rule is prebuilt or not, and dynamically calculate `rule_source` during import.
 
@@ -412,7 +411,7 @@ This "overuse" of these 3 methods for a variety of user actions makes their logi
 
 For example: the `createRules` method is used in 3 use cases:
 1. when creating custom rules with our Rule Creation endpoints
-2. when importing rules, when the imported `rule_id` does not already exist in Kibana
+2. when importing rules, when the imported `rule_id` does not already exist in Kibana 
 3. when upgrading rules, if a rule undergoes a `type` change, the existing rule is deleted a new one is created.
 
 The same happens with `patchRules`. It is used:
@@ -431,7 +430,7 @@ Our migration strategy will consist of two distinct types of migration: a **migr
 
 
 | API endpoint | Normalization-on-read | Migration-on-write | Comments |
-|-|-|-|-|
+|-|-|-|-|  
 | **Find Rules** - `GET /rules/_find` | <center>✅</center> | <center>❌</center> |  |
 | **Read Rule** - `GET /rules` | <center>✅</center> | <center>❌</center> |  |
 | **Delete Rules** - `DELETE /rules` | <center>✅</center> | <center>❌</center> |  |
@@ -461,7 +460,7 @@ All endpoints that respond with a rule Saved Object, typed as `RuleResponse`, wi
 
 This means that the endpoints will always respond with the rules with the new schema, while the actual rule saved object might still be stored with the legacy schema in Elasticsearch, if it still has not been migrated-on-write.
 
-The **normalization on read** will be carried out by a new `normalizeRuleSourceSchemaOnRuleRead` normalization function. The `internalRuleToAPIResponse` method, which is used in our endpoints to convert a rule saved object as is stored in Elasticsearch to the `RuleResponse` type which is returned to the client, calls the `commonParamsCamelToSnake` methods to convert rule parameters that are common to all rule types to what's expected in `RuleResponse`.
+The **normalization on read** will be carried out by a new `normalizeRuleSourceSchemaOnRuleRead` normalization function. The `internalRuleToAPIResponse` method, which is used in our endpoints to convert a rule saved object as is stored in Elasticsearch to the `RuleResponse` type which is returned to the client, calls the `commonParamsCamelToSnake` methods to convert rule parameters that are common to all rule types to what's expected in `RuleResponse`. 
 
 Inside this method, we will use `normalizeRuleSourceSchemaOnRuleRead` to calculate the normalized values of `rule_source` and `immutable`.
 
@@ -572,7 +571,7 @@ Upgrading prebuilt rules to their newer version is done by two endpoints:
 - **(LEGACY) Install Prebuilt Rules And Timelines** - `PUT /rules/prepackaged`
 - **Perform Rule Upgrade** - `POST /prebuilt_rules/upgrade/_perform` (Internal)
 
-The legacy endpoint does not allow for customization of fields during the upgrade, but the new rule upgrade customization endpoint does.
+The legacy endpoint does not allow for customization of fields during the upgrade, but the new rule upgrade customization endpoint does. 
 
 Additionally:
 
@@ -798,7 +797,7 @@ We should therefore create new CRUD methods as needed to uncouple them logically
 
 #### Bulk editing rules
 
-The endpoint **Bulk Actions** - `POST /rules/_bulk_action` has the same outputs from the migration logic as the endpoints listed in the above section, so it was included in the scenarios in the table above.
+The endpoint **Bulk Actions** - `POST /rules/_bulk_action` has the same outputs from the migration logic as the endpoints listed in the above section, so it was included in the scenarios in the table above. 
 
 However, this endpoint has some specific details that should be mentioned.
 
@@ -854,7 +853,7 @@ Currently, we don't support the `immutable` field in any of the endpoints' reque
 
 This is so because we will never want users to be able to create their own prebuilt rules, only install them, import them, and customize them. Also, a prebuilt rule should always be able to be compared to a `security-rule` asset distributed by Fleet, and receive updates from it, which would not be possible if a user creates its own prebuilt rules.
 
-Again, as mentioned in the [`Problem with tightly coupled logic in our endpoints`](#problem-with-tightly-coupled-logic-in-our-endpoints) section, the `createRules` CRUD method used in these two endpoints is re-used in other unrelated use cases, like upgrading rules and importing rules.
+Again, as mentioned in the [`Problem with tightly coupled logic in our endpoints`](#problem-with-tightly-coupled-logic-in-our-endpoints) section, the `createRules` CRUD method used in these two endpoints is re-used in other unrelated use cases, like upgrading rules and importing rules. 
 
 Creating new methods for those unrelated actions should help clean the `createRules` method's interface and logic, and make sure it is only used in these two endpoints.
 
@@ -1038,7 +1037,7 @@ The user will now be able to import both custom and prebuilt rules (including an
 
 We want to handle the case of importing both migrated and non-migrated rules via an `ndjson` file.
 
-If a user imports a prebuilt rule, Kibana should continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to upgrade a previously imported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule.
+If a user imports a prebuilt rule, Kibana should continue to track the rule asset from the `security_detection_engine` package if the `rule_id` matches. This means that a user will be able to upgrade a previously imported prebuilt rule, visualize any diffs on any customized fields, and continue to receive updates on the rule. 
 
 To allow for importing of Elastic prebuilt rules, we will **not rely** in the `rule_source` or the legacy `immutable` fields (which are not part of the import endpoint parameters), but we will rather **calculate them dynamically based on the `rule_id` and `version` request parameters**.
 
@@ -1048,12 +1047,12 @@ The logic to importing a rule is as follows:
 
 - Secondly, check that the `security_detection_engine` Fleet package is installed and install it if it isn't. We will need the package to be installed to check if a rule that is being imported is an Elastic prebuilt rule.
 
-- Then, using the `rule_id` and `version`, attempt to fetch the corresponding `security-rule` asset from ES.
+- Then, using the `rule_id` and `version`, attempt to fetch the corresponding `security-rule` asset from ES. 
 
 - **If a matching `rule_id` and `version` is found**, that means that the rule is an Elastic prebuilt rule, and we should therefore dynamically calculate the rule's `rule_source` field and its subfields:
   - `type`: should be always `external` since a matching external `security-rule` was found.
   - `source_updated_at`: can be retrieved from the corresponding `security-rule` asset.
-  - `is_customized`: should be calculated based on the differences between the `security-rule` asset's fields and the rule fields from the import request. If any of them are different, i.e. have diverged from the base version, `is_customized` should be true.
+  - `is_customized`: should be calculated based on the differences between the `security-rule` asset's fields and the rule fields from the import request. If any of them are different, i.e. have diverged from the base version, `is_customized` should be true. 
 
 - Finally, using the import payload, plus the rule's `security-rule` asset fields and the calculated `rule_source` fields, create the rule, or update it if already exists in Kibana.
 
@@ -1061,7 +1060,7 @@ The logic to importing a rule is as follows:
 
 In this case, we will set the rule's params to be:
 ```
-{
+{ 
   ruleSource: {
     type: 'external',
     isCustomized: false
@@ -1103,7 +1102,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My custom rule",
-}
+} 
 </pre>
     </td>
     <td>N/A</td>
@@ -1114,7 +1113,7 @@ Given the requirements described above, the following table shows the behaviour 
   rule_source: {
     type: "internal"
   }
-}
+} 
 </pre>
       </td>
     </tr>
@@ -1123,7 +1122,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My custom rule",
-}
+} 
 </pre>
     </td>
     <td>No</td>
@@ -1132,7 +1131,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My edited rule",
-}
+} 
 </pre>
     </td>
     <td>
@@ -1149,7 +1148,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My custom rule",
-}
+} 
 </pre>
     </td>
     <td>No</td>
@@ -1158,7 +1157,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My edited rule",
-}
+} 
 </pre>
     </td>
     <td>
@@ -1171,7 +1170,7 @@ Given the requirements described above, the following table shows the behaviour 
   ruleSource: {
     type: "internal"
   }
-}
+} 
 </pre>
       </td>
     <tr>
@@ -1184,7 +1183,7 @@ Given the requirements described above, the following table shows the behaviour 
 {
   name: "My prebuilt rule",
   source_updated_at: "2024-05-..."
-}
+} 
 </pre>
     </td>
     <td><b>No</b></td>
@@ -1192,7 +1191,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>N/A</td>
@@ -1203,7 +1202,7 @@ Given the requirements described above, the following table shows the behaviour 
     type: "external",
     isCustomized: false,
   }
-}
+} 
 </pre>
       </td>
     <tr>
@@ -1215,7 +1214,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>Yes</td>
@@ -1223,7 +1222,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>N/A</td>
@@ -1235,7 +1234,7 @@ Given the requirements described above, the following table shows the behaviour 
     type: "external",
     isCustomized: false,
   }
-}
+} 
 </pre>
       </td>
     <tr>
@@ -1247,7 +1246,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>Yes</td>
@@ -1255,7 +1254,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My custom prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>N/A</td>
@@ -1267,7 +1266,7 @@ Given the requirements described above, the following table shows the behaviour 
     type: "external",
     isCustomized: true,
   }
-}
+} 
 </pre>
       </td>
     <tr>
@@ -1280,14 +1279,14 @@ Given the requirements described above, the following table shows the behaviour 
     type: "external",
     isCustomized: false,
   }
-}
+} 
 </pre>
     </td>
     <td>
 <pre>
 {
   name: "My prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>Yes</td>
@@ -1295,7 +1294,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My custom prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td><b>No</b></td>
@@ -1312,14 +1311,14 @@ Given the requirements described above, the following table shows the behaviour 
     type: "external",
     isCustomized: false,
   }
-}
+} 
 </pre>
     </td>
     <td>
 <pre>
 {
   name: "My prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>Yes</td>
@@ -1327,7 +1326,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My custom prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>Yes</td>
@@ -1339,7 +1338,7 @@ Given the requirements described above, the following table shows the behaviour 
     type: "external",
     isCustomized: true,
   }
-}
+} 
 </pre>
       </td>
     <tr>
@@ -1352,14 +1351,14 @@ Given the requirements described above, the following table shows the behaviour 
     type: "external",
     isCustomized: true,
   }
-}
+} 
 </pre>
     </td>
     <td>
 <pre>
 {
   name: "My prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>Yes</td>
@@ -1367,7 +1366,7 @@ Given the requirements described above, the following table shows the behaviour 
 <pre>
 {
   name: "My prebuilt rule",
-}
+} 
 </pre>
     </td>
     <td>Yes</td>
@@ -1379,7 +1378,7 @@ Given the requirements described above, the following table shows the behaviour 
     type: "external",
     isCustomized: false,
   }
-}
+} 
 </pre>
       </td>
     <tr>
@@ -1443,7 +1442,7 @@ Depending on the endpoint, we will have to modify it to address multiple changes
 4. **Blocking the update of non-customizable fields:** while the goal of this epic is to allow users to modify their prebuilt rule fields, there are certain rule fields that we will still want to prevent the user from modifying via endpoints, since we will not provide support for resolving conflicts for them via the UI or API if they arise during an update. See the **Customizable** column in [this ticket](https://github.com/elastic/kibana/issues/147239) for a detailed list of fields that should be blocked from modification via the endpoints.
 
 The table below shows which of these changes need to be applied to our endpoints: (
-
+  
 - ✏️ Changes needed
 - ➖ No changes needed
 
@@ -1551,7 +1550,7 @@ The following use cases should be covered in the calculation of `is_customized`:
   </thead>
   <tbody>
 
-
+  
   <tr>
     <td>Modified field value diverges from base asset</td>
     <td>
@@ -1594,7 +1593,7 @@ The following use cases should be covered in the calculation of `is_customized`:
 
 
 
-
+  
   <tr>
     <td>New field added, not existing in base asset</td>
     <td>
@@ -1642,7 +1641,7 @@ The following use cases should be covered in the calculation of `is_customized`:
 
 
 
-
+  
   <tr>
     <td>Modified matches value in base asset</td>
     <td>
@@ -1688,7 +1687,7 @@ The following use cases should be covered in the calculation of `is_customized`:
 
 
 
-
+  
   <tr>
     <td>Field existing in base asset is removed</td>
     <td>
@@ -1740,7 +1739,7 @@ The following use cases should be covered in the calculation of `is_customized`:
 
 
 
-
+  
   <tr>
     <td>Edge case: base asset not found</td>
     <td>
@@ -1925,7 +1924,7 @@ In general, for all types of fields, we will follow the heuristic:
 - if `target` === `base` && `current` !== `base`, we set merge proposal to be the current version, without a conflict
 - if `current` === `base` && `target` !== `base`, we set merge proposal to be the target version, without a conflict
 - if `base` !== `current` !== `target`: mark the diff as a conflict AND:
-  - **if conflict is non-solvable**: use the `current` version as the merge proposal
+  - **if conflict is non-solvable**: use the `current` version as the merge proposal 
   - **if conflict is solvable** use the generated merged version as the merge proposal (possible only in a few types, detailed below - see tables)
 
 Depending on the specific field or type of field we might want to apply a specific merging algorithm when conflicts arise. Let's propose different types.
@@ -1998,13 +1997,13 @@ For single-line string fields we will continue to use the existing simple diff a
 
 > Examples: `description`, `setup`, `note` (Investigation guide)
 
-For multi-line string fields, in case of scenarios where the `base`, `current` and `target` versions are different, the scenario is marked as conflict.
+For multi-line string fields, in case of scenarios where the `base`, `current` and `target` versions are different, the scenario is marked as conflict. 
 However, in some cases the merged proposal can be successfully calculated and solved, while in other cases not.
 
 These two types of scenarios are found in the last two rows of the table, but let's see an example of each in detail:
 
 **Solvable conflict**
-**BASE:**
+**BASE:** 
 ```
 My description.
 This is a second line.
@@ -2045,7 +2044,7 @@ const nodeDiff3.diff3Merge(current, base, target) // Order is not a typo, that's
 The library is able to solve the changes of the two sentences individually and produces an acceptable merge proposal. We should still mark it as a conflict to drive the user's attention to the result and allow them to decide if it makes sense or not.
 
 **Non-Solvable conflict**
-**BASE:**
+**BASE:** 
 ```
 My description.
 This is a second line.
@@ -2227,10 +2226,10 @@ For **arrays of scalar values** fields, we can create a Set-based logic to caclu
 
 For example:
 
-**base**: [linux, network]
-**current**: [windows, host]
-**target**: [linux, ml]
-**expected output**: [windows, host, ml]
+**base**: [linux, network]  
+**current**: [windows, host]  
+**target**: [linux, ml]  
+**expected output**: [windows, host, ml]  
 
 The logic is as follows:
 
@@ -2253,10 +2252,10 @@ Applying these combined modifications to base results in:
 This logic can be achieved using built-in Javascript `Set` logic:
 
 ```js
-const base = new Set(["linux", "network"]);
-const current = new Set(["windows", "host"]);
-const target = new Set(["linux", "ml"]);
-const output = new Set(["windows", "host", "ml"]);
+const base = new Set(["linux", "network"]);  
+const current = new Set(["windows", "host"]);  
+const target = new Set(["linux", "ml"]);  
+const output = new Set(["windows", "host", "ml"]);  
 
 
 const addedCurrent = current.difference(base); // [windows, host]
@@ -2355,9 +2354,9 @@ The `id` will vary depending on the type of the field:
 ----
 As an example - `A`, `B` and `C` are the keys of the objects in the array, and `modified` means that an object kept it's key id value, but some other propery of the object was modified:
 
-**base**: [`A`, `B`]
-**current**: [`modified B `, `C`]
-**target**: [`modified B`, `D`]
+**base**: [`A`, `B`]  
+**current**: [`modified B `, `C`]  
+**target**: [`modified B`, `D`]  
 
 The logic is as follows:
 
@@ -2411,7 +2410,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td><pre>
 [
@@ -2425,7 +2424,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td style="border-right:3px solid black"><pre>
 [
@@ -2439,7 +2438,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td><pre>
 [
@@ -2453,7 +2452,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td><pre>NO</pre></td>
     </tr>
@@ -2471,7 +2470,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td><pre>
 [
@@ -2485,7 +2484,7 @@ The possible scenarios are:
     name: "host.os.ip",
     type: "ip"
   },
-]
+]      
       </pre></td>
       <td style="border-right:3px solid black"><pre>
 [
@@ -2499,7 +2498,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td><pre>
 [
@@ -2513,7 +2512,7 @@ The possible scenarios are:
     name: "host.os.ip",
     type: "ip"
   },
-]
+]      
       </pre></td>
       <td><pre>NO</pre></td>
     </tr>
@@ -2531,7 +2530,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td><pre>
 [
@@ -2545,7 +2544,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td style="border-right:3px solid black"><pre>
 [
@@ -2559,7 +2558,7 @@ The possible scenarios are:
     name: "host.os.ip",
     type: "ip"
   },
-]
+]    
       </pre></td>
       <td><pre>
 [
@@ -2573,7 +2572,7 @@ The possible scenarios are:
     name: "host.os.ip",
     type: "ip"
   },
-]
+]    
       </pre></td>
       <td><pre>NO</pre></td>
     </tr>
@@ -2591,7 +2590,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td><pre>
 [
@@ -2605,7 +2604,7 @@ The possible scenarios are:
     name: "host.os.ip",
     type: "ip"
   },
-]
+]    
       </pre></td>
       <td style="border-right:3px solid black"><pre>
 [
@@ -2619,7 +2618,7 @@ The possible scenarios are:
     name: "host.os.ip",
     type: "ip"
   },
-]
+]    
       </pre></td>
       <td><pre>
 [
@@ -2633,7 +2632,7 @@ The possible scenarios are:
     name: "host.os.ip",
     type: "ip"
   },
-]
+]    
       </pre></td>
       <td><pre>NO</pre></td>
     </tr>
@@ -2651,7 +2650,7 @@ The possible scenarios are:
     name: "host.os.type",
     type: "keyword"
   },
-]
+]      
       </pre></td>
       <td><pre>
 [
@@ -2665,7 +2664,7 @@ The possible scenarios are:
     name: "new.field.name",
     type: "keyword"
   },
-]
+]    
       </pre></td>
       <td style="border-right:3px solid black"><pre>
 [
@@ -2679,7 +2678,7 @@ The possible scenarios are:
     name: "new.field.ip",
     type: "ip"
   },
-]
+]   
       </pre></td>
       <td><pre>
 [
@@ -2711,7 +2710,7 @@ The possible scenarios are:
     name: "event.action",
     type: "unknown"
   }
-]
+]      
       </pre></td>
       <td><pre>
 [
@@ -2720,7 +2719,7 @@ The possible scenarios are:
     name: "event.action",
     type: "keyword"
   },
-]
+]    
       </pre></td>
       <td style="border-right:3px solid black"><pre>
 [
@@ -2729,7 +2728,7 @@ The possible scenarios are:
     name: "event.action",
     type: "string"
   },
-]
+]   
       </pre></td>
       <td><pre>
 [
@@ -2791,3 +2790,10 @@ Rules whose diffing algorithm resulted in a `CONFLICT` need to be manually resol
 > See [Three-Way-Diff Component ticket](https://github.com/elastic/kibana/issues/171520) that details UI for solving conflicts.
 
 > See [designs](https://www.figma.com/file/gLHm8LpTtSkAUQHrkG3RHU/%5B8.7%5D-%5BRules%5D-Rule-Immutability%2FCustomization?type=design&mode=design&t=LkauhLzUKUatF6cL-0#712870904).
+
+
+
+
+
+
+

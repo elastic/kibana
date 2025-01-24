@@ -130,7 +130,7 @@ export class Plugin {
   }
 
   public start(core: CoreStart, plugins: { taskManager }) {
-
+    
   }
 }
 ```
@@ -162,8 +162,8 @@ The task runner's `run` method is expected to return a promise that resolves to 
 
 |Property|Description|Type|
 |---|---|---|
-|runAt| Optional. If specified, this is used as the tasks' next `runAt`, overriding the default system scheduler. | Date ISO String |
-|schedule| Optional. If specified, this is used as the tasks' new recurring schedule, overriding the default system scheduler and any existing schedule.  | { interval: string } |
+|runAt| Optional. If specified, this is used as the tasks' next `runAt`, overriding the default system scheduler. | Date ISO String | 
+|schedule| Optional. If specified, this is used as the tasks' new recurring schedule, overriding the default system scheduler and any existing schedule.  | { interval: string } | 
 |error| Optional, an error object, logged out as a warning. The pressence of this property indicates that the task did not succeed.| Error |
 |state| Optional, this will be passed into the next run of the task, if this is a recurring task. |Record<string, unknown>|
 
@@ -186,7 +186,7 @@ The task runner's `run` method is expected to return a promise that resolves to 
 ```js
 {
   schedule: { interval: '30s' },
-
+  
   state: {
     anything: 'goes here',
   },
@@ -433,7 +433,7 @@ export class Plugin {
       // If running the task has failed, we throw an error with an appropriate message.
       // For example, if the requested task doesnt exist: `Error: failed to run task "91760f10-ba42-de9799" as it does not exist`
       // Or if, for example, the task is already running: `Error: failed to run task "91760f10-ba42-de9799" as it is currently running`
-    }
+    }    
   }
 }
 ```
@@ -459,7 +459,7 @@ export class Plugin {
       // But some updates of some tasks can be failed, due to OCC 409 conflict for example
     } catch(err: Error) {
       // if error is caught, means the whole method requested has failed and tasks weren't updated
-    }
+    }    
   }
 }
 ```
@@ -486,7 +486,7 @@ export class Plugin {
       // But some updates of some tasks can be failed, due to OCC 409 conflict for example
     } catch(err: Error) {
       // if error is caught, means the whole method requested has failed and tasks weren't updated
-    }
+    }    
   }
 }
 ```
@@ -518,7 +518,7 @@ export class Plugin {
       // But some updates of some tasks can be failed, due to OCC 409 conflict for example
     } catch(err: Error) {
       // if error is caught, means the whole method requested has failed and tasks weren't updated
-    }
+    }    
   }
 }
 ```
@@ -567,7 +567,7 @@ export class Plugin {
   }
 
   public start(core: CoreStart, plugins: { taskManager }) {
-
+    
   }
 }
 ```
@@ -596,10 +596,10 @@ We achieve this model by buffering requests into a queue using a Set (which remo
 
 Our current model, then, is this:
 ```
-  Polling Interval  --> filter(availableWorkers > 0) - mapTo([]) -------\\
+  Polling Interval  --> filter(availableWorkers > 0) - mapTo([]) -------\\ 
   Task Scheduled    --> filter(availableWorkers > 0) - mapTo([]) --------||==>Set([]+[]+[`1`,`2`]) ==> work([`1`,`2`])
   Run Task `1` Now --\                                                  //
-                      ----> buffer(availableWorkers > 0) -- [`1`,`2`] -//
+                      ----> buffer(availableWorkers > 0) -- [`1`,`2`] -// 
   Run Task `2` Now --/
 ```
 

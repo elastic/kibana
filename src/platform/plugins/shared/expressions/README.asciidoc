@@ -7,7 +7,7 @@ by the user. The final output of the expression pipeline can be rendered using
 one of the *renderers* registered in `expressions` plugin.
 
 All the arguments to expression functions need to be serializable, as well as input and output.
-Expression functions should try to stay 'pure'. This makes functions easy to reuse and also
+Expression functions should try to stay 'pure'. This makes functions easy to reuse and also 
 make it possible to serialize the whole chain as well as output at every step of execution.
 
 It is possible to add comments to expressions by starting them with a `//` sequence
@@ -23,8 +23,8 @@ for use in their own application.
 
 === Examples
 
-Below is an example of serialized expression for one Canvas element that fetches
-data using `essql` function, pipes it further to `math` and `metric` functions,
+Below is an example of serialized expression for one Canvas element that fetches 
+data using `essql` function, pipes it further to `math` and `metric` functions, 
 and final `render` function renders the result.
 
 [source]

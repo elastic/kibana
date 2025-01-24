@@ -34,6 +34,13 @@ Table of Contents
     - [Index](#index)
     - [Webhook](#webhook)
     - [PagerDuty](#pagerduty)
+  - [Action type model definition](#action-type-model-definition)
+    - [CustomConnectorSelectionItem Properties](#customconnectorselectionitem-properties)
+  - [Register action type model](#register-action-type-model)
+  - [Create and register new action type UI](#create-and-register-new-action-type-ui)
+  - [Embed the Alert Actions form within any Kibana plugin](#embed-the-alert-actions-form-within-any-kibana-plugin)
+  - [Embed the Create Connector flyout within any Kibana plugin](#embed-the-create-connector-flyout-within-any-kibana-plugin)
+  - [Embed the Edit Connector flyout within any Kibana plugin](#embed-the-edit-connector-flyout-within-any-kibana-plugin)
 
 ## Built-in Alert Types
 
@@ -1108,7 +1115,7 @@ export function getActionType(): ActionTypeModel {
 and action params form available in Create Alert form:
 ![PagerDuty action form](https://i.imgur.com/xxXmhMK.png)
 
-}
+} 
 ```
 
 ### D3Security

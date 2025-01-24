@@ -11,7 +11,7 @@ each type.
 
 By using Saved Objects your plugin can take advantage of the following
 features:
-
+ 
 * Migrations can evolve your document's schema by transforming documents and
 ensuring that the field mappings on the index are always up to date.
 * a <<saved-objects-api,HTTP API>> is automatically exposed for each type (unless
@@ -76,7 +76,7 @@ that objects of this type can only exist in a single space. See <<sharing-saved-
 [source,typescript]
 ----
 export { dashboardVisualization } from './dashboard_visualization';
-export { dashboard } from './dashboard';
+export { dashboard } from './dashboard'; 
 ----
 
 .src/plugins/my_plugin/server/plugin.ts

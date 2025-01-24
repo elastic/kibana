@@ -41,7 +41,7 @@ node scripts/functional_test_runner --config path/to/config
 
 For details on how the internal methods work, [read this readme](../packages/kbn-test/README.mdx).
 
-### ES archiver
+### ES archiver 
 
 #### Loading data
 
@@ -65,4 +65,4 @@ node scripts/es_archiver.js save <archive name for kibana data> [space separated
 ```
 
 You may want to store the .kibana index separate from data. Since adding a lot of data will bloat our repo size, we have many tests that reuse the same
-data indices but use their own `.kibana` index.
+data indices but use their own `.kibana` index. 

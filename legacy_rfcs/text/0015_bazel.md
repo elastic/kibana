@@ -28,7 +28,7 @@ Kibana has grown substantially over the years and now includes more than 2,100,0
 
 ### Installation of NPM dependencies
 
-Yarn Package Manager handles the installation of NPM dependencies, and the migration to Bazel will not immediately affect the time this step takes.
+Yarn Package Manager handles the installation of NPM dependencies, and the migration to Bazel will not immediately affect the time this step takes. 
 
 ### Building packages
 
@@ -40,7 +40,7 @@ The size of the project and the amount of TypeScript has created scaling issues,
 
 ### Building client-side plugins
 
-The [@kbn/optimizer](https://github.com/elastic/kibana/tree/main/packages/kbn-optimizer) package is responsible for building client-side plugins and is initiated during `yarn start`. Without any cache, it takes between three and four minutes, but is highly dependent on the amount of CPU cores available. The caching works similar to packages and requires a rebuild if any files change. Under the hood, this package is managing a set number of workers to run individual Webpack instances. When we first introduced Webpack back in [June of 2015](https://github.com/elastic/kibana/pull/4335), it was responsible for bundling all client-side code within a single process. As the Kibana project continued to grow over time, this Webpack process continued to impact the developer experience. A common theme to address these issues was through reducing the responsibilities of Webpack by separating [SCSS](https://github.com/elastic/kibana/pull/19643) and [vendor code](https://github.com/elastic/kibana/pull/22618). Knowing we would need to continue to scale, one of the new platform’s core objectives was to be able to build each plugin independently. This work paved the way for what we are proposing here and led to the [creation of @kbn/optimizer](https://github.com/elastic/kibana/pull/53976), which improved performance by separating and parallelizing Webpack builds.
+The [@kbn/optimizer](https://github.com/elastic/kibana/tree/main/packages/kbn-optimizer) package is responsible for building client-side plugins and is initiated during `yarn start`. Without any cache, it takes between three and four minutes, but is highly dependent on the amount of CPU cores available. The caching works similar to packages and requires a rebuild if any files change. Under the hood, this package is managing a set number of workers to run individual Webpack instances. When we first introduced Webpack back in [June of 2015](https://github.com/elastic/kibana/pull/4335), it was responsible for bundling all client-side code within a single process. As the Kibana project continued to grow over time, this Webpack process continued to impact the developer experience. A common theme to address these issues was through reducing the responsibilities of Webpack by separating [SCSS](https://github.com/elastic/kibana/pull/19643) and [vendor code](https://github.com/elastic/kibana/pull/22618). Knowing we would need to continue to scale, one of the new platform’s core objectives was to be able to build each plugin independently. This work paved the way for what we are proposing here and led to the [creation of @kbn/optimizer](https://github.com/elastic/kibana/pull/53976), which improved performance by separating and parallelizing Webpack builds. 
 
 ### Compiling server-side code
 
@@ -65,9 +65,9 @@ To avoid adding Bazel as a dependency that developers need to manage, we will be
 
 ## Typescript
 
-The [NodeJS](https://bazelbuild.github.io/rules_nodejs/TypeScript.html) rules for Bazel contain two different methods for handling TypeScript; `ts_library` and `ts_project`. We will be using `ts_project`, as it provides a wrapper around `tsc` where `ts_library` is an open-sourced version of the rule used to compile TypeScript at Google. While there are advantages to `ts_library`, it’s very opinionated and hard to migrate an existing project to while also locking us into a specific version of TypeScript. Over time, it’s expected that `ts_project` will catch up to that of `ts_library`.
+The [NodeJS](https://bazelbuild.github.io/rules_nodejs/TypeScript.html) rules for Bazel contain two different methods for handling TypeScript; `ts_library` and `ts_project`. We will be using `ts_project`, as it provides a wrapper around `tsc` where `ts_library` is an open-sourced version of the rule used to compile TypeScript at Google. While there are advantages to `ts_library`, it’s very opinionated and hard to migrate an existing project to while also locking us into a specific version of TypeScript. Over time, it’s expected that `ts_project` will catch up to that of `ts_library`. 
 
-Bazel maintains a persistent worker which `ts_project` takes advantage of by keeping the AST in memory and providing incremental updates. This should improve the time it takes for changes to be represented.
+Bazel maintains a persistent worker which `ts_project` takes advantage of by keeping the AST in memory and providing incremental updates. This should improve the time it takes for changes to be represented. 
 
 A Bazel [macro](https://docs.bazel.build/versions/master/skylark/macros.html) will be created to centralize the usage of `ts_project`. The macro will, at minimum, accept a TypeScript configuration file, supply the base `tsconfig.js` file as a source and ensure incremental builds are enabled.
 
@@ -85,7 +85,7 @@ We are aware there are quite a few alternatives to Webpack, but our plan is to c
 
 ### Unit Testing
 
-A Bazel macro will be created to centralize the usage of Jest unit testing. The macro will, at minimum, accept a Jest configuration file, add the [Jest preset](https://github.com/elastic/kibana/blob/main/packages/kbn-test/jest-preset.js) and its dependencies as sources, then use the Jest CLI to execute tests.
+A Bazel macro will be created to centralize the usage of Jest unit testing. The macro will, at minimum, accept a Jest configuration file, add the [Jest preset](https://github.com/elastic/kibana/blob/main/packages/kbn-test/jest-preset.js) and its dependencies as sources, then use the Jest CLI to execute tests. 
 
 Developers currently use `yarn test:jest` to efficiently run tests in a given directory without remembering the command or path. This command will continue to work as it does today, but will begin running tests through Bazel for packages or plugins which have been migrated.
 
@@ -137,13 +137,13 @@ Bazel outputs are created in a folder relative to the monorepo at `./bazel`. How
 
 ## Build Packaging
 
-One of the additional benefits to Bazel is that it is multi-platform. While it runs on Linux, macOS, and Windows, it can build binaries across platforms.
+One of the additional benefits to Bazel is that it is multi-platform. While it runs on Linux, macOS, and Windows, it can build binaries across platforms. 
 
 Bazel provides a [pkg](https://github.com/bazelbuild/rules_pkg/tree/main/pkg) rule providing tar, deb, and rpm support. To facilitate cross-platform tar support in the distributable build, we are currently using tar through Node, which is slow. The pkg tar rule will provide an improvement in performance. For deb and RPM builds, Kibana is currently using a Ruby package called [fpm](https://github.com/jordansissel/fpm) created by a former Elastic employee.
 
 For Docker, we currently create the images during the build using Docker then extract the image as a tar to provide the Release Manager which publishes it to our repository. For ARM, we only create a Docker context which Release Manager uses to create the image on ARM hardware. Bazel has a [docker](https://github.com/bazelbuild/rules_docker) rule, which should allow us to cross-build, and do so without actually using Docker.
 
-The current build is fairly procedural and has little caching where subsequent builds take almost as long as the previous. When working on a step later in the build system, one ultimately ends up commenting out previously completed steps to save time when testing. With Bazel, each target consumes sources or dependencies which could be other targets. Conceivably, we will have a target called release, which is dependent on another target for each of the assets in the distribution (Windows zip, Linux 64-bit tar, Darwin tar, RPM 64-bit, Deb 64-bit, Bed Aarch64, etc). Each one of these assets will then depend on the Kibana core and the rest of the plugins. The entire dependency tree for this will be resolved and rebuilt only when necessary.
+The current build is fairly procedural and has little caching where subsequent builds take almost as long as the previous. When working on a step later in the build system, one ultimately ends up commenting out previously completed steps to save time when testing. With Bazel, each target consumes sources or dependencies which could be other targets. Conceivably, we will have a target called release, which is dependent on another target for each of the assets in the distribution (Windows zip, Linux 64-bit tar, Darwin tar, RPM 64-bit, Deb 64-bit, Bed Aarch64, etc). Each one of these assets will then depend on the Kibana core and the rest of the plugins. The entire dependency tree for this will be resolved and rebuilt only when necessary. 
 
 
 ## scripts/*
@@ -165,10 +165,10 @@ We have created a proof of concept using persistent storage on Google Cloud and 
 ## Packages Build Outline
 
 Within Bazel, the packages will have new overall rules:
-
+ 
 * It cannot contain build scripts. Every package build will be written using a Bazel `BUILD.bazel` file
 * It cannot have side effects. Every package build should be cacheable and reproducible and can not produce any side effects
-* Each package should define three major public target rules in `BUILD.bazel` files: `build`, `jest`, and a js_library target with the same name of the folder where the package is living.
+* Each package should define three major public target rules in `BUILD.bazel` files: `build`, `jest`, and a js_library target with the same name of the folder where the package is living. 
 * In order to output its targets in the most Bazel friendly way, each package will output its target according to the following folder structure: for node targets, it will be `target_server`, for web target it will be `target_web` and for types, it will be `target_types`.
 
 
@@ -244,7 +244,7 @@ The `BUILD.bazel` files will look similar to that of packages, there will be a t
 
 Plugins are built in a sandbox, so they will no longer be able to use relative imports from one another. For Typescript, relative imports will be replaced with a path reference to the `bazel/bin`.
 
-Static imports across plugins are a concern that would affect the developer experience due to cascading re-builds. For example, if every plugin has static imports from `src/core`, any changes to `src/core` would cause all those plugins to re-build. There are a few options to address this; the first would be to minimize or eliminate these imports. Most plugins are importing types, so we can also ensure that only type-level changes actually trigger a re-build. Additionally, these types of dependencies could be further broken down into smaller packages to reduce the times further this is necessary.
+Static imports across plugins are a concern that would affect the developer experience due to cascading re-builds. For example, if every plugin has static imports from `src/core`, any changes to `src/core` would cause all those plugins to re-build. There are a few options to address this; the first would be to minimize or eliminate these imports. Most plugins are importing types, so we can also ensure that only type-level changes actually trigger a re-build. Additionally, these types of dependencies could be further broken down into smaller packages to reduce the times further this is necessary. 
 
 ```
 "compilerOptions": {

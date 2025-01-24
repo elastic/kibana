@@ -57,11 +57,11 @@ Try out the script:
 $ node scripts/my_task
 
 # ERROR please provide a single --path flag
-#
+# 
 #   node scripts/my_task.js
-#
+# 
 #   Run my special task
-#
+# 
 #   Options:
 #     --path             Required, path to the file to operate on
 #     --verbose, -v      Log verbosely
@@ -75,9 +75,9 @@ $ node scripts/my_task
 ### API
 
 - ***`run(fn: async ({ flags: Flags, log: ToolingLog, addCleanupTask }) => Promise<void>, options: Options)`***
-
+  
     Execte an async function, passing it the parsed flags and a tooling log that is configured to the requested logging level. If the returned promise is rejected with an error created by `createFailError(...)` or `createFlagError(...)` the process will exit as described by the error, otherwise the process will exit with code 1.
-
+    
     **`fn` Params:**
     - *[`log: ToolingLog`](../../packages/kbn-tooling-log/src/tooling_log.ts)*:
 
@@ -130,7 +130,7 @@ $ node scripts/my_task
 
 
 - ***`createFailError(reason: string, options: { exitCode: number, showHelp: boolean }): FailError`***
-
+    
     Create and return an error object that, when thrown within `run(...)` can customize the failure behavior of the CLI. `reason` is printed instead of a stacktrace, `options.exitCode` customizes the exit code of the process, and `options.showHelp` will print the help text before exiting.
 
 - ***`createFlagError(reason: string)`***
