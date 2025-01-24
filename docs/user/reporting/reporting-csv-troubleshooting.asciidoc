@@ -94,7 +94,9 @@ This error occurs in deployments that use token-based authentication (SAML token
 
 This means that the deployment is stable, but the size of the requested report is too large to complete within the time allowed by the authentication token available to the Reporting task.
 
-=== Avoiding token expiration
+[float]
+[[avoid-token-expiration]]
+==== Avoiding token expiration
 
 You can use the following workarounds for this error:
 
