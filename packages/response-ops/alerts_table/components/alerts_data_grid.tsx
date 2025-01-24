@@ -13,23 +13,18 @@ import {
   EuiDataGridControlColumn,
   EuiDataGridProps,
   EuiDataGridStyle,
-  EuiFlexGroup,
   RenderCellValue,
   tint,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
+import { ActionsCellHost } from './actions_cell_host';
 import { ControlColumnHeaderCell } from './control_column_header_cell';
 import { CellValueHost } from './cell_value_host';
 import { BulkActionsCell } from './bulk_actions_cell';
 import { BulkActionsHeader } from './bulk_actions_header_cell';
-import {
-  AdditionalContext,
-  AlertsDataGridProps,
-  BulkActionsVerbs,
-  CellActionsOptions,
-} from '../types';
+import { AdditionalContext, AlertsDataGridProps, CellActionsOptions } from '../types';
 import { useGetToolbarVisibility } from '../hooks/use_toolbar_visibility';
 import { InspectButtonContainer } from './alerts_query_inspector';
 import { typedMemo } from '../utils/react';
@@ -41,19 +36,17 @@ import { NonVirtualizedGridBody } from './non_virtualized_grid_body';
 
 const AlertsFlyout = lazy(() => import('./alerts_flyout')) as typeof AlertsFlyoutType;
 
-const DefaultGridStyle: EuiDataGridStyle = {
+const defaultGridStyle: EuiDataGridStyle = {
   border: 'none',
   header: 'underline',
   fontSize: 's',
 };
-
 const defaultCellActionsOptions: CellActionsOptions = {
   getCellActionsForColumn: () => [],
   disabledCellActions: [],
 };
 const DEFAULT_PAGE_SIZE_OPTIONS = [10, 20, 50, 100];
 const DEFAULT_ACTIONS_COLUMN_WIDTH = 75;
-
 const stableMappedRowClasses: EuiDataGridStyle['rowClasses'] = {};
 
 export const AlertsDataGrid = typedMemo(
@@ -99,7 +92,7 @@ export const AlertsDataGrid = typedMemo(
       alertsCount,
       isLoadingAlerts,
       browserFields,
-      renderActionsCell: ActionsCell,
+      renderActionsCell,
       pageIndex,
       pageSize,
       refresh: refreshQueries,
@@ -116,7 +109,6 @@ export const AlertsDataGrid = typedMemo(
       bulkActions,
       setIsBulkActionsLoading,
       clearSelection,
-      updateBulkActionsState,
     } = useBulkActions({
       ruleTypeIds,
       query,
@@ -157,50 +149,6 @@ export const AlertsDataGrid = typedMemo(
       settings,
     });
 
-    const customActionsColumn: EuiDataGridControlColumn | undefined = useMemo(() => {
-      if (ActionsCell) {
-        const RowCellRender: EuiDataGridControlColumn['rowCellRender'] = (_props) => {
-          const idx = _props.rowIndex - _props.pageSize * _props.pageIndex;
-          const alert = _props.alerts[idx];
-          const legacyAlert = _props.oldAlertsData[idx];
-          const ecsAlert = _props.ecsAlertsData[idx];
-          const setIsActionLoading = useCallback(
-            (_isLoading: boolean = true) => {
-              updateBulkActionsState({
-                action: BulkActionsVerbs.updateRowLoadingState,
-                rowIndex: _props.visibleRowIndex,
-                isLoading: _isLoading,
-              });
-            },
-            [_props.visibleRowIndex]
-          );
-
-          if (!alert) {
-            return null;
-          }
-
-          return (
-            <EuiFlexGroup gutterSize="none" responsive={false}>
-              <ActionsCell
-                // Though untyped, `_props` contains the correct render context
-                {...(_props as any)}
-                alert={alert}
-                legacyAlert={legacyAlert}
-                ecsAlert={ecsAlert}
-                setIsActionLoading={setIsActionLoading}
-              />
-            </EuiFlexGroup>
-          );
-        };
-        return {
-          id: 'expandColumn',
-          width: actionsColumnWidth,
-          headerCellRender: ControlColumnHeaderCell,
-          rowCellRender: RowCellRender,
-        };
-      }
-    }, [ActionsCell, actionsColumnWidth, updateBulkActionsState]);
-
     const leadingControlColumns: EuiDataGridControlColumn[] | undefined = useMemo(() => {
       const controlColumns = [
         ...(additionalLeadingControlColumns ?? []),
@@ -214,12 +162,29 @@ export const AlertsDataGrid = typedMemo(
               },
             ]
           : []),
-        ...(customActionsColumn ? [customActionsColumn] : []),
+        // If the user provided an actions cell renderer, add the actions column
+        ...(renderActionsCell
+          ? [
+              {
+                id: 'expandColumn',
+                width: actionsColumnWidth,
+                headerCellRender: ControlColumnHeaderCell,
+                // Though untyped, rowCellRender's CellPropsWithContext contains the correct context
+                rowCellRender:
+                  ActionsCellHost as unknown as EuiDataGridControlColumn['rowCellRender'],
+              },
+            ]
+          : []),
       ];
       if (controlColumns.length) {
         return controlColumns;
       }
-    }, [additionalLeadingControlColumns, isBulkActionsColumnActive, customActionsColumn]);
+    }, [
+      additionalLeadingControlColumns,
+      isBulkActionsColumnActive,
+      renderActionsCell,
+      actionsColumnWidth,
+    ]);
 
     const flyoutRowIndex = flyoutAlertIndex + pageIndex * pageSize;
 
@@ -285,7 +250,7 @@ export const AlertsDataGrid = typedMemo(
       const propGridStyle: NonNullable<EuiDataGridStyle> = props.gridStyle ?? {};
       // Merges default row classes, custom ones and adds the active row class style
       return {
-        ...DefaultGridStyle,
+        ...defaultGridStyle,
         ...propGridStyle,
         rowClasses: {
           // We're spreading the highlighted row classes first, so that the active
@@ -400,7 +365,7 @@ export const AlertsDataGrid = typedMemo(
               rowCount={alertsCount}
               renderCustomGridBody={dynamicRowHeight ? renderCustomGridBody : undefined}
               cellContext={renderContext}
-              // Cast necessary because the `cellContext` type is too wide in EuiDataGrid
+              // Cast necessary because `cellContext` is untyped in EuiDataGrid
               renderCellValue={CellValueHost as RenderCellValue}
               renderCellPopover={CellPopoverHost}
               gridStyle={actualGridStyle}
