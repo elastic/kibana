@@ -6,10 +6,7 @@
  */
 
 import { getListOfSloSummaryIndices } from './summary_indices';
-import {
-  DEFAULT_STALE_SLO_THRESHOLD_HOURS,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-} from './constants';
+import { DEFAULT_STALE_SLO_THRESHOLD_HOURS, SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
 
 describe('getListOfSloSummaryIndices', () => {
   it('should return default index if disabled', function () {
@@ -19,7 +16,7 @@ describe('getListOfSloSummaryIndices', () => {
       staleThresholdInHours: DEFAULT_STALE_SLO_THRESHOLD_HOURS,
     };
     const result = getListOfSloSummaryIndices(settings, []);
-    expect(result).toBe(SLO_SUMMARY_DESTINATION_INDEX_PATTERN);
+    expect(result).toBe(SUMMARY_DESTINATION_INDEX_PATTERN);
   });
 
   it('should return all remote clusters when enabled', function () {
@@ -34,7 +31,7 @@ describe('getListOfSloSummaryIndices', () => {
     ];
     const result = getListOfSloSummaryIndices(settings, clustersByName);
     expect(result).toBe(
-      `${SLO_SUMMARY_DESTINATION_INDEX_PATTERN},cluster1:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN},cluster2:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`
+      `${SUMMARY_DESTINATION_INDEX_PATTERN},cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN},cluster2:${SUMMARY_DESTINATION_INDEX_PATTERN}`
     );
   });
 
@@ -50,7 +47,7 @@ describe('getListOfSloSummaryIndices', () => {
     ];
     const result = getListOfSloSummaryIndices(settings, clustersByName);
     expect(result).toBe(
-      `${SLO_SUMMARY_DESTINATION_INDEX_PATTERN},cluster1:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`
+      `${SUMMARY_DESTINATION_INDEX_PATTERN},cluster1:${SUMMARY_DESTINATION_INDEX_PATTERN}`
     );
   });
 });

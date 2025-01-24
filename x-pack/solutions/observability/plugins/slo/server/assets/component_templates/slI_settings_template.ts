@@ -5,21 +5,23 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION } from '../../../common/constants';
+import {
+  SLI_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SLO_RESOURCES_VERSION,
+} from '../../../common/constants';
 
-export const getSLOSummaryIndexTemplate = (
-  name: string,
-  indexPattern: string,
-  composedOf: string[]
-) => ({
-  name,
-  index_patterns: [indexPattern],
-  composed_of: composedOf,
-  priority: 500,
+export const SLI_SETTINGS_TEMPLATE = {
+  name: SLI_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  template: {
+    settings: {
+      auto_expand_replicas: '0-1',
+      hidden: true,
+    },
+  },
   _meta: {
-    description: 'SLO summary index template',
+    description: 'Settings for SLO rollup data',
     version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',
   },
-});
+};

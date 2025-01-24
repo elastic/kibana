@@ -5,10 +5,13 @@
  * 2.0.
  */
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SLO_RESOURCES_VERSION } from '../../../common/constants';
+import {
+  SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SLO_RESOURCES_VERSION,
+} from '../../../common/constants';
 
-export const getSLOMappingsTemplate = (name: string): ClusterPutComponentTemplateRequest => ({
-  name,
+export const SLI_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
+  name: SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   template: {
     mappings: {
       properties: {
@@ -109,4 +112,4 @@ export const getSLOMappingsTemplate = (name: string): ClusterPutComponentTemplat
     managed: true,
     managed_by: 'observability',
   },
-});
+};
