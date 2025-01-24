@@ -23,7 +23,7 @@ const requiredPluginNames = [
 ];
 
 type RequiredRuleFormPlugins = Omit<
-  RuleFormProps['services'],
+  RuleFormProps['plugins'],
   'actionTypeRegistry' | 'ruleTypeRegistry'
 >;
 export const validateRuleFormPlugins = (input: unknown): RequiredRuleFormPlugins => {

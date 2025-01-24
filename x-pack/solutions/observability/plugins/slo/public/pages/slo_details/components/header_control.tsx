@@ -402,7 +402,7 @@ export function HeaderControl({ slo }: Props) {
 
       {isRuleFlyoutVisible ? (
         <AddRuleFlyout
-          services={services}
+          plugins={services}
           consumer={sloFeatureId}
           ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
           onCancel={onCloseRuleFlyout}

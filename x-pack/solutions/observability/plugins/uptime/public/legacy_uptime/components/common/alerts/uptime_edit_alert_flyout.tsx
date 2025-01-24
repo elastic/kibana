@@ -28,7 +28,7 @@ export const UptimeEditAlertFlyoutComponent = ({
   initialAlert,
   setAlertFlyoutVisibility,
 }: Props) => {
-  const { triggersActionsUi, ...services } = useKibana<KibanaDeps>().services;
+  const { triggersActionsUi, ...plugins } = useKibana<KibanaDeps>().services;
 
   const onClose = useCallback(() => {
     setAlertFlyoutVisibility(false);
@@ -40,9 +40,9 @@ export const UptimeEditAlertFlyoutComponent = ({
         id: initialAlert.id,
         onCancel: onClose,
         onSubmit: onClose,
-        services,
+        plugins,
       }),
-    [initialAlert, triggersActionsUi, onClose, services]
+    [initialAlert, triggersActionsUi, onClose, plugins]
   );
   return <>{alertFlyoutVisible && EditAlertFlyout}</>;
 };

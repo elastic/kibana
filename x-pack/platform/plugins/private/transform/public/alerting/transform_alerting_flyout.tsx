@@ -32,13 +32,13 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
   onCloseFlyout,
   onSave,
 }) => {
-  const { triggersActionsUi, ...services } = useAppDependencies();
+  const { triggersActionsUi, ...plugins } = useAppDependencies();
 
   const AlertFlyout = useMemo(() => {
     if (!triggersActionsUi) return;
 
     const commonProps = {
-      services,
+      plugins,
       onCancel: () => {
         onCloseFlyout();
       },
@@ -67,7 +67,7 @@ export const TransformAlertFlyout: FC<TransformAlertFlyoutProps> = ({
       },
     });
     // deps on id to avoid re-rendering on auto-refresh
-  }, [triggersActionsUi, services, initialAlert, ruleParams, onCloseFlyout, onSave]);
+  }, [triggersActionsUi, plugins, initialAlert, ruleParams, onCloseFlyout, onSave]);
 
   return <>{AlertFlyout}</>;
 };

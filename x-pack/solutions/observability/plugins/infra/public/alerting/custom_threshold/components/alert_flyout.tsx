@@ -25,7 +25,7 @@ export function AlertFlyout({ onClose }: Props) {
     }
 
     return triggersActionsUI.getRuleFormFlyout({
-      services,
+      plugins: services,
       consumer: 'infrastructure',
       onCancel: onClose,
       onSubmit: onClose,

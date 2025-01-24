@@ -68,7 +68,7 @@ export const AlertsPopover = () => {
       ).toDataviewSpec();
 
       return triggersActionsUi.getRuleFormFlyout<ThresholdRuleTypeParams>({
-        services: { application, http, ...services },
+        plugins: { application, http, ...services },
         consumer: 'logs',
         ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
         initialValues: {

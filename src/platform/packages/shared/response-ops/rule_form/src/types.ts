@@ -9,6 +9,7 @@
 
 import { ActionType } from '@kbn/actions-types';
 import { ActionVariable, RulesSettingsFlapping } from '@kbn/alerting-types';
+import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import type { ChartsPluginSetup } from '@kbn/charts-plugin/public';
 import type { ApplicationStart } from '@kbn/core-application-browser';
 import type { DocLinksStart } from '@kbn/core-doc-links-browser';
@@ -16,22 +17,21 @@ import type { HttpStart } from '@kbn/core-http-browser';
 import type { I18nStart } from '@kbn/core-i18n-browser';
 import type { NotificationsStart } from '@kbn/core-notifications-browser';
 import type { ThemeServiceStart } from '@kbn/core-theme-browser';
-import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { SettingsStart } from '@kbn/core-ui-settings-browser';
+import type { UserProfileService } from '@kbn/core-user-profile-browser';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { ActionConnector, ActionTypeRegistryContract } from '@kbn/alerts-ui-shared';
 import {
   MinimumScheduleInterval,
   Rule,
   RuleFormActionsErrors,
   RuleFormBaseErrors,
   RuleFormParamsErrors,
+  RuleTypeMetaData,
   RuleTypeModel,
   RuleTypeParams,
-  RuleTypeMetaData,
   RuleTypeRegistryContract,
   RuleTypeWithDescription,
   RuleUiAction,
@@ -53,7 +53,7 @@ export interface RuleFormData<Params extends RuleTypeParams = RuleTypeParams> {
   flapping?: Rule<Params>['flapping'];
 }
 
-export interface RuleFormServices {
+export interface RuleFormPlugins {
   http: HttpStart;
   i18n: I18nStart;
   theme: ThemeServiceStart;
@@ -68,10 +68,7 @@ export interface RuleFormServices {
   docLinks: DocLinksStart;
   ruleTypeRegistry: RuleTypeRegistryContract;
   actionTypeRegistry: ActionTypeRegistryContract;
-  isServerless?: boolean;
 }
-
-export type RuleFormPlugins = Omit<RuleFormServices, 'isServerless'>;
 
 export interface RuleFormState<
   Params extends RuleTypeParams = RuleTypeParams,

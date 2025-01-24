@@ -19,12 +19,12 @@ import {
   RULE_FORM_ROUTE_PARAMS_ERROR_TEXT,
   RULE_FORM_ROUTE_PARAMS_ERROR_TITLE,
 } from './translations';
-import { RuleFormData, RuleFormServices, RuleTypeMetaData } from './types';
+import { RuleFormData, RuleFormPlugins, RuleTypeMetaData } from './types';
 
 const queryClient = new QueryClient();
 
 export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaData> {
-  services: RuleFormServices;
+  plugins: RuleFormPlugins;
   id?: string;
   ruleTypeId?: string;
   isFlyout?: boolean;
@@ -42,13 +42,14 @@ export interface RuleFormProps<MetaData extends RuleTypeMetaData = RuleTypeMetaD
   showMustacheAutocompleteSwitch?: boolean;
   initialValues?: Partial<RuleFormData>;
   initialMetadata?: MetaData;
+  isServerless?: boolean;
 }
 
 export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
   props: RuleFormProps<MetaData>
 ) => {
   const {
-    services: _services,
+    plugins: _plugins,
     onCancel,
     onSubmit,
     onChangeMetaData,
@@ -66,6 +67,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     showMustacheAutocompleteSwitch,
     initialValues,
     initialMetadata,
+    isServerless,
   } = props;
 
   const {
@@ -83,8 +85,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     docLinks,
     ruleTypeRegistry,
     actionTypeRegistry,
-    isServerless,
-  } = _services;
+  } = _plugins;
 
   const ruleFormComponent = useMemo(() => {
     const plugins = {

@@ -38,14 +38,14 @@ export const MlAnomalyAlertFlyout: FC<MlAnomalyAlertFlyoutProps> = ({
   onSave,
 }) => {
   const {
-    services: { triggersActionsUi, ...services },
+    services: { triggersActionsUi, ...plugins },
   } = useMlKibana();
 
   const AlertFlyout = useMemo(() => {
     if (!triggersActionsUi) return;
 
     const commonProps = {
-      services,
+      plugins,
       onCancel: () => {
         onCloseFlyout();
       },

@@ -62,7 +62,7 @@ export const RuleFormRoute = () => {
   return (
     <IntlProvider locale="en">
       <RuleForm
-        services={{
+        plugins={{
           http,
           application,
           notifications,
@@ -74,9 +74,9 @@ export const RuleFormRoute = () => {
           docLinks,
           ruleTypeRegistry,
           actionTypeRegistry,
-          isServerless,
           ...startServices,
         }}
+        isServerless={isServerless}
         id={id}
         ruleTypeId={ruleTypeId}
         onCancel={() => {

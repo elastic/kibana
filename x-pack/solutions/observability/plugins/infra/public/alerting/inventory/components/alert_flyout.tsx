@@ -33,7 +33,7 @@ export const AlertFlyout = ({ options, nodeType, filter, visible, setVisible }: 
     () =>
       triggersActionsUI &&
       triggersActionsUI.getRuleFormFlyout({
-        services,
+        plugins: services,
         consumer: 'infrastructure',
         onCancel: onCloseFlyout,
         onSubmit: onCloseFlyout,

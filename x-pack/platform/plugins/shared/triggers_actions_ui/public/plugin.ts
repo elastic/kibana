@@ -121,10 +121,10 @@ export interface TriggersAndActionsUIPublicPluginStart {
     props: Omit<EditConnectorFlyoutProps, 'actionTypeRegistry'>
   ) => ReactElement<EditConnectorFlyoutProps>;
   getRuleFormFlyout: <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
-    props: Omit<RuleFormProps<MetaData>, 'services'> & {
-      // Use Partial<RuleFormProps['services']> for compatibility with useKibana hooks that return
-      // possibly undefined services. Use validateRuleFormPlugins to ensure that the services are not undefined.
-      services: Omit<Partial<RuleFormProps['services']>, 'actionTypeRegistry' | 'ruleTypeRegistry'>;
+    props: Omit<RuleFormProps<MetaData>, 'plugins'> & {
+      // Use Partial<RuleFormProps['plugins']> for compatibility with useKibana hooks that return
+      // possibly undefined plugins. Use validateRuleFormPlugins to ensure that the plugins are not undefined.
+      plugins: Omit<Partial<RuleFormProps['plugins']>, 'actionTypeRegistry' | 'ruleTypeRegistry'>;
     }
   ) => ReactElement<RuleFormProps<MetaData>>;
   getAlertsTable: (props: AlertsTableProps) => ReactElement<AlertsTableProps>;
@@ -488,8 +488,8 @@ export class Plugin
       getRuleFormFlyout: (props) => {
         return getRuleFormFlyoutLazy({
           ...props,
-          services: {
-            ...validateRuleFormPlugins(props.services),
+          plugins: {
+            ...validateRuleFormPlugins(props.plugins),
             actionTypeRegistry: this.actionTypeRegistry,
             ruleTypeRegistry: this.ruleTypeRegistry,
           },

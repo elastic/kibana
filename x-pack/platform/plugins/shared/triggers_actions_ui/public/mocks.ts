@@ -89,8 +89,8 @@ function createStartMock(): TriggersAndActionsUIPublicPluginStart {
     getRuleFormFlyout: (props) => {
       return getRuleFormFlyoutLazy({
         ...props,
-        services: {
-          ...props.services,
+        plugins: {
+          ...props.plugins,
           actionTypeRegistry,
           ruleTypeRegistry,
         },

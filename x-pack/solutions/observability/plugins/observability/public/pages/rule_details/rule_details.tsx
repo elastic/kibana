@@ -269,7 +269,7 @@ export function RuleDetailsPage() {
 
       {isEditRuleFlyoutVisible && (
         <EditRuleFlyout
-          services={services}
+          plugins={services}
           id={rule.id}
           onCancel={handleCloseRuleFlyout}
           onSubmit={() => {

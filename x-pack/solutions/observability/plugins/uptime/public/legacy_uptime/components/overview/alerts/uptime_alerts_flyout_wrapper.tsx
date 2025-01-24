@@ -24,7 +24,7 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   alertTypeId,
   setAlertFlyoutVisibility,
 }: Props) => {
-  const { triggersActionsUi, ...services } = useKibana<KibanaDeps>().services;
+  const { triggersActionsUi, ...plugins } = useKibana<KibanaDeps>().services;
   const onCloseAlertFlyout = useCallback(
     () => setAlertFlyoutVisibility(false),
     [setAlertFlyoutVisibility]
@@ -32,7 +32,7 @@ export const UptimeAlertsFlyoutWrapperComponent = ({
   const AddAlertFlyout = useMemo(
     () =>
       triggersActionsUi.getRuleFormFlyout({
-        services,
+        plugins,
         consumer: 'uptime',
         onCancel: onCloseAlertFlyout,
         onSubmit: onCloseAlertFlyout,

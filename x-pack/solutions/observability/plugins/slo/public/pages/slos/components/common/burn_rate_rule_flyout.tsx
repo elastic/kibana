@@ -56,7 +56,7 @@ export function BurnRateRuleFlyout({
 
   return isAddRuleFlyoutOpen && slo ? (
     <AddRuleFlyout
-      services={services}
+      plugins={services}
       consumer={sloFeatureId}
       filteredRuleTypes={filteredRuleTypes}
       ruleTypeId={SLO_BURN_RATE_RULE_TYPE_ID}
