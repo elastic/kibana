@@ -75,7 +75,7 @@ export function registerPolicyRoutes(
           deprecated: {
             documentationUrl:
               docLinks.links.securitySolution.legacyEndpointManagementApiDeprecations,
-            severity: 'warning',
+            severity: 'critical',
             message: i18n.translate(
               'xpack.securitySolution.deprecations.endpoint.agent_policy_summary',
               {

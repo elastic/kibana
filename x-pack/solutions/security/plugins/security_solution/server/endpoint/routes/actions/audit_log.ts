@@ -47,7 +47,7 @@ export function registerActionAuditLogRoutes(
           deprecated: {
             documentationUrl:
               docLinks.links.securitySolution.legacyEndpointManagementApiDeprecations,
-            severity: 'warning',
+            severity: 'critical',
             message: i18n.translate(
               'xpack.securitySolution.deprecations.endpoint.response_actions.action_log',
               {

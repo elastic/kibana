@@ -61,7 +61,7 @@ export function registerEndpointSuggestionsRoutes(
           deprecated: {
             documentationUrl:
               docLinks.links.securitySolution.legacyEndpointManagementApiDeprecations,
-            severity: 'warning',
+            severity: 'critical',
             message: i18n.translate('xpack.securitySolution.deprecations.endpoint.suggestions', {
               defaultMessage:
                 'The "{path}" URL is deprecated and will be removed in the next major version.',

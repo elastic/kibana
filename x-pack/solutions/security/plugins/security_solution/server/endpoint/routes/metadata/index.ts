@@ -122,7 +122,7 @@ export function registerEndpointRoutes(
           deprecated: {
             documentationUrl:
               docLinks.links.securitySolution.legacyEndpointManagementApiDeprecations,
-            severity: 'warning',
+            severity: 'critical',
             message: i18n.translate(
               'xpack.securitySolution.deprecations.endpoint.metadata.transforms',
               {
