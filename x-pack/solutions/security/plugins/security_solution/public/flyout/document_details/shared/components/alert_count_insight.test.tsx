@@ -152,10 +152,10 @@ describe('getFormattedAlertStats', () => {
   it('should return alert stats', () => {
     const alertStats = getFormattedAlertStats(mockAlertData, euiTheme);
     expect(alertStats).toEqual([
-      { key: 'High', count: 2, color: SEVERITY_COLOR.high },
-      { key: 'Low', count: 2, color: SEVERITY_COLOR.low },
-      { key: 'Medium', count: 2, color: SEVERITY_COLOR.medium },
-      { key: 'Critical', count: 2, color: SEVERITY_COLOR.critical },
+      { key: 'High', count: 2, color: '#ff7e62' },
+      { key: 'Low', count: 2, color: '#54b399' },
+      { key: 'Medium', count: 2, color: '#f1d86f' },
+      { key: 'Critical', count: 2, color: '#bd271e' },
     ]);
   });
 

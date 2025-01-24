@@ -60,7 +60,7 @@ describe('legend', () => {
           showColor: true,
           stackByField0: 'kibana.alert.rule.name',
         }).color
-      ).toEqual('#54B399');
+      ).toEqual('#54b399');
     });
 
     it('returns the expected count', () => {
@@ -170,7 +170,7 @@ describe('legend', () => {
           })
         )
       ).toEqual({
-        color: '#54B399',
+        color: '#54b399',
         count: 12,
         field: 'host.name',
         value: 'Host-k8iyfzraq9',
@@ -216,35 +216,35 @@ describe('legend', () => {
         }).map((x) => omit(['render', 'dataProviderId'], x))
       ).toEqual([
         {
-          color: '#54B399',
+          color: '#54b399',
           count: 34,
           field: 'kibana.alert.rule.name',
           value: 'matches everything',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#DA8B45',
+          color: '#ff7e62',
           count: 28,
           field: 'kibana.alert.rule.name',
           value: 'EQL process sequence',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#D6BF57',
+          color: '#f1d86f',
           count: 19,
           field: 'kibana.alert.rule.name',
           value: 'Endpoint Security',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#E7664C',
+          color: '#bd271e',
           count: 5,
           field: 'kibana.alert.rule.name',
           value: 'mimikatz process started',
           scopeId: TableId.alertsOnAlertsPage,
         },
         {
-          color: '#E7664C',
+          color: '#bd271e',
           count: 1,
           field: 'kibana.alert.rule.name',
           value: 'Threshold rule',

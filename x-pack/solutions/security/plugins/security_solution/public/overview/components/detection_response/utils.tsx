@@ -5,7 +5,7 @@
  * 2.0.
  */
 /**
- * deprecated, use getRiskSeverityColors or useRiskSeverityColors from /common/utils/risk_color_palette.tsx instead
+ * @deprecated, use getRiskSeverityColors or useRiskSeverityColors from /common/utils/risk_color_palette.tsx instead
  */
 export const SEVERITY_COLOR = {
   critical: '#E7664C',
