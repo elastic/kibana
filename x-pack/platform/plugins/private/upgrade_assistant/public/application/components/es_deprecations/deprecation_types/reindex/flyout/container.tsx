@@ -73,7 +73,7 @@ export const ReindexFlyout: React.FunctionComponent<ReindexFlyoutProps> = ({
     />
   ) : (
     <ChecklistFlyoutStep
-      deprecation={deprecation}
+      frozen={deprecation.frozen}
       closeFlyout={closeFlyout}
       startReindex={startReindexWithWarnings}
       reindexState={reindexState}

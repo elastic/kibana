@@ -72,12 +72,12 @@ const buttonLabel = (status?: ReindexStatus) => {
  * Displays a flyout that shows the current reindexing status for a given index.
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
-  deprecation: EnrichedDeprecationInfo;
+  frozen?: boolean;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-}> = ({ deprecation, closeFlyout, reindexState, startReindex, cancelReindex }) => {
+}> = ({ frozen, closeFlyout, reindexState, startReindex, cancelReindex }) => {
   const {
     services: {
       api,
@@ -198,7 +198,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               }}
             />
           </p>
-          {deprecation.frozen && (
+          {frozen && (
             <p>
               <FormattedMessage
                 id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndex"
