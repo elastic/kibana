@@ -16,11 +16,13 @@ export const CRAWLERS_PATH = `${ROOT_PATH}crawlers`;
 export const CRAWLERS_ELASTIC_MANAGED_PATH = `${CRAWLERS_PATH}/elastic_managed`;
 export const SETTINGS_PATH = `${ROOT_PATH}settings`;
 
+// TODO: remove and replace with create index locator
 export const NEW_INDEX_PATH = `${SEARCH_INDICES_PATH}/new_index`;
 export const NEW_API_PATH = `${NEW_INDEX_PATH}/api`;
 export const NEW_ES_INDEX_PATH = `${NEW_INDEX_PATH}/elasticsearch`;
 export const NEW_DIRECT_UPLOAD_PATH = `${NEW_INDEX_PATH}/upload`;
 export const NEW_INDEX_SELECT_CONNECTOR_PATH = `${CONNECTORS_PATH}/select_connector`;
+// TODO: remove this path
 export const NEW_CONNECTOR_PATH = `${CONNECTORS_PATH}/new_connector`;
 export const NEW_CONNECTOR_FLOW_PATH = `${CONNECTORS_PATH}/new_connector_flow`;
 export const NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH = `${CONNECTORS_PATH}/select_connector?filter=native`;

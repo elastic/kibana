@@ -17,16 +17,13 @@ import { FormattedMessage } from '@kbn/i18n-react';
 
 import { docLinks } from '../../../shared/doc_links';
 import { KibanaLogic } from '../../../shared/kibana';
-import { isApiIndex, isConnectorIndex, isCrawlerIndex } from '../../utils/indices';
+import { isApiIndex, isConnectorIndex } from '../../utils/indices';
 
 import { ConvertConnectorModal } from '../shared/convert_connector_modal/convert_connector_modal';
 
 import { ApiTotalStats } from './api_total_stats';
 import { ConvertConnectorLogic } from './connector/native_connector_configuration/convert_connector_logic';
 import { ConnectorTotalStats } from './connector_total_stats';
-import { CrawlDetailsFlyout } from './crawler/crawl_details_flyout/crawl_details_flyout';
-import { CrawlRequestsPanel } from './crawler/crawl_requests_panel/crawl_requests_panel';
-import { CrawlerTotalStats } from './crawler_total_stats';
 import { GenerateApiKeyPanel } from './generate_api_key_panel';
 import { IndexViewLogic } from './index_view_logic';
 import { OverviewLogic } from './overview.logic';
@@ -112,24 +109,11 @@ export const SearchIndexOverview: React.FC = () => {
           <EuiSpacer />
         </>
       )}
-      {isCrawlerIndex(indexData) ? (
-        <CrawlerTotalStats />
-      ) : isConnectorIndex(indexData) ? (
-        <ConnectorTotalStats />
-      ) : (
-        <ApiTotalStats />
-      )}
+      {isConnectorIndex(indexData) ? <ConnectorTotalStats /> : <ApiTotalStats />}
       {isApiIndex(indexData) && (
         <>
           <EuiSpacer />
           <GenerateApiKeyPanel />
-        </>
-      )}
-      {isCrawlerIndex(indexData) && (
-        <>
-          <EuiSpacer />
-          <CrawlRequestsPanel />
-          <CrawlDetailsFlyout />
         </>
       )}
       {isConnectorIndex(indexData) && (
