@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { useCallback, useState, useEffect, useRef, useMemo } from 'react';
+import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
@@ -16,6 +16,30 @@ import {
   UseInTableSearchMatchesProps,
 } from './use_in_table_search_matches';
 import { InTableSearchInput, INPUT_TEST_SUBJ } from './in_table_search_input';
+
+const innerCss = css`
+  .dataGridInTableSearch__matchesCounter {
+    font-variant-numeric: tabular-nums;
+  }
+
+  .dataGridInTableSearch__input {
+    /* to prevent the width from changing when entering the search term */
+    min-width: 210px;
+  }
+
+  .euiFormControlLayout__append {
+    padding-inline-end: 0 !important;
+    background: none;
+  }
+
+  /* override borders style only if it's under the custom grid toolbar */
+  .unifiedDataTableToolbarControlIconButton & .euiFormControlLayout,
+  .unifiedDataTableToolbarControlIconButton & .dataGridInTableSearch__input {
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
+    border-right: 0;
+  }
+`;
 
 const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
@@ -144,38 +168,6 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     }
   }, [isInputVisible]);
 
-  const innerCss = useMemo(
-    () => css`
-      .dataGridInTableSearch__matchesCounter {
-        font-variant-numeric: tabular-nums;
-      }
-
-      .dataGridInTableSearch__button {
-        /* to make the transition between the button and input more seamless for cases where a custom toolbar is not used */
-        min-height: 2 * ${euiTheme.size.base}; // input height
-      }
-
-      .dataGridInTableSearch__input {
-        /* to prevent the width from changing when entering the search term */
-        min-width: 210px;
-      }
-
-      .euiFormControlLayout__append {
-        padding-inline-end: 0 !important;
-        background: none;
-      }
-
-      /* override borders style only if it's under the custom grid toolbar */
-      .unifiedDataTableToolbarControlIconButton & .euiFormControlLayout,
-      .unifiedDataTableToolbarControlIconButton & .dataGridInTableSearch__input {
-        border-top-right-radius: 0;
-        border-bottom-right-radius: 0;
-        border-right: 0;
-      }
-    `,
-    [euiTheme]
-  );
-
   return (
     <div ref={(node) => (containerRef.current = node)} css={innerCss}>
       {isInputVisible ? (
@@ -207,6 +199,10 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             aria-label={i18n.translate('dataGridInTableSearch.buttonSearch', {
               defaultMessage: 'Search in the table',
             })}
+            css={css`
+              /* to make the transition between the button and input more seamless for cases where a custom toolbar is not used */
+              min-height: calc(2 * ${euiTheme.size.base}); // input height
+            `}
             onClick={showInput}
           />
         </EuiToolTip>
