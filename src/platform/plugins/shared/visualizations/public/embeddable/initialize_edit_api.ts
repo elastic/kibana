@@ -15,7 +15,7 @@ import {
 } from '@kbn/presentation-publishing';
 import { TimeRange } from '@kbn/es-query';
 import type { Vis } from '../vis';
-import { urlFor } from '../utils/saved_visualize_utils';
+import { urlFor } from '..';
 import { getCapabilities, getEmbeddable } from '../services';
 
 export function initializeEditApi({

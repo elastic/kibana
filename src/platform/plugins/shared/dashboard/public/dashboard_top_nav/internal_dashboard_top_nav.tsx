@@ -347,7 +347,6 @@ export function InternalDashboardTopNav({
             ? setCustomHeaderActionMenu ?? undefined
             : setHeaderActionMenu
         }
-        className={fullScreenMode ? 'kbnTopNavMenu-isFullScreen' : undefined}
         config={
           visibilityProps.showTopNavMenu
             ? viewMode === 'edit'
