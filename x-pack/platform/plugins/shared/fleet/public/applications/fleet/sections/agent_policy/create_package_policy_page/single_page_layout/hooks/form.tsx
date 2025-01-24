@@ -311,6 +311,7 @@ export function useOnSubmit({
       setSelectedPolicyTab,
       packageInfo,
       packagePolicy,
+      integrationToEnable,
     });
   const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
   // sync the inputs with the agentless selector change

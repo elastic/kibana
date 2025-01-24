@@ -68,6 +68,7 @@ export function useSetupTechnology({
   packagePolicy,
   isEditPage,
   agentPolicies,
+  integrationToEnable,
 }: {
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
@@ -77,17 +78,21 @@ export function useSetupTechnology({
   packagePolicy: NewPackagePolicy;
   isEditPage?: boolean;
   agentPolicies?: AgentPolicy[];
+  integrationToEnable?: string;
 }) {
   const { isAgentlessEnabled } = useAgentless();
 
   // this is a placeholder for the new agent-BASED policy that will be used when the user switches from agentless to agent-based and back
   const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });
   const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
+
+  // derive default setup technology based on package info and selected integration
   const defaultSetupTechnology = useMemo(() => {
-    return isOnlyAgentlessIntegration(packageInfo) || isAgentlessSetupDefault(packageInfo)
+    return isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
+      isAgentlessSetupDefault(packageInfo, integrationToEnable)
       ? SetupTechnology.AGENTLESS
       : SetupTechnology.AGENT_BASED;
-  }, [packageInfo]);
+  }, [packageInfo, integrationToEnable]);
   const [selectedSetupTechnology, setSelectedSetupTechnology] =
     useState<SetupTechnology>(defaultSetupTechnology);
 
@@ -165,9 +170,19 @@ export function useSetupTechnology({
   };
 }
 
-const isAgentlessSetupDefault = (packageInfo?: PackageInfo) => {
-  // TODO: https://github.com/elastic/kibana/issues/205761
-  // placeholder for the logic to determine if the agentless setup is the default
+const isAgentlessSetupDefault = (packageInfo?: PackageInfo, integrationToEnable?: string) => {
+  if (
+    packageInfo &&
+    packageInfo.policy_templates &&
+    packageInfo.policy_templates.length > 0 &&
+    ((integrationToEnable &&
+      packageInfo?.policy_templates?.find((p) => p.name === integrationToEnable)?.deployment_modes
+        ?.agentless.is_default) ||
+      packageInfo?.policy_templates?.every((p) => p.deployment_modes?.agentless.is_default))
+  ) {
+    return true;
+  }
+
   return false;
 };
 
