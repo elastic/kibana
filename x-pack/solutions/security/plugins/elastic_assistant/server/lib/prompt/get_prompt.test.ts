@@ -5,10 +5,11 @@
  * 2.0.
  */
 
-import { getPrompt, promptDictionary } from './get_prompt';
+import { getPrompt } from './get_prompt';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { BEDROCK_SYSTEM_PROMPT, DEFAULT_SYSTEM_PROMPT } from './prompts';
+import { promptDictionary } from './local_prompt_object';
 
 jest.mock('@kbn/core-saved-objects-api-server');
 jest.mock('@kbn/actions-plugin/server');

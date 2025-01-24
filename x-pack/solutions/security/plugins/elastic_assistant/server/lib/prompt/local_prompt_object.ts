@@ -1,0 +1,65 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { Prompt } from './types';
+import {
+  BEDROCK_SYSTEM_PROMPT,
+  DEFAULT_SYSTEM_PROMPT,
+  GEMINI_SYSTEM_PROMPT,
+  GEMINI_USER_PROMPT,
+  STRUCTURED_SYSTEM_PROMPT,
+} from './prompts';
+
+export const promptDictionary = {
+  systemPrompt: 'systemPrompt-default',
+  userPrompt: 'userPrompt-default',
+};
+
+export const localPrompts: Prompt[] = [
+  {
+    promptId: promptDictionary.systemPrompt,
+    provider: 'openai',
+    prompt: {
+      default: DEFAULT_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.systemPrompt,
+    prompt: {
+      default: DEFAULT_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.systemPrompt,
+    provider: 'bedrock',
+    prompt: {
+      default: BEDROCK_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.systemPrompt,
+    provider: 'gemini',
+    prompt: {
+      default: GEMINI_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.systemPrompt,
+    provider: 'openai',
+    model: 'oss',
+    prompt: {
+      default: STRUCTURED_SYSTEM_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.userPrompt,
+    provider: 'gemini',
+    prompt: {
+      default: GEMINI_USER_PROMPT,
+    },
+  },
+];
