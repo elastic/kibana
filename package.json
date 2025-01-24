@@ -73,7 +73,7 @@
     "url": "https://github.com/elastic/kibana.git"
   },
   "engines": {
-    "node": "20.15.1",
+    "node": "20.18.2",
     "yarn": "^1.22.19"
   },
   "resolutions": {
@@ -572,6 +572,7 @@
     "@kbn/index-management-shared-types": "link:x-pack/platform/packages/shared/index-management/index_management_shared_types",
     "@kbn/index-patterns-test-plugin": "link:test/plugin_functional/plugins/index_patterns",
     "@kbn/inference-common": "link:x-pack/platform/packages/shared/ai-infra/inference-common",
+    "@kbn/inference-endpoint-plugin": "link:x-pack/platform/plugins/shared/inference_endpoint",
     "@kbn/inference-endpoint-ui-common": "link:x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common",
     "@kbn/inference-plugin": "link:x-pack/platform/plugins/shared/inference",
     "@kbn/inference_integration_flyout": "link:x-pack/platform/packages/private/ml/inference_integration_flyout",
@@ -821,6 +822,7 @@
     "@kbn/security-plugin-types-public": "link:x-pack/platform/packages/shared/security/plugin_types_public",
     "@kbn/security-plugin-types-server": "link:x-pack/platform/packages/shared/security/plugin_types_server",
     "@kbn/security-role-management-model": "link:x-pack/platform/packages/private/security/role_management_model",
+    "@kbn/security-solution-connectors": "link:x-pack/solutions/security/packages/connectors",
     "@kbn/security-solution-distribution-bar": "link:x-pack/solutions/security/packages/distribution_bar",
     "@kbn/security-solution-ess": "link:x-pack/solutions/security/plugins/security_solution_ess",
     "@kbn/security-solution-features": "link:x-pack/solutions/security/packages/features",
@@ -1063,7 +1065,7 @@
     "@turf/length": "^6.0.2",
     "@xstate/react": "^3.2.2",
     "@xstate5/react": "npm:@xstate/react@^4.1.2",
-    "@xyflow/react": "^12.3.6",
+    "@xyflow/react": "^12.4.0",
     "adm-zip": "^0.5.9",
     "ai": "^4.0.18",
     "ajv": "^8.17.1",
@@ -1330,7 +1332,7 @@
     "@cypress/webpack-preprocessor": "^6.0.1",
     "@elastic/eslint-plugin-eui": "0.0.2",
     "@elastic/makelogs": "^6.1.1",
-    "@elastic/synthetics": "^1.12.1",
+    "@elastic/synthetics": "^1.17.2",
     "@emotion/babel-preset-css-prop": "^11.11.0",
     "@emotion/jest": "^11.11.0",
     "@frsource/cypress-plugin-visual-regression-diff": "^3.3.10",
@@ -1528,7 +1530,7 @@
     "@octokit/rest": "^17.11.2",
     "@parcel/watcher": "^2.1.0",
     "@playwright/test": "1.49.0",
-    "@redocly/cli": "^1.27.1",
+    "@redocly/cli": "^1.27.2",
     "@statoscope/webpack-plugin": "^5.28.2",
     "@storybook/addon-a11y": "^6.5.16",
     "@storybook/addon-actions": "^6.5.16",
