@@ -68,10 +68,10 @@ export const KibanaSolutionAvatar = (props: KibanaSolutionAvatarProps) => {
     base: css(useEuiShadow('s')),
     xxl: css`
       ${useEuiShadow('m')};
-      line-height: 100px;
-      width: 100px;
-      height: 100px;
-      border-radius: 100px;
+      line-height: calc(${euiTheme.size.xs} * 25);
+      width: calc(${euiTheme.size.xs} * 25);
+      height: calc(${euiTheme.size.xs} * 25);
+      border-radius: calc(${euiTheme.size.xs} * 25);
       display: inline-block;
       background: ${euiTheme.colors.backgroundBasePlain} url(${textureImage}) no-repeat;
       background-size: cover, 125%;

@@ -107,7 +107,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
   function renderLayout() {
     const { setMenuMountPoint, visible } = props;
     const styles = {
-      withElements: css`
+      badgeWrapper: css`
         display: flex;
         align-items: center;
       `,
@@ -124,7 +124,7 @@ export function TopNavMenu<QT extends AggregateQuery | Query = Query>(
             <MountPointPortal setMountPoint={setMenuMountPoint}>
               <span
                 className="kbnTopNavMenu__wrapper"
-                css={[styles.withElements, visible === false && styles.hidden]}
+                css={[styles.badgeWrapper, visible === false && styles.hidden]}
               >
                 {badgesEl}
                 {menuEl}
