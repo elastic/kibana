@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { PluginInitializerContext } from '@kbn/core/server';
+
 import { SearchAssistantPlugin } from './plugin';
 
 export { config } from './config';

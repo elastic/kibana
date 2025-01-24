@@ -7,8 +7,9 @@
 
 import React from 'react';
 
-import { i18n } from '@kbn/i18n';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink, EuiPanel } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { useKibana } from '../../hooks/use_kibana';
 
 import { DEFAULT_PAGE_SIZE } from './constants';

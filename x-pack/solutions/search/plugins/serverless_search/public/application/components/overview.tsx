@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
+
+import { useLocation } from 'react-router-dom';
+
 import {
   EuiAvatar,
   EuiButtonEmpty,
@@ -17,6 +21,10 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import type {
+  LanguageDefinition,
+  LanguageDefinitionSnippetArguments,
+} from '@kbn/search-api-panels';
 import {
   WelcomeBanner,
   IngestData,
@@ -29,28 +37,25 @@ import {
   PreprocessDataPanel,
 } from '@kbn/search-api-panels';
 
-import React, { useEffect, useMemo, useState, FC, PropsWithChildren } from 'react';
-import type {
-  LanguageDefinition,
-  LanguageDefinitionSnippetArguments,
-} from '@kbn/search-api-panels';
-import { useLocation } from 'react-router-dom';
 import { CloudDetailsPanel } from '@kbn/search-api-panels';
+
 import { DEFAULT_INGESTION_PIPELINE } from '../../../common';
 import { docLinks } from '../../../common/doc_links';
-import { useKibanaServices } from '../hooks/use_kibana';
-import { useAssetBasePath } from '../hooks/use_asset_base_path';
+import { OPTIONAL_LABEL } from '../../../common/i18n_string';
 import { API_KEY_PLACEHOLDER, CLOUD_ID_PLACEHOLDER } from '../constants';
+import { useAssetBasePath } from '../hooks/use_asset_base_path';
+import { useKibanaServices } from '../hooks/use_kibana';
+
 import { javaDefinition } from './languages/java';
-import { languageDefinitions } from './languages/languages';
 import { LanguageGrid } from './languages/language_grid';
+import { languageDefinitions } from './languages/languages';
 import './overview.scss';
 import { ApiKeyPanel } from './api_key/api_key';
 import { ConnectorIngestionPanel } from './connectors_ingestion';
+import { PipelineManageButton } from './pipeline_manage_button';
 import { PipelineOverviewButton } from './pipeline_overview_button';
 import { SelectClientCallouts } from './select_client_callouts';
-import { PipelineManageButton } from './pipeline_manage_button';
-import { OPTIONAL_LABEL } from '../../../common/i18n_string';
+
 import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
 import { useElasticsearchUrl } from '../hooks/use_elastisearch_url';
 

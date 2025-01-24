@@ -9,10 +9,13 @@ import React from 'react';
 import { Controller, useFormContext } from 'react-hook-form';
 
 import { EuiPanel } from '@elastic/eui';
+
 import { useLLMsModels } from '../../hooks/use_llms_models';
+
+import { ChatForm, ChatFormFields } from '../../types';
+
 import { IncludeCitationsField } from './include_citations_field';
 import { InstructionsField } from './instructions_field';
-import { ChatForm, ChatFormFields } from '../../types';
 import { SummarizationModel } from './summarization_model';
 
 export const SummarizationPanel: React.FC = () => {
@@ -45,7 +48,7 @@ export const SummarizationPanel: React.FC = () => {
       <Controller
         name={ChatFormFields.citations}
         control={control}
-        defaultValue={true}
+        defaultValue
         render={({ field }) => (
           <IncludeCitationsField checked={field.value} onChange={field.onChange} />
         )}

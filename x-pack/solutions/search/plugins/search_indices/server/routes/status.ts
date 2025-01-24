@@ -5,10 +5,10 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-import { schema } from '@kbn/config-schema';
 import { GET_STATUS_ROUTE, GET_USER_PRIVILEGES_ROUTE } from '../../common/routes';
 import { fetchIndicesStatus, fetchUserStartPrivileges } from '../lib/status';
 

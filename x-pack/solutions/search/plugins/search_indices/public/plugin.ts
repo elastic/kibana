@@ -5,12 +5,23 @@
  * 2.0.
  */
 
+import { Subscription } from 'rxjs';
+
 import type { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
 import { SEARCH_INDICES_CREATE_INDEX } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 
-import { Subscription } from 'rxjs';
+import { INDICES_APP_ID, START_APP_ID } from '../common';
 import { docLinks } from '../common/doc_links';
+
+import { registerLocators } from './locators';
+import {
+  CREATE_INDEX_PATH,
+  INDICES_APP_BASE,
+  START_APP_BASE,
+  SearchIndexDetailsTabValues,
+} from './routes';
+import { initQueryClient } from './services/query_client';
 import type {
   AppPluginSetupDependencies,
   SearchIndicesAppPluginStartDependencies,
@@ -18,15 +29,6 @@ import type {
   SearchIndicesPluginStart,
   SearchIndicesServicesContextDeps,
 } from './types';
-import { initQueryClient } from './services/query_client';
-import { INDICES_APP_ID, START_APP_ID } from '../common';
-import {
-  CREATE_INDEX_PATH,
-  INDICES_APP_BASE,
-  START_APP_BASE,
-  SearchIndexDetailsTabValues,
-} from './routes';
-import { registerLocators } from './locators';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>

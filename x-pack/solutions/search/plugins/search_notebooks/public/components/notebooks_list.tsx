@@ -7,6 +7,7 @@
 import React from 'react';
 
 import { NotebookInformation } from '../../common/types';
+
 import { LoadingPanel } from './loading_panel';
 import { SelectionPanel } from './selection_panel';
 

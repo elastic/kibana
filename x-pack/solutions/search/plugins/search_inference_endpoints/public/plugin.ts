@@ -17,8 +17,12 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
+
 import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 import { docLinks } from '../common/doc_links';
+
+import { INFERENCE_ENDPOINTS_PATH } from './components/routes';
+import { registerLocators } from './locators';
 import {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
@@ -26,8 +30,6 @@ import {
   SearchInferenceEndpointsPluginSetup,
   SearchInferenceEndpointsPluginStart,
 } from './types';
-import { registerLocators } from './locators';
-import { INFERENCE_ENDPOINTS_PATH } from './components/routes';
 
 export class SearchInferenceEndpointsPlugin
   implements Plugin<SearchInferenceEndpointsPluginSetup, SearchInferenceEndpointsPluginStart>

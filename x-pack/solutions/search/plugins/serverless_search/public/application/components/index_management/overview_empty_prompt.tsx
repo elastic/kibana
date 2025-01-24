@@ -6,8 +6,7 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiEmptyPrompt,
   EuiFlexItem,
@@ -18,6 +17,8 @@ import {
   EuiPanel,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { Connector } from '@kbn/search-connectors';
 
 import { docLinks } from '../../../../common/doc_links';

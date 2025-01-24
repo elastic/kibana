@@ -6,8 +6,9 @@
  */
 
 import type { ReactNode } from 'react';
-import type { AppDeepLinkId, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
+import type { AppDeepLinkId, ChromeBreadcrumb } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 

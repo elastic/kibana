@@ -6,13 +6,15 @@
  */
 
 import React from 'react';
-import { CoreStart } from '@kbn/core/public';
+
+import { QueryClient } from '@tanstack/react-query';
+
 import type {
   EmbeddedConsoleView,
   EmbeddedConsoleViewButtonProps,
 } from '@kbn/console-plugin/public';
+import { CoreStart } from '@kbn/core/public';
 import { dynamic } from '@kbn/shared-ux-utility';
-import { QueryClient } from '@tanstack/react-query';
 
 import { NotebookListValue, AppMetricsTracker } from './types';
 

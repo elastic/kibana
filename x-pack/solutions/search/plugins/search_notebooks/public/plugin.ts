@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
+
+import { CoreSetup, Plugin, CoreStart } from '@kbn/core/public';
 
 import { notebooksConsoleView } from './console_view';
 import {
@@ -17,8 +18,8 @@ import {
   AppMetricsTracker,
 } from './types';
 import { getErrorCode, getErrorMessage, isKibanaServerError } from './utils/get_error_message';
-import { createUsageTracker } from './utils/usage_tracker';
 import { removeNotebookParameter, setNotebookParameter } from './utils/notebook_query_param';
+import { createUsageTracker } from './utils/usage_tracker';
 
 export class SearchNotebooksPlugin
   implements Plugin<SearchNotebooksPluginSetup, SearchNotebooksPluginStart>

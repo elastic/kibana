@@ -8,6 +8,7 @@
 import { useEffect } from 'react';
 
 import * as i18n from '../../common/translations';
+
 import { useKibana } from './use_kibana';
 
 export const useInferenceEndpointsBreadcrumbs = () => {

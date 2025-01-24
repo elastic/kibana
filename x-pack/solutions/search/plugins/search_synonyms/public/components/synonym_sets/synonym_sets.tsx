@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+
 import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
 import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
+
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
+
 import { DeleteSynonymsSetModal } from './delete_synonyms_set_modal';
 
 export const SynonymSets = () => {

@@ -12,18 +12,19 @@ import type {
   CoreSetup,
   Logger,
 } from '@kbn/core/server';
-import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
 import { isAgentlessEnabled } from '@kbn/fleet-plugin/server/services/utils/agentless';
+import { ConnectorServerSideDefinition } from '@kbn/search-connectors';
+
 import { getConnectorTypes } from '../common/lib/connector_types';
+
+import { SearchConnectorsConfig } from './config';
+import { AgentlessConnectorDeploymentsSyncService } from './task';
 import type {
   SearchConnectorsPluginSetup as SearchConnectorsPluginSetup,
   SearchConnectorsPluginStart as SearchConnectorsPluginStart,
   SearchConnectorsPluginSetupDependencies,
   SearchConnectorsPluginStartDependencies,
 } from './types';
-
-import { AgentlessConnectorDeploymentsSyncService } from './task';
-import { SearchConnectorsConfig } from './config';
 
 export class SearchConnectorsPlugin
   implements

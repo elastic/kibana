@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { deleteSynonymsSet } from './delete_synonyms_set';
 
 describe('delete synonyms sets lib function', () => {

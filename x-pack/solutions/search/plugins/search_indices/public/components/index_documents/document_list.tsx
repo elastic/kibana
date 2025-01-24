@@ -6,15 +6,17 @@
  */
 
 import React from 'react';
+
 import { MappingProperty, SearchHit } from '@elastic/elasticsearch/lib/api/types';
 
+import { EuiSpacer } from '@elastic/eui';
 import { Result, resultMetaData, resultToField } from '@kbn/search-index-documents';
 
-import { EuiSpacer } from '@elastic/eui';
-
 import { reorderFieldsInImportance } from '@kbn/search-index-documents';
-import { RecentDocsActionMessage } from './recent_docs_action_message';
+
 import { useDeleteDocument } from '../../hooks/api/use_delete_document';
+
+import { RecentDocsActionMessage } from './recent_docs_action_message';
 
 export interface DocumentListProps {
   indexName: string;

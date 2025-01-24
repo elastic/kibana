@@ -15,15 +15,16 @@ import {
 } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
 
+import { PLUGIN_ID, PLUGIN_NAME } from '../common';
+
 import { sendMessageEvent } from './analytics/events';
+import { defineRoutes } from './routes';
 import {
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginSetupDependencies,
   SearchPlaygroundPluginStart,
   SearchPlaygroundPluginStartDependencies,
 } from './types';
-import { defineRoutes } from './routes';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common';
 
 export class SearchPlaygroundPlugin
   implements

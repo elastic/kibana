@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+
 import { useKibana } from './use_kibana';
 import { useUsageTracker } from './use_usage_tracker';
 

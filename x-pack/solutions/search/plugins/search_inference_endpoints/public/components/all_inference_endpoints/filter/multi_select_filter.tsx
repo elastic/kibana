@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+
+import { css } from '@emotion/react';
+import _ from 'lodash';
+
 import {
   EuiFilterButton,
   EuiFilterGroup,
@@ -16,9 +21,7 @@ import {
   EuiTextColor,
   useEuiTheme,
 } from '@elastic/eui';
-import { css } from '@emotion/react';
-import React, { useState } from 'react';
-import _ from 'lodash';
+
 import * as i18n from './translations';
 
 export interface MultiSelectFilterOption {

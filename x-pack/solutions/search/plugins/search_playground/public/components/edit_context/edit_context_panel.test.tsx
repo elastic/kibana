@@ -6,11 +6,16 @@
  */
 
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import { EditContextPanel } from './edit_context_panel';
+
 import { FormProvider, useForm } from 'react-hook-form';
+
+import { render, fireEvent, screen } from '@testing-library/react';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
 import { ChatFormFields } from '../../types';
+
+import { EditContextPanel } from './edit_context_panel';
 
 jest.mock('../../hooks/use_source_indices_field', () => ({
   useSourceIndicesFields: () => ({

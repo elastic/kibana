@@ -8,6 +8,7 @@
 import { generatePath } from 'react-router-dom';
 
 import type { ApplicationStart, HttpSetup } from '@kbn/core/public';
+
 import { INDICES_APP_BASE, SEARCH_INDICES_DETAILS_PATH } from '../routes';
 
 const INDEX_DETAILS_FULL_PATH = `${INDICES_APP_BASE}${SEARCH_INDICES_DETAILS_PATH}`;

@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFieldSearch } from '@elastic/eui';
 import React, { useCallback } from 'react';
+
+import { EuiFieldSearch } from '@elastic/eui';
 
 interface TableSearchComponentProps {
   searchKey: string;

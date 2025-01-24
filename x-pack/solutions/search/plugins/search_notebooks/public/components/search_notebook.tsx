@@ -5,11 +5,13 @@
  * 2.0.
  */
 import React, { useEffect } from 'react';
+
 import { EuiPanel } from '@elastic/eui';
 import { NotebookRenderer } from '@kbn/ipynb';
 
 import { useNotebook } from '../hooks/use_notebook';
 import { useUsageTracker } from '../hooks/use_usage_tracker';
+
 import { LoadingPanel } from './loading_panel';
 import { SearchNotebookError } from './search_notebook_error';
 

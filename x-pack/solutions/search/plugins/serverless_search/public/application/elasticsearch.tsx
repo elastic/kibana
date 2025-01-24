@@ -7,12 +7,17 @@
 
 import React from 'react';
 import ReactDOM from 'react-dom';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+
+import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
 import { CoreStart } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
+
 import { Route, Router, Routes } from '@kbn/shared-ux-router';
+
 import { ServerlessSearchContext } from './hooks/use_kibana';
 
 export async function renderApp(

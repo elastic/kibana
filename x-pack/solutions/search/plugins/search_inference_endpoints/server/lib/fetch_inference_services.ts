@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { InferenceProvider } from '../types';
 
 export const fetchInferenceServices = async (

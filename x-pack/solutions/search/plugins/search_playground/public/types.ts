@@ -5,26 +5,28 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import {
   HealthStatus,
   IndexName,
   IndicesStatsIndexMetadataState,
   Uuid,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import React from 'react';
-import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
-import type { AppMountParameters, CoreStart } from '@kbn/core/public';
-import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
+import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
+import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
 import type { SearchNavigationPluginStart } from '@kbn/search-navigation/public';
 import type { SecurityPluginStart } from '@kbn/security-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { ActionConnector } from '@kbn/alerts-ui-shared/src/common/types';
-import type { ServiceProviderKeys } from '@kbn/inference-endpoint-ui-common';
+import type { SharePluginSetup, SharePluginStart } from '@kbn/share-plugin/public';
+import type { TriggersAndActionsUIPublicPluginStart } from '@kbn/triggers-actions-ui-plugin/public';
+import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+
 import type { ChatRequestData, MessageRole, LLMs } from '../common/types';
 
 export * from '../common/types';

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+
 import { EuiPanel, EuiLoadingSpinner } from '@elastic/eui';
 
 export const LoadingPanel = () => (

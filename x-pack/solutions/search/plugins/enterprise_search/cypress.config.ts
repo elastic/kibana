@@ -24,13 +24,12 @@ export default defineCypressConfig({
   viewportHeight: 900,
   viewportWidth: 1440,
 
-  // eslint-disable-next-line sort-keys
   env: {
     configport: '5601',
     hostname: 'localhost',
     protocol: 'http',
   },
-  // eslint-disable-next-line sort-keys
+
   e2e: {
     baseUrl: 'http://localhost:5601',
     supportFile: './cypress/support/e2e.ts',

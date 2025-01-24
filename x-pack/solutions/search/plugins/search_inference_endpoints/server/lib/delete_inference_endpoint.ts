@@ -7,6 +7,7 @@
 
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { TaskTypes } from '../../common/types';
 
 function isTaskType(type?: string): type is InferenceTaskType {

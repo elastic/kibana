@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import React, { useEffect } from 'react';
+
+import { useQueryClient } from '@tanstack/react-query';
+
 import { EuiPanel, EuiSpacer } from '@elastic/eui';
 import { Connector, ConnectorConfigurationComponent } from '@kbn/search-connectors';
-import { useQueryClient } from '@tanstack/react-query';
-import React, { useEffect } from 'react';
+
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useEditConnectorConfiguration } from '../../../hooks/api/use_connector_configuration';
+
 import { ApiKeyPanel } from './api_key_panel';
 import { ConnectionDetails } from './connection_details_panel';
 import { ConnectorIndexnamePanel } from './connector_index_name_panel';

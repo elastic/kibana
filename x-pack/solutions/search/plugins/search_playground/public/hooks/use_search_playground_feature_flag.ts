@@ -6,6 +6,7 @@
  */
 
 import { isSearchModeEnabled } from '../utils/feature_flags';
+
 import { useKibana } from './use_kibana';
 
 export const useSearchPlaygroundFeatureFlag = (): boolean => {

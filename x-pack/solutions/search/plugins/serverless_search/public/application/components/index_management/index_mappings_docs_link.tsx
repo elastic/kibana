@@ -6,6 +6,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,8 +17,8 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { CoreStart } from '@kbn/core/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { IndexContent } from '@kbn/index-management-shared-types';
 
 const IndexMappingsDocsLink: FunctionComponent<{ docLinks: CoreStart['docLinks'] }> = ({

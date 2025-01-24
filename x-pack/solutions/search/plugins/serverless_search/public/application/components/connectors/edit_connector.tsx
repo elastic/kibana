@@ -4,6 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React, { useEffect, useState } from 'react';
+import { useParams } from 'react-router-dom';
+
 import {
   EuiButton,
   EuiButtonIcon,
@@ -17,24 +20,25 @@ import {
   EuiSpacer,
   EuiText,
 } from '@elastic/eui';
-import React, { useEffect, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { i18n } from '@kbn/i18n';
 import { copyToClipboard } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import {
   CONNECTOR_LABEL,
   COPY_CONNECTOR_ID_LABEL,
   DELETE_CONNECTOR_LABEL,
 } from '../../../../common/i18n_string';
-import { useKibanaServices } from '../../hooks/use_kibana';
-import { EditName } from './edit_name';
-import { EditServiceType } from './edit_service_type';
-import { EditDescription } from './edit_description';
-import { DeleteConnectorModal } from './delete_connector_modal';
-import { ConnectorConfiguration } from './connector_config/connector_configuration';
+
 import { useConnector } from '../../hooks/api/use_connector';
 import { useConnectors } from '../../hooks/api/use_connectors';
+import { useKibanaServices } from '../../hooks/use_kibana';
+
+import { ConnectorConfiguration } from './connector_config/connector_configuration';
 import { ConnectorPrivilegesCallout } from './connector_config/connector_privileges_callout';
+import { DeleteConnectorModal } from './delete_connector_modal';
+import { EditDescription } from './edit_description';
+import { EditName } from './edit_name';
+import { EditServiceType } from './edit_service_type';
 
 export const EditConnector: React.FC = () => {
   const [deleteModalIsOpen, setDeleteModalIsOpen] = useState(false);

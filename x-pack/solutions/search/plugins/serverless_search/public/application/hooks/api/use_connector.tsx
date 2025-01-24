@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { Connector } from '@kbn/search-connectors';
 import { useQuery } from '@tanstack/react-query';
+
+import { Connector } from '@kbn/search-connectors';
+
 import { useKibanaServices } from '../use_kibana';
 
 export const useConnector = (id: string) => {

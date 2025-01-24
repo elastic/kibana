@@ -5,11 +5,21 @@
  * 2.0.
  */
 
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import {
   ElasticsearchClientMock,
   elasticsearchClientMock,
 } from '@kbn/core-elasticsearch-client-server-mocks';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
+import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
+import {
+  createPackagePolicyServiceMock,
+  createMockAgentPolicyService,
+} from '@kbn/fleet-plugin/server/mocks';
+import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
+
 import {
   AgentlessConnectorsInfraService,
   ConnectorMetadata,
@@ -17,15 +27,6 @@ import {
   getConnectorsToDeploy,
   getPoliciesToDelete,
 } from '.';
-import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { MockedLogger, loggerMock } from '@kbn/logging-mocks';
-import {
-  createPackagePolicyServiceMock,
-  createMockAgentPolicyService,
-} from '@kbn/fleet-plugin/server/mocks';
-import { AgentPolicyServiceInterface, PackagePolicyClient } from '@kbn/fleet-plugin/server';
-import { AgentPolicy, PackagePolicy, PackagePolicyInput } from '@kbn/fleet-plugin/common';
-import { createAgentPolicyMock, createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
 
 jest.mock('@kbn/fleet-plugin/server/services/epm/packages', () => {
   const mockedGetPackageInfo = ({ pkgName }: { pkgName: string }) => {

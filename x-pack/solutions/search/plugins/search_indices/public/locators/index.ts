@@ -6,6 +6,7 @@
  */
 import { SharePluginSetup } from '@kbn/share-plugin/public';
 import { SerializableRecord } from '@kbn/utility-types';
+
 import { CreateIndexLocatorDefinition } from './create_index_locator';
 import { SearchIndicesLocatorDefinition } from './search_indices_locator';
 

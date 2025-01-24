@@ -6,9 +6,10 @@
  */
 
 import { type MouseEvent } from 'react';
-import { i18n } from '@kbn/i18n';
+
 import type { CoreStart, ScopedHistory } from '@kbn/core/public';
 import type { ChromeNavLink, EuiSideNavItemTypeEnhanced } from '@kbn/core-chrome-browser';
+import { i18n } from '@kbn/i18n';
 import type { SolutionNavProps } from '@kbn/shared-ux-page-solution-nav';
 
 import type { ClassicNavItem, ClassicNavItemDeepLink, ClassicNavigationFactoryFn } from './types';

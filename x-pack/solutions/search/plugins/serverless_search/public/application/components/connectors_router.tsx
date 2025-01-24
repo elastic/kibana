@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { EditConnector } from './connectors/edit_connector';
-import { ConnectorsOverview } from './connectors_overview';
-import { ConnectorsElasticManaged } from './connectors_elastic_managed';
+
+import { Route, Routes } from '@kbn/shared-ux-router';
+
 import { ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
+
+import { EditConnector } from './connectors/edit_connector';
+import { ConnectorsElasticManaged } from './connectors_elastic_managed';
+import { ConnectorsOverview } from './connectors_overview';
 
 export const ConnectorsRouter: React.FC = () => {
   return (

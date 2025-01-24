@@ -4,6 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
+import React from 'react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -12,8 +14,8 @@ import {
   EuiPageTemplate,
   EuiText,
 } from '@elastic/eui';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 interface IndexloadingErrorProps {
   error: {
     title: string;

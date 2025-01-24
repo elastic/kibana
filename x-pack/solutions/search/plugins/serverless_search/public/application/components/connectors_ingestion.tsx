@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,9 +19,8 @@ import {
 import { i18n } from '@kbn/i18n';
 import { GithubLink } from '@kbn/search-api-panels';
 
-import React from 'react';
-import { useCreateConnector } from '../hooks/api/use_create_connector';
 import { useConnectors } from '../hooks/api/use_connectors';
+import { useCreateConnector } from '../hooks/api/use_create_connector';
 
 export const ConnectorIngestionPanel: React.FC<{ assetBasePath: string }> = ({ assetBasePath }) => {
   const { createConnector } = useCreateConnector();

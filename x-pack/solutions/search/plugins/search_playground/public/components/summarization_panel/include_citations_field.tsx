@@ -6,10 +6,12 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { EuiFormRow, EuiSwitch } from '@elastic/eui';
-import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { i18n } from '@kbn/i18n';
+
 import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
 interface IncludeCitationsFieldProps {
   checked: boolean;

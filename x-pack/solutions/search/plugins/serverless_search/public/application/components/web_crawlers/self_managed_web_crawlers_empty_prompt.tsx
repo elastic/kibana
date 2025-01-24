@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+
 import {
   EuiBadge,
   EuiButton,
@@ -16,12 +17,13 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { ELASTIC_MANAGED_WEB_CRAWLERS_PATH, BASE_WEB_CRAWLERS_PATH } from '../../constants';
+import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+
 import { COMING_SOON_LABEL } from '../../../../common/i18n_string';
-import { useKibanaServices } from '../../hooks/use_kibana';
+import { ELASTIC_MANAGED_WEB_CRAWLERS_PATH, BASE_WEB_CRAWLERS_PATH } from '../../constants';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
+import { useKibanaServices } from '../../hooks/use_kibana';
 
 export const SelfManagedWebCrawlersEmptyPrompt = () => {
   const {

@@ -5,17 +5,20 @@
  * 2.0.
  */
 
-import { getChatParams } from './get_chat_params';
+import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { ActionsClientChatOpenAI, ActionsClientSimpleChatModel } from '@kbn/langchain/server';
+
 import {
   OPENAI_CONNECTOR_ID,
   BEDROCK_CONNECTOR_ID,
   GEMINI_CONNECTOR_ID,
   INFERENCE_CONNECTOR_ID,
 } from '@kbn/stack-connectors-plugin/public/common';
+
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
-import { KibanaRequest, Logger } from '@kbn/core/server';
-import { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
+
+import { getChatParams } from './get_chat_params';
 
 jest.mock('@kbn/langchain/server', () => {
   const original = jest.requireActual('@kbn/langchain/server');

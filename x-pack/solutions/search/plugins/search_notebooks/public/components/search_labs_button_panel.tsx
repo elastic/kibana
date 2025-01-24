@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+
 import { EuiPanel, EuiButton, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 

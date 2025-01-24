@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
+
 import { SERVICE_PROVIDERS } from '../render_table_columns/render_service_provider/service_provider';
 import type { FilterOptions, ServiceProviderKeys } from '../types';
+
 import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
 import * as i18n from './translations';
 

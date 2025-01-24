@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { IRouter, Logger } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter, Logger } from '@kbn/core/server';
+
 import { APIRoutes } from '../common/api_routes';
 
-import { errorHandler } from './utils/error_handler';
-import { fetchSynonymSets } from './lib/fetch_synonym_sets';
 import { DEFAULT_PAGE_VALUE } from '../common/pagination';
+
 import { deleteSynonymsSet } from './lib/delete_synonyms_set';
+import { fetchSynonymSets } from './lib/fetch_synonym_sets';
+import { errorHandler } from './utils/error_handler';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(

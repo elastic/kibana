@@ -5,12 +5,13 @@
  * 2.0.
  */
 import React from 'react';
+
 import { EuiButton, EuiCallOut, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-import { useKibanaServices } from '../hooks/use_kibana';
 import { FILE_UPLOAD_PATH } from '../constants';
+import { useKibanaServices } from '../hooks/use_kibana';
 
 export const FileUploadCallout = () => {
   const {

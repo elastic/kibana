@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useMemo, useState } from 'react';
+
 import { useKibana } from './use_kibana';
 
 export const useManagementLink = (connectorId: string) => {

@@ -5,8 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
+
+import { css } from '@emotion/react';
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -20,19 +23,19 @@ import {
   EuiTextTruncate,
   EuiBadgeGroup,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+import { i18n } from '@kbn/i18n';
+
 import { Connector as BaseConnector } from '@kbn/search-connectors';
-import { css } from '@emotion/react';
-import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 import { BETA_LABEL, TECH_PREVIEW_LABEL } from '../../../../common/i18n_string';
+import { useConnector } from '../../hooks/api/use_connector';
+import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 
 interface Connector extends BaseConnector {
   iconPath?: string;
 }
 import { useKibanaServices } from '../../hooks/use_kibana';
-import { useConnectorTypes } from '../../hooks/api/use_connector_types';
-import { useConnector } from '../../hooks/api/use_connector';
 
 interface EditServiceTypeProps {
   connector: Connector;

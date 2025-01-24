@@ -5,21 +5,25 @@
  * 2.0.
  */
 import React, { useEffect, useRef, useState } from 'react';
-import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
-import { EuiButton, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
+
 import { css } from '@emotion/react';
-import { v4 } from 'uuid';
+
 import useObservable from 'react-use/lib/useObservable';
-import { i18n } from '@kbn/i18n';
+import { v4 } from 'uuid';
+
+import { EuiButton, EuiLoadingSpinner, EuiToolTip, useEuiTheme } from '@elastic/eui';
+
+import { EuiErrorBoundary } from '@elastic/eui';
 import { useAIAssistantAppService, ChatFlyout } from '@kbn/ai-assistant';
 import { useKibana } from '@kbn/ai-assistant/src/hooks/use_kibana';
 import { AIAssistantPluginStartDependencies } from '@kbn/ai-assistant/src/types';
-import { EuiErrorBoundary } from '@elastic/eui';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import type { CoreStart } from '@kbn/core/public';
+import { i18n } from '@kbn/i18n';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
+import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { KibanaThemeProvider } from '@kbn/react-kibana-context-theme';
 import { RedirectAppLinks } from '@kbn/shared-ux-link-redirect-app';
-import { AssistantIcon } from '@kbn/ai-assistant-icon';
 
 interface NavControlWithProviderDeps {
   coreStart: CoreStart;

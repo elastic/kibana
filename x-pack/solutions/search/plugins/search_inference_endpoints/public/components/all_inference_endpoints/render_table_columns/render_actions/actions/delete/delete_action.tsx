@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+
 import { EuiButtonIcon } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { isEndpointPreconfigured } from '../../../../../../utils/preconfigured_endpoint_helper';
+
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
+import { isEndpointPreconfigured } from '../../../../../../utils/preconfigured_endpoint_helper';
 import { InferenceEndpointUI } from '../../../../types';
+
 import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
 
 interface DeleteActionProps {

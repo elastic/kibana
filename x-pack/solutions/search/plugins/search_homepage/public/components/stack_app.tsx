@@ -9,6 +9,7 @@ import React from 'react';
 
 import { UsageTrackerContextProvider } from '../contexts/usage_tracker_context';
 import { useKibana } from '../hooks/use_kibana';
+
 import { SearchHomepageBody } from './search_homepage_body';
 import { SearchHomepageHeader } from './search_homepage_header';
 

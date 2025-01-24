@@ -7,11 +7,13 @@
 
 import React from 'react';
 
+import { isEmpty } from 'lodash';
+
 import { EuiFormRow, EuiTextArea, EuiIconTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { isEmpty } from 'lodash';
-import { useUsageTracker } from '../../hooks/use_usage_tracker';
+
 import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
 
 interface InstructionsFieldProps {
   value?: string;

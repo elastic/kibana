@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react';
-import { useUsageTracker } from './use_usage_tracker';
 import { useController } from 'react-hook-form';
-import { useIndicesFields } from './use_indices_fields';
+
+import { renderHook, act } from '@testing-library/react';
+
 import { AnalyticsEvents } from '../analytics/constants';
+
+import { useIndicesFields } from './use_indices_fields';
+
 import { useSourceIndicesFields } from './use_source_indices_field';
+import { useUsageTracker } from './use_usage_tracker';
 
 jest.mock('./use_usage_tracker');
 jest.mock('react-hook-form');

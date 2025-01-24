@@ -6,9 +6,9 @@
  */
 
 import { useCallback, useEffect, useRef, useState } from 'react';
+
 import useSWR, { KeyedMutator } from 'swr';
 import { v4 as uuidv4 } from 'uuid';
-import { fetchApi } from '../utils/api';
 
 import type {
   ChatRequest,
@@ -19,6 +19,7 @@ import type {
   UseChatOptions,
 } from '../types';
 import { MessageRole } from '../types';
+import { fetchApi } from '../utils/api';
 
 const getStreamedResponse = async (
   api: string | ((init: RequestInit) => Promise<Response>),

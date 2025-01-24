@@ -5,13 +5,16 @@
  * 2.0.
  */
 
-import type { Client } from '@elastic/elasticsearch';
 import { BaseChatModel } from '@langchain/core/language_models/chat_models';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { FakeListChatModel, FakeStreamingLLM } from '@langchain/core/utils/testing';
-import { createAssist as Assist } from '../utils/assist';
-import { ConversationalChain, contextLimitCheck } from './conversational_chain';
+
+import type { Client } from '@elastic/elasticsearch';
+
 import { ChatMessage, MessageRole } from '../types';
+import { createAssist as Assist } from '../utils/assist';
+
+import { ConversationalChain, contextLimitCheck } from './conversational_chain';
 
 describe('conversational chain', () => {
   beforeEach(() => {

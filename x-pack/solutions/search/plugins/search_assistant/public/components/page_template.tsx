@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 export function SearchAIAssistantPageTemplate({ children }: { children: React.ReactNode }) {

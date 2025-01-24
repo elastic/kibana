@@ -11,6 +11,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+
 import { fetchIndicesStatus, fetchUserStartPrivileges } from './status';
 
 const mockLogger = {

@@ -10,9 +10,10 @@ import React, { useState } from 'react';
 import { EuiPageTemplate } from '@elastic/eui';
 
 import { useQueryInferenceEndpoints } from '../hooks/use_inference_endpoints';
+
+import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
 import { TabularPage } from './all_inference_endpoints/tabular_page';
 import { InferenceEndpointsHeader } from './inference_endpoints_header';
-import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
 
 export const InferenceEndpoints: React.FC = () => {
   const { data } = useQueryInferenceEndpoints();

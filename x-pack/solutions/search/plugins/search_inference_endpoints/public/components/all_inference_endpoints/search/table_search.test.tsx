@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { TableSearch } from './table_search';
 import React from 'react';
+
+import { render, screen, fireEvent } from '@testing-library/react';
+
+import { TableSearch } from './table_search';
 
 describe('TableSearchComponent', () => {
   const mockSetSearchKey = jest.fn();

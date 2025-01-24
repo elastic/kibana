@@ -6,8 +6,10 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
-import type { APIKeyCreationResponse } from '@kbn/search-api-keys-server/types';
+
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+import type { APIKeyCreationResponse } from '@kbn/search-api-keys-server/types';
+
 import { APIRoutes } from '../types';
 
 export const useCreateApiKey = ({

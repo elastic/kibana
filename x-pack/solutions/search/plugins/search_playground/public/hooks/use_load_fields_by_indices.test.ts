@@ -6,12 +6,14 @@
  */
 
 import { renderHook } from '@testing-library/react';
-import { useLoadFieldsByIndices } from './use_load_fields_by_indices';
-import { useUsageTracker } from './use_usage_tracker';
-import { useIndicesFields } from './use_indices_fields';
-import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../utils/create_query';
+
 import { AnalyticsEvents } from '../analytics/constants';
 import { ChatFormFields } from '../types';
+import { createQuery, getDefaultQueryFields, getDefaultSourceFields } from '../utils/create_query';
+
+import { useIndicesFields } from './use_indices_fields';
+import { useLoadFieldsByIndices } from './use_load_fields_by_indices';
+import { useUsageTracker } from './use_usage_tracker';
 
 // Mock dependencies
 jest.mock('./use_usage_tracker');

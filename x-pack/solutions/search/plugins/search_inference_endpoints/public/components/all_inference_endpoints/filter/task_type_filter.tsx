@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
+
 import { TaskTypes } from '../../../../common/types';
 import { FilterOptions } from '../types';
+
 import { MultiSelectFilter, MultiSelectFilterOption } from './multi_select_filter';
 import * as i18n from './translations';
 

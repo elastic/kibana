@@ -6,6 +6,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core/public';
+
 import { SEARCH_MODE_FEATURE_FLAG_ID } from '../../common';
 
 export function isSearchModeEnabled(uiSettings: IUiSettingsClient): boolean {

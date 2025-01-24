@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import {
   EuiButton,
   EuiFieldText,

@@ -6,12 +6,14 @@
  */
 
 import { NotebookDefinition } from '@kbn/ipynb';
+
 import {
   NotebookCatalog,
   NotebookCatalogResponse,
   NotebookCatalogSchema,
   NotebookInformation,
 } from '../common/types';
+
 import type {
   CachedNotebook,
   CachedNotebookCatalog,

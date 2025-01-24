@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useEffect, useState } from 'react';
+
+import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { GenerativeAIForSearchPlaygroundConnectorFeatureId } from '@kbn/actions-plugin/common';
+import { FormattedMessage } from '@kbn/i18n-react';
+
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useKibana } from '../../hooks/use_kibana';
 import { useLoadConnectors } from '../../hooks/use_load_connectors';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { AnalyticsEvents } from '../../analytics/constants';
 
 export const ConnectLLMButton: React.FC = () => {
   const [connectorFlyoutOpen, setConnectorFlyoutOpen] = useState(false);

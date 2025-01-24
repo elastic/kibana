@@ -5,12 +5,15 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiLink } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
-import { Connector, ConnectorConfigurationComponent } from '@kbn/search-connectors';
-import { useQueryClient } from '@tanstack/react-query';
 import React, { useEffect } from 'react';
+
+import { useQueryClient } from '@tanstack/react-query';
+
+import { EuiFlexGroup, EuiFlexItem, EuiText, EuiTitle, EuiLink } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+import { Connector, ConnectorConfigurationComponent } from '@kbn/search-connectors';
+
 import { docLinks } from '../../../../../common/doc_links';
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useEditConnectorConfiguration } from '../../../hooks/api/use_connector_configuration';

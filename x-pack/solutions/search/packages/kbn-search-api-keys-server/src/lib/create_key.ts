@@ -7,6 +7,7 @@
 
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
 import type { Logger } from '@kbn/logging';
+
 import type { APIKeyCreationResponse } from '../../types';
 
 export async function createAPIKey(

@@ -8,6 +8,7 @@
 import { PluginInitializerContext } from '@kbn/core/server';
 
 import { ServerlessSearchPlugin } from './plugin';
+
 export { config } from './config';
 
 //  This exports static code and TypeScript types,

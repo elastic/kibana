@@ -5,11 +5,13 @@
  * 2.0.
  */
 
-import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
-import { useLoadConnectors } from './use_load_connectors';
-import { useKibana } from './use_kibana';
 import { waitFor, renderHook } from '@testing-library/react';
+
 import { OpenAiProviderType } from '@kbn/stack-connectors-plugin/common/openai/constants';
+import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
+
+import { useKibana } from './use_kibana';
+import { useLoadConnectors } from './use_load_connectors';
 
 const mockedLoadConnectors = loadConnectors as jest.Mock;
 const mockedUseKibana = useKibana as jest.Mock;

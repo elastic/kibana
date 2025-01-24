@@ -6,11 +6,15 @@
  */
 
 import React, { FC, PropsWithChildren } from 'react';
+
 import { render, fireEvent, waitFor } from '@testing-library/react';
-import { SelectIndicesFlyout } from './select_indices_flyout';
-import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
-import { useQueryIndices } from '../hooks/use_query_indices';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { useQueryIndices } from '../hooks/use_query_indices';
+import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
+
+import { SelectIndicesFlyout } from './select_indices_flyout';
 
 jest.mock('../hooks/use_source_indices_field');
 jest.mock('../hooks/use_query_indices');

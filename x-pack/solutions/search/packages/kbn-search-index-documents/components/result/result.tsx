@@ -66,7 +66,7 @@ export const Result: React.FC<ResultProps> = ({
   const toolTipContent = <>{tooltipText}</>;
 
   return (
-    <EuiSplitPanel.Outer hasBorder={true} data-test-subj="search-index-documents-result">
+    <EuiSplitPanel.Outer hasBorder data-test-subj="search-index-documents-result">
       <EuiSplitPanel.Inner paddingSize="m" color="plain" className="resultHeaderContainer">
         <EuiFlexGroup gutterSize="none" alignItems="center">
           <EuiFlexItem>

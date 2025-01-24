@@ -6,11 +6,13 @@
  */
 
 import React, { useState } from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { EuiBasicTable, EuiButtonEmpty, EuiText } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AIMessage as AIMessageType, Doc } from '../../types';
-import { AnalyticsEvents } from '../../analytics/constants';
 
 type CitationsTableProps = Pick<AIMessageType, 'citations'>;
 

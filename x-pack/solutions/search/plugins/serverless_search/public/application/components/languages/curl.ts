@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
+import { Languages, LanguageDefinition } from '@kbn/search-api-panels';
+
 import { docLinks } from '../../../../common/doc_links';
 
 export const curlDefinition: LanguageDefinition = {

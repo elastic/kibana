@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-/* eslint-disable sort-keys */
-
 import React from 'react';
 
 import { EuiPageSection, EuiSteps, EuiText, EuiLink, EuiCallOut } from '@elastic/eui';

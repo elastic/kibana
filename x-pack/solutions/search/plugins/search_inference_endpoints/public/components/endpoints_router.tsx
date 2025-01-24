@@ -9,9 +9,8 @@ import React from 'react';
 
 import { Route, Routes } from '@kbn/shared-ux-router';
 
-import { INFERENCE_ENDPOINTS_PATH } from './routes';
-
 import { InferenceEndpoints } from './inference_endpoints';
+import { INFERENCE_ENDPOINTS_PATH } from './routes';
 
 export const EndpointsRouter: React.FC = () => {
   return (

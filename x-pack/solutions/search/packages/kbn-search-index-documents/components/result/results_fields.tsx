@@ -10,6 +10,7 @@ import React from 'react';
 import { EuiTable, EuiTableBody, EuiTableHeader, EuiTableHeaderCell } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
+
 import { ResultField } from './result_field';
 import { ResultFieldProps } from './result_types';
 

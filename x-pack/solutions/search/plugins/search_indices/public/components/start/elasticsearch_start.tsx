@@ -6,25 +6,27 @@
  */
 
 import React, { useCallback, useEffect, useState } from 'react';
+
 import { i18n } from '@kbn/i18n';
 
 import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
 import { AvailableLanguages } from '../../code_examples';
+import { WorkflowId } from '../../code_examples/workflows';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
+import { useKibana } from '../../hooks/use_kibana';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { CreateIndexFormState, CreateIndexViewMode } from '../../types';
 import { generateRandomIndexName } from '../../utils/indices';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
-import { CreateIndexUIView } from './create_index';
 import { CreateIndexCodeView } from '../shared/create_index_code_view';
-import { CreateIndexFormState, CreateIndexViewMode } from '../../types';
 
 import { CreateIndexPanel } from '../shared/create_index_panel';
-import { useKibana } from '../../hooks/use_kibana';
-import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
-import { WorkflowId } from '../../code_examples/workflows';
 import { useWorkflow } from '../shared/hooks/use_workflow';
+
+import { CreateIndexUIView } from './create_index';
 
 function initCreateIndexState(): CreateIndexFormState {
   const defaultIndexName = generateRandomIndexName();

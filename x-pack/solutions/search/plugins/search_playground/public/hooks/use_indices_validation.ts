@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+
 import { useQueryIndices } from './use_query_indices';
 
 export const useIndicesValidation = (unvalidatedIndices: string[]) => {

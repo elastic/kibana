@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import { deleteDocument } from './documents';
-import { Logger } from '@kbn/logging';
 import type { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
+import { Logger } from '@kbn/logging';
+
+import { deleteDocument } from './documents';
 
 describe('deleteDocument', () => {
   let mockClient: jest.Mocked<ElasticsearchClient>;

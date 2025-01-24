@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+
 import type { EuiTableSortingType } from '@elastic/eui';
 import { Pagination } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { useMemo } from 'react';
+
 import { TaskTypes } from '../../common/types';
 import { DEFAULT_TABLE_LIMIT } from '../components/all_inference_endpoints/constants';
 import {

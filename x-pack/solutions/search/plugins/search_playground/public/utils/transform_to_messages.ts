@@ -13,6 +13,7 @@ import {
   AnnotationDoc,
   AnnotationTokens,
 } from '../types';
+
 import { transformAnnotationToDoc } from './transform_annotation_to_doc';
 
 export const transformFromChatMessages = (messages: UseChatHelpers['messages']): Message[] =>

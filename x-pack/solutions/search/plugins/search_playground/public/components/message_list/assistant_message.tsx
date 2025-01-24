@@ -7,6 +7,7 @@
 
 import React, { useState } from 'react';
 
+import { css } from '@emotion/react';
 import moment from 'moment';
 
 import {
@@ -22,13 +23,15 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+
 import { docLinks } from '../../../common/doc_links';
-import { RetrievalDocsFlyout } from './retrieval_docs_flyout';
+
 import type { AIMessage as AIMessageType } from '../../types';
 
-import { CopyActionButton } from './copy_action_button';
 import { CitationsTable } from './citations_table';
+import { CopyActionButton } from './copy_action_button';
+import { RetrievalDocsFlyout } from './retrieval_docs_flyout';
+
 import { TokenEstimateTooltip } from './token_estimate_tooltip';
 
 interface AssistantMessageProps {

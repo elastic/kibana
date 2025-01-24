@@ -6,10 +6,14 @@
  */
 
 import React from 'react';
-import { render, fireEvent, screen } from '@testing-library/react';
-import { TokenEstimateTooltip } from './token_estimate_tooltip';
+
 import { FormProvider, useForm } from 'react-hook-form';
+
+import { render, fireEvent, screen } from '@testing-library/react';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { TokenEstimateTooltip } from './token_estimate_tooltip';
 
 jest.mock('../../hooks/use_llms_models', () => ({
   useLLMsModels: () => [

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
+
+import { useParams } from 'react-router-dom';
+
 import {
   EuiPageTemplate,
   EuiFlexItem,
@@ -15,32 +19,34 @@ import {
   useEuiTheme,
   EuiButton,
 } from '@elastic/eui';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
-import { useParams } from 'react-router-dom';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
+
 import { SectionLoading } from '@kbn/es-ui-shared-plugin/public';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { ApiKeyForm } from '@kbn/search-api-keys-components';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { useNavigateToDiscover } from '../../hooks/use_navigate_to_discover';
+
+import { AnalyticsEvents } from '../../analytics/constants';
+import { useUsageTracker } from '../../contexts/usage_tracker_context';
+import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
 import { useIndex } from '../../hooks/api/use_index';
-import { useKibana } from '../../hooks/use_kibana';
-import { ConnectionDetails } from '../connection_details/connection_details';
-import { QuickStats } from '../quick_stats/quick_stats';
 import { useIndexMapping } from '../../hooks/api/use_index_mappings';
+import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
+import { useKibana } from '../../hooks/use_kibana';
+import { useNavigateToDiscover } from '../../hooks/use_navigate_to_discover';
+import { usePageChrome } from '../../hooks/use_page_chrome';
+import { SearchIndexDetailsTabs } from '../../routes';
+import { ConnectionDetails } from '../connection_details/connection_details';
 import { IndexDocuments } from '../index_documents/index_documents';
+import { QuickStats } from '../quick_stats/quick_stats';
+
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+
 import { DeleteIndexModal } from './delete_index_modal';
 import { IndexloadingError } from './details_page_loading_error';
-import { SearchIndexDetailsTabs } from '../../routes';
 import { SearchIndexDetailsMappings } from './details_page_mappings';
-import { SearchIndexDetailsSettings } from './details_page_settings';
 import { SearchIndexDetailsPageMenuItemPopover } from './details_page_menu_item';
-import { useIndexDocumentSearch } from '../../hooks/api/use_document_search';
-import { useUsageTracker } from '../../contexts/usage_tracker_context';
-import { AnalyticsEvents } from '../../analytics/constants';
-import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
-import { usePageChrome } from '../../hooks/use_page_chrome';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { SearchIndexDetailsSettings } from './details_page_settings';
 
 export const SearchIndexDetailsPage = () => {
   const indexName = decodeURIComponent(useParams<{ indexName: string }>().indexName);

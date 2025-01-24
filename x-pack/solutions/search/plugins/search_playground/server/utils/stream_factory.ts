@@ -10,11 +10,11 @@
 // - removed support for ndjson
 // - improved the cloud proxy buffer to work for our use case (works for newline string chunks vs ndjson only)
 
+import { repeat } from 'lodash';
 import { PassThrough } from 'stream';
 
-import type { Logger } from '@kbn/logging';
 import type { ResponseHeaders } from '@kbn/core-http-server';
-import { repeat } from 'lodash';
+import type { Logger } from '@kbn/logging';
 
 const DELIMITER = `
 `;

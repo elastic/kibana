@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import React from 'react';
+
+import { Controller, useController, useFormContext } from 'react-hook-form';
+
+import { css } from '@emotion/react';
+
+import { useQueryClient } from '@tanstack/react-query';
+
 import {
   EuiEmptyPrompt,
   EuiFieldText,
@@ -13,17 +21,16 @@ import {
   EuiForm,
   useEuiTheme,
 } from '@elastic/eui';
-import React from 'react';
-import { css } from '@emotion/react';
-import { Controller, useController, useFormContext } from 'react-hook-form';
 import { i18n } from '@kbn/i18n';
-import { useQueryClient } from '@tanstack/react-query';
+
 import { DEFAULT_PAGINATION } from '../../../common';
-import { ResultList } from './result_list';
-import { ChatForm, ChatFormFields, Pagination } from '../../types';
-import { useSearchPreview } from '../../hooks/use_search_preview';
-import { getPaginationFromPage } from '../../utils/pagination_helper';
+
 import { useIndexMappings } from '../../hooks/use_index_mappings';
+import { useSearchPreview } from '../../hooks/use_search_preview';
+import { ChatForm, ChatFormFields, Pagination } from '../../types';
+import { getPaginationFromPage } from '../../utils/pagination_helper';
+
+import { ResultList } from './result_list';
 
 export const SearchMode: React.FC = () => {
   const { euiTheme } = useEuiTheme();

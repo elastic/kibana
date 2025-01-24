@@ -6,6 +6,7 @@
  */
 
 import { PluginInitializer, PluginInitializerContext } from '@kbn/core/public';
+
 import { PublicConfigType, SearchAssistantPlugin } from './plugin';
 import {
   SearchAssistantPluginSetup,

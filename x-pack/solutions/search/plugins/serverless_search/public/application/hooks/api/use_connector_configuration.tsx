@@ -6,6 +6,7 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
+
 import { useKibanaServices } from '../use_kibana';
 
 export const useEditConnectorConfiguration = (connectorId: string) => {

@@ -5,10 +5,12 @@
  * 2.0.
  */
 
+import React, { ChangeEvent } from 'react';
+
+import { css } from '@emotion/react';
+
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem, EuiPanel, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ChangeEvent } from 'react';
-import { css } from '@emotion/react';
 
 interface DocumentsProps {
   accessControlSwitch?: React.ReactNode;

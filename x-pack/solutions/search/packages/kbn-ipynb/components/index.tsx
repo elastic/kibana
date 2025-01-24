@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 
 import { NotebookDefinition } from '../types';

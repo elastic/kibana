@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
+import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 import { loggerMock, MockedLogger } from '@kbn/logging-mocks';
-import { infraSyncTaskRunner } from './task';
+
 import { ConcreteTaskInstance, TaskStatus } from '@kbn/task-manager-plugin/server';
+
 import {
   AgentlessConnectorsInfraService,
   ConnectorMetadata,
   PackagePolicyMetadata,
 } from './services';
-import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import { createPackagePolicyMock } from '@kbn/fleet-plugin/common/mocks';
+import { infraSyncTaskRunner } from './task';
 
 const DATE_1970 = '1970-01-01T00:00:00.000Z';
 

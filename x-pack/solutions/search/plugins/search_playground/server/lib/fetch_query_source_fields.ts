@@ -14,6 +14,7 @@ import {
 } from '@elastic/elasticsearch/lib/api/types';
 
 import { IScopedClusterClient } from '@kbn/core-elasticsearch-server';
+
 import { IndicesQuerySourceFields } from '../types';
 
 interface FieldModelId {

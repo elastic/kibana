@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useMemo, useState } from 'react';
+
 import {
   EuiButton,
   EuiCallOut,
@@ -17,19 +19,22 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useMemo, useState } from 'react';
 
 import { GithubLink } from '@kbn/search-api-panels';
-import { SelfManagedConnectorsEmptyPrompt } from './connectors/self_managed_connectors_empty_prompt';
+
 import { docLinks } from '../../../common/doc_links';
+
 import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
+import { BASE_CONNECTORS_PATH, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
 import { useConnectors } from '../hooks/api/use_connectors';
 import { useCreateConnector } from '../hooks/api/use_create_connector';
-import { useKibanaServices } from '../hooks/use_kibana';
-import { ConnectorsTable } from './connectors/connectors_table';
-import { ConnectorPrivilegesCallout } from './connectors/connector_config/connector_privileges_callout';
 import { useAssetBasePath } from '../hooks/use_asset_base_path';
-import { BASE_CONNECTORS_PATH, ELASTIC_MANAGED_CONNECTOR_PATH } from '../constants';
+import { useKibanaServices } from '../hooks/use_kibana';
+
+import { ConnectorPrivilegesCallout } from './connectors/connector_config/connector_privileges_callout';
+import { ConnectorsTable } from './connectors/connectors_table';
+
+import { SelfManagedConnectorsEmptyPrompt } from './connectors/self_managed_connectors_empty_prompt';
 
 const CALLOUT_KEY = 'search.connectors.ElasticManaged.ComingSoon.feedbackCallout';
 

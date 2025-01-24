@@ -6,15 +6,18 @@
  */
 
 import React, { useEffect, useState } from 'react';
-import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+
 import { css } from '@emotion/react';
+
+import { EuiButtonEmpty, EuiConfirmModal, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 
-import * as i18n from './translations';
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
 import { InferenceEndpointUI, InferenceUsageInfo } from '../../../../../types';
 import { RenderMessageWithIcon } from '../../component/render_message_with_icon';
 import { ScanUsageResults } from '../../component/scan_usage_results';
+
+import * as i18n from './translations';
 
 interface ConfirmDeleteEndpointModalProps {
   onCancel: () => void;

@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import { I18nProvider } from '@kbn/i18n-react';
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+
+import { render, screen } from '@testing-library/react';
+
+import { I18nProvider } from '@kbn/i18n-react';
+
 import { INDEX_DOCUMENTS_META_DEFAULT } from '../types';
+
 import { DocumentList } from './document_list';
 import '@testing-library/jest-dom';
+
 export const DEFAULT_VALUES = {
   dataTelemetryIdPrefix: `entSearchContent-api`,
   docs: [],

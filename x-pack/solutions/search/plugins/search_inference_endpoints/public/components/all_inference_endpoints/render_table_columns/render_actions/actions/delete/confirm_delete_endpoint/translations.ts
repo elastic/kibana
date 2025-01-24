@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 export * from '../../../../../../../../common/translations';
 
 export const DELETE_TITLE = i18n.translate(

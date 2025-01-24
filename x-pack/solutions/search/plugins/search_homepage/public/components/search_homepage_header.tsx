@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+
 import { EuiPageTemplate, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 

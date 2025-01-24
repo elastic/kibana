@@ -7,8 +7,10 @@
 
 import React, { useState } from 'react';
 import { useFormContext } from 'react-hook-form';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { ChatForm, ChatFormFields } from '../../types';
 import { SelectIndicesFlyout } from '../select_indices_flyout';
 

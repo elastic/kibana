@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+
 import {
   EuiBadge,
   EuiButton,
@@ -14,12 +15,14 @@ import {
   EuiFlexItem,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { FormInfoField } from '@kbn/search-shared-ui';
-import { ApiKeyFlyoutWrapper } from './api_key_flyout_wrapper';
-import { useSearchApiKey } from '../hooks/use_search_api_key';
+
 import { Status } from '../constants';
+import { useSearchApiKey } from '../hooks/use_search_api_key';
+
+import { ApiKeyFlyoutWrapper } from './api_key_flyout_wrapper';
 
 const API_KEY_MASK = '•'.repeat(60);
 

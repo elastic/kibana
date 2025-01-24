@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EuiCodeBlock } from '@elastic/eui';
 import React from 'react';
-import { ChatForm } from '../../../types';
+
+import { EuiCodeBlock } from '@elastic/eui';
+
 import { Prompt } from '../../../../common/prompt';
+import { ChatForm } from '../../../types';
+
 import { getESQuery } from './utils';
 
 export const getSourceFields = (sourceFields: ChatForm['source_fields']) => {

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { UserProfileWithAvatar } from '@kbn/user-profile-components';
 import { useQuery } from '@tanstack/react-query';
+
+import { UserProfileWithAvatar } from '@kbn/user-profile-components';
+
 import { useKibana } from './use_kibana';
 
 export const useUserProfile = (): UserProfileWithAvatar | undefined => {

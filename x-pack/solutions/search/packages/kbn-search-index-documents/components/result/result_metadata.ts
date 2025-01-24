@@ -10,6 +10,7 @@ import type {
   MappingProperty,
   SearchHit,
 } from '@elastic/elasticsearch/lib/api/types';
+
 import type { MetaDataProps, FieldProps } from './result_types';
 
 const TITLE_KEYS = ['title', 'name'];

@@ -17,8 +17,11 @@ import {
   AppUpdater,
   AppStatus,
 } from '@kbn/core/public';
+
 import { PLUGIN_ID, PLUGIN_NAME, PLUGIN_PATH } from '../common';
 import { docLinks } from '../common/doc_links';
+
+import { registerLocators } from './locators';
 import type {
   AppPluginSetupDependencies,
   AppPluginStartDependencies,
@@ -26,7 +29,6 @@ import type {
   SearchPlaygroundPluginSetup,
   SearchPlaygroundPluginStart,
 } from './types';
-import { registerLocators } from './locators';
 
 export class SearchPlaygroundPlugin
   implements Plugin<SearchPlaygroundPluginSetup, SearchPlaygroundPluginStart>

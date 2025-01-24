@@ -6,11 +6,12 @@
  */
 
 import React, { useMemo } from 'react';
+
 import { EuiIcon, EuiSuperSelect, EuiText, EuiFlexGroup } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { AvailableLanguages } from '../../code_examples';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { CodeLanguage } from '../../types';
 
 export interface LanguageSelectorProps {

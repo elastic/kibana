@@ -7,12 +7,13 @@
 
 import React, { useMemo } from 'react';
 
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { useKibana } from '../../hooks/use_kibana';
-import { SynonymSets } from '../synonym_sets/synonym_sets';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
+import { useKibana } from '../../hooks/use_kibana';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
+import { SynonymSets } from '../synonym_sets/synonym_sets';
 
 export const SearchSynonymsOverview = () => {
   const {

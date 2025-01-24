@@ -21,6 +21,7 @@ import {
   updateConnectorScheduling,
   updateConnectorServiceType,
 } from '@kbn/search-connectors';
+
 import { DEFAULT_INGESTION_PIPELINE } from '../../common';
 import { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';

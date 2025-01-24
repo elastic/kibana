@@ -6,13 +6,18 @@
  */
 
 import React from 'react';
-import { render, waitFor, act } from '@testing-library/react';
-import { FormProvider, LOCAL_STORAGE_KEY } from './form_provider';
-import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
-import { useLLMsModels } from '../hooks/use_llms_models';
+
 import * as ReactHookForm from 'react-hook-form';
-import { ChatFormFields } from '../types';
+
 import { useSearchParams } from 'react-router-dom-v5-compat';
+
+import { render, waitFor, act } from '@testing-library/react';
+
+import { useLLMsModels } from '../hooks/use_llms_models';
+import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
+import { ChatFormFields } from '../types';
+
+import { FormProvider, LOCAL_STORAGE_KEY } from './form_provider';
 
 jest.mock('../hooks/use_load_fields_by_indices');
 jest.mock('../hooks/use_llms_models');

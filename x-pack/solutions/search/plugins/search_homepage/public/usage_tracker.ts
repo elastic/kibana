@@ -10,6 +10,7 @@ import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
+
 import { AppUsageTracker } from './types';
 
 const APP_TRACKER_NAME = 'searchHomepage';

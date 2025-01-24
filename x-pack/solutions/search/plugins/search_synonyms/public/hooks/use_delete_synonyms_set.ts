@@ -6,8 +6,10 @@
  */
 
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import { i18n } from '@kbn/i18n';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+
 import { useKibana } from './use_kibana';
 
 interface MutationArgs {

@@ -5,10 +5,13 @@
  * 2.0.
  */
 import React, { Fragment, useEffect } from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { EuiConfirmModal } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useDeleteIndex } from '../../hooks/api/use_delete_index';
+
 interface DeleteIndexModelProps {
   onCancel: () => void;
   indexName: string;

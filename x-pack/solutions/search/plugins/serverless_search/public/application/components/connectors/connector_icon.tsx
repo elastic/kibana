@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 
 export const ConnectorIcon: React.FC<{ name: string; serviceType: string; iconPath?: string }> = ({

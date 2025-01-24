@@ -6,6 +6,7 @@
  */
 
 import { renderHook } from '@testing-library/react';
+
 import { useQueryIndices } from './use_query_indices';
 
 jest.mock('./use_kibana', () => ({

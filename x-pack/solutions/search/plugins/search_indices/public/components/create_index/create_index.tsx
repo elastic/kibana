@@ -11,6 +11,7 @@ import type { IndicesStatusResponse } from '../../../common';
 
 import { AnalyticsEvents } from '../../analytics/constants';
 import { AvailableLanguages } from '../../code_examples';
+import { WorkflowId } from '../../code_examples/workflows';
 import { useUserPrivilegesQuery } from '../../hooks/api/use_user_permissions';
 import { useKibana } from '../../hooks/use_kibana';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
@@ -20,10 +21,10 @@ import { getDefaultCodingLanguage } from '../../utils/language';
 
 import { CreateIndexPanel } from '../shared/create_index_panel';
 
+import { useWorkflow } from '../shared/hooks/use_workflow';
+
 import { CreateIndexCodeView } from './create_index_code_view';
 import { CreateIndexUIView } from './create_index_ui_view';
-import { WorkflowId } from '../../code_examples/workflows';
-import { useWorkflow } from '../shared/hooks/use_workflow';
 
 function initCreateIndexState() {
   const defaultIndexName = generateRandomIndexName();

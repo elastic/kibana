@@ -5,12 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
+
+import { useMemo } from 'react';
+
 import { EuiSpacer } from '@elastic/eui';
 import { Index } from '@kbn/index-management-shared-types';
-import React from 'react';
-import { useMemo } from 'react';
-import { useKibana } from '../../hooks/use_kibana';
+
 import type { UserStartPrivilegesResponse } from '../../../common';
+import { useKibana } from '../../hooks/use_kibana';
 
 export interface SearchIndexDetailsMappingsProps {
   index?: Index;

@@ -16,9 +16,11 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useQueryIndices } from '../../hooks/use_query_indices';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { AnalyticsEvents } from '../../analytics/constants';
+
 import { AddDataSources } from './add_data_sources';
 
 export const SearchPlaygroundSetupPage: React.FC = () => {

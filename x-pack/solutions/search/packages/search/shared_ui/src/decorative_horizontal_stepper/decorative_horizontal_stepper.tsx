@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { EuiStepsHorizontal, EuiStepsHorizontalProps } from '@elastic/eui';
+
 import { css } from '@emotion/react';
+
+import { EuiStepsHorizontal, EuiStepsHorizontalProps } from '@elastic/eui';
 
 interface DecorativeHorizontalStepperProps {
   stepCount?: number;

@@ -10,8 +10,8 @@ import React from 'react';
 import { EuiSpacer, EuiText, EuiButton } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
-import { useKibanaServices } from '../hooks/use_kibana';
 import { useIngestPipelines } from '../hooks/api/use_ingest_pipelines';
+import { useKibanaServices } from '../hooks/use_kibana';
 
 export const PipelineOverviewButton: React.FC = () => {
   const { http } = useKibanaServices();

@@ -9,9 +9,10 @@ import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
 import { registerSearchApiKeysRoutes } from '@kbn/search-api-keys-server';
+
+import { registerDocumentRoutes } from './documents';
 import { registerIndicesRoutes } from './indices';
 import { registerStatusRoutes } from './status';
-import { registerDocumentRoutes } from './documents';
 
 export function defineRoutes(router: IRouter, logger: Logger) {
   registerIndicesRoutes(router, logger);

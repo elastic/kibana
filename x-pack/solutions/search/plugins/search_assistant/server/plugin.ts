@@ -7,13 +7,12 @@
 
 import type { CoreStart, Plugin, PluginInitializerContext } from '@kbn/core/server';
 
+import { registerFunctions } from './functions';
 import type {
   SearchAssistantPluginSetup,
   SearchAssistantPluginStart,
   SearchAssistantPluginStartDependencies,
 } from './types';
-
-import { registerFunctions } from './functions';
 
 export class SearchAssistantPlugin
   implements

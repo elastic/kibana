@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiMarkdownFormat, EuiCodeBlock, EuiTitle } from '@elastic/eui';
 
 import { NotebookCellType } from '../types';

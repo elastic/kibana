@@ -5,9 +5,10 @@
  * 2.0.
  */
 
-import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import type { ApplicationStart } from '@kbn/core-application-browser';
+import type { AppDeepLinkId, NavigationTreeDefinition } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
+
 import { CONNECTORS_LABEL, WEB_CRAWLERS_LABEL } from '../common/i18n_string';
 
 export const navigationTree = ({ isAppRegistered }: ApplicationStart): NavigationTreeDefinition => {

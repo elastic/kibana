@@ -5,13 +5,13 @@
  * 2.0.
  */
 
+import { schema } from '@kbn/config-schema';
 import type { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 
-import { schema } from '@kbn/config-schema';
 import { APIRoutes } from '../../types';
-import { getAPIKeyById } from '../lib/get_key_by_id';
 import { createAPIKey } from '../lib/create_key';
+import { getAPIKeyById } from '../lib/get_key_by_id';
 import { fetchClusterHasApiKeys, fetchUserStartPrivileges } from '../lib/privileges';
 
 const API_KEY_NAME = 'Unrestricted API Key';

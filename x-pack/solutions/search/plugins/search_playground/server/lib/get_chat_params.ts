@@ -5,20 +5,22 @@
  * 2.0.
  */
 
-import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
-import { v4 as uuidv4 } from 'uuid';
-import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
-import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
-import type { KibanaRequest, Logger } from '@kbn/core/server';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
+import { v4 as uuidv4 } from 'uuid';
+
+import type { PluginStartContract as ActionsPluginStartContract } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
+import type { KibanaRequest, Logger } from '@kbn/core/server';
 import {
   ActionsClientChatOpenAI,
   ActionsClientSimpleChatModel,
   getDefaultArguments,
 } from '@kbn/langchain/server';
+import { BEDROCK_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/bedrock/constants';
 import { GEMINI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/gemini/constants';
 import { INFERENCE_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/inference/constants';
+import { OPENAI_CONNECTOR_ID } from '@kbn/stack-connectors-plugin/common/openai/constants';
+
 import { Prompt, QuestionRewritePrompt } from '../../common/prompt';
 
 export const getChatParams = async (

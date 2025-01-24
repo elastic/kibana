@@ -6,7 +6,9 @@
  */
 
 import { useEffect } from 'react';
+
 import type { ChromeBreadcrumb } from '@kbn/core-chrome-browser';
+
 import { useKibana } from './use_kibana';
 
 export const usePageChrome = (docTitle: string, breadcrumbs: ChromeBreadcrumb[]) => {

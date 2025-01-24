@@ -6,8 +6,8 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import type { IRouter } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
 
 import { INDEX_DOCUMENT_ROUTE } from '../../common/routes';

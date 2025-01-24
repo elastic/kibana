@@ -16,10 +16,12 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useQueryIndices } from '../../hooks/use_query_indices';
+
 import { docLinks } from '../../../common/doc_links';
-import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { useQueryIndices } from '../../hooks/use_query_indices';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+
 import { AddDataSources } from './add_data_sources';
 import { ConnectLLMButton } from './connect_llm_button';
 import { CreateIndexButton } from './create_index_button';

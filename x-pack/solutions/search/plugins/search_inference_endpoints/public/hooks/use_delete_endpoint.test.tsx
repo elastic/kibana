@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { waitFor, renderHook } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { useKibana } from './use_kibana';
-import { useDeleteEndpoint } from './use_delete_endpoint';
-import * as i18n from './translations';
 import React from 'react';
+
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { waitFor, renderHook } from '@testing-library/react';
+
+import * as i18n from './translations';
+import { useDeleteEndpoint } from './use_delete_endpoint';
+import { useKibana } from './use_kibana';
 
 jest.mock('./use_kibana');
 

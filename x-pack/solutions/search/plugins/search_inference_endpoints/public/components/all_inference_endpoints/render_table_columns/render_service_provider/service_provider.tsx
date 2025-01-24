@@ -5,24 +5,27 @@
  * 2.0.
  */
 
-import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import React from 'react';
+
+import { EuiBadge, EuiFlexGroup, EuiFlexItem, EuiIcon, EuiText } from '@elastic/eui';
 import {
   ELASTIC_MODEL_DEFINITIONS,
   InferenceAPIConfigResponse,
 } from '@kbn/ml-trained-models-utils';
-import elasticIcon from '../../../../assets/images/providers/elastic.svg';
-import huggingFaceIcon from '../../../../assets/images/providers/hugging_face.svg';
-import cohereIcon from '../../../../assets/images/providers/cohere.svg';
-import openAIIcon from '../../../../assets/images/providers/open_ai.svg';
+
+import alibabaCloudAISearchIcon from '../../../../assets/images/providers/alibaba_cloud_ai_search.svg';
+import amazonBedrockIcon from '../../../../assets/images/providers/amazon_bedrock.svg';
 import azureAIStudioIcon from '../../../../assets/images/providers/azure_ai_studio.svg';
 import azureOpenAIIcon from '../../../../assets/images/providers/azure_open_ai.svg';
+import cohereIcon from '../../../../assets/images/providers/cohere.svg';
+import elasticIcon from '../../../../assets/images/providers/elastic.svg';
 import googleAIStudioIcon from '../../../../assets/images/providers/google_ai_studio.svg';
+import huggingFaceIcon from '../../../../assets/images/providers/hugging_face.svg';
 import mistralIcon from '../../../../assets/images/providers/mistral.svg';
-import amazonBedrockIcon from '../../../../assets/images/providers/amazon_bedrock.svg';
-import alibabaCloudAISearchIcon from '../../../../assets/images/providers/alibaba_cloud_ai_search.svg';
+import openAIIcon from '../../../../assets/images/providers/open_ai.svg';
 import watsonxAIIcon from '../../../../assets/images/providers/watsonx_ai.svg';
 import { ServiceProviderKeys } from '../../types';
+
 import * as i18n from './translations';
 
 interface ServiceProviderProps {
