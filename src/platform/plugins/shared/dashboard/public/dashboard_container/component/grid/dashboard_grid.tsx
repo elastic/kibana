@@ -59,6 +59,7 @@ export const DashboardGrid = ({
         width: gridData.w,
         height: gridData.h,
       };
+      // update `data-grid-row` attribute for all panels because it is used for some styling
       const panelRef = panelRefs.current[panelId];
       if (typeof panelRef !== 'function' && panelRef?.current) {
         panelRef.current.setAttribute('data-grid-row', `${gridData.y}`);
@@ -113,8 +114,7 @@ export const DashboardGrid = ({
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
           dashboardContainerRef={dashboardContainerRef}
-          // `data-grid-row` gets updated without the need for a re-render
-          data-grid-row={currentPanels[id].gridData.y}
+          data-grid-row={currentPanels[id].gridData.y} // initialize data-grid-row
         />
       );
     },

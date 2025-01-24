@@ -110,7 +110,7 @@ export const PresentationPanelTitle = ({
         </>
       </EuiToolTip>
     );
-  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, euiTheme]);
+  }, [hideTitle, panelDescription, panelTitle, panelTitleElement, euiTheme.size]);
 
   return describedPanelTitleElement;
 };

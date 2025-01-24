@@ -11,7 +11,7 @@ import { EuiScreenReaderOnly, transparentize, useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/presentation-publishing';
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
@@ -72,6 +72,29 @@ export const PresentationPanelHeader = <
     [setDragHandle]
   );
 
+  const { captionStyles, headerStyles } = useMemo(() => {
+    return {
+      captionStyles: css`
+        .dshLayout--editing &:hover {
+          cursor: move;
+          background-color: ${transparentize(euiTheme.colors.warning, 0.2)};
+        }
+      `,
+      headerStyles: css`
+        height: ${euiTheme.size.l};
+        overflow: hidden;
+        line-height: ${euiTheme.size.l};
+        padding: 0px ${euiTheme.size.s};
+
+        display: flex;
+        flex-grow: 1;
+        flex-wrap: wrap;
+        column-gap: ${euiTheme.size.s};
+        align-items: center;
+      `,
+    };
+  }, [euiTheme.colors.warning, euiTheme.size]);
+
   const showPanelBar =
     (!hideTitle && panelTitle) || badgeElements.length > 0 || notificationElements.length > 0;
 
@@ -88,29 +111,13 @@ export const PresentationPanelHeader = <
     <figcaption
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
       className={'embPanel__header'}
-      css={css`
-        .dshLayout--editing &:hover {
-          cursor: move;
-          background-color: ${transparentize(euiTheme.colors.warning, 0.2)};
-        }
-      `}
+      css={captionStyles}
     >
       <h2
         className="embPanel__title"
         ref={memoizedSetDragHandle}
         data-test-subj="dashboardPanelTitle"
-        css={css`
-          height: ${euiTheme.size.l};
-          overflow: hidden;
-          line-height: ${euiTheme.size.l};
-          padding: 0px ${euiTheme.size.s};
-
-          display: flex;
-          flex-grow: 1;
-          flex-wrap: wrap;
-          column-gap: ${euiTheme.size.s};
-          align-items: center;
-        `}
+        css={headerStyles}
       >
         {ariaLabelElement}
         <PresentationPanelTitle
