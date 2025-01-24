@@ -33,6 +33,8 @@ const definition: EntityDefinition = convertToEntityManagerDefinition(
     indexMappings: {},
     indexPatterns: [],
     settings: {
+      timeout: '180s',
+      docsPerSecond: undefined,
       syncDelay: '1m',
       frequency: '1m',
       timestampField: '@timestamp',
