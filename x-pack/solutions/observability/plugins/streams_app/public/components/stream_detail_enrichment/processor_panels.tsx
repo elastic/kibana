@@ -81,7 +81,12 @@ export function AddProcessorPanel({
     closePanel();
   };
 
-  const confirmDiscardAndClose = useDiscardConfirm(closePanel);
+  const handleCancel = () => {
+    methods.reset();
+    closePanel();
+  };
+
+  const confirmDiscardAndClose = useDiscardConfirm(handleCancel);
 
   const buttonContent = isOpen ? (
     i18n.translate(
@@ -119,7 +124,7 @@ export function AddProcessorPanel({
         extraAction={
           isOpen ? (
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiButtonEmpty onClick={hasChanges ? confirmDiscardAndClose : closePanel} size="s">
+              <EuiButtonEmpty onClick={hasChanges ? confirmDiscardAndClose : handleCancel} size="s">
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
                   { defaultMessage: 'Cancel' }
@@ -190,7 +195,12 @@ export function EditProcessorPanel({
     closePanel();
   };
 
-  const confirmDiscardAndClose = useDiscardConfirm(closePanel);
+  const handleCancel = () => {
+    methods.reset();
+    closePanel();
+  };
+
+  const confirmDiscardAndClose = useDiscardConfirm(handleCancel);
   const confirmDeletionAndClose = useDiscardConfirm(handleProcessorDelete, {
     title: deleteProcessorTitle,
     message: deleteProcessorMessage,
@@ -235,7 +245,7 @@ export function EditProcessorPanel({
         extraAction={
           isOpen ? (
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiButtonEmpty onClick={hasChanges ? confirmDiscardAndClose : closePanel} size="s">
+              <EuiButtonEmpty onClick={hasChanges ? confirmDiscardAndClose : handleCancel} size="s">
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
                   { defaultMessage: 'Cancel' }
@@ -273,7 +283,7 @@ export function EditProcessorPanel({
             <EuiSpacer size="m" />
             {formFields.type === 'grok' && <GrokProcessorForm />}
             {formFields.type === 'dissect' && <DissectProcessorForm />}
-            <EuiHorizontalRule />
+            <EuiHorizontalRule margin="m" />
             <EuiButton color="danger" onClick={confirmDeletionAndClose}>
               {deleteProcessorLabel}
             </EuiButton>
