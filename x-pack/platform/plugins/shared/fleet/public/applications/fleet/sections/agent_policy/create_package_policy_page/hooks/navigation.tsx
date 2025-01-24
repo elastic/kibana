@@ -14,7 +14,6 @@ import { useStartServices, useLink, useIntraAppState } from '../../../../hooks';
 import type {
   CreatePackagePolicyRouteState,
   PackagePolicy,
-  NewPackagePolicy,
   OnSaveQueryParamKeys,
 } from '../../../../types';
 import type { EditPackagePolicyFrom } from '../types';
@@ -60,13 +59,12 @@ export const useCancelAddPackagePolicy = (params: UseCancelParams) => {
 };
 
 interface UseOnSaveNavigateParams {
-  packagePolicy: NewPackagePolicy;
   routeState?: CreatePackagePolicyRouteState;
   queryParamsPolicyId?: string;
 }
 
 export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
-  const { packagePolicy, queryParamsPolicyId } = params;
+  const { queryParamsPolicyId } = params;
   const routeState = useIntraAppState<CreatePackagePolicyRouteState>();
   const doOnSaveNavigation = useRef<boolean>(true);
   const { getPath } = useLink();
@@ -87,14 +85,15 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       if (!doOnSaveNavigation.current) {
         return;
       }
-      const hasNoAgentPolicies = packagePolicy.policy_ids.length === 0;
-      const packagePolicyPath = hasNoAgentPolicies
-        ? getPath('integration_details_policies', {
-            pkgkey: pkgKeyFromPackageInfo(packagePolicy.package!),
-          })
-        : getPath('policy_details', {
-            policyId: packagePolicy.policy_ids[0], // TODO navigates to first policy
-          });
+      const hasNoAgentPolicies = policy.policy_ids.length === 0;
+      const packagePolicyPath =
+        hasNoAgentPolicies || policy.supports_agentless
+          ? getPath('integration_details_policies', {
+              pkgkey: pkgKeyFromPackageInfo(policy.package!),
+            })
+          : getPath('policy_details', {
+              policyId: policy.policy_ids[0], // TODO navigates to first policy
+            });
       const [onSaveNavigateTo, onSaveQueryParams]: [
         Parameters<ApplicationStart['navigateToApp']>,
         CreatePackagePolicyRouteState['onSaveQueryParams']
@@ -102,7 +101,7 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
         ? [routeState.onSaveNavigateTo, routeState?.onSaveQueryParams]
         : [
             [
-              hasNoAgentPolicies ? INTEGRATIONS_PLUGIN_ID : PLUGIN_ID,
+              hasNoAgentPolicies || policy.supports_agentless ? INTEGRATIONS_PLUGIN_ID : PLUGIN_ID,
               {
                 path: packagePolicyPath,
               },
@@ -129,8 +128,6 @@ export const useOnSaveNavigate = (params: UseOnSaveNavigateParams) => {
       }
     },
     [
-      packagePolicy.policy_ids,
-      packagePolicy.package,
       getPath,
       routeState?.onSaveNavigateTo,
       routeState?.onSaveQueryParams,
