@@ -59,7 +59,7 @@ const getPanelHandle = (panelId: string, interactionType: 'resize' | 'drag' = 'd
 };
 
 describe('GridLayout', () => {
-  const expectedInitialOrder = [
+  const expectedInitPanelIdsInOrder = [
     'panel1',
     'panel5',
     'panel2',
@@ -79,7 +79,7 @@ describe('GridLayout', () => {
   it(`'renderPanelContents' is not called during dragging`, () => {
     renderGridLayout();
 
-    expect(mockRenderPanelContents).toHaveBeenCalledTimes(expectedInitialOrder.length); // renderPanelContents is called ONLY ONCE for each of 10 panels on initial render
+    expect(mockRenderPanelContents).toHaveBeenCalledTimes(expectedInitPanelIdsInOrder.length); // renderPanelContents is called ONLY ONCE for each of 10 panels on initial render
     jest.clearAllMocks();
 
     const panelHandle = getPanelHandle('panel1');
@@ -120,7 +120,7 @@ describe('GridLayout', () => {
     });
     it('on initializing', () => {
       renderGridLayout();
-      expect(getAllThePanelIds()).toEqual(expectedInitialOrder);
+      expect(getAllThePanelIds()).toEqual(expectedInitPanelIdsInOrder);
     });
 
     it('after reordering some panels', async () => {
@@ -130,7 +130,7 @@ describe('GridLayout', () => {
       mouseStartDragging(panelHandle);
 
       mouseMoveTo({ clientX: 256, clientY: 128 });
-      expect(getAllThePanelIds()).toEqual(expectedInitialOrder); // the panels shouldn't be reordered till we mouseDrop
+      expect(getAllThePanelIds()).toEqual(expectedInitPanelIdsInOrder); // the panels shouldn't be reordered till we mouseDrop
 
       mouseDrop(panelHandle);
       expect(getAllThePanelIds()).toEqual([
@@ -152,7 +152,7 @@ describe('GridLayout', () => {
       const panelHandle = getPanelHandle('panel1');
       touchStart(panelHandle);
       touchMoveTo(panelHandle, { touches: [{ clientX: 256, clientY: 128 }] });
-      expect(getAllThePanelIds()).toEqual(expectedInitialOrder); // the panels shouldn't be reordered till we mouseDrop
+      expect(getAllThePanelIds()).toEqual(expectedInitPanelIdsInOrder); // the panels shouldn't be reordered till we mouseDrop
 
       touchEnd(panelHandle);
       expect(getAllThePanelIds()).toEqual([
