@@ -130,16 +130,12 @@ export async function getMenuItemGroups(
 
   return Object.values(groups)
     .map((group) => {
-      group.items.sort(
-        (itemA, itemB) => {
-          return itemA.order === itemB.order
-            ? itemA.name.localeCompare(itemB.name)
-            : itemB.order - itemA.order;
-        }
-      );
+      group.items.sort((itemA, itemB) => {
+        return itemA.order === itemB.order
+          ? itemA.name.localeCompare(itemB.name)
+          : itemB.order - itemA.order;
+      });
       return group;
     })
-    .sort(
-      (groupA, groupB) => groupB.order - groupA.order
-    );
+    .sort((groupA, groupB) => groupB.order - groupA.order);
 }

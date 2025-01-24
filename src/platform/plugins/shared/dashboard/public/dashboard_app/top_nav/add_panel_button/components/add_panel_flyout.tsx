@@ -52,34 +52,34 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
 
     const q = searchTerm.toLowerCase();
 
+    const currentGroups = groups ?? ([] as MenuItemGroup[]);
     setFilteredGroups(
-      groups ??
-        ([] as MenuItemGroup[])
-          .map((group) => {
-            const groupMatch = group.title.toLowerCase().includes(q);
+      currentGroups
+        .map((group) => {
+          const groupMatch = group.title.toLowerCase().includes(q);
 
-            const [itemsMatch, items] = group.items.reduce(
-              (acc, item) => {
-                const itemMatch = item.name.toLowerCase().includes(q);
+          const [itemsMatch, items] = group.items.reduce(
+            (acc, item) => {
+              const itemMatch = item.name.toLowerCase().includes(q);
 
-                acc[0] = acc[0] || itemMatch;
-                acc[1].push({
-                  ...item,
-                  isDisabled: !(groupMatch || itemMatch),
-                });
+              acc[0] = acc[0] || itemMatch;
+              acc[1].push({
+                ...item,
+                isDisabled: !(groupMatch || itemMatch),
+              });
 
-                return acc;
-              },
-              [false, [] as MenuItem[]]
-            );
+              return acc;
+            },
+            [false, [] as MenuItem[]]
+          );
 
-            return {
-              ...group,
-              isDisabled: !(groupMatch || itemsMatch),
-              items,
-            };
-          })
-          .filter((group) => !group.isDisabled)
+          return {
+            ...group,
+            isDisabled: !(groupMatch || itemsMatch),
+            items,
+          };
+        })
+        .filter((group) => !group.isDisabled)
     );
   }, [groups, searchTerm]);
 
