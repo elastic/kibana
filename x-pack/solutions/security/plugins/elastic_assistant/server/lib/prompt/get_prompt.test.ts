@@ -8,7 +8,7 @@
 import { getPrompt, promptDictionary } from './get_prompt';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ActionsClient } from '@kbn/actions-plugin/server';
-import { BEDROCK_SYSTEM_PROMPT, DEFAULT_SYSTEM_PROMPT, STRUCTURED_SYSTEM_PROMPT } from './prompts';
+import { BEDROCK_SYSTEM_PROMPT, DEFAULT_SYSTEM_PROMPT } from './prompts';
 
 jest.mock('@kbn/core-saved-objects-api-server');
 jest.mock('@kbn/actions-plugin/server');
@@ -368,19 +368,5 @@ describe('getPrompt', () => {
     expect(actionsClient.get).toHaveBeenCalled();
 
     expect(result).toBe('Hello world this is a system prompt for bedrock claude-3-5-sonnet');
-  });
-
-  it('should return the OSS prompt matching provider and model', async () => {
-    const result = await getPrompt({
-      savedObjectsClient,
-      promptId: promptDictionary.systemPrompt,
-      provider: 'openai',
-      model: 'oss',
-      actionsClient,
-      connectorId: 'connector-123',
-    });
-    expect(actionsClient.get).not.toHaveBeenCalled();
-
-    expect(result).toBe(STRUCTURED_SYSTEM_PROMPT);
   });
 });

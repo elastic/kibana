@@ -134,7 +134,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
 
   const defaultSystemPrompt = await getPrompt({
     savedObjectsClient,
-    llm: llmType,
+    provider: llmType,
     // use oss as model when using openai and oss
     model: llmType === 'openai' && isOssModel ? 'oss' : request.body.model,
     promptId: promptDictionary.systemPrompt,

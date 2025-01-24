@@ -103,33 +103,42 @@ const findPromptEntry = (
   model?: string
 ) => {
   const backupPrompts = localPrompts.filter((p) => p.attributes.promptId === promptId);
-
   // Try to find the entry with matching provider and model
-  let entry =
-    prompts.find(
-      (prompt) => prompt.attributes.provider === provider && prompt.attributes.model === model
-    ) ||
-    backupPrompts.find(
-      (prompt) => prompt.attributes.provider === provider && prompt.attributes.model === model
-    );
+  let entry = prompts.find(
+    (prompt) => prompt.attributes.provider === provider && prompt.attributes.model === model
+  );
   if (!entry) {
     // If no match, try to find an entry with matching provider
-    entry =
-      prompts.find(
-        (prompt) => prompt.attributes.provider === provider && !prompt.attributes.model
-      ) ||
-      backupPrompts.find(
-        (prompt) => prompt.attributes.provider === provider && !prompt.attributes.model
-      );
+    entry = prompts.find(
+      (prompt) => prompt.attributes.provider === provider && !prompt.attributes.model
+    );
   }
 
   if (!entry) {
     // If still no match, find the entry without provider or model
-    entry =
-      prompts.find((prompt) => !prompt.attributes.provider && !prompt.attributes.model) ||
-      backupPrompts.find(
-        (prompt) => prompt.attributes.provider === provider && !prompt.attributes.model
-      );
+    entry = prompts.find((prompt) => !prompt.attributes.provider && !prompt.attributes.model);
+  }
+
+  // find local prompt definitions if still no entries
+
+  if (!entry) {
+    // If still no match, find the entry without provider or model
+    entry = backupPrompts.find(
+      (prompt) => prompt.attributes.provider === provider && prompt.attributes.model === model
+    );
+  }
+  if (!entry) {
+    // If no match, try to find an entry with matching provider
+    entry = backupPrompts.find(
+      (prompt) => prompt.attributes.provider === provider && !prompt.attributes.model
+    );
+  }
+
+  if (!entry) {
+    // If still no match, find the entry without provider or model
+    entry = backupPrompts.find(
+      (prompt) => prompt.attributes.provider === provider && !prompt.attributes.model
+    );
   }
 
   return entry?.attributes?.prompt?.default;
