@@ -203,19 +203,10 @@ export function EditProcessorPanel({
   ) : (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       <EuiIcon type="grab" />
-      <EuiText size="s">
-        <strong>{processorType.toUpperCase()}</strong>
+      <strong>{processorType.toUpperCase()}</strong>
+      <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
+        {processorDescription}
       </EuiText>
-      <EuiFlexItem
-        /* Allow text to overflow in flex child nodes */
-        css={css`
-          min-width: 0;
-        `}
-      >
-        <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
-          {processorDescription}
-        </EuiText>
-      </EuiFlexItem>
     </EuiFlexGroup>
   );
 
@@ -232,7 +223,14 @@ export function EditProcessorPanel({
           css: { display: 'none' },
         }}
         buttonContent={buttonContent}
+        buttonContentClassName="eui-textTruncate"
         buttonElement="div"
+        buttonProps={{
+          /* Allow text ellipsis in flex child nodes */
+          css: css`
+            min-width: 0;
+          `,
+        }}
         forceState={isOpen ? 'open' : 'closed'}
         extraAction={
           isOpen ? (
