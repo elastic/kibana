@@ -780,11 +780,9 @@
     {
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
-        "@mapbox/vector-tile",
         "csstype",
         "cronstrue",
-        "immer",
-        "@types/mapbox__vector-tile"
+        "immer"
       ],
       "reviewers": [
         "team:kibana-management"
@@ -2360,9 +2358,11 @@
         "@mapbox/mapbox-gl-draw",
         "@mapbox/mapbox-gl-rtl-text",
         "@mapbox/mapbox-gl-supported",
+        "@mapbox/vector-tile",
         "mapbox-gl-draw-rectangle-mode",
         "maplibre-gl",
-        "@types/geojson"
+        "@types/geojson",
+        "@types/mapbox__vector-tile"
       ],
       "reviewers": [
         "team:kibana-presentation"
