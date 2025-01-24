@@ -85,7 +85,6 @@ export function calculateObjectDiff<TBase extends Obj, TCompare extends Obj>(
         if (isAllUndefined(removedMap[key])) delete removedMap[key];
         if (isAllUndefined(updatedMap[key])) delete updatedMap[key];
       } else if (base[key] !== compare[key]) {
-        console.log(key, base[key], compare[key]);
         updatedMap[key] = compare[key];
       }
     }

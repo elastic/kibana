@@ -44,9 +44,11 @@ export interface UseProcessingSimulatorReturnType {
 export const useProcessingSimulator = ({
   definition,
   condition,
+  index,
 }: {
   definition: ReadStreamDefinition;
   condition?: Condition;
+  index?: number;
 }): UseProcessingSimulatorReturnType => {
   const { dependencies } = useKibana();
   const {
@@ -90,7 +92,6 @@ export const useProcessingSimulator = ({
   );
 
   const sampleDocs = (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
-
   const [{ loading: isLoadingSimulation, error, value }, simulate] = useAsyncFn(
     (processingDefinition: ProcessingDefinition, detectedFields?: DetectedField[]) => {
       if (!definition) {
@@ -126,13 +127,26 @@ export const useProcessingSimulator = ({
           ) as SimulationRequestBody['detected_fields'])
         : undefined;
 
+      // collect processors, replace the index one with processorDefinition. If not index, just add processorDefinition
+      let added = false;
+      const processing = definition.stream.ingest.processing.map((processor, i) => {
+        if (i === index) {
+          added = true;
+          return processorDefinition;
+        }
+        return processor;
+      });
+      if (!added) {
+        processing.push(processorDefinition);
+      }
+
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
         signal: abortController.signal,
         params: {
           path: { id: definition.name },
           body: {
             documents: sampleDocs,
-            processing: [processorDefinition],
+            processing,
             detected_fields,
           },
         },

@@ -44,6 +44,7 @@ export interface AddProcessorFlyoutProps extends ProcessorFlyoutProps {
 }
 export interface EditProcessorFlyoutProps extends ProcessorFlyoutProps {
   processor: EnrichmentUIProcessorDefinition;
+  index: number;
   onDeleteProcessor: (id: string) => void;
   onUpdateProcessor: (id: string, processor: EnrichmentUIProcessorDefinition) => void;
 }
@@ -129,7 +130,10 @@ export function EditProcessorFlyout({
   onDeleteProcessor,
   onUpdateProcessor,
   processor,
+  definition,
+  index,
 }: EditProcessorFlyoutProps) {
+  console.log('index', index);
   const processorType = 'grok' in processor.config ? 'grok' : 'dissect';
 
   const defaultValues = useMemo(
@@ -157,6 +161,13 @@ export function EditProcessorFlyout({
     onDeleteProcessor(processor.id);
     onClose();
   };
+
+  const { error, isLoading, refreshSamples, simulation, samples, simulate } =
+    useProcessingSimulator({
+      definition,
+      condition: { field: formFields.field, operator: 'exists' },
+      index,
+    });
 
   return (
     <ProcessorFlyoutTemplate
@@ -195,6 +206,16 @@ export function EditProcessorFlyout({
           {formFields.type === 'dissect' && <DissectProcessorForm />}
           <EuiHorizontalRule />
           <DangerZone onDeleteProcessor={handleProcessorDelete} />
+          <ProcessorOutcomePreview
+            definition={definition}
+            formFields={formFields}
+            simulation={simulation}
+            samples={samples}
+            onSimulate={simulate}
+            onRefreshSamples={refreshSamples}
+            simulationError={error}
+            isLoading={isLoading}
+          />
         </EuiForm>
       </FormProvider>
     </ProcessorFlyoutTemplate>
