@@ -62,9 +62,9 @@ export const RemoteClusterReview = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.onPrem.step1.paragraph"
-            defaultMessage="Ensure security features are enabled on both clusters, and that both clusters meet the requirements needed to enable the connection. {documentationLink}"
+            defaultMessage="Ensure security features are enabled on both clusters, and that both clusters meet the {requirmentsLink} needed to enable the connection. "
             values={{
-              documentationLink: (
+              requirmentsLink: (
                 <EuiLink
                   href={
                     securityModel === SECURITY_MODEL.API
@@ -76,9 +76,9 @@ export const RemoteClusterReview = ({
                   data-test-subj="remoteClusterReviewOnPremStep1"
                 >
                   {i18n.translate(
-                    'xpack.remoteClusters.remoteClusterForm.cloud.cert.paragraph2.documentationLink',
+                    'xpack.remoteClusters.remoteClusterForm.onPrem.step1.requirements',
                     {
-                      defaultMessage: 'Documentation',
+                      defaultMessage: 'requirements',
                     }
                   )}
                 </EuiLink>
@@ -90,16 +90,16 @@ export const RemoteClusterReview = ({
     },
     {
       title: i18n.translate('xpack.remoteClusters.remoteClusterForm.onPrem.step2.title', {
-        defaultMessage: 'Establish trust with a remote cluster',
+        defaultMessage: 'Confirm trust is established',
       }),
       status: 'incomplete',
       children: (
         <EuiText size="s">
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.onPrem.step2.paragraph"
-            defaultMessage="Follow the steps outlined in the document in order to establish trust between local and remote clusters. {documentationLink}"
+            defaultMessage="Follow the {addRemoteClusterGuideLink} to establish trust between local and remote clusters."
             values={{
-              documentationLink: (
+              addRemoteClusterGuideLink: (
                 <EuiLink
                   href={
                     securityModel === SECURITY_MODEL.API ? onPremSecurityApiKey : onPremSecurityCert
@@ -109,9 +109,9 @@ export const RemoteClusterReview = ({
                   data-test-subj="remoteClusterReviewOnPremStep2"
                 >
                   {i18n.translate(
-                    'xpack.remoteClusters.remoteClusterForm.cloud.cert.paragraph2.documentationLink',
+                    'xpack.remoteClusters.remoteClusterForm.onPrem.step1.addClustersGuide',
                     {
-                      defaultMessage: 'Documentation',
+                      defaultMessage: 'Add remote clusters guide',
                     }
                   )}
                 </EuiLink>
@@ -216,8 +216,7 @@ export const RemoteClusterReview = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.onPrem.disclaimerInfo"
-            defaultMessage="Make sure you complete the steps below before completing this setup, otherwise your
-        connection won’t work."
+            defaultMessage="Confirm the following requirements are met before you proceed. If all requirements are not met, the remote cluster will not connect."
           />
         </EuiText>
         <EuiSpacer size="l" />
