@@ -11,10 +11,9 @@ import { Client } from '@elastic/elasticsearch';
 import { EsArchiver } from '@kbn/es-archiver';
 import { REPO_ROOT } from '@kbn/repo-info';
 import type { KbnClient } from '@kbn/test';
-import type { ToolingLog } from '@kbn/tooling-log';
-import { serviceLoadedMsg } from '../../playwright/utils';
+import { ScoutLogger } from './logger';
 
-export function createEsArchiver(esClient: Client, kbnClient: KbnClient, log: ToolingLog) {
+export function createEsArchiver(esClient: Client, kbnClient: KbnClient, log: ScoutLogger) {
   const esArchiver = new EsArchiver({
     log,
     client: esClient,
@@ -22,7 +21,7 @@ export function createEsArchiver(esClient: Client, kbnClient: KbnClient, log: To
     baseDir: REPO_ROOT,
   });
 
-  log.debug(serviceLoadedMsg('esArchiver'));
+  log.serviceMessage(`'esArchiver' loaded`);
 
   return esArchiver;
 }

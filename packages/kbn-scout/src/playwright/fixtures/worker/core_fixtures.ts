@@ -8,9 +8,6 @@
  */
 
 import { test as base } from '@playwright/test';
-
-import type { ToolingLog } from '@kbn/tooling-log';
-
 import { KbnClient, SamlSessionManager } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
 import {
@@ -24,10 +21,11 @@ import {
 } from '../../../common/services';
 import { ScoutTestOptions } from '../../types';
 import { ScoutTestConfig } from '.';
+import { ScoutLogger } from '../../../common';
 
 // re-export to import types from '@kbn-scout'
 export type { KbnClient, SamlSessionManager } from '@kbn/test';
-export type { ToolingLog } from '@kbn/tooling-log';
+export type { ScoutLogger } from '../../../common';
 export type { Client as EsClient } from '@elastic/elasticsearch';
 export type { KibanaUrl } from '../../../common/services/kibana_url';
 export type { ScoutTestConfig } from '../../../types';
@@ -42,7 +40,7 @@ export type { ScoutTestConfig } from '../../../types';
 export const coreWorkerFixtures = base.extend<
   {},
   {
-    log: ToolingLog;
+    log: ScoutLogger;
     config: ScoutTestConfig;
     kbnUrl: KibanaUrl;
     esClient: Client;

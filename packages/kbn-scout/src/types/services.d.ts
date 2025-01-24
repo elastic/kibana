@@ -7,7 +7,4 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export type { KbnClient, SamlSessionManager } from '@kbn/test';
-export type { Client } from '@elastic/elasticsearch';
-export type { KibanaUrl } from '../common/services';
-export type { ToolingLog } from '@kbn/tooling-log';
+export type { EsClient, KbnClient, KibanaUrl, SamlSessionManager, ScoutLogger } from '../common';

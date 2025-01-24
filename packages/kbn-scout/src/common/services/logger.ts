@@ -8,12 +8,22 @@
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
-import { serviceLoadedMsg } from '../../playwright/utils';
+
+export class ScoutLogger extends ToolingLog {
+  private log: ToolingLog;
+
+  constructor() {
+    super({ level: 'verbose', writeTo: process.stdout });
+
+    this.log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
+    this.serviceMessage('logger');
+  }
+
+  public serviceMessage(msg: string) {
+    this.log.debug(`[scout service] ${msg}`);
+  }
+}
 
 export function createLogger() {
-  const log = new ToolingLog({ level: 'verbose', writeTo: process.stdout });
-
-  log.debug(serviceLoadedMsg('logger'));
-
-  return log;
+  return new ScoutLogger();
 }
