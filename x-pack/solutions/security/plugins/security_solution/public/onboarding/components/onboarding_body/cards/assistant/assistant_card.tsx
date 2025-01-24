@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useMemo, useState } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiLink } from '@elastic/eui';
 import { css } from '@emotion/css';
 import { useAssistantContext, type Conversation } from '@kbn/elastic-assistant';
@@ -52,18 +52,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
     setExpandedCardId(OnboardingCardId.integrations, { scroll: true });
   }, [setExpandedCardId]);
 
-  const [storedAssistantConnectorId, setStoredAssistantConnectorId] =
-    useStoredAssistantConnectorId(spaceId);
-
-  const [selectedConnectorId, setSelectedConnectorId] = useState(storedAssistantConnectorId || '');
-
-  const onSelectConnectorId = useCallback(
-    (connectorId: string) => {
-      setSelectedConnectorId(connectorId);
-      setStoredAssistantConnectorId(connectorId);
-    },
-    [setStoredAssistantConnectorId]
-  );
+  const [selectedConnectorId, setSelectedConnectorId] = useStoredAssistantConnectorId(spaceId);
 
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);
 
@@ -131,11 +120,17 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
         }
       }
 
-      if (onSelectConnectorId != null) {
-        onSelectConnectorId(connectorId);
+      if (selectedConnectorId != null) {
+        setSelectedConnectorId(connectorId);
       }
     },
-    [currentConversation, onSelectConnectorId, setApiConfig, onConversationChange]
+    [
+      currentConversation,
+      selectedConnectorId,
+      setApiConfig,
+      onConversationChange,
+      setSelectedConnectorId,
+    ]
   );
 
   if (!checkCompleteMetadata) {
@@ -145,6 +140,11 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
       </OnboardingCardContentPanel>
     );
   }
+
+  const onNewConnectorSaved = (connectorId: string) => {
+    checkComplete();
+    setSelectedConnectorId(connectorId);
+  };
 
   return (
     <OnboardingCardContentPanel>
@@ -180,7 +180,7 @@ export const AssistantCard: OnboardingCardComponent<AssistantCardMetadata> = ({
               <ConnectorCards
                 canCreateConnectors={canCreateConnectors}
                 connectors={connectors}
-                onNewConnectorSaved={checkComplete}
+                onNewConnectorSaved={onNewConnectorSaved}
                 selectedConnectorId={selectedConnectorId}
                 onConnectorSelected={onConnectorSelected}
               />

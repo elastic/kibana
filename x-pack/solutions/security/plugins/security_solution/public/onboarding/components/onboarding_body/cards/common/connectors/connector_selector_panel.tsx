@@ -14,7 +14,7 @@ import type { AIConnector } from './types';
 
 interface ConnectorSelectorPanelProps {
   connectors: AIConnector[];
-  selectedConnectorId?: string;
+  selectedConnectorId?: string | null;
   onConnectorSelected: (connector: AIConnector) => void;
 }
 

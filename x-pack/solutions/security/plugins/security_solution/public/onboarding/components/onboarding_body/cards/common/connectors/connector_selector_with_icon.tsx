@@ -20,7 +20,7 @@ import * as i18n from './translations';
 
 interface Props {
   isDisabled?: boolean;
-  selectedConnectorId?: string;
+  selectedConnectorId?: string | null;
   connectors: AIConnector[];
   onConnectorSelected: (connector: AIConnector) => void;
 }
@@ -100,15 +100,16 @@ export const ConnectorSelectorWithIcon = React.memo<Props>(
             />
           </EuiFlexItem>
         )}
-
-        <EuiFlexItem grow={false}>
-          <ConnectorSelector
-            connectors={connectorOptions}
-            isDisabled={localIsDisabled}
-            selectedId={selectedConnectorId}
-            onChange={onConnectorSelectionChange}
-          />
-        </EuiFlexItem>
+        {selectedConnectorId && (
+          <EuiFlexItem grow={false}>
+            <ConnectorSelector
+              connectors={connectorOptions}
+              isDisabled={localIsDisabled}
+              selectedId={selectedConnectorId}
+              onChange={onConnectorSelectionChange}
+            />
+          </EuiFlexItem>
+        )}
       </EuiFlexGroup>
     );
   }

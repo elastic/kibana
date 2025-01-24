@@ -13,14 +13,12 @@ import * as i18n from './translations';
 import { MissingPrivilegesDescription } from './missing_privileges';
 import { ConnectorSetup } from './connector_setup';
 import { ConnectorSelectorPanel } from './connector_selector_panel';
-import { useStoredAssistantConnectorId } from '../../../../hooks/use_stored_state';
-import { useOnboardingContext } from '../../../../onboarding_context';
 
 interface ConnectorCardsProps {
-  onNewConnectorSaved: () => void;
+  onNewConnectorSaved: (connectorId: string) => void;
   canCreateConnectors?: boolean;
   connectors?: AIConnector[]; // make connectors optional to handle loading state
-  selectedConnectorId?: string;
+  selectedConnectorId?: string | null;
   onConnectorSelected: (connector: AIConnector) => void;
 }
 
@@ -32,17 +30,13 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
     selectedConnectorId,
     onConnectorSelected,
   }) => {
-    const { spaceId } = useOnboardingContext();
-    const [, setStoredAssistantConnectorId] = useStoredAssistantConnectorId(spaceId);
-
     const onNewConnectorStoredSave = useCallback(
       (newConnector: AIConnector) => {
-        onNewConnectorSaved();
-        setStoredAssistantConnectorId(newConnector.id);
+        onNewConnectorSaved(newConnector.id);
         // default select the new connector created
         onConnectorSelected(newConnector);
       },
-      [onConnectorSelected, onNewConnectorSaved, setStoredAssistantConnectorId]
+      [onConnectorSelected, onNewConnectorSaved]
     );
 
     if (!connectors) {
