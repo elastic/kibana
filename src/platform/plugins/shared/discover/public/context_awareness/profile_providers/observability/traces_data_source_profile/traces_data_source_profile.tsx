@@ -145,28 +145,32 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                   const isRootSpan = !params.record.flattened['parent.id'];
                   return (
                     <EuiPanel color="transparent" hasShadow={false}>
-                      <EuiFlexGroup>
-                        <EuiFlexItem>
-                          <EuiText color="subdued" size="xs">
-                            Name
-                          </EuiText>
-                          {isRootSpan ? (
-                            <TransactionLink
-                              traceId={traceId as string}
-                              transactionName={transactionName as string}
-                              serviceName={serviceName as string}
-                              indexPattern={context.indexPattern}
-                            />
-                          ) : (
-                            <SpanLink
-                              spanId={spanId as string}
-                              spanName={spanName as string}
-                              traceId={traceId as string}
-                            />
-                          )}
-                        </EuiFlexItem>
-                      </EuiFlexGroup>
-                      <EuiSpacer size="l" />
+                      {!!spanId && (
+                        <>
+                          <EuiFlexGroup>
+                            <EuiFlexItem>
+                              <EuiText color="subdued" size="xs">
+                                Name
+                              </EuiText>
+                              {isRootSpan ? (
+                                <TransactionLink
+                                  traceId={traceId as string}
+                                  transactionName={transactionName as string}
+                                  serviceName={serviceName as string}
+                                  indexPattern={context.indexPattern}
+                                />
+                              ) : (
+                                <SpanLink
+                                  spanId={spanId as string}
+                                  spanName={spanName as string}
+                                  traceId={traceId as string}
+                                />
+                              )}
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                          <EuiSpacer size="l" />
+                        </>
+                      )}
                       <EuiFlexGroup>
                         <EuiFlexItem>
                           <EuiText color="subdued" size="xs">
