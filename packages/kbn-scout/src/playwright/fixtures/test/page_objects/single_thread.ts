@@ -7,9 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { test as base } from '@playwright/test';
-import { ScoutTestFixtures, ScoutWorkerFixtures } from '../types';
-import { createCorePageObjects } from '../../page_objects';
+import { PageObjects, createCorePageObjects } from '../../../page_objects';
+import { serviceLoadedMsg } from '../../../utils';
+import { scoutPageFixture } from '../scout_page';
 
 /**
  * The "pageObjects" fixture provides a centralized and consistent way to access and
@@ -19,10 +19,12 @@ import { createCorePageObjects } from '../../page_objects';
  *
  * Note: Page Objects are lazily instantiated on first access.
  */
-export const pageObjectsFixture = base.extend<ScoutTestFixtures, ScoutWorkerFixtures>({
-  pageObjects: async ({ page }, use) => {
+export const pageObjectsFixture = scoutPageFixture.extend<{
+  pageObjects: PageObjects;
+}>({
+  pageObjects: async ({ page, log }, use) => {
     const corePageObjects = createCorePageObjects(page);
-
+    log.debug(serviceLoadedMsg(`pageObjects`));
     await use(corePageObjects);
   },
 });

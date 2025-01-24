@@ -7,5 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { serviceLoadedMsg, isValidUTCDate, formatTime, getPlaywrightGrepTag } from './runner_utils';
-export { measurePerformance } from './performance';
+import { ToolingLog } from '../../types';
+
+export const measurePerformance = async <T>(
+  log: ToolingLog,
+  label: string,
+  fn: () => Promise<T>
+): Promise<T> => {
+  const startTime = performance.now();
+  const result = await fn();
+  const duration = performance.now() - startTime;
+  log.debug(`${label} took ${duration.toFixed(2)}ms`);
+  return result;
+};
