@@ -30,14 +30,14 @@ describe('parse severity data', () => {
 });
 
 describe.each([
-  { severity: 'critical', colorToken: 'euiColorVis9', themeName: 'Amsterdam' },
-  { severity: 'high', colorToken: 'euiColorVis7', themeName: 'Amsterdam' },
-  { severity: 'medium', colorToken: 'euiColorVis5', themeName: 'Amsterdam' },
-  { severity: 'low', colorToken: 'euiColorVis0', themeName: 'Amsterdam' },
-  { severity: 'critical', colorToken: 'euiColorSeverity14', themeName: 'Borealis' },
-  { severity: 'high', colorToken: 'euiColorSeverity10', themeName: 'Borealis' },
-  { severity: 'medium', colorToken: 'euiColorSeverity7', themeName: 'Borealis' },
-  { severity: 'low', colorToken: 'euiColorVisSuccess0', themeName: 'Borealis' },
+  { severity: 'critical', colorToken: '#E7664C', themeName: 'Amsterdam' },
+  { severity: 'high', colorToken: '#DA8B45', themeName: 'Amsterdam' },
+  { severity: 'medium', colorToken: '#D6BF57', themeName: 'Amsterdam' },
+  { severity: 'low', colorToken: '#54B399', themeName: 'Amsterdam' },
+  { severity: 'critical', colorToken: '#E7664C', themeName: 'Borealis' },
+  { severity: 'high', colorToken: '#DA8B45', themeName: 'Borealis' },
+  { severity: 'medium', colorToken: '#D6BF57', themeName: 'Borealis' },
+  { severity: 'low', colorToken: '#54B399', themeName: 'Borealis' },
 ])('$themeName: getSeverityColor', ({ severity, colorToken, themeName }) => {
   const mockEuiTheme =
     themeName === 'Amsterdam' ? getMockEuiAmsterdamTheme() : getMockEuiBorealisTheme();
