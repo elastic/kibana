@@ -57236,6 +57236,7 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
         lookbackPeriod:
           default: 24h
+          pattern: '[smh]$'
           type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
