@@ -307,15 +307,12 @@ paths:
             schema:
               type: object
               properties:
-<<<<<<< HEAD
-=======
                 enrichPolicyExecutionInterval:
                   $ref: '#/components/schemas/Interval'
                 entityTypes:
                   items:
                     $ref: '#/components/schemas/EntityType'
                   type: array
->>>>>>> 1ca4d967d92 ([SecuritySolution] Add enrichPolicyExecutionInterval to entity enablement and init APIs (#207374))
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.
@@ -1150,7 +1147,7 @@ components:
         Interval in which enrich policy runs. For example, `"1h"` means the rule
         runs every hour.
       example: 1h
-      pattern: ^[1-9]\d*[smh]$
+      pattern: '^[1-9]\d*[smh]$'
       type: string
     RiskEngineScheduleNowErrorResponse:
       type: object
