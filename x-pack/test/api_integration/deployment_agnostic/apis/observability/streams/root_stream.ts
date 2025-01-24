@@ -17,7 +17,7 @@ import {
 const rootStreamDefinition: WiredStreamDefinition = {
   name: 'logs',
   ingest: {
-    lifecycle: { disabled: {} },
+    lifecycle: { dsl: {} },
     processing: [],
     routing: [],
     wired: {

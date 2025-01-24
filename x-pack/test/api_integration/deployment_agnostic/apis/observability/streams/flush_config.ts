@@ -25,7 +25,7 @@ const streams: StreamPutItem[] = [
     name: 'logs',
     stream: {
       ingest: {
-        lifecycle: { disabled: {} },
+        lifecycle: { dsl: {} },
         processing: [],
         wired: {
           fields: {
