@@ -36,7 +36,10 @@ export const AwsInputVarFields = ({
       {fields.map((field, index) => {
         const invalid = fieldIsInvalid(field.value, hasInvalidRequiredVars);
         const invalidError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
-          defaultMessage: `${field.label} is required`,
+          defaultMessage: '{field} is required',
+          values: {
+            field: field.label,
+          },
         });
         return (
           <div key={index}>

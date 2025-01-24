@@ -593,14 +593,20 @@ export const GcpInputVarFields = ({
   const organizationIdError = i18n.translate(
     'xpack.csp.cspmIntegration.integration.fieldRequired',
     {
-      defaultMessage: `${organizationIdFields?.label} is required`,
+      defaultMessage: '{field} is required',
+      values: {
+        field: organizationIdFields?.label,
+      },
     }
   );
 
   const projectIdFields = getFieldById('gcp.project_id');
   const projectIdValueInvalid = fieldIsInvalid(projectIdFields?.value, hasInvalidRequiredVars);
   const projectIdError = i18n.translate('xpack.csp.cspmIntegration.integration.fieldRequired', {
-    defaultMessage: `${projectIdFields?.label} is required`,
+    defaultMessage: '{field} is required',
+    values: {
+      field: projectIdFields?.label,
+    },
   });
 
   const credentialsTypeFields = getFieldById('gcp.credentials.type');
@@ -613,7 +619,10 @@ export const GcpInputVarFields = ({
   const credentialFilesError = i18n.translate(
     'xpack.csp.cspmIntegration.integration.fieldRequired',
     {
-      defaultMessage: `${credentialFilesFields?.label} is required`,
+      defaultMessage: '{field} is required',
+      values: {
+        field: credentialFilesFields?.label,
+      },
     }
   );
 
@@ -625,7 +634,10 @@ export const GcpInputVarFields = ({
   const credentialJSONError = i18n.translate(
     'xpack.csp.cspmIntegration.integration.fieldRequired',
     {
-      defaultMessage: `${credentialJSONFields?.label} is required`,
+      defaultMessage: '{field} is required',
+      values: {
+        field: credentialJSONFields?.label,
+      },
     }
   );
 
