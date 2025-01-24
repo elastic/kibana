@@ -7,11 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import {
-  createStateContainer,
-  createStateContainerReactHelpers,
-  ReduxLikeStateContainer,
-} from '@kbn/kibana-utils-plugin/common';
+import { createStateContainer, ReduxLikeStateContainer } from '@kbn/kibana-utils-plugin/common';
 import {
   AggregateQuery,
   COMPARE_ALL_OPTIONS,
@@ -174,9 +170,6 @@ export interface AppStateUrl extends Omit<DiscoverAppState, 'sort'> {
   index?: string;
 }
 
-export const { Provider: DiscoverAppStateProvider, useSelector: useAppStateSelector } =
-  createStateContainerReactHelpers<ReduxLikeStateContainer<DiscoverAppState>>();
-
 /**
  * This is the app state container for Discover main, it's responsible for syncing state with the URL
  * @param stateStorage
@@ -215,7 +208,7 @@ export const getDiscoverAppStateContainer = ({
       if (isOfAggregateQueryType(value.query)) {
         value.dataSource = createEsqlDataSource();
       }
-
+      internalStateContainer.transitions.setAppState(value);
       appStateContainer.set(value);
     },
   };

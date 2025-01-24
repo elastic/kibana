@@ -49,7 +49,6 @@ import { useQuerySubscriber } from '@kbn/unified-field-list';
 import { DiscoverGrid } from '../../../../components/discover_grid';
 import { getDefaultRowsPerPage } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { FetchStatus } from '../../../types';
 import { DiscoverStateContainer } from '../../state_management/discover_state';
@@ -123,18 +122,18 @@ function DiscoverDocumentsComponent({
     columns,
     sampleSizeState,
     density,
-  ] = useAppStateSelector((state) => {
+  ] = useInternalStateSelector((state) => {
     return [
-      state.dataSource,
-      state.query,
-      state.sort,
-      state.rowHeight,
-      state.headerRowHeight,
-      state.rowsPerPage,
-      state.grid,
-      state.columns,
-      state.sampleSize,
-      state.density,
+      state.appState?.dataSource,
+      state.appState?.query,
+      state.appState?.sort,
+      state.appState?.rowHeight,
+      state.appState?.headerRowHeight,
+      state.appState?.rowsPerPage,
+      state.appState?.grid,
+      state.appState?.columns,
+      state.appState?.sampleSize,
+      state.appState?.density,
     ];
   });
   const expandedDoc = useInternalStateSelector((state) => state.expandedDoc);

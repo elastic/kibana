@@ -21,11 +21,11 @@ import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { FieldStatisticsTab } from '../field_stats_table';
 import { DiscoverDocuments } from './discover_documents';
 import { DOCUMENTS_VIEW_CLICK, FIELD_STATISTICS_VIEW_CLICK } from '../field_stats_table/constants';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import type { PanelsToggleProps } from '../../../../components/panels_toggle';
 import { PatternAnalysisTab } from '../pattern_analysis/pattern_analysis_tab';
 import { PATTERN_ANALYSIS_VIEW_CLICK } from '../pattern_analysis/constants';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
+import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
 
 const DROP_PROPS = {
   value: {
@@ -127,7 +127,7 @@ export const DiscoverMainContent = ({
 
   const viewModeToggle = useMemo(() => renderViewModeToggle(), [renderViewModeToggle]);
 
-  const showChart = useAppStateSelector((state) => !state.hideChart);
+  const showChart = useInternalStateSelector((state) => !state.appState?.hideChart);
 
   return (
     <Droppable

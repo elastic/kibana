@@ -35,7 +35,6 @@ import { useSavedSearchInitial } from '../../state_management/discover_state_pro
 import { DiscoverStateContainer } from '../../state_management/discover_state';
 import { VIEW_MODE } from '../../../../../common/constants';
 import { useInternalStateSelector } from '../../state_management/discover_internal_state_container';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import { DiscoverNoResults } from '../no_results';
 import { LoadingSpinner } from '../loading_spinner/loading_spinner';
@@ -63,6 +62,7 @@ export interface DiscoverLayoutProps {
 }
 
 export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
+  const services = useDiscoverServices();
   const {
     trackUiMetric,
     capabilities,
@@ -76,26 +76,26 @@ export function DiscoverLayout({ stateContainer }: DiscoverLayoutProps) {
     dataVisualizer: dataVisualizerService,
     ebtManager,
     fieldsMetadata,
-  } = useDiscoverServices();
+  } = services;
   const pageBackgroundColor = useEuiBackgroundColor('plain');
   const globalQueryState = data.query.getState();
   const { main$ } = stateContainer.dataState.data$;
-  const [query, savedQuery, columns, sort, grid] = useAppStateSelector((state) => [
-    state.query,
-    state.savedQuery,
-    state.columns,
-    state.sort,
-    state.grid,
+  const [query, savedQuery, columns, sort, grid] = useInternalStateSelector((state) => [
+    state.appState?.query,
+    state.appState?.savedQuery,
+    state.appState?.columns,
+    state.appState?.sort,
+    state.appState?.grid,
   ]);
   const isEsqlMode = useIsEsqlMode();
 
-  const viewMode: VIEW_MODE = useAppStateSelector((state) => {
+  const viewMode: VIEW_MODE = useInternalStateSelector((state) => {
     const fieldStatsNotAvailable =
       !uiSettings.get(SHOW_FIELD_STATISTICS) && !!dataVisualizerService;
-    if (state.viewMode === VIEW_MODE.AGGREGATED_LEVEL && fieldStatsNotAvailable) {
+    if (state.appState?.viewMode === VIEW_MODE.AGGREGATED_LEVEL && fieldStatsNotAvailable) {
       return VIEW_MODE.DOCUMENT_LEVEL;
     }
-    return state.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
+    return state.appState?.viewMode ?? VIEW_MODE.DOCUMENT_LEVEL;
   });
   const [dataView, dataViewLoading] = useInternalStateSelector((state) => [
     state.dataView!,

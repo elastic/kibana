@@ -20,7 +20,6 @@ import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 import type { DiscoverStateContainer } from '../../state_management/discover_state';
 import { onSaveSearch } from './on_save_search';
 import { useDiscoverCustomization } from '../../../../customizations';
-import { useAppStateSelector } from '../../state_management/discover_app_state_container';
 import { useDiscoverTopNav } from './use_discover_topnav';
 import { useIsEsqlMode } from '../../hooks/use_is_esql_mode';
 import { ESQLToDataViewTransitionModal } from './esql_dataview_transition';
@@ -48,7 +47,7 @@ export const DiscoverTopNav = ({
   const services = useDiscoverServices();
   const { dataViewEditor, navigation, dataViewFieldEditor, data, uiSettings, setHeaderActionMenu } =
     services;
-  const query = useAppStateSelector((state) => state.query);
+  const query = useInternalStateSelector((state) => state.appState?.query);
   const adHocDataViews = useInternalStateSelector((state) => state.adHocDataViews);
   const dataView = useInternalStateSelector((state) => state.dataView!);
   const savedDataViews = useInternalStateSelector((state) => state.savedDataViews);

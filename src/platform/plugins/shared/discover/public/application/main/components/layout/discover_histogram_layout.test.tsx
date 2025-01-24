@@ -62,7 +62,6 @@ function getStateContainer(savedSearch?: SavedSearch) {
 }
 
 const mountComponent = async ({
-  isEsqlMode = false,
   storage,
   savedSearch = savedSearchMockWithTimeField,
   searchSessionId = '123',
