@@ -46,12 +46,12 @@ export interface CreateRuleFormProps {
   canShowConsumerSelection?: boolean;
   showMustacheAutocompleteSwitch?: boolean;
   isFlyout?: boolean;
+  isServerless?: boolean;
   onCancel?: () => void;
   onSubmit?: (ruleId: string) => void;
   onChangeMetaData?: (metadata?: RuleTypeMetaData) => void;
   initialValues?: Partial<RuleFormData>;
   initialMetadata?: RuleTypeMetaData;
-  isServerless?: boolean;
 }
 
 export const CreateRuleForm = (props: CreateRuleFormProps) => {
@@ -67,12 +67,12 @@ export const CreateRuleForm = (props: CreateRuleFormProps) => {
     canShowConsumerSelection = true,
     showMustacheAutocompleteSwitch = false,
     isFlyout,
+    isServerless = false,
     onCancel,
     onSubmit,
     onChangeMetaData,
     initialMetadata,
     initialValues = {},
-    isServerless,
   } = props;
 
   const { http, docLinks, notifications, ruleTypeRegistry, ...deps } = plugins;

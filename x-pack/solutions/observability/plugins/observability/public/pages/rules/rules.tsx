@@ -11,12 +11,10 @@ import { ALERTING_FEATURE_ID } from '@kbn/alerting-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useBreadcrumbs } from '@kbn/observability-shared-plugin/public';
-import { AlertConsumers } from '@kbn/rule-data-utils';
 import { useLoadRuleTypesQuery } from '@kbn/triggers-actions-ui-plugin/public';
 import React, { lazy, useEffect, useState } from 'react';
 import { useHistory } from 'react-router-dom';
-import { observabilityRuleCreationValidConsumers } from '../../../common/constants';
-import { RULES_LOGS_PATH, RULES_PATH } from '../../../common/locators/paths';
+import { RULES_LOGS_PATH, RULES_PATH, paths } from '../../../common/locators/paths';
 import { useGetFilteredRuleTypes } from '../../hooks/use_get_filtered_rule_types';
 import { usePluginContext } from '../../hooks/use_plugin_context';
 import { useKibana } from '../../utils/kibana_react';
@@ -38,18 +36,13 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
     docLinks,
     notifications: { toasts },
     observabilityAIAssistant,
-    triggersActionsUi: {
-      ruleTypeRegistry,
-      getRuleFormFlyout: AddRuleFlyout,
-      getRulesSettingsLink: RulesSettingsLink,
-    },
+    application,
+    triggersActionsUi: { ruleTypeRegistry, getRulesSettingsLink: RulesSettingsLink },
     serverless,
   } = services;
   const { ObservabilityPageTemplate } = usePluginContext();
   const history = useHistory();
   const [ruleTypeModalVisibility, setRuleTypeModalVisibility] = useState<boolean>(false);
-  const [ruleTypeIdToCreate, setRuleTypeIdToCreate] = useState<string | undefined>(undefined);
-  const [addRuleFlyoutVisibility, setAddRuleFlyoutVisibility] = useState(false);
   const [stateRefresh, setRefresh] = useState(new Date());
 
   useBreadcrumbs(
@@ -189,33 +182,15 @@ export function RulesPage({ activeTab = RULES_TAB_NAME }: RulesPageProps) {
         <RuleTypeModal
           onClose={() => setRuleTypeModalVisibility(false)}
           onSelectRuleType={(ruleTypeId) => {
-            setRuleTypeIdToCreate(ruleTypeId);
             setRuleTypeModalVisibility(false);
-            setAddRuleFlyoutVisibility(true);
+            return application.navigateToUrl(
+              http.basePath.prepend(paths.observability.createRule(ruleTypeId))
+            );
           }}
           http={http}
           toasts={toasts}
           registeredRuleTypes={ruleTypeRegistry.list()}
           filteredRuleTypes={filteredRuleTypes}
-        />
-      )}
-
-      {addRuleFlyoutVisibility && (
-        <AddRuleFlyout
-          services={services}
-          ruleTypeId={ruleTypeIdToCreate}
-          consumer={ALERTING_FEATURE_ID}
-          filteredRuleTypes={filteredRuleTypes}
-          validConsumers={observabilityRuleCreationValidConsumers}
-          multiConsumerSelection={AlertConsumers.LOGS}
-          onCancel={() => {
-            setAddRuleFlyoutVisibility(false);
-          }}
-          onSubmit={() => {
-            setRefresh(new Date());
-            setAddRuleFlyoutVisibility(false);
-          }}
-          shouldUseRuleProducer
         />
       )}
     </ObservabilityPageTemplate>

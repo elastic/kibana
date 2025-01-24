@@ -8,9 +8,9 @@
  */
 
 import { EuiEmptyPrompt, EuiText } from '@elastic/eui';
-import type { RuleCreationValidConsumer } from '@kbn/rule-data-utils';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React, { useMemo } from 'react';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { type RuleCreationValidConsumer } from '@kbn/rule-data-utils';
 import { CreateRuleForm } from './create_rule_form';
 import { EditRuleForm } from './edit_rule_form';
 import './rule_form.scss';
@@ -177,6 +177,8 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     isServerless,
     id,
     ruleTypeId,
+    validConsumers,
+    multiConsumerSelection,
     onCancel,
     onSubmit,
     onChangeMetaData,
@@ -185,9 +187,7 @@ export const RuleForm = <MetaData extends RuleTypeMetaData = RuleTypeMetaData>(
     connectorFeatureId,
     initialMetadata,
     consumer,
-    multiConsumerSelection,
     hideInterval,
-    validConsumers,
     filteredRuleTypes,
     shouldUseRuleProducer,
     canShowConsumerSelection,
