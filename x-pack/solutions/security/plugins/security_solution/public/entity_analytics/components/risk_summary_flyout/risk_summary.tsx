@@ -78,7 +78,7 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       severity: entityData?.risk?.calculated_level,
       query: `${fieldName}: ${entityName}`,
       spaceId: 'default',
-      riskEntity: entityType, 
+      riskEntity: entityType,
       // TODO: add in riskColors when severity palette agreed on.
       // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
     });
