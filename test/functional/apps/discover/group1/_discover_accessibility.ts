@@ -75,9 +75,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await focusAndPressButton('discoverAlertsButton');
         expect(await hasFocus('discoverAlertsButton')).to.be(false);
         await focusAndPressButton('discoverCreateAlertButton');
+        expect(await testSubjects.exists('ruleFormFlyoutLoading')).to.be(true);
         // Increase timeout. The rule flyout has to load asynchronously when the user clicks the create rule button,
         // so a higher timeout here reduces flakiness in the test
-        expect(await testSubjects.exists('addRuleFlyoutTitle', { timeout: 10000 })).to.be(true);
+        expect(await testSubjects.exists('addRuleFlyoutTitle', { timeout: 20000 })).to.be(true);
         await retry.try(async () => {
           await browser.pressKeys(browser.keys.ESCAPE);
           // A bug exists with the create rule flyout where sometimes the confirm modal

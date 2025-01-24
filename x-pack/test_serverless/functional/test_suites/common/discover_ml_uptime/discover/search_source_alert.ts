@@ -606,9 +606,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await openDiscoverAlertFlyout();
       await defineSearchSourceAlert('test-adhoc-alert');
       await testSubjects.click('ruleFormStep-details');
-      await testSubjects.click('saveRuleButton');
+      await testSubjects.click('ruleFlyoutFooterSaveButton');
       await retry.try(async () => {
-        await testSubjects.missingOrFail('saveRuleButton');
+        await testSubjects.missingOrFail('ruleFlyoutFooterSaveButton');
       });
       await PageObjects.header.waitUntilLoadingHasFinished();
 

@@ -92,7 +92,7 @@ const registerCustomThresholdRuleAction = (
         const { filters, query } = data.query.getState();
 
         return triggersActionsUi.getRuleFormFlyout({
-          services: { data, ...services },
+          plugins: { data, ...services },
           consumer: 'logs',
           ruleTypeId: OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
           initialValues: {

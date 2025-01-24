@@ -80,7 +80,7 @@ const CreateAlertFlyout: React.FC<{
   );
 
   return triggersActionsUi?.getRuleFormFlyout<EsQueryAlertMetaData>({
-    services,
+    plugins: services,
     initialMetadata: discoverMetadata,
     consumer: 'alerts',
     onCancel: onFinishAction,
