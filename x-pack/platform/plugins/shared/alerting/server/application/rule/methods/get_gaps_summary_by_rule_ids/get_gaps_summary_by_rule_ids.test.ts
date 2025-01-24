@@ -74,7 +74,7 @@ const filter = fromKueryExpression(
   '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp))'
 );
 
-describe('getGapsInfoByRuleIds', () => {
+describe('getGapsSummaryByRuleIds', () => {
   let rulesClient: RulesClient;
 
   beforeEach(() => {
@@ -125,7 +125,7 @@ describe('getGapsInfoByRuleIds', () => {
       },
     });
 
-    const result = await rulesClient.getGapsInfoByRuleIds({
+    const result = await rulesClient.getGapsSummaryByRuleIds({
       ruleIds,
       start,
       end,
@@ -237,7 +237,7 @@ describe('getGapsInfoByRuleIds', () => {
       },
     });
 
-    const result = await rulesClient.getGapsInfoByRuleIds({
+    const result = await rulesClient.getGapsSummaryByRuleIds({
       ruleIds,
       start,
       end,
@@ -265,7 +265,7 @@ describe('getGapsInfoByRuleIds', () => {
       authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Not authorized'));
 
       await expect(
-        rulesClient.getGapsInfoByRuleIds({
+        rulesClient.getGapsSummaryByRuleIds({
           ruleIds: ['1'],
           start: '2023-11-16T08:00:00.000Z',
           end: '2023-11-16T09:00:00.000Z',
@@ -278,7 +278,7 @@ describe('getGapsInfoByRuleIds', () => {
           message: 'Not authorized',
         },
         event: {
-          action: 'rule_get_gaps_info_by_rule_ids',
+          action: 'rule_get_gaps_summary_by_rule_ids',
           category: ['database'],
           outcome: 'failure',
           type: ['access'],
@@ -304,7 +304,7 @@ describe('getGapsInfoByRuleIds', () => {
       });
 
       await expect(
-        rulesClient.getGapsInfoByRuleIds({
+        rulesClient.getGapsSummaryByRuleIds({
           ruleIds: ['1'],
           start: '2023-11-16T08:00:00.000Z',
           end: '2023-11-16T09:00:00.000Z',
@@ -328,7 +328,7 @@ describe('getGapsInfoByRuleIds', () => {
       authorization.ensureAuthorized.mockRejectedValue(new Error('Not authorized for rule type'));
 
       await expect(
-        rulesClient.getGapsInfoByRuleIds({
+        rulesClient.getGapsSummaryByRuleIds({
           ruleIds: ['1'],
           start: '2023-11-16T08:00:00.000Z',
           end: '2023-11-16T09:00:00.000Z',
@@ -341,7 +341,7 @@ describe('getGapsInfoByRuleIds', () => {
           message: 'Not authorized for rule type',
         },
         event: {
-          action: 'rule_get_gaps_info_by_rule_ids',
+          action: 'rule_get_gaps_summary_by_rule_ids',
           category: ['database'],
           outcome: 'failure',
           type: ['access'],

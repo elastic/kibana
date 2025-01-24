@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 
-export const getGapsInfoByRuleIdsQuerySchema = schema.object(
+export const getGapsSummaryByRuleIdsQuerySchema = schema.object(
   {
     end: schema.string(),
     start: schema.string(),
@@ -30,7 +30,7 @@ export const getGapsInfoByRuleIdsQuerySchema = schema.object(
   }
 );
 
-export const getGapsInfoByRuleIdsResponseSchema = schema.object({
+export const getGapsSummaryByRuleIdsResponseSchema = schema.object({
   data: schema.arrayOf(
     schema.object({
       rule_id: schema.string(),

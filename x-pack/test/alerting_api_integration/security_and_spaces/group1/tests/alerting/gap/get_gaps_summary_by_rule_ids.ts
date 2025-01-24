@@ -11,11 +11,11 @@ import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
 import { getUrlPrefix, ObjectRemover, getTestRuleData } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
-export default function getGapsInfoByRuleIdsTests({ getService }: FtrProviderContext) {
+export default function getGapsSummaryByRuleIdsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
 
-  describe('get gaps info by rule ids', () => {
+  describe('get gaps summary by rule ids', () => {
     const objectRemover = new ObjectRemover(supertest);
     const searchStart = '2024-01-01T00:00:00.000Z';
     const searchEnd = '2024-01-31T00:00:00.000Z';
@@ -50,7 +50,7 @@ export default function getGapsInfoByRuleIdsTests({ getService }: FtrProviderCon
           password: user.password,
         };
 
-        describe(`get gaps info by rule ids (${scenario.id})`, () => {
+        describe(`get gaps summary by rule ids (${scenario.id})`, () => {
           beforeEach(async () => {
             await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/_test/delete_gaps`)
@@ -59,7 +59,7 @@ export default function getGapsInfoByRuleIdsTests({ getService }: FtrProviderCon
               .expect(200);
           });
 
-          it('should return gaps info for multiple rules', async () => {
+          it('should return gaps summary for multiple rules', async () => {
             // Create 2 rules
             const rresponse1 = await supertest
               .post(`${getUrlPrefix(apiOptions.spaceId)}/api/alerting/rule`)
@@ -102,7 +102,7 @@ export default function getGapsInfoByRuleIdsTests({ getService }: FtrProviderCon
               .post(
                 `${getUrlPrefix(
                   apiOptions.spaceId
-                )}/internal/alerting/rules/gaps/_get_gaps_info_by_rule_ids`
+                )}/internal/alerting/rules/gaps/_get_gaps_summary_by_rule_ids`
               )
               .set('kbn-xsrf', 'foo')
               .auth(apiOptions.username, apiOptions.password)
@@ -119,7 +119,7 @@ export default function getGapsInfoByRuleIdsTests({ getService }: FtrProviderCon
                 expect(response.body).to.eql({
                   error: 'Forbidden',
                   message:
-                    'Failed to find gaps info for rules: Unauthorized to find rules for any rule types',
+                    'Failed to find gaps summary for rules: Unauthorized to find rules for any rule types',
                   statusCode: 403,
                 });
                 break;
@@ -159,7 +159,7 @@ export default function getGapsInfoByRuleIdsTests({ getService }: FtrProviderCon
               .post(
                 `${getUrlPrefix(
                   apiOptions.spaceId
-                )}/internal/alerting/rules/gaps/_get_gaps_info_by_rule_ids`
+                )}/internal/alerting/rules/gaps/_get_gaps_summary_by_rule_ids`
               )
               .set('kbn-xsrf', 'foo')
               .auth(apiOptions.username, apiOptions.password)
@@ -176,7 +176,7 @@ export default function getGapsInfoByRuleIdsTests({ getService }: FtrProviderCon
                 expect(response.body).to.eql({
                   error: 'Forbidden',
                   message:
-                    'Failed to find gaps info for rules: Unauthorized to find rules for any rule types',
+                    'Failed to find gaps summary for rules: Unauthorized to find rules for any rule types',
                   statusCode: 403,
                 });
                 break;
@@ -190,7 +190,7 @@ export default function getGapsInfoByRuleIdsTests({ getService }: FtrProviderCon
                 expect(response.body).to.eql({
                   statusCode: 400,
                   error: 'Bad Request',
-                  message: `Failed to find gaps info for rules: No rules matching ids ${nonExistentRuleId} found to get gaps info`,
+                  message: `Failed to find gaps summary for rules: No rules matching ids ${nonExistentRuleId} found to get gaps summary`,
                 });
                 break;
 
@@ -232,7 +232,7 @@ export default function getGapsInfoByRuleIdsTests({ getService }: FtrProviderCon
                 .post(
                   `${getUrlPrefix(
                     apiOptions.spaceId
-                  )}/internal/alerting/rules/gaps/_get_gaps_info_by_rule_ids`
+                  )}/internal/alerting/rules/gaps/_get_gaps_summary_by_rule_ids`
                 )
                 .set('kbn-xsrf', 'foo')
                 .auth(apiOptions.username, apiOptions.password)

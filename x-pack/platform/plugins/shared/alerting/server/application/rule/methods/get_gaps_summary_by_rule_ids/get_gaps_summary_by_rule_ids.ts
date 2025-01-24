@@ -9,7 +9,7 @@ import Boom from '@hapi/boom';
 import { KueryNode, nodeBuilder } from '@kbn/es-query';
 import { AlertingAuthorizationEntity, ReadOperations } from '../../../../authorization';
 import { RuleBulkOperationAggregation, RulesClientContext } from '../../../../rules_client';
-import { GetGapsInfoByRuleIdsParams, GetGapsInfoByRuleIdsResponse } from './types';
+import { GetGapsSummaryByRuleIdsParams, GetGapsSummaryByRuleIdsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 import { convertRuleIdsToKueryNode } from '../../../../lib';
@@ -20,9 +20,9 @@ import {
 } from '../../../../rules_client/common/constants';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 
-export async function getGapsInfoByRuleIds(
+export async function getGapsSummaryByRuleIds(
   context: RulesClientContext,
-  params: GetGapsInfoByRuleIdsParams
+  params: GetGapsSummaryByRuleIdsParams
 ) {
   try {
     let authorizationTuple;
@@ -34,7 +34,7 @@ export async function getGapsInfoByRuleIds(
     } catch (error) {
       context.auditLogger?.log(
         ruleAuditEvent({
-          action: RuleAuditAction.GET_GAPS_INFO_BY_RULE_IDS,
+          action: RuleAuditAction.GET_GAPS_SUMMARY_BY_RULE_IDS,
           error,
         })
       );
@@ -88,7 +88,7 @@ export async function getGapsInfoByRuleIds(
         } catch (error) {
           context.auditLogger?.log(
             ruleAuditEvent({
-              action: RuleAuditAction.GET_GAPS_INFO_BY_RULE_IDS,
+              action: RuleAuditAction.GET_GAPS_SUMMARY_BY_RULE_IDS,
               error,
             })
           );
@@ -148,7 +148,7 @@ export async function getGapsInfoByRuleIds(
     const uniqueRuleIdsAgg = aggs.aggregations?.unique_rule_ids as UniqueRuleIdsAgg;
     const resultBuckets = uniqueRuleIdsAgg?.buckets ?? [];
 
-    const result: GetGapsInfoByRuleIdsResponse = {
+    const result: GetGapsSummaryByRuleIdsResponse = {
       data: resultBuckets.map((bucket) => ({
         ruleId: bucket.key,
         totalUnfilledDurationMs: bucket.totalUnfilledDurationMs.value,

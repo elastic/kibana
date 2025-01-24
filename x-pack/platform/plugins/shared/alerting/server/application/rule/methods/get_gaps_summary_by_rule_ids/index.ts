@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './get_gaps_info_by_rule_ids';
+export { getGapsSummaryByRuleIds } from './get_gaps_summary_by_rule_ids';

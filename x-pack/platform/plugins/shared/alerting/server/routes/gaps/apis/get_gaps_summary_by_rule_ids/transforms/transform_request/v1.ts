@@ -6,14 +6,14 @@
  */
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import { GetGapsInfoByRuleIdsParams } from '../../../../../../application/rule/methods/get_gaps_info_by_rule_ids/types';
-import { GetGapsInfoByRuleIdsQueryV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_info_by_rule_ids';
+import { GetGapsSummaryByRuleIdsParams } from '../../../../../../application/rule/methods/get_gaps_summary_by_rule_ids/types';
+import { GetGapsSummaryByRuleIdsQueryV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 
 export const transformRequest = ({
   rule_ids,
   start,
   end,
-}: GetGapsInfoByRuleIdsQueryV1): GetGapsInfoByRuleIdsParams => ({
+}: GetGapsSummaryByRuleIdsQueryV1): GetGapsSummaryByRuleIdsParams => ({
   ruleIds: rule_ids,
   start,
   end,

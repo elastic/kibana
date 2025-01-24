@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { GetGapsInfoByRuleIdsResponse } from '../../../../../../application/rule/methods/get_gaps_info_by_rule_ids/types';
-import { GetGapsInfoByRuleIdsResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_info_by_rule_ids';
+import { GetGapsSummaryByRuleIdsResponse } from '../../../../../../application/rule/methods/get_gaps_summary_by_rule_ids/types';
+import { GetGapsSummaryByRuleIdsResponseBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 
 export const transformResponse = (
-  response: GetGapsInfoByRuleIdsResponse
-): GetGapsInfoByRuleIdsResponseBodyV1 => ({
+  response: GetGapsSummaryByRuleIdsResponse
+): GetGapsSummaryByRuleIdsResponseBodyV1 => ({
   data: response.data.map((gap) => ({
     rule_id: gap.ruleId,
     total_unfilled_duration_ms: gap.totalUnfilledDurationMs,

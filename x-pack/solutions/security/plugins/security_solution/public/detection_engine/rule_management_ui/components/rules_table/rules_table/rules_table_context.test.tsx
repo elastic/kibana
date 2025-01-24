@@ -12,7 +12,7 @@ import { useUiSetting$ } from '../../../../../common/lib/kibana';
 import type { Rule, RulesSnoozeSettingsMap } from '../../../../rule_management/logic';
 import { useFindRules } from '../../../../rule_management/logic/use_find_rules';
 import { useFetchRulesSnoozeSettingsQuery } from '../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query';
-import { useGetGapsInfoByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_info_by_rule_id';
+import { useGetGapsSummaryByRuleIds } from '../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id';
 import type { RulesTableState } from './rules_table_context';
 import { RulesTableContextProvider, useRulesTableContext } from './rules_table_context';
 import {
@@ -28,7 +28,7 @@ jest.mock('../../../../../common/lib/kibana');
 jest.mock('../../../../rule_management/logic/use_find_rules');
 jest.mock('../../../../rule_management/logic/prebuilt_rules/use_prebuilt_rules_install_review');
 jest.mock('../../../../rule_management/api/hooks/use_fetch_rules_snooze_settings_query');
-jest.mock('../../../../rule_gaps/api/hooks/use_get_gaps_info_by_rule_id');
+jest.mock('../../../../rule_gaps/api/hooks/use_get_gaps_summary_by_rule_id');
 jest.mock('./use_rules_table_saved_state');
 
 function renderUseRulesTableContext({
@@ -54,7 +54,7 @@ function renderUseRulesTableContext({
     data: rulesSnoozeSettings instanceof Error ? undefined : rulesSnoozeSettings,
     isError: rulesSnoozeSettings instanceof Error,
   });
-  (useGetGapsInfoByRuleIds as jest.Mock).mockReturnValue({
+  (useGetGapsSummaryByRuleIds as jest.Mock).mockReturnValue({
     data: [],
     isError: false,
   });

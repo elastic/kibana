@@ -6,27 +6,27 @@
  */
 import { IRouter } from '@kbn/core/server';
 import {
-  getGapsInfoByRuleIdsQuerySchemaV1,
-  GetGapsInfoByRuleIdsQueryV1,
-  GetGapsInfoByRuleIdsResponseV1,
-} from '../../../../../common/routes/gaps/apis/get_gaps_info_by_rule_ids';
+  getGapsSummaryByRuleIdsQuerySchemaV1,
+  GetGapsSummaryByRuleIdsQueryV1,
+  GetGapsSummaryByRuleIdsResponseV1,
+} from '../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
 import {
   AlertingRequestHandlerContext,
-  INTERNAL_ALERTING_GAPS_GET_INFO_BY_RULE_IDS_API_PATH,
+  INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH,
 } from '../../../../types';
 import { transformRequestV1, transformResponseV1 } from './transforms';
 
-export const getGapsInfoByRuleIdsRoute = (
+export const getGapsSummaryByRuleIdsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
   router.post(
     {
-      path: `${INTERNAL_ALERTING_GAPS_GET_INFO_BY_RULE_IDS_API_PATH}`,
+      path: `${INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH}`,
       validate: {
-        body: getGapsInfoByRuleIdsQuerySchemaV1,
+        body: getGapsSummaryByRuleIdsQuerySchemaV1,
       },
       options: {
         access: 'internal',
@@ -36,9 +36,9 @@ export const getGapsInfoByRuleIdsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-        const body: GetGapsInfoByRuleIdsQueryV1 = req.body;
-        const result = await rulesClient.getGapsInfoByRuleIds(transformRequestV1(body));
-        const response: GetGapsInfoByRuleIdsResponseV1 = {
+        const body: GetGapsSummaryByRuleIdsQueryV1 = req.body;
+        const result = await rulesClient.getGapsSummaryByRuleIds(transformRequestV1(body));
+        const response: GetGapsSummaryByRuleIdsResponseV1 = {
           body: transformResponseV1(result),
         };
         return res.ok(response);
