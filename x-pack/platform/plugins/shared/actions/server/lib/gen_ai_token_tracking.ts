@@ -26,7 +26,7 @@ import {
 } from './get_token_count_from_invoke_stream';
 import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 
-interface TelemetryMetadata {
+export interface TelemetryMetadata {
   pluginId?: string;
   aggregateBy?: string;
 }
@@ -250,7 +250,10 @@ export const getGenAiTokenTracking = async ({
   }
 
   // this is a non-streamed Bedrock response used by security solution
-  if (actionTypeId === '.bedrock' && validatedParams.subAction === 'invokeAI') {
+  if (
+    actionTypeId === '.bedrock' &&
+    (validatedParams.subAction === 'invokeAI' || validatedParams.subAction === 'invokeAIRaw')
+  ) {
     try {
       const rData = result.data as unknown as {
         message: string;

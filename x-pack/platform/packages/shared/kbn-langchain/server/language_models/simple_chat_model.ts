@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { Readable } from 'stream';
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
+import { Logger } from '@kbn/logging';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import {
   SimpleChatModel,
   type BaseChatModelParams,
 } from '@langchain/core/language_models/chat_models';
 import { AIMessageChunk, type BaseMessage } from '@langchain/core/messages';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { Logger } from '@kbn/logging';
-import { v4 as uuidv4 } from 'uuid';
-import { get } from 'lodash/fp';
 import { ChatGenerationChunk } from '@langchain/core/outputs';
-import { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { parseGeminiStreamAsAsyncIterator, parseGeminiStream } from '../utils/gemini';
-import { parseBedrockStreamAsAsyncIterator, parseBedrockStream } from '../utils/bedrock';
+import { get } from 'lodash/fp';
+import { Readable } from 'stream';
+import { v4 as uuidv4 } from 'uuid';
+import { parseBedrockStream, parseBedrockStreamAsAsyncIterator } from '../utils/bedrock';
+import { parseGeminiStream, parseGeminiStreamAsAsyncIterator } from '../utils/gemini';
 import { getDefaultArguments } from './constants';
 
 export const getMessageContentAndRole = (prompt: string, role = 'user') => ({
@@ -37,6 +38,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   temperature?: number;
   streaming: boolean;
   maxTokens?: number;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 function _formatMessages(messages: BaseMessage[]) {
@@ -62,6 +64,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
   streaming: boolean;
   model?: string;
   temperature?: number;
+  telemetryMetadata?: TelemetryMetadata;
 
   constructor({
     actionsClient,
@@ -73,6 +76,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     signal,
     streaming,
     maxTokens,
+    telemetryMetadata,
   }: CustomChatModelInput) {
     super({});
 
@@ -86,6 +90,7 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
     this.model = model;
     this.temperature = temperature;
     this.streaming = streaming;
+    this.telemetryMetadata = telemetryMetadata;
   }
 
   _llmType() {
@@ -119,6 +124,10 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
+          telemetryMetadata: {
+            pluginId: this.telemetryMetadata?.pluginId,
+            aggregateBy: this.telemetryMetadata?.aggregateBy,
+          },
           ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
         },
       },
@@ -214,6 +223,10 @@ export class ActionsClientSimpleChatModel extends SimpleChatModel {
         subActionParams: {
           model: this.model,
           messages: formattedMessages,
+          telemetryMetadata: {
+            pluginId: this.telemetryMetadata?.pluginId,
+            aggregateBy: this.telemetryMetadata?.aggregateBy,
+          },
           ...getDefaultArguments(this.llmType, this.temperature, options.stop, this.#maxTokens),
         },
       },

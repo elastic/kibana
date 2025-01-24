@@ -5,6 +5,11 @@
  * 2.0.
  */
 
+import { EnhancedGenerateContentResponse } from '@google/generative-ai';
+import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
+import { PublicMethodsOf } from '@kbn/utility-types';
+import { AsyncCaller } from '@langchain/core/utils/async_caller';
 import {
   ChatConnection,
   GeminiContent,
@@ -12,10 +17,6 @@ import {
   GoogleAIBaseLLMInput,
   GoogleLLMResponse,
 } from '@langchain/google-common';
-import { ActionsClient } from '@kbn/actions-plugin/server';
-import { PublicMethodsOf } from '@kbn/utility-types';
-import { EnhancedGenerateContentResponse } from '@google/generative-ai';
-import { AsyncCaller } from '@langchain/core/utils/async_caller';
 import { convertResponseBadFinishReasonToErrorMsg } from '../../utils/gemini';
 
 // only implements non-streaming requests
@@ -26,17 +27,20 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
   #model?: string;
   temperature: number;
   caller: AsyncCaller;
+  telemetryMetadata?: TelemetryMetadata;
   constructor(
     fields: GoogleAIBaseLLMInput<Auth>,
     caller: AsyncCaller,
     client: GoogleAbstractedClient,
     _streaming: boolean, // defaulting to false in the super
     actionsClient: PublicMethodsOf<ActionsClient>,
-    connectorId: string
+    connectorId: string,
+    telemetryMetadata?: TelemetryMetadata
   ) {
     super(fields, caller, client, false);
     this.actionsClient = actionsClient;
     this.connectorId = connectorId;
+    this.telemetryMetadata = telemetryMetadata;
     this.caller = caller;
     this.#model = fields.model;
     this.temperature = fields.temperature ?? 0;
@@ -77,6 +81,7 @@ export class ActionsClientChatConnection<Auth> extends ChatConnection<Auth> {
           params: {
             subAction: 'invokeAIRaw',
             subActionParams: {
+              telemetryMetadata: this.telemetryMetadata,
               model: this.#model,
               messages: data?.contents,
               tools: data?.tools,

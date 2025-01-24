@@ -6,12 +6,12 @@
  */
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { Logger } from '@kbn/logging';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { BedrockChat as _BedrockChat } from '@langchain/community/chat_models/bedrock/web';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION, prepareMessages } from '../utils/bedrock';
-import type { TelemetryMetadata } from './types';
 
 export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;

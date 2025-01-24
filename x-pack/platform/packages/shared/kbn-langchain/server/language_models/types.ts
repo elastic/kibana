@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import type OpenAI from 'openai';
 
@@ -57,9 +58,4 @@ export interface TraceOptions {
   runName?: string;
   tags?: string[];
   tracers?: LangChainTracer[];
-}
-
-export interface TelemetryMetadata {
-  pluginId?: string;
-  aggregateBy?: string;
 }

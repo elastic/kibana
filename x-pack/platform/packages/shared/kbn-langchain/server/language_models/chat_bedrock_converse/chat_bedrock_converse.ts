@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ChatBedrockConverse } from '@langchain/aws';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import type { TelemetryMetadata } from '@kbn/actions-plugin/server/lib';
 import { Logger } from '@kbn/logging';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { BedrockRuntimeClient } from './bedrock_runtime_client';
+import { ChatBedrockConverse } from '@langchain/aws';
+import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION } from '../../utils/bedrock';
+import { BedrockRuntimeClient } from './bedrock_runtime_client';
 
 export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -18,6 +19,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   logger: Logger;
   signal?: AbortSignal;
   model?: string;
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 /**
@@ -45,6 +47,7 @@ export class ActionsClientChatBedrockConverse extends ChatBedrockConverse {
       connectorId,
       streaming: this.streaming,
       region: DEFAULT_BEDROCK_REGION,
+      telemetryMetadata: fields?.telemetryMetadata,
     });
   }
 }
