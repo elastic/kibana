@@ -90,12 +90,14 @@ image::https://images.contentstack.io/v3/assets/bltefdd0b53724fa2ce/blt4758e67aa
 
 A relatively common type of error seen for CSV exports is: `security_exception Root causes: security_exception: token expired`.
 
-These happen in deployments that use token-based authentication (SAML tokens) when creating the CSV report takes longer than time allows with the authentication that is cached in report job details.
+This error occurs in deployments that use token-based authentication (SAML tokens) when it takes too long to create the CSV report with the authentication cached in report job details.
 
-The thing to note about this type of error is that the deployment is stable, it's just the size of a requested report is too large to complete within the time allowed by the authentication token available to the Reporting task.
+This means that the deployment is stable, but the size of the requested report is too large to complete within the time allowed by the authentication token available to the Reporting task.
 
 === Avoiding token expiration
 
-* You can work around this error by creating smaller reports: instead of one report covering a large time range, create multiple reports that cover segmented time ranges.
-* Another workaround would be to increase `xpack.security.authc.token.timeout`, which is set to `20m` by default.
-* To avoid token expirations completely, use a type of authentication that doesn't expire (such as Basic auth) or run the export using scripts that query Elasticsearch directly.
+You can use the following workarounds for this error:
+
+* Create smaller reports. Instead of creating one report that covers a large time range, create multiple reports that cover segmented time ranges.
+* Increase `xpack.security.authc.token.timeout`, which is set to `20m` by default.
+* To avoid token expirations completely, use a type of authentication that doesn't expire (such as Basic auth), or run the export using scripts that query {es} directly.
