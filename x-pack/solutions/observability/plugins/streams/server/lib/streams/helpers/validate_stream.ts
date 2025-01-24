@@ -5,11 +5,16 @@
  * 2.0.
  */
 
-import { StreamDefinition, WiredStreamDefinition, isWiredStream } from '@kbn/streams-schema';
+import {
+  StreamDefinition,
+  WiredStreamDefinition,
+  isUnwiredStreamDefinition,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { difference, isEqual } from 'lodash';
-import { RootStreamImmutabilityException } from '../errors';
-import { MalformedStream } from '../errors/malformed_stream';
-import { MalformedChildren } from '../errors/malformed_children';
+import { MalformedChildrenError } from '../errors/malformed_children_error';
+import { MalformedStreamError } from '../errors/malformed_stream_error';
+import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';
 
 /*
  * Changes to mappings (fields) and processing rules are not allowed on the root stream.
@@ -20,21 +25,21 @@ export function validateRootStreamChanges(
   nextStreamDefinition: WiredStreamDefinition
 ) {
   const hasFieldChanges = !isEqual(
-    currentStreamDefinition.stream.ingest.wired.fields,
-    nextStreamDefinition.stream.ingest.wired.fields
+    currentStreamDefinition.ingest.wired.fields,
+    nextStreamDefinition.ingest.wired.fields
   );
 
   if (hasFieldChanges) {
-    throw new RootStreamImmutabilityException('Root stream fields cannot be changed');
+    throw new RootStreamImmutabilityError('Root stream fields cannot be changed');
   }
 
   const hasProcessingChanges = !isEqual(
-    currentStreamDefinition.stream.ingest.processing,
-    nextStreamDefinition.stream.ingest.processing
+    currentStreamDefinition.ingest.processing,
+    nextStreamDefinition.ingest.processing
   );
 
   if (hasProcessingChanges) {
-    throw new RootStreamImmutabilityException('Root stream processing rules cannot be changed');
+    throw new RootStreamImmutabilityError('Root stream processing rules cannot be changed');
   }
 }
 
@@ -45,18 +50,20 @@ export function validateStreamTypeChanges(
   currentStreamDefinition: StreamDefinition,
   nextStreamDefinition: StreamDefinition
 ) {
-  const fromIngestToWired =
-    !isWiredStream(currentStreamDefinition) && isWiredStream(nextStreamDefinition);
+  const fromUnwiredToWired =
+    isUnwiredStreamDefinition(currentStreamDefinition) &&
+    isWiredStreamDefinition(nextStreamDefinition);
 
-  if (fromIngestToWired) {
-    throw new MalformedStream('Cannot change ingest stream to wired stream');
+  if (fromUnwiredToWired) {
+    throw new MalformedStreamError('Cannot change unwired stream to wired stream');
   }
 
-  const fromWiredToIngest =
-    isWiredStream(currentStreamDefinition) && !isWiredStream(nextStreamDefinition);
+  const fromWiredToUnwired =
+    isWiredStreamDefinition(currentStreamDefinition) &&
+    isUnwiredStreamDefinition(nextStreamDefinition);
 
-  if (fromWiredToIngest) {
-    throw new MalformedStream('Cannot change wired stream to ingest stream');
+  if (fromWiredToUnwired) {
+    throw new MalformedStreamError('Cannot change wired stream to unwired stream');
   }
 }
 
@@ -67,13 +74,17 @@ export function validateStreamChildrenChanges(
   currentStreamDefinition: WiredStreamDefinition,
   nextStreamDefinition: WiredStreamDefinition
 ) {
-  const existingChildren = currentStreamDefinition.stream.ingest.routing.map((child) => child.name);
+  const existingChildren = currentStreamDefinition.ingest.routing.map(
+    (routingDefinition) => routingDefinition.destination
+  );
 
-  const nextChildren = nextStreamDefinition.stream.ingest.routing.map((child) => child.name);
+  const nextChildren = nextStreamDefinition.ingest.routing.map(
+    (routingDefinition) => routingDefinition.destination
+  );
 
   const removedChildren = difference(existingChildren, nextChildren);
 
   if (removedChildren.length) {
-    throw new MalformedChildren('Cannot remove children from a stream via updates');
+    throw new MalformedChildrenError('Cannot remove children from a stream via updates');
   }
 }

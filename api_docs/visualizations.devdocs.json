@@ -2048,7 +2048,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+        "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2062,7 +2062,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+            "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2293,55 +2293,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.updateOldState",
-        "type": "Function",
-        "tags": [],
-        "label": "updateOldState",
-        "description": [],
-        "signature": [
-          "(oldState: unknown) => ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.SavedVisState",
-            "text": "SavedVisState"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          ">"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/legacy/vis_update_state.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.updateOldState.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "oldState",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/public/legacy/vis_update_state.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.urlFor",
         "type": "Function",
         "tags": [],
@@ -2350,7 +2301,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+        "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2364,7 +2315,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+            "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

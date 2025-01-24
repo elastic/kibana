@@ -87,6 +87,11 @@ import {
 import { CRITICALITY_VALUES } from '../asset_criticality/constants';
 import { createEngineDescription } from './installation/engine_description';
 import { convertToEntityManagerDefinition } from './entity_definitions/entity_manager_conversion';
+import {
+  createKeywordBuilderPipeline,
+  deleteKeywordBuilderPipeline,
+} from '../../asset_inventory/ingest_pipelines';
+import { DEFAULT_INTERVAL } from './task/constants';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -199,7 +204,13 @@ export class EntityStoreDataClient {
   }
 
   public async enable(
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
+    {
+      indexPattern = '',
+      filter = '',
+      fieldHistoryLength = 10,
+      entityTypes,
+      enrichPolicyExecutionInterval,
+    }: InitEntityStoreRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityStoreResponse> {
     if (!this.options.taskManager) {
@@ -211,11 +222,20 @@ export class EntityStoreDataClient {
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
     const { experimentalFeatures } = this.options;
-    const enginesTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+    const enabledEntityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+
+    // When entityTypes param is defined it only enables the engines that are provided
+    const enginesTypes = entityTypes
+      ? (entityTypes as EntityType[]).filter((type) => enabledEntityTypes.includes(type))
+      : enabledEntityTypes;
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
-        this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
+        this.init(
+          entity,
+          { indexPattern, filter, fieldHistoryLength, enrichPolicyExecutionInterval },
+          { pipelineDebugMode }
+        )
       )
     );
 
@@ -273,7 +293,12 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
+    {
+      indexPattern = '',
+      filter = '',
+      fieldHistoryLength = 10,
+      enrichPolicyExecutionInterval = DEFAULT_INTERVAL,
+    }: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     const { experimentalFeatures } = this.options;
@@ -330,6 +355,7 @@ export class EntityStoreDataClient {
     this.asyncSetup(
       entityType,
       fieldHistoryLength,
+      enrichPolicyExecutionInterval,
       this.options.taskManager,
       indexPattern,
       filter,
@@ -345,6 +371,7 @@ export class EntityStoreDataClient {
   private async asyncSetup(
     entityType: EntityType,
     fieldHistoryLength: number,
+    enrichPolicyExecutionInterval: string,
     taskManager: TaskManagerStartContract,
     indexPattern: string,
     filter: string,
@@ -378,6 +405,14 @@ export class EntityStoreDataClient {
         installOnly: true,
       });
       this.log(`debug`, entityType, `Created entity definition`);
+
+      if (entityType === EntityType.universal) {
+        logger.debug('creating keyword builder pipeline');
+        await createKeywordBuilderPipeline({
+          logger,
+          esClient: this.esClient,
+        });
+      }
 
       // the index must be in place with the correct mapping before the enrich policy is created
       // this is because the enrich policy will fail if the index does not exist with the correct fields
@@ -425,6 +460,7 @@ export class EntityStoreDataClient {
         namespace,
         logger,
         taskManager,
+        interval: enrichPolicyExecutionInterval,
       });
 
       this.log(`debug`, entityType, `Started entity store field retention enrich task`);
@@ -654,6 +690,15 @@ export class EntityStoreDataClient {
         logger,
       });
       this.log('debug', entityType, `Deleted field retention enrich policy`);
+
+      if (entityType === EntityType.universal) {
+        logger.debug(`Deleting asset inventory keyword builder pipeline`);
+
+        await deleteKeywordBuilderPipeline({
+          logger,
+          esClient: this.esClient,
+        });
+      }
 
       if (deleteData) {
         await deleteEntityIndex({
