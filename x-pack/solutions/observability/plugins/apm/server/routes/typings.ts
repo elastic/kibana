@@ -47,6 +47,7 @@ export type MinimalApmPluginRequestHandlerContext = Omit<
 export interface APMRouteCreateOptions {
   tags?: Array<'oas-tag:APM agent keys' | 'oas-tag:APM annotations'>;
   disableTelemetry?: boolean;
+  stream?: boolean;
 }
 
 export type TelemetryUsageCounter = ReturnType<UsageCollectionSetup['createUsageCounter']>;
