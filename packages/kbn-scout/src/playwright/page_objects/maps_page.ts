@@ -24,7 +24,7 @@ export class MapsPage {
 
   async waitForRender(count: number = 1): Promise<void> {
     await retryForSuccess(this.log, {
-      retryCount: 10,
+      retryCount: 3,
       retryDelay: 1500,
       timeout: 10_000,
       methodName: 'waitForRender()',
