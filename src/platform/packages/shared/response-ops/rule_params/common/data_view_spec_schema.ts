@@ -7,10 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { schema } from '@kbn/config-schema';
 import { schema, Type } from '@kbn/config-schema';
 import {
-  MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
   MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH,
   RUNTIME_FIELD_TYPES,
   RUNTIME_FIELD_TYPES2,
@@ -57,11 +55,6 @@ const primitiveRuntimeFieldSchema = schema.object({
   ...primitiveRuntimeFieldSchemaShared,
 });
 
-const primitiveRuntimeFieldSchemaUpdate = schema.object({
-  type: schema.maybe(runtimeFieldNonCompositeFieldsSpecTypeSchema),
-  ...primitiveRuntimeFieldSchemaShared,
-});
-
 const compositeRuntimeFieldSchemaShared = {
   script: schema.maybe(
     schema.object({
@@ -95,17 +88,7 @@ const compositeRuntimeFieldSchema = schema.object({
   ...compositeRuntimeFieldSchemaShared,
 });
 
-const compositeRuntimeFieldSchemaUpdate = schema.object({
-  type: schema.maybe(schema.literal('composite') as Type<RuntimeType>),
-  ...compositeRuntimeFieldSchemaShared,
-});
-
 const runtimeFieldSchema = schema.oneOf([primitiveRuntimeFieldSchema, compositeRuntimeFieldSchema]);
-
-const runtimeFieldSchemaUpdate = schema.oneOf([
-  primitiveRuntimeFieldSchemaUpdate,
-  compositeRuntimeFieldSchemaUpdate,
-]);
 
 const fieldSpecSchemaFields = {
   name: schema.string({
@@ -162,7 +145,7 @@ const fieldSpecSchema = schema.object(fieldSpecSchemaFields, {
   unknowns: 'ignore',
 });
 
-const dataViewSpecSchema = schema.object({
+export const dataViewSpecSchema = schema.object({
   title: schema.string(),
   version: schema.maybe(schema.string()),
   id: schema.maybe(schema.string()),
