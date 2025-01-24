@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createLlmProxy,
@@ -119,7 +119,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // need some obs app or obs menu wont show where we can click on AI Assistant
           infrastructure: ['all'],
         });
-        await PageObjects.common.navigateToUrl('home', '', {
+        await PageObjects.common.navigateToUrl('infraOps', '', {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
