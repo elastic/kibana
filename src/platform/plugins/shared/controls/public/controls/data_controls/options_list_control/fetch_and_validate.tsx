@@ -33,7 +33,7 @@ export function fetchAndValidate$({
   api,
   stateManager,
 }: {
-  api: Pick<OptionsListControlApi, 'dataViews' | 'field$' | 'setBlockingError' | 'parentApi'> &
+  api: Pick<OptionsListControlApi, 'dataViews$' | 'field$' | 'setBlockingError' | 'parentApi'> &
     Pick<OptionsListComponentApi, 'loadMoreSubject'> & {
       controlFetch$: Observable<ControlFetchContext>;
       loadingSuggestions$: BehaviorSubject<boolean>;
@@ -49,7 +49,7 @@ export function fetchAndValidate$({
   let abortController: AbortController | undefined;
 
   return combineLatest([
-    api.dataViews,
+    api.dataViews$,
     api.field$,
     api.controlFetch$,
     api.parentApi.allowExpensiveQueries$,
