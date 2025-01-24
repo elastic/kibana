@@ -255,9 +255,10 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
         // need to get reed of ../../ to make sure we will not be out of space basePath
         const normalizedRoute = new URL(route, 'https://localhost');
 
-        const queryOnboardingToken = request.url.searchParams.get('onboarding_token');
+        const queryOnboardingToken = request.url.searchParams.get('onboarding_token') ?? undefined;
+        const queryOnboardingSecurity = request.url.searchParams.get('security') ?? undefined;
         const solutionType = this.config.onboarding?.default_solution;
-        if (queryOnboardingToken) {
+        if (queryOnboardingToken || queryOnboardingSecurity) {
           core
             .getStartServices()
             .then(async ([coreStart]) => {
@@ -269,6 +270,8 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
                 logger: this.logger,
                 onboardingToken: queryOnboardingToken,
                 solutionType,
+                // TODO create a isOnboardingSecurity
+                security: queryOnboardingSecurity,
               });
             })
             .catch((errorMsg) => this.logger.error(errorMsg));
