@@ -215,6 +215,24 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
               {
                 next: schema.maybe(schema.string()),
                 onboarding_token: schema.maybe(schema.string()),
+                security: schema.maybe(
+                  schema.object({
+                    use_case: schema.oneOf([
+                      schema.literal('siem'),
+                      schema.literal('cloud'),
+                      schema.literal('edr'),
+                      schema.literal('other'),
+                    ]),
+                    migration: schema.maybe(
+                      schema.object({
+                        value: schema.boolean(),
+                        type: schema.maybe(
+                          schema.oneOf([schema.literal('splunk'), schema.literal('other')])
+                        ),
+                      })
+                    ),
+                  })
+                ),
               },
               { unknowns: 'ignore' }
             )
