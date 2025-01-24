@@ -83,7 +83,8 @@
     "@kbn/visualization-utils",
     "@kbn/std",
     "@kbn/core-rendering-browser",
-    "@kbn/grid-layout"
+    "@kbn/grid-layout",
+    "@kbn/ui-actions-browser"
   ],
   "exclude": ["target/**/*"]
 }
