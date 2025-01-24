@@ -41,6 +41,51 @@ describe('request utils', () => {
   });
 
   describe('getDefaultAsyncSubmitParams', () => {
+    test('Uses `keep_alive` from default params if no `sessionId` is provided', async () => {
+      const mockUiSettingsClient = getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
+      });
+      const mockConfig = getMockSearchConfig({
+        sessions: {
+          defaultExpiration: moment.duration(3, 'd'),
+        },
+      });
+      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {});
+      expect(params).toHaveProperty('keep_alive', '60000ms');
+    });
+
+    test('Uses `keep_alive` from config if enabled and session is stored', async () => {
+      const mockUiSettingsClient = getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
+      });
+      const mockConfig = getMockSearchConfig({
+        sessions: {
+          defaultExpiration: moment.duration(3, 'd'),
+        },
+      });
+      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {
+        sessionId: 'foo',
+        isStored: true,
+      });
+      expect(params).toHaveProperty('keep_alive', '259200000ms');
+    });
+
+    test('Uses `keepAlive` of `1m` if disabled', async () => {
+      const mockUiSettingsClient = getMockUiSettingsClient({
+        [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
+      });
+      const mockConfig = getMockSearchConfig({
+        sessions: {
+          defaultExpiration: moment.duration(3, 'd'),
+          enabled: false,
+        },
+      });
+      const params = await getDefaultAsyncSubmitParams(mockUiSettingsClient, mockConfig, {
+        sessionId: 'foo',
+      });
+      expect(params).toHaveProperty('keep_alive', '60000ms');
+    });
+
     test('Uses `keep_on_completion` if enabled', async () => {
       const mockUiSettingsClient = getMockUiSettingsClient({
         [UI_SETTINGS.SEARCH_INCLUDE_FROZEN]: false,
@@ -92,6 +137,43 @@ describe('request utils', () => {
       });
       const params = getDefaultAsyncGetParams(mockConfig, {});
       expect(params).toHaveProperty('wait_for_completion_timeout');
+    });
+
+    test('Uses `keep_alive` if `sessionId` is not provided', async () => {
+      const mockConfig = getMockSearchConfig({
+        sessions: {
+          defaultExpiration: moment.duration(3, 'd'),
+          enabled: true,
+        },
+      });
+      const params = getDefaultAsyncGetParams(mockConfig, {});
+      expect(params).toHaveProperty('keep_alive', '60000ms');
+    });
+
+    test('Has no `keep_alive` if `sessionId` is provided and search already stored', async () => {
+      const mockConfig = getMockSearchConfig({
+        sessions: {
+          defaultExpiration: moment.duration(3, 'd'),
+          enabled: true,
+        },
+      });
+      const params = getDefaultAsyncGetParams(mockConfig, {
+        sessionId: 'foo',
+        isStored: true,
+        isSearchStored: true,
+      });
+      expect(params).not.toHaveProperty('keep_alive');
+    });
+
+    test('Uses `keep_alive` if `sessionId` is provided but sessions disabled', async () => {
+      const mockConfig = getMockSearchConfig({
+        sessions: {
+          defaultExpiration: moment.duration(3, 'd'),
+          enabled: false,
+        },
+      });
+      const params = getDefaultAsyncGetParams(mockConfig, { sessionId: 'foo' });
+      expect(params).toHaveProperty('keep_alive', '60000ms');
     });
   });
 });
