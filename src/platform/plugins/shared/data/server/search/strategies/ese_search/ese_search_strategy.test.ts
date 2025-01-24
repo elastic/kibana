@@ -145,6 +145,7 @@ describe('ES search strategy', () => {
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
         expect(request.body).toEqual(params.body);
+        expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
       it('returns status if incomplete', async () => {
@@ -231,6 +232,7 @@ describe('ES search strategy', () => {
             body: { query: {} },
             ignore_unavailable: true,
             index: 'logstash-*',
+            keep_alive: '60000ms',
             keep_on_completion: false,
             max_concurrent_shard_requests: undefined,
             track_total_hits: true,
@@ -280,6 +282,7 @@ describe('ES search strategy', () => {
         expect(mockSubmitCaller).toBeCalled();
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request).toHaveProperty('wait_for_completion_timeout');
+        expect(request).toHaveProperty('keep_alive');
       });
 
       it('calls the rollup API if the index is a rollup type', async () => {
@@ -433,6 +436,8 @@ describe('ES search strategy', () => {
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
         expect(request.body).toEqual(params.body);
+
+        expect(request).toHaveProperty('keep_alive', '60000ms');
       });
 
       it('Submit search with session id and session is saved creates a search with long keep_alive', async () => {
@@ -451,6 +456,8 @@ describe('ES search strategy', () => {
         const request = mockSubmitCaller.mock.calls[0][0];
         expect(request.index).toEqual(params.index);
         expect(request.body).toEqual(params.body);
+
+        expect(request).toHaveProperty('keep_alive', '604800000ms');
       });
 
       it('makes a GET request to async search with short keepalive, if session is not saved', async () => {
