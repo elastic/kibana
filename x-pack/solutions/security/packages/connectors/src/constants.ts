@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { validateStartDate } from './validate_start_date';
-export { validateEndDate } from './validate_end_date';
-export { validateRecurrenceBy, createValidateRecurrenceBy } from './validate_recurrence_by';
+export const ADD_NEW_CONNECTOR = 'ADD_NEW_CONNECTOR';
