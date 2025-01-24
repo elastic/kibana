@@ -7,14 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-function booleanFromEnv(varName: string): boolean {
+function booleanFromEnv(varName: string, defaultValue: boolean = false): boolean {
   const truthyStrings = ['1', 'yes', 'true'];
-  return truthyStrings.includes((process.env[varName] || 'false').toLowerCase());
+  return truthyStrings.includes((process.env[varName] || 'false').toLowerCase()) || defaultValue;
 }
 
 export const SCOUT_REPORTER_ENABLED = booleanFromEnv('SCOUT_REPORTER_ENABLED');
 export const SCOUT_REPORTER_ES_URL = process.env.SCOUT_REPORTER_ES_URL;
 export const SCOUT_REPORTER_ES_API_KEY = process.env.SCOUT_REPORTER_ES_API_KEY;
+export const SCOUT_REPORTER_ES_VERIFY_CERTS = booleanFromEnv(
+  'SCOUT_REPORTER_ES_VERIFY_CERTS',
+  true
+);
 export const SCOUT_TEST_EVENTS_TEMPLATE_NAME =
   process.env.SCOUT_TEST_EVENTS_TEMPLATE_NAME || 'scout-test-events';
 export const SCOUT_TEST_EVENTS_INDEX_PATTERN =

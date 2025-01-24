@@ -12,7 +12,7 @@ import { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
 import { SCOUT_REPORTER_ES_URL, SCOUT_REPORTER_ES_API_KEY } from '@kbn/scout-info';
 import { ScoutReportDataStream } from '../reporting/report/events';
-import { getValidatedESClient } from './common';
+import { getValidatedESClient } from '../helpers/elasticsearch';
 
 export const uploadEvents: Command<void> = {
   name: 'upload-events',
@@ -52,7 +52,8 @@ export const uploadEvents: Command<void> = {
           rejectUnauthorized: flagsReader.boolean('verifyTLSCerts'),
         },
       },
-      log
+      log,
+      true
     );
 
     // Event log upload

@@ -15,8 +15,10 @@ import { Client as ESClient } from '@elastic/elasticsearch';
 import {
   SCOUT_REPORTER_ES_API_KEY,
   SCOUT_REPORTER_ES_URL,
+  SCOUT_REPORTER_ES_VERIFY_CERTS,
   SCOUT_TEST_EVENTS_DATA_STREAM_NAME,
 } from '@kbn/scout-info';
+import { getValidatedESClient } from '../../../../helpers/elasticsearch';
 import { ScoutReportEvent } from '../event';
 import * as componentTemplates from './component_templates';
 import * as indexTemplates from './index_templates';
@@ -168,10 +170,17 @@ export async function uploadScoutReportEvents(eventLogPath: string, log?: Toolin
     return;
   }
 
-  const es = new ESClient({
-    node: SCOUT_REPORTER_ES_URL,
-    auth: { apiKey: SCOUT_REPORTER_ES_API_KEY },
-  });
+  log?.info(`Connecting to Scout reporter ES URL ${SCOUT_REPORTER_ES_URL}`);
+  const es = await getValidatedESClient(
+    {
+      node: SCOUT_REPORTER_ES_URL,
+      auth: { apiKey: SCOUT_REPORTER_ES_API_KEY },
+      tls: {
+        rejectUnauthorized: SCOUT_REPORTER_ES_VERIFY_CERTS,
+      },
+    },
+    log
+  );
 
   const reportDataStream = new ScoutReportDataStream(es, logger);
   await reportDataStream.addEventsFromFile(eventLogPath);
