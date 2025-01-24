@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-export const validateEndDate = (date: string) => {
-  const parsedValue = Date.parse(date);
-  if (isNaN(parsedValue)) return `Invalid date: ${date}`;
-  if (parsedValue <= Date.now()) return `Invalid snooze date as it is in the past: ${date}`;
-  return;
+module.exports = {
+  preset: '@kbn/test',
+  roots: ['<rootDir>/x-pack/solutions/security/packages/connectors'],
+  rootDir: '../../../../..',
 };

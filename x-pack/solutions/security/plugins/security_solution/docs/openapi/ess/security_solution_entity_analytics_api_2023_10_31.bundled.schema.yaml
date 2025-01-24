@@ -307,6 +307,8 @@ paths:
             schema:
               type: object
               properties:
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Interval'
                 entityTypes:
                   items:
                     $ref: '#/components/schemas/EntityType'
@@ -422,6 +424,8 @@ paths:
             schema:
               type: object
               properties:
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Interval'
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.
@@ -1211,6 +1215,13 @@ components:
       required:
         - dsl
         - response
+    Interval:
+      description: >-
+        Interval in which enrich policy runs. For example, `"1h"` means the rule
+        runs every hour.
+      example: 1h
+      pattern: ^[1-9]\d*[smh]$
+      type: string
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
