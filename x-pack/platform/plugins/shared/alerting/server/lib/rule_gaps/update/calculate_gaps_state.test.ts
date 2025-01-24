@@ -10,10 +10,11 @@ import { backfillClientMock } from '../../../backfill_client/backfill_client.moc
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { Gap } from '../gap';
 import { adHocRunStatus } from '../../../../common/constants';
-
+import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 describe('calculateGapStateFromAllBackfills', () => {
   const mockSavedObjectsRepository = savedObjectsRepositoryMock.create();
   const mockBackfillClient = backfillClientMock.create();
+  const actionsClient = actionsClientMock.create();
 
   beforeEach(() => {
     jest.resetAllMocks();
@@ -33,6 +34,7 @@ describe('calculateGapStateFromAllBackfills', () => {
       savedObjectsRepository: mockSavedObjectsRepository,
       ruleId: 'test-rule-id',
       backfillClient: mockBackfillClient,
+      actionsClient,
     });
 
     expect(mockBackfillClient.findOverlappingBackfills).toHaveBeenCalledWith({
@@ -40,6 +42,7 @@ describe('calculateGapStateFromAllBackfills', () => {
       start: testGap.range.gte,
       end: testGap.range.lte,
       savedObjectsRepository: mockSavedObjectsRepository,
+      actionsClient,
     });
   });
 
@@ -64,6 +67,7 @@ describe('calculateGapStateFromAllBackfills', () => {
       savedObjectsRepository: mockSavedObjectsRepository,
       ruleId: 'test-rule-id',
       backfillClient: mockBackfillClient,
+      actionsClient,
     });
 
     expect(spy).toHaveBeenCalled();
@@ -100,6 +104,7 @@ describe('calculateGapStateFromAllBackfills', () => {
       savedObjectsRepository: mockSavedObjectsRepository,
       ruleId: 'test-rule-id',
       backfillClient: mockBackfillClient,
+      actionsClient,
     });
 
     expect(updatedGap.inProgressIntervals).toHaveLength(1);
@@ -135,6 +140,7 @@ describe('calculateGapStateFromAllBackfills', () => {
       savedObjectsRepository: mockSavedObjectsRepository,
       ruleId: 'test-rule-id',
       backfillClient: mockBackfillClient,
+      actionsClient,
     });
 
     expect(updatedGap.inProgressIntervals).toHaveLength(1);

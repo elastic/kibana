@@ -6,6 +6,7 @@
  */
 
 import { ISavedObjectsRepository } from '@kbn/core/server';
+import { ActionsClient } from '@kbn/actions-plugin/server';
 import { Gap } from '../gap';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import { BackfillClient } from '../../../backfill_client/backfill_client';
@@ -18,17 +19,20 @@ export const calculateGapStateFromAllBackfills = async ({
   savedObjectsRepository,
   ruleId,
   backfillClient,
+  actionsClient,
 }: {
   gap: Gap;
   savedObjectsRepository: ISavedObjectsRepository;
   ruleId: string;
   backfillClient: BackfillClient;
+  actionsClient: ActionsClient;
 }): Promise<Gap> => {
   const transformedBackfills = await backfillClient.findOverlappingBackfills({
     ruleId,
     start: gap.range.gte,
     end: gap.range.lte,
     savedObjectsRepository,
+    actionsClient,
   });
 
   gap.resetInProgressIntervals();

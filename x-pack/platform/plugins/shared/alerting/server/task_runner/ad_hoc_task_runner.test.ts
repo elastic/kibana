@@ -905,6 +905,7 @@ describe('Ad Hoc Task Runner', () => {
       ],
       savedObjectsRepository: internalSavedObjectsRepository,
       backfillClient: taskRunnerFactoryInitializerParams.backfillClient,
+      actionsClient,
     });
 
     testAlertingEventLogCalls({

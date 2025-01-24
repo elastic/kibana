@@ -283,6 +283,7 @@ export class BackfillClient {
           savedObjectsRepository: internalSavedObjectsRepository,
           logger: this.logger,
           backfillClient: this,
+          actionsClient,
         });
       }
     } catch {
@@ -369,11 +370,13 @@ export class BackfillClient {
     start,
     end,
     savedObjectsRepository,
+    actionsClient,
   }: {
     ruleId: string;
     start: Date;
     end: Date;
     savedObjectsRepository: ISavedObjectsRepository;
+    actionsClient: ActionsClient;
   }) {
     const adHocRuns: Array<SavedObjectsFindResult<AdHocRunSO>> = [];
 
@@ -398,7 +401,12 @@ export class BackfillClient {
       await adHocRunFinder.close();
     }
 
-    return adHocRuns.map((data) => transformAdHocRunToBackfillResult(data));
+    return adHocRuns.map((data) =>
+      transformAdHocRunToBackfillResult({
+        adHocRunSO: data,
+        isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+      })
+    );
   }
 }
 

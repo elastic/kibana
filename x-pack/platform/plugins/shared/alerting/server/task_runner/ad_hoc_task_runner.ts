@@ -651,7 +651,7 @@ export class AdHocTaskRunner implements CancellableTask {
     );
 
     const eventLogClient = await this.context.getEventLogClient(fakeRequest);
-
+    const actionsClient = await this.context.actionsPlugin.getActionsClientWithRequest(fakeRequest);
     return updateGaps({
       ruleId: this.ruleId,
       start: new Date(this.adHocRange.start),
@@ -662,6 +662,7 @@ export class AdHocTaskRunner implements CancellableTask {
       backfillSchedule: this.adHocRunSchedule,
       savedObjectsRepository: this.internalSavedObjectsRepository,
       backfillClient: this.context.backfillClient,
+      actionsClient,
     });
   }
 }

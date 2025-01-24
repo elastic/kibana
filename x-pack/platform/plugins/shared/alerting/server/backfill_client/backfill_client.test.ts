@@ -487,6 +487,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -702,6 +705,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -899,6 +905,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -1048,6 +1057,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -1222,6 +1234,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -1438,6 +1453,9 @@ describe('BackfillClient', () => {
         ruleTypeRegistry,
         spaceId: 'default',
         unsecuredSavedObjectsClient,
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
       });
 
       const bulkCreateParams = [
@@ -2129,6 +2147,7 @@ describe('BackfillClient', () => {
         eventLogClient,
         internalSavedObjectsRepository,
         eventLogger,
+        actionsClient,
       });
 
       expect(updateGaps).toHaveBeenCalledTimes(2);
@@ -2142,6 +2161,7 @@ describe('BackfillClient', () => {
         savedObjectsRepository: internalSavedObjectsRepository,
         logger,
         backfillClient,
+        actionsClient,
       });
       expect(updateGaps).toHaveBeenNthCalledWith(2, {
         backfillSchedule: mockAttributes.schedule,
@@ -2153,6 +2173,7 @@ describe('BackfillClient', () => {
         savedObjectsRepository: internalSavedObjectsRepository,
         logger,
         backfillClient,
+        actionsClient,
       });
     });
 
@@ -2179,6 +2200,7 @@ describe('BackfillClient', () => {
         eventLogClient,
         internalSavedObjectsRepository,
         eventLogger,
+        actionsClient,
       });
 
       expect(logger.warn).toHaveBeenCalledWith('Error updating gaps for backfill jobs: abc');
@@ -2209,6 +2231,7 @@ describe('BackfillClient', () => {
         eventLogClient,
         internalSavedObjectsRepository,
         eventLogger,
+        actionsClient,
       });
 
       expect(updateGaps).toHaveBeenCalledWith({
@@ -2221,6 +2244,7 @@ describe('BackfillClient', () => {
         savedObjectsRepository: internalSavedObjectsRepository,
         logger,
         backfillClient,
+        actionsClient,
       });
     });
   });
@@ -2563,6 +2587,7 @@ describe('BackfillClient', () => {
         start: mockStart,
         end: mockEnd,
         savedObjectsRepository: mockSavedObjectsRepository,
+        actionsClient,
       });
 
       expect(mockSavedObjectsRepository.createPointInTimeFinder).toHaveBeenCalledWith({
@@ -2598,6 +2623,7 @@ describe('BackfillClient', () => {
           start: mockStart,
           end: mockEnd,
           savedObjectsRepository: mockSavedObjectsRepository,
+          actionsClient,
         })
       ).rejects.toThrow('Failed to find');
     });
@@ -2617,6 +2643,7 @@ describe('BackfillClient', () => {
         start: mockStart,
         end: mockEnd,
         savedObjectsRepository: mockSavedObjectsRepository,
+        actionsClient,
       });
 
       expect(result).toHaveLength(0);

@@ -84,7 +84,12 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       })
     );
 
-    const backfillResult = transformAdHocRunToBackfillResult(result);
+    const actionsClient = await context.getActionsClient();
+
+    const backfillResult = transformAdHocRunToBackfillResult({
+      adHocRunSO: result,
+      isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+    });
 
     // delete the saved object
     const removeResult = await context.unsecuredSavedObjectsClient.delete(
@@ -109,6 +114,7 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
         eventLogger: context.eventLogger,
         shouldRefetchAllBackfills: true,
         backfillClient: context.backfillClient,
+        actionsClient,
       });
     }
 
