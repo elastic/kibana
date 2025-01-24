@@ -29,10 +29,7 @@ import crawlerLogo from '../../../../assets/images/search_crawler.svg';
 import languageClientsLogo from '../../../../assets/images/search_language_clients.svg';
 
 import { IngestionCard } from '../../../enterprise_search_content/components/shared/ingestion_card/ingestion_card';
-import {
-  NEW_API_PATH,
-  NEW_INDEX_SELECT_CONNECTOR_PATH,
-} from '../../../enterprise_search_content/routes';
+import { NEW_INDEX_SELECT_CONNECTOR_PATH } from '../../../enterprise_search_content/routes';
 
 import { ConnectorIcon } from '../../../shared/icons/connector';
 
@@ -44,6 +41,7 @@ export const IngestionSelector: React.FC = () => {
     application: { navigateToApp },
     productFeatures,
   } = useValues(KibanaLogic);
+
   return (
     <>
       <EuiFlexGroup>
@@ -60,7 +58,7 @@ export const IngestionSelector: React.FC = () => {
                   'Add documents programmatically by connecting with the API using your preferred language client.',
               }
             )}
-            href={generatePath(ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL + NEW_API_PATH)}
+            href="/app/elasticsearch/indices/create"
             buttonIcon="console"
             buttonLabel={i18n.translate(
               'xpack.enterpriseSearch.ingestSelector.method.apiButtonLabel',
