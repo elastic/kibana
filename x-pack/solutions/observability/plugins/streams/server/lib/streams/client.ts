@@ -24,8 +24,6 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
-  isDisabledLifecycle,
-  isIlmLifecycle,
   isInheritLifecycle,
   isRootStreamDefinition,
   isUnwiredStreamDefinition,
@@ -55,7 +53,6 @@ import {
 } from './stream_crud';
 import { updateDataStreamsLifecycle } from './data_streams/manage_data_streams';
 import { DefinitionNotFoundError } from './errors/definition_not_found_error';
-import { MalformedStreamError } from './errors/malformed_stream_error';
 import { MalformedStreamIdError } from './errors/malformed_stream_id_error';
 import { SecurityError } from './errors/security_error';
 import { findInheritedLifecycle, findInheritingStreams } from './helpers/lifecycle';
