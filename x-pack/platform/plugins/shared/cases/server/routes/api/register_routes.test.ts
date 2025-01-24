@@ -180,7 +180,6 @@ describe('registerRoutes', () => {
       ['params' | 'query' | 'body', keyof CasesRouter, Record<string, unknown>]
     > = [
       ['params', 'get', { case_id: '123' }],
-      ['query', 'get', { includeComments: false }],
       ['body', 'post', { title: 'test' }],
     ];
 
