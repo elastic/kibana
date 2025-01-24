@@ -295,9 +295,9 @@ export const createRemoteClustersActions = (testBed: TestBed): RemoteClustersAct
     const trustButtonSelector = 'remoteClusterTrustNextButton';
     return {
       setupTrustStep: {
-        apiCardExist: () => exists('setupTrustApiKeyCard'),
-        certCardExist: () => exists('setupTrustCertCard'),
-        selectApiKeyTrustMode: () => click('setupTrustApiKeyMode'),
+        apiCardExist: () => exists('setupTrustApiMode'),
+        certCardExist: () => exists('setupTrustCertMode'),
+        selectApiKeyTrustMode: () => click('setupTrustApiMode'),
         selectCertificatesTrustMode: () => click('setupTrustCertMode'),
         button: {
           click: () => click(trustButtonSelector),

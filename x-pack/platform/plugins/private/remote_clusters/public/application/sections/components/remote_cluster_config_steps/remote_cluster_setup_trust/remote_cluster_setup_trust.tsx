@@ -5,19 +5,18 @@
  * 2.0.
  */
 
-import React, { useContext, useState } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SECURITY_MODEL } from '../../../../../../common/constants';
 import {
   EuiSpacer,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiButton,
 } from '../../../../../shared_imports';
 
-import { SECURITY_MODEL } from '../../../../../../common/constants';
 import { AppContext } from '../../../../app_context';
 import { ActionButtons } from '../components';
 
@@ -61,34 +60,9 @@ export const RemoteClusterSetupTrust = ({
   const { canUseAPIKeyTrustModel } = useContext(AppContext);
   const [securityModel, setSecurityModel] = useState<string>(currentSecurityModel);
 
-  const selectModeButton = (securityModelType: string, testSubj: string) => {
-    const isSelected = securityModel === securityModelType;
-    const buttonProps = {
-      onClick: () => {
-        setSecurityModel(securityModelType);
-        onSecurityChange(securityModelType);
-      },
-      fullWidth: true,
-      'data-test-subj': testSubj,
-    };
-    return (
-      <EuiButton
-        {...buttonProps}
-        iconSide={isSelected ? 'left' : undefined}
-        iconType={isSelected ? 'check' : undefined}
-        color={isSelected ? 'success' : 'text'}
-      >
-        <FormattedMessage
-          id={
-            isSelected
-              ? 'xpack.remoteClusters.clusterWizard.trustStep.selected'
-              : 'xpack.remoteClusters.clusterWizard.trustStep.docs'
-          }
-          defaultMessage={isSelected ? 'Selected' : 'Select'}
-        />
-      </EuiButton>
-    );
-  };
+  useEffect(() => {
+    onSecurityChange(securityModel);
+  }, [onSecurityChange, securityModel]);
 
   return (
     <div>
@@ -103,53 +77,47 @@ export const RemoteClusterSetupTrust = ({
 
       <EuiSpacer size="xxl" />
 
-      <EuiFlexGroup wrap justifyContent="center">
+      <EuiFlexGroup gutterSize="l" wrap justifyContent="center">
         {canUseAPIKeyTrustModel && (
           <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
             <EuiCard
-              title={i18nTexts.apiKeyTitle}
               paddingSize="l"
-              data-test-subj="setupTrustApiKeyCard"
-            >
-              <EuiText size="s">
-                <p>{i18nTexts.apiKeyDescription}</p>
-              </EuiText>
-              <EuiSpacer size="xl" />
-
-              {selectModeButton(SECURITY_MODEL.API, 'setupTrustApiKeyMode')}
-
-              <EuiSpacer size="xl" />
-              <EuiText size="xs" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.remoteClusters.clusterWizard.trustStep.apiKeyNote"
-                    defaultMessage="Both clusters must be on version {minAllowedVersion} or above."
-                    values={{ minAllowedVersion: MIN_ALLOWED_VERSION_API_KEYS_METHOD }}
-                  />
-                </p>
-              </EuiText>
-            </EuiCard>
+              data-test-subj="setupTrustApiMode"
+              title={i18nTexts.apiKeyTitle}
+              description={i18nTexts.apiKeyDescription}
+              footer={
+                <EuiText size="xs" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.remoteClusters.clusterWizard.trustStep.apiKeyNote"
+                      defaultMessage="Both clusters must be on version {minAllowedVersion} or above."
+                      values={{ minAllowedVersion: MIN_ALLOWED_VERSION_API_KEYS_METHOD }}
+                    />
+                  </p>
+                </EuiText>
+              }
+              selectable={{
+                onClick: () => {
+                  setSecurityModel(SECURITY_MODEL.API);
+                },
+                isSelected: securityModel === SECURITY_MODEL.API,
+              }}
+            />
           </EuiFlexItem>
         )}
-
         <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
           <EuiCard
-            title={
-              <>
-                <EuiSpacer size="s" />
-                {i18nTexts.certTitle}
-              </>
-            }
             paddingSize="l"
-            data-test-subj="setupTrustCertCard"
-          >
-            <EuiText size="s">
-              <p>{i18nTexts.certDescription}</p>
-            </EuiText>
-            <EuiSpacer size="xl" />
-
-            {selectModeButton(SECURITY_MODEL.CERTIFICATE, 'setupTrustCertMode')}
-          </EuiCard>
+            data-test-subj="setupTrustCertMode"
+            title={i18nTexts.certTitle}
+            description={i18nTexts.certDescription}
+            selectable={{
+              onClick: () => {
+                setSecurityModel(SECURITY_MODEL.CERTIFICATE);
+              },
+              isSelected: securityModel === SECURITY_MODEL.CERTIFICATE,
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
