@@ -220,7 +220,9 @@ export const deleteAllComments = async ({
 
   return comment;
 };
-
+/**
+ * remove this method and use findAttachments instead https://github.com/elastic/kibana/issues/208188
+ */
 export const getAllComments = async ({
   supertest,
   caseId,

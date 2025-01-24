@@ -110,6 +110,11 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
     }
   );
 
+  /**
+   * This is a fake route to handle deprecated getAllComments method which returns all comments
+   * where as findComments returns only comments of type 'user'
+   * we should improve findComments method to return all comments https://github.com/elastic/kibana/issues/208188
+   */
   router.get(
     {
       path: '/api/cases_fixture/cases/{id}/comments',
