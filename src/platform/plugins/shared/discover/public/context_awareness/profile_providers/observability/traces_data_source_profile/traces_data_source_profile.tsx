@@ -197,6 +197,7 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
 
                 if (isLog) {
                   const logMessage = params.record.flattened.message;
+                  const spanId = params.record.flattened['span.id'];
                   return (
                     <EuiPanel color="transparent" hasShadow={false}>
                       <EuiFlexGroup>
@@ -205,6 +206,15 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                             Message (TODO ADD LINK)
                           </EuiText>
                           <p>{logMessage as string}</p>
+                        </EuiFlexItem>
+                      </EuiFlexGroup>
+                      <EuiSpacer size="l" />
+                      <EuiFlexGroup>
+                        <EuiFlexItem>
+                          <EuiText color="subdued" size="xs">
+                            Traces
+                          </EuiText>
+                          <TracesExplorerWaterfallLink spanId={spanId as string} />
                         </EuiFlexItem>
                       </EuiFlexGroup>
                       <EuiSpacer size="l" />
