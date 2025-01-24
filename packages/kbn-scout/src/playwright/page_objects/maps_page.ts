@@ -9,7 +9,7 @@
 
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutPage } from '../fixtures/types';
+import { ScoutPage } from '..';
 
 const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
 const RENDER_COMPLETE_PENDING_SELECTOR = '[data-render-complete="false"]';
@@ -24,8 +24,7 @@ export class MapsPage {
 
   async waitForRender(count: number = 1): Promise<void> {
     await retryForSuccess(this.log, {
-      retryCount: 3,
-      retryDelay: 1500,
+      retryCount: 10,
       timeout: 10_000,
       methodName: 'waitForRender()',
       block: async () => {
