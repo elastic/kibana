@@ -46,7 +46,7 @@ export function createFlyout(
   return new Promise(async (resolve, reject) => {
     try {
       let results: FileUploadResults | null = null;
-      const { onUploadComplete, autoAddInference } = props;
+      const { onUploadComplete, autoAddInference, indexSettings } = props;
       try {
         const onFlyoutClose = () => {
           flyoutSession.close();
@@ -67,6 +67,7 @@ export function createFlyout(
             >
               <FileUploadLiteFlyoutContents
                 autoAddInference={autoAddInference}
+                indexSettings={indexSettings}
                 onClose={() => {
                   onFlyoutClose();
                   resolve();

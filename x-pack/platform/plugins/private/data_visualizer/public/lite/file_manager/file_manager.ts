@@ -15,7 +15,10 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { ImportResponse, IngestPipeline } from '@kbn/file-upload-plugin/common/types';
-import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type {
+  IndicesIndexSettings,
+  MappingTypeMapping,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { AnalyzedFile } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
@@ -66,7 +69,7 @@ export class FileManager {
   );
   public readonly analysisOk$ = new BehaviorSubject<boolean>(false); // can this be removed in favour of uploadStatus?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   private mappingsCheckSubscription: Subscription;
-  private settings = {};
+  private settings;
   private mappings: MappingTypeMapping | null = null;
   private pipeline: IngestPipeline | null = null;
   private inferenceId: string | null = null;
@@ -92,9 +95,11 @@ export class FileManager {
     private fileUpload: FileUploadStartApi,
     private http: HttpSetup,
     private dataViewsContract: DataViewsServicePublic,
-    private autoAddInferenceEndpointName: string | null = null
+    private autoAddInferenceEndpointName: string | null = null,
+    indexSettingsOverride: IndicesIndexSettings | undefined = undefined
   ) {
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
+    this.settings = indexSettingsOverride ?? {};
 
     this.mappingsCheckSubscription = this.analysisStatus$.subscribe((statuses) => {
       const allFilesAnalyzed = statuses.every((status) => status.loaded);

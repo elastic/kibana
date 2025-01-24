@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import type { FileUploadResults } from './create_flyout';
 import { getFileDataVisualizerLiteWrapper } from './component_wrapper';
 
@@ -15,17 +16,20 @@ interface Props {
   onClose?: () => void;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddInference?: string;
+  indexSettings?: IndicesIndexSettings;
 }
 
 export const FileUploadLiteFlyoutContents: FC<Props> = ({
   onClose,
   setUploadResults,
   autoAddInference,
+  indexSettings,
 }) => {
   const Wrapper = getFileDataVisualizerLiteWrapper(
     undefined,
     setUploadResults,
     autoAddInference,
+    indexSettings,
     onClose
   );
   return <>{Wrapper}</>;

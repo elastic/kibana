@@ -8,6 +8,7 @@
 import type { FC } from 'react';
 import React from 'react';
 
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import type { ResultLinks } from '../../../common/app';
 import type { FileUploadResults } from './create_flyout';
 
@@ -17,14 +18,16 @@ export const FileDataVisualizerLiteWrapper: FC<{
   resultLinks?: ResultLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddInference?: string;
+  indexSettings?: IndicesIndexSettings;
   onClose?: () => void;
-}> = ({ resultLinks, setUploadResults, autoAddInference, onClose }) => {
+}> = ({ resultLinks, setUploadResults, autoAddInference, indexSettings, onClose }) => {
   return (
     <React.Suspense fallback={<div />}>
       <FileDataVisualizerLiteComponent
         resultLinks={resultLinks}
         setUploadResults={setUploadResults}
         autoAddInference={autoAddInference}
+        indexSettings={indexSettings}
         onClose={onClose}
       />
     </React.Suspense>
@@ -36,6 +39,7 @@ export function getFileDataVisualizerLiteWrapper(
   resultLinks?: ResultLinks,
   setUploadResults?: (results: FileUploadResults) => void,
   autoAddInference?: string,
+  indexSettings?: IndicesIndexSettings,
   onClose?: () => void
 ) {
   return (
@@ -43,6 +47,7 @@ export function getFileDataVisualizerLiteWrapper(
       resultLinks={resultLinks}
       setUploadResults={setUploadResults}
       autoAddInference={autoAddInference}
+      indexSettings={indexSettings}
       onClose={onClose}
     />
   );

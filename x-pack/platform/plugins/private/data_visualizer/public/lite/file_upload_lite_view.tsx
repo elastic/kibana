@@ -25,6 +25,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import type { FC } from 'react';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import useObservable from 'react-use/lib/useObservable';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { FileClashWarning } from './file_clash_warning';
@@ -46,6 +47,7 @@ interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddInference?: string;
+  indexSettings?: IndicesIndexSettings;
   onClose?: () => void;
 }
 
@@ -55,14 +57,22 @@ export const FileUploadLiteView: FC<Props> = ({
   dataStart,
   setUploadResults,
   autoAddInference,
+  indexSettings,
   onClose,
 }) => {
   const [indexName, setIndexName] = useState<string>('');
   const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
 
   const fm = useMemo(
-    () => new FileManager(fileUpload, http, dataStart.dataViews, autoAddInference ?? null),
-    [autoAddInference, dataStart.dataViews, fileUpload, http]
+    () =>
+      new FileManager(
+        fileUpload,
+        http,
+        dataStart.dataViews,
+        autoAddInference ?? null,
+        indexSettings
+      ),
+    [autoAddInference, dataStart.dataViews, fileUpload, http, indexSettings]
   );
   const deleteFile = useCallback((i: number) => fm.removeFile(i), [fm]);
 

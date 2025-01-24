@@ -43,14 +43,22 @@ export function createOpenFileUploadLiteAction(
       i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
         defaultMessage: 'Create categorization anomaly detection job',
       }),
-    async execute({ onUploadComplete, autoAddInference }: OpenFileUploadLiteContext) {
+    async execute({
+      onUploadComplete,
+      autoAddInference,
+      indexSettings,
+    }: OpenFileUploadLiteContext) {
       try {
         const [{ showFlyout }, [coreStart, { share, data }]] = await Promise.all([
           import('./flyout/show_flyout'),
           getStartServices(),
         ]);
 
-        await showFlyout(coreStart, share, data, { onUploadComplete, autoAddInference });
+        await showFlyout(coreStart, share, data, {
+          onUploadComplete,
+          autoAddInference,
+          indexSettings,
+        });
       } catch (e) {
         return Promise.reject();
       }

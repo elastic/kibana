@@ -8,6 +8,7 @@ import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
+import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { getCoreStart, getPluginsStart } from '../kibana_services';
@@ -19,6 +20,7 @@ export interface Props {
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
   autoAddInference?: string;
+  indexSettings?: IndicesIndexSettings;
   onClose?: () => void;
 }
 
@@ -29,6 +31,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
   resultLinks,
   setUploadResults,
   autoAddInference,
+  indexSettings,
   onClose,
 }) => {
   const coreStart = getCoreStart();
@@ -59,6 +62,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
             capabilities={coreStart.application.capabilities}
             setUploadResults={setUploadResults}
             autoAddInference={autoAddInference}
+            indexSettings={indexSettings}
             onClose={onClose}
           />
         </CloudContext>
