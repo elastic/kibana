@@ -324,6 +324,7 @@ paths:
                 lookbackPeriod:
                   default: 24h
                   description: The lookback period for the entity store
+                  pattern: '[smh]$'
                   type: string
         description: Schema for the entity store initialization
         required: true
@@ -1016,6 +1017,7 @@ components:
           $ref: '#/components/schemas/IndexPattern'
         lookbackPeriod:
           default: 24h
+          pattern: '[smh]$'
           type: string
         status:
           $ref: '#/components/schemas/EngineStatus'
