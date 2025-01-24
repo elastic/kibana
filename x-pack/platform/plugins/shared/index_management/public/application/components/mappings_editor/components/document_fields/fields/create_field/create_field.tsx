@@ -12,7 +12,9 @@ import {
   EuiFlexItem,
   EuiOutsideClickDetector,
   EuiSpacer,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import { TrainedModelStat } from '@kbn/ml-plugin/common/types/trained_models';
 import { MlPluginStart } from '@kbn/ml-plugin/public';
@@ -257,6 +259,14 @@ export const CreateField = React.memo(function CreateFieldComponent({
     </EuiFlexGroup>
   );
 
+  const { euiTheme } = useEuiTheme();
+
+  const paddingLeftCreateFieldWrapper = `${
+    isMultiField
+      ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
+      : paddingLeft
+  }px`;
+
   return (
     <>
       <EuiOutsideClickDetector onOutsideClick={onClickOutside}>
@@ -272,13 +282,11 @@ export const CreateField = React.memo(function CreateFieldComponent({
                 Boolean(maxNestedDepth) && maxNestedDepth! > 0,
               'mappingsEditor__createFieldWrapper--multiField': isMultiField,
             })}
-            style={{
-              paddingLeft: `${
-                isMultiField
-                  ? paddingLeft! - EUI_SIZE * 1.5 // As there are no "L" bullet list we need to substract some indent
-                  : paddingLeft
-              }px`,
-            }}
+            css={css`
+              padding: ${euiTheme.size.l};
+              paddingleft: ${paddingLeftCreateFieldWrapper};
+              background-color: ${euiTheme.colors.backgroundBaseSubdued};
+            `}
             ref={createFieldFormRef}
             tabIndex={0}
           >
