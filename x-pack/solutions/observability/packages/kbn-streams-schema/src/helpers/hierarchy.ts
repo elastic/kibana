@@ -42,7 +42,3 @@ export function getAncestorsAndSelf(id: string) {
 export function getSegments(id: string) {
   return id.split('.');
 }
-
-export function stringifySegments(segments: string[]) {
-  return segments.join('.');
-}
