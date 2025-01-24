@@ -17,6 +17,7 @@ import { IndexTable } from './index_table';
 export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ history }) => {
   const {
     core: { executionContext },
+    services: { extensionsService },
   } = useAppContext();
 
   useExecutionContext(executionContext, {
@@ -25,7 +26,11 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
   });
 
   useEffect(() => {
-    breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
+    if (!extensionsService.indexDetailsPageRoute) {
+      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
+    } else {
+      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexList);
+    }
   }, []);
 
   return (

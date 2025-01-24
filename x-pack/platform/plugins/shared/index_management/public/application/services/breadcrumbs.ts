@@ -44,6 +44,10 @@ export enum IndexManagementBreadcrumb {
    */
   enrichPolicies = 'enrichPolicies',
   enrichPoliciesCreate = 'enrichPoliciesCreate',
+
+  content = 'content',
+  indexList ='indexList'
+
 }
 
 class BreadcrumbService {
@@ -56,7 +60,14 @@ class BreadcrumbService {
 
   public setup(setBreadcrumbsHandler: SetBreadcrumbs): void {
     this.setBreadcrumbsHandler = setBreadcrumbsHandler;
-
+    this.breadcrumbs.content = [
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.contentLabel', {
+          defaultMessage: 'Content',
+        }),
+        href: ``,
+      },
+    ];
     this.breadcrumbs.home = [
       {
         text: i18n.translate('xpack.idxMgmt.breadcrumb.homeLabel', {
@@ -194,6 +205,16 @@ class BreadcrumbService {
         href: `/enrich_policies/create`,
       },
     ];
+    this.breadcrumbs.indexList = [
+      ...this.breadcrumbs.content,
+      ...this.breadcrumbs.home,
+      {
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indicesLabel', {
+          defaultMessage: 'Indices List',
+        }),
+        href: `/indices`,
+      },
+    ];
   }
 
   public setBreadcrumbs(
@@ -203,7 +224,7 @@ class BreadcrumbService {
     if (!this.setBreadcrumbsHandler) {
       throw new Error(`BreadcrumbService#setup() must be called first!`);
     }
-
+    console.log("type", type)
     const newBreadcrumbs = this.breadcrumbs[type]
       ? [...this.breadcrumbs[type]!]
       : [...this.breadcrumbs.home!];
