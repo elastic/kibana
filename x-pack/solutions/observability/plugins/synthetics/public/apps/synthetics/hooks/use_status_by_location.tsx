@@ -75,11 +75,13 @@ export function useStatusByLocation({
 
   return useMemo(() => {
     const getColor = (status: string) => {
+      const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
+
       switch (status) {
         case 'up':
-          return euiTheme.colors.success;
+          return isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
         case 'down':
-          return euiTheme.colors.vis.euiColorVis6;
+          return isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis6;
         default:
           return euiTheme.colors.backgroundBaseSubdued;
       }
@@ -113,8 +115,11 @@ export function useStatusByLocation({
     data?.aggregations?.locations.buckets,
     loading,
     monitorLocations,
+    euiTheme.themeName,
     euiTheme.colors.success,
+    euiTheme.colors.vis.euiColorVis0,
     euiTheme.colors.vis.euiColorVis6,
+    euiTheme.colors.vis.euiColorVis9,
     euiTheme.colors.backgroundBaseSubdued,
   ]);
 }
