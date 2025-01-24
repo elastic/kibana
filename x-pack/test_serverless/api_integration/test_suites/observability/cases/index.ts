@@ -12,7 +12,6 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_case'));
     loadTestFile(require.resolve('./find_cases'));
     loadTestFile(require.resolve('./post_case'));
-    loadTestFile(require.resolve('./get_status'));
     loadTestFile(require.resolve('./get_all_comments'));
     loadTestFile(require.resolve('./get_all_user_actions'));
   });
