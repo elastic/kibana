@@ -11,9 +11,9 @@ import { v4 as uuidv4 } from 'uuid';
 import { SavedSearch } from '@kbn/saved-search-plugin/public';
 import { BehaviorSubject } from 'rxjs';
 import { cloneDeep } from 'lodash';
-import { COMPARE_ALL_OPTIONS, FilterCompareOptions } from '@kbn/es-query';
+import { COMPARE_ALL_OPTIONS, FilterCompareOptions, updateFilterReferences } from '@kbn/es-query';
 import type { SearchSourceFields } from '@kbn/data-plugin/common';
-import type { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewSpec } from '@kbn/data-views-plugin/common';
 import {
   canImportVisContext,
   UnifiedHistogramVisContext,
@@ -189,7 +189,7 @@ export function getSavedSearchContainer({
     // If the Discover session is using a default profile ad hoc data view,
     // we copy it with a new ID to avoid conflicts with the profile defaults
     if (dataView?.id && profileDataViewIds.includes(dataView.id)) {
-      replacementDataView = await services.dataViews.create({
+      const replacementSpec: DataViewSpec = {
         ...dataView.toSpec(),
         id: uuidv4(),
         name: i18n.translate('discover.savedSearch.defaultProfileDataViewCopyName', {
@@ -199,7 +199,10 @@ export function getSavedSearchContainer({
             discoverSessionTitle: nextSavedSearch.title,
           },
         }),
-      });
+      };
+
+      // Skip field list fetching since the existing data view already has the fields
+      replacementDataView = await services.dataViews.create(replacementSpec, true);
     }
 
     updateSavedSearch({
@@ -209,6 +212,16 @@ export function getSavedSearchContainer({
       useFilterAndQueryServices: true,
       dataView: replacementDataView,
     });
+
+    const currentFilters = nextSavedSearch.searchSource.getField('filter');
+
+    // If the data view was replaced, we need to update the filter references
+    if (dataView?.id && replacementDataView?.id && Array.isArray(currentFilters)) {
+      nextSavedSearch.searchSource.setField(
+        'filter',
+        updateFilterReferences(currentFilters, dataView.id, replacementDataView.id)
+      );
+    }
 
     const id = await services.savedSearch.save(nextSavedSearch, saveOptions || {});
 

@@ -7,13 +7,24 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './compare_filters';
-export * from './dedup_filters';
-export * from './uniq_filters';
-export * from './update_filter';
-export * from './meta_filter';
-export * from './only_disabled';
-export * from './extract_time_filter';
-export * from './convert_range_filter';
-export * from './update_filter_references';
-export * from './types';
+import { Filter } from '..';
+
+export function updateFilterReferences(
+  filters: Filter[],
+  fromDataView: string,
+  toDataView: string | undefined
+) {
+  return (filters || []).map((filter) => {
+    if (filter.meta.index === fromDataView) {
+      return {
+        ...filter,
+        meta: {
+          ...filter.meta,
+          index: toDataView,
+        },
+      };
+    } else {
+      return filter;
+    }
+  });
+}
