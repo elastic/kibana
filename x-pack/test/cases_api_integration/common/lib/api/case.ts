@@ -112,16 +112,21 @@ export const updateCaseStatus = async ({
   auth?: { user: User; space: string | null };
 }) => {
   const updateRequest: CasePatchRequest = {
-    status,
-    version,
-    id: caseId,
+    cases: [
+      {
+        status,
+        version,
+        id: caseId,
+      },
+    ],
   };
 
   const { body: updatedCase } = await supertest
-    .patch(`/api/cases/${caseId}`)
+    .patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'xxx')
-    .send(updateRequest);
+    .send(updateRequest)
+    .expect(expectedHttpCode);
   return updatedCase;
 };
 
@@ -141,15 +146,20 @@ export const updateCaseAssignee = async ({
   auth?: { user: User; space: string | null };
 }) => {
   const updateRequest: CasePatchRequest = {
-    version,
-    assignees: [{ uid: assigneeId }],
-    id: caseId,
+    cases: [
+      {
+        version,
+        assignees: [{ uid: assigneeId }],
+        id: caseId,
+      },
+    ],
   };
 
   const { body: updatedCase } = await supertest
-    .patch(`/api/cases/${caseId}`)
+    .patch(`${getSpaceUrlPrefix(auth?.space)}${CASES_URL}`)
     .auth(auth.user.username, auth.user.password)
     .set('kbn-xsrf', 'xxx')
-    .send(updateRequest);
+    .send(updateRequest)
+    .expect(expectedHttpCode);
   return updatedCase;
 };

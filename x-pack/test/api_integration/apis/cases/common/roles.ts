@@ -176,7 +176,7 @@ export const secCasesV2NoReopenWithCreateComment: Role = {
       {
         feature: {
           siem: ['all'],
-          securitySolutionCasesV2: ['read', 'update', 'create', 'delete', 'create_comment'],
+          securitySolutionCasesV2: ['read', 'update', 'create', 'cases_delete', 'create_comment'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -550,13 +550,7 @@ export const casesV3NoAssignee: Role = {
         spaces: ['*'],
         base: [],
         feature: {
-          generalCasesV3: [
-            'minimal_all',
-            'create_comment',
-            'case_reopen',
-            'cases_delete',
-            'cases_settings',
-          ],
+          generalCasesV3: ['minimal_read', 'delete', 'case_reopen'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -830,7 +824,13 @@ export const obsCasesV2NoReopenWithCreateComment: Role = {
         spaces: ['*'],
         base: [],
         feature: {
-          observabilityCasesV2: ['read', 'update', 'create', 'delete', 'create_comment'],
+          observabilityCasesV2: [
+            'read',
+            'cases_update',
+            'create',
+            'cases_delete',
+            'create_comment',
+          ],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -855,7 +855,7 @@ export const obsCasesV2NoCreateCommentWithReopen: Role = {
         spaces: ['*'],
         base: [],
         feature: {
-          observabilityCasesV2: ['read', 'update', 'create', 'delete', 'case_reopen'],
+          observabilityCasesV2: ['read', 'update', 'create', 'cases_delete', 'case_reopen'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
