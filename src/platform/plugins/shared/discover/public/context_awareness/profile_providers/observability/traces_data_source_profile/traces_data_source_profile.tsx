@@ -203,7 +203,7 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                       <EuiFlexGroup>
                         <EuiFlexItem>
                           <EuiText color="subdued" size="xs">
-                            Message (TODO ADD LINK)
+                            Message
                           </EuiText>
                           <p>{logMessage as string}</p>
                         </EuiFlexItem>
