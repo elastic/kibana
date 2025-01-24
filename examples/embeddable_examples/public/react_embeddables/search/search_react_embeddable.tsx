@@ -50,9 +50,9 @@ export const getSearchEmbeddableFactory = (services: Services) => {
       const api = buildApi(
         {
           ...timeRange.api,
-          blockingError: blockingError$,
-          dataViews: dataViews$,
-          dataLoading: dataLoading$,
+          blockingError$,
+          dataViews$,
+          dataLoading$,
           serializeState: () => {
             return {
               rawState: {

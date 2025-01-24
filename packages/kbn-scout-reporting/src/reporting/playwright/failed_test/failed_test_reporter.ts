@@ -36,6 +36,7 @@ import {
   getTestIDForTitle,
   stripRunCommand,
   stripFilePath,
+  excapeHtmlCharacters,
 } from '../../../helpers';
 
 /**
@@ -105,7 +106,9 @@ export class ScoutFailedTestReporter implements Reporter {
         duration: result.duration,
         error: {
           message: result.error?.message ? stripFilePath(result.error.message) : undefined,
-          stack_trace: result.error?.stack ? stripFilePath(result.error.stack) : undefined,
+          stack_trace: result.error?.stack
+            ? excapeHtmlCharacters(stripFilePath(result.error.stack))
+            : undefined,
         },
         stdout: result.stdout ? parseStdout(result.stdout) : undefined,
         attachments: result.attachments.map((attachment) => ({

@@ -48,6 +48,10 @@ Array [
   },
   Object {
     "cost": 1,
+    "taskType": "actions:.microsoft_defender_endpoint",
+  },
+  Object {
+    "cost": 1,
     "taskType": "actions:.observability-ai-assistant",
   },
   Object {

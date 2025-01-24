@@ -6,7 +6,11 @@
  */
 
 import { SavedObjectsBulkResponse, SavedObjectsClientContract, Logger } from '@kbn/core/server';
-import { RunNowResult, TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import {
+  RunNowResult,
+  TaskPriority,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import {
   RawAction,
   ActionTypeRegistryContract,
@@ -33,9 +37,11 @@ export interface ExecuteOptions
   id: string;
   uuid?: string;
   spaceId: string;
+  apiKeyId?: string;
   apiKey: string | null;
   executionId: string;
   actionTypeId: string;
+  priority?: TaskPriority;
 }
 
 interface ActionTaskParams
@@ -171,15 +177,17 @@ export function createBulkExecutionEnqueuerFunction({
           executionId: actionToExecute.executionId,
           consumer: actionToExecute.consumer,
           relatedSavedObjects: relatedSavedObjectWithRefs,
+          apiKeyId: actionToExecute.apiKeyId,
           ...(actionToExecute.source ? { source: actionToExecute.source.type } : {}),
         },
         references: taskReferences,
       };
     });
+
     const actionTaskParamsRecords: SavedObjectsBulkResponse<ActionTaskParams> =
       await unsecuredSavedObjectsClient.bulkCreate(actions, { refresh: false });
 
-    const taskInstances = actionTaskParamsRecords.saved_objects.map((so) => {
+    const taskInstances = actionTaskParamsRecords.saved_objects.map((so, index) => {
       const actionId = so.attributes.actionId;
       return {
         taskType: `actions:${actionTypeIds[actionId]}`,
@@ -189,6 +197,7 @@ export function createBulkExecutionEnqueuerFunction({
         },
         state: {},
         scope: ['actions'],
+        ...(runnableActions[index]?.priority ? { priority: runnableActions[index].priority } : {}),
       };
     });
 

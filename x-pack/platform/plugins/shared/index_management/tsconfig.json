@@ -56,6 +56,7 @@
     "@kbn/unsaved-changes-prompt",
     "@kbn/shared-ux-table-persist",
     "@kbn/core-application-browser",
+    "@kbn/inference-endpoint-ui-common",
   ],
   "exclude": ["target/**/*"]
 }

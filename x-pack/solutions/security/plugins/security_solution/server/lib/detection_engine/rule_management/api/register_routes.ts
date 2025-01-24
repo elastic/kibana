@@ -5,16 +5,16 @@
  * 2.0.
  */
 
-import type { Logger } from '@kbn/core/server';
+import type { DocLinksServiceSetup, Logger } from '@kbn/core/server';
 import type { ConfigType } from '../../../../config';
 import type { SetupPlugins } from '../../../../plugin_contract';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 
 import { performBulkActionRoute } from './rules/bulk_actions/route';
 import { bulkCreateRulesRoute } from './rules/bulk_create_rules/route';
-import { bulkDeleteRulesRoute } from './rules/bulk_delete_rules/route';
-import { bulkPatchRulesRoute } from './rules/bulk_patch_rules/route';
 import { bulkUpdateRulesRoute } from './rules/bulk_update_rules/route';
+import { bulkPatchRulesRoute } from './rules/bulk_patch_rules/route';
+import { bulkDeleteRulesRoute } from './rules/bulk_delete_rules/route';
 import { createRuleRoute } from './rules/create_rule/route';
 import { deleteRuleRoute } from './rules/delete_rule/route';
 import { exportRulesRoute } from './rules/export_rules/route';
@@ -31,7 +31,8 @@ export const registerRuleManagementRoutes = (
   router: SecuritySolutionPluginRouter,
   config: ConfigType,
   ml: SetupPlugins['ml'],
-  logger: Logger
+  logger: Logger,
+  docLinks: DocLinksServiceSetup
 ) => {
   // Rules CRUD
   createRuleRoute(router);
@@ -40,11 +41,11 @@ export const registerRuleManagementRoutes = (
   patchRuleRoute(router);
   deleteRuleRoute(router);
 
-  // Rules bulk CRUD
-  bulkCreateRulesRoute(router, logger);
-  bulkUpdateRulesRoute(router, logger);
-  bulkPatchRulesRoute(router, logger);
-  bulkDeleteRulesRoute(router, logger);
+  // These four bulk endpoints are deprecated and will be removed in 9.0
+  bulkCreateRulesRoute(router, logger, docLinks);
+  bulkUpdateRulesRoute(router, logger, docLinks);
+  bulkPatchRulesRoute(router, logger, docLinks);
+  bulkDeleteRulesRoute(router, logger, docLinks);
 
   // Rules bulk actions
   performBulkActionRoute(router, config, ml, logger);

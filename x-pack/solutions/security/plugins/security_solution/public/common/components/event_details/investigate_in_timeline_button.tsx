@@ -13,6 +13,7 @@ import type { Filter } from '@kbn/es-query';
 import type { TimeRange } from '../../store/inputs/model';
 import type { DataProvider } from '../../../../common/types';
 import { ACTION_INVESTIGATE_IN_TIMELINE } from '../../../detections/components/alerts_table/translations';
+import { useUserPrivileges } from '../user_privileges';
 import { useInvestigateInTimeline } from '../../hooks/timeline/use_investigate_in_timeline';
 
 export interface InvestigateInTimelineButtonProps {
@@ -37,6 +38,10 @@ export interface InvestigateInTimelineButtonProps {
   iconType?: IconType;
   children?: React.ReactNode;
   flush?: EuiButtonEmptyProps['flush'];
+  /**
+   * Data test subject string for testing
+   */
+  ['data-test-subj']?: string;
 }
 
 /**
@@ -54,6 +59,8 @@ export const InvestigateInTimelineButton: FC<
   keepDataView,
   iconType,
   flush,
+  isDisabled,
+  'data-test-subj': dataTestSubj,
   ...rest
 }) => {
   const { investigateInTimeline } = useInvestigateInTimeline();
@@ -65,6 +72,11 @@ export const InvestigateInTimelineButton: FC<
       keepDataView,
     });
   }, [dataProviders, filters, timeRange, keepDataView, investigateInTimeline]);
+  const {
+    timelinePrivileges: { read: canUseTimeline },
+  } = useUserPrivileges();
+
+  const disabled = !canUseTimeline || isDisabled;
 
   return asEmptyButton ? (
     <EuiButtonEmpty
@@ -73,11 +85,19 @@ export const InvestigateInTimelineButton: FC<
       flush={flush ?? 'right'}
       size="xs"
       iconType={iconType}
+      disabled={disabled}
+      data-test-subj={dataTestSubj}
     >
       {children}
     </EuiButtonEmpty>
   ) : (
-    <EuiButton aria-label={ACTION_INVESTIGATE_IN_TIMELINE} onClick={openTimelineCallback} {...rest}>
+    <EuiButton
+      aria-label={ACTION_INVESTIGATE_IN_TIMELINE}
+      disabled={disabled}
+      onClick={openTimelineCallback}
+      data-test-subj={dataTestSubj}
+      {...rest}
+    >
       {children}
     </EuiButton>
   );

@@ -39,6 +39,7 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   describe('reindexing', function () {
+    this.onlyEsVersion('8');
     // bail on first error in this suite since cases sequentially depend on each other
     this.bail(true);
 
