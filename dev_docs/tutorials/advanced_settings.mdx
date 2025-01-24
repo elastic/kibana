@@ -204,7 +204,7 @@ To change or remove a `uiSetting`, you must migrate the whole `config` Saved Obj
 
 For example, in 7.9.0, `siem` as renamed to `securitySolution`, and in 8.0.0, `theme:version` was removed:
 
-For all current advanced settings migrations see: `src/core/packages/ui-settings/server-internal/src/saved_objects/migrations.ts`
+As of 8.17, the advanced settings migrations are defined in `src/core/packages/ui-settings/server-internal/src/saved_objects/migrations.ts`.
 
 ### Creating Transforms
 
@@ -214,4 +214,4 @@ first upgraded. Note that you might need to add an extra attribute to verify tha
 applied again in the future.
 
 For example, we needed to transform the `defaultIndex` attribute, and we added an extra `isDefaultIndexMigrated` attribute for this purpose.
-See `src/core/packages/ui-settings/server-internal/src/saved_objects/transforms.ts` and [#13339](https://github.com/elastic/kibana/pull/133339) for an example.
+Refer to `src/core/packages/ui-settings/server-internal/src/saved_objects/transforms.ts` and [#13339](https://github.com/elastic/kibana/pull/133339) for an example.
