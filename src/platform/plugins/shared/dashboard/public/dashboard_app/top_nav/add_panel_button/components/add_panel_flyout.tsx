@@ -102,8 +102,7 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
       );
     }
 
-    const hasGroups = filteredGroups.some(({ isDisabled }) => !isDisabled);
-    return !hasGroups ? (
+    return filteredGroups.length === 0 ? (
       <EuiText size="s" textAlign="center" data-test-subj="dashboardPanelSelectionNoPanelMessage">
         <FormattedMessage
           id="dashboard.solutionToolbar.addPanelFlyout.noResultsDescription"
