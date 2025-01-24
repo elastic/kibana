@@ -17,6 +17,7 @@ import {
   EuiPopover,
   EuiDescriptionList,
   EuiDescriptionListDescription,
+  euiTextBreakWord,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { css as classNameCss } from '@emotion/css';
@@ -86,7 +87,9 @@ function ErrorsWarningsContent({
                     </EuiFlexItem>
                   </EuiFlexGroup>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false}>{item.message}</EuiFlexItem>
+                <EuiFlexItem grow={false} css={euiTextBreakWord()}>
+                  {item.message}
+                </EuiFlexItem>
               </EuiFlexGroup>
             </EuiDescriptionListDescription>
           );
