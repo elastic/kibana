@@ -179,7 +179,7 @@ export const getEnrichedDeprecations = async (
         correctiveAction,
       };
     })
-    .filter((deprecation, _, elements) => {
+    .filter((deprecation, index, elements) => {
       if (deprecation.message.includes(`Index [${deprecation.index}] is a frozen index`)) {
         // frozen indices are created in 7.x, so they are old / incompatible as well
         // reindexing + deleting is required, so no need to bubble up this deprecation in the UI
