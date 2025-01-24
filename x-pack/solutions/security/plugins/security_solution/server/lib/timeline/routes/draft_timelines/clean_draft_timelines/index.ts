@@ -33,7 +33,7 @@ export const cleanDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) =
       path: TIMELINE_DRAFT_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: ['timeline_write'],
         },
       },
       access: 'public',

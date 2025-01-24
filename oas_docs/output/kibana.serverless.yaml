@@ -9578,6 +9578,22 @@ paths:
                               - name
                               - enabled
                           type: array
+                        agentless:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            resources:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                requests:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    cpu:
+                                      type: string
+                                    memory:
+                                      type: string
                         agents:
                           type: number
                         data_output_id:
@@ -9708,6 +9724,8 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  agents:
+                                    type: number
                                   created_at:
                                     type: string
                                   created_by:
@@ -9732,133 +9750,204 @@ paths:
                                   id:
                                     type: string
                                   inputs:
-                                    items:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        compiled_input: {}
-                                        config:
-                                          additionalProperties:
-                                            additionalProperties: false
-                                            type: object
-                                            properties:
-                                              frozen:
-                                                type: boolean
-                                              type:
-                                                type: string
-                                              value: {}
-                                            required:
-                                              - value
-                                          description: Package variable (see integration documentation for more information)
+                                    anyOf:
+                                      - items:
+                                          additionalProperties: false
                                           type: object
-                                        enabled:
-                                          type: boolean
-                                        id:
-                                          type: string
-                                        keep_enabled:
-                                          type: boolean
-                                        policy_template:
-                                          type: string
-                                        streams:
-                                          items:
-                                            additionalProperties: false
-                                            type: object
-                                            properties:
-                                              compiled_stream: {}
-                                              config:
-                                                additionalProperties:
-                                                  additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    frozen:
-                                                      type: boolean
-                                                    type:
-                                                      type: string
-                                                    value: {}
-                                                  required:
-                                                    - value
-                                                description: Package variable (see integration documentation for more information)
-                                                type: object
-                                              data_stream:
+                                          properties:
+                                            compiled_input: {}
+                                            config:
+                                              additionalProperties:
                                                 additionalProperties: false
                                                 type: object
                                                 properties:
-                                                  dataset:
+                                                  frozen:
+                                                    type: boolean
+                                                  type:
                                                     type: string
-                                                  elasticsearch:
+                                                  value: {}
+                                                required:
+                                                  - value
+                                              description: Package variable (see integration documentation for more information)
+                                              type: object
+                                            enabled:
+                                              type: boolean
+                                            id:
+                                              type: string
+                                            keep_enabled:
+                                              type: boolean
+                                            policy_template:
+                                              type: string
+                                            streams:
+                                              items:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  compiled_stream: {}
+                                                  config:
+                                                    additionalProperties:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        frozen:
+                                                          type: boolean
+                                                        type:
+                                                          type: string
+                                                        value: {}
+                                                      required:
+                                                        - value
+                                                    description: Package variable (see integration documentation for more information)
+                                                    type: object
+                                                  data_stream:
                                                     additionalProperties: false
                                                     type: object
                                                     properties:
-                                                      dynamic_dataset:
-                                                        type: boolean
-                                                      dynamic_namespace:
-                                                        type: boolean
-                                                      privileges:
+                                                      dataset:
+                                                        type: string
+                                                      elasticsearch:
                                                         additionalProperties: false
                                                         type: object
                                                         properties:
-                                                          indices:
-                                                            items:
-                                                              type: string
-                                                            type: array
+                                                          dynamic_dataset:
+                                                            type: boolean
+                                                          dynamic_namespace:
+                                                            type: boolean
+                                                          privileges:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              indices:
+                                                                items:
+                                                                  type: string
+                                                                type: array
+                                                      type:
+                                                        type: string
+                                                    required:
+                                                      - dataset
+                                                      - type
+                                                  enabled:
+                                                    type: boolean
+                                                  id:
+                                                    type: string
+                                                  keep_enabled:
+                                                    type: boolean
+                                                  release:
+                                                    enum:
+                                                      - ga
+                                                      - beta
+                                                      - experimental
+                                                    type: string
+                                                  vars:
+                                                    additionalProperties:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        frozen:
+                                                          type: boolean
+                                                        type:
+                                                          type: string
+                                                        value: {}
+                                                      required:
+                                                        - value
+                                                    description: Package variable (see integration documentation for more information)
+                                                    type: object
+                                                required:
+                                                  - enabled
+                                                  - data_stream
+                                                  - compiled_stream
+                                              type: array
+                                            type:
+                                              type: string
+                                            vars:
+                                              additionalProperties:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  frozen:
+                                                    type: boolean
                                                   type:
                                                     type: string
+                                                  value: {}
                                                 required:
-                                                  - dataset
-                                                  - type
-                                              enabled:
-                                                type: boolean
-                                              id:
-                                                type: string
-                                              keep_enabled:
-                                                type: boolean
-                                              release:
-                                                enum:
-                                                  - ga
-                                                  - beta
-                                                  - experimental
-                                                type: string
-                                              vars:
-                                                additionalProperties:
-                                                  additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    frozen:
-                                                      type: boolean
-                                                    type:
-                                                      type: string
-                                                    value: {}
-                                                  required:
-                                                    - value
-                                                description: Package variable (see integration documentation for more information)
-                                                type: object
-                                            required:
-                                              - enabled
-                                              - data_stream
-                                              - compiled_stream
-                                          type: array
-                                        type:
-                                          type: string
-                                        vars:
-                                          additionalProperties:
-                                            additionalProperties: false
-                                            type: object
-                                            properties:
-                                              frozen:
-                                                type: boolean
-                                              type:
-                                                type: string
-                                              value: {}
-                                            required:
-                                              - value
-                                          description: Package variable (see integration documentation for more information)
+                                                  - value
+                                              description: Package variable (see integration documentation for more information)
+                                              type: object
+                                          required:
+                                            - type
+                                            - enabled
+                                            - streams
+                                            - compiled_input
+                                        type: array
+                                      - additionalProperties:
+                                          additionalProperties: false
                                           type: object
-                                      required:
-                                        - type
-                                        - enabled
-                                        - streams
-                                        - compiled_input
-                                    type: array
+                                          properties:
+                                            enabled:
+                                              description: enable or disable that input, (default to true)
+                                              type: boolean
+                                            streams:
+                                              additionalProperties:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  enabled:
+                                                    description: enable or disable that stream, (default to true)
+                                                    type: boolean
+                                                  vars:
+                                                    additionalProperties:
+                                                      anyOf:
+                                                        - type: boolean
+                                                        - type: string
+                                                        - type: number
+                                                        - items:
+                                                            type: string
+                                                          type: array
+                                                        - items:
+                                                            type: number
+                                                          type: array
+                                                        - additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            id:
+                                                              type: string
+                                                            isSecretRef:
+                                                              type: boolean
+                                                          required:
+                                                            - id
+                                                            - isSecretRef
+                                                      nullable: true
+                                                    description: Input/stream level variable (see integration documentation for more information)
+                                                    type: object
+                                              description: Input streams (see integration documentation to know what streams are available)
+                                              type: object
+                                            vars:
+                                              additionalProperties:
+                                                anyOf:
+                                                  - type: boolean
+                                                  - type: string
+                                                  - type: number
+                                                  - items:
+                                                      type: string
+                                                    type: array
+                                                  - items:
+                                                      type: number
+                                                    type: array
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      id:
+                                                        type: string
+                                                      isSecretRef:
+                                                        type: boolean
+                                                    required:
+                                                      - id
+                                                      - isSecretRef
+                                                nullable: true
+                                              description: Input/stream level variable (see integration documentation for more information)
+                                              type: object
+                                        description: Package policy inputs (see integration documentation to know what inputs are available)
+                                        type: object
+                                        x-oas-optional: true
                                   is_managed:
                                     type: boolean
                                   name:
@@ -9941,6 +10030,10 @@ paths:
                                       required:
                                         - id
                                     type: array
+                                  spaceIds:
+                                    items:
+                                      type: string
+                                    type: array
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
@@ -9951,19 +10044,45 @@ paths:
                                   updated_by:
                                     type: string
                                   vars:
-                                    additionalProperties:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        frozen:
-                                          type: boolean
-                                        type:
-                                          type: string
-                                        value: {}
-                                      required:
-                                        - value
-                                    description: Package variable (see integration documentation for more information)
-                                    type: object
+                                    anyOf:
+                                      - additionalProperties:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            frozen:
+                                              type: boolean
+                                            type:
+                                              type: string
+                                            value: {}
+                                          required:
+                                            - value
+                                        description: Package variable (see integration documentation for more information)
+                                        type: object
+                                      - additionalProperties:
+                                          anyOf:
+                                            - type: boolean
+                                            - type: string
+                                            - type: number
+                                            - items:
+                                                type: string
+                                              type: array
+                                            - items:
+                                                type: number
+                                              type: array
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                id:
+                                                  type: string
+                                                isSecretRef:
+                                                  type: boolean
+                                              required:
+                                                - id
+                                                - isSecretRef
+                                          nullable: true
+                                        description: Input/stream level variable (see integration documentation for more information)
+                                        type: object
+                                        x-oas-optional: true
                                   version:
                                     type: string
                                 required:
@@ -10113,6 +10232,22 @@ paths:
                       - name
                       - enabled
                   type: array
+                agentless:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    resources:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        requests:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
                 data_output_id:
                   nullable: true
                   type: string
@@ -10292,6 +10427,22 @@ paths:
                             - name
                             - enabled
                         type: array
+                      agentless:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          resources:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              requests:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                  memory:
+                                    type: string
                       agents:
                         type: number
                       data_output_id:
@@ -10422,6 +10573,8 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                agents:
+                                  type: number
                                 created_at:
                                   type: string
                                 created_by:
@@ -10446,133 +10599,204 @@ paths:
                                 id:
                                   type: string
                                 inputs:
-                                  items:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      compiled_input: {}
-                                      config:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value: {}
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
+                                  anyOf:
+                                    - items:
+                                        additionalProperties: false
                                         type: object
-                                      enabled:
-                                        type: boolean
-                                      id:
-                                        type: string
-                                      keep_enabled:
-                                        type: boolean
-                                      policy_template:
-                                        type: string
-                                      streams:
-                                        items:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            compiled_stream: {}
-                                            config:
-                                              additionalProperties:
-                                                additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  frozen:
-                                                    type: boolean
-                                                  type:
-                                                    type: string
-                                                  value: {}
-                                                required:
-                                                  - value
-                                              description: Package variable (see integration documentation for more information)
-                                              type: object
-                                            data_stream:
+                                        properties:
+                                          compiled_input: {}
+                                          config:
+                                            additionalProperties:
                                               additionalProperties: false
                                               type: object
                                               properties:
-                                                dataset:
+                                                frozen:
+                                                  type: boolean
+                                                type:
                                                   type: string
-                                                elasticsearch:
+                                                value: {}
+                                              required:
+                                                - value
+                                            description: Package variable (see integration documentation for more information)
+                                            type: object
+                                          enabled:
+                                            type: boolean
+                                          id:
+                                            type: string
+                                          keep_enabled:
+                                            type: boolean
+                                          policy_template:
+                                            type: string
+                                          streams:
+                                            items:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                compiled_stream: {}
+                                                config:
+                                                  additionalProperties:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      frozen:
+                                                        type: boolean
+                                                      type:
+                                                        type: string
+                                                      value: {}
+                                                    required:
+                                                      - value
+                                                  description: Package variable (see integration documentation for more information)
+                                                  type: object
+                                                data_stream:
                                                   additionalProperties: false
                                                   type: object
                                                   properties:
-                                                    dynamic_dataset:
-                                                      type: boolean
-                                                    dynamic_namespace:
-                                                      type: boolean
-                                                    privileges:
+                                                    dataset:
+                                                      type: string
+                                                    elasticsearch:
                                                       additionalProperties: false
                                                       type: object
                                                       properties:
-                                                        indices:
-                                                          items:
-                                                            type: string
-                                                          type: array
+                                                        dynamic_dataset:
+                                                          type: boolean
+                                                        dynamic_namespace:
+                                                          type: boolean
+                                                        privileges:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            indices:
+                                                              items:
+                                                                type: string
+                                                              type: array
+                                                    type:
+                                                      type: string
+                                                  required:
+                                                    - dataset
+                                                    - type
+                                                enabled:
+                                                  type: boolean
+                                                id:
+                                                  type: string
+                                                keep_enabled:
+                                                  type: boolean
+                                                release:
+                                                  enum:
+                                                    - ga
+                                                    - beta
+                                                    - experimental
+                                                  type: string
+                                                vars:
+                                                  additionalProperties:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      frozen:
+                                                        type: boolean
+                                                      type:
+                                                        type: string
+                                                      value: {}
+                                                    required:
+                                                      - value
+                                                  description: Package variable (see integration documentation for more information)
+                                                  type: object
+                                              required:
+                                                - enabled
+                                                - data_stream
+                                                - compiled_stream
+                                            type: array
+                                          type:
+                                            type: string
+                                          vars:
+                                            additionalProperties:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                frozen:
+                                                  type: boolean
                                                 type:
                                                   type: string
+                                                value: {}
                                               required:
-                                                - dataset
-                                                - type
-                                            enabled:
-                                              type: boolean
-                                            id:
-                                              type: string
-                                            keep_enabled:
-                                              type: boolean
-                                            release:
-                                              enum:
-                                                - ga
-                                                - beta
-                                                - experimental
-                                              type: string
-                                            vars:
-                                              additionalProperties:
-                                                additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  frozen:
-                                                    type: boolean
-                                                  type:
-                                                    type: string
-                                                  value: {}
-                                                required:
-                                                  - value
-                                              description: Package variable (see integration documentation for more information)
-                                              type: object
-                                          required:
-                                            - enabled
-                                            - data_stream
-                                            - compiled_stream
-                                        type: array
-                                      type:
-                                        type: string
-                                      vars:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value: {}
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
+                                                - value
+                                            description: Package variable (see integration documentation for more information)
+                                            type: object
+                                        required:
+                                          - type
+                                          - enabled
+                                          - streams
+                                          - compiled_input
+                                      type: array
+                                    - additionalProperties:
+                                        additionalProperties: false
                                         type: object
-                                    required:
-                                      - type
-                                      - enabled
-                                      - streams
-                                      - compiled_input
-                                  type: array
+                                        properties:
+                                          enabled:
+                                            description: enable or disable that input, (default to true)
+                                            type: boolean
+                                          streams:
+                                            additionalProperties:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                enabled:
+                                                  description: enable or disable that stream, (default to true)
+                                                  type: boolean
+                                                vars:
+                                                  additionalProperties:
+                                                    anyOf:
+                                                      - type: boolean
+                                                      - type: string
+                                                      - type: number
+                                                      - items:
+                                                          type: string
+                                                        type: array
+                                                      - items:
+                                                          type: number
+                                                        type: array
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          id:
+                                                            type: string
+                                                          isSecretRef:
+                                                            type: boolean
+                                                        required:
+                                                          - id
+                                                          - isSecretRef
+                                                    nullable: true
+                                                  description: Input/stream level variable (see integration documentation for more information)
+                                                  type: object
+                                            description: Input streams (see integration documentation to know what streams are available)
+                                            type: object
+                                          vars:
+                                            additionalProperties:
+                                              anyOf:
+                                                - type: boolean
+                                                - type: string
+                                                - type: number
+                                                - items:
+                                                    type: string
+                                                  type: array
+                                                - items:
+                                                    type: number
+                                                  type: array
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    id:
+                                                      type: string
+                                                    isSecretRef:
+                                                      type: boolean
+                                                  required:
+                                                    - id
+                                                    - isSecretRef
+                                              nullable: true
+                                            description: Input/stream level variable (see integration documentation for more information)
+                                            type: object
+                                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                                      type: object
+                                      x-oas-optional: true
                                 is_managed:
                                   type: boolean
                                 name:
@@ -10655,6 +10879,10 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                spaceIds:
+                                  items:
+                                    type: string
+                                  type: array
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
@@ -10665,19 +10893,45 @@ paths:
                                 updated_by:
                                   type: string
                                 vars:
-                                  additionalProperties:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      frozen:
-                                        type: boolean
-                                      type:
-                                        type: string
-                                      value: {}
-                                    required:
-                                      - value
-                                  description: Package variable (see integration documentation for more information)
-                                  type: object
+                                  anyOf:
+                                    - additionalProperties:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          frozen:
+                                            type: boolean
+                                          type:
+                                            type: string
+                                          value: {}
+                                        required:
+                                          - value
+                                      description: Package variable (see integration documentation for more information)
+                                      type: object
+                                    - additionalProperties:
+                                        anyOf:
+                                          - type: boolean
+                                          - type: string
+                                          - type: number
+                                          - items:
+                                              type: string
+                                            type: array
+                                          - items:
+                                              type: number
+                                            type: array
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                              isSecretRef:
+                                                type: boolean
+                                            required:
+                                              - id
+                                              - isSecretRef
+                                        nullable: true
+                                      description: Input/stream level variable (see integration documentation for more information)
+                                      type: object
+                                      x-oas-optional: true
                                 version:
                                   type: string
                               required:
@@ -10846,6 +11100,22 @@ paths:
                               - name
                               - enabled
                           type: array
+                        agentless:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            resources:
+                              additionalProperties: false
+                              type: object
+                              properties:
+                                requests:
+                                  additionalProperties: false
+                                  type: object
+                                  properties:
+                                    cpu:
+                                      type: string
+                                    memory:
+                                      type: string
                         agents:
                           type: number
                         data_output_id:
@@ -10976,6 +11246,8 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  agents:
+                                    type: number
                                   created_at:
                                     type: string
                                   created_by:
@@ -11000,133 +11272,204 @@ paths:
                                   id:
                                     type: string
                                   inputs:
-                                    items:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        compiled_input: {}
-                                        config:
-                                          additionalProperties:
-                                            additionalProperties: false
-                                            type: object
-                                            properties:
-                                              frozen:
-                                                type: boolean
-                                              type:
-                                                type: string
-                                              value: {}
-                                            required:
-                                              - value
-                                          description: Package variable (see integration documentation for more information)
+                                    anyOf:
+                                      - items:
+                                          additionalProperties: false
                                           type: object
-                                        enabled:
-                                          type: boolean
-                                        id:
-                                          type: string
-                                        keep_enabled:
-                                          type: boolean
-                                        policy_template:
-                                          type: string
-                                        streams:
-                                          items:
-                                            additionalProperties: false
-                                            type: object
-                                            properties:
-                                              compiled_stream: {}
-                                              config:
-                                                additionalProperties:
-                                                  additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    frozen:
-                                                      type: boolean
-                                                    type:
-                                                      type: string
-                                                    value: {}
-                                                  required:
-                                                    - value
-                                                description: Package variable (see integration documentation for more information)
-                                                type: object
-                                              data_stream:
+                                          properties:
+                                            compiled_input: {}
+                                            config:
+                                              additionalProperties:
                                                 additionalProperties: false
                                                 type: object
                                                 properties:
-                                                  dataset:
+                                                  frozen:
+                                                    type: boolean
+                                                  type:
                                                     type: string
-                                                  elasticsearch:
+                                                  value: {}
+                                                required:
+                                                  - value
+                                              description: Package variable (see integration documentation for more information)
+                                              type: object
+                                            enabled:
+                                              type: boolean
+                                            id:
+                                              type: string
+                                            keep_enabled:
+                                              type: boolean
+                                            policy_template:
+                                              type: string
+                                            streams:
+                                              items:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  compiled_stream: {}
+                                                  config:
+                                                    additionalProperties:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        frozen:
+                                                          type: boolean
+                                                        type:
+                                                          type: string
+                                                        value: {}
+                                                      required:
+                                                        - value
+                                                    description: Package variable (see integration documentation for more information)
+                                                    type: object
+                                                  data_stream:
                                                     additionalProperties: false
                                                     type: object
                                                     properties:
-                                                      dynamic_dataset:
-                                                        type: boolean
-                                                      dynamic_namespace:
-                                                        type: boolean
-                                                      privileges:
+                                                      dataset:
+                                                        type: string
+                                                      elasticsearch:
                                                         additionalProperties: false
                                                         type: object
                                                         properties:
-                                                          indices:
-                                                            items:
-                                                              type: string
-                                                            type: array
+                                                          dynamic_dataset:
+                                                            type: boolean
+                                                          dynamic_namespace:
+                                                            type: boolean
+                                                          privileges:
+                                                            additionalProperties: false
+                                                            type: object
+                                                            properties:
+                                                              indices:
+                                                                items:
+                                                                  type: string
+                                                                type: array
+                                                      type:
+                                                        type: string
+                                                    required:
+                                                      - dataset
+                                                      - type
+                                                  enabled:
+                                                    type: boolean
+                                                  id:
+                                                    type: string
+                                                  keep_enabled:
+                                                    type: boolean
+                                                  release:
+                                                    enum:
+                                                      - ga
+                                                      - beta
+                                                      - experimental
+                                                    type: string
+                                                  vars:
+                                                    additionalProperties:
+                                                      additionalProperties: false
+                                                      type: object
+                                                      properties:
+                                                        frozen:
+                                                          type: boolean
+                                                        type:
+                                                          type: string
+                                                        value: {}
+                                                      required:
+                                                        - value
+                                                    description: Package variable (see integration documentation for more information)
+                                                    type: object
+                                                required:
+                                                  - enabled
+                                                  - data_stream
+                                                  - compiled_stream
+                                              type: array
+                                            type:
+                                              type: string
+                                            vars:
+                                              additionalProperties:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  frozen:
+                                                    type: boolean
                                                   type:
                                                     type: string
+                                                  value: {}
                                                 required:
-                                                  - dataset
-                                                  - type
-                                              enabled:
-                                                type: boolean
-                                              id:
-                                                type: string
-                                              keep_enabled:
-                                                type: boolean
-                                              release:
-                                                enum:
-                                                  - ga
-                                                  - beta
-                                                  - experimental
-                                                type: string
-                                              vars:
-                                                additionalProperties:
-                                                  additionalProperties: false
-                                                  type: object
-                                                  properties:
-                                                    frozen:
-                                                      type: boolean
-                                                    type:
-                                                      type: string
-                                                    value: {}
-                                                  required:
-                                                    - value
-                                                description: Package variable (see integration documentation for more information)
-                                                type: object
-                                            required:
-                                              - enabled
-                                              - data_stream
-                                              - compiled_stream
-                                          type: array
-                                        type:
-                                          type: string
-                                        vars:
-                                          additionalProperties:
-                                            additionalProperties: false
-                                            type: object
-                                            properties:
-                                              frozen:
-                                                type: boolean
-                                              type:
-                                                type: string
-                                              value: {}
-                                            required:
-                                              - value
-                                          description: Package variable (see integration documentation for more information)
+                                                  - value
+                                              description: Package variable (see integration documentation for more information)
+                                              type: object
+                                          required:
+                                            - type
+                                            - enabled
+                                            - streams
+                                            - compiled_input
+                                        type: array
+                                      - additionalProperties:
+                                          additionalProperties: false
                                           type: object
-                                      required:
-                                        - type
-                                        - enabled
-                                        - streams
-                                        - compiled_input
-                                    type: array
+                                          properties:
+                                            enabled:
+                                              description: enable or disable that input, (default to true)
+                                              type: boolean
+                                            streams:
+                                              additionalProperties:
+                                                additionalProperties: false
+                                                type: object
+                                                properties:
+                                                  enabled:
+                                                    description: enable or disable that stream, (default to true)
+                                                    type: boolean
+                                                  vars:
+                                                    additionalProperties:
+                                                      anyOf:
+                                                        - type: boolean
+                                                        - type: string
+                                                        - type: number
+                                                        - items:
+                                                            type: string
+                                                          type: array
+                                                        - items:
+                                                            type: number
+                                                          type: array
+                                                        - additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            id:
+                                                              type: string
+                                                            isSecretRef:
+                                                              type: boolean
+                                                          required:
+                                                            - id
+                                                            - isSecretRef
+                                                      nullable: true
+                                                    description: Input/stream level variable (see integration documentation for more information)
+                                                    type: object
+                                              description: Input streams (see integration documentation to know what streams are available)
+                                              type: object
+                                            vars:
+                                              additionalProperties:
+                                                anyOf:
+                                                  - type: boolean
+                                                  - type: string
+                                                  - type: number
+                                                  - items:
+                                                      type: string
+                                                    type: array
+                                                  - items:
+                                                      type: number
+                                                    type: array
+                                                  - additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      id:
+                                                        type: string
+                                                      isSecretRef:
+                                                        type: boolean
+                                                    required:
+                                                      - id
+                                                      - isSecretRef
+                                                nullable: true
+                                              description: Input/stream level variable (see integration documentation for more information)
+                                              type: object
+                                        description: Package policy inputs (see integration documentation to know what inputs are available)
+                                        type: object
+                                        x-oas-optional: true
                                   is_managed:
                                     type: boolean
                                   name:
@@ -11209,6 +11552,10 @@ paths:
                                       required:
                                         - id
                                     type: array
+                                  spaceIds:
+                                    items:
+                                      type: string
+                                    type: array
                                   supports_agentless:
                                     default: false
                                     description: Indicates whether the package policy belongs to an agentless agent policy.
@@ -11219,19 +11566,45 @@ paths:
                                   updated_by:
                                     type: string
                                   vars:
-                                    additionalProperties:
-                                      additionalProperties: false
-                                      type: object
-                                      properties:
-                                        frozen:
-                                          type: boolean
-                                        type:
-                                          type: string
-                                        value: {}
-                                      required:
-                                        - value
-                                    description: Package variable (see integration documentation for more information)
-                                    type: object
+                                    anyOf:
+                                      - additionalProperties:
+                                          additionalProperties: false
+                                          type: object
+                                          properties:
+                                            frozen:
+                                              type: boolean
+                                            type:
+                                              type: string
+                                            value: {}
+                                          required:
+                                            - value
+                                        description: Package variable (see integration documentation for more information)
+                                        type: object
+                                      - additionalProperties:
+                                          anyOf:
+                                            - type: boolean
+                                            - type: string
+                                            - type: number
+                                            - items:
+                                                type: string
+                                              type: array
+                                            - items:
+                                                type: number
+                                              type: array
+                                            - additionalProperties: false
+                                              type: object
+                                              properties:
+                                                id:
+                                                  type: string
+                                                isSecretRef:
+                                                  type: boolean
+                                              required:
+                                                - id
+                                                - isSecretRef
+                                          nullable: true
+                                        description: Input/stream level variable (see integration documentation for more information)
+                                        type: object
+                                        x-oas-optional: true
                                   version:
                                     type: string
                                 required:
@@ -11380,6 +11753,22 @@ paths:
                             - name
                             - enabled
                         type: array
+                      agentless:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          resources:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              requests:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                  memory:
+                                    type: string
                       agents:
                         type: number
                       data_output_id:
@@ -11510,6 +11899,8 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                agents:
+                                  type: number
                                 created_at:
                                   type: string
                                 created_by:
@@ -11534,133 +11925,204 @@ paths:
                                 id:
                                   type: string
                                 inputs:
-                                  items:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      compiled_input: {}
-                                      config:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value: {}
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
+                                  anyOf:
+                                    - items:
+                                        additionalProperties: false
                                         type: object
-                                      enabled:
-                                        type: boolean
-                                      id:
-                                        type: string
-                                      keep_enabled:
-                                        type: boolean
-                                      policy_template:
-                                        type: string
-                                      streams:
-                                        items:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            compiled_stream: {}
-                                            config:
-                                              additionalProperties:
-                                                additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  frozen:
-                                                    type: boolean
-                                                  type:
-                                                    type: string
-                                                  value: {}
-                                                required:
-                                                  - value
-                                              description: Package variable (see integration documentation for more information)
-                                              type: object
-                                            data_stream:
+                                        properties:
+                                          compiled_input: {}
+                                          config:
+                                            additionalProperties:
                                               additionalProperties: false
                                               type: object
                                               properties:
-                                                dataset:
+                                                frozen:
+                                                  type: boolean
+                                                type:
                                                   type: string
-                                                elasticsearch:
+                                                value: {}
+                                              required:
+                                                - value
+                                            description: Package variable (see integration documentation for more information)
+                                            type: object
+                                          enabled:
+                                            type: boolean
+                                          id:
+                                            type: string
+                                          keep_enabled:
+                                            type: boolean
+                                          policy_template:
+                                            type: string
+                                          streams:
+                                            items:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                compiled_stream: {}
+                                                config:
+                                                  additionalProperties:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      frozen:
+                                                        type: boolean
+                                                      type:
+                                                        type: string
+                                                      value: {}
+                                                    required:
+                                                      - value
+                                                  description: Package variable (see integration documentation for more information)
+                                                  type: object
+                                                data_stream:
                                                   additionalProperties: false
                                                   type: object
                                                   properties:
-                                                    dynamic_dataset:
-                                                      type: boolean
-                                                    dynamic_namespace:
-                                                      type: boolean
-                                                    privileges:
+                                                    dataset:
+                                                      type: string
+                                                    elasticsearch:
                                                       additionalProperties: false
                                                       type: object
                                                       properties:
-                                                        indices:
-                                                          items:
-                                                            type: string
-                                                          type: array
+                                                        dynamic_dataset:
+                                                          type: boolean
+                                                        dynamic_namespace:
+                                                          type: boolean
+                                                        privileges:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            indices:
+                                                              items:
+                                                                type: string
+                                                              type: array
+                                                    type:
+                                                      type: string
+                                                  required:
+                                                    - dataset
+                                                    - type
+                                                enabled:
+                                                  type: boolean
+                                                id:
+                                                  type: string
+                                                keep_enabled:
+                                                  type: boolean
+                                                release:
+                                                  enum:
+                                                    - ga
+                                                    - beta
+                                                    - experimental
+                                                  type: string
+                                                vars:
+                                                  additionalProperties:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      frozen:
+                                                        type: boolean
+                                                      type:
+                                                        type: string
+                                                      value: {}
+                                                    required:
+                                                      - value
+                                                  description: Package variable (see integration documentation for more information)
+                                                  type: object
+                                              required:
+                                                - enabled
+                                                - data_stream
+                                                - compiled_stream
+                                            type: array
+                                          type:
+                                            type: string
+                                          vars:
+                                            additionalProperties:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                frozen:
+                                                  type: boolean
                                                 type:
                                                   type: string
+                                                value: {}
                                               required:
-                                                - dataset
-                                                - type
-                                            enabled:
-                                              type: boolean
-                                            id:
-                                              type: string
-                                            keep_enabled:
-                                              type: boolean
-                                            release:
-                                              enum:
-                                                - ga
-                                                - beta
-                                                - experimental
-                                              type: string
-                                            vars:
-                                              additionalProperties:
-                                                additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  frozen:
-                                                    type: boolean
-                                                  type:
-                                                    type: string
-                                                  value: {}
-                                                required:
-                                                  - value
-                                              description: Package variable (see integration documentation for more information)
-                                              type: object
-                                          required:
-                                            - enabled
-                                            - data_stream
-                                            - compiled_stream
-                                        type: array
-                                      type:
-                                        type: string
-                                      vars:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value: {}
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
+                                                - value
+                                            description: Package variable (see integration documentation for more information)
+                                            type: object
+                                        required:
+                                          - type
+                                          - enabled
+                                          - streams
+                                          - compiled_input
+                                      type: array
+                                    - additionalProperties:
+                                        additionalProperties: false
                                         type: object
-                                    required:
-                                      - type
-                                      - enabled
-                                      - streams
-                                      - compiled_input
-                                  type: array
+                                        properties:
+                                          enabled:
+                                            description: enable or disable that input, (default to true)
+                                            type: boolean
+                                          streams:
+                                            additionalProperties:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                enabled:
+                                                  description: enable or disable that stream, (default to true)
+                                                  type: boolean
+                                                vars:
+                                                  additionalProperties:
+                                                    anyOf:
+                                                      - type: boolean
+                                                      - type: string
+                                                      - type: number
+                                                      - items:
+                                                          type: string
+                                                        type: array
+                                                      - items:
+                                                          type: number
+                                                        type: array
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          id:
+                                                            type: string
+                                                          isSecretRef:
+                                                            type: boolean
+                                                        required:
+                                                          - id
+                                                          - isSecretRef
+                                                    nullable: true
+                                                  description: Input/stream level variable (see integration documentation for more information)
+                                                  type: object
+                                            description: Input streams (see integration documentation to know what streams are available)
+                                            type: object
+                                          vars:
+                                            additionalProperties:
+                                              anyOf:
+                                                - type: boolean
+                                                - type: string
+                                                - type: number
+                                                - items:
+                                                    type: string
+                                                  type: array
+                                                - items:
+                                                    type: number
+                                                  type: array
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    id:
+                                                      type: string
+                                                    isSecretRef:
+                                                      type: boolean
+                                                  required:
+                                                    - id
+                                                    - isSecretRef
+                                              nullable: true
+                                            description: Input/stream level variable (see integration documentation for more information)
+                                            type: object
+                                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                                      type: object
+                                      x-oas-optional: true
                                 is_managed:
                                   type: boolean
                                 name:
@@ -11743,6 +12205,10 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                spaceIds:
+                                  items:
+                                    type: string
+                                  type: array
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
@@ -11753,19 +12219,45 @@ paths:
                                 updated_by:
                                   type: string
                                 vars:
-                                  additionalProperties:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      frozen:
-                                        type: boolean
-                                      type:
-                                        type: string
-                                      value: {}
-                                    required:
-                                      - value
-                                  description: Package variable (see integration documentation for more information)
-                                  type: object
+                                  anyOf:
+                                    - additionalProperties:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          frozen:
+                                            type: boolean
+                                          type:
+                                            type: string
+                                          value: {}
+                                        required:
+                                          - value
+                                      description: Package variable (see integration documentation for more information)
+                                      type: object
+                                    - additionalProperties:
+                                        anyOf:
+                                          - type: boolean
+                                          - type: string
+                                          - type: number
+                                          - items:
+                                              type: string
+                                            type: array
+                                          - items:
+                                              type: number
+                                            type: array
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                              isSecretRef:
+                                                type: boolean
+                                            required:
+                                              - id
+                                              - isSecretRef
+                                        nullable: true
+                                      description: Input/stream level variable (see integration documentation for more information)
+                                      type: object
+                                      x-oas-optional: true
                                 version:
                                   type: string
                               required:
@@ -11914,6 +12406,22 @@ paths:
                       - name
                       - enabled
                   type: array
+                agentless:
+                  additionalProperties: false
+                  type: object
+                  properties:
+                    resources:
+                      additionalProperties: false
+                      type: object
+                      properties:
+                        requests:
+                          additionalProperties: false
+                          type: object
+                          properties:
+                            cpu:
+                              type: string
+                            memory:
+                              type: string
                 data_output_id:
                   nullable: true
                   type: string
@@ -12093,6 +12601,22 @@ paths:
                             - name
                             - enabled
                         type: array
+                      agentless:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          resources:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              requests:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                  memory:
+                                    type: string
                       agents:
                         type: number
                       data_output_id:
@@ -12223,6 +12747,8 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                agents:
+                                  type: number
                                 created_at:
                                   type: string
                                 created_by:
@@ -12247,133 +12773,204 @@ paths:
                                 id:
                                   type: string
                                 inputs:
-                                  items:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      compiled_input: {}
-                                      config:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value: {}
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
+                                  anyOf:
+                                    - items:
+                                        additionalProperties: false
                                         type: object
-                                      enabled:
-                                        type: boolean
-                                      id:
-                                        type: string
-                                      keep_enabled:
-                                        type: boolean
-                                      policy_template:
-                                        type: string
-                                      streams:
-                                        items:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            compiled_stream: {}
-                                            config:
-                                              additionalProperties:
-                                                additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  frozen:
-                                                    type: boolean
-                                                  type:
-                                                    type: string
-                                                  value: {}
-                                                required:
-                                                  - value
-                                              description: Package variable (see integration documentation for more information)
-                                              type: object
-                                            data_stream:
+                                        properties:
+                                          compiled_input: {}
+                                          config:
+                                            additionalProperties:
                                               additionalProperties: false
                                               type: object
                                               properties:
-                                                dataset:
+                                                frozen:
+                                                  type: boolean
+                                                type:
                                                   type: string
-                                                elasticsearch:
+                                                value: {}
+                                              required:
+                                                - value
+                                            description: Package variable (see integration documentation for more information)
+                                            type: object
+                                          enabled:
+                                            type: boolean
+                                          id:
+                                            type: string
+                                          keep_enabled:
+                                            type: boolean
+                                          policy_template:
+                                            type: string
+                                          streams:
+                                            items:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                compiled_stream: {}
+                                                config:
+                                                  additionalProperties:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      frozen:
+                                                        type: boolean
+                                                      type:
+                                                        type: string
+                                                      value: {}
+                                                    required:
+                                                      - value
+                                                  description: Package variable (see integration documentation for more information)
+                                                  type: object
+                                                data_stream:
                                                   additionalProperties: false
                                                   type: object
                                                   properties:
-                                                    dynamic_dataset:
-                                                      type: boolean
-                                                    dynamic_namespace:
-                                                      type: boolean
-                                                    privileges:
+                                                    dataset:
+                                                      type: string
+                                                    elasticsearch:
                                                       additionalProperties: false
                                                       type: object
                                                       properties:
-                                                        indices:
-                                                          items:
-                                                            type: string
-                                                          type: array
+                                                        dynamic_dataset:
+                                                          type: boolean
+                                                        dynamic_namespace:
+                                                          type: boolean
+                                                        privileges:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            indices:
+                                                              items:
+                                                                type: string
+                                                              type: array
+                                                    type:
+                                                      type: string
+                                                  required:
+                                                    - dataset
+                                                    - type
+                                                enabled:
+                                                  type: boolean
+                                                id:
+                                                  type: string
+                                                keep_enabled:
+                                                  type: boolean
+                                                release:
+                                                  enum:
+                                                    - ga
+                                                    - beta
+                                                    - experimental
+                                                  type: string
+                                                vars:
+                                                  additionalProperties:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      frozen:
+                                                        type: boolean
+                                                      type:
+                                                        type: string
+                                                      value: {}
+                                                    required:
+                                                      - value
+                                                  description: Package variable (see integration documentation for more information)
+                                                  type: object
+                                              required:
+                                                - enabled
+                                                - data_stream
+                                                - compiled_stream
+                                            type: array
+                                          type:
+                                            type: string
+                                          vars:
+                                            additionalProperties:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                frozen:
+                                                  type: boolean
                                                 type:
                                                   type: string
+                                                value: {}
                                               required:
-                                                - dataset
-                                                - type
-                                            enabled:
-                                              type: boolean
-                                            id:
-                                              type: string
-                                            keep_enabled:
-                                              type: boolean
-                                            release:
-                                              enum:
-                                                - ga
-                                                - beta
-                                                - experimental
-                                              type: string
-                                            vars:
-                                              additionalProperties:
-                                                additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  frozen:
-                                                    type: boolean
-                                                  type:
-                                                    type: string
-                                                  value: {}
-                                                required:
-                                                  - value
-                                              description: Package variable (see integration documentation for more information)
-                                              type: object
-                                          required:
-                                            - enabled
-                                            - data_stream
-                                            - compiled_stream
-                                        type: array
-                                      type:
-                                        type: string
-                                      vars:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value: {}
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
+                                                - value
+                                            description: Package variable (see integration documentation for more information)
+                                            type: object
+                                        required:
+                                          - type
+                                          - enabled
+                                          - streams
+                                          - compiled_input
+                                      type: array
+                                    - additionalProperties:
+                                        additionalProperties: false
                                         type: object
-                                    required:
-                                      - type
-                                      - enabled
-                                      - streams
-                                      - compiled_input
-                                  type: array
+                                        properties:
+                                          enabled:
+                                            description: enable or disable that input, (default to true)
+                                            type: boolean
+                                          streams:
+                                            additionalProperties:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                enabled:
+                                                  description: enable or disable that stream, (default to true)
+                                                  type: boolean
+                                                vars:
+                                                  additionalProperties:
+                                                    anyOf:
+                                                      - type: boolean
+                                                      - type: string
+                                                      - type: number
+                                                      - items:
+                                                          type: string
+                                                        type: array
+                                                      - items:
+                                                          type: number
+                                                        type: array
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          id:
+                                                            type: string
+                                                          isSecretRef:
+                                                            type: boolean
+                                                        required:
+                                                          - id
+                                                          - isSecretRef
+                                                    nullable: true
+                                                  description: Input/stream level variable (see integration documentation for more information)
+                                                  type: object
+                                            description: Input streams (see integration documentation to know what streams are available)
+                                            type: object
+                                          vars:
+                                            additionalProperties:
+                                              anyOf:
+                                                - type: boolean
+                                                - type: string
+                                                - type: number
+                                                - items:
+                                                    type: string
+                                                  type: array
+                                                - items:
+                                                    type: number
+                                                  type: array
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    id:
+                                                      type: string
+                                                    isSecretRef:
+                                                      type: boolean
+                                                  required:
+                                                    - id
+                                                    - isSecretRef
+                                              nullable: true
+                                            description: Input/stream level variable (see integration documentation for more information)
+                                            type: object
+                                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                                      type: object
+                                      x-oas-optional: true
                                 is_managed:
                                   type: boolean
                                 name:
@@ -12456,6 +13053,10 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                spaceIds:
+                                  items:
+                                    type: string
+                                  type: array
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
@@ -12466,19 +13067,45 @@ paths:
                                 updated_by:
                                   type: string
                                 vars:
-                                  additionalProperties:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      frozen:
-                                        type: boolean
-                                      type:
-                                        type: string
-                                      value: {}
-                                    required:
-                                      - value
-                                  description: Package variable (see integration documentation for more information)
-                                  type: object
+                                  anyOf:
+                                    - additionalProperties:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          frozen:
+                                            type: boolean
+                                          type:
+                                            type: string
+                                          value: {}
+                                        required:
+                                          - value
+                                      description: Package variable (see integration documentation for more information)
+                                      type: object
+                                    - additionalProperties:
+                                        anyOf:
+                                          - type: boolean
+                                          - type: string
+                                          - type: number
+                                          - items:
+                                              type: string
+                                            type: array
+                                          - items:
+                                              type: number
+                                            type: array
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                              isSecretRef:
+                                                type: boolean
+                                            required:
+                                              - id
+                                              - isSecretRef
+                                        nullable: true
+                                      description: Input/stream level variable (see integration documentation for more information)
+                                      type: object
+                                      x-oas-optional: true
                                 version:
                                   type: string
                               required:
@@ -12647,6 +13274,22 @@ paths:
                             - name
                             - enabled
                         type: array
+                      agentless:
+                        additionalProperties: false
+                        type: object
+                        properties:
+                          resources:
+                            additionalProperties: false
+                            type: object
+                            properties:
+                              requests:
+                                additionalProperties: false
+                                type: object
+                                properties:
+                                  cpu:
+                                    type: string
+                                  memory:
+                                    type: string
                       agents:
                         type: number
                       data_output_id:
@@ -12777,6 +13420,8 @@ paths:
                               additionalProperties: false
                               type: object
                               properties:
+                                agents:
+                                  type: number
                                 created_at:
                                   type: string
                                 created_by:
@@ -12801,133 +13446,204 @@ paths:
                                 id:
                                   type: string
                                 inputs:
-                                  items:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      compiled_input: {}
-                                      config:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value: {}
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
+                                  anyOf:
+                                    - items:
+                                        additionalProperties: false
                                         type: object
-                                      enabled:
-                                        type: boolean
-                                      id:
-                                        type: string
-                                      keep_enabled:
-                                        type: boolean
-                                      policy_template:
-                                        type: string
-                                      streams:
-                                        items:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            compiled_stream: {}
-                                            config:
-                                              additionalProperties:
-                                                additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  frozen:
-                                                    type: boolean
-                                                  type:
-                                                    type: string
-                                                  value: {}
-                                                required:
-                                                  - value
-                                              description: Package variable (see integration documentation for more information)
-                                              type: object
-                                            data_stream:
+                                        properties:
+                                          compiled_input: {}
+                                          config:
+                                            additionalProperties:
                                               additionalProperties: false
                                               type: object
                                               properties:
-                                                dataset:
+                                                frozen:
+                                                  type: boolean
+                                                type:
                                                   type: string
-                                                elasticsearch:
+                                                value: {}
+                                              required:
+                                                - value
+                                            description: Package variable (see integration documentation for more information)
+                                            type: object
+                                          enabled:
+                                            type: boolean
+                                          id:
+                                            type: string
+                                          keep_enabled:
+                                            type: boolean
+                                          policy_template:
+                                            type: string
+                                          streams:
+                                            items:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                compiled_stream: {}
+                                                config:
+                                                  additionalProperties:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      frozen:
+                                                        type: boolean
+                                                      type:
+                                                        type: string
+                                                      value: {}
+                                                    required:
+                                                      - value
+                                                  description: Package variable (see integration documentation for more information)
+                                                  type: object
+                                                data_stream:
                                                   additionalProperties: false
                                                   type: object
                                                   properties:
-                                                    dynamic_dataset:
-                                                      type: boolean
-                                                    dynamic_namespace:
-                                                      type: boolean
-                                                    privileges:
+                                                    dataset:
+                                                      type: string
+                                                    elasticsearch:
                                                       additionalProperties: false
                                                       type: object
                                                       properties:
-                                                        indices:
-                                                          items:
-                                                            type: string
-                                                          type: array
+                                                        dynamic_dataset:
+                                                          type: boolean
+                                                        dynamic_namespace:
+                                                          type: boolean
+                                                        privileges:
+                                                          additionalProperties: false
+                                                          type: object
+                                                          properties:
+                                                            indices:
+                                                              items:
+                                                                type: string
+                                                              type: array
+                                                    type:
+                                                      type: string
+                                                  required:
+                                                    - dataset
+                                                    - type
+                                                enabled:
+                                                  type: boolean
+                                                id:
+                                                  type: string
+                                                keep_enabled:
+                                                  type: boolean
+                                                release:
+                                                  enum:
+                                                    - ga
+                                                    - beta
+                                                    - experimental
+                                                  type: string
+                                                vars:
+                                                  additionalProperties:
+                                                    additionalProperties: false
+                                                    type: object
+                                                    properties:
+                                                      frozen:
+                                                        type: boolean
+                                                      type:
+                                                        type: string
+                                                      value: {}
+                                                    required:
+                                                      - value
+                                                  description: Package variable (see integration documentation for more information)
+                                                  type: object
+                                              required:
+                                                - enabled
+                                                - data_stream
+                                                - compiled_stream
+                                            type: array
+                                          type:
+                                            type: string
+                                          vars:
+                                            additionalProperties:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                frozen:
+                                                  type: boolean
                                                 type:
                                                   type: string
+                                                value: {}
                                               required:
-                                                - dataset
-                                                - type
-                                            enabled:
-                                              type: boolean
-                                            id:
-                                              type: string
-                                            keep_enabled:
-                                              type: boolean
-                                            release:
-                                              enum:
-                                                - ga
-                                                - beta
-                                                - experimental
-                                              type: string
-                                            vars:
-                                              additionalProperties:
-                                                additionalProperties: false
-                                                type: object
-                                                properties:
-                                                  frozen:
-                                                    type: boolean
-                                                  type:
-                                                    type: string
-                                                  value: {}
-                                                required:
-                                                  - value
-                                              description: Package variable (see integration documentation for more information)
-                                              type: object
-                                          required:
-                                            - enabled
-                                            - data_stream
-                                            - compiled_stream
-                                        type: array
-                                      type:
-                                        type: string
-                                      vars:
-                                        additionalProperties:
-                                          additionalProperties: false
-                                          type: object
-                                          properties:
-                                            frozen:
-                                              type: boolean
-                                            type:
-                                              type: string
-                                            value: {}
-                                          required:
-                                            - value
-                                        description: Package variable (see integration documentation for more information)
+                                                - value
+                                            description: Package variable (see integration documentation for more information)
+                                            type: object
+                                        required:
+                                          - type
+                                          - enabled
+                                          - streams
+                                          - compiled_input
+                                      type: array
+                                    - additionalProperties:
+                                        additionalProperties: false
                                         type: object
-                                    required:
-                                      - type
-                                      - enabled
-                                      - streams
-                                      - compiled_input
-                                  type: array
+                                        properties:
+                                          enabled:
+                                            description: enable or disable that input, (default to true)
+                                            type: boolean
+                                          streams:
+                                            additionalProperties:
+                                              additionalProperties: false
+                                              type: object
+                                              properties:
+                                                enabled:
+                                                  description: enable or disable that stream, (default to true)
+                                                  type: boolean
+                                                vars:
+                                                  additionalProperties:
+                                                    anyOf:
+                                                      - type: boolean
+                                                      - type: string
+                                                      - type: number
+                                                      - items:
+                                                          type: string
+                                                        type: array
+                                                      - items:
+                                                          type: number
+                                                        type: array
+                                                      - additionalProperties: false
+                                                        type: object
+                                                        properties:
+                                                          id:
+                                                            type: string
+                                                          isSecretRef:
+                                                            type: boolean
+                                                        required:
+                                                          - id
+                                                          - isSecretRef
+                                                    nullable: true
+                                                  description: Input/stream level variable (see integration documentation for more information)
+                                                  type: object
+                                            description: Input streams (see integration documentation to know what streams are available)
+                                            type: object
+                                          vars:
+                                            additionalProperties:
+                                              anyOf:
+                                                - type: boolean
+                                                - type: string
+                                                - type: number
+                                                - items:
+                                                    type: string
+                                                  type: array
+                                                - items:
+                                                    type: number
+                                                  type: array
+                                                - additionalProperties: false
+                                                  type: object
+                                                  properties:
+                                                    id:
+                                                      type: string
+                                                    isSecretRef:
+                                                      type: boolean
+                                                  required:
+                                                    - id
+                                                    - isSecretRef
+                                              nullable: true
+                                            description: Input/stream level variable (see integration documentation for more information)
+                                            type: object
+                                      description: Package policy inputs (see integration documentation to know what inputs are available)
+                                      type: object
+                                      x-oas-optional: true
                                 is_managed:
                                   type: boolean
                                 name:
@@ -13010,6 +13726,10 @@ paths:
                                     required:
                                       - id
                                   type: array
+                                spaceIds:
+                                  items:
+                                    type: string
+                                  type: array
                                 supports_agentless:
                                   default: false
                                   description: Indicates whether the package policy belongs to an agentless agent policy.
@@ -13020,19 +13740,45 @@ paths:
                                 updated_by:
                                   type: string
                                 vars:
-                                  additionalProperties:
-                                    additionalProperties: false
-                                    type: object
-                                    properties:
-                                      frozen:
-                                        type: boolean
-                                      type:
-                                        type: string
-                                      value: {}
-                                    required:
-                                      - value
-                                  description: Package variable (see integration documentation for more information)
-                                  type: object
+                                  anyOf:
+                                    - additionalProperties:
+                                        additionalProperties: false
+                                        type: object
+                                        properties:
+                                          frozen:
+                                            type: boolean
+                                          type:
+                                            type: string
+                                          value: {}
+                                        required:
+                                          - value
+                                      description: Package variable (see integration documentation for more information)
+                                      type: object
+                                    - additionalProperties:
+                                        anyOf:
+                                          - type: boolean
+                                          - type: string
+                                          - type: number
+                                          - items:
+                                              type: string
+                                            type: array
+                                          - items:
+                                              type: number
+                                            type: array
+                                          - additionalProperties: false
+                                            type: object
+                                            properties:
+                                              id:
+                                                type: string
+                                              isSecretRef:
+                                                type: boolean
+                                            required:
+                                              - id
+                                              - isSecretRef
+                                        nullable: true
+                                      description: Input/stream level variable (see integration documentation for more information)
+                                      type: object
+                                      x-oas-optional: true
                                 version:
                                   type: string
                               required:
@@ -13279,6 +14025,7 @@ paths:
                                 additionalProperties: false
                                 type: object
                                 properties:
+                                  apm: {}
                                   enabled:
                                     type: boolean
                                   logs:
@@ -13296,6 +14043,7 @@ paths:
                                   - metrics
                                   - logs
                                   - traces
+                                  - apm
                               protection:
                                 additionalProperties: false
                                 type: object

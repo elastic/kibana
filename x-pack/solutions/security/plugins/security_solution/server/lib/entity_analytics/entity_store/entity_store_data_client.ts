@@ -504,8 +504,8 @@ export class EntityStoreDataClient {
           resource: EngineComponentResourceEnum.ingest_pipeline,
           ...pipeline,
         })),
-        ...definition.state.components.indexTemplates.map(({ installed }) => ({
-          id,
+        ...definition.state.components.indexTemplates.map(({ installed, id: templateId }) => ({
+          id: templateId,
           installed,
           resource: EngineComponentResourceEnum.index_template,
         })),

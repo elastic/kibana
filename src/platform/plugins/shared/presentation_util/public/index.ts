@@ -24,7 +24,6 @@ export {
   withSuspense,
   LazyDataViewPicker,
   LazyFieldPicker,
-  FloatingActions,
   type DashboardDrilldownOptions,
   DashboardDrilldownOptionsComponent,
   DEFAULT_DASHBOARD_DRILLDOWN_OPTIONS,
