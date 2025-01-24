@@ -7,11 +7,11 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { NodeDetailsMetricData } from '../../../../../common/http_api/node_details_api';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { NodeDetailsMetricData } from '../../../../../common/http_api/node_details_api';
 import { NoData } from '../../../../components/empty_states';
 import { InfraLoadingPanel } from '../../../../components/loading';
-import { MetricsTimeInput } from '../hooks/use_metrics_time';
+import type { MetricsTimeInput } from '../hooks/use_metrics_time';
 import { Layout } from './layout';
 
 interface Props {

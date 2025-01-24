@@ -178,6 +178,7 @@ enabled:
   - x-pack/test/banners_functional/config.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_basic.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_trial.ts
+  - x-pack/test/cases_api_integration/security_and_spaces/config_trial_common.ts
   - x-pack/test/cases_api_integration/security_and_spaces/config_no_public_base_url.ts
   - x-pack/test/cases_api_integration/spaces_only/config.ts
   - x-pack/test/disable_ems/config.ts
@@ -281,6 +282,7 @@ enabled:
   - x-pack/test/functional/config.firefox.js
   - x-pack/test/functional/config.upgrade_assistant.ts
   - x-pack/test/functional_cloud/config.ts
+  - x-pack/test/functional_cloud/saml.config.ts
   - x-pack/test/functional_solution_sidenav/config.ts
   - x-pack/test/functional_search/config.ts
   - x-pack/test/kubernetes_security/basic/config.ts
@@ -341,9 +343,7 @@ enabled:
   - x-pack/test/security_functional/expired_session.config.ts
   - x-pack/test/session_view/basic/config.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_basic.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_basic.ts
   - x-pack/test/spaces_api_integration/security_and_spaces/config_trial.ts
-  - x-pack/test/spaces_api_integration/security_and_spaces/copy_to_space_config_trial.ts
   - x-pack/test/spaces_api_integration/spaces_only/config.ts
   - x-pack/test/task_manager_claimer_update_by_query/config.ts
   - x-pack/test/ui_capabilities/security_and_spaces/config.ts
@@ -378,3 +378,4 @@ enabled:
   # stateful config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/stateful/platform.stateful.config.ts
   - x-pack/test/api_integration/apis/cloud/config.ts
+  - x-pack/test/api_integration/apis/cloud/saml.config.ts

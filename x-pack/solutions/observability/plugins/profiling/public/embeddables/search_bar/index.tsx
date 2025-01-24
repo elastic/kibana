@@ -8,7 +8,7 @@
 import React from 'react';
 import { dynamic } from '@kbn/shared-ux-utility';
 import type { EmbeddableSearchBarSharedComponent } from './embeddable_search_bar';
-import { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
+import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
 
 const LazyEmbeddableSearchBar = dynamic(async () => {
   const Component = await import('./embeddable_search_bar');

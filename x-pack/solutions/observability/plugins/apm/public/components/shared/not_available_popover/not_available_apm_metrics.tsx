@@ -9,7 +9,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { PopoverBadge } from '../popover_badge';
 import { useKibana } from '../../../context/kibana_context/use_kibana';
-import { ApmPluginStartDeps, ApmServices } from '../../../plugin';
+import type { ApmPluginStartDeps, ApmServices } from '../../../plugin';
 import { AddApmData } from '../add_data_buttons/buttons';
 
 export function NotAvailableApmMetrics() {

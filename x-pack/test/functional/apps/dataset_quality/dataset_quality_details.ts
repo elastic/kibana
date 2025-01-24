@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import originalExpect from 'expect';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
   createDegradedFieldsRecord,
@@ -25,6 +26,7 @@ const integrationActions = {
 export default function ({ getService, getPageObjects }: DatasetQualityFtrProviderContext) {
   const PageObjects = getPageObjects([
     'common',
+    'discover',
     'navigationalSearch',
     'observabilityLogsExplorer',
     'datasetQuality',
@@ -327,9 +329,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await logExplorerButton.click();
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.eql(regularDatasetName);
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(regularDatasetName);
       });
 
       it('should go log explorer for degraded docs when the button next to breakdown selector is clicked', async () => {
@@ -342,9 +343,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         );
 
         // Confirm dataset selector text in observability logs explorer
-        const datasetSelectorText =
-          await PageObjects.observabilityLogsExplorer.getDataSourceSelectorButtonText();
-        expect(datasetSelectorText).to.contain(apacheAccessDatasetName);
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(apacheAccessDatasetName);
       });
     });
 
@@ -387,7 +387,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-        const countColumn = table['Docs count'];
+        const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
         const cellTexts = await countColumn.getCellTexts();
 
         await countColumn.sort('ascending');
@@ -402,7 +402,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         });
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
-        const countColumn = table['Docs count'];
+        const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
 
         await retry.tryForTime(5000, async () => {
           const currentUrl = await browser.getCurrentUrl();
@@ -438,7 +438,7 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         const table = await PageObjects.datasetQuality.parseDegradedFieldTable();
 
-        const countColumn = table['Docs count'];
+        const countColumn = table[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
         const cellTexts = await countColumn.getCellTexts();
 
         await synthtrace.index([
@@ -452,7 +452,8 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await PageObjects.datasetQuality.refreshDetailsPageData();
 
         const updatedTable = await PageObjects.datasetQuality.parseDegradedFieldTable();
-        const updatedCountColumn = updatedTable['Docs count'];
+        const updatedCountColumn =
+          updatedTable[PageObjects.datasetQuality.texts.datasetDocsCountColumn];
 
         const updatedCellTexts = await updatedCountColumn.getCellTexts();
 

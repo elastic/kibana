@@ -3,7 +3,9 @@
     "actionTypeId",
     "name"
   ],
-  "action_task_params": [],
+  "action_task_params": [
+    "apiKeyId"
+  ],
   "ad_hoc_run_params": [
     "apiKeyId",
     "createdAt",
@@ -479,6 +481,7 @@
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",
+    "agentless",
     "data_output_id",
     "description",
     "download_source_id",
@@ -599,6 +602,7 @@
     "agent_features",
     "agent_features.enabled",
     "agent_features.name",
+    "agentless",
     "data_output_id",
     "description",
     "download_source_id",
@@ -1104,6 +1108,7 @@
     "enabled",
     "ownerId",
     "partition",
+    "priority",
     "retryAt",
     "runAt",
     "schedule",

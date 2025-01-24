@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { CustomLink, CustomLinkES } from '../../../../common/custom_link/custom_link_types';
+import type { CustomLink, CustomLinkES } from '../../../../common/custom_link/custom_link_types';
 import { toESFormat } from './helper';
-import {
+import type {
   APMIndexDocumentParams,
   APMInternalESClient,
 } from '../../../lib/helpers/create_es_client/create_internal_es_client';

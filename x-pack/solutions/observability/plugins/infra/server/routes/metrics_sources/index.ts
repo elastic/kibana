@@ -15,17 +15,17 @@ import {
   getHasDataQueryParamsRT,
   getHasDataResponseRT,
 } from '../../../common/metrics_sources/get_has_data';
-import { InfraBackendLibs } from '../../lib/infra_types';
+import type { InfraBackendLibs } from '../../lib/infra_types';
 import { hasData } from '../../lib/sources/has_data';
 import { createSearchClient } from '../../lib/create_search_client';
 import { AnomalyThresholdRangeError, NoSuchRemoteClusterError } from '../../lib/sources/errors';
+import type { MetricsSourceStatus } from '../../../common/metrics_sources';
 import {
   metricsSourceConfigurationResponseRT,
-  MetricsSourceStatus,
   partialMetricsSourceConfigurationReqPayloadRT,
 } from '../../../common/metrics_sources';
-import { InfraSource } from '../../lib/sources';
-import { InfraPluginRequestHandlerContext } from '../../types';
+import type { InfraSource } from '../../lib/sources';
+import type { InfraPluginRequestHandlerContext } from '../../types';
 import { getInfraMetricsClient } from '../../lib/helpers/get_infra_metrics_client';
 
 const defaultStatus = {

@@ -16,10 +16,10 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { HttpStart } from '@kbn/core/public';
+import type { HttpStart } from '@kbn/core/public';
 import React, { useEffect, useState } from 'react';
 import styled from '@emotion/styled';
-import { APIReturnType } from '../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../services/rest/create_call_apm_api';
 
 interface Props {
   http: HttpStart;

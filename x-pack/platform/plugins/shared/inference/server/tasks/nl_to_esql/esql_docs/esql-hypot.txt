@@ -1,0 +1,28 @@
+# HYPOT
+
+The HYPOT function is used to calculate the hypotenuse of two numbers. 
+
+## Syntax
+
+`HYPOT(number1, number2)`
+
+### Parameters
+
+#### number1
+
+This is a numeric value. If it's `null`, the function will also return `null`.
+
+#### number2
+
+This is also a numeric value. If it's `null`, the function will also return `null`.
+
+## Examples
+
+Check the hypotenuse of two variables through the following example:
+
+```esql
+ROW a = 3.0, b = 4.0
+| EVAL c = HYPOT(a, b)
+```
+
+Note that the HYPOT function returns the hypotenuse in double data type. Besides, if any of the numbers is infinity, the hypotenuse returns `null`.

@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { Environment } from '../environment_rt';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { Environment } from '../environment_rt';
 
 export interface FieldValuePair {
   fieldName: string;

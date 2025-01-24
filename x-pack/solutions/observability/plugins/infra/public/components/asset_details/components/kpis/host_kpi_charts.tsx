@@ -17,7 +17,7 @@ export interface HostKpiChartsProps {
   dateRange: TimeRange;
   query?: Query;
   filters?: Filter[];
-  searchSessionId?: string;
+  lastReloadRequestTime?: number;
   getSubtitle?: (formulaValue: string) => string;
   loading?: boolean;
 }
@@ -28,7 +28,7 @@ export const HostKpiCharts = ({
   filters,
   getSubtitle,
   query,
-  searchSessionId,
+  lastReloadRequestTime,
   loading = false,
 }: HostKpiChartsProps) => {
   const charts = useHostKpiCharts({
@@ -45,7 +45,7 @@ export const HostKpiCharts = ({
             dateRange={dateRange}
             filters={filters}
             query={query}
-            searchSessionId={searchSessionId}
+            lastReloadRequestTime={lastReloadRequestTime}
             loading={loading}
           />
         </EuiFlexItem>

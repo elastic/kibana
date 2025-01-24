@@ -7,14 +7,9 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiBasicTable,
-  EuiBasicTableColumn,
-  EuiTitle,
-  RIGHT_ALIGNMENT,
-  EuiSpacer,
-} from '@elastic/eui';
-import { ValuesType } from 'utility-types';
+import type { EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiTitle, RIGHT_ALIGNMENT, EuiSpacer } from '@elastic/eui';
+import type { ValuesType } from 'utility-types';
 import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { SparkPlot } from '../../../shared/charts/spark_plot';
 import { ChartType, getTimeSeriesColor } from '../../../shared/charts/helper/get_timeseries_color';

@@ -12,10 +12,8 @@ import { pipe } from 'fp-ts/lib/pipeable';
 import { identity } from 'fp-ts/lib/function';
 import { throwErrors, createPlainError } from '@kbn/io-ts-utils';
 import { useTrackedPromise } from '../../hooks/use_tracked_promise';
-import {
-  getMlCapabilitiesResponsePayloadRT,
-  GetMlCapabilitiesResponsePayload,
-} from './api/ml_api_types';
+import type { GetMlCapabilitiesResponsePayload } from './api/ml_api_types';
+import { getMlCapabilitiesResponsePayloadRT } from './api/ml_api_types';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
 export const useInfraMLCapabilities = () => {

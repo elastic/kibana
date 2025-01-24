@@ -12,10 +12,11 @@ import { resolveDataView } from '../../../utils/data_view';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 import { METRIC_CHART_HEIGHT } from '../../../common/visualizations/constants';
 import { buildCombinedAssetFilter } from '../../../utils/filters/build';
-import { type BrushEndArgs, LensChart, type OnFilterEvent, LensChartProps } from '../../lens';
+import type { LensChartProps } from '../../lens';
+import { type BrushEndArgs, LensChart, type OnFilterEvent } from '../../lens';
 import { useDatePickerContext } from '../hooks/use_date_picker';
 import { extractRangeFromChartFilterEvent } from './chart_utils';
-import { useSearchSessionContext } from '../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../hooks/use_reload_request_time';
 
 export type ChartProps = Pick<LensChartProps, 'overrides'> & {
   id: string;
@@ -34,7 +35,7 @@ export const Chart = ({
   lensAttributes,
 }: ChartProps) => {
   const { setDateRange } = useDatePickerContext();
-  const { searchSessionId } = useSearchSessionContext();
+  const { reloadRequestTime } = useReloadRequestTimeContext();
   const {
     services: { dataViews },
   } = useKibanaContextForPlugin();
@@ -86,7 +87,7 @@ export const Chart = ({
       borderRadius="m"
       dateRange={dateRange}
       height={METRIC_CHART_HEIGHT}
-      searchSessionId={searchSessionId}
+      lastReloadRequestTime={reloadRequestTime}
       filters={filters}
       lensAttributes={lensAttributes}
       overrides={overrides}

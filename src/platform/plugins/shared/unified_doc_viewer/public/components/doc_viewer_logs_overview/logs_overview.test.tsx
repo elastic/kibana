@@ -8,6 +8,7 @@
  */
 
 import React from 'react';
+import { EuiProvider } from '@elastic/eui';
 import { render, screen } from '@testing-library/react';
 import { LogsOverview } from './logs_overview';
 import { DataView } from '@kbn/data-views-plugin/common';
@@ -16,6 +17,17 @@ import { buildDataTableRecord } from '@kbn/discover-utils';
 import { setUnifiedDocViewerServices } from '../../plugin';
 import { mockUnifiedDocViewerServices } from '../../__mocks__';
 import { merge } from 'lodash';
+
+jest.mock('@elastic/eui', () => ({
+  ...jest.requireActual('@elastic/eui'),
+  EuiCodeBlock: ({
+    children,
+    dangerouslySetInnerHTML,
+  }: {
+    children?: string;
+    dangerouslySetInnerHTML?: { __html: string };
+  }) => <code data-test-subj="codeBlock">{children ?? dangerouslySetInnerHTML?.__html ?? ''}</code>,
+}));
 
 const DATASET_NAME = 'logs.overview';
 const NAMESPACE = 'default';
@@ -58,51 +70,55 @@ dataView.fields.getByName = (name: string) => {
   return dataView.fields.getAll().find((field) => field.name === name);
 };
 
-const fullHit = buildDataTableRecord(
-  {
-    _index: DATA_STREAM_NAME,
-    _id: DATA_STREAM_NAME,
-    _score: 1,
-    _source: {
-      '@timestamp': NOW + 1000,
-      message: 'full document',
-      log: { level: 'info', file: { path: '/logs.overview.log' } },
-      data_stream: {
-        type: 'logs',
-        dataset: DATASET_NAME,
-        namespace: NAMESPACE,
+const buildHit = (fields?: Record<string, unknown>) =>
+  buildDataTableRecord(
+    {
+      _index: DATA_STREAM_NAME,
+      _id: DATA_STREAM_NAME,
+      _score: 1,
+      _source: {
+        '@timestamp': NOW + 1000,
+        message: 'full document',
+        log: { level: 'info', file: { path: '/logs.overview.log' } },
+        data_stream: {
+          type: 'logs',
+          dataset: DATASET_NAME,
+          namespace: NAMESPACE,
+        },
+        'service.name': DATASET_NAME,
+        'host.name': 'gke-edge-oblt-pool',
+        'trace.id': 'abcdef',
+        orchestrator: {
+          cluster: {
+            id: 'my-cluster-id',
+            name: 'my-cluster-name',
+          },
+          resource: {
+            id: 'orchestratorResourceId',
+          },
+        },
+        cloud: {
+          provider: ['gcp'],
+          region: 'us-central-1',
+          availability_zone: MORE_THAN_1024_CHARS,
+          project: {
+            id: 'elastic-project',
+          },
+          instance: {
+            id: 'BgfderflkjTheUiGuy',
+          },
+        },
+        'agent.name': 'node',
+        ...fields,
       },
-      'service.name': DATASET_NAME,
-      'host.name': 'gke-edge-oblt-pool',
-      'trace.id': 'abcdef',
-      orchestrator: {
-        cluster: {
-          id: 'my-cluster-id',
-          name: 'my-cluster-name',
-        },
-        resource: {
-          id: 'orchestratorResourceId',
-        },
+      ignored_field_values: {
+        'cloud.availability_zone': [MORE_THAN_1024_CHARS],
       },
-      cloud: {
-        provider: ['gcp'],
-        region: 'us-central-1',
-        availability_zone: MORE_THAN_1024_CHARS,
-        project: {
-          id: 'elastic-project',
-        },
-        instance: {
-          id: 'BgfderflkjTheUiGuy',
-        },
-      },
-      'agent.name': 'node',
     },
-    ignored_field_values: {
-      'cloud.availability_zone': [MORE_THAN_1024_CHARS],
-    },
-  },
-  dataView
-);
+    dataView
+  );
+
+const fullHit = buildHit();
 
 const getCustomUnifedDocViewerServices = (params?: {
   showApm: boolean;
@@ -131,11 +147,17 @@ setUnifiedDocViewerServices(
 
 const renderLogsOverview = (props: Partial<DocViewRenderProps> = {}) => {
   const { rerender: baseRerender, ...tools } = render(
-    <LogsOverview dataView={dataView} hit={fullHit} {...props} />
+    <EuiProvider>
+      <LogsOverview dataView={dataView} hit={fullHit} {...props} />
+    </EuiProvider>
   );
 
   const rerender = (rerenderProps: Partial<DocViewRenderProps>) =>
-    baseRerender(<LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />);
+    baseRerender(
+      <EuiProvider>
+        <LogsOverview dataView={dataView} hit={fullHit} {...props} {...rerenderProps} />
+      </EuiProvider>
+    );
 
   return { rerender, ...tools };
 };
@@ -304,5 +326,20 @@ describe('LogsOverview with APM links', () => {
         ).not.toBeInTheDocument();
       });
     });
+  });
+});
+
+describe('LogsOverview content breakdown', () => {
+  it('should render message value', async () => {
+    const message = 'This is a message';
+    renderLogsOverview({ hit: buildHit({ message }) });
+    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(message);
+  });
+
+  it('should render formatted JSON message value', async () => {
+    const json = { foo: { bar: true } };
+    const message = JSON.stringify(json);
+    renderLogsOverview({ hit: buildHit({ message }) });
+    expect(screen.queryByTestId('codeBlock')?.innerHTML).toBe(JSON.stringify(json, null, 2));
   });
 });

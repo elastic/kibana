@@ -22,7 +22,7 @@ import {
   isOpenTelemetryAgentName,
   isRumAgentName,
 } from '../../../../../common/agent_name';
-import { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../../typings/es_schemas/ui/fields/agent';
 
 export function TransactionCharts({
   kuery,

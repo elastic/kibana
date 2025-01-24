@@ -39,10 +39,9 @@ export function parseStringFilters(filters: string, logger: Logger) {
   try {
     return JSON.parse(filters);
   } catch (e) {
-    logger.error(`Failed to parse filters: ${e.message}`);
+    logger.info(`Failed to parse filters: ${e}`);
+    return {};
   }
-
-  return {};
 }
 
 export function parseIndex(index: string): string | string[] {

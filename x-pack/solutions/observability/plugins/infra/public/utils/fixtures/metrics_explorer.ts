@@ -5,17 +5,19 @@
  * 2.0.
  */
 
-import {
+import type {
   MetricsExplorerResponse,
   MetricsExplorerSeries,
 } from '../../../common/http_api/metrics_explorer';
-import {
+import type {
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  MetricsExplorerChartType,
-  MetricsExplorerYAxisMode,
   MetricsExplorerChartOptions,
   MetricsExplorerTimestamp,
+} from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
+import {
+  MetricsExplorerChartType,
+  MetricsExplorerYAxisMode,
 } from '../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 
 export const options: MetricsExplorerOptions = {

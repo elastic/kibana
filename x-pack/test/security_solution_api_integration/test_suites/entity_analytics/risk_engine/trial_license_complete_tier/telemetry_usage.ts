@@ -65,6 +65,14 @@ export default ({ getService }: FtrProviderContext) => {
     it('@skipInServerlessMKI should return metrics with expected values when risk engine is enabled', async () => {
       expect(await areRiskScoreIndicesEmpty({ log, es })).to.be(true);
 
+      const serviceId = uuidv4();
+      const serviceDocs = Array(10)
+        .fill(buildDocument({}, serviceId))
+        .map((event, index) => ({
+          ...event,
+          'service.name': `service-${index}`,
+        }));
+
       const hostId = uuidv4();
       const hostDocs = Array(10)
         .fill(buildDocument({}, hostId))
@@ -81,17 +89,17 @@ export default ({ getService }: FtrProviderContext) => {
           'user.name': `user-${index}`,
         }));
 
-      await indexListOfDocuments([...hostDocs, ...userDocs]);
+      await indexListOfDocuments([...hostDocs, ...userDocs, ...serviceDocs]); // , ...serviceDocs
 
       await createAndSyncRuleAndAlerts({
-        query: `id: ${userId} or id: ${hostId}`,
-        alerts: 20,
+        query: `id: ${userId} or id: ${hostId} or id: ${serviceId}`, //
+        alerts: 30,
         riskScore: 40,
       });
 
       await riskEngineRoutes.init();
 
-      await waitForRiskScoresToBePresent({ es, log, scoreCount: 20 });
+      await waitForRiskScoresToBePresent({ es, log, scoreCount: 30 });
 
       await retry.try(async () => {
         const {

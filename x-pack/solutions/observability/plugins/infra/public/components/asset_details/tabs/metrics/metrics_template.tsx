@@ -27,19 +27,23 @@ import {
 import { css, cx } from '@emotion/css';
 import { useAssetDetailsRenderPropsContext } from '../../hooks/use_asset_details_render_props';
 import { useTabSwitcherContext } from '../../hooks/use_tab_switcher';
-import { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
+import type { AddMetricsCalloutKey } from '../../add_metrics_callout/constants';
 import { AddMetricsCallout } from '../../add_metrics_callout';
 import { useEntitySummary } from '../../hooks/use_entity_summary';
 import { isMetricsSignal } from '../../utils/get_data_stream_types';
+import { useDatePickerContext } from '../../hooks/use_date_picker';
 
 export const MetricsTemplate = React.forwardRef<HTMLDivElement, { children: React.ReactNode }>(
   ({ children }, ref) => {
     const { euiTheme } = useEuiTheme();
+    const { dateRange } = useDatePickerContext();
     const { asset, renderMode } = useAssetDetailsRenderPropsContext();
     const { scrollTo, setScrollTo } = useTabSwitcherContext();
     const { dataStreams, status: dataStreamsStatus } = useEntitySummary({
       entityType: asset.type,
       entityId: asset.id,
+      from: dateRange.from,
+      to: dateRange.to,
     });
 
     const scrollTimeoutRef = useRef<NodeJS.Timeout | null>(null);

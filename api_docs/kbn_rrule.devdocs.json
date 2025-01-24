@@ -51,7 +51,7 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "Options"
+                  "ConstructorOptions"
                 ],
                 "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
                 "deprecated": false,
@@ -218,7 +218,7 @@
         "tags": [],
         "label": "Frequency",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -230,7 +230,7 @@
         "tags": [],
         "label": "Weekday",
         "description": [],
-        "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -239,15 +239,25 @@
     "misc": [
       {
         "parentPluginId": "@kbn/rrule",
-        "id": "def-common.ConstructorOptions",
+        "id": "def-common.Options",
         "type": "Type",
         "tags": [],
-        "label": "ConstructorOptions",
+        "label": "Options",
         "description": [],
         "signature": [
-          "Omit<Options, \"byweekday\" | \"wkst\"> & { byweekday?: (string | number)[] | null | undefined; wkst?: number | \"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\" | null | undefined; }"
+          "Omit<",
+          "IterOptions",
+          ", \"refDT\"> & { dtstart: Date; freq?: ",
+          {
+            "pluginId": "@kbn/rrule",
+            "scope": "common",
+            "docId": "kibKbnRrulePluginApi",
+            "section": "def-common.Frequency",
+            "text": "Frequency"
+          },
+          " | undefined; interval?: number | undefined; until?: Date | null | undefined; count?: number | undefined; tzid: string; }"
         ],
-        "path": "src/platform/packages/shared/kbn-rrule/rrule.ts",
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -262,7 +272,7 @@
         "signature": [
           "\"MO\" | \"TU\" | \"WE\" | \"TH\" | \"FR\" | \"SA\" | \"SU\""
         ],
-        "path": "src/platform/packages/shared/kbn-rrule/index.ts",
+        "path": "src/platform/packages/shared/kbn-rrule/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

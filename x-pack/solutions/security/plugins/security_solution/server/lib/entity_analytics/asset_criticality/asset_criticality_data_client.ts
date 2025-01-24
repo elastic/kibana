@@ -10,7 +10,6 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { mappingFromFieldMap } from '@kbn/alerting-plugin/common';
 import type { AuditLogger } from '@kbn/security-plugin-types-server';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
-
 import type {
   BulkUpsertAssetCriticalityRecordsResponse,
   AssetCriticalityUpsert,
@@ -19,10 +18,18 @@ import type { AssetCriticalityRecord } from '../../../../common/api/entity_analy
 import { createOrUpdateIndex } from '../utils/create_or_update_index';
 import { getAssetCriticalityIndex } from '../../../../common/entity_analytics/asset_criticality';
 import type { CriticalityValues } from './constants';
-import { CRITICALITY_VALUES, assetCriticalityFieldMap } from './constants';
+import {
+  ASSET_CRITICALITY_MAPPINGS_VERSIONS,
+  CRITICALITY_VALUES,
+  assetCriticalityFieldMap,
+} from './constants';
 import { AssetCriticalityAuditActions } from './audit';
 import { AUDIT_CATEGORY, AUDIT_OUTCOME, AUDIT_TYPE } from '../audit';
 import { getImplicitEntityFields } from './helpers';
+import {
+  getIngestPipelineName,
+  createEventIngestedFromTimestamp,
+} from '../utils/create_ingest_pipeline';
 
 interface AssetCriticalityClientOpts {
   logger: Logger;
@@ -59,6 +66,7 @@ export class AssetCriticalityDataClient {
    * Initialize asset criticality resources.
    */
   public async init() {
+    await createEventIngestedFromTimestamp(this.options.esClient, this.options.namespace);
     await this.createOrUpdateIndex();
 
     this.options.auditLogger?.log({
@@ -81,7 +89,15 @@ export class AssetCriticalityDataClient {
       logger: this.options.logger,
       options: {
         index: this.getIndex(),
-        mappings: mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
+        mappings: {
+          ...mappingFromFieldMap(assetCriticalityFieldMap, 'strict'),
+          _meta: {
+            version: ASSET_CRITICALITY_MAPPINGS_VERSIONS,
+          },
+        },
+        settings: {
+          default_pipeline: getIngestPipelineName(this.options.namespace),
+        },
       },
     });
   }
@@ -178,9 +194,12 @@ export class AssetCriticalityDataClient {
   }
 
   public getIndexMappings() {
-    return this.options.esClient.indices.getMapping({
-      index: this.getIndex(),
-    });
+    return this.options.esClient.indices.getMapping(
+      {
+        index: this.getIndex(),
+      },
+      { ignore: [404] }
+    );
   }
 
   public async get(idParts: AssetCriticalityIdParts): Promise<AssetCriticalityRecord | undefined> {

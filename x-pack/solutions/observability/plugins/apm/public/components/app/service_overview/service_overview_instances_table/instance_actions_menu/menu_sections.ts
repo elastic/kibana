@@ -6,19 +6,18 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { IBasePath } from '@kbn/core/public';
+import type { IBasePath } from '@kbn/core/public';
 import moment from 'moment';
-import { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
 import type { LocatorPublic } from '@kbn/share-plugin/public';
-import { NodeLogsLocatorParams } from '@kbn/logs-shared-plugin/common';
+import { type LogsLocatorParams, getNodeQuery, getTimeRange } from '@kbn/logs-shared-plugin/common';
 import { findInventoryFields } from '@kbn/metrics-data-access-plugin/common';
 import { type AssetDetailsLocator } from '@kbn/observability-shared-plugin/common';
-import { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
-import {
+import type { APIReturnType } from '../../../../../services/rest/create_call_apm_api';
+import type {
   Action,
-  getNonEmptySections,
   SectionRecord,
 } from '../../../../shared/transaction_action_menu/sections_helper';
+import { getNonEmptySections } from '../../../../shared/transaction_action_menu/sections_helper';
 
 type InstaceDetails =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/details/{serviceNodeName}'>;
@@ -41,16 +40,14 @@ export function getMenuSections({
   basePath,
   onFilterByInstanceClick,
   metricsHref,
-  allDatasetsLocator,
-  nodeLogsLocator,
+  logsLocator,
   assetDetailsLocator,
 }: {
   instanceDetails: InstaceDetails;
   basePath: IBasePath;
   onFilterByInstanceClick: () => void;
   metricsHref: string;
-  allDatasetsLocator: LocatorPublic<AllDatasetsLocatorParams>;
-  nodeLogsLocator: LocatorPublic<NodeLogsLocatorParams>;
+  logsLocator: LocatorPublic<LogsLocatorParams>;
   assetDetailsLocator?: AssetDetailsLocator;
 }) {
   const podId = instanceDetails.kubernetes?.pod?.uid;
@@ -60,16 +57,20 @@ export function getMenuSections({
     : undefined;
   const infraMetricsQuery = getInfraMetricsQuery(instanceDetails['@timestamp']);
 
-  const podLogsHref = nodeLogsLocator.getRedirectUrl({
-    nodeField: findInventoryFields('pod').id,
-    nodeId: podId!,
-    time,
+  const podLogsHref = logsLocator.getRedirectUrl({
+    query: getNodeQuery({
+      nodeField: findInventoryFields('pod').id,
+      nodeId: podId!,
+    }),
+    timeRange: getTimeRange(time),
   });
 
-  const containerLogsHref = nodeLogsLocator.getRedirectUrl({
-    nodeField: findInventoryFields('container').id,
-    nodeId: containerId!,
-    time,
+  const containerLogsHref = logsLocator.getRedirectUrl({
+    query: getNodeQuery({
+      nodeField: findInventoryFields('container').id,
+      nodeId: containerId!,
+    }),
+    timeRange: getTimeRange(time),
   });
 
   const hasPodLink = !!podId && !!assetDetailsLocator;

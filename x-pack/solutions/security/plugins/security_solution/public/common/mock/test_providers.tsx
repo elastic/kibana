@@ -7,6 +7,7 @@
 
 import { euiDarkVars } from '@kbn/ui-theme';
 import { I18nProvider } from '@kbn/i18n-react';
+import { EuiProvider } from '@elastic/eui';
 
 import React from 'react';
 import type { DropResult, ResponderProvided } from '@hello-pangea/dnd';
@@ -74,8 +75,8 @@ export const TestProvidersComponent = ({
   });
 
   return (
-    <I18nProvider>
-      <MockKibanaContextProvider startServices={startServices}>
+    <MockKibanaContextProvider startServices={startServices}>
+      <I18nProvider>
         <UpsellingProviderMock>
           <ReduxStoreProvider store={store}>
             <ThemeProvider theme={() => ({ eui: euiDarkVars, darkMode: true })}>
@@ -87,7 +88,9 @@ export const TestProvidersComponent = ({
                         <CellActionsProvider
                           getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                         >
-                          <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                          <EuiProvider>
+                            <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                          </EuiProvider>
                         </CellActionsProvider>
                       </ConsoleManager>
                     </ExpandableFlyoutTestProvider>
@@ -97,8 +100,8 @@ export const TestProvidersComponent = ({
             </ThemeProvider>
           </ReduxStoreProvider>
         </UpsellingProviderMock>
-      </MockKibanaContextProvider>
-    </I18nProvider>
+      </I18nProvider>
+    </MockKibanaContextProvider>
   );
 };
 
@@ -137,7 +140,7 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                   <UserPrivilegesProvider
                     kibanaCapabilities={
                       {
-                        siem: { show: true, crud: true },
+                        siemV2: { show: true, crud: true },
                         [CASES_FEATURE_ID]: { read_cases: true, crud_cases: false },
                         [ASSISTANT_FEATURE_ID]: { 'ai-assistant': true },
                       } as unknown as Capabilities
@@ -146,7 +149,9 @@ const TestProvidersWithPrivilegesComponent: React.FC<Props> = ({
                     <CellActionsProvider
                       getTriggerCompatibleActions={() => Promise.resolve(cellActions)}
                     >
-                      <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                      <EuiProvider>
+                        <DragDropContext onDragEnd={onDragEnd}>{children}</DragDropContext>
+                      </EuiProvider>
                     </CellActionsProvider>
                   </UserPrivilegesProvider>
                 </MockAssistantProvider>

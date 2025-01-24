@@ -5,9 +5,11 @@
  * 2.0.
  */
 import React from 'react';
-import { Chart, Metric, MetricDatum } from '@elastic/charts';
+import type { MetricDatum } from '@elastic/charts';
+import { Chart, Metric } from '@elastic/charts';
 import { EuiSkeletonText, EuiPanel } from '@elastic/eui';
 import { isEmpty } from 'lodash';
+import { EuiErrorBoundary } from '@elastic/eui';
 
 export function MetricItem({
   data,
@@ -36,9 +38,11 @@ export function MetricItem({
           <EuiSkeletonText lines={3} />
         </EuiPanel>
       ) : (
-        <Chart>
-          <Metric id={`metric_${id}`} data={[data]} />
-        </Chart>
+        <EuiErrorBoundary>
+          <Chart>
+            <Metric id={`metric_${id}`} data={[data]} />
+          </Chart>
+        </EuiErrorBoundary>
       )}
     </div>
   );

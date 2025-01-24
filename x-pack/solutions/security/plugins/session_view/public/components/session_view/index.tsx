@@ -62,6 +62,10 @@ export const SessionView = ({
   loadAlertDetails,
   canReadPolicyManagement,
   trackEvent,
+  openDetailsInExpandableFlyout,
+  closeDetailsInExpandableFlyout,
+  resetJumpToEntityId,
+  resetJumpToCursor,
 }: SessionViewDeps & { trackEvent: (name: SessionViewTelemetryKey) => void }) => {
   // don't engage jumpTo if jumping to session leader.
   if (jumpToEntityId === sessionEntityId) {
@@ -114,9 +118,18 @@ export const SessionView = ({
     return !!(!displayOptions?.verboseMode && searchQuery && searchResults?.length === 0);
   }, [displayOptions?.verboseMode, searchResults, searchQuery]);
 
-  const onProcessSelected = useCallback((process: Process | null) => {
-    setSelectedProcess(process);
-  }, []);
+  const onProcessSelected = useCallback(
+    (process: Process | null) => {
+      setSelectedProcess(process);
+
+      // used when SessionView is displayed in the expandable flyout
+      // This refreshes the detailed panel rendered in the flyout preview panel
+      if (openDetailsInExpandableFlyout) {
+        openDetailsInExpandableFlyout(process);
+      }
+    },
+    [openDetailsInExpandableFlyout]
+  );
 
   const onJumpToEvent = useCallback(
     (event: ProcessEvent) => {
@@ -182,11 +195,29 @@ export const SessionView = ({
   const onToggleTTY = useCallback(() => {
     if (hasTTYOutput) {
       setShowTTY(!showTTY);
+
+      // used when SessionView is displayed in the expandable flyout
+      // This closes the detailed panel rendered in the flyout preview panel when the user activate the TTY output mode
+      // then reopens the detailed panel to the previously selected process when the user deactivates the TTY output mode
+      if (closeDetailsInExpandableFlyout && !showTTY) {
+        closeDetailsInExpandableFlyout();
+      }
+      if (openDetailsInExpandableFlyout && showTTY) {
+        openDetailsInExpandableFlyout(selectedProcess);
+      }
+
       trackEvent('tty_loaded');
     } else {
       trackEvent('disabled_tty_clicked');
     }
-  }, [hasTTYOutput, showTTY, trackEvent]);
+  }, [
+    closeDetailsInExpandableFlyout,
+    hasTTYOutput,
+    openDetailsInExpandableFlyout,
+    selectedProcess,
+    showTTY,
+    trackEvent,
+  ]);
 
   const handleRefresh = useCallback(() => {
     refetch({ refetchPage: (_page, i, allPages) => allPages.length - 1 === i });
@@ -219,6 +250,19 @@ export const SessionView = ({
     updatedAlertsStatus,
     fetchAlertStatus[0] ?? ''
   );
+
+  /**
+   * This useEffect should only impact the SessionView component when displayed in the expandable flyout.
+   * The SessionView tree and its detailed panel are separated and this allows the detailed panel to reset the
+   * view of the tree from the preview panel.
+   */
+  useEffect(() => {
+    if (resetJumpToEntityId && resetJumpToCursor) {
+      setSelectedProcess(null);
+      setCurrentJumpToEntityId(resetJumpToEntityId);
+      setCurrentJumpToCursor(resetJumpToCursor);
+    }
+  }, [resetJumpToCursor, resetJumpToEntityId]);
 
   useEffect(() => {
     if (newUpdatedAlertsStatus) {
@@ -261,6 +305,12 @@ export const SessionView = ({
     }
   }, [isDetailOpen, trackEvent]);
 
+  const toggleDetailPanelInFlyout = useCallback(() => {
+    if (openDetailsInExpandableFlyout) {
+      openDetailsInExpandableFlyout(selectedProcess);
+    }
+  }, [openDetailsInExpandableFlyout, selectedProcess]);
+
   const onShowAlertDetails = useCallback(
     (alertUuid: string) => {
       if (loadAlertDetails) {
@@ -292,6 +342,86 @@ export const SessionView = ({
       }
     },
     [displayOptions?.timestamp, displayOptions?.verboseMode, setDisplayOptions, trackEvent]
+  );
+
+  const errorEmptyPrompt = useMemo(
+    () =>
+      hasError ? (
+        <EuiEmptyPrompt
+          iconType="warning"
+          color="danger"
+          title={
+            <h2>
+              <FormattedMessage
+                id="xpack.sessionView.errorHeading"
+                defaultMessage="Error loading Session View"
+              />
+            </h2>
+          }
+          body={
+            <p>
+              <FormattedMessage
+                id="xpack.sessionView.errorMessage"
+                defaultMessage="There was an error loading the Session View."
+              />
+            </p>
+          }
+        />
+      ) : null,
+    [hasError]
+  );
+
+  const processTree = useMemo(
+    () =>
+      hasData ? (
+        <div css={styles.processTree}>
+          <ProcessTree
+            key={sessionEntityId + currentJumpToCursor}
+            sessionEntityId={sessionEntityId}
+            data={data.pages}
+            searchQuery={searchQuery}
+            selectedProcess={selectedProcess}
+            onProcessSelected={onProcessSelected}
+            onJumpToOutput={onJumpToOutput}
+            jumpToEntityId={currentJumpToEntityId}
+            investigatedAlertId={investigatedAlertId}
+            isFetching={isFetching}
+            hasPreviousPage={hasPreviousPage}
+            hasNextPage={hasNextPage}
+            fetchNextPage={fetchNextPage}
+            fetchPreviousPage={fetchPreviousPage}
+            setSearchResults={setSearchResults}
+            updatedAlertsStatus={updatedAlertsStatus}
+            onShowAlertDetails={onShowAlertDetails}
+            showTimestamp={displayOptions?.timestamp}
+            verboseMode={displayOptions?.verboseMode}
+            trackEvent={trackEvent}
+          />
+        </div>
+      ) : null,
+    [
+      currentJumpToCursor,
+      currentJumpToEntityId,
+      data?.pages,
+      displayOptions?.timestamp,
+      displayOptions?.verboseMode,
+      fetchNextPage,
+      fetchPreviousPage,
+      hasData,
+      hasNextPage,
+      hasPreviousPage,
+      investigatedAlertId,
+      isFetching,
+      onJumpToOutput,
+      onProcessSelected,
+      onShowAlertDetails,
+      searchQuery,
+      selectedProcess,
+      sessionEntityId,
+      styles.processTree,
+      trackEvent,
+      updatedAlertsStatus,
+    ]
   );
 
   if (renderIsLoading) {
@@ -390,103 +520,66 @@ export const SessionView = ({
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButton
-              onClick={toggleDetailPanel}
-              iconType="list"
-              data-test-subj="sessionView:sessionViewDetailPanelToggle"
-              fill={!isDetailOpen}
-            >
-              {DETAIL_PANEL}
-            </EuiButton>
+            {openDetailsInExpandableFlyout ? (
+              <EuiButtonIcon onClick={toggleDetailPanelInFlyout} iconType="list" />
+            ) : (
+              <EuiButton
+                onClick={toggleDetailPanel}
+                iconType="list"
+                data-test-subj="sessionView:sessionViewDetailPanelToggle"
+                fill={!isDetailOpen}
+              >
+                {DETAIL_PANEL}
+              </EuiButton>
+            )}
           </EuiFlexItem>
         </EuiFlexGroup>
       </EuiPanel>
       <EuiHorizontalRule margin="none" />
-      <EuiResizableContainer>
-        {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
-          detailPanelCollapseFn.current = () => {
-            togglePanel?.(sessionViewId, { direction: 'left' });
-          };
+      {openDetailsInExpandableFlyout ? (
+        <>
+          {errorEmptyPrompt}
+          {processTree}
+        </>
+      ) : (
+        <EuiResizableContainer>
+          {(EuiResizablePanel, EuiResizableButton, { togglePanel }) => {
+            detailPanelCollapseFn.current = () => {
+              togglePanel?.(sessionViewId, { direction: 'left' });
+            };
 
-          return (
-            <>
-              <EuiResizablePanel initialSize={100} minSize="60%" paddingSize="none">
-                {hasError ? (
-                  <EuiEmptyPrompt
-                    iconType="warning"
-                    color="danger"
-                    title={
-                      <h2>
-                        <FormattedMessage
-                          id="xpack.sessionView.errorHeading"
-                          defaultMessage="Error loading Session View"
-                        />
-                      </h2>
-                    }
-                    body={
-                      <p>
-                        <FormattedMessage
-                          id="xpack.sessionView.errorMessage"
-                          defaultMessage="There was an error loading the Session View."
-                        />
-                      </p>
-                    }
+            return (
+              <>
+                <EuiResizablePanel initialSize={100} minSize="60%" paddingSize="none">
+                  {errorEmptyPrompt}
+                  {processTree}
+                </EuiResizablePanel>
+                <EuiResizableButton css={styles.resizeHandle} />
+                <EuiResizablePanel
+                  id={sessionViewId}
+                  initialSize={30}
+                  minSize="320px"
+                  paddingSize="none"
+                  css={styles.detailPanel}
+                >
+                  <SessionViewDetailPanel
+                    index={index}
+                    alerts={alerts}
+                    alertsCount={alertsCount}
+                    isFetchingAlerts={isFetchingAlerts}
+                    hasNextPageAlerts={hasNextPageAlerts}
+                    fetchNextPageAlerts={fetchNextPageAlerts}
+                    investigatedAlertId={investigatedAlertId}
+                    selectedProcess={selectedProcess}
+                    onJumpToEvent={onJumpToEvent}
+                    onShowAlertDetails={onShowAlertDetails}
                   />
-                ) : null}
-
-                {hasData && (
-                  <div css={styles.processTree}>
-                    <ProcessTree
-                      key={sessionEntityId + currentJumpToCursor}
-                      sessionEntityId={sessionEntityId}
-                      data={data.pages}
-                      searchQuery={searchQuery}
-                      selectedProcess={selectedProcess}
-                      onProcessSelected={onProcessSelected}
-                      onJumpToOutput={onJumpToOutput}
-                      jumpToEntityId={currentJumpToEntityId}
-                      investigatedAlertId={investigatedAlertId}
-                      isFetching={isFetching}
-                      hasPreviousPage={hasPreviousPage}
-                      hasNextPage={hasNextPage}
-                      fetchNextPage={fetchNextPage}
-                      fetchPreviousPage={fetchPreviousPage}
-                      setSearchResults={setSearchResults}
-                      updatedAlertsStatus={updatedAlertsStatus}
-                      onShowAlertDetails={onShowAlertDetails}
-                      showTimestamp={displayOptions?.timestamp}
-                      verboseMode={displayOptions?.verboseMode}
-                      trackEvent={trackEvent}
-                    />
-                  </div>
-                )}
-              </EuiResizablePanel>
-
-              <EuiResizableButton css={styles.resizeHandle} />
-              <EuiResizablePanel
-                id={sessionViewId}
-                initialSize={30}
-                minSize="320px"
-                paddingSize="none"
-                css={styles.detailPanel}
-              >
-                <SessionViewDetailPanel
-                  index={index}
-                  alerts={alerts}
-                  alertsCount={alertsCount}
-                  isFetchingAlerts={isFetchingAlerts}
-                  hasNextPageAlerts={hasNextPageAlerts}
-                  fetchNextPageAlerts={fetchNextPageAlerts}
-                  investigatedAlertId={investigatedAlertId}
-                  selectedProcess={selectedProcess}
-                  onJumpToEvent={onJumpToEvent}
-                  onShowAlertDetails={onShowAlertDetails}
-                />
-              </EuiResizablePanel>
-            </>
-          );
-        }}
-      </EuiResizableContainer>
+                </EuiResizablePanel>
+              </>
+            );
+          }}
+        </EuiResizableContainer>
+      )}
       <TTYPlayer
         index={index}
         show={showTTY}

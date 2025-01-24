@@ -5,20 +5,20 @@
  * 2.0.
  */
 import Boom from '@hapi/boom';
-import { SavedObjectsClientContract } from '@kbn/core/server';
-import { Artifact } from '@kbn/fleet-plugin/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
+import type { Artifact } from '@kbn/fleet-plugin/server';
 import { jsonRt, toNumberRt } from '@kbn/io-ts-utils';
 import * as t from 'io-ts';
-import { ApmFeatureFlags } from '../../../common/apm_feature_flags';
+import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import { getInternalSavedObjectsClient } from '../../lib/helpers/get_internal_saved_objects_client';
 import { stringFromBufferRt } from '../../utils/string_from_buffer_rt';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
+import type { ListSourceMapArtifactsResponse } from '../fleet/source_maps';
 import {
   createFleetSourceMapArtifact,
   deleteFleetSourcemapArtifact,
   getCleanedBundleFilePath,
   listSourceMapArtifacts,
-  ListSourceMapArtifactsResponse,
   updateSourceMapsOnFleetPolicies,
 } from '../fleet/source_maps';
 import { createApmSourceMap } from './create_apm_source_map';

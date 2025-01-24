@@ -9,3 +9,5 @@ import type { EuiBasicTableColumn } from '@elastic/eui';
 import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 
 export type TableColumn = EuiBasicTableColumn<RuleMigration>;
+
+export const COLUMN_EMPTY_VALUE = '-';

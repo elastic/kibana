@@ -6,10 +6,11 @@
  */
 
 import { darken, readableColor } from 'polished';
-import React, { CSSProperties } from 'react';
+import type { CSSProperties } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { css } from '@emotion/react';
-import { UseBooleanHandlers } from '@kbn/react-hooks';
+import type { UseBooleanHandlers } from '@kbn/react-hooks';
 import { useEuiTheme } from '@elastic/eui';
 
 type NodeProps<T = HTMLDivElement> = React.DetailedHTMLProps<React.HTMLAttributes<T>, T> & {

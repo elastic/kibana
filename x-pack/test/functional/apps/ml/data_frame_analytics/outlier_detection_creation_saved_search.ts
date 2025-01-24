@@ -83,7 +83,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '1mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',
@@ -160,7 +167,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '1mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',
@@ -237,7 +251,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '1mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',
@@ -315,7 +336,14 @@ export default function ({ getService }: FtrProviderContext) {
               {
                 section: 'state',
                 // Don't include the 'Create time' value entry as it's not stable.
-                expectedEntries: ['STOPPED', 'Create time', 'Model memory limit', '1mb', 'Version'],
+                expectedEntries: [
+                  'Status',
+                  'stopped',
+                  'Create time',
+                  'Model memory limit',
+                  '1mb',
+                  'Version',
+                ],
               },
               {
                 section: 'stats',

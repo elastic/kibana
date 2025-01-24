@@ -6,7 +6,7 @@
  */
 
 import numeral from '@elastic/numeral';
-import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
 import { createFormatter } from '../../../../../../common/formatters';
 import { InfraFormatterType } from '../../../../../common/inventory/types';
 import { metricToFormat } from './metric_to_format';

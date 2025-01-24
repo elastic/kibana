@@ -7,18 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { getHeathBarLinearGradient, HEALTH_HEX_CODES } from './gradient';
+import { useHeathBarLinearGradient, useHealthHexCodes } from './gradient';
 
-describe('getHeathBarLinearGradient', () => {
+jest.mock('@elastic/eui', () => ({
+  useEuiTheme: () => ({
+    euiTheme: {
+      colors: {
+        backgroundFilledSuccess: 'green',
+        backgroundLightWarning: 'yellow',
+        backgroundFilledDanger: 'red',
+      },
+    },
+  }),
+}));
+
+describe('useHeathBarLinearGradient', () => {
+  const healthHexCodes = useHealthHexCodes();
+
   test('should return linear-gradient with percentages for each status', () => {
-    expect(getHeathBarLinearGradient(5, 1, 1, 2)).toBe(
-      `linear-gradient(to right, ${HEALTH_HEX_CODES.successful} 0% 56%, ${HEALTH_HEX_CODES.partial} 56% 67%, ${HEALTH_HEX_CODES.skipped} 67% 78%, ${HEALTH_HEX_CODES.failed} 78% 100%)`
+    expect(useHeathBarLinearGradient(5, 1, 1, 2)).toBe(
+      `linear-gradient(to right, ${healthHexCodes.successful} 0% 56%, ${healthHexCodes.partial} 56% 67%, ${healthHexCodes.skipped} 67% 78%, ${healthHexCodes.failed} 78% 100%)`
     );
   });
 
   test('should return linear-gradient with percentages for each status with count above zero', () => {
-    expect(getHeathBarLinearGradient(5, 0, 0, 2)).toBe(
-      `linear-gradient(to right, ${HEALTH_HEX_CODES.successful} 0% 71%, ${HEALTH_HEX_CODES.failed} 71% 100%)`
+    expect(useHeathBarLinearGradient(5, 0, 0, 2)).toBe(
+      `linear-gradient(to right, ${healthHexCodes.successful} 0% 71%, ${healthHexCodes.failed} 71% 100%)`
     );
   });
 });

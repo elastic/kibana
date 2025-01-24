@@ -66,13 +66,20 @@ const ConnectorResilientTypeFieldsRt = rt.strict({
  * ServiceNow
  */
 
-export const ServiceNowITSMFieldsRt = rt.strict({
-  impact: rt.union([rt.string, rt.null]),
-  severity: rt.union([rt.string, rt.null]),
-  urgency: rt.union([rt.string, rt.null]),
-  category: rt.union([rt.string, rt.null]),
-  subcategory: rt.union([rt.string, rt.null]),
-});
+export const ServiceNowITSMFieldsRt = rt.intersection([
+  rt.strict({
+    impact: rt.union([rt.string, rt.null]),
+    severity: rt.union([rt.string, rt.null]),
+    urgency: rt.union([rt.string, rt.null]),
+    category: rt.union([rt.string, rt.null]),
+    subcategory: rt.union([rt.string, rt.null]),
+  }),
+  rt.exact(
+    rt.partial({
+      additionalFields: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
 
 export type ServiceNowITSMFieldsType = rt.TypeOf<typeof ServiceNowITSMFieldsRt>;
 
@@ -81,15 +88,22 @@ const ConnectorServiceNowITSMTypeFieldsRt = rt.strict({
   fields: rt.union([ServiceNowITSMFieldsRt, rt.null]),
 });
 
-export const ServiceNowSIRFieldsRt = rt.strict({
-  category: rt.union([rt.string, rt.null]),
-  destIp: rt.union([rt.boolean, rt.null]),
-  malwareHash: rt.union([rt.boolean, rt.null]),
-  malwareUrl: rt.union([rt.boolean, rt.null]),
-  priority: rt.union([rt.string, rt.null]),
-  sourceIp: rt.union([rt.boolean, rt.null]),
-  subcategory: rt.union([rt.string, rt.null]),
-});
+export const ServiceNowSIRFieldsRt = rt.intersection([
+  rt.strict({
+    category: rt.union([rt.string, rt.null]),
+    destIp: rt.union([rt.boolean, rt.null]),
+    malwareHash: rt.union([rt.boolean, rt.null]),
+    malwareUrl: rt.union([rt.boolean, rt.null]),
+    priority: rt.union([rt.string, rt.null]),
+    sourceIp: rt.union([rt.boolean, rt.null]),
+    subcategory: rt.union([rt.string, rt.null]),
+  }),
+  rt.exact(
+    rt.partial({
+      additionalFields: rt.union([rt.string, rt.null]),
+    })
+  ),
+]);
 
 export type ServiceNowSIRFieldsType = rt.TypeOf<typeof ServiceNowSIRFieldsRt>;
 

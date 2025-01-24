@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CoreStart } from '@kbn/core/public';
-import { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
-import { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
-import { InfraClientStartDeps, InfraClientStartExports } from '../../types';
+import type { CoreStart } from '@kbn/core/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
+import type { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 
 export type LogStreamSerializedState = SerializedTitles & SerializedTimeRange;
 

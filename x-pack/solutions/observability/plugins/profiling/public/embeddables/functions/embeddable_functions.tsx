@@ -6,12 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import { TopNFunctions } from '@kbn/profiling-utils';
+import type { TopNFunctions } from '@kbn/profiling-utils';
 import { AsyncEmbeddableComponent } from '../async_embeddable_component';
-import {
-  ProfilingEmbeddableProvider,
-  ProfilingEmbeddablesDependencies,
-} from '../profiling_embeddable_provider';
+import type { ProfilingEmbeddablesDependencies } from '../profiling_embeddable_provider';
+import { ProfilingEmbeddableProvider } from '../profiling_embeddable_provider';
 import { EmbeddableFunctionsGrid } from './embeddable_functions_grid';
 
 export type EmbeddableFunctionsProps = FunctionsProps & ProfilingEmbeddablesDependencies;

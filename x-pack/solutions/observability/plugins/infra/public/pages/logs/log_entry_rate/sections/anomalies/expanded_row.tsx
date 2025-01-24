@@ -12,12 +12,9 @@ import React from 'react';
 import useMount from 'react-use/lib/useMount';
 import styled from '@emotion/styled';
 import { useLogViewContext } from '@kbn/logs-shared-plugin/public';
-import {
-  isCategoryAnomaly,
-  LogEntryAnomaly,
-  logEntryRateJobType,
-} from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time/time_range';
+import type { LogEntryAnomaly } from '../../../../../../common/log_analysis';
+import { isCategoryAnomaly, logEntryRateJobType } from '../../../../../../common/log_analysis';
+import type { TimeRange } from '../../../../../../common/time/time_range';
 import { LogEntryExampleMessages } from '../../../../../components/logging/log_entry_examples/log_entry_examples';
 import { useLogEntryExamples } from '../../use_log_entry_examples';
 import { LogEntryExampleMessage, LogEntryExampleMessageHeaders } from './log_entry_example';

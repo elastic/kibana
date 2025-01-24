@@ -17,7 +17,7 @@ export const DATA_VIEW_ID_REF_NAME = 'dataViewId';
 
 /**
  * This needs to match the type of the saved query saved object. That type is defined here:
- * https://github.com/elastic/kibana/blob/main/src/plugins/data/public/query/saved_query/saved_query_service.ts#L54
+ * https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data/public/query/saved_query/saved_query_service.ts#L54
  */
 export const SAVED_QUERY_TYPE = 'query';
 

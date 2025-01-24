@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { UseAsync, useAsync } from './use_async';
+import type { UseAsync } from './use_async';
+import { useAsync } from './use_async';
 import { useTimeRangeContext } from './use_time_range_context';
 
 export const useTimeRangeAsync: UseAsync = (fn, dependencies) => {

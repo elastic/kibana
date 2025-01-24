@@ -28,13 +28,7 @@
             "text": "ByteSizeValue"
           },
           "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
-          {
-            "pluginId": "@kbn/core-http-common",
-            "scope": "common",
-            "docId": "kibKbnCoreHttpCommonPluginApi",
-            "section": "def-common.IExternalUrlPolicy",
-            "text": "IExternalUrlPolicy"
-          },
+          "IExternalUrlPolicy",
           "[]; }>>; csp: Partial<Readonly<{ report_only?: Readonly<{} & { form_action: string[]; }> | undefined; } & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>) => ",
           {
             "pluginId": "@kbn/config-mocks",
@@ -65,13 +59,7 @@
                 "text": "ByteSizeValue"
               },
               "; rewriteBasePath: boolean; keepaliveTimeout: number; socketTimeout: number; payloadTimeout: number; xsrf: Readonly<{} & { disableProtection: boolean; allowlist: string[]; }>; eluMonitor: Readonly<{} & { enabled: boolean; logging: Readonly<{} & { enabled: boolean; threshold: Readonly<{} & { elu: number; ela: number; }>; }>; }>; requestId: Readonly<{} & { allowFromAnyIp: boolean; ipAllowlist: string[]; }>; restrictInternalApis: boolean; }>>; externalUrl: Partial<Readonly<{} & { policy: ",
-              {
-                "pluginId": "@kbn/core-http-common",
-                "scope": "common",
-                "docId": "kibKbnCoreHttpCommonPluginApi",
-                "section": "def-common.IExternalUrlPolicy",
-                "text": "IExternalUrlPolicy"
-              },
+              "IExternalUrlPolicy",
               "[]; }>>; csp: Partial<Readonly<{ report_only?: Readonly<{} & { form_action: string[]; }> | undefined; } & { strict: boolean; disableEmbedding: boolean; disableUnsafeEval: boolean; script_src: string[]; worker_src: string[]; style_src: string[]; connect_src: string[]; default_src: string[]; font_src: string[]; frame_src: string[]; img_src: string[]; frame_ancestors: string[]; report_uri: string[]; report_to: string[]; warnLegacyBrowsers: boolean; }>>; }>"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/test_utils.ts",
@@ -174,53 +162,17 @@
         "description": [],
         "signature": [
           "{ registerRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IRouter",
-            "text": "IRouter"
-          },
+          "IRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">) => void], unknown>; basePath: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpServicePreboot",
-            "text": "HttpServicePreboot"
-          },
+          "HttpServicePreboot",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">"
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
@@ -237,117 +189,33 @@
         "description": [],
         "signature": [
           "{ csp: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.ICspConfig",
-            "text": "ICspConfig"
-          },
+          "ICspConfig",
           "; staticAssets: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IStaticAssets",
-            "text": "IStaticAssets"
-          },
+          "IStaticAssets",
           "; registerRouteHandlerContext: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextContainer",
-            "text": "IContextContainer"
-          },
+          "IContextContainer",
           ", [contextName: Exclude<keyof ContextType, \"resolve\">, provider: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextProvider",
-            "text": "IContextProvider"
-          },
+          "IContextProvider",
           "<ContextType, Exclude<keyof ContextType, \"resolve\">>], unknown>; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; createCookieSessionStorageFactory: jest.MockInstance<Promise<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.SessionStorageFactory",
-            "text": "SessionStorageFactory"
-          },
+          "SessionStorageFactory",
           "<object>>, [cookieOptions: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.SessionStorageCookieOptions",
-            "text": "SessionStorageCookieOptions"
-          },
+          "SessionStorageCookieOptions",
           "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.OnPreRoutingHandler",
-            "text": "OnPreRoutingHandler"
-          },
+          "OnPreRoutingHandler",
           "], unknown>; registerOnPreAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.OnPreAuthHandler",
-            "text": "OnPreAuthHandler"
-          },
+          "OnPreAuthHandler",
           "], unknown>; registerAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.AuthenticationHandler",
-            "text": "AuthenticationHandler"
-          },
+          "AuthenticationHandler",
           "], unknown>; registerOnPostAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.OnPostAuthHandler",
-            "text": "OnPostAuthHandler"
-          },
+          "OnPostAuthHandler",
           "], unknown>; registerOnPreResponse: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.OnPreResponseHandler",
-            "text": "OnPreResponseHandler"
-          },
+          "OnPreResponseHandler",
           "], unknown>; getDeprecatedRoutes: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouterDeprecatedApiDetails",
-            "text": "RouterDeprecatedApiDetails"
-          },
+          "RouterDeprecatedApiDetails",
           "[], [], unknown>; } & Omit<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpServiceSetup",
-            "text": "HttpServiceSetup"
-          },
+          "HttpServiceSetup",
           "<ContextType>, \"basePath\" | \"createRouter\"> & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked; createRouter: jest.MockedFunction<() => ",
           {
             "pluginId": "@kbn/core-http-router-server-mocks",
@@ -372,45 +240,15 @@
         "description": [],
         "signature": [
           "{ basePath: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           "; staticAssets: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IStaticAssets",
-            "text": "IStaticAssets"
-          },
+          "IStaticAssets",
           "; auth: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpAuth",
-            "text": "HttpAuth"
-          },
+          "HttpAuth",
           "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpServiceStart",
-            "text": "HttpServiceStart"
-          },
+          "HttpServiceStart",
           " & { basePath: BasePathMocked; staticAssets: StaticAssetsMocked; }"
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
@@ -427,81 +265,27 @@
         "description": [],
         "signature": [
           "{ externalUrl: ",
-          {
-            "pluginId": "@kbn/core-http-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerInternalPluginApi",
-            "section": "def-server.ExternalUrlConfig",
-            "text": "ExternalUrlConfig"
-          },
+          "ExternalUrlConfig",
           "; csp: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.ICspConfig",
-            "text": "ICspConfig"
-          },
+          "ICspConfig",
           "; server: ",
           "Server",
           "<",
           "ServerApplicationState",
           ">; auth: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpAuth",
-            "text": "HttpAuth"
-          },
+          "HttpAuth",
           "; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string], unknown>; registerRouteHandlerContext: <Context extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ", ContextName extends Exclude<keyof Context, \"resolve\">>(pluginOpaqueId: symbol, contextName: ContextName, provider: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextProvider",
-            "text": "IContextProvider"
-          },
+          "IContextProvider",
           "<Context, ContextName>) => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextContainer",
-            "text": "IContextContainer"
-          },
+          "IContextContainer",
           "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; registerRoutes: jest.MockInstance<void, [path: string, callback: (router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IRouter",
-            "text": "IRouter"
-          },
+          "IRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">) => void], unknown>; } & Omit<",
           "InternalHttpServicePreboot",
           ", \"basePath\" | \"staticAssets\"> & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; }"
@@ -520,155 +304,47 @@
         "description": [],
         "signature": [
           "{ externalUrl: ",
-          {
-            "pluginId": "@kbn/core-http-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerInternalPluginApi",
-            "section": "def-server.ExternalUrlConfig",
-            "text": "ExternalUrlConfig"
-          },
+          "ExternalUrlConfig",
           "; csp: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.ICspConfig",
-            "text": "ICspConfig"
-          },
+          "ICspConfig",
           "; server: ",
           "Server",
           "<",
           "ServerApplicationState",
           ">; registerStaticDir: jest.MockInstance<void, [path: string, dirPath: string], unknown>; registerRouteHandlerContext: <Context extends ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ", ContextName extends Exclude<keyof Context, \"resolve\">>(pluginOpaqueId: symbol, contextName: ContextName, provider: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextProvider",
-            "text": "IContextProvider"
-          },
+          "IContextProvider",
           "<Context, ContextName>) => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextContainer",
-            "text": "IContextContainer"
-          },
+          "IContextContainer",
           "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; createCookieSessionStorageFactory: jest.MockInstance<Promise<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.SessionStorageFactory",
-            "text": "SessionStorageFactory"
-          },
+          "SessionStorageFactory",
           "<object>>, [cookieOptions: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.SessionStorageCookieOptions",
-            "text": "SessionStorageCookieOptions"
-          },
+          "SessionStorageCookieOptions",
           "<object>], unknown>; registerOnPreRouting: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.OnPreRoutingHandler",
-            "text": "OnPreRoutingHandler"
-          },
+          "OnPreRoutingHandler",
           "], unknown>; registerOnPreAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.OnPreAuthHandler",
-            "text": "OnPreAuthHandler"
-          },
+          "OnPreAuthHandler",
           "], unknown>; registerAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.AuthenticationHandler",
-            "text": "AuthenticationHandler"
-          },
+          "AuthenticationHandler",
           "], unknown>; registerOnPostAuth: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.OnPostAuthHandler",
-            "text": "OnPostAuthHandler"
-          },
+          "OnPostAuthHandler",
           "], unknown>; registerOnPreResponse: jest.MockInstance<void, [handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.OnPreResponseHandler",
-            "text": "OnPreResponseHandler"
-          },
+          "OnPreResponseHandler",
           "], unknown>; getDeprecatedRoutes: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouterDeprecatedApiDetails",
-            "text": "RouterDeprecatedApiDetails"
-          },
+          "RouterDeprecatedApiDetails",
           "[], [], unknown>; registerOnPostValidation: jest.MockInstance<void, [cb: (req: ",
           "CoreKibanaRequest",
           "<unknown, unknown, unknown, any>, metadata: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.PostValidationMetadata",
-            "text": "PostValidationMetadata"
-          },
+          "PostValidationMetadata",
           ") => void], unknown>; registerRouterAfterListening: jest.MockInstance<void, [router: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IRouter",
-            "text": "IRouter"
-          },
+          "IRouter",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ">], unknown>; getRegisteredDeprecatedApis: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RouterDeprecatedApiDetails",
-            "text": "RouterDeprecatedApiDetails"
-          },
+          "RouterDeprecatedApiDetails",
           "[], [], unknown>; } & Omit<",
           "InternalHttpServiceSetup",
           ", \"basePath\" | \"auth\" | \"staticAssets\" | \"createRouter\" | \"authRequestHeaders\"> & { auth: AuthMocked; basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; createRouter: jest.MockedFunction<(path: string) => ",
@@ -680,13 +356,7 @@
             "text": "RouterMock"
           },
           ">; authRequestHeaders: jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IAuthHeadersStorage",
-            "text": "IAuthHeadersStorage"
-          },
+          "IAuthHeadersStorage",
           ">; }"
         ],
         "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
@@ -703,37 +373,13 @@
         "description": [],
         "signature": [
           "{ staticAssets: ",
-          {
-            "pluginId": "@kbn/core-http-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerInternalPluginApi",
-            "section": "def-server.InternalStaticAssets",
-            "text": "InternalStaticAssets"
-          },
+          "InternalStaticAssets",
           "; isListening: jest.MockInstance<boolean, [], unknown>; basePath: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IBasePath",
-            "text": "IBasePath"
-          },
+          "IBasePath",
           "; auth: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpAuth",
-            "text": "HttpAuth"
-          },
+          "HttpAuth",
           "; getServerInfo: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.HttpServerInfo",
-            "text": "HttpServerInfo"
-          },
+          "HttpServerInfo",
           ", [], unknown>; } & ",
           "InternalHttpServiceStart",
           " & { basePath: BasePathMocked; staticAssets: InternalStaticAssetsMocked; }"
@@ -767,13 +413,7 @@
               "<P = any, Q = any, B = any>({ path, headers, params, body, query, method, socket, routeTags, routeAuthRequired, validation, kibanaRouteOptions, kibanaRequestState, auth, }?: ",
               "RequestFixtureOptions",
               "<P, Q, B>) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<P, Q, B, any>"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
@@ -807,13 +447,7 @@
             "description": [],
             "signature": [
               "({ headers, }: { headers?: Record<string, string> | undefined; }) => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
@@ -1322,7 +956,7 @@
                   },
                   "<(name: string) => boolean> | undefined; }"
                 ],
-                "path": "packages/kbn-hapi-mocks/src/request.ts",
+                "path": "src/platform/packages/private/kbn-hapi-mocks/src/request.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1337,13 +971,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaResponseFactory",
-                "text": "KibanaResponseFactory"
-              },
+              "KibanaResponseFactory",
               ">"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
@@ -1361,13 +989,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.LifecycleResponseFactory",
-                "text": "LifecycleResponseFactory"
-              },
+              "LifecycleResponseFactory",
               ">"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_server.mocks.ts",
@@ -1570,21 +1192,9 @@
             "description": [],
             "signature": [
               "<ContextType extends ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RequestHandlerContextBase",
-                "text": "RequestHandlerContextBase"
-              },
+              "RequestHandlerContextBase",
               " = ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.RequestHandlerContextBase",
-                "text": "RequestHandlerContextBase"
-              },
+              "RequestHandlerContextBase",
               ">() => ",
               {
                 "pluginId": "@kbn/core-http-server-mocks",
@@ -1656,13 +1266,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.OnPreAuthToolkit",
-                "text": "OnPreAuthToolkit"
-              },
+              "OnPreAuthToolkit",
               ">"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
@@ -1680,13 +1284,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.OnPostAuthToolkit",
-                "text": "OnPostAuthToolkit"
-              },
+              "OnPostAuthToolkit",
               ">"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
@@ -1704,13 +1302,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.OnPreResponseToolkit",
-                "text": "OnPreResponseToolkit"
-              },
+              "OnPreResponseToolkit",
               ">"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
@@ -1728,13 +1320,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.OnPreRoutingToolkit",
-                "text": "OnPreRoutingToolkit"
-              },
+              "OnPreRoutingToolkit",
               ">"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
@@ -1752,13 +1338,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.AuthToolkit",
-                "text": "AuthToolkit"
-              },
+              "AuthToolkit",
               ">"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
@@ -1776,13 +1356,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.IAuthHeadersStorage",
-                "text": "IAuthHeadersStorage"
-              },
+              "IAuthHeadersStorage",
               ">"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/http_service.mock.ts",
@@ -1852,13 +1426,7 @@
             "description": [],
             "signature": [
               "<T>() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.SessionStorage",
-                "text": "SessionStorage"
-              },
+              "SessionStorage",
               "<T>>"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",
@@ -1876,13 +1444,7 @@
             "description": [],
             "signature": [
               "<T extends object>() => DeepMocked<",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.SessionStorageFactory",
-                "text": "SessionStorageFactory"
-              },
+              "SessionStorageFactory",
               "<T>>"
             ],
             "path": "packages/core/http/core-http-server-mocks/src/cookie_session_storage.mocks.ts",

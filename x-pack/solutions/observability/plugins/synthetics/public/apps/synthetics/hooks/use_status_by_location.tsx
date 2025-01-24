@@ -5,16 +5,17 @@
  * 2.0.
  */
 
-import { useEsSearch, useTheme } from '@kbn/observability-shared-plugin/public';
+import { useEuiTheme } from '@elastic/eui';
+import { useEsSearch } from '@kbn/observability-shared-plugin/public';
 import { useMemo } from 'react';
-import { useLocations } from './use_locations';
-import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
+import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
 import {
   EXCLUDE_RUN_ONCE_FILTER,
   FINAL_SUMMARY_FILTER,
 } from '../../../../common/constants/client_defaults';
-import { SYNTHETICS_INDEX_PATTERN, UNNAMED_LOCATION } from '../../../../common/constants';
+import { EncryptedSyntheticsSavedMonitor, Ping } from '../../../../common/runtime_types';
 import { useSyntheticsRefreshContext } from '../contexts';
+import { useLocations } from './use_locations';
 
 export type LocationsStatus = Array<{ status: string; id: string; label: string; color: string }>;
 
@@ -25,7 +26,7 @@ export function useStatusByLocation({
   configId: string;
   monitorLocations?: EncryptedSyntheticsSavedMonitor['locations'];
 }) {
-  const theme = useTheme();
+  const { euiTheme } = useEuiTheme();
 
   const { lastRefresh } = useSyntheticsRefreshContext();
 
@@ -74,13 +75,15 @@ export function useStatusByLocation({
 
   return useMemo(() => {
     const getColor = (status: string) => {
+      const isAmsterdam = euiTheme.themeName === 'EUI_THEME_AMSTERDAM';
+
       switch (status) {
         case 'up':
-          return theme.eui.euiColorVis0;
+          return isAmsterdam ? euiTheme.colors.vis.euiColorVis0 : euiTheme.colors.success;
         case 'down':
-          return theme.eui.euiColorVis9;
+          return isAmsterdam ? euiTheme.colors.vis.euiColorVis9 : euiTheme.colors.vis.euiColorVis6;
         default:
-          return 'subdued';
+          return euiTheme.colors.backgroundBaseSubdued;
       }
     };
 
@@ -112,7 +115,11 @@ export function useStatusByLocation({
     data?.aggregations?.locations.buckets,
     loading,
     monitorLocations,
-    theme.eui.euiColorVis0,
-    theme.eui.euiColorVis9,
+    euiTheme.themeName,
+    euiTheme.colors.success,
+    euiTheme.colors.vis.euiColorVis0,
+    euiTheme.colors.vis.euiColorVis6,
+    euiTheme.colors.vis.euiColorVis9,
+    euiTheme.colors.backgroundBaseSubdued,
   ]);
 }

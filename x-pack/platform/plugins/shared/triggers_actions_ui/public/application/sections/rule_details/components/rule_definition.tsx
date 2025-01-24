@@ -49,6 +49,8 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
 
   const [editFlyoutVisible, setEditFlyoutVisible] = useState<boolean>(false);
   const [ruleType, setRuleType] = useState<RuleType>();
+
+  const hasConditions = !!(rule?.params.criteria as any[])?.length;
   const {
     ruleTypesState: { data: ruleTypeIndex, isLoading: ruleTypesIsLoading },
   } = useLoadRuleTypesQuery({
@@ -159,28 +161,32 @@ export const RuleDefinition: React.FunctionComponent<RuleDefinitionProps> = ({
         />
       ),
     },
-    {
-      title: i18n.translate('xpack.triggersActionsUI.ruleDetails.conditionsTitle', {
-        defaultMessage: 'Conditions',
-      }),
-      description: (
-        <EuiFlexGroup
-          data-test-subj="ruleSummaryRuleConditions"
-          alignItems="center"
-          gutterSize="none"
-        >
-          <EuiFlexItem grow={false}>
-            {hasEditButton ? (
-              <EuiButtonEmpty onClick={onEditRuleClick} flush="left">
-                <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-              </EuiButtonEmpty>
-            ) : (
-              <EuiText size="s">{getRuleConditionsWording()}</EuiText>
-            )}
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      ),
-    },
+    ...(hasConditions
+      ? [
+          {
+            title: i18n.translate('xpack.triggersActionsUI.ruleDetails.conditionsTitle', {
+              defaultMessage: 'Conditions',
+            }),
+            description: (
+              <EuiFlexGroup
+                data-test-subj="ruleSummaryRuleConditions"
+                alignItems="center"
+                gutterSize="none"
+              >
+                <EuiFlexItem grow={false}>
+                  {hasEditButton ? (
+                    <EuiButtonEmpty onClick={onEditRuleClick} flush="left">
+                      <EuiText size="s">{getRuleConditionsWording()}</EuiText>
+                    </EuiButtonEmpty>
+                  ) : (
+                    <EuiText size="s">{getRuleConditionsWording()}</EuiText>
+                  )}
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            ),
+          },
+        ]
+      : []),
     {
       title: i18n.translate('xpack.triggersActionsUI.ruleDetails.actions', {
         defaultMessage: 'Actions',

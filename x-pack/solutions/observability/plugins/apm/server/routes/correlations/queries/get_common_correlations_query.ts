@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { kqlQuery, rangeQuery } from '@kbn/observability-plugin/server';
-import { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
+import type { CommonCorrelationsQueryParams } from '../../../../common/correlations/types';
 import { environmentQuery } from '../../../../common/utils/environment_query';
 
 export function getCommonCorrelationsQuery({

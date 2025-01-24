@@ -169,13 +169,7 @@
             "description": [],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              },
+              "HttpSetup",
               ", \"staticAssets\"> & { staticAssets: ",
               "InternalStaticAssets",
               "; }"
@@ -206,13 +200,7 @@
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsSetup",
-                "text": "NotificationsSetup"
-              }
+              "NotificationsSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
@@ -254,13 +242,7 @@
             "label": "docLinks",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-doc-links-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-                "section": "def-public.DocLinksStart",
-                "text": "DocLinksStart"
-              }
+              "DocLinksStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
@@ -275,13 +257,7 @@
             "description": [],
             "signature": [
               "Omit<",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpSetup",
-                "text": "HttpSetup"
-              },
+              "HttpSetup",
               ", \"staticAssets\"> & { staticAssets: ",
               "InternalStaticAssets",
               "; }"
@@ -298,13 +274,7 @@
             "label": "notifications",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-notifications-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-                "section": "def-public.NotificationsStart",
-                "text": "NotificationsStart"
-              }
+              "NotificationsStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
@@ -318,13 +288,7 @@
             "label": "uiSettings",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-ui-settings-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-                "section": "def-public.IUiSettingsClient",
-                "text": "IUiSettingsClient"
-              }
+              "IUiSettingsClient"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
@@ -358,13 +322,7 @@
             "label": "i18n",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-i18n-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreI18nBrowserPluginApi",
-                "section": "def-public.I18nStart",
-                "text": "I18nStart"
-              }
+              "I18nStart"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
@@ -378,13 +336,7 @@
             "label": "theme",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.ThemeServiceSetup",
-                "text": "ThemeServiceSetup"
-              }
+              "ThemeServiceSetup"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,
@@ -398,13 +350,7 @@
             "label": "userProfile",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              }
+              "UserProfileService"
             ],
             "path": "src/core/packages/apps/browser-internal/src/core_app.ts",
             "deprecated": false,

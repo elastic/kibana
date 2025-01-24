@@ -13,7 +13,7 @@ import { generateMapping } from '../manage_schema';
 export function generateSchemasTask({ roots }: TaskContext) {
   return roots.map((root) => ({
     task: () => {
-      if (!root.parsedCollections || !root.parsedCollections.length) {
+      if (!root.parsedCollections) {
         return;
       }
       const mapping = generateMapping(root.parsedCollections);

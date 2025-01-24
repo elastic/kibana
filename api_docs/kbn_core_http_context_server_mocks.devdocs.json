@@ -23,85 +23,25 @@
         "description": [],
         "signature": [
           "{ registerContext: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextContainer",
-            "text": "IContextContainer"
-          },
+          "IContextContainer",
           ", [pluginOpaqueId: symbol, contextName: \"resolve\", provider: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextProvider",
-            "text": "IContextProvider"
-          },
+          "IContextProvider",
           "<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ", \"resolve\">], unknown>; createHandler: jest.MockInstance<(request: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>, response: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
-            "text": "KibanaResponseFactory"
-          },
+          "KibanaResponseFactory",
           ") => Promise<",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IKibanaResponse",
-            "text": "IKibanaResponse"
-          },
+          "IKibanaResponse",
           "<any>>, [pluginOpaqueId: symbol, handler: ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandler",
-            "text": "RequestHandler"
-          },
+          "RequestHandler",
           "<unknown, unknown, unknown, ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.RequestHandlerContextBase",
-            "text": "RequestHandlerContextBase"
-          },
+          "RequestHandlerContextBase",
           ", any, ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaResponseFactory",
-            "text": "KibanaResponseFactory"
-          },
+          "KibanaResponseFactory",
           ">], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.IContextContainer",
-            "text": "IContextContainer"
-          }
+          "IContextContainer"
         ],
         "path": "packages/core/http/core-http-context-server-mocks/src/context_container.mock.ts",
         "deprecated": false,

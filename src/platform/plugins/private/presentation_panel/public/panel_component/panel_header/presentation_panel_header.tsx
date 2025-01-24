@@ -9,12 +9,24 @@
 
 import { EuiScreenReaderOnly } from '@elastic/eui';
 import { ViewMode } from '@kbn/presentation-publishing';
+import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
 import React, { useCallback } from 'react';
-import { getAriaLabelForTitle } from '../presentation_panel_strings';
+import { placeholderTitle } from './presentation_panel_title';
 import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../types';
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
+
+const getAriaLabelForTitle = (title?: string) => {
+  return title
+    ? i18n.translate('presentationPanel.enhancedAriaLabel', {
+        defaultMessage: 'Panel: {title}',
+        values: { title: title || placeholderTitle },
+      })
+    : i18n.translate('presentationPanel.ariaLabel', {
+        defaultMessage: 'Panel',
+      });
+};
 
 export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPanelApi> = {
   api: ApiType;

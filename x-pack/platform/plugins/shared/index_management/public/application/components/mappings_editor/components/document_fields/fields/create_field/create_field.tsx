@@ -20,8 +20,8 @@ import classNames from 'classnames';
 import React, { useEffect, useRef } from 'react';
 import { EUI_SIZE, TYPE_DEFINITION } from '../../../../constants';
 import { fieldSerializer } from '../../../../lib';
-import { isSemanticTextField } from '../../../../lib/utils';
-import { useDispatch } from '../../../../mappings_state_context';
+import { getFieldByPathName, isSemanticTextField } from '../../../../lib/utils';
+import { useDispatch, useMappingsState } from '../../../../mappings_state_context';
 import { Form, useForm, useFormData } from '../../../../shared_imports';
 import { Field, MainType, NormalizedFields } from '../../../../types';
 import { NameParameter, SubTypeParameter, TypeParameter } from '../../field_parameters';
@@ -29,7 +29,6 @@ import { ReferenceFieldSelects } from '../../field_parameters/reference_field_se
 import { SelectInferenceId } from '../../field_parameters/select_inference_id';
 import { FieldBetaBadge } from '../field_beta_badge';
 import { getRequiredParametersFormForType } from './required_parameters_forms';
-import { useSemanticText } from './semantic_text/use_semantic_text';
 
 const formWrapper = (props: any) => <form {...props} />;
 
@@ -77,8 +76,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
   semanticTextInfo,
   createFieldFormRef,
 }: Props) {
-  const { isSemanticTextEnabled, ml, setErrorsInTrainedModelDeployment } = semanticTextInfo ?? {};
+  const { isSemanticTextEnabled } = semanticTextInfo ?? {};
   const dispatch = useDispatch();
+  const { fields, mappingViewFields } = useMappingsState();
   const fieldTypeInputRef = useRef<HTMLInputElement>(null);
 
   const { form } = useForm<Field>({
@@ -106,17 +106,39 @@ export const CreateField = React.memo(function CreateFieldComponent({
     }
   };
 
-  const { createInferenceEndpoint, handleSemanticText } = useSemanticText({
-    form,
-    setErrorsInTrainedModelDeployment,
-    ml,
-  });
-
   const isSemanticText = form.getFormData().type === 'semantic_text';
 
   useEffect(() => {
     if (createFieldFormRef?.current) createFieldFormRef?.current.focus();
   }, [createFieldFormRef]);
+
+  useEffect(() => {
+    if (isSemanticText) {
+      const allSemanticFields = {
+        byId: {
+          ...fields.byId,
+          ...mappingViewFields.byId,
+        },
+        rootLevelFields: [],
+        aliases: {},
+        maxNestedDepth: 0,
+      };
+      const defaultName = getFieldByPathName(allSemanticFields, 'semantic_text')
+        ? ''
+        : 'semantic_text';
+      const referenceField =
+        Object.values(allSemanticFields.byId)
+          .find((field) => field.source.type === 'text' && !field.isMultiField)
+          ?.path.join('.') || '';
+      if (!form.getFormData().name) {
+        form.setFieldValue('name', defaultName);
+      }
+      if (!form.getFormData().reference_field) {
+        form.setFieldValue('reference_field', referenceField);
+      }
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [isSemanticText]);
 
   const submitForm = async (
     e?: React.FormEvent,
@@ -130,8 +152,9 @@ export const CreateField = React.memo(function CreateFieldComponent({
     const { isValid, data } = await form.submit();
 
     if (isValid && !clickOutside) {
-      if (isSemanticTextField(data)) {
-        handleSemanticText(data);
+      if (isSemanticTextField(data) && !data.inference_id) {
+        const { inference_id: inferenceId, ...rest } = data;
+        dispatch({ type: 'field.add', value: rest });
       } else {
         dispatch({ type: 'field.add', value: data });
       }
@@ -286,9 +309,7 @@ export const CreateField = React.memo(function CreateFieldComponent({
 
               {renderRequiredParametersForm()}
 
-              {isSemanticText && (
-                <SelectInferenceId createInferenceEndpoint={createInferenceEndpoint} />
-              )}
+              {isSemanticText && <SelectInferenceId />}
               {renderFormActions()}
             </div>
           </div>

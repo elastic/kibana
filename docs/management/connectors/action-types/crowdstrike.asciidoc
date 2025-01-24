@@ -12,6 +12,8 @@ preview::[]
 
 The CrowdStrike connector communicates with CrowdStrike Management Console via REST API.
 
+To use this connector, you must have authority to run {endpoint-sec} connectors, which is an *{connectors-feature}* sub-feature privilege. Refer to <<kibana-privileges>>.
+
 [float]
 [[define-crowdstrike-ui]]
 === Create connectors in {kib}

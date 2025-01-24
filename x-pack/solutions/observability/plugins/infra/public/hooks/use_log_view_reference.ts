@@ -7,7 +7,8 @@
 
 import useAsync from 'react-use/lib/useAsync';
 import { v4 as uuidv4 } from 'uuid';
-import { DEFAULT_LOG_VIEW, LogViewReference } from '@kbn/logs-shared-plugin/common';
+import type { LogViewReference } from '@kbn/logs-shared-plugin/common';
+import { DEFAULT_LOG_VIEW } from '@kbn/logs-shared-plugin/common';
 import { useCallback } from 'react';
 import { useLazyRef } from './use_lazy_ref';
 import { useKibanaContextForPlugin } from './use_kibana';

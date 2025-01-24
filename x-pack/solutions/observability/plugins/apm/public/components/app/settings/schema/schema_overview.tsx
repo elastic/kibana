@@ -21,7 +21,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
 import semverLt from 'semver/functions/lt';
-import { PackagePolicy } from '@kbn/fleet-plugin/common/types';
+import type { PackagePolicy } from '@kbn/fleet-plugin/common/types';
 import rocketLaunchGraphic from './blog_rocket_720x420.png';
 import { MigrationInProgressPanel } from './migration_in_progress_panel';
 import { UpgradeAvailableCard } from './migrated/upgrade_available_card';

@@ -7,17 +7,19 @@
 
 import { EuiBasicTable, EuiFlexGroup, EuiFlexItem, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useEffect, useState } from 'react';
 import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
-import { PAGE_SIZE, SortDirection } from '../service_overview_instances_chart_and_table';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { SortDirection } from '../service_overview_instances_chart_and_table';
+import { PAGE_SIZE } from '../service_overview_instances_chart_and_table';
 import { OverviewTableContainer } from '../../../shared/overview_table_container';
 import { getColumns } from './get_columns';
 import { InstanceDetails } from './intance_details';
 import { useApmParams } from '../../../../hooks/use_apm_params';
 import { useBreakpoints } from '../../../../hooks/use_breakpoints';
-import { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
-import { InstancesSortField } from '../../../../../common/instances';
+import type { LatencyAggregationType } from '../../../../../common/latency_aggregation_types';
+import type { InstancesSortField } from '../../../../../common/instances';
 
 type ServiceInstanceMainStatistics =
   APIReturnType<'GET /internal/apm/services/{serviceName}/service_overview_instances/main_statistics'>;

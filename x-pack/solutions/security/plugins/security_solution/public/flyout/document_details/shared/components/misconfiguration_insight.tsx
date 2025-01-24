@@ -8,7 +8,7 @@
 import React, { useEffect, useMemo } from 'react';
 import { EuiFlexItem, type EuiFlexGroupProps, useEuiTheme } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 import { useMisconfigurationPreview } from '@kbn/cloud-security-posture/src/hooks/use_misconfiguration_preview';
 import { buildGenericEntityFlyoutPreviewQuery } from '@kbn/cloud-security-posture-common';
 import {

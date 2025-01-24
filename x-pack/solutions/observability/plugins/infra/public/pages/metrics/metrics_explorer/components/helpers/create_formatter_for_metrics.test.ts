@@ -6,7 +6,7 @@
  */
 
 import { createFormatterForMetric } from './create_formatter_for_metric';
-import { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerMetric } from '../../../../../../common/http_api/metrics_explorer';
 
 describe('createFormatterForMetric()', () => {
   it('should just work for count', () => {

@@ -12,14 +12,27 @@ describe('ITSM formatter', () => {
   const theCase = {
     id: 'case-id',
     connector: {
-      fields: { severity: '2', urgency: '2', impact: '2', category: 'software', subcategory: 'os' },
+      fields: {
+        severity: '2',
+        urgency: '2',
+        impact: '2',
+        category: 'software',
+        subcategory: 'os',
+        additionalFields: '{}',
+      },
     },
   } as Case;
 
   it('it formats correctly', async () => {
     const res = await format(theCase, []);
+
     expect(res).toEqual({
-      ...theCase.connector.fields,
+      severity: '2',
+      urgency: '2',
+      impact: '2',
+      category: 'software',
+      subcategory: 'os',
+      additional_fields: '{}',
       correlation_display: 'Elastic Case',
       correlation_id: 'case-id',
     });
@@ -29,6 +42,7 @@ describe('ITSM formatter', () => {
     const invalidFields = { connector: { fields: null } } as Case;
     const res = await format(invalidFields, []);
     expect(res).toEqual({
+      additional_fields: null,
       severity: null,
       urgency: null,
       impact: null,

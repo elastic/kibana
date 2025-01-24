@@ -6,7 +6,7 @@
  */
 
 import { SavedObjectsModelVersionMap } from '@kbn/core-saved-objects-server';
-import { taskSchemaV1, taskSchemaV2 } from '../schemas/task';
+import { taskSchemaV1, taskSchemaV2, taskSchemaV3 } from '../schemas/task';
 
 // IMPORTANT!!!
 // When adding new model versions, make sure to manually test
@@ -37,6 +37,20 @@ export const taskModelVersions: SavedObjectsModelVersionMap = {
     schemas: {
       forwardCompatibility: taskSchemaV2.extends({}, { unknowns: 'ignore' }),
       create: taskSchemaV2,
+    },
+  },
+  '3': {
+    changes: [
+      {
+        type: 'mappings_addition',
+        addedMappings: {
+          priority: { type: 'integer' },
+        },
+      },
+    ],
+    schemas: {
+      forwardCompatibility: taskSchemaV3.extends({}, { unknowns: 'ignore' }),
+      create: taskSchemaV3,
     },
   },
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import { getDiscoverQuery } from './discover_transaction_link';
 
 function getMockTransaction() {

@@ -6,5 +6,5 @@
  */
 
 import React from 'react';
-import { InfraMetadata } from '../../../../../common/http_api';
+import type { InfraMetadata } from '../../../../../common/http_api';
 export const MetadataContext = React.createContext<InfraMetadata | null>(null);

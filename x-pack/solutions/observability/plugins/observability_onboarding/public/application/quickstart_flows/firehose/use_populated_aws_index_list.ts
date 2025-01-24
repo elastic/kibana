@@ -8,7 +8,7 @@
 import { useFetcher } from '../../../hooks/use_fetcher';
 import {
   FIREHOSE_CLOUDFORMATION_STACK_NAME,
-  FIREHOSE_LOGS_STREAM_NAME,
+  FIREHOSE_STREAM_NAME,
 } from '../../../../common/aws_firehose';
 
 export function usePopulatedAWSIndexList() {
@@ -16,7 +16,7 @@ export function usePopulatedAWSIndexList() {
     return callApi('GET /internal/observability_onboarding/firehose/has-data', {
       params: {
         query: {
-          logsStreamName: FIREHOSE_LOGS_STREAM_NAME,
+          streamName: FIREHOSE_STREAM_NAME,
           stackName: FIREHOSE_CLOUDFORMATION_STACK_NAME,
         },
       },

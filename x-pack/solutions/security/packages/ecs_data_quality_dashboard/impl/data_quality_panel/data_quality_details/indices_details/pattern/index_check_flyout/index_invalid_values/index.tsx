@@ -7,14 +7,14 @@
 
 import { EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import styled from 'styled-components';
+import styled from '@emotion/styled';
 
 import { EMPTY_PLACEHOLDER } from '../../../../../constants';
-import { CodeDanger } from '../../../../../styles';
+import { codeDangerCss } from '../../../../../styles';
 import type { UnallowedValueCount } from '../../../../../types';
 
 const IndexInvalidValueFlexItem = styled(EuiFlexItem)`
-  margin-bottom: ${({ theme }) => theme.eui.euiSizeXS};
+  margin-bottom: ${({ theme }) => theme.euiTheme.size.xs};
 `;
 
 interface Props {
@@ -29,7 +29,7 @@ const IndexInvalidValuesComponent: React.FC<Props> = ({ indexInvalidValues }) =>
       {indexInvalidValues.map(({ fieldName, count }, i) => (
         <IndexInvalidValueFlexItem grow={false} key={`${fieldName}_${i}`}>
           <div>
-            <CodeDanger>{fieldName}</CodeDanger>{' '}
+            <EuiCode css={codeDangerCss}>{fieldName}</EuiCode>{' '}
             <span>
               {'('}
               {count}

@@ -7,17 +7,18 @@
 
 import { EuiBadge, EuiIcon, EuiText, EuiTitle, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactNode, useRef, useEffect, useState } from 'react';
+import type { ReactNode } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import styled from '@emotion/styled';
 import { isMobileAgentName, isRumAgentName } from '../../../../../../../common/agent_name';
 import { TRACE_ID, TRANSACTION_ID } from '../../../../../../../common/es_fields/apm';
 import { asDuration } from '../../../../../../../common/utils/formatters';
-import { Margins } from '../../../../../shared/charts/timeline';
+import type { Margins } from '../../../../../shared/charts/timeline';
 import { TruncateWithTooltip } from '../../../../../shared/truncate_with_tooltip';
 import { SyncBadge } from './badge/sync_badge';
 import { SpanLinksBadge } from './badge/span_links_badge';
 import { ColdStartBadge } from './badge/cold_start_badge';
-import { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
+import type { IWaterfallSpanOrTransaction } from './waterfall_helpers/waterfall_helpers';
 import { FailureBadge } from './failure_badge';
 import { useApmRouter } from '../../../../../../hooks/use_apm_router';
 import { useAnyOfApmParams } from '../../../../../../hooks/use_apm_params';

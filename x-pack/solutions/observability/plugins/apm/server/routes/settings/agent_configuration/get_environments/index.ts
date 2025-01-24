@@ -9,8 +9,8 @@ import { withApmSpan } from '../../../../utils/with_apm_span';
 import { getAllEnvironments } from '../../../environments/get_all_environments';
 import { getExistingEnvironmentsForService } from './get_existing_environments_for_service';
 import { ALL_OPTION_VALUE } from '../../../../../common/agent_configuration/all_option';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
-import { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMInternalESClient } from '../../../../lib/helpers/create_es_client/create_internal_es_client';
 
 export type EnvironmentsResponse = Array<{
   name: string;

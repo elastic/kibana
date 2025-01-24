@@ -16,7 +16,7 @@ import {
 import { buildCombinedAssetFilter } from '../../../../../utils/filters/build';
 import { HostKpiCharts } from '../../../components/kpis/host_kpi_charts';
 import { ContainerKpiCharts } from '../../../components/kpis/container_kpi_charts';
-import { useSearchSessionContext } from '../../../../../hooks/use_search_session';
+import { useReloadRequestTimeContext } from '../../../../../hooks/use_reload_request_time';
 
 interface Props {
   dataView?: DataView;
@@ -26,7 +26,7 @@ interface Props {
 }
 
 export const KPIGrid = ({ assetId, assetType, dataView, dateRange }: Props) => {
-  const { searchSessionId } = useSearchSessionContext();
+  const { reloadRequestTime } = useReloadRequestTimeContext();
 
   const filters = useMemo(() => {
     return [
@@ -45,14 +45,14 @@ export const KPIGrid = ({ assetId, assetType, dataView, dateRange }: Props) => {
           dataView={dataView}
           filters={filters}
           dateRange={dateRange}
-          searchSessionId={searchSessionId}
+          lastReloadRequestTime={reloadRequestTime}
         />
       ) : (
         <ContainerKpiCharts
           dataView={dataView}
           filters={filters}
           dateRange={dateRange}
-          searchSessionId={searchSessionId}
+          lastReloadRequestTime={reloadRequestTime}
         />
       )}
     </EuiFlexGroup>

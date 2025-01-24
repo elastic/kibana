@@ -12,13 +12,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -49,13 +43,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/platform/plugins/shared/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
             "deprecated": false,
@@ -75,13 +63,7 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ") => () => ",
           {
             "pluginId": "expressions",
@@ -112,13 +94,7 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              }
+              "CoreStart"
             ],
             "path": "src/platform/plugins/shared/expression_repeat_image/public/expression_renderers/repeat_image_renderer.tsx",
             "deprecated": false,

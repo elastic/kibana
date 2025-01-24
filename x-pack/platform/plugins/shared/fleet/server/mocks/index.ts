@@ -112,11 +112,7 @@ export const createAppContextStartContractMock = (
     securitySetup: securityMock.createSetup(),
     securityStart: securityMock.createStart(),
     logger: loggingSystemMock.create().get(),
-    experimentalFeatures: {
-      agentTamperProtectionEnabled: true,
-      diagnosticFileUploadEnabled: true,
-      enableReusableIntegrationPolicies: true,
-    } as ExperimentalFeatures,
+    experimentalFeatures: {} as ExperimentalFeatures,
     isProductionMode: true,
     configInitialValue: {
       agents: { enabled: true, elasticsearch: {} },
@@ -228,8 +224,10 @@ export const createPackagePolicyServiceMock = (): jest.Mocked<PackagePolicyClien
  */
 export const createMockAgentPolicyService = (): jest.Mocked<AgentPolicyServiceInterface> => {
   return {
+    create: jest.fn().mockReturnValue(Promise.resolve()),
     get: jest.fn().mockReturnValue(Promise.resolve()),
     list: jest.fn().mockReturnValue(Promise.resolve()),
+    delete: jest.fn().mockReturnValue(Promise.resolve()),
     getFullAgentPolicy: jest.fn().mockReturnValue(Promise.resolve()),
     getByIds: jest.fn().mockReturnValue(Promise.resolve()),
     turnOffAgentTamperProtections: jest.fn().mockReturnValue(Promise.resolve()),

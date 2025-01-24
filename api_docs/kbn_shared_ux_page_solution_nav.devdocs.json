@@ -39,7 +39,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -59,7 +59,7 @@
                 "text": "SolutionNavProps"
               }
             ],
-            "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,7 +80,7 @@
           "TemplateProps",
           ">(WrappedComponent: React.ComponentType<P>) => { (props: Props<P>): React.JSX.Element; displayName: string; }"
         ],
-        "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -94,7 +94,7 @@
             "signature": [
               "React.ComponentType<P>"
             ],
-            "path": "packages/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
+            "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/with_solution_nav.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -125,7 +125,7 @@
           "EuiSideNavItemType",
           "<{}>[] | undefined; children?: React.ReactNode; closeFlyoutButtonPosition?: \"inside\" | \"outside\" | undefined; isOpenOnDesktop?: boolean | undefined; onCollapse?: (() => void) | undefined; canBeCollapsed?: boolean | undefined; }"
         ],
-        "path": "packages/shared-ux/page/solution_nav/src/solution_nav.tsx",
+        "path": "src/platform/packages/shared/shared-ux/page/solution_nav/src/solution_nav.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

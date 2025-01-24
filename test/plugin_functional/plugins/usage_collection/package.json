@@ -1,7 +1,7 @@
 {
   "name": "@kbn/usage-collection-test-plugin",
   "version": "1.0.0",
-  "main": "target/test/plugin_functional/plugins/usage_collection",
+  "main": "target/test/plugin_functional/platform/plugins/shared/usage_collection",
   "kibana": {
     "version": "kibana",
     "templateVersion": "1.0.0"

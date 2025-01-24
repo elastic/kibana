@@ -184,18 +184,6 @@ export const allowedExperimentalValues = Object.freeze({
    */
   jamfDataInAnalyzerEnabled: true,
 
-  /*
-   * Disables discover esql tab within timeline
-   *
-   */
-  timelineEsqlTabDisabled: false,
-
-  /*
-   * Disables date pickers and sourcerer in analyzer if needed.
-   *
-   */
-  analyzerDatePickersAndSourcererDisabled: false,
-
   /**
    * Enables graph visualization in alerts flyout
    */
@@ -246,7 +234,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
-  serviceEntityStoreEnabled: false,
+  serviceEntityStoreEnabled: true,
 
   /**
    * Enables the siem migrations feature
@@ -265,13 +253,26 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables CrowdStrike's RunScript RTR command
+   * Release: 8.18/9.0
    */
-  crowdstrikeRunScriptEnabled: false,
+  crowdstrikeRunScriptEnabled: true,
+
+  /**
+   * Enables the Asset Inventory Entity Store feature.
+   * Allows initializing the Universal Entity Store via the API.
+   */
+  assetInventoryStoreEnabled: false,
 
   /**
    * Enables the Asset Inventory feature
    */
-  assetInventoryStoreEnabled: false,
+  assetInventoryUXEnabled: false,
+
+  /**
+   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
+   * Release: 8.18/9.0
+   */
+  responseActionsMSDefenderEndpointEnabled: true,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

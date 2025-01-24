@@ -6,10 +6,8 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import {
-  formatDurationFromTimeUnitChar,
-  TimeUnitChar,
-} from '@kbn/observability-plugin/common/utils/formatters/duration';
+import type { TimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
+import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common/utils/formatters/duration';
 import { COMPARATORS } from '@kbn/alerting-comparators';
 import { AlertStates } from '../../../../common/alerting/metrics';
 import { UNGROUPED_FACTORY_KEY } from './utils';

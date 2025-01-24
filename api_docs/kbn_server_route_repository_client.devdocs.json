@@ -12,22 +12,10 @@
         "description": [],
         "signature": [
           "(core: ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           " | ",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreSetup",
-            "text": "CoreSetup"
-          },
-          "<object, unknown>) => ",
+          "CoreSetup",
+          "<{}, unknown>) => ",
           {
             "pluginId": "@kbn/server-route-repository-utils",
             "scope": "common",
@@ -49,22 +37,10 @@
             "label": "core",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               " | ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreSetup",
-                "text": "CoreSetup"
-              },
-              "<object, unknown>"
+              "CoreSetup",
+              "<{}, unknown>"
             ],
             "path": "src/platform/packages/shared/kbn-server-route-repository-client/src/create_repository_client.ts",
             "deprecated": false,
@@ -181,13 +157,7 @@
                 "text": "ClientRequestParamsOf"
               },
               "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              "HttpFetchOptions",
               ">) => Promise<",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -234,13 +204,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -268,13 +232,7 @@
                 "text": "ClientRequestParamsOf"
               },
               "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-              {
-                "pluginId": "@kbn/core-http-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreHttpBrowserPluginApi",
-                "section": "def-public.HttpFetchOptions",
-                "text": "HttpFetchOptions"
-              },
+              "HttpFetchOptions",
               ">) => ",
               {
                 "pluginId": "@kbn/server-route-repository-utils",
@@ -325,13 +283,7 @@
                     "text": "ClientRequestParamsOf"
                   },
                   "<TServerRouteRepository, TEndpoint> & TAdditionalClientOptions & ",
-                  {
-                    "pluginId": "@kbn/core-http-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreHttpBrowserPluginApi",
-                    "section": "def-public.HttpFetchOptions",
-                    "text": "HttpFetchOptions"
-                  },
+                  "HttpFetchOptions",
                   ">"
                 ],
                 "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
@@ -403,13 +355,7 @@
         "label": "DefaultClientOptions",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpFetchOptions",
-            "text": "HttpFetchOptions"
-          }
+          "HttpFetchOptions"
         ],
         "path": "src/platform/packages/shared/kbn-server-route-repository-utils/src/typings.ts",
         "deprecated": false,

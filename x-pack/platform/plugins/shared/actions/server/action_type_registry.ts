@@ -11,7 +11,12 @@ import { RunContext, TaskManagerSetupContract, TaskCost } from '@kbn/task-manage
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { ActionType as CommonActionType, areValidFeatures } from '../common';
 import { ActionsConfigurationUtilities } from './actions_config';
-import { getActionTypeFeatureUsageName, TaskRunnerFactory, ILicenseState } from './lib';
+import {
+  getActionTypeFeatureUsageName,
+  TaskRunnerFactory,
+  ILicenseState,
+  ActionExecutionSourceType,
+} from './lib';
 import {
   ActionType,
   InMemoryConnector,
@@ -19,7 +24,6 @@ import {
   ActionTypeSecrets,
   ActionTypeParams,
 } from './types';
-import { isBidirectionalConnectorType } from './lib/bidirectional_connectors';
 
 export interface ActionTypeRegistryOpts {
   licensing: LicensingPluginSetup;
@@ -113,19 +117,25 @@ export class ActionTypeRegistry {
     Boolean(this.actionTypes.get(actionTypeId)?.isSystemActionType);
 
   /**
-   * Returns the kibana privileges of a system action type
+   * Returns true if the connector type has a sub-feature type defined
    */
-  public getSystemActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
+  public hasSubFeature = (actionTypeId: string): boolean =>
+    Boolean(this.actionTypes.get(actionTypeId)?.subFeature);
+
+  /**
+   * Returns the kibana privileges
+   */
+  public getActionKibanaPrivileges<Params extends ActionTypeParams = ActionTypeParams>(
     actionTypeId: string,
-    params?: Params
+    params?: Params,
+    source?: ActionExecutionSourceType
   ): string[] {
     const actionType = this.actionTypes.get(actionTypeId);
 
-    if (!actionType?.isSystemActionType) {
+    if (!actionType?.isSystemActionType && !actionType?.subFeature) {
       return [];
     }
-
-    return actionType?.getKibanaPrivileges?.({ params }) ?? [];
+    return actionType?.getKibanaPrivileges?.({ params, source }) ?? [];
   }
 
   /**
@@ -175,11 +185,15 @@ export class ActionTypeRegistry {
       );
     }
 
-    if (!actionType.isSystemActionType && actionType.getKibanaPrivileges) {
+    if (
+      !actionType.isSystemActionType &&
+      !actionType.subFeature &&
+      actionType.getKibanaPrivileges
+    ) {
       throw new Error(
         i18n.translate('xpack.actions.actionTypeRegistry.register.invalidKibanaPrivileges', {
           defaultMessage:
-            'Kibana privilege authorization is only supported for system action types',
+            'Kibana privilege authorization is only supported for system actions and action types that are registered under a sub-feature',
         })
       );
     }
@@ -233,26 +247,21 @@ export class ActionTypeRegistry {
    * Returns a list of registered action types [{ id, name, enabled }], filtered by featureId if provided.
    */
   public list(featureId?: string): CommonActionType[] {
-    return (
-      Array.from(this.actionTypes)
-        .filter(([_, actionType]) =>
-          featureId ? actionType.supportedFeatureIds.includes(featureId) : true
-        )
-        // Temporarily don't return SentinelOne and Crowdstrike connector for Security Solution Rule Actions
-        .filter(([actionTypeId]) =>
-          featureId ? !isBidirectionalConnectorType(actionTypeId) : true
-        )
-        .map(([actionTypeId, actionType]) => ({
-          id: actionTypeId,
-          name: actionType.name,
-          minimumLicenseRequired: actionType.minimumLicenseRequired,
-          enabled: this.isActionTypeEnabled(actionTypeId),
-          enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
-          enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
-          supportedFeatureIds: actionType.supportedFeatureIds,
-          isSystemActionType: !!actionType.isSystemActionType,
-        }))
-    );
+    return Array.from(this.actionTypes)
+      .filter(([_, actionType]) => {
+        return featureId ? actionType.supportedFeatureIds.includes(featureId) : true;
+      })
+      .map(([actionTypeId, actionType]) => ({
+        id: actionTypeId,
+        name: actionType.name,
+        minimumLicenseRequired: actionType.minimumLicenseRequired,
+        enabled: this.isActionTypeEnabled(actionTypeId),
+        enabledInConfig: this.actionsConfigUtils.isActionTypeEnabled(actionTypeId),
+        enabledInLicense: !!this.licenseState.isLicenseValidForActionType(actionType).isValid,
+        supportedFeatureIds: actionType.supportedFeatureIds,
+        isSystemActionType: !!actionType.isSystemActionType,
+        subFeature: actionType.subFeature,
+      }));
   }
 
   /**

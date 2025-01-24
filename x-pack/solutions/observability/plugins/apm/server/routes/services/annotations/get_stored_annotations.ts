@@ -6,17 +6,18 @@
  */
 
 import { errors } from '@elastic/elasticsearch';
-import { ElasticsearchClient, Logger } from '@kbn/core/server';
+import type { ElasticsearchClient, Logger } from '@kbn/core/server';
 import { rangeQuery } from '@kbn/observability-plugin/server';
 import {
   unwrapEsResponse,
   WrappedElasticsearchClientError,
 } from '@kbn/observability-plugin/server';
 import type { ESSearchResponse } from '@kbn/es-types';
-import { Annotation as ESAnnotation } from '@kbn/observability-plugin/common/annotations';
-import { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
+import type { Annotation as ESAnnotation } from '@kbn/observability-plugin/common/annotations';
+import type { ScopedAnnotationsClient } from '@kbn/observability-plugin/server';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Annotation, AnnotationType } from '../../../../common/annotations';
+import type { Annotation } from '../../../../common/annotations';
+import { AnnotationType } from '../../../../common/annotations';
 import { SERVICE_NAME } from '../../../../common/es_fields/apm';
 import { withApmSpan } from '../../../utils/with_apm_span';
 

@@ -864,13 +864,7 @@
         "description": [],
         "signature": [
           "(getStartDependencies: (getKibanaRequest: (() => ",
-          {
-            "pluginId": "@kbn/core-http-server",
-            "scope": "server",
-            "docId": "kibKbnCoreHttpServerPluginApi",
-            "section": "def-server.KibanaRequest",
-            "text": "KibanaRequest"
-          },
+          "KibanaRequest",
           "<unknown, unknown, unknown, any>) | undefined) => Promise<",
           "KibanaContextStartDependencies",
           ">) => ",
@@ -895,13 +889,7 @@
             "description": [],
             "signature": [
               "(getKibanaRequest: (() => ",
-              {
-                "pluginId": "@kbn/core-http-server",
-                "scope": "server",
-                "docId": "kibKbnCoreHttpServerPluginApi",
-                "section": "def-server.KibanaRequest",
-                "text": "KibanaRequest"
-              },
+              "KibanaRequest",
               "<unknown, unknown, unknown, any>) | undefined) => Promise<",
               "KibanaContextStartDependencies",
               ">"
@@ -1224,13 +1212,7 @@
             "text": "ISearchSource"
           },
           "; id?: string | undefined; tags?: string[] | undefined; managed: boolean; references?: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[] | undefined; sharingSavedObjectProps?: { outcome?: \"exactMatch\" | \"aliasMatch\" | \"conflict\" | undefined; aliasTargetId?: string | undefined; aliasPurpose?: \"savedObjectConversion\" | \"savedObjectImport\" | undefined; errorJSON?: string | undefined; } | undefined; }"
         ],
         "path": "src/platform/plugins/shared/saved_search/common/types.ts",

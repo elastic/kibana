@@ -4,15 +4,20 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { v4 as uuidv4 } from 'uuid';
 import { TOP_VALUE, UNIQUE_COUNT } from '../../translations';
 import type { LensAttributes, GetLensAttributes } from '../../types';
 
+const layerId = uuidv4();
+const columnTopValue = uuidv4();
+const columnTimestamp = uuidv4();
+const columnDNSQuestionName = uuidv4();
+
 /* Exported from Kibana Saved Object */
-export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
+export const getDnsTopDomainsLensAttributes: GetLensAttributes = ({
   stackByField = 'dns.question.registered_domain',
-  extraOptions
-) =>
+  extraOptions,
+}) =>
   ({
     title: 'Top domains by dns.question.registered_domain',
     visualizationType: 'lnsXY',
@@ -55,14 +60,14 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
         preferredSeriesType: 'bar_stacked',
         layers: [
           {
-            layerId: 'b1c3efc6-c886-4fba-978f-3b6bb5e7948a',
-            accessors: ['2a4d5e20-f570-48e4-b9ab-ff3068919377'],
+            layerId,
+            accessors: [columnDNSQuestionName],
             position: 'top',
             seriesType: 'bar_stacked',
             showGridlines: false,
             layerType: 'data',
-            xAccessor: 'd1452b87-0e9e-4fc0-a725-3727a18e0b37',
-            splitAccessor: 'e8842815-2a45-4c74-86de-c19a391e2424',
+            xAccessor: columnTimestamp,
+            splitAccessor: columnTopValue,
           },
         ],
       },
@@ -100,9 +105,9 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
       datasourceStates: {
         formBased: {
           layers: {
-            'b1c3efc6-c886-4fba-978f-3b6bb5e7948a': {
+            [layerId]: {
               columns: {
-                'e8842815-2a45-4c74-86de-c19a391e2424': {
+                [columnTopValue]: {
                   label: TOP_VALUE(stackByField),
                   dataType: 'string',
                   operationType: 'terms',
@@ -113,7 +118,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                     size: 10,
                     orderBy: {
                       type: 'column',
-                      columnId: '2a4d5e20-f570-48e4-b9ab-ff3068919377',
+                      columnId: columnDNSQuestionName,
                     },
                     orderDirection: 'desc',
                     otherBucket: true,
@@ -125,7 +130,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                     accuracyMode: true,
                   },
                 },
-                'd1452b87-0e9e-4fc0-a725-3727a18e0b37': {
+                [columnTimestamp]: {
                   label: '@timestamp',
                   dataType: 'date',
                   operationType: 'date_histogram',
@@ -137,7 +142,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                     includeEmptyRows: true,
                   },
                 },
-                '2a4d5e20-f570-48e4-b9ab-ff3068919377': {
+                [columnDNSQuestionName]: {
                   label: UNIQUE_COUNT('dns.question.name'),
                   dataType: 'number',
                   operationType: 'unique_count',
@@ -147,11 +152,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
                   params: { emptyAsNull: true },
                 },
               },
-              columnOrder: [
-                'e8842815-2a45-4c74-86de-c19a391e2424',
-                'd1452b87-0e9e-4fc0-a725-3727a18e0b37',
-                '2a4d5e20-f570-48e4-b9ab-ff3068919377',
-              ],
+              columnOrder: [columnTopValue, columnTimestamp, columnDNSQuestionName],
               incompleteColumns: {},
             },
           },
@@ -164,7 +165,7 @@ export const getDnsTopDomainsLensAttributes: GetLensAttributes = (
       {
         type: 'index-pattern',
         id: '{dataViewId}',
-        name: 'indexpattern-datasource-layer-b1c3efc6-c886-4fba-978f-3b6bb5e7948a',
+        name: `indexpattern-datasource-layer-${layerId}`,
       },
     ],
   } as LensAttributes);

@@ -7,17 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import { lazy } from 'react';
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
-import { LocatorPublic } from '@kbn/share-plugin/common';
-import {
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { LocatorPublic } from '@kbn/share-plugin/common';
+import type {
   AssetDetailsLocatorParams,
   MetricsExplorerLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import {
-  MetricExpressionParams,
-  METRIC_THRESHOLD_ALERT_TYPE_ID,
-} from '../../../common/alerting/metrics';
+import type { MetricExpressionParams } from '../../../common/alerting/metrics';
+import { METRIC_THRESHOLD_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
 import { getRuleFormat } from './rule_data_formatters';
 

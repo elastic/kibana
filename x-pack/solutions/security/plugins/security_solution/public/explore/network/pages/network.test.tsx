@@ -82,7 +82,7 @@ jest.mock('../../../common/lib/kibana', () => {
         application: {
           ...original.useKibana().services.application,
           capabilities: {
-            siem: { crud_alerts: true, read_alerts: true },
+            siemV2: { crud_alerts: true, read_alerts: true },
             maps: mockMapVisibility(),
           },
           navigateToApp: mockNavigateToApp,

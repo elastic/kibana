@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EuiToolTip, PropsOf } from '@elastic/eui';
+import type { PropsOf } from '@elastic/eui';
+import { EuiToolTip } from '@elastic/eui';
 import React from 'react';
 import {
   missingMlPrivilegesTitle,

@@ -9,7 +9,7 @@ import type { ClientMessage, GetAssistantMessages } from '@kbn/elastic-assistant
 import { EuiAvatar, EuiLoadingSpinner } from '@elastic/eui';
 import React from 'react';
 
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { AssistantAvatar } from '@kbn/ai-assistant-icon';
 import type { Replacements } from '@kbn/elastic-assistant-common';
 import { replaceAnonymizedValuesWithOriginalValues } from '@kbn/elastic-assistant-common';
 import styled from '@emotion/styled';
@@ -117,9 +117,7 @@ export const getComments: GetAssistantMessages = ({
       ? [
           {
             username: i18n.SYSTEM,
-            timelineAvatar: (
-              <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
-            ),
+            timelineAvatar: <AssistantAvatar name="machine" size="l" color="subdued" />,
             timestamp:
               currentConversation.messages[0].timestamp.length === 0
                 ? new Date().toLocaleString()
@@ -148,7 +146,7 @@ export const getComments: GetAssistantMessages = ({
         timelineAvatar: isUser ? (
           <UserAvatar />
         ) : (
-          <EuiAvatar name="machine" size="l" color="subdued" iconType={AssistantAvatar} />
+          <AssistantAvatar name="machine" size="l" color="subdued" />
         ),
         timestamp: i18n.AT(
           message.timestamp.length === 0

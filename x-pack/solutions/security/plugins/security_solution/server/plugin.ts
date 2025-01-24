@@ -45,6 +45,7 @@ import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
 import { createConfig } from './config';
 import { initUiSettings } from './ui_settings';
+import { registerDeprecations } from './deprecations';
 import {
   APP_ID,
   APP_UI_ID,
@@ -129,6 +130,8 @@ import { turnOffAgentPolicyFeatures } from './endpoint/migrations/turn_off_agent
 import { getCriblPackagePolicyPostCreateOrUpdateCallback } from './security_integrations';
 import { scheduleEntityAnalyticsMigration } from './lib/entity_analytics/migrations';
 import { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import { TelemetryConfigProvider } from '../common/telemetry_config/telemetry_config_provider';
+import { TelemetryConfigWatcher } from './endpoint/lib/policy/telemetry_watch';
 
 export type { SetupPlugins, StartPlugins, PluginSetup, PluginStart } from './plugin_contract';
 
@@ -149,6 +152,8 @@ export class Plugin implements ISecuritySolutionPlugin {
   private lists: ListPluginSetup | undefined; // TODO: can we create ListPluginStart?
   private licensing$!: Observable<ILicense>;
   private policyWatcher?: PolicyWatcher;
+  private telemetryConfigProvider: TelemetryConfigProvider;
+  private telemetryWatcher?: TelemetryConfigWatcher;
 
   private manifestTask: ManifestTask | undefined;
   private completeExternalResponseActionsTask: CompleteExternalResponseActionsTask;
@@ -178,7 +183,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.asyncTelemetryEventsSender = new AsyncTelemetryEventsSender(this.logger);
     this.telemetryReceiver = new TelemetryReceiver(this.logger);
 
-    this.logger.debug('plugin initialized');
+    this.telemetryConfigProvider = new TelemetryConfigProvider();
+
     this.endpointContext = {
       logFactory: this.pluginContext.logger,
       service: this.endpointAppContextService,
@@ -191,6 +197,8 @@ export class Plugin implements ISecuritySolutionPlugin {
     this.completeExternalResponseActionsTask = new CompleteExternalResponseActionsTask({
       endpointAppContext: this.endpointContext,
     });
+
+    this.logger.debug('plugin initialized');
   }
 
   public setup(
@@ -212,6 +220,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.ruleMonitoringService.setup(core, plugins);
 
+    registerDeprecations({ core, config: this.config, logger: this.logger });
+
     if (experimentalFeatures.riskScoringPersistence) {
       registerRiskScoringTask({
         getStartServices: core.getStartServices,
@@ -221,6 +231,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskManager: plugins.taskManager,
         telemetry: core.analytics,
         entityAnalyticsConfig: config.entityAnalytics,
+        experimentalFeatures,
       });
     }
 
@@ -229,6 +240,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       taskManager: plugins.taskManager,
       logger: this.logger,
       auditLogger: plugins.security?.audit.withoutRequest,
+      kibanaVersion: pluginContext.env.packageInfo.version,
     }).catch((err) => {
       logger.error(`Error scheduling entity analytics migration: ${err}`);
     });
@@ -239,6 +251,7 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger: this.logger,
         telemetry: core.analytics,
         taskManager: plugins.taskManager,
+        experimentalFeatures,
       });
     }
 
@@ -569,6 +582,8 @@ export class Plugin implements ISecuritySolutionPlugin {
 
     this.licensing$ = plugins.licensing.license$;
 
+    this.telemetryConfigProvider.start(plugins.telemetry.isOptedIn$);
+
     // Assistant Tool and Feature Registration
     plugins.elasticAssistant.registerTools(APP_UI_ID, assistantTools);
     const features = {
@@ -600,6 +615,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       cases: plugins.cases,
       manifestManager,
       licenseService,
+      telemetryConfigProvider: this.telemetryConfigProvider,
       exceptionListsClient: exceptionListClient,
       registerListsServerExtension: this.lists?.registerExtension,
       featureUsageService,
@@ -657,6 +673,14 @@ export class Plugin implements ISecuritySolutionPlugin {
         logger
       );
       this.policyWatcher.start(licenseService);
+
+      this.telemetryWatcher = new TelemetryConfigWatcher(
+        plugins.fleet.packagePolicyService,
+        core.savedObjects,
+        core.elasticsearch,
+        this.endpointContext.service
+      );
+      this.telemetryWatcher.start(this.telemetryConfigProvider);
     }
 
     if (plugins.taskManager) {

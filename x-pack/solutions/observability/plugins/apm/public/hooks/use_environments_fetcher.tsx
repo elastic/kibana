@@ -7,8 +7,8 @@
 
 import { SERVICE_ENVIRONMENT } from '../../common/es_fields/apm';
 import { useFetcher } from './use_fetcher';
-import { Environment } from '../../common/environment_rt';
-import { APIReturnType } from '../services/rest/create_call_apm_api';
+import type { Environment } from '../../common/environment_rt';
+import type { APIReturnType } from '../services/rest/create_call_apm_api';
 
 type EnvironmentsAPIResponse = APIReturnType<'GET /internal/apm/environments'>;
 

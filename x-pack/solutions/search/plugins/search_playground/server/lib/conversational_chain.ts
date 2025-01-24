@@ -13,8 +13,10 @@ import {
   SystemMessagePromptTemplate,
 } from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
-import { BytesOutputParser, StringOutputParser } from '@langchain/core/output_parsers';
-import { createStreamDataTransformer, experimental_StreamData } from 'ai';
+import { StringOutputParser } from '@langchain/core/output_parsers';
+import { createDataStream, LangChainAdapter } from 'ai';
+import type { DataStreamWriter } from 'ai';
+import type { DataStreamString } from '@ai-sdk/ui-utils';
 import { BaseLanguageModel } from '@langchain/core/language_models/base';
 import { BaseMessage } from '@langchain/core/messages';
 import { HumanMessage, AIMessage } from '@langchain/core/messages';
@@ -112,9 +114,9 @@ export function contextLimitCheck(
   };
 }
 
-export function registerContextTokenCounts(data: experimental_StreamData) {
+export function registerContextTokenCounts(data: DataStreamWriter) {
   return (input: ContextInputs) => {
-    data.appendMessageAnnotation({
+    data.writeMessageAnnotation({
       type: 'context_token_count',
       count: getTokenEstimate(input.context),
     });
@@ -130,154 +132,159 @@ class ConversationalChainFn {
     this.options = options;
   }
 
-  async stream(client: AssistClient, msgs: ChatMessage[]) {
-    const data = new experimental_StreamData();
+  async stream(
+    client: AssistClient,
+    msgs: ChatMessage[]
+  ): Promise<ReadableStream<DataStreamString>> {
+    return createDataStream({
+      execute: async (dataStream) => {
+        const messages = msgs ?? [];
+        const lcMessages = getMessages(messages);
+        const previousMessages = lcMessages.slice(0, -1);
+        const question = lcMessages[lcMessages.length - 1]!.content;
+        const retrievedDocs: Document[] = [];
 
-    const messages = msgs ?? [];
-    const lcMessages = getMessages(messages);
-    const previousMessages = lcMessages.slice(0, -1);
-    const question = lcMessages[lcMessages.length - 1]!.content;
-    const retrievedDocs: Document[] = [];
+        let retrievalChain: Runnable = RunnableLambda.from(() => '');
+        const chatHistory = getSerialisedMessages(previousMessages);
 
-    let retrievalChain: Runnable = RunnableLambda.from(() => '');
-    const chatHistory = getSerialisedMessages(previousMessages);
+        if (this.options.rag) {
+          const retriever = new ElasticsearchRetriever({
+            retriever: this.options.rag.retriever,
+            index: this.options.rag.index,
+            client: client.getClient(),
+            content_field: this.options.rag.content_field,
+            hit_doc_mapper: this.options.rag.hit_doc_mapper ?? undefined,
+            k: this.options.rag.size ?? 3,
+          });
 
-    if (this.options.rag) {
-      const retriever = new ElasticsearchRetriever({
-        retriever: this.options.rag.retriever,
-        index: this.options.rag.index,
-        client: client.getClient(),
-        content_field: this.options.rag.content_field,
-        hit_doc_mapper: this.options.rag.hit_doc_mapper ?? undefined,
-        k: this.options.rag.size ?? 3,
-      });
+          retrievalChain = retriever.pipe(buildContext);
+        }
 
-      retrievalChain = retriever.pipe(buildContext);
-    }
-
-    let standaloneQuestionChain: Runnable = RunnableLambda.from((input) => {
-      return input.question;
-    });
-
-    if (lcMessages.length > 1) {
-      const questionRewritePromptTemplate = PromptTemplate.fromTemplate(
-        this.options.questionRewritePrompt
-      );
-      standaloneQuestionChain = RunnableSequence.from([
-        {
-          context: (input) => input.chat_history,
-          question: (input) => input.question,
-        },
-        questionRewritePromptTemplate,
-        this.options.model,
-        new StringOutputParser(),
-      ]).withConfig({
-        metadata: {
-          type: 'standalone_question',
-        },
-      });
-    }
-
-    const prompt = ChatPromptTemplate.fromMessages([
-      SystemMessagePromptTemplate.fromTemplate(this.options.prompt),
-      ...lcMessages,
-    ]);
-
-    const answerChain = RunnableSequence.from([
-      {
-        context: RunnableSequence.from([(input) => input.question, retrievalChain]),
-        question: (input) => input.question,
-      },
-      RunnableLambda.from((inputs) => {
-        data.appendMessageAnnotation({
-          type: 'search_query',
-          question: inputs.question,
+        let standaloneQuestionChain: Runnable = RunnableLambda.from((input) => {
+          return input.question;
         });
-        return inputs;
-      }),
-      RunnableLambda.from(contextLimitCheck(this.options?.rag?.inputTokensLimit, prompt)),
-      RunnableLambda.from(registerContextTokenCounts(data)),
-      prompt,
-      this.options.model.withConfig({ metadata: { type: 'question_answer_qa' } }),
-    ]);
 
-    const conversationalRetrievalQAChain = RunnableSequence.from([
-      {
-        question: standaloneQuestionChain,
-        chat_history: (input) => input.chat_history,
-      },
-      answerChain,
-      new BytesOutputParser(),
-    ]);
+        if (lcMessages.length > 1) {
+          const questionRewritePromptTemplate = PromptTemplate.fromTemplate(
+            this.options.questionRewritePrompt
+          );
+          standaloneQuestionChain = RunnableSequence.from([
+            {
+              context: (input) => input.chat_history,
+              question: (input) => input.question,
+            },
+            questionRewritePromptTemplate,
+            this.options.model,
+            new StringOutputParser(),
+          ]).withConfig({
+            metadata: {
+              type: 'standalone_question',
+            },
+          });
+        }
 
-    const stream = await conversationalRetrievalQAChain.stream(
-      {
-        question,
-        chat_history: chatHistory,
-      },
-      {
-        callbacks: [
+        const prompt = ChatPromptTemplate.fromMessages([
+          SystemMessagePromptTemplate.fromTemplate(this.options.prompt),
+          ...lcMessages,
+        ]);
+
+        const answerChain = RunnableSequence.from([
           {
-            // callback for chat based models (OpenAI)
-            handleChatModelStart(
-              llm,
-              msg: BaseMessage[][],
-              runId,
-              parentRunId,
-              extraParams,
-              tags,
-              metadata: Record<string, string>
-            ) {
-              if (metadata?.type === 'question_answer_qa') {
-                data.appendMessageAnnotation({
-                  type: 'prompt_token_count',
-                  count: getTokenEstimateFromMessages(msg),
-                });
-                data.appendMessageAnnotation({
-                  type: 'search_query',
-                  question,
-                });
-              }
-            },
-            // callback for prompt based models (Bedrock uses ActionsClientLlm)
-            handleLLMStart(llm, input, runId, parentRunId, extraParams, tags, metadata) {
-              if (metadata?.type === 'question_answer_qa') {
-                data.appendMessageAnnotation({
-                  type: 'prompt_token_count',
-                  count: getTokenEstimate(input[0]),
-                });
-              }
-            },
-            handleRetrieverEnd(documents) {
-              retrievedDocs.push(...documents);
-              data.appendMessageAnnotation({
-                type: 'retrieved_docs',
-                documents: documents as any,
-              });
-            },
-            handleChainEnd(outputs, runId, parentRunId) {
-              if (outputs?.constructor?.name === 'AIMessageChunk') {
-                data.appendMessageAnnotation({
-                  type: 'citations',
-                  documents: getCitations(
-                    outputs.content as string,
-                    'inline',
-                    retrievedDocs
-                  ) as any,
-                });
-              }
-
-              // check that main chain (without parent) is finished:
-              if (parentRunId == null) {
-                data.close().catch(() => {});
-              }
-            },
+            context: RunnableSequence.from([(input) => input.question, retrievalChain]),
+            question: (input) => input.question,
           },
-        ],
-      }
-    );
+          RunnableLambda.from((inputs) => {
+            dataStream.writeMessageAnnotation({
+              type: 'search_query',
+              question: inputs.question,
+            });
+            return inputs;
+          }),
+          RunnableLambda.from(contextLimitCheck(this.options?.rag?.inputTokensLimit, prompt)),
+          RunnableLambda.from(registerContextTokenCounts(dataStream)),
+          prompt,
+          this.options.model.withConfig({ metadata: { type: 'question_answer_qa' } }),
+        ]);
 
-    return stream.pipeThrough(createStreamDataTransformer(true)).pipeThrough(data.stream);
+        const conversationalRetrievalQAChain = RunnableSequence.from([
+          {
+            question: standaloneQuestionChain,
+            chat_history: (input) => input.chat_history,
+          },
+          answerChain,
+        ]);
+
+        const lcStream = await conversationalRetrievalQAChain.stream(
+          {
+            question,
+            chat_history: chatHistory,
+          },
+          {
+            callbacks: [
+              {
+                // callback for chat based models (OpenAI)
+                handleChatModelStart(
+                  llm,
+                  msg: BaseMessage[][],
+                  runId,
+                  parentRunId,
+                  extraParams,
+                  tags,
+                  metadata: Record<string, string>
+                ) {
+                  if (metadata?.type === 'question_answer_qa') {
+                    dataStream.writeMessageAnnotation({
+                      type: 'prompt_token_count',
+                      count: getTokenEstimateFromMessages(msg),
+                    });
+                    dataStream.writeMessageAnnotation({
+                      type: 'search_query',
+                      question,
+                    });
+                  }
+                },
+                // callback for prompt based models (Bedrock uses ActionsClientLlm)
+                handleLLMStart(llm, input, runId, parentRunId, extraParams, tags, metadata) {
+                  if (metadata?.type === 'question_answer_qa') {
+                    dataStream.writeMessageAnnotation({
+                      type: 'prompt_token_count',
+                      count: getTokenEstimate(input[0]),
+                    });
+                  }
+                },
+                handleRetrieverEnd(documents) {
+                  retrievedDocs.push(...documents);
+                  dataStream.writeMessageAnnotation({
+                    type: 'retrieved_docs',
+                    documents: documents as any,
+                  });
+                },
+                handleChainEnd(outputs, runId, parentRunId) {
+                  if (outputs?.constructor?.name === 'AIMessageChunk') {
+                    dataStream.writeMessageAnnotation({
+                      type: 'citations',
+                      documents: getCitations(
+                        outputs.content as string,
+                        'inline',
+                        retrievedDocs
+                      ) as any,
+                    });
+                  }
+                },
+              },
+            ],
+          }
+        );
+
+        return LangChainAdapter.mergeIntoDataStream(lcStream, { dataStream });
+      },
+      onError: (error: unknown) => {
+        if (error instanceof Error) {
+          return error.message;
+        }
+        return 'An error occurred while processing the request';
+      },
+    });
   }
 }
 

@@ -7,7 +7,8 @@
 
 import type { CoreStart } from '@kbn/core/public';
 import type { RefreshInterval } from '@kbn/data-plugin/common';
-import type { DefaultEmbeddableApi, EmbeddableInput } from '@kbn/embeddable-plugin/public';
+import type { DefaultEmbeddableApi } from '@kbn/embeddable-plugin/public';
+import type { EmbeddableInput } from '@kbn/embeddable-plugin/common';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import type { MlEntityField } from '@kbn/ml-anomaly-utils';
 import type {
@@ -18,7 +19,7 @@ import type {
   PublishesUnifiedSearch,
   PublishingSubject,
   PublishesTimeRange,
-  PublishesWritablePanelTitle,
+  PublishesWritableTitle,
   PublishesDataViews,
   SerializedTitles,
 } from '@kbn/presentation-publishing';
@@ -143,7 +144,7 @@ export type AnomalyChartsApi = AnomalyChartsComponentApi & AnomalyChartsDataLoad
 
 export type AnomalyChartsEmbeddableApi = MlEmbeddableBaseApi<AnomalyChartsEmbeddableState> &
   PublishesDataViews &
-  PublishesWritablePanelTitle &
+  PublishesWritableTitle &
   HasEditCapabilities &
   AnomalyChartsApi;
 
@@ -203,7 +204,7 @@ export interface SingleMetricViewerEmbeddableState
 
 export type SingleMetricViewerEmbeddableApi =
   MlEmbeddableBaseApi<SingleMetricViewerEmbeddableState> &
-    PublishesWritablePanelTitle &
+    PublishesWritableTitle &
     HasEditCapabilities &
     SingleMetricViewerComponentApi;
 

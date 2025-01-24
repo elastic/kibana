@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
-import { ProfilingStatus } from '@kbn/profiling-utils';
+import type { IScopedClusterClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { ProfilingStatus } from '@kbn/profiling-utils';
 import { areCloudResourcesSetup } from '../../../common/cloud_setup';
 import { areResourcesSetup } from '../../../common/setup';
-import { RegisterServicesParams } from '../register_services';
+import type { RegisterServicesParams } from '../register_services';
 import { getSetupState } from '../setup_state';
 
 export interface HasSetupParams {

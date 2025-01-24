@@ -7,9 +7,9 @@
 
 import { sum } from 'lodash';
 import objectHash from 'object-hash';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { rangeQuery } from '@kbn/observability-plugin/server';
-import { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../../typings/es_schemas/ui/fields/agent';
 import { getOffsetInMs } from '../../../../common/utils/get_offset_in_ms';
 import { ENVIRONMENT_NOT_DEFINED } from '../../../../common/environment_filter_values';
 import { asMutableArray } from '../../../../common/utils/as_mutable_array';
@@ -30,7 +30,7 @@ import { NodeType } from '../../../../common/connections';
 import { ApmDocumentType } from '../../../../common/document_type';
 import { RollupInterval } from '../../../../common/rollup';
 import { excludeRumExitSpansQuery } from '../exclude_rum_exit_spans_query';
-import { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../helpers/create_es_client/create_apm_event_client';
 import { getDocumentTypeFilterForServiceDestinationStatistics } from '../../helpers/spans/get_is_using_service_destination_metrics';
 
 const MAX_ITEMS = 1500;

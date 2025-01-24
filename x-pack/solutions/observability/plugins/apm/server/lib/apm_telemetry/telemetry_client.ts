@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { estypes } from '@elastic/elasticsearch';
-import { CoreSetup } from '@kbn/core/server';
-import { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
+import type { estypes } from '@elastic/elasticsearch';
+import type { CoreSetup } from '@kbn/core/server';
+import type { ESSearchRequest, ESSearchResponse } from '@kbn/es-types';
 import { unwrapEsResponse } from '@kbn/observability-plugin/server';
 
 interface RequiredSearchParams {

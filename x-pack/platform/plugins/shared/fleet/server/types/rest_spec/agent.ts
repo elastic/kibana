@@ -80,6 +80,8 @@ export const AgentStatusSchema = schema.oneOf([
   schema.literal('unenrolled'),
   schema.literal('updating'),
   schema.literal('degraded'),
+  schema.literal('uninstalled'),
+  schema.literal('orphaned'),
 ]);
 
 export const AgentResponseSchema = schema.object({
@@ -135,6 +137,7 @@ export const AgentResponseSchema = schema.object({
   enrolled_at: schema.string(),
   unenrolled_at: schema.maybe(schema.string()),
   unenrollment_started_at: schema.maybe(schema.string()),
+  audit_unenrolled_reason: schema.maybe(schema.string()),
   upgraded_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   upgrade_started_at: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
   upgrade_details: schema.maybe(
@@ -253,7 +256,7 @@ export const PostNewAgentActionResponseSchema = schema.object({
     sent_at: schema.maybe(schema.string()),
     created_at: schema.string(),
     ack_data: schema.maybe(schema.any()),
-    agents: schema.arrayOf(schema.string()),
+    agents: schema.maybe(schema.arrayOf(schema.string())),
     namespaces: schema.maybe(schema.arrayOf(schema.string())),
     expiration: schema.maybe(schema.string()),
     start_time: schema.maybe(schema.string()),
@@ -518,6 +521,8 @@ export const GetAgentStatusResponseSchema = schema.object({
     online: schema.number(),
     error: schema.number(),
     offline: schema.number(),
+    uninstalled: schema.maybe(schema.number()),
+    orphaned: schema.maybe(schema.number()),
     other: schema.number(),
     updating: schema.number(),
     inactive: schema.number(),
