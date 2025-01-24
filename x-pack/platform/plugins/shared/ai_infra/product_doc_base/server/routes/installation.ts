@@ -94,7 +94,7 @@ export const registerInstallationRoutes = ({
       },
       security: {
         authz: {
-          requiredPrivileges: ['manage_llm_product_doc'],
+          requiredPrivileges: [ApiPrivileges.manage('llm_product_doc')],
         },
       },
     },

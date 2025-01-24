@@ -87,11 +87,6 @@ export class ObservabilityAIAssistantPlugin
         },
         read: {
           disabled: true,
-          api: [
-            OBSERVABILITY_AI_ASSISTANT_FEATURE_ID,
-            'ai_assistant',
-            ApiPrivileges.manage('llm_product_doc'),
-          ],
           savedObject: {
             all: [],
             read: [],
