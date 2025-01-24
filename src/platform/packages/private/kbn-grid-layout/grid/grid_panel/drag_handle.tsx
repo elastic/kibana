@@ -9,7 +9,7 @@
 
 import React, { useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 
-import { EuiIcon, useEuiTheme } from '@elastic/eui';
+import { EuiIcon, useEuiTheme } from '@elastic/eui'; 
 import { css } from '@emotion/react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { i18n } from '@kbn/i18n';
