@@ -99,6 +99,7 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           category: null,
           closed_at: null,
           closed_by: null,
+          comments: [],
           connector: {
             fields: null,
             id: 'connector-1',
