@@ -27,7 +27,15 @@ interface DeleteStreamParams extends BaseParams {
   logger: Logger;
 }
 
-export function getDataStreamLifecycle(dataStream: IndicesDataStream): IngestStreamLifecycle {
+export function getDataStreamLifecycle(
+  dataStream: IndicesDataStream | null
+): IngestStreamLifecycle {
+  if (!dataStream) {
+    return {
+      type: 'error',
+      message: 'Data stream not found',
+    };
+  }
   if (
     dataStream.ilm_policy &&
     (!dataStream.lifecycle || typeof dataStream.prefer_ilm === 'undefined' || dataStream.prefer_ilm)

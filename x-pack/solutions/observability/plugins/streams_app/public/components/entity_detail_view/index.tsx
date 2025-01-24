@@ -164,6 +164,17 @@ function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamLifecycle }) {
     );
   }
 
+  if (lifecycle.type === 'error') {
+    return (
+      <EuiBadge color="hollow">
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
+          defaultMessage: 'Error: {message}',
+          values: { message: lifecycle.message },
+        })}
+      </EuiBadge>
+    );
+  }
+
   return (
     <EuiBadge color="hollow">
       {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dlmBadgeLabel', {

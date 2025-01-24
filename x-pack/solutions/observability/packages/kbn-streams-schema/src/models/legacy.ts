@@ -41,6 +41,7 @@ interface WiredReadStreamDefinition extends ReadStreamDefinitionBase {
 
 interface UnwiredReadStreamDefinition extends ReadStreamDefinitionBase {
   stream: UnwiredStreamDefinition;
+  data_stream_exists: boolean;
 }
 
 type ReadStreamDefinition = WiredReadStreamDefinition | UnwiredReadStreamDefinition;
@@ -64,6 +65,7 @@ const unwiredReadStreamDefinitionSchema: z.Schema<UnwiredReadStreamDefinition> =
   readStreamDefinitionSchemaBase,
   z.object({
     stream: unwiredStreamDefinitionSchema,
+    data_stream_exists: z.boolean(),
   })
 );
 

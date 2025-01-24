@@ -92,14 +92,16 @@ const linkDashboardRoute = createServerRoute({
       dashboardId: z.string(),
     }),
   }),
-  handler: async ({ params, request, assets }): Promise<LinkDashboardResponse> => {
-    const assetsClient = await assets.getClientWithRequest({ request });
+  handler: async ({ params, request, getScopedClients }): Promise<LinkDashboardResponse> => {
+    const { assetClient, streamsClient } = await getScopedClients({ request });
 
     const {
       path: { dashboardId, id: streamId },
     } = params;
 
-    await assetsClient.linkAsset({
+    await streamsClient.ensureStream(streamId);
+
+    await assetClient.linkAsset({
       entityId: streamId,
       entityType: 'stream',
       assetId: dashboardId,
@@ -209,15 +211,22 @@ const bulkDashboardsRoute = createServerRoute({
       ),
     }),
   }),
-  handler: async ({ params, request, assets, logger }): Promise<BulkUpdateAssetsResponse> => {
-    const assetsClient = await assets.getClientWithRequest({ request });
+  handler: async ({
+    params,
+    request,
+    getScopedClients,
+    logger,
+  }): Promise<BulkUpdateAssetsResponse> => {
+    const { assetClient, streamsClient } = await getScopedClients({ request });
 
     const {
       path: { id: streamId },
       body: { operations },
     } = params;
 
-    const result = await assetsClient.bulk(
+    await streamsClient.ensureStream(streamId);
+
+    const result = await assetClient.bulk(
       {
         entityId: streamId,
         entityType: 'stream',

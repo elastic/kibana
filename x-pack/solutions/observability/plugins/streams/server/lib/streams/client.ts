@@ -464,6 +464,19 @@ export class StreamsClient {
   }
 
   /**
+   * Make sure there is a stream definition for a given stream.
+   * If the data stream exists but the stream definition does not, it creates an empty stream definition.
+   * If the stream definition exists, it is a noop.
+   * If the data stream does not exist or the user does not have access, it throws.
+   */
+  async ensureStream(name: string): Promise<void> {
+    const streamDefinition = await this.getStream(name);
+    if (this.isAdHocUnwiredStream(streamDefinition)) {
+      await this.updateStoredStream(streamDefinition);
+    }
+  }
+
+  /**
    * Returns a stream definition for the given name:
    * - if a wired stream definition exists
    * - if an ingest stream definition exists
@@ -535,6 +548,17 @@ export class StreamsClient {
     };
 
     return definition;
+  }
+
+  /**
+   * Returns true whether the stream might be ad-hoc created and is not stored in the definition index yet.
+   */
+  private isAdHocUnwiredStream(definition: StreamDefinition): boolean {
+    return (
+      isUnwiredStreamDefinition(definition) &&
+      definition.ingest.routing.length === 0 &&
+      definition.ingest.processing.length === 0
+    );
   }
 
   /**

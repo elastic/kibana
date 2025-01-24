@@ -36,12 +36,21 @@ export interface IngestStreamLifecycleILM {
   policy: string;
 }
 
-export type IngestStreamLifecycle = IngestStreamLifecycleDLM | IngestStreamLifecycleILM;
+export interface IngestStreamLifecycleError {
+  type: 'error';
+  message: string;
+}
+
+export type IngestStreamLifecycle =
+  | IngestStreamLifecycleDLM
+  | IngestStreamLifecycleILM
+  | IngestStreamLifecycleError;
 
 export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.discriminatedUnion(
   'type',
   [
     z.object({ type: z.literal('dlm'), data_retention: z.optional(NonEmptyString) }),
     z.object({ type: z.literal('ilm'), policy: NonEmptyString }),
+    z.object({ type: z.literal('error'), message: NonEmptyString }),
   ]
 );

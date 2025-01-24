@@ -83,6 +83,7 @@ interface WiredStreamGetResponse extends IngestStreamGetResponseBase {
 interface UnwiredStreamGetResponse extends IngestStreamGetResponseBase {
   stream: Omit<UnwiredStreamDefinition, 'name'>;
   elasticsearch_assets: ElasticsearchAsset[];
+  data_stream_exists: boolean;
 }
 
 type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
@@ -140,6 +141,7 @@ const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.int
   z.object({
     stream: unwiredStreamDefinitionSchemaBase,
     elasticsearch_assets: z.array(elasticsearchAssetSchema),
+    data_stream_exists: z.boolean(),
   })
 );
 
@@ -155,7 +157,7 @@ const isWiredStreamGetResponse = createIsNarrowSchema(
 
 const isUnWiredStreamGetResponse = createIsNarrowSchema(
   ingestStreamGetResponseSchema,
-  wiredStreamGetResponseSchema
+  unwiredStreamGetResponseSchema
 );
 
 const asWiredStreamGetResponse = createAsSchemaOrThrow(
