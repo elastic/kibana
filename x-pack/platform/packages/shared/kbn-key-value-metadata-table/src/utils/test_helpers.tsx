@@ -10,7 +10,7 @@
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render } from '@testing-library/react';
 import React from 'react';
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 
 export function renderWithTheme(component: React.ReactNode, params?: any) {
   return render(<EuiThemeProvider>{component}</EuiThemeProvider>, params);

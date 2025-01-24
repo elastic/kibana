@@ -6,7 +6,7 @@
  */
 
 import React from 'react';
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 // eslint-disable-next-line import/no-extraneous-dependencies
 import { render } from '@testing-library/react';
 // eslint-disable-next-line import/no-extraneous-dependencies
