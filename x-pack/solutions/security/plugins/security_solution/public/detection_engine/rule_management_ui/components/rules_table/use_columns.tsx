@@ -520,7 +520,9 @@ export const useMonitoringColumns = ({
         name: i18n.COLUMN_TOTAL_UNFILLED_GAPS_DURATION,
         render: (value: number | undefined) => (
           <EuiText data-test-subj="gap_info" size="s">
-            {value != null ? moment.duration(value, 'ms').humanize() : getEmptyTagValue()}
+            {value != null && value > 0
+              ? moment.duration(value, 'ms').humanize()
+              : getEmptyTagValue()}
           </EuiText>
         ),
         sortable: false,
