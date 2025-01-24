@@ -11886,7 +11886,7 @@ paths:
                 lookbackPeriod:
                   default: 24h
                   description: The lookback period for the entity store
-                  pattern: '[smh]$'
+                  pattern: '[smdh]$'
                   type: string
         description: Schema for the entity store initialization
         required: true
@@ -57213,7 +57213,7 @@ components:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
         lookbackPeriod:
           default: 24h
-          pattern: '[smh]$'
+          pattern: '[smdh]$'
           type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
