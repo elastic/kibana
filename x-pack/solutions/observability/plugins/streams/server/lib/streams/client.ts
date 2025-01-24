@@ -24,6 +24,7 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
+  isDisabledLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRootStreamDefinition,
@@ -41,6 +42,7 @@ import { validateAncestorFields, validateDescendantFields } from './helpers/vali
 import {
   validateRootStreamChanges,
   validateStreamChildrenChanges,
+  validateStreamLifecycle,
   validateStreamTypeChanges,
 } from './helpers/validate_stream';
 import { rootStreamDefinition } from './root_stream_definition';
@@ -321,9 +323,7 @@ export class StreamsClient {
     }
 
     if (isWiredStreamDefinition(definition)) {
-      if (this.dependencies.isServerless && isIlmLifecycle(definition.ingest.lifecycle)) {
-        throw new MalformedStreamError('ILM lifecycle is not supported in serverless environments');
-      }
+      validateStreamLifecycle(definition, this.dependencies.isServerless);
 
       const validateWiredStreamResult = await this.validateWiredStreamAndCreateChildrenIfNeeded({
         existingDefinition: existingDefinition as WiredStreamDefinition,

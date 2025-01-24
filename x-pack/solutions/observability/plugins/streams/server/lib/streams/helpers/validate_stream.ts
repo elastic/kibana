@@ -8,6 +8,8 @@
 import {
   StreamDefinition,
   WiredStreamDefinition,
+  isDisabledLifecycle,
+  isIlmLifecycle,
   isInheritLifecycle,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
@@ -92,5 +94,17 @@ export function validateStreamChildrenChanges(
 
   if (removedChildren.length) {
     throw new MalformedChildrenError('Cannot remove children from a stream via updates');
+  }
+}
+
+export function validateStreamLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
+  const lifecycle = definition.ingest.lifecycle;
+
+  if (isServerless && isIlmLifecycle(lifecycle)) {
+    throw new MalformedStreamError('ILM lifecycle is not supported in serverless environments');
+  }
+
+  if (isDisabledLifecycle(lifecycle)) {
+    throw new MalformedStreamError('Lifecycle cannot be disabled for wired streams');
   }
 }
