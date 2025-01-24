@@ -7,16 +7,12 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
-<<<<<<< HEAD
-import { PanelInteractionEvent, UserInteractionEvent } from '../types';
-=======
 import { GridLayoutStateManager } from '../types';
 import { useGridLayoutEvents } from '../use_grid_layout_events';
->>>>>>> 02455ffe3a6e ([Dashboard][Collapsable panels] Enable touch between panel sections and refactor events flow  (#206941))
 
 export const ResizeHandle = ({
   gridLayoutStateManager,
@@ -28,16 +24,12 @@ export const ResizeHandle = ({
   panelId: string;
 }) => {
   const { euiTheme } = useEuiTheme();
-<<<<<<< HEAD
-=======
   const startInteraction = useGridLayoutEvents({
     interactionType: 'resize',
     gridLayoutStateManager,
     panelId,
     rowIndex,
   });
->>>>>>> 02455ffe3a6e ([Dashboard][Collapsable panels] Enable touch between panel sections and refactor events flow  (#206941))
-
   return (
     <button
       onMouseDown={startInteraction}
