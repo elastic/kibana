@@ -5,26 +5,31 @@
  * 2.0.
  */
 
-import { PassThrough, Readable } from 'stream';
 import { Logger } from '@kbn/logging';
-import { Stream } from 'openai/streaming';
 import { ChatCompletionChunk } from 'openai/resources/chat/completions';
+import { Stream } from 'openai/streaming';
+import { PassThrough, Readable } from 'stream';
+import { ActionTypeExecutorRawResult } from '../../common';
 import {
-  getTokensFromBedrockConverseStream,
   SmithyStream,
+  getTokensFromBedrockConverseStream,
 } from './get_token_count_from_bedrock_converse';
+import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
 import {
   InvokeAsyncIteratorBody,
   getTokenCountFromInvokeAsyncIterator,
 } from './get_token_count_from_invoke_async_iterator';
-import { getTokenCountFromBedrockInvoke } from './get_token_count_from_bedrock_invoke';
-import { ActionTypeExecutorRawResult } from '../../common';
-import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
 import {
-  getTokenCountFromInvokeStream,
   InvokeBody,
+  getTokenCountFromInvokeStream,
   parseGeminiStreamForUsageMetadata,
 } from './get_token_count_from_invoke_stream';
+import { getTokenCountFromOpenAIStream } from './get_token_count_from_openai_stream';
+
+interface TelemetryMetadata {
+  pluginId?: string;
+  aggregateBy?: string;
+}
 
 interface OwnProps {
   actionTypeId: string;
@@ -50,8 +55,13 @@ export const getGenAiTokenTracking = async ({
   total_tokens: number;
   prompt_tokens: number;
   completion_tokens: number;
+  telemetry_metadata?: TelemetryMetadata;
 } | null> => {
   // this is an async iterator from the OpenAI sdk
+  let telemetryMetadata: TelemetryMetadata | undefined;
+  if (hasTelemetryMetadata(validatedParams.subActionParams)) {
+    telemetryMetadata = validatedParams.subActionParams.telemetryMetadata;
+  }
   if (validatedParams.subAction === 'invokeAsyncIterator' && actionTypeId === '.gen-ai') {
     try {
       const data = result.data as {
@@ -69,6 +79,7 @@ export const getGenAiTokenTracking = async ({
           total_tokens: total,
           prompt_tokens: prompt,
           completion_tokens: completion,
+          telemetry_metadata: telemetryMetadata,
         };
       }
       logger.error(
@@ -78,6 +89,7 @@ export const getGenAiTokenTracking = async ({
         total_tokens: 0,
         prompt_tokens: 0,
         completion_tokens: 0,
+        telemetry_metadata: telemetryMetadata,
       };
     } catch (e) {
       logger.error(
@@ -105,6 +117,7 @@ export const getGenAiTokenTracking = async ({
         total_tokens: totalTokenCount,
         prompt_tokens: promptTokenCount,
         completion_tokens: candidatesTokenCount,
+        telemetry_metadata: telemetryMetadata,
       };
     } catch (e) {
       logger.error('Failed to calculate tokens from Invoke Stream subaction streaming response');
@@ -130,6 +143,7 @@ export const getGenAiTokenTracking = async ({
         total_tokens: total,
         prompt_tokens: prompt,
         completion_tokens: completion,
+        telemetry_metadata: telemetryMetadata,
       };
     } catch (e) {
       logger.error('Failed to calculate tokens from Invoke Stream subaction streaming response');
@@ -150,6 +164,7 @@ export const getGenAiTokenTracking = async ({
         total_tokens: total,
         prompt_tokens: prompt,
         completion_tokens: completion,
+        telemetry_metadata: telemetryMetadata,
       };
     } catch (e) {
       logger.error('Failed to calculate tokens from streaming response');
@@ -171,6 +186,7 @@ export const getGenAiTokenTracking = async ({
       total_tokens: data.usage?.total_tokens ?? 0,
       prompt_tokens: data.usage?.prompt_tokens ?? 0,
       completion_tokens: data.usage?.completion_tokens ?? 0,
+      telemetry_metadata: telemetryMetadata,
     };
   }
 
@@ -195,6 +211,7 @@ export const getGenAiTokenTracking = async ({
           total_tokens: total,
           prompt_tokens: prompt,
           completion_tokens: completion,
+          telemetry_metadata: telemetryMetadata,
         };
       } else {
         logger.error('Response from Bedrock run response did not contain completion string');
@@ -202,6 +219,7 @@ export const getGenAiTokenTracking = async ({
           total_tokens: 0,
           prompt_tokens: 0,
           completion_tokens: 0,
+          telemetry_metadata: telemetryMetadata,
         };
       }
     } catch (e) {
@@ -227,6 +245,7 @@ export const getGenAiTokenTracking = async ({
       total_tokens: data.usageMetadata?.totalTokenCount ?? 0,
       prompt_tokens: data.usageMetadata?.promptTokenCount ?? 0,
       completion_tokens: data.usageMetadata?.candidatesTokenCount ?? 0,
+      telemetry_metadata: telemetryMetadata,
     };
   }
 
@@ -253,6 +272,7 @@ export const getGenAiTokenTracking = async ({
           total_tokens: total,
           prompt_tokens: prompt,
           completion_tokens: completion,
+          telemetry_metadata: telemetryMetadata,
         };
       } else {
         logger.error('Response from Bedrock invoke response did not contain message string');
@@ -260,6 +280,7 @@ export const getGenAiTokenTracking = async ({
           total_tokens: 0,
           prompt_tokens: 0,
           completion_tokens: 0,
+          telemetry_metadata: telemetryMetadata,
         };
       }
     } catch (e) {
@@ -284,6 +305,7 @@ export const getGenAiTokenTracking = async ({
         total_tokens: usage.totalTokens,
         prompt_tokens: usage.inputTokens,
         completion_tokens: usage.outputTokens,
+        telemetry_metadata: telemetryMetadata,
       };
     } else {
       logger.error('Response from Bedrock converse API did not contain usage object');
@@ -299,3 +321,7 @@ export const shouldTrackGenAiToken = (actionTypeId: string) =>
   actionTypeId === '.bedrock' ||
   actionTypeId === '.gemini' ||
   actionTypeId === '.inference';
+
+function hasTelemetryMetadata(obj: unknown): obj is { telemetryMetadata: TelemetryMetadata } {
+  return obj !== null && typeof obj === 'object' && 'telemetryMetadata' in obj;
+}

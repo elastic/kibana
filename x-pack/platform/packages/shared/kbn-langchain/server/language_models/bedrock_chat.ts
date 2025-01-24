@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { BedrockChat as _BedrockChat } from '@langchain/community/chat_models/bedrock/web';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
-import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { Logger } from '@kbn/logging';
 import { PublicMethodsOf } from '@kbn/utility-types';
-import { prepareMessages, DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION } from '../utils/bedrock';
+import { BedrockChat as _BedrockChat } from '@langchain/community/chat_models/bedrock/web';
+import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
+import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION, prepareMessages } from '../utils/bedrock';
 
 export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -20,6 +20,10 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   signal?: AbortSignal;
   model?: string;
   maxTokens?: number;
+  telemetryMetadata?: {
+    pluginId?: string;
+    aggregateBy?: string;
+  };
 }
 
 /**
@@ -49,6 +53,10 @@ export class ActionsClientBedrockChatModel extends _BedrockChat {
           params: {
             subAction: 'invokeAIRaw',
             subActionParams: {
+              telemetryMetadata: {
+                pluginId: params?.telemetryMetadata?.pluginId,
+                aggregateBy: params?.telemetryMetadata?.aggregateBy,
+              },
               messages: prepareMessages(inputBody.messages),
               temperature: params.temperature ?? inputBody.temperature,
               stopSequences: inputBody.stop_sequences,

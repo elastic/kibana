@@ -5,52 +5,50 @@
  * 2.0.
  */
 
-import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
-import aws from 'aws4';
 import { BedrockRuntimeClient } from '@aws-sdk/client-bedrock-runtime';
+import { ServiceParams, SubActionConnector } from '@kbn/actions-plugin/server';
+import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
+import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
 import { SmithyMessageDecoderStream } from '@smithy/eventstream-codec';
+import aws from 'aws4';
 import { AxiosError, Method } from 'axios';
 import { IncomingMessage } from 'http';
 import { PassThrough } from 'stream';
-import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';
-import { ConnectorUsageCollector } from '@kbn/actions-plugin/server/types';
-import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 import {
-  RunActionParamsSchema,
+  DEFAULT_TIMEOUT_MS,
+  DEFAULT_TOKEN_LIMIT,
+  SUB_ACTION,
+} from '../../../common/bedrock/constants';
+import {
+  BedrockClientSendParamsSchema,
+  DashboardActionParamsSchema,
   InvokeAIActionParamsSchema,
   InvokeAIRawActionParamsSchema,
   InvokeAIRawActionResponseSchema,
-  StreamingResponseSchema,
+  RunActionParamsSchema,
   RunActionResponseSchema,
   RunApiLatestResponseSchema,
-  BedrockClientSendParamsSchema,
+  StreamingResponseSchema,
 } from '../../../common/bedrock/schema';
 import {
+  BedrockMessage,
+  BedrockToolChoice,
   Config,
-  Secrets,
-  RunActionParams,
-  RunActionResponse,
+  ConverseActionParams,
+  ConverseActionResponse,
+  DashboardActionParams,
+  DashboardActionResponse,
   InvokeAIActionParams,
   InvokeAIActionResponse,
   InvokeAIRawActionParams,
   InvokeAIRawActionResponse,
+  RunActionParams,
+  RunActionResponse,
   RunApiLatestResponse,
-  BedrockMessage,
-  BedrockToolChoice,
-  ConverseActionParams,
-  ConverseActionResponse,
-} from '../../../common/bedrock/types';
-import {
-  SUB_ACTION,
-  DEFAULT_TOKEN_LIMIT,
-  DEFAULT_TIMEOUT_MS,
-} from '../../../common/bedrock/constants';
-import {
-  DashboardActionParams,
-  DashboardActionResponse,
+  Secrets,
   StreamingResponse,
 } from '../../../common/bedrock/types';
-import { DashboardActionParamsSchema } from '../../../common/bedrock/schema';
+import { initDashboard } from '../lib/gen_ai/create_gen_ai_dashboard';
 
 interface SignedRequest {
   host: string;
@@ -392,7 +390,7 @@ The Kibana Connector in use may need to be reconfigured with an updated Amazon B
       },
       connectorUsageCollector
     )) as RunActionResponse;
-    return { message: res.completion.trim() };
+    return { message: res.completion.trim(), usage: res?.usage };
   }
 
   public async invokeAIRaw(
