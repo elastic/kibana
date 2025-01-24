@@ -78,7 +78,7 @@ describe('GridLayout', () => {
     jest.clearAllMocks();
   });
 
-  it('`onLayoutChange` gets called when layout prop changes', async () => {
+  it('`onLayoutChange` gets called when layout prop changes', () => {
     const layoutComponent = renderGridLayout();
     onLayoutChange.mockClear();
 
@@ -109,9 +109,8 @@ describe('GridLayout', () => {
     layoutComponent.rerender({
       layout: newLayout,
     });
-    await waitFor(() => {
-      expect(onLayoutChange).toBeCalledTimes(1);
-    });
+
+    expect(onLayoutChange).toBeCalledTimes(1);
   });
 
   it(`'renderPanelContents' is not called during dragging`, () => {
