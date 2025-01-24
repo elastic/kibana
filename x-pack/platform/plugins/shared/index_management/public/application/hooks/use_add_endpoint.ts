@@ -7,7 +7,7 @@
 
 import { useCallback } from 'react';
 
-import { InferenceEndpoint } from '../../../common/types/inference';
+import { InferenceEndpoint } from '@kbn/inference-endpoint-ui-common';
 import { useMLModelNotificationToasts } from '../../hooks/use_ml_model_status_toasts';
 import { createInferenceEndpoint } from '../services';
 

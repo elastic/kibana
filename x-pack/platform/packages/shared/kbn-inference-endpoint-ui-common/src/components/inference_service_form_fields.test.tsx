@@ -55,4 +55,48 @@ describe('Inference Services', () => {
     await userEvent.click(screen.getByTestId('provider-select'));
     expect(screen.getByTestId('euiSelectableList')).toBeInTheDocument();
   });
+
+  it('renders selected provider fields - hugging_face', async () => {
+    render(
+      <MockFormProvider>
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+      </MockFormProvider>
+    );
+
+    await userEvent.click(screen.getByTestId('provider-select'));
+    await userEvent.click(screen.getByText('Hugging Face'));
+
+    expect(screen.getByTestId('provider-select')).toHaveValue('Hugging Face');
+    expect(screen.getByTestId('api_key-password')).toBeInTheDocument();
+    expect(screen.getByTestId('url-input')).toBeInTheDocument();
+    expect(screen.getByTestId('taskTypeSelect')).toBeInTheDocument();
+    expect(screen.getByTestId('inference-endpoint-input-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('inference-endpoint-input-field')).toHaveDisplayValue(
+      /hugging_face-text_embedding/
+    );
+  });
+
+  it('re-renders fields when selected to anthropic from hugging_face', async () => {
+    render(
+      <MockFormProvider>
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+      </MockFormProvider>
+    );
+
+    await userEvent.click(screen.getByTestId('provider-select'));
+    await userEvent.click(screen.getByText('Hugging Face'));
+    expect(screen.getByTestId('provider-select')).toHaveValue('Hugging Face');
+
+    await userEvent.click(screen.getByTestId('provider-select'));
+    await userEvent.click(screen.getByText('Anthropic'));
+
+    expect(screen.getByTestId('provider-select')).toHaveValue('Anthropic');
+    expect(screen.getByTestId('api_key-password')).toBeInTheDocument();
+    expect(screen.getByTestId('model_id-input')).toBeInTheDocument();
+    expect(screen.getByTestId('taskTypeSelectSingle')).toBeInTheDocument();
+    expect(screen.getByTestId('inference-endpoint-input-field')).toBeInTheDocument();
+    expect(screen.queryByTestId('inference-endpoint-input-field')).toHaveDisplayValue(
+      /anthropic-completion/
+    );
+  });
 });
