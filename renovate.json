@@ -782,8 +782,26 @@
       "matchDepNames": [
         "csstype",
         "cronstrue",
+        "immer"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Kibana Management",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-management - file-saver",
+      "matchDepNames": [
         "file-saver",
-        "immer",
         "@types/file-saver"
       ],
       "reviewers": [
