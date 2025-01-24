@@ -55,7 +55,7 @@ export const useLayoutStyles = () => {
       }
 
       .kbnGridPanel--resizeHandle {
-        z-index: ${euiTheme.levels.maskBelowHeader};
+        z-index: ${euiTheme.levels.mask};
 
         // applying mask via ::after allows for focus borders to show
         &:after {
