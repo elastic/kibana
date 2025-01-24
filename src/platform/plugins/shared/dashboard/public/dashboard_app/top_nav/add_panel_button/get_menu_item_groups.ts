@@ -33,13 +33,13 @@ const VIS_GROUP_TO_ADD_PANEL_GROUP: Record<VisGroups, undefined | PresentableGro
 export async function getMenuItemGroups(
   api: HasAppContext & TracksOverlays
 ): Promise<MenuItemGroup[]> {
-  const menuItemGroups: Record<string, MenuItemGroup> = {};
+  const groups: Record<string, MenuItemGroup> = {};
   const addPanelContext = {
     embeddable: api,
     trigger: addPanelMenuTrigger,
   };
   function addGroup(group: PresentableGroup) {
-    menuItemGroups[group.id] = {
+    groups[group.id] = {
       id: group.id,
       title: group.getDisplayName?.(addPanelContext) ?? '',
       'data-test-subj': `dashboardEditorMenu-${group.id}Group`,
@@ -54,10 +54,10 @@ export async function getMenuItemGroups(
 
     const group = VIS_GROUP_TO_ADD_PANEL_GROUP[visType.group];
     if (!group) return;
-    if (!menuItemGroups[group.id]) {
+    if (!groups[group.id]) {
       addGroup(group);
     }
-    menuItemGroups[group.id]?.items?.push({
+    groups[group.id]?.items?.push({
       id: visType.name,
       name: visType.titleInWizard || visType.title,
       isDeprecated: visType.isDeprecated,
@@ -75,10 +75,10 @@ export async function getMenuItemGroups(
   // add menu items from vis alias
   visualizationsService.getAliases().forEach((visTypeAlias) => {
     if (visTypeAlias.disableCreate) return;
-    if (!menuItemGroups[ADD_PANEL_VISUALIZATION_GROUP.id]) {
+    if (!groups[ADD_PANEL_VISUALIZATION_GROUP.id]) {
       addGroup(ADD_PANEL_VISUALIZATION_GROUP);
     }
-    menuItemGroups[ADD_PANEL_VISUALIZATION_GROUP.id]?.items?.push({
+    groups[ADD_PANEL_VISUALIZATION_GROUP.id]?.items?.push({
       id: visTypeAlias.name,
       name: visTypeAlias.title,
       icon: visTypeAlias.icon ?? 'empty',
@@ -98,12 +98,12 @@ export async function getMenuItemGroups(
   ).forEach((action) => {
     const actionGroups = Array.isArray(action.grouping) ? action.grouping : [ADD_PANEL_OTHER_GROUP];
     actionGroups.forEach((group) => {
-      if (!menuItemGroups[group.id]) {
+      if (!groups[group.id]) {
         addGroup(group);
       }
 
       const actionName = action.getDisplayName(addPanelContext);
-      menuItemGroups[group.id]?.items?.push({
+      groups[group.id]?.items?.push({
         id: action.id,
         name: actionName,
         icon: action.getIconType?.(addPanelContext) ?? 'empty',
@@ -128,16 +128,18 @@ export async function getMenuItemGroups(
     });
   });
 
-  return Object.values(menuItemGroups)
+  return Object.values(groups)
     .map((group) => {
       group.items.sort(
-        // larger number sorted to the top
-        (panelGroupA, panelGroupB) => panelGroupB.order - panelGroupA.order
+        (itemA, itemB) => {
+          return itemA.order === itemB.order
+            ? itemA.name.localeCompare(itemB.name)
+            : itemB.order - itemA.order;
+        }
       );
       return group;
     })
     .sort(
-      // larger number sorted to the top
-      (panelGroupA, panelGroupB) => panelGroupB.order - panelGroupA.order
+      (groupA, groupB) => groupB.order - groupA.order
     );
 }
