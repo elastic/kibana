@@ -6,7 +6,7 @@
  */
 
 import { FieldDefinition, WiredStreamDefinition } from '@kbn/streams-schema';
-import { MalformedFields } from '../errors/malformed_fields';
+import { MalformedFieldsError } from '../errors/malformed_fields_error';
 
 export function validateAncestorFields({
   ancestors,
@@ -24,7 +24,7 @@ export function validateAncestorFields({
             attr.type !== fields[fieldName].type && ancestorFieldName === fieldName
         )
       ) {
-        throw new MalformedFields(
+        throw new MalformedFieldsError(
           `Field ${fieldName} is already defined with incompatible type in the parent stream ${ancestor.name}`
         );
       }
@@ -48,7 +48,7 @@ export function validateDescendantFields({
             attr.type !== fields[fieldName].type && descendantFieldName === fieldName
         )
       ) {
-        throw new MalformedFields(
+        throw new MalformedFieldsError(
           `Field ${fieldName} is already defined with incompatible type in the child stream ${descendant.name}`
         );
       }

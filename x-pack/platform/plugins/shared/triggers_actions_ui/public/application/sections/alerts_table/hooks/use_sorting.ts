@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { SortCombinations } from '@elastic/elasticsearch/lib/api/types';
+import type { SortCombinations } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { EuiDataGridSorting } from '@elastic/eui';
 import { useCallback, useMemo, useState } from 'react';
 
