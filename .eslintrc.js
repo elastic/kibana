@@ -1618,7 +1618,7 @@ module.exports = {
      */
     {
       // All files
-      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
       rules: {
         'import/order': [
           'error',
@@ -1655,8 +1655,6 @@ module.exports = {
         'import/newline-after-import': 'error',
         'react-hooks/exhaustive-deps': 'off',
         'react/jsx-boolean-value': ['error', 'never'],
-        'sort-keys': 1, // warning
-        '@typescript-eslint/member-ordering': [1, { default: { order: 'alphabetically' } }], // warning
         '@typescript-eslint/no-unused-vars': [
           'error',
           { vars: 'all', args: 'after-used', ignoreRestSiblings: true, varsIgnorePattern: '^_' },
@@ -1670,7 +1668,7 @@ module.exports = {
      * Allows snake_case variables in the server, because that's how we return API properties
      */
     {
-      files: ['x-pack/solutions/search/plugins/enterprise_search/server/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/plugins/**/server/**/*.{ts,tsx}'],
       rules: {
         '@typescript-eslint/naming-convention': [
           'error',
@@ -1692,26 +1690,12 @@ module.exports = {
     },
     {
       // Source files only - allow `any` in test/mock files
-      files: ['x-pack/solutions/search/plugins/enterprise_search/**/*.{ts,tsx}'],
+      files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
       excludedFiles: [
-        'x-pack/solutions/search/plugins/enterprise_search/**/*.{test,mock,test_helper}.{ts,tsx}',
+        'x-pack/solutions/search/**/*.{test,mock,test_helper}.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
-      },
-    },
-
-    /**
-     * Serverless Search overrides
-     */
-    {
-      // All files
-      files: [
-        'x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}',
-        'packages/kbn-search-*',
-      ],
-      rules: {
-        '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
     },
 
