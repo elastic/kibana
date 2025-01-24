@@ -130,7 +130,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div><span class=\\"unifiedDataTable__cellValue\\">100</span></div>"`
+      `"<span class=\\"unifiedDataTable__cellValue\\">100</span>"`
     );
   });
 
@@ -155,7 +155,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div><div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-w92548-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-w92548-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
   });
 
@@ -181,7 +181,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div><div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-w92548-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div></div>"`
+      `"<div data-test-subj=\\"dataTableExpandCellActionPopover\\" class=\\"euiFlexGroup css-1h68cm-euiFlexGroup-none-flexStart-stretch-row\\"><div class=\\"euiFlexItem css-9sbomz-euiFlexItem-grow-1\\"><span class=\\"unifiedDataTable__cellPopoverValue eui-textBreakWord\\"><span>100</span></span></div><div class=\\"euiFlexItem css-kpsrin-euiFlexItem-growZero\\"><button class=\\"euiButtonIcon css-w92548-euiButtonIcon-xs-empty-primary\\" type=\\"button\\" aria-label=\\"Close popover\\" data-test-subj=\\"docTableClosePopover\\"><span data-euiicon-type=\\"cross\\" class=\\"euiButtonIcon__icon\\" aria-hidden=\\"true\\" color=\\"inherit\\"></span></button></div></div>"`
     );
     findTestSubject(component, 'docTableClosePopover').simulate('click');
     expect(closePopoverMockFn).toHaveBeenCalledTimes(1);
@@ -246,50 +246,46 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        key="cell-"
-      >
-        <SourcePopoverContent
-          closeButton={
-            <EuiButtonIcon
-              aria-label="Close popover"
-              data-test-subj="docTableClosePopover"
-              iconSize="s"
-              iconType="cross"
-              onClick={[MockFunction]}
-              size="xs"
-            />
-          }
-          columnId="_source"
-          row={
-            Object {
-              "flattened": Object {
-                "_index": "test",
-                "_score": 1,
+      <SourcePopoverContent
+        closeButton={
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
+          />
+        }
+        columnId="_source"
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": 100,
+              "extension": ".gz",
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": Object {
                 "bytes": 100,
                 "extension": ".gz",
               },
-              "id": "test::1::",
-              "isAnchor": undefined,
-              "raw": Object {
-                "_id": "1",
-                "_index": "test",
-                "_score": 1,
-                "_source": Object {
-                  "bytes": 100,
-                  "extension": ".gz",
-                },
-                "highlight": Object {
-                  "extension": Array [
-                    "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                  ],
-                },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
               },
-            }
+            },
           }
-          useTopLevelObjectColumns={false}
-        />
-      </InTableSearchHighlightsWrapper>
+        }
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
@@ -431,26 +427,38 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        key="cell-"
-      >
-        <SourcePopoverContent
-          closeButton={
-            <EuiButtonIcon
-              aria-label="Close popover"
-              data-test-subj="docTableClosePopover"
-              iconSize="s"
-              iconType="cross"
-              onClick={[MockFunction]}
-              size="xs"
-            />
-          }
-          columnId="_source"
-          row={
-            Object {
-              "flattened": Object {
-                "_index": "test",
-                "_score": 1,
+      <SourcePopoverContent
+        closeButton={
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
+          />
+        }
+        columnId="_source"
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "bytes": Array [
+                100,
+              ],
+              "extension": Array [
+                ".gz",
+              ],
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
                 "bytes": Array [
                   100,
                 ],
@@ -458,32 +466,16 @@ describe('Unified data table cell rendering', function () {
                   ".gz",
                 ],
               },
-              "id": "test::1::",
-              "isAnchor": undefined,
-              "raw": Object {
-                "_id": "1",
-                "_index": "test",
-                "_score": 1,
-                "_source": undefined,
-                "fields": Object {
-                  "bytes": Array [
-                    100,
-                  ],
-                  "extension": Array [
-                    ".gz",
-                  ],
-                },
-                "highlight": Object {
-                  "extension": Array [
-                    "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                  ],
-                },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
               },
-            }
+            },
           }
-          useTopLevelObjectColumns={false}
-        />
-      </InTableSearchHighlightsWrapper>
+        }
+        useTopLevelObjectColumns={false}
+      />
     `);
   });
 
@@ -588,26 +580,38 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        key="cell-"
-      >
-        <SourcePopoverContent
-          closeButton={
-            <EuiButtonIcon
-              aria-label="Close popover"
-              data-test-subj="docTableClosePopover"
-              iconSize="s"
-              iconType="cross"
-              onClick={[MockFunction]}
-              size="xs"
-            />
-          }
-          columnId="object"
-          row={
-            Object {
-              "flattened": Object {
-                "_index": "test",
-                "_score": 1,
+      <SourcePopoverContent
+        closeButton={
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
+          />
+        }
+        columnId="object"
+        row={
+          Object {
+            "flattened": Object {
+              "_index": "test",
+              "_score": 1,
+              "extension": Array [
+                ".gz",
+              ],
+              "object.value": Array [
+                100,
+              ],
+            },
+            "id": "test::1::",
+            "isAnchor": undefined,
+            "raw": Object {
+              "_id": "1",
+              "_index": "test",
+              "_score": 1,
+              "_source": undefined,
+              "fields": Object {
                 "extension": Array [
                   ".gz",
                 ],
@@ -615,32 +619,16 @@ describe('Unified data table cell rendering', function () {
                   100,
                 ],
               },
-              "id": "test::1::",
-              "isAnchor": undefined,
-              "raw": Object {
-                "_id": "1",
-                "_index": "test",
-                "_score": 1,
-                "_source": undefined,
-                "fields": Object {
-                  "extension": Array [
-                    ".gz",
-                  ],
-                  "object.value": Array [
-                    100,
-                  ],
-                },
-                "highlight": Object {
-                  "extension": Array [
-                    "@kibana-highlighted-field.gz@/kibana-highlighted-field",
-                  ],
-                },
+              "highlight": Object {
+                "extension": Array [
+                  "@kibana-highlighted-field.gz@/kibana-highlighted-field",
+                ],
               },
-            }
+            },
           }
-          useTopLevelObjectColumns={true}
-        />
-      </InTableSearchHighlightsWrapper>
+        }
+        useTopLevelObjectColumns={true}
+      />
     `);
   });
 
@@ -694,20 +682,16 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        key="cell-"
-      >
-        <span
-          className="unifiedDataTable__cellValue"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
-                100,
-              ],
-            }
+      <span
+        className="unifiedDataTable__cellValue"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": Array [
+              100,
+            ],
           }
-        />
-      </InTableSearchHighlightsWrapper>
+        }
+      />
     `);
   });
 
@@ -732,7 +716,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div><span class=\\"unifiedDataTable__cellValue\\">-</span></div>"`
+      `"<span class=\\"unifiedDataTable__cellValue\\">-</span>"`
     );
   });
 
@@ -757,7 +741,7 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component.html()).toMatchInlineSnapshot(
-      `"<div><span class=\\"unifiedDataTable__cellValue\\">-</span></div>"`
+      `"<span class=\\"unifiedDataTable__cellValue\\">-</span>"`
     );
   });
 
@@ -795,20 +779,16 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(component).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        key="cell-"
-      >
-        <span
-          className="unifiedDataTable__cellValue"
-          dangerouslySetInnerHTML={
-            Object {
-              "__html": Array [
-                ".gz",
-              ],
-            }
+      <span
+        className="unifiedDataTable__cellValue"
+        dangerouslySetInnerHTML={
+          Object {
+            "__html": Array [
+              ".gz",
+            ],
           }
-        />
-      </InTableSearchHighlightsWrapper>
+        }
+      />
     `);
 
     const componentWithDetails = shallow(
@@ -823,42 +803,38 @@ describe('Unified data table cell rendering', function () {
       />
     );
     expect(componentWithDetails).toMatchInlineSnapshot(`
-      <InTableSearchHighlightsWrapper
-        key="cell-"
+      <EuiFlexGroup
+        data-test-subj="dataTableExpandCellActionPopover"
+        direction="row"
+        gutterSize="none"
+        responsive={false}
       >
-        <EuiFlexGroup
-          data-test-subj="dataTableExpandCellActionPopover"
-          direction="row"
-          gutterSize="none"
-          responsive={false}
-        >
-          <EuiFlexItem>
-            <DataTablePopoverCellValue>
-              <span
-                dangerouslySetInnerHTML={
-                  Object {
-                    "__html": Array [
-                      ".gz",
-                    ],
-                  }
+        <EuiFlexItem>
+          <DataTablePopoverCellValue>
+            <span
+              dangerouslySetInnerHTML={
+                Object {
+                  "__html": Array [
+                    ".gz",
+                  ],
                 }
-              />
-            </DataTablePopoverCellValue>
-          </EuiFlexItem>
-          <EuiFlexItem
-            grow={false}
-          >
-            <EuiButtonIcon
-              aria-label="Close popover"
-              data-test-subj="docTableClosePopover"
-              iconSize="s"
-              iconType="cross"
-              onClick={[MockFunction]}
-              size="xs"
+              }
             />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-      </InTableSearchHighlightsWrapper>
+          </DataTablePopoverCellValue>
+        </EuiFlexItem>
+        <EuiFlexItem
+          grow={false}
+        >
+          <EuiButtonIcon
+            aria-label="Close popover"
+            data-test-subj="docTableClosePopover"
+            iconSize="s"
+            iconType="cross"
+            onClick={[MockFunction]}
+            size="xs"
+          />
+        </EuiFlexItem>
+      </EuiFlexGroup>
     `);
   });
 });

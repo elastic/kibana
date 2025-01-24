@@ -747,17 +747,21 @@ export const UnifiedDataTable = ({
 
   const { dataGridId, dataGridWrapper, setDataGridWrapper } = useFullScreenWatcher();
 
-  const { inTableSearchTermCss, inTableSearchControl, extendedCellContext } =
-    useDataGridInTableSearch({
-      enableInTableSearch,
-      dataGridWrapper,
-      dataGridRef,
-      visibleColumns,
-      rows: displayedRows,
-      renderCellValue,
-      cellContext,
-      pagination: paginationObj,
-    });
+  const {
+    inTableSearchTermCss,
+    inTableSearchControl,
+    cellContextWithInTableSearchSupport,
+    renderCellValueWithInTableSearchSupport,
+  } = useDataGridInTableSearch({
+    enableInTableSearch,
+    dataGridWrapper,
+    dataGridRef,
+    visibleColumns,
+    rows: displayedRows,
+    renderCellValue,
+    cellContext,
+    pagination: paginationObj,
+  });
 
   const renderCustomPopover = useMemo(
     () => renderCellPopover ?? getCustomCellPopoverRenderer(),
@@ -1208,7 +1212,7 @@ export const UnifiedDataTable = ({
               leadingControlColumns={leadingControlColumns}
               onColumnResize={onResize}
               pagination={paginationObj}
-              renderCellValue={renderCellValue}
+              renderCellValue={renderCellValueWithInTableSearchSupport}
               ref={dataGridRef}
               rowCount={rowCount}
               schemaDetectors={schemaDetectors}
@@ -1219,7 +1223,7 @@ export const UnifiedDataTable = ({
               renderCustomGridBody={renderCustomGridBody}
               renderCustomToolbar={renderCustomToolbarFn}
               trailingControlColumns={trailingControlColumns}
-              cellContext={extendedCellContext}
+              cellContext={cellContextWithInTableSearchSupport}
               renderCellPopover={renderCustomPopover}
               // Don't use row overscan when showing Document column since
               // rendering so much DOM content in each cell impacts performance

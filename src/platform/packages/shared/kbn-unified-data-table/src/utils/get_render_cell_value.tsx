@@ -10,14 +10,15 @@
 import React, { useEffect, useContext, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import {
+  EuiButtonIcon,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiDataGridCellValueElementProps,
+} from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
-import {
-  InTableSearchHighlightsWrapper,
-  RenderCellValuePropsWithInTableSearch,
-} from '@kbn/data-grid-in-table-search';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
 import { SourceDocument } from '../components/source_document';
@@ -57,9 +58,7 @@ export const getRenderCellValueFn = ({
     colIndex,
     isExpandable,
     isExpanded,
-    inTableSearchTerm,
-    onHighlightsCountFound,
-  }: RenderCellValuePropsWithInTableSearch) => {
+  }: EuiDataGridCellValueElementProps) => {
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);
@@ -78,96 +77,78 @@ export const getRenderCellValueFn = ({
       }
     }, [ctx, row, setCellProps]);
 
-    const render = () => {
-      if (typeof row === 'undefined') {
-        return <span className={CELL_CLASS}>-</span>;
-      }
+    if (typeof row === 'undefined') {
+      return <span className={CELL_CLASS}>-</span>;
+    }
 
-      const CustomCellRenderer = externalCustomRenderers?.[columnId];
+    const CustomCellRenderer = externalCustomRenderers?.[columnId];
 
-      if (CustomCellRenderer) {
-        return (
-          <span className={CELL_CLASS}>
-            <CustomCellRenderer
-              rowIndex={rowIndex}
-              columnId={columnId}
-              isDetails={isDetails}
-              setCellProps={setCellProps}
-              isExpandable={isExpandable}
-              isExpanded={isExpanded}
-              colIndex={colIndex}
-              row={row}
-              dataView={dataView}
-              fieldFormats={fieldFormats}
-              closePopover={closePopover}
-              isCompressed={isCompressed}
-            />
-          </span>
-        );
-      }
-
-      /**
-       * when using the fields api this code is used to show top level objects
-       * this is used for legacy stuff like displaying products of our ecommerce dataset
-       */
-      const useTopLevelObjectColumns = Boolean(
-        !field && row?.raw.fields && !(row.raw.fields as Record<string, unknown[]>)[columnId]
-      );
-
-      if (isDetails) {
-        return renderPopoverContent({
-          row,
-          field,
-          columnId,
-          dataView,
-          useTopLevelObjectColumns,
-          fieldFormats,
-          closePopover,
-        });
-      }
-
-      if (field?.type === '_source' || useTopLevelObjectColumns) {
-        return (
-          <SourceDocument
-            useTopLevelObjectColumns={useTopLevelObjectColumns}
+    if (CustomCellRenderer) {
+      return (
+        <span className={CELL_CLASS}>
+          <CustomCellRenderer
+            rowIndex={rowIndex}
+            columnId={columnId}
+            isDetails={isDetails}
+            setCellProps={setCellProps}
+            isExpandable={isExpandable}
+            isExpanded={isExpanded}
+            colIndex={colIndex}
             row={row}
             dataView={dataView}
-            columnId={columnId}
             fieldFormats={fieldFormats}
-            shouldShowFieldHandler={shouldShowFieldHandler}
-            maxEntries={maxEntries}
-            isPlainRecord={isPlainRecord}
+            closePopover={closePopover}
             isCompressed={isCompressed}
           />
-        );
-      }
+        </span>
+      );
+    }
 
+    /**
+     * when using the fields api this code is used to show top level objects
+     * this is used for legacy stuff like displaying products of our ecommerce dataset
+     */
+    const useTopLevelObjectColumns = Boolean(
+      !field && row?.raw.fields && !(row.raw.fields as Record<string, unknown[]>)[columnId]
+    );
+
+    if (isDetails) {
+      return renderPopoverContent({
+        row,
+        field,
+        columnId,
+        dataView,
+        useTopLevelObjectColumns,
+        fieldFormats,
+        closePopover,
+      });
+    }
+
+    if (field?.type === '_source' || useTopLevelObjectColumns) {
       return (
-        <span
-          className={CELL_CLASS}
-          // formatFieldValue guarantees sanitized values
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{
-            __html: formatFieldValue(
-              row.flattened[columnId],
-              row.raw,
-              fieldFormats,
-              dataView,
-              field
-            ),
-          }}
+        <SourceDocument
+          useTopLevelObjectColumns={useTopLevelObjectColumns}
+          row={row}
+          dataView={dataView}
+          columnId={columnId}
+          fieldFormats={fieldFormats}
+          shouldShowFieldHandler={shouldShowFieldHandler}
+          maxEntries={maxEntries}
+          isPlainRecord={isPlainRecord}
+          isCompressed={isCompressed}
         />
       );
-    };
+    }
 
     return (
-      <InTableSearchHighlightsWrapper
-        key={`cell-${inTableSearchTerm || ''}`} // it's very important to have a unique key for each inTableSearchTerm change so it can add the highlights again
-        inTableSearchTerm={inTableSearchTerm}
-        onHighlightsCountFound={onHighlightsCountFound}
-      >
-        {render()}
-      </InTableSearchHighlightsWrapper>
+      <span
+        className={CELL_CLASS}
+        // formatFieldValue guarantees sanitized values
+        // eslint-disable-next-line react/no-danger
+        dangerouslySetInnerHTML={{
+          __html: formatFieldValue(row.flattened[columnId], row.raw, fieldFormats, dataView, field),
+        }}
+      />
     );
   };
 

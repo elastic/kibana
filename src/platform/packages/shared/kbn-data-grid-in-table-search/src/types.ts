@@ -31,11 +31,13 @@ export interface InTableSearchHighlightsWrapperProps {
 export type RenderCellValuePropsWithInTableSearch = EuiDataGridCellValueElementProps &
   Pick<InTableSearchHighlightsWrapperProps, 'inTableSearchTerm' | 'onHighlightsCountFound'>;
 
+export type RenderCellValueWrapper = (props: RenderCellValuePropsWithInTableSearch) => ReactNode;
+
 export interface UseFindMatchesProps {
   inTableSearchTerm: string;
   visibleColumns: string[];
   rows: unknown[];
-  renderCellValue: (props: RenderCellValuePropsWithInTableSearch) => ReactNode;
+  renderCellValue: RenderCellValueWrapper;
   onScrollToActiveMatch: (activeMatch: ActiveMatch) => void;
 }
 

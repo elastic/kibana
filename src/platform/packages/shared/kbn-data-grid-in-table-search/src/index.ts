@@ -8,10 +8,6 @@
  */
 
 export {
-  InTableSearchHighlightsWrapper,
-  type InTableSearchHighlightsWrapperProps,
-} from './in_table_search_highlights_wrapper';
-export {
   useDataGridInTableSearch,
   type UseDataGridInTableSearchProps,
   type UseDataGridInTableSearchReturn,

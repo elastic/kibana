@@ -8,12 +8,7 @@
  */
 
 export {
-  InTableSearchHighlightsWrapper,
   useDataGridInTableSearch,
   type UseDataGridInTableSearchProps,
   type UseDataGridInTableSearchReturn,
 } from './src';
-export type {
-  RenderCellValuePropsWithInTableSearch,
-  InTableSearchHighlightsWrapperProps,
-} from './src/types';
