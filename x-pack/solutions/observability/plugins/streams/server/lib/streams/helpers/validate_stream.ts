@@ -12,9 +12,9 @@ import {
   isWiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { difference, isEqual } from 'lodash';
-import { RootStreamImmutabilityException } from '../errors';
-import { MalformedStream } from '../errors/malformed_stream';
-import { MalformedChildren } from '../errors/malformed_children';
+import { MalformedChildrenError } from '../errors/malformed_children_error';
+import { MalformedStreamError } from '../errors/malformed_stream_error';
+import { RootStreamImmutabilityError } from '../errors/root_stream_immutability_error';
 
 /*
  * Changes to mappings (fields) and processing rules are not allowed on the root stream.
@@ -30,7 +30,7 @@ export function validateRootStreamChanges(
   );
 
   if (hasFieldChanges) {
-    throw new RootStreamImmutabilityException('Root stream fields cannot be changed');
+    throw new RootStreamImmutabilityError('Root stream fields cannot be changed');
   }
 
   const hasProcessingChanges = !isEqual(
@@ -39,7 +39,7 @@ export function validateRootStreamChanges(
   );
 
   if (hasProcessingChanges) {
-    throw new RootStreamImmutabilityException('Root stream processing rules cannot be changed');
+    throw new RootStreamImmutabilityError('Root stream processing rules cannot be changed');
   }
 }
 
@@ -55,7 +55,7 @@ export function validateStreamTypeChanges(
     isWiredStreamDefinition(nextStreamDefinition);
 
   if (fromUnwiredToWired) {
-    throw new MalformedStream('Cannot change unwired stream to wired stream');
+    throw new MalformedStreamError('Cannot change unwired stream to wired stream');
   }
 
   const fromWiredToUnwired =
@@ -63,7 +63,7 @@ export function validateStreamTypeChanges(
     isUnwiredStreamDefinition(nextStreamDefinition);
 
   if (fromWiredToUnwired) {
-    throw new MalformedStream('Cannot change wired stream to unwired stream');
+    throw new MalformedStreamError('Cannot change wired stream to unwired stream');
   }
 }
 
@@ -85,6 +85,6 @@ export function validateStreamChildrenChanges(
   const removedChildren = difference(existingChildren, nextChildren);
 
   if (removedChildren.length) {
-    throw new MalformedChildren('Cannot remove children from a stream via updates');
+    throw new MalformedChildrenError('Cannot remove children from a stream via updates');
   }
 }
