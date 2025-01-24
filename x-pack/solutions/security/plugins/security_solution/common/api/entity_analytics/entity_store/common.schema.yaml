@@ -32,6 +32,8 @@ components:
           type: string
         fieldHistoryLength:
           type: integer
+        timestampField:
+          type: string
         error:
           type: object
 

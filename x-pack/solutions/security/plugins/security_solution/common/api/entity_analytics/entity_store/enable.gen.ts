@@ -26,6 +26,10 @@ export const InitEntityStoreRequestBody = z.object({
   fieldHistoryLength: z.number().int().optional().default(10),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
+  /**
+   * The field to use as the timestamp.
+   */
+  timestampField: z.string().optional().default('@timestamp'),
 });
 export type InitEntityStoreRequestBodyInput = z.input<typeof InitEntityStoreRequestBody>;
 

@@ -265,6 +265,7 @@ import type {
 import type { ListEntityEnginesResponse } from './entity_analytics/entity_store/engine/list.gen';
 import type {
   StartEntityEngineRequestParamsInput,
+  StartEntityEngineRequestBodyInput,
   StartEntityEngineResponse,
 } from './entity_analytics/entity_store/engine/start.gen';
 import type {
@@ -2146,6 +2147,7 @@ detection engine rules.
           [ELASTIC_HTTP_VERSION_HEADER]: '2023-10-31',
         },
         method: 'POST',
+        body: props.body,
       })
       .catch(catchAxiosErrorFormatAndThrow);
   }
@@ -2579,6 +2581,7 @@ export interface SetAlertTagsProps {
 }
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
+  body: StartEntityEngineRequestBodyInput;
 }
 export interface StartRuleMigrationProps {
   params: StartRuleMigrationRequestParamsInput;

@@ -27,6 +27,15 @@ export const StartEntityEngineRequestParams = z.object({
 });
 export type StartEntityEngineRequestParamsInput = z.input<typeof StartEntityEngineRequestParams>;
 
+export type StartEntityEngineRequestBody = z.infer<typeof StartEntityEngineRequestBody>;
+export const StartEntityEngineRequestBody = z.object({
+  /**
+   * The field to use as the timestamp for the entity type.
+   */
+  timestampField: z.string().optional().default('@timestamp'),
+});
+export type StartEntityEngineRequestBodyInput = z.input<typeof StartEntityEngineRequestBody>;
+
 export type StartEntityEngineResponse = z.infer<typeof StartEntityEngineResponse>;
 export const StartEntityEngineResponse = z.object({
   started: z.boolean().optional(),

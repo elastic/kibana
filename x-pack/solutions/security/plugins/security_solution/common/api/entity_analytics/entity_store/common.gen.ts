@@ -36,6 +36,7 @@ export const EngineDescriptor = z.object({
   status: EngineStatus,
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int(),
+  timestampField: z.string().optional(),
   error: z.object({}).optional(),
 });
 

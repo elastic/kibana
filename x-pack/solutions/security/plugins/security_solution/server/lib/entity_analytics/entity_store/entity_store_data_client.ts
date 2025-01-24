@@ -203,7 +203,12 @@ export class EntityStoreDataClient {
   }
 
   public async enable(
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
+    {
+      indexPattern = '',
+      filter = '',
+      fieldHistoryLength = 10,
+      timestampField = '@timestamp',
+    }: InitEntityStoreRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityStoreResponse> {
     if (!this.options.taskManager) {
@@ -219,7 +224,11 @@ export class EntityStoreDataClient {
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
-        this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
+        this.init(
+          entity,
+          { indexPattern, filter, fieldHistoryLength, timestampField },
+          { pipelineDebugMode }
+        )
       )
     );
 
@@ -277,7 +286,12 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
+    {
+      indexPattern = '',
+      filter = '',
+      fieldHistoryLength = 10,
+      timestampField,
+    }: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     const { experimentalFeatures } = this.options;
@@ -328,6 +342,7 @@ export class EntityStoreDataClient {
       filter,
       fieldHistoryLength,
       indexPattern,
+      timestampField,
     });
     this.log('debug', entityType, `Initialized engine saved object`);
 
@@ -338,7 +353,8 @@ export class EntityStoreDataClient {
       indexPattern,
       filter,
       config,
-      pipelineDebugMode
+      pipelineDebugMode,
+      timestampField
     ).catch((e) =>
       this.log('error', entityType, `Error during async setup of entity store: ${e.message}`)
     );
@@ -353,7 +369,8 @@ export class EntityStoreDataClient {
     indexPattern: string,
     filter: string,
     config: EntityStoreConfig,
-    pipelineDebugMode: boolean
+    pipelineDebugMode: boolean,
+    timestampField: string
   ) {
     const setupStartTime = moment().utc().toISOString();
     const { logger, namespace, appClient, dataViewsService } = this.options;
@@ -363,7 +380,7 @@ export class EntityStoreDataClient {
       const description = createEngineDescription({
         entityType,
         namespace,
-        requestParams: { indexPattern, fieldHistoryLength },
+        requestParams: { indexPattern, fieldHistoryLength, timestampField },
         defaultIndexPatterns,
         config,
       });

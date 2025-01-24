@@ -146,7 +146,10 @@ import { SearchAlertsRequestBodyInput } from '@kbn/security-solution-plugin/comm
 import { SetAlertAssigneesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_assignees/set_alert_assignees_route.gen';
 import { SetAlertsStatusRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/signals/set_signal_status/set_signals_status_route.gen';
 import { SetAlertTagsRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/alert_tags/set_alert_tags/set_alert_tags.gen';
-import { StartEntityEngineRequestParamsInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
+import {
+  StartEntityEngineRequestParamsInput,
+  StartEntityEngineRequestBodyInput,
+} from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/engine/start.gen';
 import {
   StartRuleMigrationRequestParamsInput,
   StartRuleMigrationRequestBodyInput,
@@ -1488,7 +1491,8 @@ detection engine rules.
         )
         .set('kbn-xsrf', 'true')
         .set(ELASTIC_HTTP_VERSION_HEADER, '2023-10-31')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+        .send(props.body as object);
     },
     /**
      * Starts a SIEM rules migration using the migration id provided
@@ -1893,6 +1897,7 @@ export interface SetAlertTagsProps {
 }
 export interface StartEntityEngineProps {
   params: StartEntityEngineRequestParamsInput;
+  body: StartEntityEngineRequestBodyInput;
 }
 export interface StartRuleMigrationProps {
   params: StartRuleMigrationRequestParamsInput;

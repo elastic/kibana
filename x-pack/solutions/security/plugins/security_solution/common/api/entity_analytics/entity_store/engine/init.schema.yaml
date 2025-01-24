@@ -33,6 +33,10 @@ paths:
                   $ref: '../common.schema.yaml#/components/schemas/IndexPattern'
                 filter:
                   type: string
+                timestampField:
+                  type: string
+                  description: The field to use as the timestamp for the entity type.
+                  default: '@timestamp'
       responses:
         '200':
           description: Successful response

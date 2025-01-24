@@ -42,6 +42,7 @@ interface EngineDescriptionParams {
   requestParams?: {
     indexPattern?: string;
     fieldHistoryLength?: number;
+    timestampField?: string;
   };
   defaultIndexPatterns: string[];
 }
@@ -60,7 +61,10 @@ export const createEngineDescription = (options: EngineDescriptionParams) => {
     syncDelay: `${config.syncDelay.asSeconds()}s`,
     frequency: `${config.frequency.asSeconds()}s`,
     lookbackPeriod: description.settings?.lookbackPeriod || DEFAULT_LOOKBACK_PERIOD,
-    timestampField: description.settings?.timestampField || DEFAULT_TIMESTAMP_FIELD,
+    timestampField:
+      requestParams?.timestampField ||
+      description.settings?.timestampField ||
+      DEFAULT_TIMESTAMP_FIELD,
   };
 
   const updatedDescription = pipe(

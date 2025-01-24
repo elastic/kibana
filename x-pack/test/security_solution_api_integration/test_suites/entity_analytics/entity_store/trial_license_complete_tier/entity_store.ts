@@ -90,6 +90,7 @@ export default ({ getService }: FtrProviderContext) => {
             indexPattern: '',
             filter: '',
             fieldHistoryLength: 10,
+            timestampField: '@timestamp',
           });
         });
 
@@ -106,6 +107,7 @@ export default ({ getService }: FtrProviderContext) => {
             indexPattern: '',
             filter: '',
             fieldHistoryLength: 10,
+            timestampField: '@timestamp',
           });
         });
       });
@@ -124,6 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
               indexPattern: '',
               filter: '',
               fieldHistoryLength: 10,
+              timestampField: '@timestamp',
             },
             {
               status: 'started',
@@ -131,6 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
               indexPattern: '',
               filter: '',
               fieldHistoryLength: 10,
+              timestampField: '@timestamp',
             },
           ]);
         });
@@ -166,6 +170,7 @@ export default ({ getService }: FtrProviderContext) => {
         await api
           .startEntityEngine({
             params: { entityType: 'host' },
+            body: {},
           })
           .expect(200);
 

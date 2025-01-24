@@ -78,6 +78,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
             filter: '',
             fieldHistoryLength: 10,
             indexPattern: '',
+            timestampField: '@timestamp',
           });
         });
 
@@ -97,6 +98,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
             filter: '',
             fieldHistoryLength: 10,
             indexPattern: '',
+            timestampField: '@timestamp',
           });
         });
       });
@@ -115,6 +117,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
               filter: '',
               fieldHistoryLength: 10,
               indexPattern: '',
+              timestampField: '@timestamp',
             },
             {
               status: 'started',
@@ -122,6 +125,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
               filter: '',
               fieldHistoryLength: 10,
               indexPattern: '',
+              timestampField: '@timestamp',
             },
           ]);
         });
@@ -164,6 +168,7 @@ export default ({ getService }: FtrProviderContextWithSpaces) => {
           .startEntityEngine(
             {
               params: { entityType: 'host' },
+              body: {},
             },
             namespace
           )
