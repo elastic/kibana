@@ -391,11 +391,12 @@ export default function createGetTests({ getService }: FtrProviderContext) {
           it('should preserve the comment', async () => {
             const { comments } = await findAttachments({
               supertest,
-              caseId: 'a97a13b0-22f3-11ec-9f3b-fbc97859d7ed',
+              caseId: 'f3a43e72-4b37-55b0-bc51-eceb8616a5ce',
               auth,
             });
 
-            const comment = comments![0] as UserCommentAttachmentAttributes;
+            const comment = comments[0] as UserCommentAttachmentAttributes;
+
             expect(comment.comment).to.be('a comment');
             expect(comment.owner).to.be(SECURITY_SOLUTION_OWNER);
           });
