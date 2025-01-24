@@ -91,6 +91,7 @@ import {
   createKeywordBuilderPipeline,
   deleteKeywordBuilderPipeline,
 } from '../../asset_inventory/ingest_pipelines';
+import { DEFAULT_INTERVAL } from './task/constants';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -221,7 +222,7 @@ export class EntityStoreDataClient {
       throw new Error('Task Manager is not available');
     }
 
-    const { indexPattern, lookbackPeriod, filter, fieldHistoryLength, entityTypes } = {
+    const { indexPattern, lookbackPeriod, filter, fieldHistoryLength, entityTypes, enrichPolicyExecutionInterval } = {
       ...DEFAULT_INIT_ENTITY_STORE,
       ...requestBodyOverrides,
     };
@@ -242,7 +243,7 @@ export class EntityStoreDataClient {
       run(() =>
         this.init(
           entity,
-          { indexPattern, lookbackPeriod, filter, fieldHistoryLength },
+          { indexPattern, lookbackPeriod, filter, fieldHistoryLength, enrichPolicyExecutionInterval },
           { pipelineDebugMode }
         )
       )
@@ -310,7 +311,7 @@ export class EntityStoreDataClient {
       ...InitEntityEngineRequestBodyOverrides,
     } as Required<typeof DEFAULT_ENTITY_ENGINE>;
 
-    const { indexPattern, filter, fieldHistoryLength, lookbackPeriod } = mergedRequest;
+    const { indexPattern, filter, fieldHistoryLength, lookbackPeriod, enrichPolicyExecutionInterval } = mergedRequest;
     const { experimentalFeatures } = this.options;
 
     if (entityType === EntityType.universal && !experimentalFeatures.assetInventoryStoreEnabled) {
@@ -367,6 +368,7 @@ export class EntityStoreDataClient {
       entityType,
       fieldHistoryLength,
       lookbackPeriod,
+      enrichPolicyExecutionInterval,
       this.options.taskManager,
       indexPattern,
       filter,
@@ -383,6 +385,7 @@ export class EntityStoreDataClient {
     entityType: EntityType,
     fieldHistoryLength: number,
     lookbackPeriod: string,
+    enrichPolicyExecutionInterval: string,
     taskManager: TaskManagerStartContract,
     indexPattern: string,
     filter: string,
@@ -471,6 +474,7 @@ export class EntityStoreDataClient {
         namespace,
         logger,
         taskManager,
+        interval: enrichPolicyExecutionInterval,
       });
 
       this.log(`debug`, entityType, `Started entity store field retention enrich task`);
