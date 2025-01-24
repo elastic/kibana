@@ -44,9 +44,7 @@ export const SynonymSets = () => {
       }),
       render: (name: string) => (
         <div data-test-subj="synonyms-set-item-name">
-          <EuiLink
-            onClick={() => application?.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/synonym/${name}`)}
-          >
+          <EuiLink onClick={() => application?.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/${name}`)}>
             {name}
           </EuiLink>
         </div>
@@ -91,7 +89,8 @@ export const SynonymSets = () => {
           icon: 'pencil',
           color: 'text',
           type: 'icon',
-          onClick: () => {},
+          onClick: (synonymsSet: SynonymsGetSynonymsSetsSynonymsSetItem) =>
+            application?.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/${synonymsSet.synonyms_set}`),
         },
       ],
     },

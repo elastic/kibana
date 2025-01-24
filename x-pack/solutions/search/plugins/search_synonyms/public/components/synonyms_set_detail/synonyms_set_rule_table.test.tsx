@@ -8,7 +8,7 @@
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
-import { SynonymsSetDetail } from './synonyms_set_detail';
+import { SynonymsSetRuleTable } from './synonyms_set_rule_table';
 
 jest.mock('../../hooks/use_fetch_synonyms_set', () => ({
   useFetchSynonymsSet: () => ({
@@ -39,15 +39,9 @@ jest.mock('../../hooks/use_fetch_synonyms_set', () => ({
   }),
 }));
 
-jest.mock('react-router-dom', () => ({
-  useParams: () => ({
-    synonymsSetId: 'my_synonyms_set',
-  }),
-}));
-
 describe('SynonymSetDetail table', () => {
   it('should render the list with synonym rules', () => {
-    render(<SynonymsSetDetail />);
+    render(<SynonymsSetRuleTable synonymsSetId="synonymSetId" />);
     const synonymSetTable = screen.getByTestId('synonyms-set-table');
     expect(synonymSetTable).toBeInTheDocument();
 
