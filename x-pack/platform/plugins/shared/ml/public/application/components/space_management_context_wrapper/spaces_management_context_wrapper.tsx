@@ -7,9 +7,10 @@
 import React, { type FC, type PropsWithChildren } from 'react';
 import { useSpacesContextWrapper } from '../../hooks/use_spaces';
 
-export const SpaceManagementContextWrapper: FC<
-  PropsWithChildren<unknown> & { feature?: string }
-> = ({ children, feature }) => {
+export const SpaceManagementContextWrapper: FC<PropsWithChildren<{ feature?: string }>> = ({
+  children,
+  feature,
+}) => {
   const ContextWrapper = useSpacesContextWrapper();
 
   return <ContextWrapper feature={feature}>{children}</ContextWrapper>;
