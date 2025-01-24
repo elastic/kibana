@@ -30,9 +30,14 @@ import {
 import { jsonRt, mergeRt } from '@kbn/io-ts-utils';
 import type { InspectResponse } from '@kbn/observability-plugin/typings/common';
 import apm from 'elastic-apm-node';
-import type { VersionedRouteRegistrar } from '@kbn/core-http-server';
+import { type VersionedRouteRegistrar } from '@kbn/core-http-server';
 import type { IRuleDataClient } from '@kbn/rule-registry-plugin/server';
 import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
+import type { Observable } from 'rxjs';
+import { isObservable } from 'rxjs';
+import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
+import type { ServerSentEvent } from '@kbn/sse-utils';
+import { Stream } from 'stream';
 import type { ApmFeatureFlags } from '../../../common/apm_feature_flags';
 import type {
   APMCore,
@@ -43,7 +48,6 @@ import type {
 import type { ApmPluginRequestHandlerContext } from '../typings';
 import type { APMConfig } from '../..';
 import type { APMPluginSetupDependencies, APMPluginStartDependencies } from '../../types';
-
 const inspectRt = t.exact(
   t.partial({
     query: t.exact(t.partial({ _inspect: jsonRt.pipe(t.boolean) })),
@@ -148,7 +152,7 @@ export function registerRoutes({
             ),
             ruleDataClient,
             kibanaVersion,
-          }).then((value: Record<string, any> | undefined | null) => {
+          }).then((value: Record<string, any> | ReadableStream | undefined | null) => {
             return {
               aborted: false,
               data: value,
@@ -170,20 +174,42 @@ export function registerRoutes({
           throw new Error('Return type cannot be an array');
         }
 
-        const body = validatedParams.query?._inspect
-          ? {
-              ...data,
-              _inspect: inspectableEsQueriesMap.get(request),
-            }
-          : { ...data };
-        if (!options.disableTelemetry && telemetryUsageCounter) {
-          telemetryUsageCounter.incrementCounter({
-            counterName: `${method.toUpperCase()} ${pathname}`,
-            counterType: 'success',
+        if (isObservable(data)) {
+          const controller = new AbortController();
+          request.events.aborted$.subscribe(() => {
+            controller.abort();
           });
+          return response.ok({
+            body: observableIntoEventSourceStream(data as Observable<ServerSentEvent>, {
+              logger,
+              signal: controller.signal,
+            }),
+          });
+        } else if (data instanceof Stream) {
+          const body = data || {};
+          return response.custom({
+            statusCode: 200,
+            headers: {
+              'content-type': 'application/octet-stream',
+              'transfer-encoding': 'chunked',
+            },
+            body,
+          });
+        } else {
+          const body = validatedParams.query?._inspect
+            ? {
+                ...data,
+                _inspect: inspectableEsQueriesMap.get(request),
+              }
+            : { ...data };
+          if (!options.disableTelemetry && telemetryUsageCounter) {
+            telemetryUsageCounter.incrementCounter({
+              counterName: `${method.toUpperCase()} ${pathname}`,
+              counterType: 'success',
+            });
+          }
+          return response.ok({ body });
         }
-
-        return response.ok({ body });
       } catch (error) {
         logger.error(error);
 
@@ -270,6 +296,7 @@ export type MinimalAPMRouteHandlerResources = Omit<APMRouteHandlerResources, 'co
 
 export interface APMRouteHandlerResources {
   request: KibanaRequest;
+  response: KibanaResponseFactory;
   context: ApmPluginRequestHandlerContext;
   params: {
     query: {
