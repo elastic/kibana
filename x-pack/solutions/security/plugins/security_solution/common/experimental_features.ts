@@ -253,8 +253,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables CrowdStrike's RunScript RTR command
+   * Release: 8.18/9.0
    */
-  crowdstrikeRunScriptEnabled: false,
+  crowdstrikeRunScriptEnabled: true,
 
   /**
    * Enables the Asset Inventory Entity Store feature.
@@ -268,9 +269,10 @@ export const allowedExperimentalValues = Object.freeze({
   assetInventoryUXEnabled: false,
 
   /**
-   * Enabled Microsoft Defender for  Endpoint actions client
+   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
+   * Release: 8.18/9.0
    */
-  responseActionsMSDefenderEndpointEnabled: false,
+  responseActionsMSDefenderEndpointEnabled: true,
 
   /**
    * Enables banner for informing users about changes in data collection.
