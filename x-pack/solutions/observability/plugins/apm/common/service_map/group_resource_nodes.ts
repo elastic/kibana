@@ -8,13 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import { compact, groupBy } from 'lodash';
 import type { ValuesType } from 'utility-types';
-import { SPAN_TYPE, SPAN_SUBTYPE } from '../../../common/es_fields/apm';
-import type {
-  ConnectionEdge,
-  ConnectionElement,
-  ConnectionNode,
-} from '../../../common/service_map';
-import { isSpanGroupingSupported } from '../../../common/service_map';
+import { SPAN_TYPE, SPAN_SUBTYPE } from '../es_fields/apm';
+import type { ConnectionEdge, ConnectionElement, ConnectionNode } from './typings';
+import { isSpanGroupingSupported } from './utils';
 
 const MINIMUM_GROUP_SIZE = 4;
 
