@@ -10,7 +10,7 @@ const YOU_ARE_A_HELPFUL_EXPERT_ASSISTANT =
 const IF_YOU_DONT_KNOW_THE_ANSWER = 'Do not answer questions unrelated to Elastic Security.';
 export const KNOWLEDGE_HISTORY =
   'If available, use the Knowledge History provided to try and answer the question. If not provided, you can try and query for additional knowledge via the KnowledgeBaseRetrievalTool.';
-export const INCLUDE_CITATIONS = `In your response, include citations using the format: \`{{reference(...)}}\` when possible. Only use the reference blocks provided by the tools and do not create reference blocks using other information. The reference should be placed after the punctuation marks.  
+export const INCLUDE_CITATIONS = `In your response, always include citations using the format: \`{{reference(...)}}\` when information returned by a tool is used. Only use the reference string provided by the tools and do not create reference strings using other information. The reference should be placed after the punctuation marks.
 Example citations: 
 \`\`\`
 Your favourite food is pizza. {{reference(HMCxq)}} 
