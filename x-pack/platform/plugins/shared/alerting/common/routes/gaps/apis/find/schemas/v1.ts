@@ -17,8 +17,8 @@ export const findGapsBodySchema = schema.object(
     sort_field: schema.maybe(
       schema.oneOf([
         schema.literal('@timestamp'),
-        schema.literal('status'),
-        schema.literal('total_gap_duration_ms'),
+        schema.literal('kibana.alert.rule.gap.status'),
+        schema.literal('kibana.alert.rule.gap.total_gap_duration_ms'),
       ])
     ),
     sort_order: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),

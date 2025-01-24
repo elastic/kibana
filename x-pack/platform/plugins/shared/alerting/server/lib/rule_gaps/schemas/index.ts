@@ -43,8 +43,8 @@ export const findGapsParamsSchema = schema.object(
     sortField: schema.maybe(
       schema.oneOf([
         schema.literal('@timestamp'),
-        schema.literal('total_gap_duration_ms'),
-        schema.literal('status'),
+        schema.literal('kibana.alert.rule.gap.total_gap_duration_ms'),
+        schema.literal('kibana.alert.rule.gap.status'),
       ])
     ),
     sortOrder: schema.maybe(schema.oneOf([schema.literal('asc'), schema.literal('desc')])),

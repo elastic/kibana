@@ -91,7 +91,7 @@ describe('findGaps', () => {
         ruleId: 'test-rule',
         page: 1,
         perPage: 10,
-        sortField: 'total_gap_duration_ms',
+        sortField: 'kibana.alert.rule.gap.total_gap_duration_ms',
         sortOrder: 'asc',
       },
     });

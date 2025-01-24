@@ -164,6 +164,13 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     direction: 'desc',
   });
 
+  const getSortField = (field: keyof Gap) => {
+    if (field === '@timestamp' || !field) {
+      return '@timestamp';
+    }
+    return `kibana.alert.rule.gap.${field}`;
+  };
+
   const { data, isLoading, isError, isFetching, refetch, dataUpdatedAt } = useFindGapsForRule({
     ruleId,
     page: pageIndex + 1,
@@ -171,7 +178,7 @@ export const RuleGaps = ({ ruleId, enabled }: { ruleId: string; enabled: boolean
     start: dateRange.start,
     end: dateRange.end,
     statuses: selectedStatuses,
-    sortField: sort.field,
+    sortField: getSortField(sort.field),
     sortOrder: sort.direction,
   });
 

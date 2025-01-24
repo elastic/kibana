@@ -33,13 +33,6 @@ export const findGaps = async ({
   try {
     const filter = buildGapsFilter({ start, end, statuses });
 
-    const getField = (field?: string) => {
-      if (field === '@timestamp' || !field) {
-        return '@timestamp';
-      }
-      return `kibana.alert.rule.gap.${field}`;
-    };
-
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
       [ruleId],
@@ -47,7 +40,7 @@ export const findGaps = async ({
         filter,
         sort: [
           {
-            sort_field: getField(sortField),
+            sort_field: sortField ?? '@timestamp',
             sort_order: sortOrder ?? 'desc',
           },
         ],
