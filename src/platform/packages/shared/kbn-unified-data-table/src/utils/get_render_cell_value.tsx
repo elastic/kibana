@@ -10,18 +10,13 @@
 import React, { useEffect, useContext, memo } from 'react';
 import { i18n } from '@kbn/i18n';
 import type { DataView, DataViewField } from '@kbn/data-views-plugin/public';
-import {
-  EuiDataGridCellValueElementProps,
-  EuiButtonIcon,
-  EuiFlexGroup,
-  EuiFlexItem,
-} from '@elastic/eui';
+import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import type { FieldFormatsStart } from '@kbn/field-formats-plugin/public';
 import type { DataTableRecord, ShouldShowFieldInTableHandler } from '@kbn/discover-utils/types';
 import { formatFieldValue } from '@kbn/discover-utils';
 import {
   InTableSearchHighlightsWrapper,
-  InTableSearchHighlightsWrapperProps,
+  RenderCellValuePropsWithInTableSearch,
 } from '@kbn/data-grid-in-table-search';
 import { UnifiedDataTableContext } from '../table_context';
 import type { CustomCellRenderer } from '../types';
@@ -64,8 +59,7 @@ export const getRenderCellValueFn = ({
     isExpanded,
     inTableSearchTerm,
     onHighlightsCountFound,
-  }: EuiDataGridCellValueElementProps &
-    Pick<InTableSearchHighlightsWrapperProps, 'inTableSearchTerm' | 'onHighlightsCountFound'>) => {
+  }: RenderCellValuePropsWithInTableSearch) => {
     const row = rows ? rows[rowIndex] : undefined;
     const field = dataView.fields.getByName(columnId);
     const ctx = useContext(UnifiedDataTableContext);

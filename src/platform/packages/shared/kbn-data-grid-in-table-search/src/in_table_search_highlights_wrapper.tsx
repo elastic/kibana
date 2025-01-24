@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import React, { ReactNode, useEffect, useRef } from 'react';
+import React, { useEffect, useRef } from 'react';
 import { escapeRegExp, memoize } from 'lodash';
+import { HIGHLIGHT_COLOR, HIGHLIGHT_CLASS_NAME, CELL_MATCH_INDEX_ATTRIBUTE } from './constants';
+import { InTableSearchHighlightsWrapperProps } from './types';
 
-export interface InTableSearchHighlightsWrapperProps {
-  inTableSearchTerm?: string;
-  onHighlightsCountFound?: (count: number) => void;
-  children: ReactNode;
-}
-
+/**
+ * Counts and highlights search term matches in the children of the component
+ */
 export const InTableSearchHighlightsWrapper: React.FC<InTableSearchHighlightsWrapperProps> = ({
   inTableSearchTerm,
   onHighlightsCountFound,
@@ -87,9 +86,9 @@ function modifyDOMAndAddSearchHighlights(
           if (searchTermRegExp.test(part)) {
             const mark = document.createElement('mark');
             mark.textContent = part;
-            mark.style.backgroundColor = '#e5ffc0'; // TODO: Use a named color token
-            mark.setAttribute('class', 'dataGridInTableSearch__match');
-            mark.setAttribute('data-match-index', `${matchIndex++}`);
+            mark.style.backgroundColor = HIGHLIGHT_COLOR;
+            mark.setAttribute('class', HIGHLIGHT_CLASS_NAME);
+            mark.setAttribute(CELL_MATCH_INDEX_ATTRIBUTE, `${matchIndex++}`);
             nodeWithHighlights.appendChild(mark);
           } else {
             nodeWithHighlights.appendChild(document.createTextNode(part));

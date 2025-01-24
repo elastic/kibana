@@ -11,11 +11,14 @@ import React, { useCallback, useState, useEffect, useRef } from 'react';
 import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
-import {
-  useInTableSearchMatches,
-  UseInTableSearchMatchesProps,
-} from './use_in_table_search_matches';
+import { useFindMatches } from './matches/use_find_matches';
 import { InTableSearchInput, INPUT_TEST_SUBJ } from './in_table_search_input';
+import { UseFindMatchesProps } from './types';
+import {
+  ACTIVE_HIGHLIGHT_COLOR,
+  CELL_MATCH_INDEX_ATTRIBUTE,
+  HIGHLIGHT_CLASS_NAME,
+} from './constants';
 
 const innerCss = css`
   .dataGridInTableSearch__matchesCounter {
@@ -44,7 +47,7 @@ const innerCss = css`
 const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
 export interface InTableSearchControlProps
-  extends Omit<UseInTableSearchMatchesProps, 'onScrollToActiveMatch'> {
+  extends Omit<UseFindMatchesProps, 'onScrollToActiveMatch'> {
   pageSize: number | null; // null when the pagination is disabled
   getColumnIndexFromId: (columnId: string) => number;
   scrollToCell: (params: { rowIndex: number; columnIndex: number; align: 'center' }) => void;
@@ -69,15 +72,14 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
   const shouldReturnFocusToButtonRef = useRef<boolean>(false);
   const [isInputVisible, setIsInputVisible] = useState<boolean>(false);
 
-  const onScrollToActiveMatch: UseInTableSearchMatchesProps['onScrollToActiveMatch'] = useCallback(
+  const onScrollToActiveMatch: UseFindMatchesProps['onScrollToActiveMatch'] = useCallback(
     ({ rowIndex, columnId, matchIndexWithinCell }) => {
       if (typeof pageSize === 'number') {
         const expectedPageIndex = Math.floor(rowIndex / pageSize);
         onChangeToExpectedPage(expectedPageIndex);
       }
 
-      // TODO: use a named color token
-      // The cell border is useful when the active match is not visible due to the cell height.
+      // The cell border is useful when the active match is not visible due to the limited cell height.
       onChangeCss(css`
         .euiDataGridRowCell[data-gridcell-row-index='${rowIndex}'][data-gridcell-column-id='${columnId}'] {
           &:after {
@@ -86,11 +88,11 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             pointer-events: none;
             position: absolute;
             inset: 0;
-            border: 2px solid #ffc30e !important;
+            border: 2px solid ${ACTIVE_HIGHLIGHT_COLOR} !important;
             border-radius: 3px;
           }
-          .dataGridInTableSearch__match[data-match-index='${matchIndexWithinCell}'] {
-            background-color: #ffc30e !important;
+          .${HIGHLIGHT_CLASS_NAME}[${CELL_MATCH_INDEX_ATTRIBUTE}='${matchIndexWithinCell}'] {
+            background-color: ${ACTIVE_HIGHLIGHT_COLOR} !important;
           }
         }
       `);
@@ -115,7 +117,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     goToNextMatch,
     renderCellsShadowPortal,
     resetState,
-  } = useInTableSearchMatches({ ...props, onScrollToActiveMatch });
+  } = useFindMatches({ ...props, onScrollToActiveMatch });
 
   const showInput = useCallback(() => {
     setIsInputVisible(true);
@@ -130,6 +132,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
     [setIsInputVisible, resetState]
   );
 
+  // listens for the cmd+f or ctrl+f keydown event to open the input
   useEffect(() => {
     const handleGlobalKeyDown = (event: KeyboardEvent) => {
       if (
@@ -151,12 +154,12 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
 
     document.addEventListener('keydown', handleGlobalKeyDown);
 
-    // Cleanup the event listener
     return () => {
       document.removeEventListener('keydown', handleGlobalKeyDown);
     };
   }, [showInput, shouldOverrideCmdF]);
 
+  // returns focus to the button when the input was cancelled by pressing the escape key
   useEffect(() => {
     if (shouldReturnFocusToButtonRef.current && !isInputVisible) {
       shouldReturnFocusToButtonRef.current = false;
@@ -181,6 +184,8 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             onChangeSearchTerm={onChange}
             onHideInput={hideInput}
           />
+          {/* We include it here so the same parent contexts (like KibanaRenderContextProvider, UnifiedDataTableContext etc) will be applied to the portal components too */}
+          {/* as they do for the current component */}
           {renderCellsShadowPortal ? renderCellsShadowPortal() : null}
         </>
       ) : (

@@ -7,13 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export {
-  InTableSearchHighlightsWrapper,
-  useDataGridInTableSearch,
-  type UseDataGridInTableSearchProps,
-  type UseDataGridInTableSearchReturn,
-} from './src';
-export type {
-  RenderCellValuePropsWithInTableSearch,
-  InTableSearchHighlightsWrapperProps,
-} from './src/types';
+export const CELL_MATCH_INDEX_ATTRIBUTE = 'data-match-index';
+export const HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
+export const HIGHLIGHT_COLOR = '#e5ffc0'; // TODO: Use a named color token
+export const ACTIVE_HIGHLIGHT_COLOR = '#ffc30e'; // TODO: Use a named color token
