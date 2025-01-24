@@ -58,7 +58,7 @@ const createRulesClientMock = () => {
     bulkUntrackAlerts: jest.fn(),
     findGaps: jest.fn(),
     fillGapById: jest.fn(),
-    getRulesWithGaps: jest.fn(),
+    getRuleIdsWithGaps: jest.fn(),
     getGapsSummaryByRuleIds: jest.fn(),
   };
   return mocked;

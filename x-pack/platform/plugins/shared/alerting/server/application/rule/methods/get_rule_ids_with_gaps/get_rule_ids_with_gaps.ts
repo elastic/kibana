@@ -12,14 +12,14 @@ import {
   AlertingAuthorizationFilterType,
 } from '../../../../authorization';
 import { RulesClientContext } from '../../../../rules_client';
-import { GetRulesWithGapsParams, GetRulesWithGapsResponse } from './types';
+import { GetRuleIdsWithGapsParams, GetRuleIdsWithGapsResponse } from './types';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { buildGapsFilter } from '../../../../lib/rule_gaps/build_gaps_filter';
 export const RULE_SAVED_OBJECT_TYPE = 'alert';
 
-export async function getRulesWithGaps(
+export async function getRuleIdsWithGaps(
   context: RulesClientContext,
-  params: GetRulesWithGapsParams
+  params: GetRuleIdsWithGapsParams
 ) {
   try {
     let authorizationTuple;
@@ -79,7 +79,7 @@ export async function getRulesWithGaps(
 
     const ruleIds = resultBuckets.map((bucket) => bucket.key) ?? [];
 
-    const result: GetRulesWithGapsResponse = {
+    const result: GetRuleIdsWithGapsResponse = {
       total: ruleIds?.length,
       ruleIds,
     };

@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export { getRulesWithGaps } from './get_rules_with_gaps';
+export { getRuleIdsWithGaps } from './get_rule_ids_with_gaps';

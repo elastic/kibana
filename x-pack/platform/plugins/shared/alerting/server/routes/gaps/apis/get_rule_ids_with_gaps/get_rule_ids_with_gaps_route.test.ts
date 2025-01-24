@@ -10,7 +10,7 @@ import { licenseStateMock } from '../../../../lib/license_state.mock';
 import { verifyApiAccess } from '../../../../lib/license_api_access';
 import { mockHandlerArguments } from '../../../_mock_handler_arguments';
 import { rulesClientMock } from '../../../../rules_client.mock';
-import { getRulesWithGapsRoute } from './get_rules_with_gaps_route';
+import { getRuleIdsWithGapsRoute } from './get_rule_ids_with_gaps_route';
 
 const rulesClient = rulesClientMock.create();
 
@@ -18,7 +18,7 @@ jest.mock('../../../../lib/license_api_access', () => ({
   verifyApiAccess: jest.fn(),
 }));
 
-describe('getRulesWithGapsRoute', () => {
+describe('getRuleIdsWithGapsRoute', () => {
   beforeEach(() => {
     jest.resetAllMocks();
   });
@@ -37,9 +37,9 @@ describe('getRulesWithGapsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRulesWithGapsRoute(router, licenseState);
+    getRuleIdsWithGapsRoute(router, licenseState);
 
-    rulesClient.getRulesWithGaps.mockResolvedValueOnce(mockResult);
+    rulesClient.getRuleIdsWithGaps.mockResolvedValueOnce(mockResult);
     const [config, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { body: mockBody });
 
@@ -47,7 +47,7 @@ describe('getRulesWithGapsRoute', () => {
 
     await handler(context, req, res);
 
-    expect(rulesClient.getRulesWithGaps).toHaveBeenLastCalledWith(mockBody);
+    expect(rulesClient.getRuleIdsWithGaps).toHaveBeenLastCalledWith(mockBody);
     expect(res.ok).toHaveBeenLastCalledWith({
       body: {
         total: 1,
@@ -60,9 +60,9 @@ describe('getRulesWithGapsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRulesWithGapsRoute(router, licenseState);
+    getRuleIdsWithGapsRoute(router, licenseState);
 
-    rulesClient.getRulesWithGaps.mockResolvedValueOnce(mockResult);
+    rulesClient.getRuleIdsWithGaps.mockResolvedValueOnce(mockResult);
     const [, handler] = router.post.mock.calls[0];
     const [context, req, res] = mockHandlerArguments({ rulesClient }, { query: mockBody });
     await handler(context, req, res);
@@ -73,7 +73,7 @@ describe('getRulesWithGapsRoute', () => {
     const licenseState = licenseStateMock.create();
     const router = httpServiceMock.createRouter();
 
-    getRulesWithGapsRoute(router, licenseState);
+    getRuleIdsWithGapsRoute(router, licenseState);
 
     (verifyApiAccess as jest.Mock).mockImplementation(() => {
       throw new Error('Failure');

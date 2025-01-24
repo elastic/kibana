@@ -6,7 +6,7 @@
  */
 
 import { TypeOf } from '@kbn/config-schema';
-import { getRulesWithGapsParamsSchema, getRulesWithGapsResponseSchema } from '../schemas';
+import { getRuleIdsWithGapsParamsSchema, getRuleIdsWithGapsResponseSchema } from '../schemas';
 
-export type GetRulesWithGapsParams = TypeOf<typeof getRulesWithGapsParamsSchema>;
-export type GetRulesWithGapsResponse = TypeOf<typeof getRulesWithGapsResponseSchema>;
+export type GetRuleIdsWithGapsParams = TypeOf<typeof getRuleIdsWithGapsParamsSchema>;
+export type GetRuleIdsWithGapsResponse = TypeOf<typeof getRuleIdsWithGapsResponseSchema>;

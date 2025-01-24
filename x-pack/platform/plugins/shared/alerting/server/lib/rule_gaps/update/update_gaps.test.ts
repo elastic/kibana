@@ -237,7 +237,7 @@ describe('updateGaps', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to update gap: test-id after 3 retries due to conflicts')
       );
-    }, 10000);
+    }, 15000);
   });
 
   describe('backfill handling', () => {

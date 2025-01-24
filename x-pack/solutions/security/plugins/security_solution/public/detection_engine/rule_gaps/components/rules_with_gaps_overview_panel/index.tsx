@@ -23,7 +23,7 @@ import {
 import { gapStatus } from '@kbn/alerting-plugin/common';
 import { useRulesTableContext } from '../../../rule_management_ui/components/rules_table/rules_table/rules_table_context';
 import * as i18n from './translations';
-import { useGetRulesWithGaps } from '../../api/hooks/use_get_rules_with_gaps';
+import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gaps';
 import { defaultRangeValue, GapRangeValue } from '../../constants';
 
 export const RulesWithGapsOverviewPanel = () => {
@@ -34,7 +34,7 @@ export const RulesWithGapsOverviewPanel = () => {
     },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data } = useGetRulesWithGaps(
+  const { data } = useGetRuleIdsWithGaps(
     {
       gapRange: gapSearchRange ?? defaultRangeValue,
       statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],

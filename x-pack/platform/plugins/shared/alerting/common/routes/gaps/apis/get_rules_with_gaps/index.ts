@@ -5,20 +5,20 @@
  * 2.0.
  */
 
-export { getRulesWithGapQuerySchema, getRulesWithGapResponseSchema } from './schemas/latest';
+export { getRuleIdsWithGapQuerySchema, getRuleIdsWithGapResponseSchema } from './schemas/latest';
 export type {
-  GetRulesWithGapQuery,
-  GetRulesWithGapResponse,
-  GetRulesWithGapResponseBody,
+  GetRuleIdsWithGapQuery,
+  GetRuleIdsWithGapResponse,
+  GetRuleIdsWithGapResponseBody,
 } from './types/latest';
 
 export {
-  getRulesWithGapQuerySchema as getRulesWithGapQuerySchemaV1,
-  getRulesWithGapResponseSchema as getRulesWithGapResponseSchemaV1,
+  getRuleIdsWithGapQuerySchema as getRuleIdsWithGapQuerySchemaV1,
+  getRuleIdsWithGapResponseSchema as getRuleIdsWithGapResponseSchemaV1,
 } from './schemas/v1';
 
 export type {
-  GetRulesWithGapQuery as GetRulesWithGapQueryV1,
-  GetRulesWithGapResponse as GetRulesWithGapResponseV1,
-  GetRulesWithGapResponseBody as GetRulesWithGapResponseBodyV1,
+  GetRuleIdsWithGapQuery as GetRuleIdsWithGapQueryV1,
+  GetRuleIdsWithGapResponse as GetRuleIdsWithGapResponseV1,
+  GetRuleIdsWithGapResponseBody as GetRuleIdsWithGapResponseBodyV1,
 } from './types/v1';

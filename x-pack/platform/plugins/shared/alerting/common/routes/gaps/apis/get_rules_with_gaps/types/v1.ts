@@ -6,11 +6,11 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { getRulesWithGapQuerySchemaV1, getRulesWithGapResponseSchemaV1 } from '..';
+import { getRuleIdsWithGapQuerySchemaV1, getRuleIdsWithGapResponseSchemaV1 } from '..';
 
-export type GetRulesWithGapQuery = TypeOf<typeof getRulesWithGapQuerySchemaV1>;
-export type GetRulesWithGapResponseBody = TypeOf<typeof getRulesWithGapResponseSchemaV1>;
+export type GetRuleIdsWithGapQuery = TypeOf<typeof getRuleIdsWithGapQuerySchemaV1>;
+export type GetRuleIdsWithGapResponseBody = TypeOf<typeof getRuleIdsWithGapResponseSchemaV1>;
 
-export interface GetRulesWithGapResponse {
-  body: GetRulesWithGapResponseBody;
+export interface GetRuleIdsWithGapResponse {
+  body: GetRuleIdsWithGapResponseBody;
 }

@@ -78,9 +78,9 @@ import { DisableRuleParams } from '../application/rule/methods/disable';
 import { EnableRuleParams } from '../application/rule/methods/enable_rule';
 import { findGaps } from '../application/rule/methods/find_gaps';
 import { fillGapById } from '../application/rule/methods/fill_gap_by_id';
-import { GetRulesWithGapsParams } from '../application/rule/methods/get_rules_with_gaps/types';
+import { GetRuleIdsWithGapsParams } from '../application/rule/methods/get_rule_ids_with_gaps/types';
 
-import { getRulesWithGaps } from '../application/rule/methods/get_rules_with_gaps';
+import { getRuleIdsWithGaps } from '../application/rule/methods/get_rule_ids_with_gaps';
 import { getGapsSummaryByRuleIds } from '../application/rule/methods/get_gaps_summary_by_rule_ids';
 import { GetGapsSummaryByRuleIdsParams } from '../application/rule/methods/get_gaps_summary_by_rule_ids/types';
 import { FindGapsParams, FindGapByIdParams } from '../lib/rule_gaps/types';
@@ -220,8 +220,8 @@ export class RulesClient {
 
   public fillGapById = (params: FindGapByIdParams) => fillGapById(this.context, params);
 
-  public getRulesWithGaps = (params: GetRulesWithGapsParams) =>
-    getRulesWithGaps(this.context, params);
+  public getRuleIdsWithGaps = (params: GetRuleIdsWithGapsParams) =>
+    getRuleIdsWithGaps(this.context, params);
 
   public getGapsSummaryByRuleIds = (params: GetGapsSummaryByRuleIdsParams) =>
     getGapsSummaryByRuleIds(this.context, params);

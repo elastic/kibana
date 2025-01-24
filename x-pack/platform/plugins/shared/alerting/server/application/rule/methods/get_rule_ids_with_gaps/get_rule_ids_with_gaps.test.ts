@@ -12,10 +12,10 @@ import {
   AlertingAuthorizationEntity,
   AlertingAuthorizationFilterType,
 } from '../../../../authorization';
-import { getRulesWithGaps } from './get_rules_with_gaps';
+import { getRuleIdsWithGaps } from './get_rule_ids_with_gaps';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-describe('getRulesWithGaps', () => {
+describe('getRuleIdsWithGaps', () => {
   let context: any;
   const auditLogger = auditLoggerMock.create();
   const mockEventLogClient = eventLogClientMock.create();
@@ -57,7 +57,7 @@ describe('getRulesWithGaps', () => {
 
   describe('authorization', () => {
     it('should get authorization filter with correct parameters', async () => {
-      await getRulesWithGaps(context, params);
+      await getRuleIdsWithGaps(context, params);
 
       expect(context.authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
         authorizationEntity: AlertingAuthorizationEntity.Rule,
@@ -75,7 +75,7 @@ describe('getRulesWithGaps', () => {
       const authError = new Error('Authorization failed');
       context.authorization.getFindAuthorizationFilter.mockRejectedValue(authError);
 
-      await expect(getRulesWithGaps(context, params)).rejects.toThrow('Authorization failed');
+      await expect(getRuleIdsWithGaps(context, params)).rejects.toThrow('Authorization failed');
 
       expect(auditLogger.log).toHaveBeenCalledWith(
         expect.objectContaining({
@@ -104,7 +104,7 @@ describe('getRulesWithGaps', () => {
         aggregations: mockAggregations,
       });
 
-      const result = await getRulesWithGaps(context, params);
+      const result = await getRuleIdsWithGaps(context, params);
 
       expect(mockEventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
@@ -130,7 +130,7 @@ describe('getRulesWithGaps', () => {
         },
       });
 
-      const result = await getRulesWithGaps(context, params);
+      const result = await getRuleIdsWithGaps(context, params);
 
       expect(result).toEqual({
         total: 0,
@@ -152,7 +152,7 @@ describe('getRulesWithGaps', () => {
         },
       });
 
-      await getRulesWithGaps(context, paramsWithoutStatuses);
+      await getRuleIdsWithGaps(context, paramsWithoutStatuses);
 
       expect(mockEventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
@@ -169,7 +169,7 @@ describe('getRulesWithGaps', () => {
       const error = new Error('Event log client error');
       mockEventLogClient.aggregateEventsWithAuthFilter.mockRejectedValue(error);
 
-      await expect(getRulesWithGaps(context, params)).rejects.toThrow(
+      await expect(getRuleIdsWithGaps(context, params)).rejects.toThrow(
         'Failed to find rules with gaps'
       );
       expect(context.logger.error).toHaveBeenCalled();

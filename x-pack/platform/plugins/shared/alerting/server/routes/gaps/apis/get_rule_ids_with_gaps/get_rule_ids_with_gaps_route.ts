@@ -6,9 +6,9 @@
  */
 import { IRouter } from '@kbn/core/server';
 import {
-  getRulesWithGapQuerySchemaV1,
-  GetRulesWithGapQueryV1,
-  GetRulesWithGapResponseV1,
+  getRuleIdsWithGapQuerySchemaV1,
+  GetRuleIdsWithGapQueryV1,
+  GetRuleIdsWithGapResponseV1,
 } from '../../../../../common/routes/gaps/apis/get_rules_with_gaps';
 import { ILicenseState } from '../../../../lib';
 import { verifyAccessAndContext } from '../../../lib';
@@ -18,7 +18,7 @@ import {
 } from '../../../../types';
 import { transformResponseV1 } from './transforms';
 
-export const getRulesWithGapsRoute = (
+export const getRuleIdsWithGapsRoute = (
   router: IRouter<AlertingRequestHandlerContext>,
   licenseState: ILicenseState
 ) => {
@@ -26,7 +26,7 @@ export const getRulesWithGapsRoute = (
     {
       path: `${INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH}`,
       validate: {
-        body: getRulesWithGapQuerySchemaV1,
+        body: getRuleIdsWithGapQuerySchemaV1,
       },
       options: {
         access: 'internal',
@@ -36,9 +36,9 @@ export const getRulesWithGapsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-        const body: GetRulesWithGapQueryV1 = req.body;
-        const result = await rulesClient.getRulesWithGaps(body);
-        const response: GetRulesWithGapResponseV1 = {
+        const body: GetRuleIdsWithGapQueryV1 = req.body;
+        const result = await rulesClient.getRuleIdsWithGaps(body);
+        const response: GetRuleIdsWithGapResponseV1 = {
           body: transformResponseV1(result),
         };
         return res.ok(response);

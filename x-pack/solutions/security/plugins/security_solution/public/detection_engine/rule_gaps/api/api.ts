@@ -18,7 +18,7 @@ import {
 import type { FindBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/find';
 import type { ScheduleBackfillResponseBody } from '@kbn/alerting-plugin/common/routes/backfill/apis/schedule';
 import type { GetGapsSummaryByRuleIdsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
-import type { GetRulesWithGapResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_rules_with_gaps';
+import type { GetRuleIdsWithGapResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/get_rules_with_gaps';
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import type { FillGapByIdResponseV1 } from '@kbn/alerting-plugin/common/routes/gaps/apis/fill';
 import dateMath from '@kbn/datemath';
@@ -110,7 +110,7 @@ export const deleteBackfill = async ({ backfillId }: { backfillId: string }) => 
  * @param signal? AbortSignal
  * @returns
  */
-export const getRulesWithGaps = async ({
+export const getRuleIdsWithGaps = async ({
   signal,
   start,
   end,
@@ -120,8 +120,8 @@ export const getRulesWithGaps = async ({
   end: string;
   statuses: string[];
   signal?: AbortSignal;
-}): Promise<GetRulesWithGapResponseBody> =>
-  KibanaServices.get().http.fetch<GetRulesWithGapResponseBody>(
+}): Promise<GetRuleIdsWithGapResponseBody> =>
+  KibanaServices.get().http.fetch<GetRuleIdsWithGapResponseBody>(
     INTERNAL_ALERTING_GAPS_GET_RULES_API_PATH,
     {
       method: 'POST',
