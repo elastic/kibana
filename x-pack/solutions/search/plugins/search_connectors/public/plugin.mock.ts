@@ -6,7 +6,9 @@
  */
 
 import { IStaticAssets } from '@kbn/core-http-browser';
+
 import { getConnectorFullTypes } from '../common/lib/connector_types';
+
 import type { SearchConnectorsPluginStart } from './types';
 
 const createStartMock = (): jest.Mocked<SearchConnectorsPluginStart> => ({

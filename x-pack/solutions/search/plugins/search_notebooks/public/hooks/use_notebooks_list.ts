@@ -6,7 +6,9 @@
  */
 
 import { useMemo } from 'react';
+
 import { parse } from 'query-string';
+
 import { useKibanaServices } from './use_kibana';
 
 export const readNotebookListFromParam = () => {

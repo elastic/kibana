@@ -5,14 +5,16 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import { MockRouter } from '../__mocks__/router.mock';
+
 import { RequestHandlerContext } from '@kbn/core/server';
 import { coreMock } from '@kbn/core/server/mocks';
-import { MockRouter } from '../__mocks__/router.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+
 import { ConversationalChain } from './lib/conversational_chain';
+import { ContextLimitError } from './lib/errors';
 import { getChatParams } from './lib/get_chat_params';
 import { createRetriever, defineRoutes } from './routes';
-import { ContextLimitError } from './lib/errors';
 
 jest.mock('./lib/get_chat_params', () => ({
   getChatParams: jest.fn(),

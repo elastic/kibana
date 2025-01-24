@@ -6,19 +6,24 @@
  */
 
 import React, { useState } from 'react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { useWatch } from 'react-hook-form';
-import { QueryMode } from './query_mode/query_mode';
-import { ChatSetupPage } from './setup_page/chat_setup_page';
-import { Header } from './header';
-import { useLoadConnectors } from '../hooks/use_load_connectors';
-import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../types';
-import { Chat } from './chat';
-import { SearchMode } from './search_mode/search_mode';
-import { SearchPlaygroundSetupPage } from './setup_page/search_playground_setup_page';
-import { usePageMode } from '../hooks/use_page_mode';
+
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
 import { useKibana } from '../hooks/use_kibana';
+import { useLoadConnectors } from '../hooks/use_load_connectors';
+
+import { usePageMode } from '../hooks/use_page_mode';
+import { ChatForm, ChatFormFields, PlaygroundPageMode } from '../types';
+
+import { Chat } from './chat';
+import { Header } from './header';
+import { QueryMode } from './query_mode/query_mode';
+import { SearchMode } from './search_mode/search_mode';
+import { ChatSetupPage } from './setup_page/chat_setup_page';
+
+import { SearchPlaygroundSetupPage } from './setup_page/search_playground_setup_page';
 
 export interface AppProps {
   showDocs?: boolean;

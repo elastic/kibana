@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+
 import { PlaygroundPageMode } from '../types';
 
 export const usePageMode = ({

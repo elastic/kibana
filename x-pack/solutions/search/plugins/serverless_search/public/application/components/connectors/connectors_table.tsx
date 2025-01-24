@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+
+import { generatePath } from 'react-router-dom';
+
 import {
   copyToClipboard,
   Criteria,
@@ -34,17 +38,17 @@ import {
   syncStatusToColor,
   syncStatusToText,
 } from '@kbn/search-connectors';
-import React, { useEffect, useState } from 'react';
-import { generatePath } from 'react-router-dom';
+
 import {
   CONNECTORS_LABEL,
   COPY_CONNECTOR_ID_LABEL,
   DELETE_CONNECTOR_LABEL,
 } from '../../../../common/i18n_string';
-import { useConnectors } from '../../hooks/api/use_connectors';
-import { useConnectorTypes } from '../../hooks/api/use_connector_types';
-import { useKibanaServices } from '../../hooks/use_kibana';
 import { EDIT_CONNECTOR_PATH } from '../../constants';
+import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { useConnectors } from '../../hooks/api/use_connectors';
+import { useKibanaServices } from '../../hooks/use_kibana';
+
 import { DeleteConnectorModal } from './delete_connector_modal';
 
 export const ConnectorsTable: React.FC = () => {

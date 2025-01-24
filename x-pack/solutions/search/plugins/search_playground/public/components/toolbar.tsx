@@ -5,11 +5,14 @@
  * 2.0.
  */
 
-import { EuiFlexGroup } from '@elastic/eui';
 import React from 'react';
+
+import { EuiFlexGroup } from '@elastic/eui';
+
+import { PlaygroundPageMode } from '../types';
+
 import { DataActionButton } from './data_action_button';
 import { ViewCodeAction } from './view_code/view_code_action';
-import { PlaygroundPageMode } from '../types';
 
 export const Toolbar: React.FC<{ selectedPageMode: PlaygroundPageMode }> = ({
   selectedPageMode = PlaygroundPageMode.chat,

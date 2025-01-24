@@ -6,10 +6,13 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
-import { APIRoutes } from '../types';
-import { useKibana } from './use_kibana';
+
 import { INFERENCE_ENDPOINTS_QUERY_KEY } from '../../common/constants';
+import { APIRoutes } from '../types';
+
+import { useKibana } from './use_kibana';
 
 export const useQueryInferenceEndpoints = () => {
   const { services } = useKibana();

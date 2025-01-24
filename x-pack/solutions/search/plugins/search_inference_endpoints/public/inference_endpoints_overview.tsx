@@ -6,6 +6,7 @@
  */
 
 import React, { useMemo } from 'react';
+
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { App } from './components/app';

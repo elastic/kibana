@@ -6,9 +6,12 @@
  */
 
 import { useQuery } from '@tanstack/react-query';
+
 import { IndexName } from '@elastic/elasticsearch/lib/api/types';
-import { useKibana } from './use_kibana';
+
 import { APIRoutes } from '../types';
+
+import { useKibana } from './use_kibana';
 
 export const useQueryIndices = (
   {

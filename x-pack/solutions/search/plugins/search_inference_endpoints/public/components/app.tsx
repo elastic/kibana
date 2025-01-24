@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { InferenceEndpoints } from './inference_endpoints';
 
 export const App: React.FC = () => {

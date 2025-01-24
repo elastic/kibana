@@ -7,6 +7,8 @@
 
 import React, { useState } from 'react';
 
+import { css } from '@emotion/react';
+
 import {
   EuiButton,
   EuiButtonIcon,
@@ -26,8 +28,8 @@ import {
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { MetaDataProps } from './result_types';
 
 interface Props {

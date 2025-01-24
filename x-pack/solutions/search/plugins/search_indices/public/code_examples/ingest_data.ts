@@ -6,13 +6,14 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { IngestDataCodeExamples } from '../types';
 
+import { INSTALL_INSTRUCTIONS_TITLE, INSTALL_INSTRUCTIONS_DESCRIPTION } from './constants';
+import { CurlIngestDataExample } from './curl';
 import { JSIngestDataExample } from './javascript';
 import { PythonIngestDataExample } from './python';
 import { ConsoleIngestDataExample } from './sense';
-import { CurlIngestDataExample } from './curl';
-import { INSTALL_INSTRUCTIONS_TITLE, INSTALL_INSTRUCTIONS_DESCRIPTION } from './constants';
 
 const addMappingsTitle = i18n.translate(
   'xpack.searchIndices.codeExamples.serverless.denseVector.mappingsTitle',

@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { Index } from '@kbn/index-management-shared-types';
 import { useQuery } from '@tanstack/react-query';
+
+import type { Index } from '@kbn/index-management-shared-types';
+
 import { QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
 

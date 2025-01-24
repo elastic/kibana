@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import { useQuery } from '@tanstack/react-query';
+
 import { Pagination } from '@elastic/eui';
 import { ConnectorSyncJob, Paginate } from '@kbn/search-connectors';
-import { useQuery } from '@tanstack/react-query';
+
 import { useKibanaServices } from '../use_kibana';
 
 export const useSyncJobs = (

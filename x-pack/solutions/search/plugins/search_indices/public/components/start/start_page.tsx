@@ -6,19 +6,21 @@
  */
 
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { EuiLoadingLogo, EuiPageTemplate } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { useKibana } from '../../hooks/use_kibana';
 import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
+import { useKibana } from '../../hooks/use_kibana';
 
-import { useIndicesRedirect } from './hooks/use_indices_redirect';
-import { ElasticsearchStart } from './elasticsearch_start';
-import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
 import { usePageChrome } from '../../hooks/use_page_chrome';
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
+import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
+
+import { ElasticsearchStart } from './elasticsearch_start';
+import { useIndicesRedirect } from './hooks/use_indices_redirect';
 
 const PageTitle = i18n.translate('xpack.searchIndices.startPage.docTitle', {
   defaultMessage: 'Create your first index',

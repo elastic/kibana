@@ -6,8 +6,10 @@
  */
 
 import React from 'react';
-import { ListUsageResults } from './list_usage_results';
+
 import { render, screen, fireEvent } from '@testing-library/react';
+
+import { ListUsageResults } from './list_usage_results';
 
 describe('ListUsageResults', () => {
   const items = [

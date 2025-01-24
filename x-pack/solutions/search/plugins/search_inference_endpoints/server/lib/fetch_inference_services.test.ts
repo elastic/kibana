@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { fetchInferenceServices } from './fetch_inference_services';
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { mockProviders } from '../../public/utils/test_utils/test_utils';
+
+import { fetchInferenceServices } from './fetch_inference_services';
 
 describe('fetch inference services', () => {
   beforeEach(() => {

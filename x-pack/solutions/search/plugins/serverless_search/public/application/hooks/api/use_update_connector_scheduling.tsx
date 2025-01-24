@@ -10,8 +10,10 @@
  * 2.0.
  */
 
-import { SchedulingConfiguraton } from '@kbn/search-connectors';
 import { useMutation } from '@tanstack/react-query';
+
+import { SchedulingConfiguraton } from '@kbn/search-connectors';
+
 import { useKibanaServices } from '../use_kibana';
 
 export const useConnectorScheduling = (connectorId: string) => {

@@ -6,6 +6,7 @@
  */
 
 import type { PluginInitializerContext } from '@kbn/core-plugins-browser';
+
 import { SearchNavigationPlugin } from './plugin';
 
 export function plugin(initializerContext: PluginInitializerContext) {

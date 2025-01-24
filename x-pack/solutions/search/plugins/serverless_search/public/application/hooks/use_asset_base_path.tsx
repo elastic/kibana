@@ -6,6 +6,7 @@
  */
 
 import { PLUGIN_ID } from '../../../common';
+
 import { useKibanaServices } from './use_kibana';
 
 export const useAssetBasePath = () => {

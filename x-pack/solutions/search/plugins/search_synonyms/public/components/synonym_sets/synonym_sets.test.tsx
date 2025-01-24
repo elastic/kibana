@@ -8,6 +8,7 @@
 import React from 'react';
 
 import { render, screen } from '@testing-library/react';
+
 import { SynonymSets } from './synonym_sets';
 
 jest.mock('../../hooks/use_fetch_synonyms_sets', () => ({

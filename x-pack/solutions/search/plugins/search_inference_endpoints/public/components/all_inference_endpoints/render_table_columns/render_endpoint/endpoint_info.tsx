@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
+
+import { EuiBetaBadge, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+
 import { isEndpointPreconfigured } from '../../../../utils/preconfigured_endpoint_helper';
-import * as i18n from './translations';
+
 import { isProviderTechPreview } from '../../../../utils/reranker_helper';
+
+import * as i18n from './translations';
 
 export interface EndpointInfoProps {
   inferenceId: string;

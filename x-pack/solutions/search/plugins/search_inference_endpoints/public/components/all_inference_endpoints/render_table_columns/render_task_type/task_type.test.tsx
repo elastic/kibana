@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { TaskTypes } from '../../../../../common/types';
-import { render, screen } from '@testing-library/react';
 import React from 'react';
+
+import { render, screen } from '@testing-library/react';
+
+import { TaskTypes } from '../../../../../common/types';
+
 import { TaskType } from './task_type';
 
 describe('TaskType component', () => {

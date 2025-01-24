@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiBadgeGroup, EuiBadge } from '@elastic/eui';
 
 export interface BadgeListProps {

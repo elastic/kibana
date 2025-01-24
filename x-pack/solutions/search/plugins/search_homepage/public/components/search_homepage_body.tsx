@@ -5,8 +5,9 @@
  * 2.0.
  */
 import React from 'react';
-import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
 import { ConsoleLinkButton } from './console_link_button';
 

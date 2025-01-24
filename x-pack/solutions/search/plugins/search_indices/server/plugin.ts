@@ -13,8 +13,8 @@ import type {
   Logger,
 } from '@kbn/core/server';
 
-import type { SearchIndicesPluginSetup, SearchIndicesPluginStart } from './types';
 import { defineRoutes } from './routes';
+import type { SearchIndicesPluginSetup, SearchIndicesPluginStart } from './types';
 
 export class SearchIndicesPlugin
   implements Plugin<SearchIndicesPluginSetup, SearchIndicesPluginStart>

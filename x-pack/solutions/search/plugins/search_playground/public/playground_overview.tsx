@@ -6,13 +6,15 @@
  */
 
 import React, { useMemo } from 'react';
+
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
+
+import { App } from './components/app';
+import { useKibana } from './hooks/use_kibana';
+import { usePlaygroundBreadcrumbs } from './hooks/use_playground_breadcrumbs';
 import { PlaygroundProvider } from './providers/playground_provider';
 
-import { useKibana } from './hooks/use_kibana';
 import { PlaygroundPageMode } from './types';
-import { App } from './components/app';
-import { usePlaygroundBreadcrumbs } from './hooks/use_playground_breadcrumbs';
 
 interface PlaygroundOverviewProps {
   pageMode?: PlaygroundPageMode;

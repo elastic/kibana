@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import {
   EuiButtonEmpty,
   EuiFlexGroup,
@@ -16,7 +18,6 @@ import {
   EuiTitle,
   useGeneratedHtmlId,
 } from '@elastic/eui';
-import React from 'react';
 
 import { InferenceForm } from './inference_form';
 import * as i18n from './translations';

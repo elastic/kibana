@@ -9,6 +9,7 @@ import React, { useState } from 'react';
 
 import { EuiCodeBlock, EuiConfirmModal } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+
 import { useDeleteSynonymsSet } from '../../hooks/use_delete_synonyms_set';
 
 export interface DeleteSynonymsSetModalProps {

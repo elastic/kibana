@@ -6,6 +6,7 @@
  */
 
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { DEFAULT_DOCS_PER_PAGE } from '../types';
 
 import { fetchSearchResults } from './fetch_search_results';

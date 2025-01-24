@@ -6,9 +6,10 @@
  */
 
 import React from 'react';
-import { i18n } from '@kbn/i18n';
+
 import { EuiButton, EuiButtonEmpty } from '@elastic/eui';
 import { EmbeddedConsoleViewButtonProps } from '@kbn/console-plugin/public';
+import { i18n } from '@kbn/i18n';
 
 export interface SearchNotebooksButtonProps extends EmbeddedConsoleViewButtonProps {
   clearNotebookList: () => void;

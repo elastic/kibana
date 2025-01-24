@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+
+import { useController } from 'react-hook-form';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,12 +21,11 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
-import { useController } from 'react-hook-form';
+
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
-import { AnalyticsEvents } from '../../analytics/constants';
 
 export const EditContextPanel: React.FC = () => {
   const usageTracker = useUsageTracker();

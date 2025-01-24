@@ -6,6 +6,7 @@
  */
 
 import { CreateIndexCodeExamples } from '../types';
+
 import {
   CONNECT_CREATE_DEFAULT_INDEX_CMD_DESCRIPTION,
   CONNECT_CREATE_DEFAULT_INDEX_CMD_TITLE,

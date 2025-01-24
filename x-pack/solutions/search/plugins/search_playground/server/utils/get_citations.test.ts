@@ -6,6 +6,7 @@
  */
 
 import { Document } from '@langchain/core/documents';
+
 import { getCitations } from './get_citations';
 
 describe('getCitations', () => {

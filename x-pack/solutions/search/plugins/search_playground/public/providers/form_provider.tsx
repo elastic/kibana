@@ -4,13 +4,14 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';
 import React, { useEffect, useMemo } from 'react';
+import { FormProvider as ReactHookFormProvider, useForm } from 'react-hook-form';
 import { useSearchParams } from 'react-router-dom-v5-compat';
+
 import { useIndicesValidation } from '../hooks/use_indices_validation';
+import { useLLMsModels } from '../hooks/use_llms_models';
 import { useLoadFieldsByIndices } from '../hooks/use_load_fields_by_indices';
 import { ChatForm, ChatFormFields } from '../types';
-import { useLLMsModels } from '../hooks/use_llms_models';
 
 type PartialChatForm = Partial<ChatForm>;
 export const LOCAL_STORAGE_KEY = 'search_playground_session';

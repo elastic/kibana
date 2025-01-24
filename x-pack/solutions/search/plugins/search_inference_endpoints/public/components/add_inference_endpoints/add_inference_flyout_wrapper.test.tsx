@@ -5,14 +5,17 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+
 import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
-import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
 
-import { AddInferenceFlyoutWrapper } from './add_inference_flyout_wrapper';
 import { mockProviders } from '../../utils/test_utils/test_utils';
+
+import { AddInferenceFlyoutWrapper } from './add_inference_flyout_wrapper';
 
 const mockAddEndpoint = jest.fn();
 const onClose = jest.fn();

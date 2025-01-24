@@ -6,10 +6,14 @@
  */
 
 import React from 'react';
+
 import { render } from '@testing-library/react';
-import { AddDocumentsCodeExample, exampleTexts } from './add_documents_code_example';
-import { generateSampleDocument } from '../../utils/document_generation';
+
 import { MappingProperty } from '@elastic/elasticsearch/lib/api/types';
+
+import { generateSampleDocument } from '../../utils/document_generation';
+
+import { AddDocumentsCodeExample, exampleTexts } from './add_documents_code_example';
 
 jest.mock('../../utils/language', () => ({
   getDefaultCodingLanguage: jest.fn().mockReturnValue('python'),

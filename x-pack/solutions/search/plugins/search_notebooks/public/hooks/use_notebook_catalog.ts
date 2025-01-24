@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { NotebookCatalogResponse } from '../../common/types';
+
 import { useKibanaServices } from './use_kibana';
 import { useNotebookList } from './use_notebooks_list';
 

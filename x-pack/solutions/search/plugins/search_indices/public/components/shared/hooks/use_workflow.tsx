@@ -6,17 +6,18 @@
  */
 
 import { useState } from 'react';
+
+import {
+  DefaultCodeExamples,
+  DenseVectorCodeExamples,
+  SemanticCodeExamples,
+} from '../../../code_examples/create_index';
 import {
   DenseVectorIngestDataCodeExamples,
   SemanticIngestDataCodeExamples,
   DefaultIngestDataCodeExamples,
 } from '../../../code_examples/ingest_data';
 import { WorkflowId, workflows } from '../../../code_examples/workflows';
-import {
-  DefaultCodeExamples,
-  DenseVectorCodeExamples,
-  SemanticCodeExamples,
-} from '../../../code_examples/create_index';
 
 const workflowIdToCreateIndexExamples = (type: WorkflowId) => {
   switch (type) {

@@ -6,6 +6,9 @@
  */
 
 import React, { useState } from 'react';
+
+import { useFormContext } from 'react-hook-form';
+
 import {
   EuiButtonEmpty,
   EuiContextMenu,
@@ -19,7 +22,7 @@ import {
   EuiCallOut,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useFormContext } from 'react-hook-form';
+
 import { docLinks } from '../../../common/doc_links';
 import { useLLMsModels } from '../../hooks/use_llms_models';
 import { ChatForm, ChatFormFields } from '../../types';

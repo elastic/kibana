@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import type { Subscription } from 'rxjs';
+
 import type {
   CoreSetup,
   CoreStart,
@@ -12,10 +14,10 @@ import type {
   PluginInitializerContext,
   ScopedHistory,
 } from '@kbn/core/public';
-import type { Subscription } from 'rxjs';
 import type { ChromeBreadcrumb, ChromeStyle } from '@kbn/core-chrome-browser';
 import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
+
 import type {
   SearchNavigationPluginSetup,
   SearchNavigationPluginStart,

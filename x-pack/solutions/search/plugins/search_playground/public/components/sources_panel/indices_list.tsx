@@ -5,8 +5,9 @@
  * 2.0.
  */
 
-import { EuiFormRow, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import React from 'react';
+
+import { EuiFormRow, EuiListGroup, EuiListGroupItem } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 
 interface IndicesListProps {

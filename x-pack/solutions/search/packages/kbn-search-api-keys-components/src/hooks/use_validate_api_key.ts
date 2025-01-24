@@ -6,7 +6,9 @@
  */
 
 import { useMutation } from '@tanstack/react-query';
+
 import { useKibana } from '@kbn/kibana-react-plugin/public';
+
 import { APIRoutes } from '../types';
 
 export const useValidateApiKey = (): ((id: string) => Promise<boolean>) => {

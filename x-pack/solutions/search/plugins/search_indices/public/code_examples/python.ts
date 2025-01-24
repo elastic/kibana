@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 import { API_KEY_PLACEHOLDER, INDEX_PLACEHOLDER } from '../constants';
 import {
   CodeLanguage,

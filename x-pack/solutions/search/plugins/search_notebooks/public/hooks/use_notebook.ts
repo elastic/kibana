@@ -7,6 +7,7 @@
 import { useQuery } from '@tanstack/react-query';
 
 import { Notebook } from '../../common/types';
+
 import { useKibanaServices } from './use_kibana';
 
 export const useNotebook = (id: string) => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { useCallback } from 'react';
+
 import {
   EuiBadge,
   EuiFlexGroup,
@@ -16,12 +18,11 @@ import {
   EuiIcon,
   EuiSpacer,
 } from '@elastic/eui';
-import React, { useCallback } from 'react';
 import { MANAGEMENT_APP_ID } from '@kbn/deeplinks-management/constants';
 
 import { useKibana } from '../../../../../../hooks/use_kibana';
-import { InferenceUsageInfo } from '../../../../types';
 import { PIPELINE_URL } from '../../../../constants';
+import { InferenceUsageInfo } from '../../../../types';
 
 interface UsageProps {
   usageItem: InferenceUsageInfo;

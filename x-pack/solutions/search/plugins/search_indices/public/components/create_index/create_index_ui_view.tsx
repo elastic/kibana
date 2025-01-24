@@ -9,13 +9,12 @@ import React, { useCallback, useState } from 'react';
 
 import type { UserStartPrivilegesResponse } from '../../../common';
 import { AnalyticsEvents } from '../../analytics/constants';
-import { CreateIndexFormState } from '../../types';
-import { CreateIndexForm } from '../shared/create_index_form';
-import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { isValidIndexName } from '../../utils/indices';
-import { useCreateIndex } from '../shared/hooks/use_create_index';
-
 import { useKibana } from '../../hooks/use_kibana';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+import { CreateIndexFormState } from '../../types';
+import { isValidIndexName } from '../../utils/indices';
+import { CreateIndexForm } from '../shared/create_index_form';
+import { useCreateIndex } from '../shared/hooks/use_create_index';
 
 export interface CreateIndexUIViewProps {
   formState: CreateIndexFormState;

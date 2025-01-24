@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
 import React from 'react';
+
+import { renderReactTestingLibraryWithI18n as render } from '@kbn/test-jest-helpers';
+
 import { useKibana } from '../../../../../../hooks/use_kibana';
+
 import { CopyIDAction } from './copy_id_action';
 
 const mockInferenceEndpoint = {

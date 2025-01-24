@@ -6,8 +6,9 @@
  */
 
 import React, { useCallback, createContext, useState, useMemo, useRef } from 'react';
-import { useCreateApiKey } from '../hooks/use_create_api_key';
+
 import { Status } from '../constants';
+import { useCreateApiKey } from '../hooks/use_create_api_key';
 import { useValidateApiKey } from '../hooks/use_validate_api_key';
 
 const API_KEY_STORAGE_KEY = 'searchApiKey';

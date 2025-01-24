@@ -6,10 +6,12 @@
  */
 
 import React, { useState } from 'react';
+
 import { EuiFieldSearch, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { InferenceUsageInfo } from '../../../../types';
 import * as i18n from '../delete/confirm_delete_endpoint/translations';
+
 import { IndexItem } from './index_item';
 import { PipelineItem } from './pipeline_item';
 
@@ -27,9 +29,9 @@ export const ListUsageResults: React.FC<ListUsageResultsProps> = ({ list }) => {
           placeholder={i18n.SEARCH_LABEL}
           value={term}
           onChange={(e) => setTerm(e.target.value)}
-          isClearable={true}
+          isClearable
           aria-label={i18n.SEARCH_ARIA_LABEL}
-          fullWidth={true}
+          fullWidth
           data-test-subj="usageFieldSearch"
         />
       </EuiFlexItem>

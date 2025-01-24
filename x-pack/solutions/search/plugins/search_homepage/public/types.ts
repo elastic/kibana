@@ -6,10 +6,12 @@
  */
 
 import type { ComponentProps, FC } from 'react';
+
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
 import type { AppMountParameters } from '@kbn/core/public';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
+
 import type { App } from './components/stack_app';
 
 export interface SearchHomepageConfigType {

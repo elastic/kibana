@@ -6,13 +6,17 @@
  */
 
 import React, { useMemo } from 'react';
+
 import { EuiLink, EuiPageTemplate, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
-import { ElasticManagedConnectorsEmptyPrompt } from './connectors/elastic_managed_connectors_empty_prompt';
-import { useKibanaServices } from '../hooks/use_kibana';
+
 import { docLinks } from '../../../common/doc_links';
+import { LEARN_MORE_LABEL } from '../../../common/i18n_string';
+
+import { useKibanaServices } from '../hooks/use_kibana';
+
+import { ElasticManagedConnectorsEmptyPrompt } from './connectors/elastic_managed_connectors_empty_prompt';
 
 export const ConnectorsElasticManaged = () => {
   const { console: consolePlugin } = useKibanaServices();

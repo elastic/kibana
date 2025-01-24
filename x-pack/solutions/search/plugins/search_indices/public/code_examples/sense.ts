@@ -7,6 +7,7 @@
 
 import { INDEX_PLACEHOLDER } from '../constants';
 import { IngestDataCodeDefinition } from '../types';
+
 import { CreateIndexLanguageExamples } from './types';
 
 export const ConsoleCreateIndexExamples: CreateIndexLanguageExamples = {

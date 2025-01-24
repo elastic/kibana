@@ -6,9 +6,11 @@
  */
 
 import React from 'react';
+
 import { EuiEmptyPrompt, EuiCodeBlock } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import type { AppMetricsTracker } from '../types';
 import { getErrorMessage } from '../utils/get_error_message';
 

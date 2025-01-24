@@ -7,13 +7,13 @@
 
 import React, { useEffect, useState } from 'react';
 
+import { i18n } from '@kbn/i18n';
 import {
   DocumentList,
   DocumentsOverview,
   INDEX_DOCUMENTS_META_DEFAULT,
 } from '@kbn/search-index-documents';
 
-import { i18n } from '@kbn/i18n';
 import { useIndexDocumentSearch } from '../../hooks/api/use_index_documents';
 import { useIndexMappings } from '../../hooks/api/use_index_mappings';
 

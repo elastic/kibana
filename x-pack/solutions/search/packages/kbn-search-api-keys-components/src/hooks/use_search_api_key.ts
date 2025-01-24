@@ -6,6 +6,7 @@
  */
 
 import { useContext, useEffect } from 'react';
+
 import { ApiKeyContext } from '../providers/search_api_key_provider';
 
 export const useSearchApiKey = () => {

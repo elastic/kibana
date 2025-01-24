@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React, { useState } from 'react';
+
+import { useQueryClient, useMutation } from '@tanstack/react-query';
+
 import { EuiButton, EuiSpacer, Pagination } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -13,11 +17,11 @@ import {
   pageToPagination,
   SyncJobsTable,
 } from '@kbn/search-connectors';
-import { useQueryClient, useMutation } from '@tanstack/react-query';
-import React, { useState } from 'react';
+
 import { useConnector } from '../../../hooks/api/use_connector';
 import { useSyncJobs } from '../../../hooks/api/use_sync_jobs';
 import { useKibanaServices } from '../../../hooks/use_kibana';
+
 import { SyncScheduledCallOut } from './sync_scheduled_callout';
 
 interface ConnectorOverviewProps {

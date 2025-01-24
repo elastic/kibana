@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import type { IToasts } from '@kbn/core/public';
 import { QueryClient, MutationCache, QueryCache } from '@tanstack/react-query';
+
+import type { IToasts } from '@kbn/core/public';
+
 import { getErrorCode, getErrorMessage, isKibanaServerError } from '../utils/errors';
 
 export function initQueryClient(toasts: IToasts): QueryClient {

@@ -6,8 +6,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
   EuiEmptyPrompt,
   EuiFlexItem,
@@ -22,6 +21,8 @@ import {
   EuiSteps,
 } from '@elastic/eui';
 import { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import {
   CodeBox,
   getConsoleRequest,
@@ -31,21 +32,18 @@ import {
   LanguageDefinitionSnippetArguments,
 } from '@kbn/search-api-panels';
 
+import { DEFAULT_INGESTION_PIPELINE } from '../../../../common';
 import { BACK_LABEL } from '../../../../common/i18n_string';
 
-import { useAssetBasePath } from '../../hooks/use_asset_base_path';
-import { useKibanaServices } from '../../hooks/use_kibana';
-import { javaDefinition } from '../languages/java';
-import { languageDefinitions } from '../languages/languages';
-import { LanguageGrid } from '../languages/language_grid';
-
-import { useIngestPipelines } from '../../hooks/api/use_ingest_pipelines';
-import { DEFAULT_INGESTION_PIPELINE } from '../../../../common';
-
 import { API_KEY_PLACEHOLDER, CLOUD_ID_PLACEHOLDER } from '../../constants';
-
-import { ApiKeyPanel } from '../api_key/api_key';
+import { useIngestPipelines } from '../../hooks/api/use_ingest_pipelines';
+import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useElasticsearchUrl } from '../../hooks/use_elastisearch_url';
+import { useKibanaServices } from '../../hooks/use_kibana';
+import { ApiKeyPanel } from '../api_key/api_key';
+import { javaDefinition } from '../languages/java';
+import { LanguageGrid } from '../languages/language_grid';
+import { languageDefinitions } from '../languages/languages';
 
 export interface APIIndexEmptyPromptProps {
   indexName: string;

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect, useMemo } from 'react';
+
+import { useController, useWatch } from 'react-hook-form';
+
 import {
   EuiAccordion,
   EuiBasicTable,
@@ -20,13 +24,12 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useMemo } from 'react';
-import { useController, useWatch } from 'react-hook-form';
+
+import { docLinks } from '../../../common/doc_links';
+import { AnalyticsEvents } from '../../analytics/constants';
 import { useSourceIndicesFields } from '../../hooks/use_source_indices_field';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, ChatFormFields } from '../../types';
-import { AnalyticsEvents } from '../../analytics/constants';
-import { docLinks } from '../../../common/doc_links';
 import { createQuery } from '../../utils/create_query';
 
 const isQueryFieldSelected = (

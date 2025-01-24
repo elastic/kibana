@@ -5,10 +5,12 @@
  * 2.0.
  */
 import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem, EuiIcon, EuiPanel, EuiText } from '@elastic/eui';
+import { SERVERLESS_ES_WEB_CRAWLERS_ID } from '@kbn/deeplinks-search/constants';
 import { i18n } from '@kbn/i18n';
 import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
-import { SERVERLESS_ES_WEB_CRAWLERS_ID } from '@kbn/deeplinks-search/constants';
+
 import { BACK_LABEL, COMING_SOON_LABEL } from '../../../../common/i18n_string';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
 import { useKibanaServices } from '../../hooks/use_kibana';

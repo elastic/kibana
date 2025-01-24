@@ -7,8 +7,10 @@
 
 import React from 'react';
 
-import { EuiCodeBlock } from '@elastic/eui';
 import { useFormContext } from 'react-hook-form';
+
+import { EuiCodeBlock } from '@elastic/eui';
+
 import { ChatFormFields } from '../../../types';
 
 export const DevToolsCode: React.FC = () => {

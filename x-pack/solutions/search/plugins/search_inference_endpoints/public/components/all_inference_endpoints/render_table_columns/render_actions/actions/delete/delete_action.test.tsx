@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { render, screen, fireEvent } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-import { DeleteAction } from './delete_action';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { render, screen, fireEvent } from '@testing-library/react';
+
 import { InferenceEndpointUI } from '../../../../types';
+
+import { DeleteAction } from './delete_action';
 
 describe('Delete Action', () => {
   const mockProvider = {

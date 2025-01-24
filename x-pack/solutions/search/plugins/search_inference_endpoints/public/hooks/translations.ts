@@ -6,6 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
+
 export * from '../../common/translations';
 
 export const ENDPOINT_DELETION_FAILED = i18n.translate(

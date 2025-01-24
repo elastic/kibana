@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { EuiCallOut, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+
+import { EuiCallOut, EuiSpacer } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { useConnectors } from '../../../hooks/api/use_connectors';
 
 export const ConnectorPrivilegesCallout: React.FC = () => {

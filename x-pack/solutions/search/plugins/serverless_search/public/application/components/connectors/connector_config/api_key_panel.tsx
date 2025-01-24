@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import {
   EuiPanel,
   EuiFlexGroup,
@@ -18,12 +20,13 @@ import {
   EuiCodeBlock,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { Connector, CONNECTORS_INDEX } from '@kbn/search-connectors';
+
 import { OPTIONAL_LABEL } from '../../../../../common/i18n_string';
-import { useCreateApiKey } from '../../../hooks/api/use_create_api_key';
 import { useGetApiKeys } from '../../../hooks/api/use_api_key';
+import { useCreateApiKey } from '../../../hooks/api/use_create_api_key';
+
 interface ApiKeyPanelProps {
   connector: Connector;
 }

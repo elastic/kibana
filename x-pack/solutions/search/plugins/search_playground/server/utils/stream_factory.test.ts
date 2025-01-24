@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { streamFactory } from './stream_factory';
-import { Logger } from '@kbn/logging';
 import { PassThrough } from 'stream';
+
+import { Logger } from '@kbn/logging';
+
+import { streamFactory } from './stream_factory';
 
 describe('streamFactory', () => {
   it('should create a stream with the correct initial state', () => {

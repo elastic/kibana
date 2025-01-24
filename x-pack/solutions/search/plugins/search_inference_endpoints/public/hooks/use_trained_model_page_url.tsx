@@ -6,6 +6,7 @@
  */
 
 import { useEffect, useState } from 'react';
+
 import { useKibana } from './use_kibana';
 
 export const useTrainedModelPageUrl = () => {

@@ -10,6 +10,7 @@ import type { SharePluginSetup } from '@kbn/share-plugin/public';
 import type { SerializableRecord } from '@kbn/utility-types';
 
 import { PLUGIN_ID } from '../common/constants';
+
 import { SEARCH_INFERENCE_ENDPOINTS_PATH } from './routes';
 
 export function registerLocators(share: SharePluginSetup) {

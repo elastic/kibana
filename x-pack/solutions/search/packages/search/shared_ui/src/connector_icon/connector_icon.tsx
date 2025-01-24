@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiToolTip, EuiIcon } from '@elastic/eui';
 
 interface ConnectorIconProps {

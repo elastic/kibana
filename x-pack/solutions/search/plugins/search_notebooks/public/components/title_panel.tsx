@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { FC, PropsWithChildren } from 'react';
+
 import { EuiHorizontalRule, EuiPanel, EuiText } from '@elastic/eui';
 
 export const TitlePanel: FC<PropsWithChildren<unknown>> = ({ children }) => (

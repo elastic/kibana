@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 
 import { ConnectorsCallout } from './connectors_callout';

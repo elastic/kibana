@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -16,18 +18,18 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { ConnectorIcon } from '@kbn/search-shared-ui';
 import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
+
 import { docLinks } from '../../../../common/doc_links';
-import { useKibanaServices } from '../../hooks/use_kibana';
+import { BACK_LABEL } from '../../../../common/i18n_string';
+import { ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
+import { useConnectors } from '../../hooks/api/use_connectors';
 import { useCreateConnector } from '../../hooks/api/use_create_connector';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
-import { useConnectors } from '../../hooks/api/use_connectors';
-import { ELASTIC_MANAGED_CONNECTOR_PATH, BASE_CONNECTORS_PATH } from '../../constants';
-import { BACK_LABEL } from '../../../../common/i18n_string';
+import { useKibanaServices } from '../../hooks/use_kibana';
 
 export const SelfManagedConnectorsEmptyPrompt: React.FC = () => {
   const connectorTypes = useConnectorTypes();

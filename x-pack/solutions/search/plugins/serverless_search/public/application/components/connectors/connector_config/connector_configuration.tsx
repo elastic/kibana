@@ -6,7 +6,6 @@
  */
 import React, { useEffect, useState } from 'react';
 
-import { Connector, ConnectorStatus } from '@kbn/search-connectors';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -17,18 +16,22 @@ import {
   EuiTabbedContentTab,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { Connector, ConnectorStatus } from '@kbn/search-connectors';
+
 import {
   CONFIGURATION_LABEL,
   OVERVIEW_LABEL,
   SCHEDULING_LABEL,
 } from '../../../../../common/i18n_string';
-import { ConnectorLinkElasticsearch } from './connector_link';
-import { ConnectorConfigFields } from './connector_config_fields';
-import { ConnectorIndexName } from './connector_index_name';
-import { ConnectorConfigurationPanels } from './connector_config_panels';
-import { ConnectorOverview } from './connector_overview';
-import { ConnectorScheduling } from '../conector_scheduling_tab/connector_scheduling';
+
 import { useConnectors } from '../../../hooks/api/use_connectors';
+import { ConnectorScheduling } from '../conector_scheduling_tab/connector_scheduling';
+
+import { ConnectorConfigFields } from './connector_config_fields';
+import { ConnectorConfigurationPanels } from './connector_config_panels';
+import { ConnectorIndexName } from './connector_index_name';
+import { ConnectorLinkElasticsearch } from './connector_link';
+import { ConnectorOverview } from './connector_overview';
 
 interface ConnectorConfigurationProps {
   connector: Connector;

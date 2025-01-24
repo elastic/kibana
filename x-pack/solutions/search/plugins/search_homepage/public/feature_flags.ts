@@ -6,6 +6,7 @@
  */
 
 import { IUiSettingsClient } from '@kbn/core/public';
+
 import { HOMEPAGE_FEATURE_FLAG_ID } from '../common';
 
 export function isHomepageEnabled(uiSettings: IUiSettingsClient): boolean {

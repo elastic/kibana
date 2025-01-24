@@ -5,29 +5,32 @@
  * 2.0.
  */
 
-import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { DataStreamString } from '@ai-sdk/ui-utils';
 import { Document } from '@langchain/core/documents';
+import { BaseLanguageModel } from '@langchain/core/language_models/base';
+import { BaseMessage } from '@langchain/core/messages';
+import { HumanMessage, AIMessage } from '@langchain/core/messages';
+import { StringOutputParser } from '@langchain/core/output_parsers';
 import {
   ChatPromptTemplate,
   PromptTemplate,
   SystemMessagePromptTemplate,
 } from '@langchain/core/prompts';
 import { Runnable, RunnableLambda, RunnableSequence } from '@langchain/core/runnables';
-import { StringOutputParser } from '@langchain/core/output_parsers';
 import { createDataStream, LangChainAdapter } from 'ai';
 import type { DataStreamWriter } from 'ai';
-import type { DataStreamString } from '@ai-sdk/ui-utils';
-import { BaseLanguageModel } from '@langchain/core/language_models/base';
-import { BaseMessage } from '@langchain/core/messages';
-import { HumanMessage, AIMessage } from '@langchain/core/messages';
+
+import { SearchHit } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+
 import { ChatMessage } from '../types';
-import { ElasticsearchRetriever } from './elasticsearch_retriever';
-import { renderTemplate } from '../utils/render_template';
 
 import { AssistClient } from '../utils/assist';
 import { getCitations } from '../utils/get_citations';
-import { getTokenEstimate, getTokenEstimateFromMessages } from './token_tracking';
+import { renderTemplate } from '../utils/render_template';
+
+import { ElasticsearchRetriever } from './elasticsearch_retriever';
 import { ContextLimitError } from './errors';
+import { getTokenEstimate, getTokenEstimateFromMessages } from './token_tracking';
 
 interface RAGOptions {
   index: string;

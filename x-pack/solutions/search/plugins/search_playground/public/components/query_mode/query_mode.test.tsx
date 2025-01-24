@@ -6,11 +6,16 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { QueryMode } from './query_mode';
+
 import { FormProvider, useForm } from 'react-hook-form';
+
+import { render, screen } from '@testing-library/react';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
 import { ChatFormFields } from '../../types';
+
+import { QueryMode } from './query_mode';
 
 jest.mock('../../hooks/use_source_indices_field', () => ({
   useSourceIndicesFields: () => ({

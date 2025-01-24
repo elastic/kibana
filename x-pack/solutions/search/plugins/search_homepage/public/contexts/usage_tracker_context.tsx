@@ -6,13 +6,14 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,
 } from '@kbn/usage-collection-plugin/public';
 
-import { createUsageTracker, createEmptyUsageTracker } from '../usage_tracker';
 import { AppUsageTracker } from '../types';
+import { createUsageTracker, createEmptyUsageTracker } from '../usage_tracker';
 
 const UsageTrackerContext = createContext<AppUsageTracker>(createEmptyUsageTracker());
 

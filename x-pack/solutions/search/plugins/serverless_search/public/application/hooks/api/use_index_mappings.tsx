@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
 import { useQuery } from '@tanstack/react-query';
+
+import { IndicesGetMappingIndexMappingRecord } from '@elastic/elasticsearch/lib/api/types';
+
 import { useKibanaServices } from '../use_kibana';
 
 export const useIndexMappings = (indexName: string) => {

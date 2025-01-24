@@ -5,8 +5,10 @@
  * 2.0.
  */
 import React from 'react';
-import { Route, Router, Routes } from '@kbn/shared-ux-router';
+
 import { Redirect } from 'react-router-dom';
+
+import { Route, Router, Routes } from '@kbn/shared-ux-router';
 
 import { useKibana } from '../hooks/use_kibana';
 import {
@@ -15,8 +17,9 @@ import {
   SEARCH_INDICES_DETAILS_TABS_PATH,
   CREATE_INDEX_PATH,
 } from '../routes';
-import { SearchIndexDetailsPage } from './indices/details_page';
+
 import { CreateIndexPage } from './create_index/create_index_page';
+import { SearchIndexDetailsPage } from './indices/details_page';
 
 export const SearchIndicesRouter: React.FC = () => {
   const { application, history } = useKibana().services;

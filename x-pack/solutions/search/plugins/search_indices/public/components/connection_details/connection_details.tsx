@@ -10,6 +10,7 @@ import React from 'react';
 import { i18n } from '@kbn/i18n';
 
 import { FormInfoField } from '@kbn/search-shared-ui';
+
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
 
 export const ConnectionDetails: React.FC = () => {

@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import {
   EuiButton,
   EuiCallOut,
@@ -16,9 +18,10 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { ConnectorStatus } from '@kbn/search-connectors';
-import React from 'react';
+
 import { docLinks } from '../../../../../common/doc_links';
 import { useAssetBasePath } from '../../../hooks/use_asset_base_path';
+
 import { ConnectionDetails } from './connection_details_panel';
 
 interface ConnectorLinkElasticsearchProps {

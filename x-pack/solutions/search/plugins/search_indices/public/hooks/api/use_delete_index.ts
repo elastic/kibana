@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
 import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { AcknowledgedResponseBase } from '@elastic/elasticsearch/lib/api/types';
+
 import { QueryKeys } from '../../constants';
 import { useKibana } from '../use_kibana';
 

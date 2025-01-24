@@ -7,9 +7,11 @@
 
 import React from 'react';
 
-import { EmptyPrompt } from './empty_prompt';
 import { render, screen } from '@testing-library/react';
+
 import { I18nProvider } from '@kbn/i18n-react';
+
+import { EmptyPrompt } from './empty_prompt';
 
 jest.mock('../../../common/doc_links', () => ({
   docLinks: {

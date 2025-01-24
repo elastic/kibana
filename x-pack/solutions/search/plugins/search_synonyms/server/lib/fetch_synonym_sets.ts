@@ -7,6 +7,7 @@
 
 import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
 import { ElasticsearchClient } from '@kbn/core/server';
+
 import { Page, Paginate, pageToPagination } from '../../common/pagination';
 
 export const fetchSynonymSets = async (

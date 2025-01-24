@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+
+import { css } from '@emotion/react';
+
 import {
   EuiCheckbox,
   EuiFlexGroup,
@@ -14,17 +18,18 @@ import {
   EuiText,
   EuiButtonEmpty,
 } from '@elastic/eui';
-import React from 'react';
-import { euiThemeVars } from '@kbn/ui-theme';
-import { css } from '@emotion/react';
 import { ENTERPRISE_SEARCH_CONTENT_APP_ID } from '@kbn/deeplinks-search';
 
 import { SEARCH_INDICES } from '@kbn/deeplinks-search/constants';
-import { InferenceUsageInfo } from '../../../../types';
+import { euiThemeVars } from '@kbn/ui-theme';
+
 import { useKibana } from '../../../../../../hooks/use_kibana';
-import { RenderMessageWithIcon } from './render_message_with_icon';
+import { InferenceUsageInfo } from '../../../../types';
+
 import * as i18n from '../delete/confirm_delete_endpoint/translations';
+
 import { ListUsageResults } from './list_usage_results';
+import { RenderMessageWithIcon } from './render_message_with_icon';
 
 interface ScanUsageResultsProps {
   list: InferenceUsageInfo[];
@@ -64,7 +69,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
         />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
+        <EuiPanel hasBorder>
           <EuiFlexGroup gutterSize="m" direction="column">
             <EuiFlexItem>
               <EuiFlexGroup justifyContent="spaceBetween" gutterSize="s" alignItems="center">
@@ -104,7 +109,7 @@ export const ScanUsageResults: React.FC<ScanUsageResultsProps> = ({
         <EuiHorizontalRule margin="s" />
       </EuiFlexItem>
       <EuiFlexItem>
-        <EuiPanel hasBorder={true}>
+        <EuiPanel hasBorder>
           <EuiCheckbox
             data-test-subj="warningCheckbox"
             id={'ignoreWarningCheckbox'}

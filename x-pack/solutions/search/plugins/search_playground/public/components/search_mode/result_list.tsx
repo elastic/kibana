@@ -7,14 +7,15 @@
 
 import React, { useEffect, useState } from 'react';
 
+import type { IndicesGetMappingResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
+import { Pagination as PaginationTypeEui } from '@elastic/eui';
+import type { DataView } from '@kbn/data-views-plugin/public';
+import { buildDataTableRecord } from '@kbn/discover-utils';
+import type { EsHitRecord } from '@kbn/discover-utils/types';
 import { DocumentList, pageToPagination } from '@kbn/search-index-documents';
 
-import type { DataView } from '@kbn/data-views-plugin/public';
-import type { EsHitRecord } from '@kbn/discover-utils/types';
-import type { IndicesGetMappingResponse, SearchHit } from '@elastic/elasticsearch/lib/api/types';
-import { buildDataTableRecord } from '@kbn/discover-utils';
 import { UnifiedDocViewerFlyout } from '@kbn/unified-doc-viewer-plugin/public';
-import { Pagination as PaginationTypeEui } from '@elastic/eui';
+
 import { useKibana } from '../../hooks/use_kibana';
 import { Pagination } from '../../types';
 

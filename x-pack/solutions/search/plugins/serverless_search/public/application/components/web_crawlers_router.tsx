@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
-import { WebCrawlersOverview } from './web_crawlers_overview';
+
+import { Route, Routes } from '@kbn/shared-ux-router';
+
 import { WebCrawlersElasticManaged } from './web_crawlers_elastic_managed';
+import { WebCrawlersOverview } from './web_crawlers_overview';
 
 export const WebCrawlersRouter: React.FC = () => {
   return (

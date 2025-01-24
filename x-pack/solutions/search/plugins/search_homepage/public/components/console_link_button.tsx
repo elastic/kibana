@@ -5,9 +5,10 @@
  * 2.0.
  */
 import React, { useCallback } from 'react';
+
 import { EuiButtonEmpty } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import type { ConsolePluginStart } from '@kbn/console-plugin/public';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useKibana } from '../hooks/use_kibana';
 import { useUsageTracker } from '../hooks/use_usage_tracker';

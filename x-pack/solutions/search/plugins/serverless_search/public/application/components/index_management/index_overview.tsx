@@ -6,8 +6,7 @@
  */
 
 import React, { FunctionComponent } from 'react';
-import { i18n } from '@kbn/i18n';
-import { FormattedMessage, FormattedPlural } from '@kbn/i18n-react';
+
 import {
   EuiLoadingSpinner,
   EuiEmptyPrompt,
@@ -21,6 +20,8 @@ import {
   EuiLink,
   EuiSpacer,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage, FormattedPlural } from '@kbn/i18n-react';
 
 import { Index } from '@kbn/index-management-plugin/common/types/indices';
 
@@ -28,9 +29,10 @@ import { docLinks } from '../../../../common/doc_links';
 import { useIndex } from '../../hooks/api/use_index';
 
 import { BadgeList } from '../badge_list';
+
+import { IndexAliasesFlyout } from './index_aliases_flyout';
 import { OverviewEmptyPrompt } from './overview_empty_prompt';
 import { IndexOverviewPanel, IndexOverviewPanelStat } from './overview_panel';
-import { IndexAliasesFlyout } from './index_aliases_flyout';
 
 export interface IndexDetailOverviewProps {
   index: Index;

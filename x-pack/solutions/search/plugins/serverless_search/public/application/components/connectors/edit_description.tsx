@@ -5,9 +5,12 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-import { css } from '@emotion/react';
 import React, { useEffect, useState } from 'react';
+
+import { css } from '@emotion/react';
+
+import { useMutation, useQueryClient } from '@tanstack/react-query';
+
 import {
   EuiFlexItem,
   EuiFlexGroup,
@@ -18,11 +21,13 @@ import {
   EuiText,
   EuiLink,
 } from '@elastic/eui';
-import { useMutation, useQueryClient } from '@tanstack/react-query';
+
+import { i18n } from '@kbn/i18n';
 import { Connector } from '@kbn/search-connectors';
+
 import { CANCEL_LABEL, EDIT_LABEL, SAVE_LABEL } from '../../../../common/i18n_string';
-import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnector } from '../../hooks/api/use_connector';
+import { useKibanaServices } from '../../hooks/use_kibana';
 
 interface EditDescriptionProps {
   isDisabled?: boolean;

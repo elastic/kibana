@@ -6,18 +6,19 @@
  */
 
 import React, { useMemo } from 'react';
-import { i18n } from '@kbn/i18n';
 
 import { EuiLoadingLogo } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 
-import { useKibana } from '../../hooks/use_kibana';
 import { useIndicesStatusQuery } from '../../hooks/api/use_indices_status';
+import { useKibana } from '../../hooks/use_kibana';
+import { usePageChrome } from '../../hooks/use_page_chrome';
+import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
 import { LoadIndicesStatusError } from '../shared/load_indices_status_error';
 
 import { CreateIndex } from './create_index';
-import { usePageChrome } from '../../hooks/use_page_chrome';
-import { IndexManagementBreadcrumbs } from '../shared/breadcrumbs';
 
 const CreateIndexLabel = i18n.translate('xpack.searchIndices.createIndex.docTitle', {
   defaultMessage: 'Create Index',

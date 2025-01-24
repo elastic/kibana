@@ -29,6 +29,7 @@ import {
   DENSE_PIPELINE_FIELD_CAPS,
   DENSE_OLD_PIPELINE_DOCS,
 } from '../../__mocks__/fetch_query_source_fields.mock';
+
 import {
   fetchFields,
   getModelIdFields,

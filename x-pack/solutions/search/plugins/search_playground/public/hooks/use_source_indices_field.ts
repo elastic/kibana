@@ -5,13 +5,17 @@
  * 2.0.
  */
 
-import { useController } from 'react-hook-form';
-import { IndexName } from '@elastic/elasticsearch/lib/api/types';
 import { useCallback } from 'react';
-import { useIndicesFields } from './use_indices_fields';
-import { ChatFormFields } from '../types';
-import { useUsageTracker } from './use_usage_tracker';
+import { useController } from 'react-hook-form';
+
+import { IndexName } from '@elastic/elasticsearch/lib/api/types';
+
 import { AnalyticsEvents } from '../analytics/constants';
+import { ChatFormFields } from '../types';
+
+import { useIndicesFields } from './use_indices_fields';
+
+import { useUsageTracker } from './use_usage_tracker';
 
 export const useSourceIndicesFields = () => {
   const usageTracker = useUsageTracker();

@@ -8,13 +8,18 @@
 // create @testing-library/react tests for Header component
 // check if EuiButtonGroup is differently labeled based on the selectedPageMode prop
 
-import { render, screen } from '@testing-library/react';
 import React from 'react';
-import { Header } from './header';
-import { ChatFormFields, PlaygroundPageMode } from '../types';
-import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
-import { EuiForm } from '@elastic/eui';
+
 import { FormProvider, useForm } from 'react-hook-form';
+
+import { render, screen } from '@testing-library/react';
+
+import { EuiForm } from '@elastic/eui';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { ChatFormFields, PlaygroundPageMode } from '../types';
+
+import { Header } from './header';
 
 const MockFormProvider = ({ children }: { children: React.ReactElement }) => {
   const methods = useForm({

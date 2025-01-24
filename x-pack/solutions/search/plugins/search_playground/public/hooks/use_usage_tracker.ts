@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { METRIC_TYPE } from '@kbn/analytics';
 import { useMemo } from 'react';
+
+import { METRIC_TYPE } from '@kbn/analytics';
+
 import { useKibana } from './use_kibana';
 
 const APP_TRACKER_NAME = 'search_playground';

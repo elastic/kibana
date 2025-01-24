@@ -6,6 +6,7 @@
  */
 
 import React, { useState } from 'react';
+
 import {
   EuiButton,
   EuiButtonEmpty,
@@ -21,13 +22,14 @@ import {
   EuiTabbedContent,
   EuiTitle,
 } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
-import { i18n } from '@kbn/i18n';
 import { EuiSelectableOption } from '@elastic/eui/src/components/selectable/selectable_option';
-import { getIndicesWithNoSourceFields } from '../utils/create_query';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useIndicesFields } from '../hooks/use_indices_fields';
-import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
 import { useQueryIndices } from '../hooks/use_query_indices';
+import { useSourceIndicesFields } from '../hooks/use_source_indices_field';
+import { getIndicesWithNoSourceFields } from '../utils/create_query';
 
 interface SelectIndicesFlyout {
   onClose: () => void;

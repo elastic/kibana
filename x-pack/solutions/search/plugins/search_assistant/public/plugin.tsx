@@ -5,16 +5,18 @@
  * 2.0.
  */
 
-import { type CoreSetup, type Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
-import { createAppService } from '@kbn/ai-assistant';
-import ReactDOM from 'react-dom';
 import React from 'react';
+import ReactDOM from 'react-dom';
+
+import { createAppService } from '@kbn/ai-assistant';
+import { type CoreSetup, type Plugin, CoreStart, PluginInitializerContext } from '@kbn/core/public';
+
+import { NavControlInitiator } from './components/nav_control/lazy_nav_control';
 import type {
   SearchAssistantPluginSetup,
   SearchAssistantPluginStart,
   SearchAssistantPluginStartDependencies,
 } from './types';
-import { NavControlInitiator } from './components/nav_control/lazy_nav_control';
 
 export interface PublicConfigType {
   ui: {

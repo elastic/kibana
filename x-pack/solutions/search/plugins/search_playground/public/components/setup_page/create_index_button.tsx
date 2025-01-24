@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiButton, EuiCallOut } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useCallback, useMemo } from 'react';
+
+import { EuiButton, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
+
 import { useKibana } from '../../hooks/use_kibana';
 
 export const CreateIndexButton: React.FC = () => {

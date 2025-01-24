@@ -6,6 +6,7 @@
  */
 
 import { IndicesQuerySourceFields } from '../types';
+
 import {
   createQuery,
   getDefaultQueryFields,

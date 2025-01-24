@@ -6,10 +6,14 @@
  */
 
 import React from 'react';
-import { render, screen } from '@testing-library/react';
-import { AssistantMessage } from './assistant_message';
+
 import { FormProvider, useForm } from 'react-hook-form';
+
+import { render, screen } from '@testing-library/react';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { AssistantMessage } from './assistant_message';
 
 // for tooltip
 jest.mock('../../hooks/use_llms_models', () => ({

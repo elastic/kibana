@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import {
   EuiBetaBadge,
   EuiButtonGroup,
@@ -17,12 +19,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React from 'react';
+
+import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
+import { PlaygroundPageMode } from '../types';
+
+import { ViewMode } from './app';
 import { PlaygroundHeaderDocs } from './playground_header_docs';
 import { Toolbar } from './toolbar';
-import { ViewMode } from './app';
-import { PlaygroundPageMode } from '../types';
-import { useSearchPlaygroundFeatureFlag } from '../hooks/use_search_playground_feature_flag';
 
 interface HeaderProps {
   showDocs?: boolean;

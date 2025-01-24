@@ -5,11 +5,15 @@
  * 2.0.
  */
 
-import { useQuery } from '@tanstack/react-query';
-import type { HttpSetup } from '@kbn/core-http-browser';
-import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
 import { useFormContext } from 'react-hook-form';
+
+import { useQuery } from '@tanstack/react-query';
+
+import { IndicesGetMappingResponse } from '@elastic/elasticsearch/lib/api/types';
+import type { HttpSetup } from '@kbn/core-http-browser';
+
 import { APIRoutes, ChatForm, ChatFormFields } from '../types';
+
 import { useKibana } from './use_kibana';
 
 export interface FetchIndexMappingsArgs {

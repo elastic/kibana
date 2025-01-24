@@ -6,6 +6,7 @@
  */
 
 import { Mappings } from '../../types';
+
 import { countVectorBasedTypesFromMappings } from './mappings_convertor';
 
 describe('mappings convertor', () => {

@@ -6,11 +6,11 @@
  */
 
 import { schema } from '@kbn/config-schema';
-import { i18n } from '@kbn/i18n';
 import type { IRouter } from '@kbn/core/server';
+import { i18n } from '@kbn/i18n';
 import type { Logger } from '@kbn/logging';
-import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 import { fetchSearchResults } from '@kbn/search-index-documents/lib';
+import { DEFAULT_DOCS_PER_PAGE } from '@kbn/search-index-documents/types';
 
 import { POST_CREATE_INDEX_ROUTE, SEARCH_DOCUMENTS_ROUTE } from '../../common/routes';
 import { CreateIndexRequest } from '../../common/types';

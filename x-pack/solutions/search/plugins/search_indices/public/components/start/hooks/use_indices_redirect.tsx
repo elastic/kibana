@@ -9,11 +9,11 @@ import { useEffect, useState } from 'react';
 
 import type { IndicesStatusResponse } from '../../../../common';
 
+import { AnalyticsEvents } from '../../../analytics/constants';
+import { useUsageTracker } from '../../../contexts/usage_tracker_context';
 import { useKibana } from '../../../hooks/use_kibana';
 
 import { navigateToIndexDetails } from '../../utils';
-import { useUsageTracker } from '../../../contexts/usage_tracker_context';
-import { AnalyticsEvents } from '../../../analytics/constants';
 
 export const useIndicesRedirect = (indicesStatus?: IndicesStatusResponse) => {
   const { application, http } = useKibana().services;

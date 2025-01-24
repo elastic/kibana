@@ -6,6 +6,7 @@
  */
 
 import { useCallback } from 'react';
+
 import { useKibana } from './use_kibana';
 
 const DISCOVER_LOCATOR_ID = 'DISCOVER_APP_LOCATOR';

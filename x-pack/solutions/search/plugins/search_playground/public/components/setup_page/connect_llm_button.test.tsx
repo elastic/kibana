@@ -6,11 +6,16 @@
  */
 
 import React from 'react';
+
 import { fireEvent, render as testingLibraryRender, waitFor } from '@testing-library/react';
-import { ConnectLLMButton } from './connect_llm_button';
-import { useKibana } from '../../hooks/use_kibana';
-import { useLoadConnectors } from '../../hooks/use_load_connectors';
+
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
+import { useKibana } from '../../hooks/use_kibana';
+
+import { useLoadConnectors } from '../../hooks/use_load_connectors';
+
+import { ConnectLLMButton } from './connect_llm_button';
 
 const render = (children: React.ReactNode) =>
   testingLibraryRender(<IntlProvider locale="en">{children}</IntlProvider>);

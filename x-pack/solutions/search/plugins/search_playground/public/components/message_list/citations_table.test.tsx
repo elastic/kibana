@@ -6,7 +6,9 @@
  */
 
 import React from 'react';
+
 import { render, fireEvent } from '@testing-library/react';
+
 import { CitationsTable } from './citations_table';
 
 jest.mock('../../hooks/use_usage_tracker', () => ({

@@ -5,6 +5,10 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+
+import { useFormContext } from 'react-hook-form';
+
 import {
   EuiFlyout,
   EuiFlyoutBody,
@@ -18,16 +22,16 @@ import {
   EuiButtonEmpty,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { useEffect, useState } from 'react';
-import { useFormContext } from 'react-hook-form';
+
+import { MANAGEMENT_API_KEYS } from '../../../common/routes';
 import { AnalyticsEvents } from '../../analytics/constants';
+import { useKibana } from '../../hooks/use_kibana';
 import { useUsageTracker } from '../../hooks/use_usage_tracker';
 import { ChatForm, PlaygroundPageMode } from '../../types';
-import { useKibana } from '../../hooks/use_kibana';
-import { MANAGEMENT_API_KEYS } from '../../../common/routes';
-import { LANGCHAIN_PYTHON } from './examples/py_langchain_python';
-import { PY_LANG_CLIENT } from './examples/py_lang_client';
+
 import { DevToolsCode } from './examples/dev_tools';
+import { PY_LANG_CLIENT } from './examples/py_lang_client';
+import { LANGCHAIN_PYTHON } from './examples/py_langchain_python';
 
 interface ViewCodeFlyoutProps {
   onClose: () => void;

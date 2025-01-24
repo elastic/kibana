@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { useMutation } from '@tanstack/react-query';
 import { useFormContext } from 'react-hook-form';
-import { useKibana } from './use_kibana';
+
+import { useMutation } from '@tanstack/react-query';
+
 import { APIRoutes, ChatFormFields } from '../types';
+
+import { useKibana } from './use_kibana';
 
 interface UseApiKeyQueryParams {
   name: string;

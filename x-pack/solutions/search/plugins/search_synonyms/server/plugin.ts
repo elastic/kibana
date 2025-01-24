@@ -15,14 +15,15 @@ import {
 } from '@kbn/core/server';
 
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+
+import { PLUGIN_ID, PLUGIN_TITLE } from '../common';
+
+import { defineRoutes } from './routes';
 import {
   SearchSynonymsPluginSetup,
   SearchSynonymsPluginSetupDependencies,
   SearchSynonymsPluginStart,
 } from './types';
-
-import { defineRoutes } from './routes';
-import { PLUGIN_ID, PLUGIN_TITLE } from '../common';
 
 export class SearchSynonymsPlugin
   implements Plugin<SearchSynonymsPluginSetup, SearchSynonymsPluginStart, {}, {}>

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
-import { render, fireEvent, screen } from '@testing-library/react';
-import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import React from 'react';
-import { ConfirmDeleteEndpointModal } from '.';
-import * as i18n from './translations';
+
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { render, fireEvent, screen } from '@testing-library/react';
+
 import { useScanUsage } from '../../../../../../../hooks/use_scan_usage';
+
+import * as i18n from './translations';
+
+import { ConfirmDeleteEndpointModal } from '.';
 
 jest.mock('../../../../../../../hooks/use_scan_usage');
 const mockUseScanUsage = useScanUsage as jest.Mock;

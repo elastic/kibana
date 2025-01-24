@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { EuiPageTemplate, EuiButtonEmpty, EuiButton } from '@elastic/eui';
 import React from 'react';
-import * as i18n from '../../common/translations';
+
+import { EuiPageTemplate, EuiButtonEmpty, EuiButton } from '@elastic/eui';
+
 import { docLinks } from '../../common/doc_links';
+import * as i18n from '../../common/translations';
 import { useTrainedModelPageUrl } from '../hooks/use_trained_model_page_url';
 
 interface InferenceEndpointsHeaderProps {
@@ -24,7 +26,7 @@ export const InferenceEndpointsHeader: React.FC<InferenceEndpointsHeaderProps> =
       data-test-subj="allInferenceEndpointsPage"
       pageTitle={i18n.INFERENCE_ENDPOINT_LABEL}
       description={i18n.MANAGE_INFERENCE_ENDPOINTS_LABEL}
-      bottomBorder={true}
+      bottomBorder
       rightSideItems={[
         <EuiButton
           iconType="plusInCircle"

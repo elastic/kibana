@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { EuiButton, EuiForm } from '@elastic/eui';
 import React, { FormEventHandler } from 'react';
+
 import { fireEvent, render, screen } from '@testing-library/react';
+
+import { EuiButton, EuiForm } from '@elastic/eui';
 import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
+
 import { QuestionInput } from './question_input';
 
 const mockButton = (
@@ -53,12 +56,7 @@ describe('Question Input', () => {
       render(
         <IntlProvider locale="en">
           <MockChatForm handleSubmit={handleOnSubmitMock}>
-            <QuestionInput
-              value="my question"
-              onChange={() => {}}
-              button={mockButton}
-              isDisabled={true}
-            />
+            <QuestionInput value="my question" onChange={() => {}} button={mockButton} isDisabled />
           </MockChatForm>
         </IntlProvider>
       );

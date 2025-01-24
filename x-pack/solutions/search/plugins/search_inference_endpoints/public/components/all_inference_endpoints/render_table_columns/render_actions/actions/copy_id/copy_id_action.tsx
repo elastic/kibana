@@ -5,9 +5,11 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { EuiButtonIcon, EuiCopy } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
+
 import { useKibana } from '../../../../../../hooks/use_kibana';
 
 interface CopyIDActionProps {

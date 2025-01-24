@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiButtonEmpty, EuiPanel } from '@elastic/eui';
 
 import { BACK_LABEL } from '../../../../common/i18n_string';

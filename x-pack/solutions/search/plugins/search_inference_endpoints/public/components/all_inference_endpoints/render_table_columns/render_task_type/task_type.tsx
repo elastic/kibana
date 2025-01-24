@@ -5,8 +5,10 @@
  * 2.0.
  */
 
-import { EuiBadge } from '@elastic/eui';
 import React from 'react';
+
+import { EuiBadge } from '@elastic/eui';
+
 import { TaskTypes } from '../../../../../common/types';
 
 interface TaskTypeProps {

@@ -6,6 +6,7 @@
  */
 
 import fs from 'fs/promises';
+
 import type { Logger } from '@kbn/logging';
 
 // Mocking dependencies
@@ -19,6 +20,9 @@ const mockLogger: Logger = {
   error: jest.fn(),
 } as Partial<Logger> as Logger;
 
+import { RemoteNotebookCatalog, SearchNotebooksConfig } from '../config';
+import { createNotebooksCache } from '../utils';
+
 import {
   getNotebook,
   getNotebookCatalog,
@@ -27,8 +31,7 @@ import {
   NotebookCatalogFetchOptions,
   getNotebookMetadata,
 } from './notebook_catalog';
-import { createNotebooksCache } from '../utils';
-import { RemoteNotebookCatalog, SearchNotebooksConfig } from '../config';
+
 import { NotebookDefinition } from '@kbn/ipynb';
 
 const emptyNotebookCache = createNotebooksCache();

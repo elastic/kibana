@@ -6,6 +6,7 @@
  */
 
 import { type SharePluginSetup } from '@kbn/share-plugin/public';
+
 import { PlaygroundLocatorDefinition, type PlaygroundLocatorParams } from './playground_locator';
 
 export function registerLocators(share: SharePluginSetup) {

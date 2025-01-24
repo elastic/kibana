@@ -6,6 +6,7 @@
  */
 
 import { SearchHit, SearchResponse, SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
+
 import { Paginate } from '../types';
 
 const defaultResult = <T>(data: T[]) => ({

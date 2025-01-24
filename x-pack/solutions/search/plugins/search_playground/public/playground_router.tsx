@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
+
 import { Redirect } from 'react-router-dom';
+
+import { Route, Routes } from '@kbn/shared-ux-router';
+
+import { useSearchPlaygroundFeatureFlag } from './hooks/use_search_playground_feature_flag';
 import { PlaygroundOverview } from './playground_overview';
 
 import { ROOT_PATH, SEARCH_PLAYGROUND_CHAT_PATH, SEARCH_PLAYGROUND_SEARCH_PATH } from './routes';
 import { PlaygroundPageMode } from './types';
-import { useSearchPlaygroundFeatureFlag } from './hooks/use_search_playground_feature_flag';
 
 export const PlaygroundRouter: React.FC = () => {
   const isSearchModeEnabled = useSearchPlaygroundFeatureFlag();

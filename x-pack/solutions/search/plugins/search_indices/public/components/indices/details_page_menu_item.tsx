@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+import React, { ReactElement, useMemo, useState } from 'react';
+
 import {
   EuiButtonIcon,
   EuiContextMenuItem,
@@ -14,10 +16,10 @@ import {
   EuiText,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { ReactElement, useMemo, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useKibana } from '../../hooks/use_kibana';
+
 import type { UserStartPrivilegesResponse } from '../../../common';
+import { useKibana } from '../../hooks/use_kibana';
 
 interface SearchIndexDetailsPageMenuItemPopoverProps {
   handleDeleteIndexModal: () => void;

@@ -5,9 +5,10 @@
  * 2.0.
  */
 
+import React from 'react';
+
 import { EuiCallOut, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React from 'react';
 
 export const SyncScheduledCallOut: React.FC = () => {
   return (

@@ -5,12 +5,14 @@
  * 2.0.
  */
 
-import { render, fireEvent, screen } from '@testing-library/react';
 import React from 'react';
 
-import { IndexItem } from './index_item';
-import { InferenceUsageInfo } from '../../../../types';
+import { render, fireEvent, screen } from '@testing-library/react';
+
 import { useKibana } from '../../../../../../hooks/use_kibana';
+import { InferenceUsageInfo } from '../../../../types';
+
+import { IndexItem } from './index_item';
 
 jest.mock('../../../../../../hooks/use_kibana');
 const mockUseKibana = useKibana as jest.Mock;

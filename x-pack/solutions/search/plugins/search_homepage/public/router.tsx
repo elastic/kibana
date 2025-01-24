@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { Route, Routes } from '@kbn/shared-ux-router';
 
 import { SearchHomepagePage } from './components/search_homepage';

@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
 import React, { useCallback, useState } from 'react';
-import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
+
 import { EuiButton, EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import * as i18n from './translations';
+import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_lib';
+import { InferenceServiceFormFields } from '@kbn/inference-endpoint-ui-common';
+
 import { useAddEndpoint } from '../../hooks/use_add_endpoint';
-import { InferenceEndpoint } from '../../types';
 import { useKibana } from '../../hooks/use_kibana';
+import { InferenceEndpoint } from '../../types';
+
+import * as i18n from './translations';
 
 interface InferenceFormProps {
   onSubmitSuccess: (state: boolean) => void;

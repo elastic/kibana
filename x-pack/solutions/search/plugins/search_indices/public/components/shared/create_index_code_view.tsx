@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React, { useMemo } from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -13,22 +14,23 @@ import {
   EuiText,
   EuiTitle,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { useSearchApiKey } from '@kbn/search-api-keys-components';
 import { TryInConsoleButton } from '@kbn/try-in-console';
 
-import { useSearchApiKey } from '@kbn/search-api-keys-components';
-import { i18n } from '@kbn/i18n';
 import { Languages, AvailableLanguages, LanguageOptions } from '../../code_examples';
 
-import { useUsageTracker } from '../../hooks/use_usage_tracker';
-import { useKibana } from '../../hooks/use_kibana';
+import { Workflow, WorkflowId } from '../../code_examples/workflows';
 import { useElasticsearchUrl } from '../../hooks/use_elasticsearch_url';
+import { useKibana } from '../../hooks/use_kibana';
+import { useUsageTracker } from '../../hooks/use_usage_tracker';
+
+import { CreateIndexCodeExamples } from '../../types';
 
 import { APIKeyCallout } from './api_key_callout';
 import { CodeSample } from './code_sample';
-import { LanguageSelector } from './language_selector';
 import { GuideSelector } from './guide_selector';
-import { Workflow, WorkflowId } from '../../code_examples/workflows';
-import { CreateIndexCodeExamples } from '../../types';
+import { LanguageSelector } from './language_selector';
 
 export interface CreateIndexCodeViewProps {
   selectedLanguage: AvailableLanguages;
@@ -75,7 +77,7 @@ export const CreateIndexCodeView = ({
   return (
     <EuiFlexGroup direction="column" data-test-subj="createIndexCodeView">
       {canCreateApiKey && (
-        <EuiFlexItem grow={true}>
+        <EuiFlexItem grow>
           <APIKeyCallout apiKey={apiKey} />
         </EuiFlexItem>
       )}

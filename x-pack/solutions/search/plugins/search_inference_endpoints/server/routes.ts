@@ -5,14 +5,15 @@
  * 2.0.
  */
 
-import { IRouter } from '@kbn/core/server';
 import { schema } from '@kbn/config-schema';
+import { IRouter } from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
+
+import { addInferenceEndpoint } from './lib/add_inference_endpoint';
+import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
 import { fetchInferenceEndpoints } from './lib/fetch_inference_endpoints';
 import { APIRoutes, InferenceEndpoint } from './types';
 import { errorHandler } from './utils/error_handler';
-import { deleteInferenceEndpoint } from './lib/delete_inference_endpoint';
-import { addInferenceEndpoint } from './lib/add_inference_endpoint';
 
 export function defineRoutes({ logger, router }: { logger: Logger; router: IRouter }) {
   router.get(

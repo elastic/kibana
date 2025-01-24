@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import type { SearchIndices, SearchStart } from '@kbn/deeplinks-search/deep_links';
 import { SEARCH_INDICES, SEARCH_INDICES_START } from '@kbn/deeplinks-search';
+import type { SearchIndices, SearchStart } from '@kbn/deeplinks-search/deep_links';
 
 export const PLUGIN_ID = 'searchIndices';
 export const PLUGIN_NAME = 'searchIndices';

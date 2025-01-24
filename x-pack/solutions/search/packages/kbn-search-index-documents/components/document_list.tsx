@@ -28,10 +28,10 @@ import { i18n } from '@kbn/i18n';
 
 import { FormattedMessage, FormattedNumber } from '@kbn/i18n-react';
 
-import { resultMetaData, resultToFieldFromMappingResponse } from './result/result_metadata';
-
 import { Result } from '..';
+
 import { type ResultProps } from './result/result';
+import { resultMetaData, resultToFieldFromMappingResponse } from './result/result_metadata';
 
 interface DocumentListProps {
   dataTelemetryIdPrefix: string;

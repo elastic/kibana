@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import fetch from 'node-fetch';
 import fs from 'fs/promises';
+import fetch from 'node-fetch';
 import path from 'path';
+
 import { i18n } from '@kbn/i18n';
-import type { Logger } from '@kbn/logging';
 import { NotebookDefinition } from '@kbn/ipynb';
+import type { Logger } from '@kbn/logging';
 
 import {
   NotebookCatalog,

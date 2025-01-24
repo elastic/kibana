@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import { renderHook, waitFor } from '@testing-library/react';
-import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 
-import { useAddEndpoint } from './use_add_endpoint';
+import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
+import { renderHook, waitFor } from '@testing-library/react';
+
 import * as i18n from './translations';
+import { useAddEndpoint } from './use_add_endpoint';
 import { useKibana } from './use_kibana';
 
 const wrapper = ({ children }: { children: React.ReactNode }) => {

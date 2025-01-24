@@ -6,9 +6,11 @@
  */
 
 import React, { useMemo } from 'react';
+
 import { EuiPageTemplate } from '@elastic/eui';
 
 import { useKibana } from '../hooks/use_kibana';
+
 import { SearchHomepageBody } from './search_homepage_body';
 import { SearchHomepageHeader } from './search_homepage_header';
 

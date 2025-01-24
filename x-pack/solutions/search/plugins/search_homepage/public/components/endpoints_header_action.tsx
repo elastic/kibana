@@ -5,12 +5,13 @@
  * 2.0.
  */
 import React, { useState, useCallback } from 'react';
+
 import { EuiButtonEmpty, EuiFlexGroup, EuiFlyout, EuiHeaderLinks } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import {
   KibanaWiredConnectionDetailsProvider,
   ConnectionDetailsFlyoutContent,
 } from '@kbn/cloud/connection_details';
+import { FormattedMessage } from '@kbn/i18n-react';
 
 import { useUsageTracker } from '../hooks/use_usage_tracker';
 

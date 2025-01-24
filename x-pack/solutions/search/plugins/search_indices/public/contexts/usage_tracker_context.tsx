@@ -6,6 +6,7 @@
  */
 
 import React, { createContext, useContext, useMemo } from 'react';
+
 import type {
   UsageCollectionSetup,
   UsageCollectionStart,

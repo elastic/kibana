@@ -14,6 +14,9 @@ import {
   PluginInitializerContext,
 } from '@kbn/core/server';
 import { KibanaFeatureScope } from '@kbn/features-plugin/common';
+
+import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
+
 import { defineRoutes } from './routes';
 import {
   SearchInferenceEndpointsPluginSetup,
@@ -21,7 +24,6 @@ import {
   SearchInferenceEndpointsPluginStart,
   SearchInferenceEndpointsPluginStartDependencies,
 } from './types';
-import { PLUGIN_ID, PLUGIN_NAME } from '../common/constants';
 
 export class SearchInferenceEndpointsPlugin
   implements

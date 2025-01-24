@@ -1691,9 +1691,7 @@ module.exports = {
     {
       // Source files only - allow `any` in test/mock files
       files: ['x-pack/solutions/search/**/*.{ts,tsx}'],
-      excludedFiles: [
-        'x-pack/solutions/search/**/*.{test,mock,test_helper}.{ts,tsx}',
-      ],
+      excludedFiles: ['x-pack/solutions/search/**/*.{test,mock,test_helper}.{ts,tsx}'],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },

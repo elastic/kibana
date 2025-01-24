@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import {
   EuiFlexGroup,
   EuiFlexGrid,
@@ -17,8 +18,8 @@ import {
   useIsWithinBreakpoints,
 } from '@elastic/eui';
 
-import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 import { i18n } from '@kbn/i18n';
+import { LanguageDefinition, Languages } from '@kbn/search-api-panels';
 
 export interface LanguageGridProps {
   assetBasePath: string;

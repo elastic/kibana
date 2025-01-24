@@ -7,13 +7,13 @@
 
 import React from 'react';
 
+import { css } from '@emotion/react';
 import moment from 'moment';
 
 import { EuiComment, EuiText, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { UserAvatar } from '@kbn/user-profile-components';
 
-import { css } from '@emotion/react';
 import { useUserProfile } from '../../hooks/use_user_profile';
 import type { Message as MessageType } from '../../types';
 

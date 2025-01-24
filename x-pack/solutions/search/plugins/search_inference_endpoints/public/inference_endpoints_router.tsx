@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { Route, Routes } from '@kbn/shared-ux-router';
 import React from 'react';
 import { Redirect } from 'react-router-dom';
+
+import { Route, Routes } from '@kbn/shared-ux-router';
+
 import { InferenceEndpointsOverview } from './inference_endpoints_overview';
 
 import { ROOT_PATH, SEARCH_INFERENCE_ENDPOINTS_PATH } from './routes';

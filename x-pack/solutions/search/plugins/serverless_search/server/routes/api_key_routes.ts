@@ -6,6 +6,7 @@
  */
 
 import { schema } from '@kbn/config-schema';
+
 import { RouteDependencies } from '../plugin';
 import { errorHandler } from '../utils/error_handler';
 

@@ -6,9 +6,10 @@
  */
 
 import { useEffect, useState } from 'react';
-import { useKibana } from './use_kibana';
 
 import { ELASTICSEARCH_URL_PLACEHOLDER } from '../constants';
+
+import { useKibana } from './use_kibana';
 
 export const useElasticsearchUrl = (): string => {
   const {

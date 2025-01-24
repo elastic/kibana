@@ -6,6 +6,7 @@
  */
 
 import React from 'react';
+
 import { EuiCodeBlock } from '@elastic/eui';
 
 import { NotebookOutputType } from '../types';

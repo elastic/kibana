@@ -7,6 +7,8 @@
 
 import React from 'react';
 
+import { css } from '@emotion/react';
+
 import {
   EuiButton,
   EuiFlexGrid,
@@ -22,7 +24,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
+
 import { docLinks } from '../../../common/doc_links';
 
 export const EmptyPrompt: React.FC = () => {

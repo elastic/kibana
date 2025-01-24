@@ -6,10 +6,13 @@
  */
 
 import React from 'react';
+
 import { screen } from '@testing-library/react';
 import { render } from '@testing-library/react';
-import { TabularPage } from './tabular_page';
+
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
+
+import { TabularPage } from './tabular_page';
 
 const inferenceEndpoints = [
   {

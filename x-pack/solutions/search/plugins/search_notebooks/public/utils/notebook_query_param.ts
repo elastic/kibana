@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import qs from 'query-string';
 import { compressToEncodedURIComponent, decompressFromEncodedURIComponent } from 'lz-string';
+import qs from 'query-string';
 
 function getBaseUrl() {
   return `${window.location.protocol}//${window.location.host}${window.location.pathname}`;

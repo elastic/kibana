@@ -5,6 +5,14 @@
  * 2.0.
  */
 
+import React, { useEffect, useState } from 'react';
+
+import { css } from '@emotion/react';
+
+import {
+  SecurityCreateApiKeyResponse,
+  SecurityUpdateApiKeyResponse,
+} from '@elastic/elasticsearch/lib/api/types';
 import {
   EuiBadge,
   EuiButton,
@@ -19,18 +27,16 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { css } from '@emotion/react';
-import React, { useEffect, useState } from 'react';
+
 import { ApiKeySelectableTokenField } from '@kbn/security-api-key-management';
-import {
-  SecurityCreateApiKeyResponse,
-  SecurityUpdateApiKeyResponse,
-} from '@elastic/elasticsearch/lib/api/types';
-import { useKibanaServices } from '../../hooks/use_kibana';
+
 import { MANAGEMENT_API_KEYS } from '../../../../common/routes';
-import { CreateApiKeyFlyout } from './create_api_key_flyout';
-import './api_key.scss';
 import { useGetApiKeys } from '../../hooks/api/use_api_key';
+import { useKibanaServices } from '../../hooks/use_kibana';
+
+import { CreateApiKeyFlyout } from './create_api_key_flyout';
+
+import './api_key.scss';
 
 function isCreatedResponse(
   value: SecurityCreateApiKeyResponse | SecurityUpdateApiKeyResponse
@@ -59,7 +65,6 @@ export const ApiKeyPanel = ({ setClientApiKey }: { setClientApiKey: (value: stri
       setClientApiKey(apiKey.encoded);
       setIsFlyoutOpen(false);
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [apiKey]);
 
   return (

@@ -7,24 +7,23 @@
 
 import { Logger, CoreStart, SavedObjectsClient } from '@kbn/core/server';
 
+import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
 import type {
   ConcreteTaskInstance,
   TaskManagerStartContract,
   TaskInstance,
 } from '@kbn/task-manager-plugin/server';
 
-import { LicensingPluginStart } from '@kbn/licensing-plugin/server';
-import type {
-  SearchConnectorsPluginStartDependencies,
-  SearchConnectorsPluginSetupDependencies,
-} from './types';
+import { SearchConnectorsConfig } from './config';
 import {
   AgentlessConnectorsInfraService,
   getConnectorsToDeploy,
   getPoliciesToDelete,
 } from './services';
-
-import { SearchConnectorsConfig } from './config';
+import type {
+  SearchConnectorsPluginStartDependencies,
+  SearchConnectorsPluginSetupDependencies,
+} from './types';
 
 const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_ID = 'search:agentless-connectors-manager-task';
 const AGENTLESS_CONNECTOR_DEPLOYMENTS_SYNC_TASK_TYPE = 'search:agentless-connectors-manager';
