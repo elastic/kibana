@@ -11,6 +11,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { BedrockChat as _BedrockChat } from '@langchain/community/chat_models/bedrock/web';
 import { BaseChatModelParams } from '@langchain/core/language_models/chat_models';
 import { DEFAULT_BEDROCK_MODEL, DEFAULT_BEDROCK_REGION, prepareMessages } from '../utils/bedrock';
+import type { TelemetryMetadata } from './types';
 
 export interface CustomChatModelInput extends BaseChatModelParams {
   actionsClient: PublicMethodsOf<ActionsClient>;
@@ -20,10 +21,7 @@ export interface CustomChatModelInput extends BaseChatModelParams {
   signal?: AbortSignal;
   model?: string;
   maxTokens?: number;
-  telemetryMetadata?: {
-    pluginId?: string;
-    aggregateBy?: string;
-  };
+  telemetryMetadata?: TelemetryMetadata;
 }
 
 /**

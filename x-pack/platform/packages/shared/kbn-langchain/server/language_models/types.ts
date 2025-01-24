@@ -39,6 +39,7 @@ export interface InvokeAIActionParamsSchema {
   functions?: OpenAI.ChatCompletionCreateParamsNonStreaming['functions'];
   signal?: AbortSignal;
   timeout?: number;
+  telemetryMetadata?: TelemetryMetadata;
 }
 export interface RunActionParamsSchema {
   body: string;
@@ -56,4 +57,9 @@ export interface TraceOptions {
   runName?: string;
   tags?: string[];
   tracers?: LangChainTracer[];
+}
+
+export interface TelemetryMetadata {
+  pluginId?: string;
+  aggregateBy?: string;
 }
