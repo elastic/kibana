@@ -10,11 +10,9 @@
 import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { GridPanel, GridPanelProps } from './grid_panel';
-import { gridLayoutStateManagerMock } from '../test_utils/mocks';
+import { gridLayoutStateManagerMock, mockRenderPanelContents } from '../test_utils/mocks';
 
 describe('GridPanel', () => {
-  const mockRenderPanelContents = jest.fn((panelId) => <div>Panel Content {panelId}</div>);
-
   const renderGridPanel = (propsOverrides: Partial<GridPanelProps> = {}) => {
     return render(
       <GridPanel
@@ -26,12 +24,14 @@ describe('GridPanel', () => {
       />
     );
   };
+
   afterEach(() => {
     jest.clearAllMocks();
   });
 
-  it('renders panel contents correctly', () => {
+  it('renders panel contents', () => {
     renderGridPanel();
-    expect(screen.getByText('Panel Content panel1')).toBeInTheDocument();
+    expect(screen.getByText('panel content panel1')).toBeInTheDocument();
+    expect(mockRenderPanelContents).toHaveBeenCalledWith('panel1', expect.any(Function));
   });
 });

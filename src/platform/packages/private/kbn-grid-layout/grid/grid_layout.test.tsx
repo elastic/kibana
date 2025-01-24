@@ -7,81 +7,58 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { fireEvent, render, screen } from '@testing-library/react';
+import { render, screen, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getSampleLayout } from './test_utils/sample_layout';
 import { GridLayout, GridLayoutProps } from './grid_layout';
 import { gridSettings, mockRenderPanelContents } from './test_utils/mocks';
 import { cloneDeep } from 'lodash';
+import {
+  mouseDrop,
+  mouseMoveTo,
+  mouseStartDragging,
+  touchEnd,
+  touchMoveTo,
+  touchStart,
+} from './test_utils/events';
 
-class TouchEventFake extends Event {
-  constructor(public touches: Array<{ clientX: number; clientY: number }>) {
-    super('touchmove');
-    this.touches = [{ clientX: 256, clientY: 128 }];
-  }
-}
+const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
+  const defaultProps: GridLayoutProps = {
+    accessMode: 'EDIT',
+    layout: getSampleLayout(),
+    gridSettings,
+    renderPanelContents: mockRenderPanelContents,
+    onLayoutChange: jest.fn(),
+  };
+
+  const { rerender, ...rtlRest } = render(<GridLayout {...defaultProps} {...propsOverrides} />);
+
+  return {
+    ...rtlRest,
+    rerender: (overrides: Partial<GridLayoutProps>) =>
+      rerender(<GridLayout {...defaultProps} {...overrides} />),
+  };
+};
+
+const getAllThePanelIds = () =>
+  screen
+    .getAllByRole('button', { name: /panelId:panel/i })
+    .map((el) => el.getAttribute('aria-label')?.replace(/panelId:/g, ''));
+
+const assertTabThroughPanel = async (panelId: string) => {
+  await userEvent.tab(); // tab to drag handle
+  await userEvent.tab(); // tab to the panel
+  expect(screen.getByLabelText(`panelId:${panelId}`)).toHaveFocus();
+  await userEvent.tab(); // tab to the resize handle
+};
+
+const getPanelHandle = (panelId: string, interactionType: 'resize' | 'drag' = 'drag') => {
+  const gridPanel = screen.getByText(`panel content ${panelId}`).closest('div')!;
+  const handleText = new RegExp(interactionType === 'resize' ? /resize to move/i : /drag to move/i);
+  return within(gridPanel).getByRole('button', { name: handleText });
+};
 
 describe('GridLayout', () => {
-  const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
-    const defaultProps: GridLayoutProps = {
-      accessMode: 'EDIT',
-      layout: getSampleLayout(),
-      gridSettings,
-      renderPanelContents: mockRenderPanelContents,
-      onLayoutChange: jest.fn(),
-    };
-
-    const { rerender, ...rtlRest } = render(<GridLayout {...defaultProps} {...propsOverrides} />);
-
-    return {
-      ...rtlRest,
-      rerender: (overrides: Partial<GridLayoutProps>) =>
-        rerender(<GridLayout {...defaultProps} {...overrides} />),
-    };
-  };
-
-  const getAllThePanelIds = () =>
-    screen
-      .getAllByRole('button', { name: /panelId:panel/i })
-      .map((el) => el.getAttribute('aria-label')?.replace(/panelId:/g, ''));
-
-  const mouseStartDragging = (handle: HTMLElement, options = { clientX: 0, clientY: 0 }) => {
-    fireEvent.mouseDown(handle, options);
-  };
-
-  const mouseMoveTo = (options = { clientX: 256, clientY: 128 }) => {
-    fireEvent.mouseMove(document, options);
-  };
-
-  const mouseDrop = (handle: HTMLElement) => {
-    fireEvent.mouseUp(handle);
-  };
-  const touchStart = (handle: HTMLElement, options = { touches: [{ clientX: 0, clientY: 0 }] }) => {
-    fireEvent.touchStart(handle, options);
-  };
-
-  const touchMoveTo = (
-    handle: HTMLElement,
-    options = { touches: [{ clientX: 256, clientY: 128 }] }
-  ) => {
-    const realTouchEvent = window.TouchEvent;
-    // @ts-expect-error
-    window.TouchEvent = TouchEventFake;
-    fireEvent.touchMove(handle, new TouchEventFake(options.touches));
-    window.TouchEvent = realTouchEvent;
-  };
-
-  const touchEnd = (handle: HTMLElement) => {
-    fireEvent.touchEnd(handle);
-  };
-
-  const assertTabThroughPanel = async (panelId: string) => {
-    await userEvent.tab(); // tab to drag handle
-    await userEvent.tab(); // tab to the panel
-    expect(screen.getByLabelText(`panelId:${panelId}`)).toHaveFocus();
-    await userEvent.tab(); // tab to the resize handle
-  };
-
   const expectedInitialOrder = [
     'panel1',
     'panel5',
@@ -102,31 +79,31 @@ describe('GridLayout', () => {
   it(`'renderPanelContents' is not called during dragging`, () => {
     renderGridLayout();
 
-    expect(mockRenderPanelContents).toHaveBeenCalledTimes(10); // renderPanelContents is called for each of 10 panels
+    expect(mockRenderPanelContents).toHaveBeenCalledTimes(expectedInitialOrder.length); // renderPanelContents is called ONLY ONCE for each of 10 panels on initial render
     jest.clearAllMocks();
 
-    const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
-    mouseStartDragging(panel1DragHandle);
+    const panelHandle = getPanelHandle('panel1');
+    mouseStartDragging(panelHandle);
     mouseMoveTo({ clientX: 256, clientY: 128 });
     expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called during dragging
 
-    mouseDrop(panel1DragHandle);
+    mouseDrop(panelHandle);
     expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called after reordering
   });
 
   it('panel gets active when dragged', () => {
     renderGridLayout();
-    const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
+    const panelHandle = getPanelHandle('panel1');
     expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
       exact: true,
     });
-    mouseStartDragging(panel1DragHandle);
+    mouseStartDragging(panelHandle);
     mouseMoveTo({ clientX: 256, clientY: 128 });
     expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass(
       'kbnGridPanel kbnGridPanel--active',
       { exact: true }
     );
-    mouseDrop(panel1DragHandle);
+    mouseDrop(panelHandle);
     expect(screen.getByLabelText('panelId:panel1').closest('div')).toHaveClass('kbnGridPanel', {
       exact: true,
     });
@@ -149,13 +126,13 @@ describe('GridLayout', () => {
     it('after reordering some panels', async () => {
       renderGridLayout();
 
-      const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
-      mouseStartDragging(panel1DragHandle);
+      const panelHandle = getPanelHandle('panel1');
+      mouseStartDragging(panelHandle);
 
       mouseMoveTo({ clientX: 256, clientY: 128 });
       expect(getAllThePanelIds()).toEqual(expectedInitialOrder); // the panels shouldn't be reordered till we mouseDrop
 
-      mouseDrop(panel1DragHandle);
+      mouseDrop(panelHandle);
       expect(getAllThePanelIds()).toEqual([
         'panel2',
         'panel5',
@@ -172,12 +149,12 @@ describe('GridLayout', () => {
     it('after reordering some panels via touch events', async () => {
       renderGridLayout();
 
-      const panel1DragHandle = screen.getAllByRole('button', { name: /drag to move/i })[0];
-      touchStart(panel1DragHandle);
-      touchMoveTo(panel1DragHandle, { touches: [{ clientX: 256, clientY: 128 }] });
+      const panelHandle = getPanelHandle('panel1');
+      touchStart(panelHandle);
+      touchMoveTo(panelHandle, { touches: [{ clientX: 256, clientY: 128 }] });
       expect(getAllThePanelIds()).toEqual(expectedInitialOrder); // the panels shouldn't be reordered till we mouseDrop
 
-      touchEnd(panel1DragHandle);
+      touchEnd(panelHandle);
       expect(getAllThePanelIds()).toEqual([
         'panel2',
         'panel5',
