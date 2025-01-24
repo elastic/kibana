@@ -186,7 +186,10 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={close} data-test-subj="dashboardPanelSelectionCloseBtn">
+            <EuiButtonEmpty
+              onClick={dashboardApi.clearOverlays}
+              data-test-subj="dashboardPanelSelectionCloseBtn"
+            >
               <FormattedMessage
                 id="dashboard.solutionToolbar.addPanelFlyout.cancelButtonText"
                 defaultMessage="Cancel"
