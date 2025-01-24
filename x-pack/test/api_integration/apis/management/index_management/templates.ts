@@ -236,7 +236,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
 
       describe('with logs-*-* index pattern', () => {
-        const logsdbTemplateName = 'logs';
+        const logsdbTemplateName = 'test-logsdb-template';
         before(async () => {
           const template = getTemplatePayload(logsdbTemplateName, ['logs-*-*']);
           await createTemplate(template).expect(200);
@@ -249,7 +249,7 @@ export default function ({ getService }: FtrProviderContext) {
         const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
           { enabled: true, indexMode: 'logsdb' },
           { enabled: false, indexMode: 'standard' },
-          { enabled: null, indexMode: 'logsdb' }, // In stateful Kibana, the cluster.logsdb.enabled setting is false by default, so standard index mode
+          { enabled: null, indexMode: 'standard' }, // In stateful Kibana, the cluster.logsdb.enabled setting is false by default, so standard index mode
         ];
 
         logsdbSettings.forEach(({ enabled, indexMode }) => {

@@ -161,7 +161,8 @@ export default function ({ getService }: FtrProviderContext) {
 
             const { body: dataStream } = await supertest
               .get(`${API_BASE_PATH}/data_streams/${logsdbDataStreamName}`)
-              .set('kbn-xsrf', 'xxx')
+              .set(internalReqHeader)
+              .set(roleAuthc.apiKeyHeader)
               .expect(200);
 
             expect(dataStream.indexMode).to.eql(indexMode);
