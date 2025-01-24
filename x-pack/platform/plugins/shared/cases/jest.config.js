@@ -8,7 +8,6 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  testTimeout: 7500,
   roots: ['<rootDir>/x-pack/platform/plugins/shared/cases'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/x-pack/platform/plugins/shared/cases',
   coverageReporters: ['text', 'html'],
