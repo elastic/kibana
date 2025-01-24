@@ -6,12 +6,12 @@
  */
 
 import { useMemo } from 'react';
-import { useLoadActionTypes as loadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
-import { useAssistantContext } from '@kbn/elastic-assistant';
+import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
+import { useKibana } from '../../../../../../../common/lib/kibana/kibana_react';
 import { AIActionTypeIds } from '../constants';
 
 export const useFilteredActionTypes = () => {
-  const { http, toasts } = useAssistantContext();
-  const { data } = loadActionTypes({ http, toasts });
+  const { http, notifications } = useKibana().services;
+  const { data } = useLoadActionTypes({ http, toasts: notifications.toasts });
   return useMemo(() => data?.filter(({ id }) => AIActionTypeIds.includes(id)), [data]);
 };

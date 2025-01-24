@@ -5,19 +5,22 @@
  * 2.0.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useMemo } from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import { css } from '@emotion/react';
+import { useLoadActionTypes } from '@kbn/elastic-assistant/impl/connectorland/use_load_action_types';
+import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import { ConnectorsMissingPrivilegesCallOut } from './missing_privileges';
 import type { AIConnector } from './types';
 import { ConnectorSetup } from './connector_setup';
 import { ConnectorSelectorPanel } from './connector_selector_panel';
+import { AIActionTypeIds } from './constants';
 
 interface ConnectorCardsProps {
   onNewConnectorSaved: (connectorId: string) => void;
   canCreateConnectors?: boolean;
   connectors?: AIConnector[]; // make connectors optional to handle loading state
-  selectedConnectorId?: string | null;
+  selectedConnectorId?: string;
   onConnectorSelected: (connector: AIConnector) => void;
 }
 
@@ -29,6 +32,13 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
     selectedConnectorId,
     onConnectorSelected,
   }) => {
+    const { http, notifications } = useKibana().services;
+    const { data } = useLoadActionTypes({ http, toasts: notifications.toasts });
+    const actionTypes = useMemo(
+      () => data?.filter(({ id }) => AIActionTypeIds.includes(id)),
+      [data]
+    );
+
     const onNewConnectorStoredSave = useCallback(
       (newConnector: AIConnector) => {
         onNewConnectorSaved(newConnector.id);
@@ -38,7 +48,7 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
       [onConnectorSelected, onNewConnectorSaved]
     );
 
-    if (!connectors) {
+    if (!connectors || !actionTypes) {
       return <EuiLoadingSpinner />;
     }
 
@@ -66,7 +76,7 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
             </EuiFlexItem>
           )}
           <EuiFlexItem>
-            <ConnectorSetup onConnectorSaved={onNewConnectorStoredSave} />
+            <ConnectorSetup actionTypes={actionTypes} onConnectorSaved={onNewConnectorStoredSave} />
           </EuiFlexItem>
         </EuiFlexGroup>
       </>

@@ -25,9 +25,9 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
   setComplete,
 }) => {
   const { siemMigrations } = useKibana().services;
-  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string>(
+  const [storedConnectorId, setStoredConnectorId] = useDefinedLocalStorage<string | undefined>(
     siemMigrations.rules.connectorIdStorage.key,
-    ''
+    undefined
   );
   const setSelectedConnector = useCallback(
     (connector: AIConnector) => {

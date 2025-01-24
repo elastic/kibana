@@ -11,6 +11,7 @@ import { OnboardingCardId } from '../../../../../constants';
 import { START_MIGRATION_CARD_TITLE } from './translations';
 import cardIcon from './images/card_header_icon.png';
 import type { StartMigrationCardMetadata } from './types';
+import { checkStartMigrationCardComplete } from './start_migration_check_complete';
 
 export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
   id: OnboardingCardId.siemMigrationsStart,
@@ -24,9 +25,5 @@ export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMe
         './start_migration_card'
       )
   ),
-  checkComplete: (services) =>
-    import(
-      /* webpackChunkName: "onboarding_siem_migrations_start_migration_card_check_complete" */
-      './start_migration_check_complete'
-    ).then((module) => module.checkStartMigrationCardComplete(services)),
+  checkComplete: checkStartMigrationCardComplete,
 };
