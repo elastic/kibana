@@ -10,7 +10,7 @@ import { Case, CaseStatuses } from '@kbn/cases-plugin/common/types/domain';
 import {
   CasePostRequest,
   CasesFindResponse,
-  CasePatchRequest,
+  CasesPatchRequest,
 } from '@kbn/cases-plugin/common/types/api';
 import type SuperTest from 'supertest';
 import { ToolingLog } from '@kbn/tooling-log';
@@ -111,7 +111,7 @@ export const updateCaseStatus = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }) => {
-  const updateRequest: CasePatchRequest = {
+  const updateRequest: CasesPatchRequest = {
     cases: [
       {
         status,
@@ -145,7 +145,7 @@ export const updateCaseAssignee = async ({
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };
 }) => {
-  const updateRequest: CasePatchRequest = {
+  const updateRequest: CasesPatchRequest = {
     cases: [
       {
         version,
