@@ -27,6 +27,7 @@ paths:
                   type: string
                   description: The lookback period for the entity store
                   default: 24h
+                  pattern: '[smh]$'
                 indexPattern:
                   $ref: './common.schema.yaml#/components/schemas/IndexPattern'
                 filter:

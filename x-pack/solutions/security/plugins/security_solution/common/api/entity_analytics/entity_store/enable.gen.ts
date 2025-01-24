@@ -27,7 +27,11 @@ export const InitEntityStoreRequestBody = z.object({
   /**
    * The lookback period for the entity store
    */
-  lookbackPeriod: z.string().optional().default('24h'),
+  lookbackPeriod: z
+    .string()
+    .regex(/[smh]$/)
+    .optional()
+    .default('24h'),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
   entityTypes: z.array(EntityType).optional(),

@@ -9738,6 +9738,7 @@ paths:
                 lookbackPeriod:
                   default: 24h
                   description: The lookback period for the entity store
+                  pattern: '[smh]$'
                   type: string
         description: Schema for the entity store initialization
         required: true

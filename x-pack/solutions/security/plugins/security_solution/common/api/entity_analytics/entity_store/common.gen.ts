@@ -36,7 +36,11 @@ export const EngineDescriptor = z.object({
   status: EngineStatus,
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int(),
-  lookbackPeriod: z.string().optional().default('24h'),
+  lookbackPeriod: z
+    .string()
+    .regex(/[smh]$/)
+    .optional()
+    .default('24h'),
   error: z.object({}).optional(),
 });
 
