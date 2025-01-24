@@ -35,7 +35,7 @@ export class MapsPage {
           .and(this.page.locator('data-title'));
         const loadingLocator = this.page.locator(DATA_LOADING_SELECTOR);
 
-        await renderCompleteLocator.waitFor();
+        await renderCompleteLocator.waitFor({ timeout: 1000 });
         const completedElementsCount = await renderCompleteLocator.count();
 
         if (completedElementsCount < count) {
