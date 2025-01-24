@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useCallback, useMemo, useRef, useState } from 'react';
+import { useCallback, useRef, useState, useEffect } from 'react';
 
 import { useConfig } from '../../../../../hooks';
 import { generateNewAgentPolicyWithDefaults } from '../../../../../../../../common/services/generate_new_agent_policy';
@@ -86,15 +86,22 @@ export function useSetupTechnology({
   const orginalAgentPolicyRef = useRef<NewAgentPolicy>({ ...newAgentPolicy });
   const [currentAgentPolicy, setCurrentAgentPolicy] = useState(newAgentPolicy);
 
+  const [selectedSetupTechnology, setSelectedSetupTechnology] = useState<SetupTechnology>(
+    SetupTechnology.AGENT_BASED
+  );
   // derive default setup technology based on package info and selected integration
-  const defaultSetupTechnology = useMemo(() => {
-    return isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
+  const [defaultSetupTechnology, setDefaultSetupTechnology] = useState<SetupTechnology>(
+    SetupTechnology.AGENT_BASED
+  );
+  useEffect(() => {
+    const shouldBeDefault =
+      isOnlyAgentlessIntegration(packageInfo, integrationToEnable) ||
       isAgentlessSetupDefault(packageInfo, integrationToEnable)
-      ? SetupTechnology.AGENTLESS
-      : SetupTechnology.AGENT_BASED;
+        ? SetupTechnology.AGENTLESS
+        : SetupTechnology.AGENT_BASED;
+    setDefaultSetupTechnology(shouldBeDefault);
+    setSelectedSetupTechnology(shouldBeDefault);
   }, [packageInfo, integrationToEnable]);
-  const [selectedSetupTechnology, setSelectedSetupTechnology] =
-    useState<SetupTechnology>(defaultSetupTechnology);
 
   const agentlessPolicyName = getAgentlessAgentPolicyNameFromPackagePolicyName(packagePolicy.name);
 

@@ -465,17 +465,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
       headingElement: 'h2',
     },
+    ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS
+      ? [
+          {
+            title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
+              defaultMessage: 'Where to add this integration?',
+            }),
+            children: stepSelectAgentPolicy,
+            headingElement: 'h2',
+          },
+        ]
+      : []),
   ];
-
-  if (selectedSetupTechnology !== SetupTechnology.AGENTLESS) {
-    steps.push({
-      title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
-        defaultMessage: 'Where to add this integration?',
-      }),
-      children: stepSelectAgentPolicy,
-      headingElement: 'h2',
-    });
-  }
 
   // Display package error if there is one
   if (packageInfoError) {
