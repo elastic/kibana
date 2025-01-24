@@ -149,7 +149,7 @@ export function JobSelector({
 
   const removeJobId = (jobId: string) => {
     const newSelection = selectedIds.filter((id) => id !== jobId);
-    applySelection({ newSelection, jobIds: newSelection });
+    applySelection({ newSelection, jobIds: newSelection, time: undefined });
   };
   function renderJobSelectionBar() {
     return (

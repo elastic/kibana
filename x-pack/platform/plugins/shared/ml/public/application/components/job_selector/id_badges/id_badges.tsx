@@ -8,9 +8,9 @@
 import React from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { JobSelectorBadge } from '../job_selector_badge';
+import { GroupSelectorMenu } from '../group_or_job_selector_menu/group_selector_menu';
 import type { GroupObj } from '../job_selector';
-import { AnomalyDetectionInfoButton } from '../job_selector_badge/job_selector_button';
+import { AnomalyDetectionInfoButton } from '../group_or_job_selector_menu/job_selector_button';
 import type { MlPages } from '../../../../../common/constants/locator';
 
 export interface IdBadgesProps {
@@ -39,10 +39,12 @@ export function IdBadges({
     const currentGroup = selectedGroups[i];
     badges.push(
       <EuiFlexItem grow={false} key={currentGroup.groupId}>
-        <JobSelectorBadge
-          id={currentGroup.groupId}
-          isGroup={true}
-          numJobs={currentGroup.jobIds.length}
+        <GroupSelectorMenu
+          groupId={currentGroup.groupId}
+          jobIds={currentGroup.jobIds}
+          page={page}
+          onRemoveJobId={onRemoveJobId}
+          removeJobIdDisabled={selectedJobIds.length < 2}
         />
       </EuiFlexItem>
     );

@@ -49,8 +49,9 @@ export const JobInfoFlyoutsProvider: React.FC<{ children: React.ReactNode }> = (
     [activeFlyout]
   );
   const closeActiveFlyout = useCallback(() => {
+    setActiveJobId(null);
     setActiveFlyout(null);
-  }, [setActiveFlyout]);
+  }, [setActiveJobId, setActiveFlyout]);
 
   return (
     <JobInfoFlyoutsContext.Provider

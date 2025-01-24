@@ -26,6 +26,7 @@ const props: IdBadgesProps = {
   selectedJobIds: ['job1', 'job2', 'job3'],
   onLinkClick: jest.fn(),
   showAllBarBadges: false,
+  onRemoveJobId: jest.fn(),
 };
 
 const overLimitProps: IdBadgesProps = { ...props, selectedJobIds: ['job4'] };
