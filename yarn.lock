@@ -7124,6 +7124,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/security-solution-connectors@link:x-pack/solutions/security/packages/connectors":
+  version "0.0.0"
+  uid ""
+
 "@kbn/security-solution-distribution-bar@link:x-pack/solutions/security/packages/distribution_bar":
   version "0.0.0"
   uid ""
