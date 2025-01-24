@@ -21,6 +21,36 @@ export const logsDefaultPipelineProcessors = [
     },
   },
   {
+    script: {
+      lang: 'painless',
+      source: `
+    void collectFieldNames(def ctx, Map map, String parent) {
+      for (Map.Entry entry : map.entrySet()) {
+        String key = entry.getKey();
+        if (ctx == map && (key.startsWith('_') || key.equals('original_fields'))) { continue; }
+        Object value = entry.getValue();
+        String fullPath = parent == null ? key : parent + "." + key;
+        
+        ctx.original_fields.add(fullPath);
+        
+        if (value instanceof Map) {
+          collectFieldNames(ctx, (Map) value, fullPath);
+        } else if (value instanceof List) {
+          for (Object item : (List) value) {
+            if (item instanceof Map) {
+              collectFieldNames(ctx, (Map) item, fullPath);
+            }
+          }
+        }
+      }
+    }
+          ctx.original_fields = new ArrayList();
+
+    collectFieldNames(ctx, ctx, null);
+  `,
+    },
+  },
+  {
     dot_expander: {
       field: '*',
     },
