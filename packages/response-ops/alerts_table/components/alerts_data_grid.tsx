@@ -128,13 +128,15 @@ export const AlertsDataGrid = typedMemo(
       clearSelection();
     }, [clearSelection, refreshQueries]);
 
+    const columnIds = useMemo(() => columns.map((column) => column.id), [columns]);
+
     const toolbarVisibility = useGetToolbarVisibility({
       bulkActions,
       alertsCount,
       rowSelection: bulkActionsState.rowSelection,
       alerts,
       isLoading,
-      columnIds: columns.map((column) => column.id),
+      columnIds,
       onToggleColumn,
       onResetColumns,
       browserFields,
