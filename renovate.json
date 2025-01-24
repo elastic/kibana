@@ -801,7 +801,7 @@
       "minimumReleaseAge": "7 days"
     },
     {
-      "groupName": "@elastic/kibana-management dependencies temp",
+      "groupName": "@elastic/kibana-management - file-saver",
       "matchDepNames": [
         "file-saver",
         "@types/file-saver"
