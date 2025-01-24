@@ -54,7 +54,8 @@ export function SearchStartProvider({ getService }: FtrProviderContext) {
     },
     async clickSkipButton() {
       await testSubjects.existOrFail('createIndexSkipBtn');
-      await testSubjects.scrollIntoView('createIndexSkipBtn');
+      const element = await testSubjects.find('createIndexSkipBtn');
+      await element.scrollIntoView();
       await testSubjects.click('createIndexSkipBtn');
     },
     async expectCreateIndexButtonToExist() {
