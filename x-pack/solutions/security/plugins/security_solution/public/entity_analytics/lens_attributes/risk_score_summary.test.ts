@@ -27,14 +27,6 @@ jest.mock('uuid', () => ({
   v4: jest.fn().mockReturnValue('2cc5663b-f062-43f8-8688-fc8166c2ca8e'),
 }));
 
-const riskColors = {
-  [RiskSeverity.Critical]: '#E7664C',
-  [RiskSeverity.High]: '#DA8B45',
-  [RiskSeverity.Moderate]: '#D6BF57',
-  [RiskSeverity.Low]: '#54B399',
-  [RiskSeverity.Unknown]: '#98a2b3',
-};
-
 describe('getRiskScoreSummaryAttributes', () => {
   it('should render', () => {
     const { result } = renderHook(
@@ -44,7 +36,6 @@ describe('getRiskScoreSummaryAttributes', () => {
             severity: RiskSeverity.Low,
             query: `user.name: test.user`,
             spaceId: 'default',
-            riskColors,
             riskEntity: EntityType.user,
           }),
         }),
@@ -62,7 +53,6 @@ describe('getRiskScoreSummaryAttributes', () => {
             severity: RiskSeverity.Low,
             query: `user.name: test.user`,
             spaceId: 'default',
-            riskColors,
             riskEntity: EntityType.user,
           }),
         }),
@@ -82,7 +72,6 @@ describe('getRiskScoreSummaryAttributes', () => {
             severity: RiskSeverity.Low,
             query,
             spaceId: 'default',
-            riskColors,
             riskEntity: EntityType.user,
           }),
 

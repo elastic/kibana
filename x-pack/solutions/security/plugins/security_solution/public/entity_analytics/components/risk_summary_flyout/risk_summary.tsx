@@ -45,7 +45,6 @@ import {
   SUMMARY_TABLE_MIN_WIDTH,
 } from './common';
 import { EntityEventTypes } from '../../../common/lib/telemetry';
-import { useRiskSeverityColors } from '../../common/utils';
 
 export interface RiskSummaryProps<T extends EntityType> {
   riskScoreData: RiskScoreState<T>;
@@ -71,7 +70,6 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
   const riskData = data && data.length > 0 ? data[0] : undefined;
   const entityData = getEntityData<T>(entityType, riskData);
   const { euiTheme } = useEuiTheme();
-  const riskColors = useRiskSeverityColors();
   const lensAttributes = useMemo(() => {
     const entityName = entityData?.name ?? '';
     const fieldName = EntityTypeToIdentifierField[entityType];
@@ -80,10 +78,11 @@ const FlyoutRiskSummaryComponent = <T extends EntityType>({
       severity: entityData?.risk?.calculated_level,
       query: `${fieldName}: ${entityName}`,
       spaceId: 'default',
-      riskColors,
-      riskEntity: entityType,
+      riskEntity: entityType, 
+      // TODO: add in riskColors when severity palette agreed on.
+      // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
     });
-  }, [entityData?.name, entityData?.risk?.calculated_level, entityType, riskColors]);
+  }, [entityData?.name, entityData?.risk?.calculated_level, entityType]);
   const xsFontSize = useEuiFontSize('xxs').fontSize;
   const rows = useMemo(() => getItems(entityData), [entityData]);
 

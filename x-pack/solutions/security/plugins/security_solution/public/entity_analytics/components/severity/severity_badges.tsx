@@ -7,7 +7,7 @@
 
 import { EuiFlexGroup, EuiNotificationBadge, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
-import { useRiskSeverityColors } from '../../common/utils';
+import { RISK_SEVERITY_COLOUR } from '../../common/utils';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import { RiskScoreLevel } from './common';
 import type { SeverityCount } from './types';
@@ -15,7 +15,8 @@ import type { SeverityCount } from './types';
 export const SeverityBadges: React.FC<{
   severityCount: SeverityCount;
 }> = React.memo(({ severityCount }) => {
-  const riskColors = useRiskSeverityColors();
+  // TODO: use riskSeverity hook when palette agreed.
+  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
   return (
     <EuiFlexGroup
       justifyContent="spaceBetween"
@@ -25,7 +26,7 @@ export const SeverityBadges: React.FC<{
       <EuiFlexItem grow={false} />
       <EuiFlexItem grow={false}>
         <EuiFlexGroup gutterSize="m">
-          {(Object.keys(riskColors) as RiskSeverity[]).map((status) => (
+          {(Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).map((status) => (
             <EuiFlexItem key={status} grow={false}>
               <SeverityBadge status={status} count={severityCount[status] || 0} />
             </EuiFlexItem>

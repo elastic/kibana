@@ -9,7 +9,7 @@ import styled from 'styled-components';
 import { EuiColorPaletteDisplay } from '@elastic/eui';
 import React, { useMemo } from 'react';
 
-import { useRiskSeverityColors } from '../../common/utils';
+import { RISK_SEVERITY_COLOUR } from '../../common/utils';
 import type { RiskSeverity } from '../../../../common/search_strategy';
 import type { SeverityCount } from './types';
 
@@ -31,22 +31,23 @@ type PalletteArray = PalletteObject[];
 export const SeverityBar: React.FC<{
   severityCount: SeverityCount;
 }> = ({ severityCount }) => {
-  const riskSeverityColor = useRiskSeverityColors();
+  // TODO: use riskSeverity hook when palette agreed.
+  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
   const palette = useMemo(
     () =>
-      (Object.keys(riskSeverityColor) as RiskSeverity[]).reduce(
+      (Object.keys(RISK_SEVERITY_COLOUR) as RiskSeverity[]).reduce(
         (acc: PalletteArray, status: RiskSeverity) => {
           const previousStop = acc.length > 0 ? acc[acc.length - 1].stop : 0;
           const newEntry: PalletteObject = {
             stop: previousStop + (severityCount[status] || 0),
-            color: riskSeverityColor[status],
+            color: RISK_SEVERITY_COLOUR[status],
           };
           acc.push(newEntry);
           return acc;
         },
         [] as PalletteArray
       ),
-    [severityCount, riskSeverityColor]
+    [severityCount]
   );
   return (
     <StyledEuiColorPaletteDisplay

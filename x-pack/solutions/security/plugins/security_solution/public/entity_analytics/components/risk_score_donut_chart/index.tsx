@@ -10,7 +10,7 @@ import React from 'react';
 import styled from 'styled-components';
 import { i18n } from '@kbn/i18n';
 import { ChartLabel } from '../../../overview/components/detection_response/alerts_by_status/chart_label';
-import { useRiskSeverityColors } from '../../common/utils';
+import { RISK_SEVERITY_COLOUR } from '../../common/utils';
 import type { SeverityCount } from '../severity/types';
 import { useRiskDonutChartData } from './use_risk_donut_chart_data';
 import type { FillColor } from '../../../common/components/charts/donutchart';
@@ -36,10 +36,11 @@ interface RiskScoreDonutChartProps {
 
 export const RiskScoreDonutChart = ({ severityCount }: RiskScoreDonutChartProps) => {
   const [donutChartData, legendItems, total] = useRiskDonutChartData(severityCount);
-  const riskColors = useRiskSeverityColors();
+  // TODO: Borealis theme migration, when severity palette agreed, update RISK_SEVERITY_COLOUR to use shared hook from security colors:
+  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
   const fillColorValue: FillColor = (dataName) => {
-    return Object.hasOwn(riskColors, dataName)
-      ? riskColors[dataName as RiskSeverity]
+    return Object.hasOwn(RISK_SEVERITY_COLOUR, dataName)
+      ? RISK_SEVERITY_COLOUR[dataName as RiskSeverity]
       : emptyDonutColor;
   };
   return (

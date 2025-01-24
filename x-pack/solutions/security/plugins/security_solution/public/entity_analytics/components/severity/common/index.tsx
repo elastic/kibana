@@ -11,7 +11,7 @@ import { EuiHealth, EuiTextColor, useEuiTheme } from '@elastic/eui';
 
 import styled, { css } from 'styled-components';
 
-import { useRiskSeverityColors } from '../../../common/utils';
+import { RISK_SEVERITY_COLOUR } from '../../../common/utils';
 import { HoverPopover } from '../../../../common/components/hover_popover';
 import type { RiskSeverity } from '../../../../../common/search_strategy';
 
@@ -72,7 +72,8 @@ const RiskScoreBadge: React.FC<{
   ['data-test-subj']?: string;
 }> = React.memo(({ severity, hideBackgroundColor = false, 'data-test-subj': dataTestSubj }) => {
   const { euiTheme } = useEuiTheme();
-  const riskColors = useRiskSeverityColors();
+  // TODO: use riskSeverity hook when palette agreed.
+  // https://github.com/elastic/security-team/issues/11516 hook - https://github.com/elastic/kibana/pull/206276
   return (
     <RiskBadge
       color={euiTheme.colors.backgroundLightDanger}
@@ -81,7 +82,7 @@ const RiskScoreBadge: React.FC<{
       data-test-subj={dataTestSubj ?? 'risk-score'}
     >
       <EuiTextColor color="default">
-        <EuiHealth className="eui-alignMiddle" color={riskColors[severity]}>
+        <EuiHealth className="eui-alignMiddle" color={RISK_SEVERITY_COLOUR[severity]}>
           {severity}
         </EuiHealth>
       </EuiTextColor>
