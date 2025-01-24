@@ -115,3 +115,14 @@ export const appendStatsByToQuery = (queryString: string, column: string) => {
     return `${queryString}\n| STATS BY ${column}`;
   }
 };
+
+export const validateVariableName = (variableName: string) => {
+  let text = variableName
+    // variable name can only contain letters, numbers and underscores
+    .replace(/[^a-zA-Z0-9_]/g, '');
+  if (text.charAt(0) === '_') {
+    text = text.substring(1);
+  }
+
+  return text;
+};

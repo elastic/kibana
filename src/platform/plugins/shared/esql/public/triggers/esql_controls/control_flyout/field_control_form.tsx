@@ -30,7 +30,12 @@ import {
   VariableName,
   ControlLabel,
 } from './shared_form_components';
-import { getRecurrentVariableName, getFlyoutStyling, getQueryForFields } from './helpers';
+import {
+  getRecurrentVariableName,
+  getFlyoutStyling,
+  getQueryForFields,
+  validateVariableName,
+} from './helpers';
 import { EsqlControlType } from '../types';
 
 interface FieldControlFormProps {
@@ -126,10 +131,7 @@ export function FieldControlForm({
 
   const onVariableNameChange = useCallback(
     (e: { target: { value: React.SetStateAction<string> } }) => {
-      let text = String(e.target.value).replace('?', '');
-      if (text.charAt(0) === '_') {
-        text = text.substring(1);
-      }
+      const text = validateVariableName(String(e.target.value));
       setVariableName(text);
     },
     []

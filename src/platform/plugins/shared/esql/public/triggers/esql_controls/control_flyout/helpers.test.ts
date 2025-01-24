@@ -14,6 +14,7 @@ import {
   getRecurrentVariableName,
   getValuesFromQueryField,
   appendStatsByToQuery,
+  validateVariableName,
 } from './helpers';
 
 describe('helpers', () => {
@@ -116,6 +117,23 @@ describe('helpers', () => {
       const statsBy = 'my_field';
       const updatedQueryString = appendStatsByToQuery(queryString, statsBy);
       expect(updatedQueryString).toBe('FROM my_index | LIMIT 10\n| STATS BY my_field');
+    });
+  });
+
+  describe('validateVariableName', () => {
+    it('should return the variable without special characters', () => {
+      const variable = validateVariableName('my_variable/123');
+      expect(variable).toBe('my_variable123');
+    });
+
+    it('should remove the questionarks', () => {
+      const variable = validateVariableName('?my_variable');
+      expect(variable).toBe('my_variable');
+    });
+
+    it('should remove the _ in the first char', () => {
+      const variable = validateVariableName('?_my_variable');
+      expect(variable).toBe('my_variable');
     });
   });
 });
