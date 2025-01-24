@@ -39,9 +39,6 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
   useIsExperimentalFeatureEnabled: jest.fn(),
 }));
 
-// rule types that do not support logged requests
-const doNotSupportLoggedRequests: Type[] = ['threat_match'];
-
 const supportLoggedRequests: Type[] = [
   'esql',
   'eql',
@@ -50,6 +47,7 @@ const supportLoggedRequests: Type[] = [
   'query',
   'saved_query',
   'new_terms',
+  'threat_match',
 ];
 
 const getMockIndexPattern = (): DataViewBase => ({
@@ -167,21 +165,6 @@ describe('PreviewQuery', () => {
       );
 
       expect(screen.getByTestId('show-elasticsearch-requests')).toBeInTheDocument();
-    });
-  });
-
-  doNotSupportLoggedRequests.forEach((ruleType) => {
-    test(`does not render "Show Elasticsearch requests" for ${ruleType} rule type`, () => {
-      render(
-        <TestProviders>
-          <RulePreview
-            {...defaultProps}
-            defineRuleData={{ ...defaultProps.defineRuleData, ruleType }}
-          />
-        </TestProviders>
-      );
-
-      expect(screen.queryByTestId('show-elasticsearch-requests')).toBeNull();
     });
   });
 });
