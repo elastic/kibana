@@ -12,6 +12,7 @@ import { GraphInvestigation, type GraphInvestigationProps } from './graph_invest
 import {
   KibanaReactStorybookDecorator,
   ReactQueryStorybookDecorator,
+  GlobalStylesStorybookDecorator,
 } from '../../../.storybook/decorators';
 import { mockDataView } from '../mock/data_view.mock';
 import { SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY } from '../../common/constants';
@@ -46,6 +47,7 @@ export default {
   decorators: [
     ReactQueryStorybookDecorator,
     KibanaReactStorybookDecorator,
+    GlobalStylesStorybookDecorator,
     (StoryComponent, context) => {
       const { shouldShowSearchBarTour, isLoading } = context.args;
       localStorage.setItem(SHOW_SEARCH_BAR_BUTTON_TOUR_STORAGE_KEY, shouldShowSearchBarTour);
