@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { IndexPattern, EngineDescriptor } from './common.gen';
+import { IndexPattern, EntityType, EngineDescriptor } from './common.gen';
 
 export type InitEntityStoreRequestBody = z.infer<typeof InitEntityStoreRequestBody>;
 export const InitEntityStoreRequestBody = z.object({
@@ -30,6 +30,7 @@ export const InitEntityStoreRequestBody = z.object({
   lookbackPeriod: z.string().optional().default('24h'),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
+  entityTypes: z.array(EntityType).optional(),
 });
 export type InitEntityStoreRequestBodyInput = z.input<typeof InitEntityStoreRequestBody>;
 

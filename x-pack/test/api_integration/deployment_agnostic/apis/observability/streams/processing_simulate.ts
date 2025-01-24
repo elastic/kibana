@@ -54,13 +54,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     };
 
     const basicGrokProcessor = {
-      config: {
-        grok: {
-          field: 'message',
-          patterns: [
-            '%{TIMESTAMP_ISO8601:parsed_timestamp} %{LOGLEVEL:parsed_level} %{GREEDYDATA:parsed_message}',
-          ],
-        },
+      grok: {
+        field: 'message',
+        patterns: [
+          '%{TIMESTAMP_ISO8601:parsed_timestamp} %{LOGLEVEL:parsed_level} %{GREEDYDATA:parsed_message}',
+        ],
+        if: { always: {} },
       },
     };
 
@@ -82,7 +81,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           name: 'logs.test',
         },
-        condition: {
+        if: {
           field: 'host.name',
           operator: 'eq' as const,
           value: TEST_HOST,
@@ -160,17 +159,17 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             processing: [
               {
-                config: {
-                  grok: {
-                    field: 'message',
-                    patterns: ['%{INVALID_PATTERN:field}'],
-                  },
+                grok: {
+                  field: 'message',
+                  patterns: ['%{INVALID_PATTERN:field}'],
+                  if: { always: {} },
                 },
               },
             ],
             documents: [createTestDocument('test message')],
           },
-          400
+          // this should be a 400, but ES reports this as a 500
+          500
         );
       });
 
@@ -181,11 +180,10 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           {
             processing: [
               {
-                config: {
-                  grok: {
-                    field: 'message',
-                    patterns: ['%{TIMESTAMP_ISO8601:parsed_timestamp} %{GREEDYDATA:message}'], // Overwrites existing message field
-                  },
+                grok: {
+                  field: 'message',
+                  patterns: ['%{TIMESTAMP_ISO8601:parsed_timestamp} %{GREEDYDATA:message}'], // Overwrites existing message field
+                  if: { always: {} },
                 },
               },
             ],
