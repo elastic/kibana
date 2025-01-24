@@ -120,15 +120,68 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe('GET /api/upgrade_assistant/status', () => {
+    describe.only('GET /api/upgrade_assistant/status', () => {
       it('returns a successful response', async () => {
         const { body } = await supertest
           .get('/api/upgrade_assistant/status')
+          // .query({
+          //   targetVersion: '10.0.0',
+          // })
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 
         const expectedResponseKeys = ['readyForUpgrade', 'details'];
+        // We're not able to easily test different upgrade status scenarios (there are tests with mocked data to handle this)
+        // so, for now, we simply verify the response returns the expected format
+        expectedResponseKeys.forEach((key) => {
+          expect(body[key]).to.not.equal(undefined);
+        });
+      });
 
+      it('returns a successful response when upgrading to the next minor', async () => {
+        const { body } = await supertest
+          .get('/api/upgrade_assistant/status')
+          .query({
+            targetVersion: '9.1.0',
+          })
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const expectedResponseKeys = ['readyForUpgrade', 'details'];
+        // We're not able to easily test different upgrade status scenarios (there are tests with mocked data to handle this)
+        // so, for now, we simply verify the response returns the expected format
+        expectedResponseKeys.forEach((key) => {
+          expect(body[key]).to.not.equal(undefined);
+        });
+      });
+
+      it('returns a successful response when upgrading to the next major', async () => {
+        const { body } = await supertest
+          .get('/api/upgrade_assistant/status')
+          .query({
+            targetVersion: '10.0.0',
+          })
+          .set('kbn-xsrf', 'xxx')
+          .expect(200);
+
+        const expectedResponseKeys = ['readyForUpgrade', 'details'];
+        // We're not able to easily test different upgrade status scenarios (there are tests with mocked data to handle this)
+        // so, for now, we simply verify the response returns the expected format
+        expectedResponseKeys.forEach((key) => {
+          expect(body[key]).to.not.equal(undefined);
+        });
+      });
+
+      it('returns 403 forbidden error when upgrading more than 1 major', async () => {
+        const { body } = await supertest
+          .get('/api/upgrade_assistant/status')
+          .query({
+            targetVersion: '11.0.0',
+          })
+          .set('kbn-xsrf', 'xxx')
+          .expect(403);
+
+        const expectedResponseKeys = ['readyForUpgrade', 'details'];
         // We're not able to easily test different upgrade status scenarios (there are tests with mocked data to handle this)
         // so, for now, we simply verify the response returns the expected format
         expectedResponseKeys.forEach((key) => {

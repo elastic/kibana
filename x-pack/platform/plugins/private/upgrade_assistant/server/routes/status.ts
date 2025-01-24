@@ -4,21 +4,15 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { type ReleaseType } from 'semver';
 import { i18n } from '@kbn/i18n';
 import { schema } from '@kbn/config-schema';
 import { API_BASE_PATH } from '../../common/constants';
 import { getESUpgradeStatus } from '../lib/es_deprecations_status';
 import { versionCheckHandlerWrapper } from '../lib/es_version_precheck';
 import { getKibanaUpgradeStatus } from '../lib/kibana_status';
-
 import { getESSystemIndicesMigrationStatus } from '../lib/es_system_indices_migration';
 import { RouteDependencies } from '../types';
 import { getUpgradeType } from '../lib/upgrade_type';
-
-// export const getUpgradeType = ({ current, target }: UpgradeTypeParams) =>
-//   // if we don't know the target, we default to 9.0.0
-//   semver.diff(current, target);
 
 /**
  * Note that this route is primarily intended for consumption by Cloud.
@@ -51,11 +45,15 @@ export function registerUpgradeStatusRoute({
       },
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      // console.log('WHAT IS THE CURRENT VERSION AS PASSED IN HERE?', current);
+      // console.log('WHAT IS THE CURRENT VERSION TYPE AS PASSED IN HERE?', typeof current);
+      // console.log('Do we have a query? request.query', request.query);
+      // console.log('Do we have a defaultTarget? ', defaultTarget);
       const targetVersion = request.query?.targetVersion || `${defaultTarget}`;
-      const upgradeType = getUpgradeType({
-        current,
-        target: targetVersion,
-      });
+      // returns null if identical versions, undefined if version diff > 1, otherwise ReleaseType
+      const upgradeType = getUpgradeType({ current, target: targetVersion });
+      // handle null and undefined upgrade Types.
+      if (!upgradeType) return response.forbidden();
 
       try {
         const {
@@ -96,22 +94,19 @@ export function registerUpgradeStatusRoute({
         const { totalCriticalDeprecations: kibanaTotalCriticalDeps } = await getKibanaUpgradeStatus(
           deprecationsClient
         );
-        // @Tina: DETERMINE IF READY FOR UPGRADE
-        // minor and patch upgrades only blocked on health issues (status !== green)
-        const upgradeTypeBasedReadyForUpgrade = (ut: ReleaseType) => {
-          if (ut === 'major') {
-            return (
-              totalCriticalHealthIssues === 0 && // should be none if ready for upgrade
-              totalCriticalDeprecations === 0 && // es critical deprecations
-              kibanaTotalCriticalDeps === 0 && // kbn critical deprecations
-              systemIndicesMigrationStatus === 'NO_MIGRATION_NEEDED'
-            );
-          }
+        // non-major upgrades blocked only for health issues (status !== green)
+        let upgradeTypeBasedReadyForUpgrade: boolean;
+        if (upgradeType === 'major') {
+          upgradeTypeBasedReadyForUpgrade =
+            totalCriticalHealthIssues === 0 &&
+            totalCriticalDeprecations === 0 &&
+            kibanaTotalCriticalDeps === 0 &&
+            systemIndicesMigrationStatus === 'NO_MIGRATION_NEEDED';
+        } else {
+          upgradeTypeBasedReadyForUpgrade = totalCriticalHealthIssues === 0;
+        }
 
-          return totalCriticalHealthIssues === 0;
-        };
-
-        const readyForUpgrade = upgradeTypeBasedReadyForUpgrade(upgradeType!);
+        const readyForUpgrade = upgradeType && upgradeTypeBasedReadyForUpgrade;
 
         const getStatusMessage = () => {
           if (readyForUpgrade) {
@@ -121,18 +116,21 @@ export function registerUpgradeStatusRoute({
           }
 
           const upgradeIssues: string[] = [];
-          const esTotalCriticalDeps = totalCriticalDeprecations + totalCriticalHealthIssues;
+          let esTotalCriticalDeps = totalCriticalHealthIssues;
+          if (upgradeType === 'major') {
+            esTotalCriticalDeps += totalCriticalDeprecations;
+          }
 
-          if (notMigratedSystemIndices) {
+          if (upgradeType === 'major' && notMigratedSystemIndices) {
             upgradeIssues.push(
               i18n.translate('xpack.upgradeAssistant.status.systemIndicesMessage', {
                 defaultMessage:
-                  '{notMigratedSystemIndices} unmigrated system {notMigratedSystemIndices, plural, one {index} othezr {indices}}',
+                  '{notMigratedSystemIndices} unmigrated system {notMigratedSystemIndices, plural, one {index} other {indices}}',
                 values: { notMigratedSystemIndices },
               })
             );
           }
-
+          // can be improved by showing health indicator issues separately
           if (esTotalCriticalDeps) {
             upgradeIssues.push(
               i18n.translate('xpack.upgradeAssistant.status.esTotalCriticalDepsMessage', {
@@ -143,7 +141,7 @@ export function registerUpgradeStatusRoute({
             );
           }
 
-          if (kibanaTotalCriticalDeps) {
+          if (upgradeType === 'major' && kibanaTotalCriticalDeps) {
             upgradeIssues.push(
               i18n.translate('xpack.upgradeAssistant.status.kibanaTotalCriticalDepsMessage', {
                 defaultMessage:
@@ -152,7 +150,6 @@ export function registerUpgradeStatusRoute({
               })
             );
           }
-
           return i18n.translate('xpack.upgradeAssistant.status.deprecationsUnresolvedMessage', {
             defaultMessage:
               'The following issues must be resolved before upgrading: {upgradeIssues}.',

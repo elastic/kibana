@@ -27,7 +27,6 @@ export interface RouteDependencies {
     featureSet: FeatureSet;
     isSecurityEnabled: () => boolean;
   };
-  // @TINA still on the fence about using versionService rather than string
   current: SemVer;
   defaultTarget: number;
 }
