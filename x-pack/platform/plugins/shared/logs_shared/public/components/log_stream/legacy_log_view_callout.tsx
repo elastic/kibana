@@ -25,7 +25,7 @@ export const LegacyLogViewCallout: React.FC<{ upgradeAssistantUrl?: string }> = 
     <EuiCallOut title={legacyLogViewTitle} color="warning" iconType="alert">
       <p>
         <FormattedMessage
-          id="xpack.logs.logsView.legacyLogViewDescription"
+          id="xpack.logsShared.logStream.legacyLogViewDescription"
           defaultMessage="This view uses a deprecated configuration. Use the {UpgradeAssistant} to migrate to a supported configuration."
           values={{
             UpgradeAssistant,
@@ -36,10 +36,13 @@ export const LegacyLogViewCallout: React.FC<{ upgradeAssistantUrl?: string }> = 
   );
 };
 
-const legacyLogViewTitle = i18n.translate('xpack.logs.logsView.legacyLogViewTitle', {
+const legacyLogViewTitle = i18n.translate('xpack.logsShared.logStream.legacyLogViewTitle', {
   defaultMessage: 'Deprecated Log Source Configuration',
 });
 
-const upgradeAssistantLabel = i18n.translate('xpack.logs.logsView.upgradeAssistantLinkText', {
-  defaultMessage: 'Upgrade Assistant',
-});
+const upgradeAssistantLabel = i18n.translate(
+  'xpack.logsShared.logStream.upgradeAssistantLinkText',
+  {
+    defaultMessage: 'Upgrade Assistant',
+  }
+);
