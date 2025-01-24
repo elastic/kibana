@@ -7,11 +7,57 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+const ts = require('typescript');
+const path = require('path');
+
+function getImportedVariableValue(importedName, context) {
+  try {
+    const parent = context
+      .getAncestors()
+      .find((ancestor) => ['BlockStatement', 'Program'].includes(ancestor.type));
+
+    if (!parent) return;
+
+    const importDeclaration = parent.body.find(
+      (statement) =>
+        statement.type === 'ImportDeclaration' &&
+        statement.specifiers.some((specifier) => specifier.local.name === importedName)
+    );
+
+    if (!importDeclaration) return;
+
+    const absoluteImportPath = require.resolve(importDeclaration.source.value, {
+      paths: [path.dirname(context.getFilename())],
+    });
+
+    const program = ts.createProgram([absoluteImportPath], {});
+    const sourceFile = program.getSourceFile(absoluteImportPath);
+
+    if (!sourceFile) return null;
+
+    const checker = program.getTypeChecker();
+    const symbols = checker.getExportsOfModule(sourceFile.symbol);
+    const symbol = symbols.find((s) => s.name === importedName);
+
+    if (!symbol || !symbol?.valueDeclaration) return null;
+
+    const valueDeclaration = symbol.valueDeclaration;
+
+    if (valueDeclaration.initializer && ts.isStringLiteral(valueDeclaration.initializer)) {
+      return valueDeclaration.initializer.text;
+    }
+
+    return null;
+  } catch (e) {
+    return null;
+  }
+}
+
 module.exports = {
   meta: {
     type: 'problem',
     docs: {
-      description: 'Ensure API privileges in registerKibanaFeature follow naming conventions.',
+      description: 'Ensure API privileges in registerKibanaFeature call follow naming conventions',
       category: 'Best Practices',
       recommended: true,
     },
@@ -85,8 +131,10 @@ module.exports = {
 
               if (element.type === 'Literal' && typeof element.value === 'string') {
                 valueToCheck = element.value;
-              } else if (element.type === 'Identifier' && scopedVariables.has(element.name)) {
-                valueToCheck = scopedVariables.get(element.name);
+              } else if (element.type === 'Identifier') {
+                valueToCheck = scopedVariables.has(element.name)
+                  ? scopedVariables.get(element.name)
+                  : getImportedVariableValue(element.name, context);
               }
 
               if (valueToCheck) {
