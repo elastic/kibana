@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import {
   createLlmProxy,
@@ -119,29 +119,25 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           // need some obs app or obs menu wont show where we can click on AI Assistant
           infrastructure: ['all'],
         });
-      });
-      it('shows no AI Assistant link in solution nav', async () => {
-        // navigate to an observability app so the left side o11y menu shows up
-        await PageObjects.common.navigateToUrl('infraOps', '', {
+        await PageObjects.common.navigateToUrl('home', '', {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
+      });
+      it('shows no AI Assistant link in solution nav', async () => {
+        // navigate to an observability app so the left side o11y menu shows up
         await testSubjects.missingOrFail(ui.pages.links.solutionMenuLink);
       });
       it('shows no AI Assistant button in global nav', async () => {
         await testSubjects.missingOrFail(ui.pages.links.globalHeaderButton);
       });
       it('shows no AI Assistant conversations link in global search', async () => {
-        await PageObjects.common.navigateToUrl('home', '', {
-          ensureCurrentUrl: true,
-          shouldLoginIfPrompted: false,
-        });
         await PageObjects.navigationalSearch.searchFor('observability ai assistant');
         const results = await PageObjects.navigationalSearch.getDisplayedResults();
-        const aiAssistantConversationsEntry = results.find(
+        const aiAssistantConversationsEntry = results.some(
           ({ label }) => label === obsAssistantConversationsGlobalSearchEntry
         );
-        expect(aiAssistantConversationsEntry).to.be(undefined);
+        expect(aiAssistantConversationsEntry).to.be(false);
       });
       it('cannot navigate to AI Assistant page', async () => {
         await PageObjects.common.navigateToUrl('obsAIAssistant', '', {
