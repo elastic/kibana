@@ -56,14 +56,14 @@ export async function fillGapById(context: RulesClientContext, params: FindGapBy
 
     const gapState = gap.getState();
 
-    const allGapsScheduled =
+    const allGapsToSchedule =
       gapState.unfilledIntervals.map((interval) => ({
         ruleId: params.ruleId,
         start: interval.gte,
         end: interval.lte,
       })) ?? [];
 
-    if (allGapsScheduled.length === 0) {
+    if (allGapsToSchedule.length === 0) {
       throw Boom.badRequest(`No unfilled intervals found for ruleId ${params.ruleId}`);
     }
 
@@ -74,7 +74,7 @@ export async function fillGapById(context: RulesClientContext, params: FindGapBy
       })
     );
 
-    return scheduleBackfill(context, allGapsScheduled);
+    return scheduleBackfill(context, allGapsToSchedule);
   } catch (err) {
     const errorMessage = `Failed to find gap and schedule manual rule run for ruleId ${params.ruleId}`;
     context.logger.error(`${errorMessage} - ${err}`);
