@@ -71,7 +71,7 @@ export class ReportingPlugin
     });
 
     registerUiSettings(core);
-    registerDeprecations({ core, reportingCore });
+    registerDeprecations(core);
     registerReportingUsageCollector(reportingCore, plugins.usageCollection);
     registerReportingEventTypes(core);
 

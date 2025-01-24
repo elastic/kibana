@@ -41,11 +41,11 @@ describe('deprecations', () => {
     expect(messages).toMatchInlineSnapshot(`Array []`);
   });
 
-  it('logs a warning if roles.allow: true is set', () => {
-    const { messages } = applyReportingDeprecations({ roles: { allow: true } });
+  it(`logs a warning if roles.allow: ['my_reporting_role'] is set`, () => {
+    const { messages } = applyReportingDeprecations({ roles: { allow: ['my_reporting_role'] } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "The default mechanism for Reporting privileges will work differently in future versions, which will affect the behavior of this cluster. Set \\"xpack.reporting.roles.allow\\" to \\"false\\" to adopt the future behavior before upgrading.",
+        "The default mechanism for Reporting privileges will work differently in future versions, which will affect the behavior of this cluster. Remove \\"xpack.reporting.roles.allow\\" to adopt the future behavior before upgrading.",
       ]
     `);
   });
