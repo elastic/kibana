@@ -7,7 +7,7 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
-import { formatLatestUserMessage } from '../prompts';
+import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
@@ -34,7 +34,9 @@ const NO_KNOWLEDGE_HISTORY = '[No existing knowledge history]';
  * @param kbDataClient -  Data client for accessing the Knowledge Base on behalf of the current user
  */
 export async function runAgent({
+  actionsClient,
   logger,
+  savedObjectsClient,
   state,
   agentRunnable,
   config,
@@ -43,6 +45,16 @@ export async function runAgent({
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const knowledgeHistory = await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries();
+  let userPrompt = '';
+  if (state.llmType === 'gemini') {
+    userPrompt = await getPrompt({
+      savedObjectsClient,
+      provider: 'gemini',
+      promptId: promptDictionary.userPrompt,
+      actionsClient,
+      connectorId: state.connectorId,
+    });
+  }
   const agentOutcome = await agentRunnable
     .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
     .invoke(
@@ -54,7 +66,7 @@ export async function runAgent({
             : NO_KNOWLEDGE_HISTORY
         }`,
         // prepend any user prompt (gemini)
-        input: formatLatestUserMessage(state.input, state.llmType),
+        input: `${userPrompt}${state.input}`,
         chat_history: state.messages, // TODO: Message de-dupe with ...state spread
       },
       config

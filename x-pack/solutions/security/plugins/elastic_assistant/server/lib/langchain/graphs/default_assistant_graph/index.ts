@@ -14,12 +14,12 @@ import {
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
-import { getPrompt, promptDictionary } from '../../../prompt/get_prompt';
+import { getPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
 import { AssistantToolParams } from '../../../../types';
 import { AgentExecutor } from '../../executors/types';
-import { formatPrompt, formatPromptStructured, systemPrompts } from './prompts';
+import { formatPrompt, formatPromptStructured } from './prompts';
 import { GraphInputs } from './types';
 import { getDefaultAssistantGraph } from './graph';
 import { invokeGraph, streamGraph } from './helpers';
@@ -161,7 +161,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
         await createStructuredChatAgent({
           llm: createLlmInstance(),
           tools,
-          prompt: formatPromptStructured(systemPrompts.structuredChat, systemPrompt),
+          prompt: formatPromptStructured(defaultSystemPrompt, systemPrompt),
           streamRunnable: isStream,
         });
 
@@ -183,6 +183,8 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     // we need to pass it like this or streaming does not work for bedrock
     createLlmInstance,
     logger,
+    actionsClient,
+    savedObjectsClient,
     tools,
     replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
@@ -191,6 +193,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
   const inputs: GraphInputs = {
     responseLanguage,
     conversationId,
+    connectorId,
     llmType,
     isStream,
     isOssModel,
