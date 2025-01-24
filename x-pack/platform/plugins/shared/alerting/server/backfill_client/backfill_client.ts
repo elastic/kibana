@@ -252,11 +252,11 @@ export class BackfillClient {
 
     // Build array of tasks to schedule
     const adHocTasksToSchedule: TaskInstance[] = [];
-    const backfullsToSchedule: Backfill[] = [];
+    const backfillsToSchedule: Backfill[] = [];
     createSOResult.forEach((result: ScheduleBackfillResult) => {
       if (!(result as ScheduleBackfillError).error) {
         const createdSO = result as Backfill;
-        backfullsToSchedule.push(createdSO);
+        backfillsToSchedule.push(createdSO);
         const ruleTypeTimeout = ruleTypeRegistry.get(createdSO.rule.alertTypeId).ruleTaskTimeout;
         adHocTasksToSchedule.push({
           id: createdSO.id,
@@ -272,7 +272,7 @@ export class BackfillClient {
     });
 
     try {
-      for (const backfill of backfullsToSchedule) {
+      for (const backfill of backfillsToSchedule) {
         await updateGaps({
           backfillSchedule: backfill.schedule,
           ruleId: backfill.rule.id,
@@ -288,7 +288,7 @@ export class BackfillClient {
       }
     } catch {
       this.logger.warn(
-        `Error updating gaps for backfill jobs: ${backfullsToSchedule
+        `Error updating gaps for backfill jobs: ${backfillsToSchedule
           .map((backfill) => backfill.id)
           .join(', ')}`
       );

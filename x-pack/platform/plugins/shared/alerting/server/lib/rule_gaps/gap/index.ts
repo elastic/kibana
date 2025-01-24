@@ -54,10 +54,10 @@ export class Gap {
   }
 
   public fillGap(interval: Interval): void {
-    const clipedInterval = clipInterval(interval, this.range);
-    if (clipedInterval === null) return;
+    const clippedInterval = clipInterval(interval, this.range);
+    if (clippedInterval === null) return;
 
-    const newFilledIntervals = mergeIntervals([...this.filledIntervals, clipedInterval]);
+    const newFilledIntervals = mergeIntervals([...this.filledIntervals, clippedInterval]);
     this._filledIntervals = newFilledIntervals;
     const newInProgressIntervals = subtractAllIntervals(
       this.inProgressIntervals,
@@ -67,10 +67,10 @@ export class Gap {
   }
 
   public addInProgress(interval: Interval): void {
-    const clipedInterval = clipInterval(interval, this.range);
-    if (clipedInterval === null) return;
+    const clippedInterval = clipInterval(interval, this.range);
+    if (clippedInterval === null) return;
 
-    const inProgressIntervals = subtractAllIntervals([clipedInterval], this.filledIntervals);
+    const inProgressIntervals = subtractAllIntervals([clippedInterval], this.filledIntervals);
     this._inProgressIntervals = mergeIntervals([
       ...this.inProgressIntervals,
       ...inProgressIntervals,
