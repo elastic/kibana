@@ -28,7 +28,7 @@ import {
 } from '../../../common/types/api';
 import { decodeWithExcessOrThrow, decodeOrThrow } from '../../common/runtime_types';
 import { createCaseError } from '../../common/error';
-import { countAlertsForID, flattenCaseSavedObject } from '../../common/utils';
+import { countAlertsForID, flattenCaseSavedObject, countUserAttachments } from '../../common/utils';
 import type { CasesClientArgs } from '..';
 import { Operations } from '../../authorization';
 import { combineAuthorizedAndOwnerFilter } from '../utils';
@@ -38,6 +38,7 @@ import type {
   CaseTransformedAttributes,
 } from '../../common/types/case';
 import { CaseRt } from '../../../common/types/domain';
+
 /**
  * Parameters for finding cases IDs using an alert ID
  */
@@ -166,9 +167,12 @@ export interface GetParams {
  *
  * @ignore
  */
-export const get = async ({ id }: GetParams, clientArgs: CasesClientArgs): Promise<Case> => {
+export const get = async (
+  { id, includeComments }: GetParams,
+  clientArgs: CasesClientArgs
+): Promise<Case> => {
   const {
-    services: { caseService, attachmentService },
+    services: { caseService },
     logger,
     authorization,
   } = clientArgs;
@@ -183,21 +187,30 @@ export const get = async ({ id }: GetParams, clientArgs: CasesClientArgs): Promi
       entities: [{ owner: theCase.attributes.owner, id: theCase.id }],
     });
 
-    const commentStats = await attachmentService.getter.getCaseCommentStats({
-      caseIds: [theCase.id],
+    if (!includeComments) {
+      return decodeOrThrow(CaseRt)(
+        flattenCaseSavedObject({
+          savedObject: theCase,
+        })
+      );
+    }
+
+    const theComments = await caseService.getAllCaseComments({
+      id,
+      options: {
+        sortField: 'created_at',
+        sortOrder: 'asc',
+      },
     });
 
-    return decodeOrThrow(CaseRt)(
-      flattenCaseSavedObject({
-        savedObject: theCase,
-        ...(commentStats.has(theCase.id)
-          ? {
-              totalAlerts: commentStats.get(theCase.id)?.alerts,
-              totalComment: commentStats.get(theCase.id)?.userComments,
-            }
-          : {}),
-      })
-    );
+    const res = flattenCaseSavedObject({
+      savedObject: theCase,
+      comments: theComments.saved_objects,
+      totalComment: countUserAttachments(theComments.saved_objects),
+      totalAlerts: countAlertsForID({ comments: theComments, id }),
+    });
+
+    return decodeOrThrow(CaseRt)(res);
   } catch (error) {
     throw createCaseError({ message: `Failed to get case id: ${id}: ${error}`, error, logger });
   }
