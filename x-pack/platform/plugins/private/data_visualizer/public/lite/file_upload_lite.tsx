@@ -18,7 +18,7 @@ export interface Props {
   resultLinks?: ResultLinks;
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
-  autoAddSemanticTextField?: boolean;
+  autoAddInference?: string;
   onClose?: () => void;
 }
 
@@ -28,7 +28,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
   getAdditionalLinks,
   resultLinks,
   setUploadResults,
-  autoAddSemanticTextField,
+  autoAddInference,
   onClose,
 }) => {
   const coreStart = getCoreStart();
@@ -58,7 +58,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
             resultLinks={resultLinks}
             capabilities={coreStart.application.capabilities}
             setUploadResults={setUploadResults}
-            autoAddSemanticTextField={autoAddSemanticTextField}
+            autoAddInference={autoAddInference}
             onClose={onClose}
           />
         </CloudContext>

@@ -53,7 +53,7 @@ export const IngestionSelector: React.FC = () => {
   const showFileUploadFlyout = React.useCallback(() => {
     if (uiActions !== null) {
       uiActions.getTrigger('OPEN_FILE_UPLOAD_LITE_TRIGGER').exec({
-        autoAddSemanticTextField: true,
+        autoAddInference: '.elser-2-elasticsearch',
         onUploadComplete: (results: unknown) => {
           // eslint-disable-next-line no-console
           console.log('results', results);

@@ -45,7 +45,7 @@ interface Props {
   capabilities: ApplicationStart['capabilities'];
   getAdditionalLinks?: GetAdditionalLinks;
   setUploadResults?: (results: FileUploadResults) => void;
-  autoAddSemanticTextField?: boolean;
+  autoAddInference?: string;
   onClose?: () => void;
 }
 
@@ -54,15 +54,15 @@ export const FileUploadLiteView: FC<Props> = ({
   http,
   dataStart,
   setUploadResults,
-  autoAddSemanticTextField,
+  autoAddInference,
   onClose,
 }) => {
   const [indexName, setIndexName] = useState<string>('');
   const [indexValidationStatus, setIndexValidationStatus] = useState<STATUS>(STATUS.NOT_STARTED);
 
   const fm = useMemo(
-    () => new FileManager(fileUpload, http, dataStart.dataViews, autoAddSemanticTextField),
-    [autoAddSemanticTextField, dataStart.dataViews, fileUpload, http]
+    () => new FileManager(fileUpload, http, dataStart.dataViews, autoAddInference ?? null),
+    [autoAddInference, dataStart.dataViews, fileUpload, http]
   );
   const deleteFile = useCallback((i: number) => fm.removeFile(i), [fm]);
 

@@ -17,7 +17,7 @@ import type { FileUploadResults } from './lite/flyout/create_flyout';
 
 export interface OpenFileUploadLiteContext {
   onUploadComplete?: (results: FileUploadResults | null) => void;
-  autoAddSemanticTextField?: boolean;
+  autoAddInference?: string;
 }
 
 export function registerUiActions(

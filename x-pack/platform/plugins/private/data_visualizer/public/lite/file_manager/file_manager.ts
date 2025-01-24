@@ -85,13 +85,16 @@ export class FileManager {
     formatMix: false,
     errors: [],
   });
+  private autoAddSemanticTextField: boolean = false;
 
   constructor(
     private fileUpload: FileUploadStartApi,
     private http: HttpSetup,
     private dataViewsContract: DataViewsServicePublic,
-    private autoAddSemanticTextField: boolean = false
+    private autoAddInference: string | null = null
   ) {
+    this.autoAddSemanticTextField = this.autoAddInference !== null;
+
     this.mappingsCheckSubscription = this.analysisStatus$.subscribe((statuses) => {
       const allFilesAnalyzed = statuses.every((status) => status.loaded);
       if (allFilesAnalyzed) {
@@ -366,9 +369,15 @@ export class FileManager {
     if (this.inferenceId === null) {
       return;
     }
-    const autoDeploy = new AutoDeploy(this.http, this.inferenceId);
-    // put inside try catch !!!!!!!!!!!!!!!!!!!!!!!!!!!!
-    await autoDeploy.deploy();
+    try {
+      const autoDeploy = new AutoDeploy(this.http, this.inferenceId);
+      await autoDeploy.deploy();
+    } catch (error) {
+      this.setStatus({
+        modelDeployed: STATUS.FAILED,
+        errors: [{ title: 'Error deploying model', error }],
+      });
+    }
   }
 
   private isTikaFormat() {

@@ -19,18 +19,18 @@ import { getFileDataVisualizerLiteWrapper } from './component_wrapper';
 interface Props {
   onClose?: () => void;
   setUploadResults?: (results: FileUploadResults) => void;
-  autoAddSemanticTextField?: boolean;
+  autoAddInference?: string;
 }
 
 export const FileUploadLiteFlyoutContents: FC<Props> = ({
   onClose,
   setUploadResults,
-  autoAddSemanticTextField,
+  autoAddInference,
 }) => {
   const Wrapper = getFileDataVisualizerLiteWrapper(
     undefined,
     setUploadResults,
-    autoAddSemanticTextField,
+    autoAddInference,
     onClose
   );
   return <>{Wrapper}</>;

@@ -16,15 +16,15 @@ const FileDataVisualizerLiteComponent = React.lazy(() => import('../file_upload_
 export const FileDataVisualizerLiteWrapper: FC<{
   resultLinks?: ResultLinks;
   setUploadResults?: (results: FileUploadResults) => void;
-  autoAddSemanticTextField?: boolean;
+  autoAddInference?: string;
   onClose?: () => void;
-}> = ({ resultLinks, setUploadResults, autoAddSemanticTextField, onClose }) => {
+}> = ({ resultLinks, setUploadResults, autoAddInference, onClose }) => {
   return (
     <React.Suspense fallback={<div />}>
       <FileDataVisualizerLiteComponent
         resultLinks={resultLinks}
         setUploadResults={setUploadResults}
-        autoAddSemanticTextField={autoAddSemanticTextField}
+        autoAddInference={autoAddInference}
         onClose={onClose}
       />
     </React.Suspense>
@@ -35,14 +35,14 @@ export const FileDataVisualizerLiteWrapper: FC<{
 export function getFileDataVisualizerLiteWrapper(
   resultLinks?: ResultLinks,
   setUploadResults?: (results: FileUploadResults) => void,
-  autoAddSemanticTextField?: boolean,
+  autoAddInference?: string,
   onClose?: () => void
 ) {
   return (
     <FileDataVisualizerLiteWrapper
       resultLinks={resultLinks}
       setUploadResults={setUploadResults}
-      autoAddSemanticTextField={autoAddSemanticTextField}
+      autoAddInference={autoAddInference}
       onClose={onClose}
     />
   );
