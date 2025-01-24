@@ -221,7 +221,7 @@ export class EntityStoreDataClient {
       throw new Error('Task Manager is not available');
     }
 
-    const { indexPattern, lookbackPeriod, filter, fieldHistoryLength } = {
+    const { indexPattern, lookbackPeriod, filter, fieldHistoryLength, entityTypes } = {
       ...DEFAULT_INIT_ENTITY_STORE,
       ...requestBodyOverrides,
     };
