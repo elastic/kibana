@@ -4,341 +4,252 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { rangeQuery } from '@kbn/observability-plugin/server';
+import type { Logger } from '@kbn/core/server';
+import { existsQuery, rangeQuery, termsQuery } from '@kbn/observability-plugin/server';
+import type { APMEventClient } from '@kbn/apm-data-access-plugin/server';
 import { ProcessorEvent } from '@kbn/observability-plugin/common';
+import { unflattenKnownApmEventFields } from '@kbn/apm-data-access-plugin/server/utils';
+import { chunk } from 'lodash';
+import type { ServiceMapSpan } from '../../../common/service_map/typings';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import {
   AGENT_NAME,
   PARENT_ID,
-  PROCESSOR_EVENT,
   SERVICE_ENVIRONMENT,
   SERVICE_NAME,
   SPAN_DESTINATION_SERVICE_RESOURCE,
+  SPAN_ID,
   SPAN_SUBTYPE,
   SPAN_TYPE,
   TRACE_ID,
+  EVENT_OUTCOME,
 } from '../../../common/es_fields/apm';
-import type {
-  ConnectionNode,
-  ExternalConnectionNode,
-  ServiceConnectionNode,
-} from '../../../common/service_map';
-import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { calculateDocsPerShard } from './calculate_docs_per_shard';
 
-const SCRIPTED_METRICS_FIELDS_TO_COPY = [
-  PARENT_ID,
-  SERVICE_NAME,
-  SERVICE_ENVIRONMENT,
-  SPAN_DESTINATION_SERVICE_RESOURCE,
-  TRACE_ID,
-  PROCESSOR_EVENT,
-  SPAN_TYPE,
-  SPAN_SUBTYPE,
-  AGENT_NAME,
-];
-
-const AVG_BYTES_PER_FIELD = 55;
-
-export async function fetchServicePathsFromTraceIds({
+export async function fetchPathsFromTraceIds({
   apmEventClient,
   traceIds,
   start,
   end,
   terminateAfter,
-  serviceMapMaxAllowableBytes,
-  numOfRequests,
+  logger,
 }: {
   apmEventClient: APMEventClient;
   traceIds: string[];
   start: number;
   end: number;
   terminateAfter: number;
-  serviceMapMaxAllowableBytes: number;
-  numOfRequests: number;
+  logger: Logger;
 }) {
-  // make sure there's a range so ES can skip shards
-  const dayInMs = 24 * 60 * 60 * 1000;
-  const startRange = start - dayInMs;
-  const endRange = end + dayInMs;
+  logger.debug(`Fetching spans (${traceIds.length} traces)`);
 
-  const serviceMapParams = {
-    apm: {
-      events: [ProcessorEvent.span, ProcessorEvent.transaction],
-    },
-    terminate_after: terminateAfter,
-    track_total_hits: false,
-    size: 0,
-    query: {
-      bool: {
-        filter: [
-          {
-            terms: {
-              [TRACE_ID]: traceIds,
-            },
-          },
-          ...rangeQuery(startRange, endRange),
-        ],
-      },
-    },
-  };
-  // fetch without aggs to get shard count, first
-  const serviceMapQueryDataResponse = await apmEventClient.search(
-    'get_trace_ids_shard_data',
-    serviceMapParams
-  );
-  /*
-   * Calculate how many docs we can fetch per shard.
-   * Used in both terminate_after and tracking in the map script of the scripted_metric agg
-   * to ensure we don't fetch more than we can handle.
-   *
-   * 1. Use serviceMapMaxAllowableBytes setting, which represents our baseline request circuit breaker limit.
-   * 2. Divide by numOfRequests we fire off simultaneously to calculate bytesPerRequest.
-   * 3. Divide bytesPerRequest by the average doc size to get totalNumDocsAllowed.
-   * 4. Divide totalNumDocsAllowed by totalShards to get numDocsPerShardAllowed.
-   * 5. Use the lesser of numDocsPerShardAllowed or terminateAfter.
-   */
-
-  const avgDocSizeInBytes = SCRIPTED_METRICS_FIELDS_TO_COPY.length * AVG_BYTES_PER_FIELD; // estimated doc size in bytes
-  const totalShards = serviceMapQueryDataResponse._shards.total;
-
-  const calculatedDocs = calculateDocsPerShard({
-    serviceMapMaxAllowableBytes,
-    avgDocSizeInBytes,
-    totalShards,
-    numOfRequests,
+  const exitSpansSample = await fetchExitSpanIdsFromTraceIds({
+    apmEventClient,
+    traceIds,
+    start,
+    end,
+    terminateAfter,
   });
 
-  const numDocsPerShardAllowed = calculatedDocs > terminateAfter ? terminateAfter : calculatedDocs;
-
-  /*
-   * Any changes to init_script, map_script, combine_script and reduce_script
-   * must be replicated on https://github.com/elastic/elasticsearch-serverless/blob/main/distribution/archives/src/serverless-default-settings.yml
-   */
-  const serviceMapAggs = {
-    service_map: {
-      scripted_metric: {
-        params: {
-          limit: numDocsPerShardAllowed,
-          fieldsToCopy: SCRIPTED_METRICS_FIELDS_TO_COPY,
-        },
-        init_script: {
-          lang: 'painless',
-          source: `
-            state.docCount = 0;
-            state.limit = params.limit;
-            state.eventsById = new HashMap();
-            state.fieldsToCopy = params.fieldsToCopy;`,
-        },
-        map_script: {
-          lang: 'painless',
-          source: `
-            if (state.docCount >= state.limit) {
-              // Stop processing if the document limit is reached
-              return; 
-            }
-
-            def id = $('span.id', null);
-            if (id == null) {
-              id = $('transaction.id', null);
-            }
-
-            // Ensure same event isn't processed twice
-            if (id != null && !state.eventsById.containsKey(id)) {
-              def copy = new HashMap();
-              copy.id = id;
-
-              for(key in state.fieldsToCopy) {
-                def value = $(key, null);
-                if (value != null) {
-                  copy[key] = value;
-                }
-              }
-
-              state.eventsById[id] = copy;
-              state.docCount++;
-            }
-          `,
-        },
-        combine_script: {
-          lang: 'painless',
-          source: `return state;`,
-        },
-        reduce_script: {
-          lang: 'painless',
-          source: `
-            def getDestination(def event) {
-              def destination = new HashMap();
-              destination['span.destination.service.resource'] = event['span.destination.service.resource'];
-              destination['span.type'] = event['span.type'];
-              destination['span.subtype'] = event['span.subtype'];
-              return destination;
-            }
-      
-            def processAndReturnEvent(def context, def eventId) {
-              def stack = new Stack();
-              def reprocessQueue = new LinkedList();
-
-              // Avoid reprocessing the same event
-              def visited = new HashSet();
-
-              stack.push(eventId);
-
-              while (!stack.isEmpty()) {
-                def currentEventId = stack.pop();
-                def event = context.eventsById.get(currentEventId);
-
-                if (event == null || context.processedEvents.get(currentEventId) != null) {
-                  continue;
-                }
-                visited.add(currentEventId);
-
-                def service = new HashMap();
-                service['service.name'] = event['service.name'];
-                service['service.environment'] = event['service.environment'];
-                service['agent.name'] = event['agent.name'];
-                
-                def basePath = new ArrayList();
-                def parentId = event['parent.id'];
-
-                if (parentId != null && !parentId.equals(currentEventId)) {
-                  def parent = context.processedEvents.get(parentId);
-                  
-                  if (parent == null) {
-                    
-                    // Only adds the parentId to the stack if it hasn't been visited to prevent infinite loop scenarios
-                    // if the parent is null, it means it hasn't been processed yet or it could also mean that the current event
-                    // doesn't have a parent, in which case we should skip it
-                    if (!visited.contains(parentId)) {
-                      stack.push(parentId);
-                      // Add currentEventId to be reprocessed once its parent is processed
-                      reprocessQueue.add(currentEventId); 
-                    }
-
-
-                    continue;
-                  }
-
-                  // copy the path from the parent
-                  basePath.addAll(parent.path);
-                  // flag parent path for removal, as it has children
-                  context.locationsToRemove.add(parent.path);
-      
-                  // if the parent has 'span.destination.service.resource' set, and the service is different, we've discovered a service
-                  if (parent['span.destination.service.resource'] != null
-                    && parent['span.destination.service.resource'] != ""
-                    && (parent['service.name'] != event['service.name']
-                      || parent['service.environment'] != event['service.environment'])
-                  ) {
-                    def parentDestination = getDestination(parent);
-                    context.externalToServiceMap.put(parentDestination, service);
-                  }
-                }
-          
-                def lastLocation = basePath.size() > 0 ? basePath[basePath.size() - 1] : null;
-                def currentLocation = service;
-        
-                // only add the current location to the path if it's different from the last one
-                if (lastLocation == null || !lastLocation.equals(currentLocation)) {
-                  basePath.add(currentLocation);
-                }
-        
-                // if there is an outgoing span, create a new path
-                if (event['span.destination.service.resource'] != null
-                  && !event['span.destination.service.resource'].equals("")) {
-
-                  def outgoingLocation = getDestination(event);
-                  def outgoingPath = new ArrayList(basePath);
-                  outgoingPath.add(outgoingLocation);
-                  context.paths.add(outgoingPath);
-                }
-        
-                event.path = basePath;
-                context.processedEvents[currentEventId] = event;
-
-                // reprocess events which were waiting for their parents to be processed
-                while (!reprocessQueue.isEmpty()) {
-                  stack.push(reprocessQueue.remove());
-                }
-              }
-
-              return null;
-            }
-      
-            def context = new HashMap();
-      
-            context.processedEvents = new HashMap();
-            context.eventsById = new HashMap();
-            context.paths = new HashSet();
-            context.externalToServiceMap = new HashMap();
-            context.locationsToRemove = new HashSet();
-      
-            for (state in states) {
-              context.eventsById.putAll(state.eventsById);
-              state.eventsById.clear();
-            }
-
-            states.clear();
-            
-            for (entry in context.eventsById.entrySet()) {
-              processAndReturnEvent(context, entry.getKey());
-            }
-
-            context.processedEvents.clear();
-            context.eventsById.clear();
-      
-            def response = new HashMap();
-            response.paths = new HashSet();
-            response.discoveredServices = new HashSet();
-      
-            for (foundPath in context.paths) {
-              if (!context.locationsToRemove.contains(foundPath)) {
-                response.paths.add(foundPath);
-              }
-            }
-
-            context.locationsToRemove.clear();
-            context.paths.clear();
-      
-            for (entry in context.externalToServiceMap.entrySet()) {
-              def map = new HashMap();
-              map.from = entry.getKey();
-              map.to = entry.getValue();
-              response.discoveredServices.add(map);
-            }
-
-            context.externalToServiceMap.clear();
-
-            return response;
-          `,
-        },
-      },
-    } as const,
-  };
-
-  const serviceMapParamsWithAggs = {
-    ...serviceMapParams,
-    size: 1,
-    terminate_after: numDocsPerShardAllowed,
-    aggs: serviceMapAggs,
-  };
-
-  const serviceMapFromTraceIdsScriptResponse = await apmEventClient.search(
-    'get_service_paths_from_trace_ids',
-    serviceMapParamsWithAggs
+  const entries = Array.from(exitSpansSample.entries());
+  const chunkedExitSpansSample = chunk(entries, 1_000).map(
+    (chunkedEntries) => new Map(chunkedEntries)
+  );
+  const transactionsFromExitSpans = await Promise.all(
+    chunkedExitSpansSample.map((sample) =>
+      fetchTransactionsFromExitSpans({
+        apmEventClient,
+        exitSpansSample: sample,
+        start,
+        end,
+        terminateAfter,
+      })
+    )
   );
 
-  return serviceMapFromTraceIdsScriptResponse as {
-    aggregations?: {
-      service_map: {
-        value: {
-          paths: ConnectionNode[][];
-          discoveredServices: Array<{
-            from: ExternalConnectionNode;
-            to: ServiceConnectionNode;
-          }>;
-        };
-      };
-    };
-  };
+  return transactionsFromExitSpans.reduce((acc, spans) => {
+    return acc.concat(spans);
+  }, [] as ServiceMapSpan[]);
+}
+
+async function fetchExitSpanIdsFromTraceIds({
+  apmEventClient,
+  traceIds,
+  terminateAfter,
+  start,
+  end,
+}: {
+  apmEventClient: APMEventClient;
+  traceIds: string[];
+  terminateAfter: number;
+  start: number;
+  end: number;
+}) {
+  const sampleExitSpans = await apmEventClient.search('get_service_map_exit_span_samples', {
+    apm: {
+      events: [ProcessorEvent.span],
+    },
+    body: {
+      track_total_hits: false,
+      size: 0,
+      query: {
+        bool: {
+          filter: [
+            ...rangeQuery(start, end),
+            ...termsQuery(TRACE_ID, ...traceIds),
+            ...existsQuery(SPAN_DESTINATION_SERVICE_RESOURCE),
+          ],
+        },
+      },
+      aggs: {
+        exitSpans: {
+          composite: {
+            sources: asMutableArray([
+              { serviceName: { terms: { field: SERVICE_NAME } } },
+              {
+                spanDestinationServiceResource: {
+                  terms: { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                },
+              },
+            ] as const),
+            size: terminateAfter,
+          },
+          aggs: {
+            eventOutcomeGroup: {
+              filters: {
+                filters: {
+                  success: {
+                    term: {
+                      [EVENT_OUTCOME]: 'success' as const,
+                    },
+                  },
+                  others: {
+                    bool: {
+                      must_not: {
+                        term: {
+                          [EVENT_OUTCOME]: 'success' as const,
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+              aggs: {
+                sample: {
+                  top_metrics: {
+                    size: 1,
+                    sort: {
+                      '@timestamp': 'asc',
+                    },
+                    metrics: asMutableArray([
+                      { field: SPAN_ID },
+                      { field: SPAN_TYPE },
+                      { field: SPAN_SUBTYPE },
+                      { field: SPAN_DESTINATION_SERVICE_RESOURCE },
+                      { field: SERVICE_NAME },
+                      { field: SERVICE_ENVIRONMENT },
+                      { field: AGENT_NAME },
+                    ] as const),
+                  },
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  });
+
+  const destinationsBySpanId = new Map<string, ServiceMapSpan>();
+
+  sampleExitSpans.aggregations?.exitSpans.buckets.forEach((bucket) => {
+    const eventOutcomeGroup =
+      bucket.eventOutcomeGroup.buckets.success.sample.top.length > 0
+        ? bucket.eventOutcomeGroup.buckets.success
+        : bucket.eventOutcomeGroup.buckets.others.sample.top.length > 0
+        ? bucket.eventOutcomeGroup.buckets.others
+        : undefined;
+
+    const sample = eventOutcomeGroup?.sample.top[0].metrics;
+    if (!sample) {
+      return;
+    }
+
+    const spanId = sample[SPAN_ID] as string;
+    if (!sample || !spanId) {
+      return;
+    }
+
+    destinationsBySpanId.set(spanId, {
+      spanDestinationServiceResource: bucket.key.spanDestinationServiceResource as string,
+      spanId: spanId as string,
+      spanType: sample[SPAN_TYPE] as string,
+      spanSubtype: sample[SPAN_SUBTYPE] as string,
+      agentName: sample[AGENT_NAME] as AgentName,
+      serviceName: bucket.key.serviceName as string,
+      serviceEnvironment: sample[SERVICE_ENVIRONMENT] as string,
+    });
+  });
+
+  return destinationsBySpanId;
+}
+
+async function fetchTransactionsFromExitSpans({
+  apmEventClient,
+  exitSpansSample: exitSpansSample,
+  start,
+  end,
+}: {
+  apmEventClient: APMEventClient;
+  exitSpansSample: Map<string, ServiceMapSpan>;
+  terminateAfter: number;
+  start: number;
+  end: number;
+}) {
+  const optionalFields = asMutableArray([SERVICE_ENVIRONMENT] as const);
+  const requiredFields = asMutableArray([SERVICE_NAME, AGENT_NAME, PARENT_ID] as const);
+
+  const servicesResponse = await apmEventClient.search('get_transactions_for_exit_spans', {
+    apm: {
+      events: [ProcessorEvent.transaction],
+    },
+    body: {
+      track_total_hits: false,
+      query: {
+        bool: {
+          filter: [...rangeQuery(start, end), ...termsQuery(PARENT_ID, ...exitSpansSample.keys())],
+        },
+      },
+      size: exitSpansSample.size,
+      fields: [...requiredFields, ...optionalFields],
+    },
+  });
+
+  const destinationsBySpanId = new Map(exitSpansSample);
+
+  servicesResponse.hits.hits.forEach((hit) => {
+    let transaction;
+    try {
+      transaction = unflattenKnownApmEventFields(hit.fields, [...requiredFields]);
+    } catch (e) {
+      console.error('Failed to unflatten transaction', e);
+      return;
+    }
+
+    const spanId = transaction.parent.id;
+
+    const destination = destinationsBySpanId.get(spanId);
+    if (destination) {
+      destinationsBySpanId.set(spanId, {
+        ...destination,
+        downstreamService: {
+          agentName: transaction.agent.name,
+          serviceEnvironment: transaction.service.environment,
+          serviceName: transaction.service.name,
+        },
+      });
+    }
+  });
+
+  return Array.from(destinationsBySpanId.values());
 }
