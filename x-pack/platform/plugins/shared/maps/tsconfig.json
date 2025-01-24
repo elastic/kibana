@@ -55,7 +55,6 @@
     "@kbn/mapbox-gl",
     "@kbn/core-execution-context-common",
     "@kbn/chart-icons",
-    "@kbn/ui-theme",
     "@kbn/monaco",
     "@kbn/safer-lodash-set",
     "@kbn/custom-integrations-plugin",
