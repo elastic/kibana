@@ -39,8 +39,10 @@ export async function getDefaultAsyncSubmitParams(
 ): Promise<
   Pick<
     AsyncSearchSubmitRequest,
+    // @ts-expect-error 'keep_alive' has been removed from the types but still available in the docs
     | 'batched_reduce_size'
     | 'ccs_minimize_roundtrips'
+    | 'keep_alive'
     | 'wait_for_completion_timeout'
     | 'ignore_throttled'
     | 'max_concurrent_shard_requests'

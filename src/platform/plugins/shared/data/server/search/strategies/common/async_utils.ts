@@ -26,15 +26,25 @@ export function getCommonDefaultAsyncSubmitParams(
   overrides?: {
     disableSearchSessions?: true;
   }
-): Pick<AsyncSearchSubmitRequest, 'wait_for_completion_timeout' | 'keep_on_completion'> {
+): Pick<
+  AsyncSearchSubmitRequest,
+  // @ts-expect-error 'keep_alive' has been removed from the types but still available in the docs
+  'keep_alive' | 'wait_for_completion_timeout' | 'keep_on_completion'
+> {
   const useSearchSessions =
     config.sessions.enabled && !!options.sessionId && !overrides?.disableSearchSessions;
+  const keepAlive =
+    useSearchSessions && options.isStored
+      ? `${config.sessions.defaultExpiration.asMilliseconds()}ms`
+      : `${config.asyncSearch.keepAlive.asMilliseconds()}ms`;
 
   return {
     // Wait up to the timeout for the response to return
     wait_for_completion_timeout: `${config.asyncSearch.waitForCompletion.asMilliseconds()}ms`,
     // If search sessions are used, store and get an async ID even for short running requests.
     keep_on_completion: useSearchSessions,
+    // The initial keepalive is as defined in defaultExpiration if search sessions are used or 1m otherwise.
+    keep_alive: keepAlive,
   };
 }
 
