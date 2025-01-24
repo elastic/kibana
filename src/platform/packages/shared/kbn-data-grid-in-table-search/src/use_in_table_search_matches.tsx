@@ -287,19 +287,22 @@ function changeActiveMatchInState(
 }
 
 function AllCellsHighlightsCounter(props: AllCellsProps) {
-  const [container] = useState(() => document.createDocumentFragment());
-  const containerRef = useRef<DocumentFragment>();
-  containerRef.current = container;
+  const containerRef = useRef<DocumentFragment | null>(document.createDocumentFragment());
 
   useEffect(() => {
     return () => {
       if (containerRef.current) {
         unmountComponentAtNode(containerRef.current);
+        containerRef.current = null;
       }
     };
   }, []);
 
-  return createPortal(<AllCells {...props} />, container);
+  if (!containerRef.current) {
+    return null;
+  }
+
+  return createPortal(<AllCells {...props} />, containerRef.current);
 }
 
 // Process rows in chunks:
@@ -308,7 +311,7 @@ function AllCellsHighlightsCounter(props: AllCellsProps) {
 const INITIAL_ROWS_CHUNK_SIZE = 10;
 // Increases the chunk size by 10 each time. This will increase the speed of processing with each iteration as we get more certain that user is waiting for its completion.
 const ROWS_CHUNK_SIZE_INCREMENT = 10;
-const ROWS_CHUNK_SIZE_MAX = 300;
+const ROWS_CHUNK_SIZE_MAX = 100;
 
 function AllCells(props: AllCellsProps) {
   const { inTableSearchTerm, visibleColumns, renderCellValue, rowsCount, onFinish } = props;
@@ -446,7 +449,7 @@ function RowCells({
         clearTimeout(timerRef.current);
       }
     };
-  }, []);
+  }, [rowIndex]);
 
   return (
     <>
