@@ -50,7 +50,7 @@ export const EditRuleForm = (props: EditRuleFormProps) => {
     onSubmit,
     isFlyout,
     onChangeMetaData,
-    initialMetadata = {},
+    initialMetadata,
   } = props;
   const { http, notifications, docLinks, ruleTypeRegistry, application, ...deps } = plugins;
   const { toasts } = notifications;
