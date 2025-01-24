@@ -135,7 +135,7 @@ export const DEFAULT_INIT_ENTITY_STORE: InitEntityStoreRequestBody = {
   lookbackPeriod: '24h',
   filter: '',
   fieldHistoryLength: 10,
-  enrichPolicyExecutionInterval = DEFAULT_INTERVAL,
+  enrichPolicyExecutionInterval: DEFAULT_INTERVAL,
 };
 
 const DEFAULT_ENTITY_ENGINE: InitEntityEngineRequestBody & { lookbackPeriod?: string } = {
