@@ -15,7 +15,6 @@ import {
   EuiText,
   EuiBadge,
   EuiSpacer,
-  EuiCallOut,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
@@ -25,8 +24,7 @@ import {
   type CreateConnectorPopoverProps,
 } from './create_connector_popover';
 import { ConnectorSetup } from './connector_setup';
-import * as i18n from './translations';
-import { MissingPrivilegesDescription } from './missing_privileges';
+import { ConnectorsMissingPrivilegesCallOut } from './missing_privileges';
 
 interface ConnectorCardsProps
   extends CreateConnectorPopoverProps,
@@ -50,11 +48,7 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
 
     // show callout when user is missing actions.save privilege
     if (!hasConnectors && !canCreateConnectors) {
-      return (
-        <EuiCallOut title={i18n.PRIVILEGES_MISSING_TITLE} iconType="iInCircle">
-          <MissingPrivilegesDescription />
-        </EuiCallOut>
-      );
+      return <ConnectorsMissingPrivilegesCallOut level="all" />;
     }
 
     return (

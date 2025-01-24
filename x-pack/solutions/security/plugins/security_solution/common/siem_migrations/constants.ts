@@ -32,6 +32,8 @@ export const SIEM_RULE_MIGRATION_RESOURCES_MISSING_PATH =
 export const SIEM_RULE_MIGRATION_PRIVILEGES_PATH =
   `${SIEM_RULE_MIGRATIONS_PATH}/privileges` as const;
 
+export const LOOKUPS_INDEX_PREFIX = 'lookup_';
+
 export enum SiemMigrationTaskStatus {
   READY = 'ready',
   RUNNING = 'running',

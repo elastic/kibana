@@ -14,30 +14,11 @@ export const ASSISTANT_CARD_CREATE_NEW_CONNECTOR_POPOVER = i18n.translate(
   }
 );
 
-export const PRIVILEGES_MISSING_TITLE = i18n.translate(
-  'xpack.securitySolution.onboarding.assistantCard.missingPrivileges.title',
-  {
-    defaultMessage: 'Missing privileges',
-  }
+export const REQUIRED_PRIVILEGES_CONNECTORS_READ = i18n.translate(
+  'xpack.securitySolution.onboarding.assistantCard.requiredPrivileges.connectorsRead',
+  { defaultMessage: 'Management > Actions & Connectors: Read' }
 );
-
-export const PRIVILEGES_REQUIRED_TITLE = i18n.translate(
-  'xpack.securitySolution.onboarding.assistantCard.requiredPrivileges',
-  {
-    defaultMessage: 'The minimum Kibana privileges required to use this feature are:',
-  }
-);
-
 export const REQUIRED_PRIVILEGES_CONNECTORS_ALL = i18n.translate(
   'xpack.securitySolution.onboarding.assistantCard.requiredPrivileges.connectorsAll',
-  {
-    defaultMessage: 'Management > Connectors: All',
-  }
-);
-
-export const CONTACT_ADMINISTRATOR = i18n.translate(
-  'xpack.securitySolution.onboarding.assistantCard.missingPrivileges.contactAdministrator',
-  {
-    defaultMessage: 'Contact your administrator for assistance.',
-  }
+  { defaultMessage: 'Management > Actions & Connectors: All' }
 );

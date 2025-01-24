@@ -39,5 +39,5 @@ export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
     );
   }
 
-  return { isComplete, metadata: { missingCapabilities, missingIndexPrivileges: [] } };
+  return { isComplete, metadata: { missingCapabilities } };
 };

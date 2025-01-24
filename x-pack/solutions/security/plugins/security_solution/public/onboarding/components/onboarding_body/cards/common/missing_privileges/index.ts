@@ -5,6 +5,8 @@
  * 2.0.
  */
 
-export interface StartMigrationCardMetadata {
-  missingCapabilities: string[];
-}
+export {
+  MissingPrivilegesDescription,
+  MissingPrivilegesCallOut,
+  MissingPrivilegesTooltip,
+} from './missing_privileges';

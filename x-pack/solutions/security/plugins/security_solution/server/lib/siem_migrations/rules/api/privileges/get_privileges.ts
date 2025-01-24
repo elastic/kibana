@@ -7,7 +7,10 @@
 
 import type { ElasticsearchClient, IKibanaResponse, Logger } from '@kbn/core/server';
 import type { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/types';
-import { SIEM_RULE_MIGRATION_PRIVILEGES_PATH } from '../../../../../../common/siem_migrations/constants';
+import {
+  SIEM_RULE_MIGRATION_PRIVILEGES_PATH,
+  LOOKUPS_INDEX_PREFIX,
+} from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 
 export const registerSiemRuleMigrationsGetPrivilegesRoute = (
@@ -33,8 +36,7 @@ export const registerSiemRuleMigrationsGetPrivilegesRoute = (
             return response.notFound();
           }
 
-          // const spaceId = securitySolution.getSpaceId();
-          const clusterPrivileges = await readPrivileges(esClient, `lookup_*`);
+          const clusterPrivileges = await readPrivileges(esClient, `${LOOKUPS_INDEX_PREFIX}*`);
 
           const privileges = {
             ...(clusterPrivileges as object),

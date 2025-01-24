@@ -9,7 +9,8 @@ import { css } from '@emotion/css';
 import { EuiPopover, EuiLink, EuiText } from '@elastic/eui';
 import { ConnectorSetup } from './connector_setup';
 import * as i18n from './translations';
-import { MissingPrivilegesTooltip } from './missing_privileges';
+import { ConnectorsMissingPrivilegesDescription } from './missing_privileges';
+import { MissingPrivilegesTooltip } from '../missing_privileges';
 
 export interface CreateConnectorPopoverProps {
   onConnectorSaved: () => void;
@@ -27,7 +28,9 @@ export const CreateConnectorPopover = React.memo<CreateConnectorPopoverProps>(
     );
     if (!canCreateConnectors) {
       return (
-        <MissingPrivilegesTooltip>
+        <MissingPrivilegesTooltip
+          description={<ConnectorsMissingPrivilegesDescription level="all" />}
+        >
           <EuiLink data-test-subj="createConnectorPopoverButton" onClick={onButtonClick} disabled>
             {i18n.ASSISTANT_CARD_CREATE_NEW_CONNECTOR_POPOVER}
           </EuiLink>
