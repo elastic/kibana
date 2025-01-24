@@ -9,7 +9,6 @@ import React, { useMemo, useCallback, useRef, useEffect, useState } from 'react'
 import { isEqual } from 'lodash';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
-import { v4 as uuidv4 } from 'uuid';
 import {
   EuiTitle,
   EuiAccordion,
@@ -55,6 +54,7 @@ import { useApplicationUserMessages } from '../../get_application_user_messages'
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
 import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
+import { useESQLVariables } from './use_esql_variables';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -100,15 +100,16 @@ export function LensEditConfigurationFlyout({
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
 
-  const dashboardPanels = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : undefined
-  );
-  const controlGroupApi = useStateFromPublishingSubject(
-    isApiESQLVariablesCompatible(parentApi) ? parentApi?.controlGroupApi$ : undefined
-  );
   const esqlVariables = useStateFromPublishingSubject(
     isApiESQLVariablesCompatible(parentApi) ? parentApi?.esqlVariables$ : undefined
   );
+
+  const { onSaveControl, onCancelControl } = useESQLVariables({
+    parentApi,
+    panelId,
+    attributes,
+    closeFlyout,
+  });
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);
@@ -129,53 +130,6 @@ export function LensEditConfigurationFlyout({
 
   // needed for text based languages mode which works ONLY with adHoc dataviews
   const adHocDataViews = Object.values(attributes.state.adHocDataViews ?? {});
-
-  const panel = useMemo(() => {
-    if (!panelId) {
-      return;
-    }
-    return dashboardPanels?.[panelId] as {
-      updateAttributes: (attributes: TypedLensSerializedState['attributes']) => void;
-      onEdit: () => Promise<void>;
-    };
-  }, [dashboardPanels, panelId]);
-
-  const onSaveControl = useCallback(
-    async (controlState: Record<string, unknown>, updatedQuery: string) => {
-      if (!panelId) {
-        return;
-      }
-
-      // add a new control
-      controlGroupApi?.addNewPanel({
-        panelType: 'esqlControl',
-        initialState: {
-          ...controlState,
-          id: uuidv4(),
-        },
-      });
-      if (panel && updatedQuery) {
-        panel.updateAttributes({
-          ...attributes,
-          state: {
-            ...attributes.state,
-            query: { esql: updatedQuery },
-            needsRefresh: true,
-          },
-        });
-        // open the edit flyout to continue editing
-        await panel.onEdit();
-      }
-    },
-    [attributes, controlGroupApi, panel, panelId]
-  );
-
-  const onCancelControl = useCallback(() => {
-    closeFlyout?.();
-    if (panel) {
-      panel.onEdit();
-    }
-  }, [closeFlyout, panel]);
 
   const dispatch = useLensDispatch();
   useEffect(() => {
