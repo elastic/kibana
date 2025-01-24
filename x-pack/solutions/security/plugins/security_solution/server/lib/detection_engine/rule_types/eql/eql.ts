@@ -15,6 +15,8 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
+import { i18n } from '@kbn/i18n';
+
 import { buildEqlSearchRequest } from './build_eql_search_request';
 import { createEnrichEventsFunction } from '../utils/enrichments';
 
@@ -173,6 +175,12 @@ export const eqlExecutor = async ({
       const { events, sequences } = response.hits;
 
       if (shardFailures) {
+        i18n.translate('x-pack.securitySolution.detectionEngine.ruleTypes.eql.shardFailures', {
+          defaultMessage: `The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards: {shardFailures}`,
+          values: {
+            shardFailures: JSON.stringify(shardFailures),
+          },
+        });
         const shardFailureMessage = `The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards: ${JSON.stringify(
           shardFailures
         )}`;
