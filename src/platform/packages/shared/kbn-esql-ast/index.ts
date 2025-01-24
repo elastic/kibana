@@ -31,10 +31,12 @@ export type {
 } from './src/types';
 
 export {
-  isBinaryExpression,
   isColumn,
   isDoubleLiteral,
   isFunctionExpression,
+  isBinaryExpression,
+  isWhereExpression,
+  isFieldExpression,
   isIdentifier,
   isIntegerLiteral,
   isLiteral,
