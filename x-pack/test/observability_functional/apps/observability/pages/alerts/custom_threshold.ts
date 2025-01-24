@@ -226,6 +226,7 @@ export default ({ getService, getPageObjects }: FtrProviderContext) => {
         expect.objectContaining({
           name: 'test custom threshold rule',
           tags: ['tag1'],
+          consumer: 'logs',
           params: expect.objectContaining({
             alertOnGroupDisappear: false,
             alertOnNoData: false,
