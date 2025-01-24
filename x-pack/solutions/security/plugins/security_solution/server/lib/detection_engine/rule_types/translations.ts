@@ -27,3 +27,11 @@ export const EQL_SEARCH_REQUEST_DESCRIPTION = i18n.translate(
     defaultMessage: 'EQL request to find all matches',
   }
 );
+
+export const EQL_SHARD_FAILURE_MESSAGE = (shardFailuresMessage: string) =>
+  i18n.translate('x-pack.securitySolution.detectionEngine.ruleTypes.eql.shardFailures', {
+    defaultMessage: `The EQL event query was only executed on the available shards. The query failed to run successfully on the following shards: {shardFailures}`,
+    values: {
+      shardFailures: shardFailuresMessage,
+    },
+  });
