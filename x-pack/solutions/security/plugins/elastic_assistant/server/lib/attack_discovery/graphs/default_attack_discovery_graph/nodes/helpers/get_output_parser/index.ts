@@ -10,5 +10,4 @@ import { StructuredOutputParser } from 'langchain/output_parsers';
 import { AttackDiscoveriesGenerationSchema } from '../../generate/schema';
 
 export const getOutputParser = () =>
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  StructuredOutputParser.fromZodSchema(AttackDiscoveriesGenerationSchema as any);
+  StructuredOutputParser.fromZodSchema(AttackDiscoveriesGenerationSchema);

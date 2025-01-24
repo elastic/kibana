@@ -191,8 +191,7 @@ export const getStructuredToolForIndexEntry = ({
               {
                 semantic: {
                   field: indexEntry.field,
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  query: (input as any).query,
+                  query: input.query,
                 },
               },
             ],
