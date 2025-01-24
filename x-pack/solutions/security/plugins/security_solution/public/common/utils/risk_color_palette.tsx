@@ -17,7 +17,6 @@ import {
 } from '../constants';
 
 // Temporary solution until we have a decision for color palette https://github.com/elastic/kibana/issues/203387
-// TODO: Borealis migration - move from hardcoded values to severity palette https://github.com/elastic/security-team/issues/11606
 export const SEVERITY_COLOR = {
   low: '#54B399',
   medium: '#D6BF57',
