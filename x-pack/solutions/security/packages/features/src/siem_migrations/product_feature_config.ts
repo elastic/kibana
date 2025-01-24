@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SIEM_MIGRATIONS_FEATURE_ID } from '../constants';
+import { SIEM_MIGRATIONS_API_ACTION_ALL } from '../actions';
 import { ProductFeatureSiemMigrationsKey } from '../product_features_keys';
 import type { ProductFeatureKibanaConfig } from '../types';
 
@@ -26,7 +26,7 @@ export const siemMigrationsDefaultProductFeaturesConfig: Record<
   [ProductFeatureSiemMigrationsKey.siemMigrations]: {
     privileges: {
       all: {
-        api: [SIEM_MIGRATIONS_FEATURE_ID],
+        api: [SIEM_MIGRATIONS_API_ACTION_ALL],
         ui: ['all'],
       },
     },

@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { authz } from './util/authz';
 import {
   UpdateRuleMigrationRequestBody,
   type UpdateRuleMigrationResponse,
@@ -24,7 +25,7 @@ export const registerSiemRuleMigrationsUpdateRoute = (
     .put({
       path: SIEM_RULE_MIGRATIONS_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {

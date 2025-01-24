@@ -174,8 +174,8 @@ export class SiemRulesMigrationsService {
     }
 
     return getRuleMigrationsStatsAll(params).catch((e) => {
-      // Retry only on network errors (no status) and 503s, otherwise throw
-      if (e.status && e.status !== 503) {
+      // Retry only on network errors (no e.status) and 503 (Service Unavailable), otherwise throw
+      if (e.response.status || (e.status && e.status !== 503)) {
         throw e;
       }
       const nextSleepSecs = sleepSecs ? sleepSecs * 2 : 1; // Exponential backoff

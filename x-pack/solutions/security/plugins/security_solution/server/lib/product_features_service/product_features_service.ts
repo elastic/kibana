@@ -29,6 +29,7 @@ import {
   getNotesFeature,
   getSiemMigrationsFeature,
 } from '@kbn/security-solution-features/product_features';
+import { API_ACTION_PREFIX } from '@kbn/security-solution-features/actions';
 import type { RecursiveReadonly } from '@kbn/utility-types';
 import type { ExperimentalFeatures } from '../../../common';
 import { APP_ID } from '../../../common';
@@ -40,9 +41,6 @@ import {
   securityV1SavedObjects,
 } from './security_saved_objects';
 import { casesApiTags, casesUiCapabilities } from './cases_privileges';
-
-// The prefix ("securitySolution-") used by all the Security Solution API action privileges.
-export const API_ACTION_PREFIX = `${APP_ID}-`;
 
 export class ProductFeaturesService {
   private securityProductFeatures: ProductFeatures;
@@ -221,7 +219,8 @@ export class ProductFeaturesService {
       this.securityAssistantProductFeatures.isActionRegistered(action) ||
       this.attackDiscoveryProductFeatures.isActionRegistered(action) ||
       this.timelineProductFeatures.isActionRegistered(action) ||
-      this.notesProductFeatures.isActionRegistered(action)
+      this.notesProductFeatures.isActionRegistered(action) ||
+      this.siemMigrationsProductFeatures.isActionRegistered(action)
     );
   }
 

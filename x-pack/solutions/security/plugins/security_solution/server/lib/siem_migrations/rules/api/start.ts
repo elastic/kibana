@@ -18,6 +18,7 @@ import {
   type StartRuleMigrationResponse,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 import { getRetryFilter } from './util/retry';
 
@@ -29,7 +30,7 @@ export const registerSiemRuleMigrationsStartRoute = (
     .put({
       path: SIEM_RULE_MIGRATION_START_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {

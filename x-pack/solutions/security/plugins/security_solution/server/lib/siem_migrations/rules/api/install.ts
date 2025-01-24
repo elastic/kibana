@@ -14,6 +14,7 @@ import {
   InstallMigrationRulesRequestParams,
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
+import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 import { installTranslated } from './util/installation';
 
@@ -25,7 +26,7 @@ export const registerSiemRuleMigrationsInstallRoute = (
     .post({
       path: SIEM_RULE_MIGRATION_INSTALL_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {

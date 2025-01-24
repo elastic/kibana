@@ -17,6 +17,7 @@ import {
 import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
+import { authz } from '../util/authz';
 import { withLicense } from '../util/with_license';
 import { processLookups } from '../util/lookups';
 
@@ -28,7 +29,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
     .post({
       path: SIEM_RULE_MIGRATION_RESOURCES_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
       options: { body: { maxBytes: 26214400 } }, // rise payload limit to 25MB
     })
     .addVersion(

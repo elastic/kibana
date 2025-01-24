@@ -6,10 +6,7 @@
  */
 import React from 'react';
 import * as i18n from './translations';
-import {
-  MissingPrivilegesCallOut,
-  MissingPrivilegesDescription,
-} from '../missing_privileges/missing_privileges';
+import { MissingPrivilegesCallOut, MissingPrivilegesDescription } from '../missing_privileges';
 
 const LEVEL_TRANSLATION = {
   read: i18n.REQUIRED_PRIVILEGES_CONNECTORS_READ,

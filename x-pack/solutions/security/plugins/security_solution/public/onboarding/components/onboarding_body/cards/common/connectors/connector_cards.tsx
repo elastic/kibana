@@ -6,40 +6,38 @@
  */
 
 import React, { useCallback } from 'react';
-import { type AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
-import {
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiPanel,
-  EuiLoadingSpinner,
-  EuiText,
-  EuiBadge,
-  EuiSpacer,
-  useEuiTheme,
-} from '@elastic/eui';
-import { css } from '@emotion/css';
-import { useKibana } from '../../../../../../common/lib/kibana';
-import {
-  CreateConnectorPopover,
-  type CreateConnectorPopoverProps,
-} from './create_connector_popover';
-import { ConnectorSetup } from './connector_setup';
+import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
+import { css } from '@emotion/react';
 import { ConnectorsMissingPrivilegesCallOut } from './missing_privileges';
+import type { AIConnector } from './types';
+import { ConnectorSetup } from './connector_setup';
+import { ConnectorSelectorPanel } from './connector_selector_panel';
 
-interface ConnectorCardsProps
-  extends CreateConnectorPopoverProps,
-    Omit<ConnectorListProps, 'connectors'> {
+interface ConnectorCardsProps {
+  onNewConnectorSaved: (connectorId: string) => void;
+  canCreateConnectors?: boolean;
   connectors?: AIConnector[]; // make connectors optional to handle loading state
+  selectedConnectorId?: string | null;
+  onConnectorSelected: (connector: AIConnector) => void;
 }
 
 export const ConnectorCards = React.memo<ConnectorCardsProps>(
   ({
     connectors,
-    onConnectorSaved,
+    onNewConnectorSaved,
     canCreateConnectors,
     selectedConnectorId,
-    setSelectedConnectorId,
+    onConnectorSelected,
   }) => {
+    const onNewConnectorStoredSave = useCallback(
+      (newConnector: AIConnector) => {
+        onNewConnectorSaved(newConnector.id);
+        // default select the new connector created
+        onConnectorSelected(newConnector);
+      },
+      [onConnectorSelected, onNewConnectorSaved]
+    );
+
     if (!connectors) {
       return <EuiLoadingSpinner />;
     }
@@ -53,95 +51,26 @@ export const ConnectorCards = React.memo<ConnectorCardsProps>(
 
     return (
       <>
-        {hasConnectors ? (
-          <>
-            <ConnectorList
-              connectors={connectors}
-              selectedConnectorId={selectedConnectorId}
-              setSelectedConnectorId={setSelectedConnectorId}
-            />
-            <EuiSpacer />
-            <CreateConnectorPopover
-              canCreateConnectors={canCreateConnectors}
-              onConnectorSaved={onConnectorSaved}
-            />
-          </>
-        ) : (
-          <ConnectorSetup onConnectorSaved={onConnectorSaved} />
-        )}
+        <EuiFlexGroup
+          css={css`
+            height: 160px;
+          `}
+        >
+          {hasConnectors && (
+            <EuiFlexItem>
+              <ConnectorSelectorPanel
+                selectedConnectorId={selectedConnectorId}
+                connectors={connectors}
+                onConnectorSelected={onConnectorSelected}
+              />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem>
+            <ConnectorSetup onConnectorSaved={onNewConnectorStoredSave} />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       </>
     );
   }
 );
 ConnectorCards.displayName = 'ConnectorCards';
-
-interface ConnectorListProps {
-  connectors: AIConnector[];
-  selectedConnectorId?: string | null;
-  setSelectedConnectorId?: (id: string) => void;
-}
-
-const ConnectorList = React.memo<ConnectorListProps>(
-  ({ connectors, selectedConnectorId, setSelectedConnectorId }) => {
-    const { euiTheme } = useEuiTheme();
-    const { actionTypeRegistry } = useKibana().services.triggersActionsUi;
-    const onConnectorClick = useCallback(
-      (id: string) => {
-        setSelectedConnectorId?.(id);
-      },
-      [setSelectedConnectorId]
-    );
-
-    const selectedCss = `border: 2px solid ${euiTheme.colors.primary};`;
-
-    return (
-      <EuiFlexGroup
-        wrap
-        gutterSize="s"
-        className={css`
-          padding: ${euiTheme.size.s} 0;
-          max-height: 350px;
-          overflow-y: auto;
-        `}
-      >
-        {connectors.map((connector) => (
-          <EuiFlexItem
-            key={connector.id}
-            grow={false}
-            className={css`
-              width: 30%;
-            `}
-          >
-            <EuiPanel
-              hasShadow={false}
-              hasBorder
-              paddingSize="m"
-              onClick={setSelectedConnectorId ? () => onConnectorClick(connector.id) : undefined}
-              css={css`
-                ${selectedConnectorId === connector.id ? selectedCss : ''}
-              `}
-              color={selectedConnectorId === connector.id ? 'primary' : 'plain'}
-            >
-              <EuiFlexGroup direction="row" gutterSize="s" wrap>
-                <EuiFlexItem
-                  className={css`
-                    min-width: 100%;
-                  `}
-                >
-                  <EuiText size="s">{connector.name}</EuiText>
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <EuiBadge color="hollow">
-                    {actionTypeRegistry.get(connector.actionTypeId).actionTypeTitle}
-                  </EuiBadge>
-                </EuiFlexItem>
-              </EuiFlexGroup>
-            </EuiPanel>
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
-  }
-);
-
-ConnectorList.displayName = 'ConnectorList';

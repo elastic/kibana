@@ -12,6 +12,8 @@ import {
   LOOKUPS_INDEX_PREFIX,
 } from '../../../../../../common/siem_migrations/constants';
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
+import { authz } from '../util/authz';
+import { withLicense } from '../util/with_license';
 
 export const registerSiemRuleMigrationsGetPrivilegesRoute = (
   router: SecuritySolutionPluginRouter,
@@ -21,11 +23,11 @@ export const registerSiemRuleMigrationsGetPrivilegesRoute = (
     .get({
       path: SIEM_RULE_MIGRATION_PRIVILEGES_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       { version: '1', validate: false },
-      async (context, request, response): Promise<IKibanaResponse<object>> => {
+      withLicense(async (context, request, response): Promise<IKibanaResponse<object>> => {
         try {
           const core = await context.core;
           const securitySolution = await context.securitySolution;
@@ -48,7 +50,7 @@ export const registerSiemRuleMigrationsGetPrivilegesRoute = (
           logger.error(err);
           return response.badRequest({ body: err.message });
         }
-      }
+      })
     );
 };
 

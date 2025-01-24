@@ -10,8 +10,9 @@ import type { OnboardingCardConfig } from '../../../../../types';
 import { OnboardingCardId } from '../../../../../constants';
 import { START_MIGRATION_CARD_TITLE } from './translations';
 import cardIcon from './images/card_header_icon.png';
+import type { StartMigrationCardMetadata } from './types';
 
-export const startMigrationCardConfig: OnboardingCardConfig = {
+export const startMigrationCardConfig: OnboardingCardConfig<StartMigrationCardMetadata> = {
   id: OnboardingCardId.siemMigrationsStart,
   title: START_MIGRATION_CARD_TITLE,
   icon: cardIcon,

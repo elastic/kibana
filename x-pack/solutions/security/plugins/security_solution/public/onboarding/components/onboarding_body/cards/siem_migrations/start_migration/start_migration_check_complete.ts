@@ -5,9 +5,11 @@
  * 2.0.
  */
 
-import { SIEM_MIGRATIONS_FEATURE_ID } from '@kbn/security-solution-features/constants';
+import {
+  SECURITY_FEATURE_ID_V2,
+  SIEM_MIGRATIONS_FEATURE_ID,
+} from '@kbn/security-solution-features/constants';
 import { CapabilitiesChecker } from '../../../../../../common/lib/capabilities';
-// import { getUserPrivilege as getAlertsUserPrivilege } from '../../../../../../detections/containers/detection_engine/alerts/api';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 
 import type { OnboardingCardCheckComplete } from '../../../../../types';
@@ -20,7 +22,7 @@ export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
   const capabilities = new CapabilitiesChecker(application.capabilities);
 
   const missingCapabilities: string[] = [];
-  if (!capabilities.has('siem.all')) {
+  if (!capabilities.has(`${SECURITY_FEATURE_ID_V2}.crud`)) {
     missingCapabilities.push(CAPABILITIES_REQUIRED.securityAll);
   }
   if (!capabilities.has(`${SIEM_MIGRATIONS_FEATURE_ID}.all`)) {

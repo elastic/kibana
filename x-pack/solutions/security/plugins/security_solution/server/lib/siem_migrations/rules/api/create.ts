@@ -17,6 +17,7 @@ import {
 } from '../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { SecuritySolutionPluginRouter } from '../../../../types';
 import type { CreateRuleMigrationInput } from '../data/rule_migrations_data_rules_client';
+import { authz } from './util/authz';
 import { withLicense } from './util/with_license';
 
 export const registerSiemRuleMigrationsCreateRoute = (
@@ -27,7 +28,7 @@ export const registerSiemRuleMigrationsCreateRoute = (
     .post({
       path: SIEM_RULE_MIGRATION_CREATE_PATH,
       access: 'internal',
-      security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      security: { authz },
     })
     .addVersion(
       {
