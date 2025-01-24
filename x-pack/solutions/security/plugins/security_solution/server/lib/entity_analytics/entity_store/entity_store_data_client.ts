@@ -135,7 +135,7 @@ export const DEFAULT_INIT_ENTITY_STORE: InitEntityStoreRequestBody = {
   lookbackPeriod: '24h',
   filter: '',
   fieldHistoryLength: 10,
-  enrichPolicyExecutionInterval = DEFAULT_INTERVAL
+  enrichPolicyExecutionInterval = DEFAULT_INTERVAL,
 };
 
 const DEFAULT_ENTITY_ENGINE: InitEntityEngineRequestBody & { lookbackPeriod?: string } = {
@@ -223,7 +223,14 @@ export class EntityStoreDataClient {
       throw new Error('Task Manager is not available');
     }
 
-    const { indexPattern, lookbackPeriod, filter, fieldHistoryLength, entityTypes, enrichPolicyExecutionInterval } = {
+    const {
+      indexPattern,
+      lookbackPeriod,
+      filter,
+      fieldHistoryLength,
+      entityTypes,
+      enrichPolicyExecutionInterval,
+    } = {
       ...DEFAULT_INIT_ENTITY_STORE,
       ...requestBodyOverrides,
     };
@@ -244,7 +251,13 @@ export class EntityStoreDataClient {
       run(() =>
         this.init(
           entity,
-          { indexPattern, lookbackPeriod, filter, fieldHistoryLength, enrichPolicyExecutionInterval },
+          {
+            indexPattern,
+            lookbackPeriod,
+            filter,
+            fieldHistoryLength,
+            enrichPolicyExecutionInterval,
+          },
           { pipelineDebugMode }
         )
       )
@@ -312,7 +325,13 @@ export class EntityStoreDataClient {
       ...InitEntityEngineRequestBodyOverrides,
     } as Required<typeof DEFAULT_ENTITY_ENGINE>;
 
-    const { indexPattern, filter, fieldHistoryLength, lookbackPeriod, enrichPolicyExecutionInterval } = mergedRequest;
+    const {
+      indexPattern,
+      filter,
+      fieldHistoryLength,
+      lookbackPeriod,
+      enrichPolicyExecutionInterval,
+    } = mergedRequest;
     const { experimentalFeatures } = this.options;
 
     if (entityType === EntityType.universal && !experimentalFeatures.assetInventoryStoreEnabled) {
