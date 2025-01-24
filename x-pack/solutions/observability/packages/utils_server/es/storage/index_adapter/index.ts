@@ -284,11 +284,14 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
    * Get items from all non-write indices for the specified ids.
    */
   private async getDanglingItems({ ids }: { ids: string[] }) {
+    console.log('Getting dangling items' + JSON.stringify(ids));
     if (!ids.length) {
       return [];
     }
 
     const writeIndex = await this.getCurrentWriteIndexName();
+    console.log('Write index: ' + writeIndex);
+
 
     if (writeIndex) {
       const danglingItemsResponse = await this.search({
@@ -307,6 +310,7 @@ export class StorageIndexAdapter<TStorageSettings extends IndexStorageSettings> 
         },
         size: 10_000,
       });
+      console.log('Dangling items response: ' + JSON.stringify(danglingItemsResponse));
 
       return danglingItemsResponse.hits.hits.map((hit) => ({
         id: hit._id!,
