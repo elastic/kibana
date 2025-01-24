@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-export const validateStartDate = (date: string) => {
-  const parsedValue = Date.parse(date);
-  if (isNaN(parsedValue)) return `Invalid date: ${date}`;
-  return;
-};
+export * from './v1';
