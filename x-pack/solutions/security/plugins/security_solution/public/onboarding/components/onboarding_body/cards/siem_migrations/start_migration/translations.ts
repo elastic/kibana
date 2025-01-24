@@ -58,20 +58,16 @@ export const START_MIGRATION_CARD_UPLOAD_MORE_BUTTON = i18n.translate(
 );
 
 export const CAPABILITIES_REQUIRED = {
-  siemMigrationsAll: i18n.translate(
-    'xpack.securitySolution.onboarding.startMigration.capability.siemMigrationsAll',
-    { defaultMessage: 'Security > SIEM migrations: All' }
-  ),
   securityAll: i18n.translate(
     'xpack.securitySolution.onboarding.startMigration.capability.securityAll',
-    { defaultMessage: 'Security > Security : All' }
+    { defaultMessage: 'Security > Security: All' }
+  ),
+  siemMigrationsAll: i18n.translate(
+    'xpack.securitySolution.onboarding.startMigration.capability.siemMigrationsAll',
+    { defaultMessage: 'Security > Security > SIEM migrations: All' }
   ),
   connectorsRead: i18n.translate(
     'xpack.securitySolution.onboarding.startMigration.capability.connectorsRead',
-    { defaultMessage: 'Management > Actions and Connectors : Read' }
-  ),
-  fleetRead: i18n.translate(
-    'xpack.securitySolution.onboarding.startMigration.capability.fleetRead',
-    { defaultMessage: 'Management > Fleet : Read' }
+    { defaultMessage: 'Management > Actions and Connectors: Read' }
   ),
 };

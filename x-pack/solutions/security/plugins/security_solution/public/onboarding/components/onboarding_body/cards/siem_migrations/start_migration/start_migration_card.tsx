@@ -19,7 +19,10 @@ import type { StartMigrationCardMetadata } from './types';
 import { RuleMigrationsPanels } from './rule_migrations_panels';
 import { useStyles } from './start_migration_card.styles';
 import * as i18n from './translations';
-import { MissingPrivilegesDescription } from '../../common/missing_privileges';
+import {
+  MissingPrivilegesCallOut,
+  MissingPrivilegesDescription,
+} from '../../common/missing_privileges';
 
 const StartMigrationsBody: OnboardingCardComponent = React.memo(
   ({ setComplete, isCardComplete, setExpandedCardId }) => {
@@ -75,7 +78,13 @@ export const StartMigrationCard: OnboardingCardComponent<StartMigrationCardMetad
 
     const { missingCapabilities } = checkCompleteMetadata;
     if (missingCapabilities.length > 0) {
-      return <MissingPrivilegesDescription privileges={missingCapabilities} />;
+      return (
+        <OnboardingCardContentPanel>
+          <MissingPrivilegesCallOut>
+            <MissingPrivilegesDescription privileges={missingCapabilities} />
+          </MissingPrivilegesCallOut>
+        </OnboardingCardContentPanel>
+      );
     }
 
     return <StartMigrationsBody {...props} />;
