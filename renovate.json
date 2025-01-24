@@ -783,9 +783,27 @@
         "@mapbox/vector-tile",
         "csstype",
         "cronstrue",
-        "file-saver",
         "immer",
-        "@types/mapbox__vector-tile",
+        "@types/mapbox__vector-tile"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Kibana Management",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-management dependencies temp",
+      "matchDepNames": [
+        "file-saver",
         "@types/file-saver"
       ],
       "reviewers": [
