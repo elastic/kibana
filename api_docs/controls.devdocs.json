@@ -1060,7 +1060,7 @@
         "signature": [
           "\"clearControl\""
         ],
-        "path": "src/platform/plugins/shared/controls/public/actions/index.ts",
+        "path": "src/platform/plugins/shared/controls/public/actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1075,7 +1075,7 @@
         "signature": [
           "\"deleteControl\""
         ],
-        "path": "src/platform/plugins/shared/controls/public/actions/index.ts",
+        "path": "src/platform/plugins/shared/controls/public/actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1090,7 +1090,7 @@
         "signature": [
           "\"editDataControl\""
         ],
-        "path": "src/platform/plugins/shared/controls/public/actions/index.ts",
+        "path": "src/platform/plugins/shared/controls/public/actions/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1231,7 +1231,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          ">>, \"unsavedChanges\"> & ",
+          ">>, \"unsavedChanges$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1489,7 +1489,7 @@
             "section": "def-common.DefaultControlState",
             "text": "DefaultControlState"
           },
-          ">>, \"unsavedChanges\"> & ",
+          ">>, \"unsavedChanges$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1847,8 +1847,8 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
           " & ",
           {
@@ -1880,9 +1880,9 @@
           },
           " & ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.HasSerializableState",
             "text": "HasSerializableState"
           },
@@ -1939,10 +1939,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          ", \"hidePanelTitle\"> & ",
+          ", \"hideTitle$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

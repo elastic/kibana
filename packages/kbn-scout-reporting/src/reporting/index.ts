@@ -7,24 +7,23 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { createHash, randomBytes } from 'node:crypto';
 import type { ReporterDescription } from 'playwright/test';
-import type { ScoutPlaywrightReporterOptions } from './playwright';
+import { ScoutPlaywrightReporterOptions } from './playwright/scout_playwright_reporter';
 
 export * from './report';
 
-// ID helpers
-export function generateTestRunId() {
-  return randomBytes(8).toString('hex');
-}
-
-export function getTestIDForTitle(title: string) {
-  return createHash('sha256').update(title).digest('hex').slice(0, 31);
-}
-
-// Playwright reporting
+// Playwright event-based reporting
 export const scoutPlaywrightReporter = (
   options?: ScoutPlaywrightReporterOptions
 ): ReporterDescription => {
-  return ['@kbn/scout-reporting/src/reporting/playwright.ts', options];
+  return ['@kbn/scout-reporting/src/reporting/playwright/events', options];
 };
+
+// Playwright failed test reporting
+export const scoutFailedTestsReporter = (
+  options?: ScoutPlaywrightReporterOptions
+): ReporterDescription => {
+  return ['@kbn/scout-reporting/src/reporting/playwright/failed_test', options];
+};
+
+export { generateTestRunId, getTestIDForTitle } from '../helpers';

@@ -18,7 +18,6 @@ import { Subscription } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { useErrorTextStyle } from '@kbn/react-hooks';
 import { ActionExecutionMeta } from '@kbn/ui-actions-plugin/public';
-import { getErrorCallToAction } from './presentation_panel_strings';
 import { DefaultPresentationPanelApi } from './types';
 import { uiActions } from '../kibana_services';
 import { executeEditPanelAction } from '../panel_actions/edit_panel_action/execute_edit_action';
@@ -63,9 +62,15 @@ export const PresentationPanelErrorInternal = ({ api, error }: PresentationPanel
       });
   }, [api, isEditable]);
 
-  const panelTitle = useStateFromPublishingSubject(api?.panelTitle);
+  const panelTitle = useStateFromPublishingSubject(api?.title$);
   const ariaLabel = useMemo(
-    () => (panelTitle ? getErrorCallToAction(panelTitle) : label),
+    () =>
+      panelTitle
+        ? i18n.translate('presentationPanel.error.editButton', {
+            defaultMessage: 'Edit {value}',
+            values: { value: panelTitle },
+          })
+        : label,
     [label, panelTitle]
   );
 

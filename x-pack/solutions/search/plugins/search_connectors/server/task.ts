@@ -20,8 +20,8 @@ import type {
 } from './types';
 import {
   AgentlessConnectorsInfraService,
-  getConnectorsWithoutPolicies,
-  getPoliciesWithoutConnectors,
+  getConnectorsToDeploy,
+  getPoliciesToDelete,
 } from './services';
 
 import { SearchConnectorsConfig } from './config';
@@ -63,13 +63,10 @@ export function infraSyncTaskRunner(
           }
 
           // Deploy Policies
-          const connectorsWithoutPolicies = getConnectorsWithoutPolicies(
-            policiesMetadata,
-            nativeConnectors
-          );
+          const connectorsToDeploy = getConnectorsToDeploy(policiesMetadata, nativeConnectors);
 
           let agentlessConnectorsDeployed = 0;
-          for (const connectorMetadata of connectorsWithoutPolicies) {
+          for (const connectorMetadata of connectorsToDeploy) {
             // We try-catch to still be able to deploy other connectors if some fail
             try {
               await service.deployConnector(connectorMetadata);
@@ -83,13 +80,10 @@ export function infraSyncTaskRunner(
           }
 
           // Delete policies
-          const policiesWithoutConnectors = getPoliciesWithoutConnectors(
-            policiesMetadata,
-            nativeConnectors
-          );
+          const policiesToDelete = getPoliciesToDelete(policiesMetadata, nativeConnectors);
           let agentlessConnectorsRemoved = 0;
 
-          for (const policyMetadata of policiesWithoutConnectors) {
+          for (const policyMetadata of policiesToDelete) {
             // We try-catch to still be able to deploy other connectors if some fail
             try {
               await service.removeDeployment(policyMetadata.package_policy_id);

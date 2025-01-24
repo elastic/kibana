@@ -52,9 +52,7 @@ function renderTableRowActions({
 }
 describe('TableRowActions', () => {
   beforeEach(() => {
-    mockedExperimentalFeaturesService.get.mockReturnValue({
-      diagnosticFileUploadEnabled: true,
-    } as any);
+    mockedExperimentalFeaturesService.get.mockReturnValue({} as any);
     mockedUseAuthz.mockReturnValue({
       fleet: {
         all: true,
@@ -81,17 +79,6 @@ describe('TableRowActions', () => {
 
       return utils.queryByTestId('requestAgentDiagnosticsBtn');
     }
-
-    it('should not render action if feature is disabled', async () => {
-      mockedExperimentalFeaturesService.get.mockReturnValue({
-        diagnosticFileUploadEnabled: false,
-      } as any);
-      const res = renderAndGetDiagnosticsButton({
-        agent: { active: true } as Agent,
-        agentPolicy: {} as AgentPolicy,
-      });
-      expect(res).toBe(null);
-    });
 
     it('should not render action if authz do not have Agents:All', async () => {
       mockedUseAuthz.mockReturnValue({

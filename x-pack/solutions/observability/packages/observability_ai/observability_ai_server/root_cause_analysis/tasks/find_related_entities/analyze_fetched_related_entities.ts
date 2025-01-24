@@ -40,7 +40,7 @@ export interface RelatedEntityFromSearchResults {
 
 function getPromptForFoundEntity({ entity, analysis, highlight }: RelatedEntityFromSearchResults) {
   return `## Entity: ${formatEntity(entity)}
-    
+
       ${toBlockquote(`### Search highlights for ${formatEntity(entity)}
       ${JSON.stringify(highlight)}`)}
     `;
@@ -88,7 +88,7 @@ function getInputPromptBase({
 
   ## Data analysis
   ${JSON.stringify(analysis)}
-  
+
   ## Log patterns for ${formatEntity(entity)}
 
   ${logPatternsPrompt}
@@ -102,7 +102,7 @@ function getInputPromptBase({
   ${searches
     .map(({ fragments, appearsAs }) => {
       return `## Appears as: ${appearsAs}
-        
+
         ### Fragments:
         ${fragments.map((fragment) => `- \`${fragment}\``).join('\n')}`;
     })
@@ -243,9 +243,9 @@ export async function analyzeFetchedRelatedEntities({
   logger.debug(() => `Found ${foundEntities.length} entities via keyword searches`);
 
   const system = `${RCA_SYSTEM_PROMPT_BASE}
-  
+
   ${RCA_PROMPT_ENTITIES}
-  
+
   ${RCA_PROMPT_DEPENDENCIES}`;
 
   const inputPromptBase = getInputPromptBase({
@@ -285,7 +285,7 @@ export async function analyzeFetchedRelatedEntities({
         connectorId,
         system: request.system,
         input: `${inputPromptBase}
-          
+
           # Found entities
 
           ${request.texts.map((text) => text.text).join('\n\n')}
@@ -377,7 +377,7 @@ export async function analyzeFetchedRelatedEntities({
     const groupingFieldAnalysis = await Promise.all(
       keywordSearchResults.hits.hits.map(async (hit) => {
         return limiter(async () => {
-          const groupValue = hit.fields![groupingField][0] as string;
+          const groupValue = hit.fields![groupingField]?.[0] as string;
 
           const analysisForGroupingField = await analyzeDocuments({
             esClient,

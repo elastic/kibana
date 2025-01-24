@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import type OpenAI from 'openai';
 import { from, identity, switchMap, throwError } from 'rxjs';
 import { isReadable, Readable } from 'stream';
 import { createInferenceInternalError } from '@kbn/inference-common';
@@ -15,8 +14,10 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import type { OpenAIRequest } from './types';
 import { messagesToOpenAI, toolsToOpenAI, toolChoiceToOpenAI } from './to_openai';
 import { processOpenAIStream } from './process_openai_stream';
+import { emitTokenCountEstimateIfMissing } from './emit_token_count_if_missing';
 
 export const openAIAdapter: InferenceConnectorAdapter = {
   chatComplete: ({
@@ -27,12 +28,13 @@ export const openAIAdapter: InferenceConnectorAdapter = {
     tools,
     temperature = 0,
     functionCalling,
+    modelName,
     logger,
     abortSignal,
   }) => {
     const simulatedFunctionCalling = functionCalling === 'simulated';
 
-    let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
+    let request: OpenAIRequest;
     if (simulatedFunctionCalling) {
       const wrapped = wrapWithSimulatedFunctionCalling({
         system,
@@ -43,12 +45,14 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       request = {
         stream: true,
         temperature,
+        model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
       request = {
         stream: true,
         temperature,
+        model: modelName,
         messages: messagesToOpenAI({ system, messages }),
         tool_choice: toolChoiceToOpenAI(toolChoice),
         tools: toolsToOpenAI(tools),
@@ -66,6 +70,13 @@ export const openAIAdapter: InferenceConnectorAdapter = {
       })
     ).pipe(
       switchMap((response) => {
+        if (response.status === 'error') {
+          return throwError(() =>
+            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
+              rootError: response.serviceMessage,
+            })
+          );
+        }
         if (isReadable(response.data as any)) {
           return eventSourceStreamIntoObservable(response.data as Readable);
         }
@@ -74,6 +85,7 @@ export const openAIAdapter: InferenceConnectorAdapter = {
         );
       }),
       processOpenAIStream(),
+      emitTokenCountEstimateIfMissing({ request }),
       simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
