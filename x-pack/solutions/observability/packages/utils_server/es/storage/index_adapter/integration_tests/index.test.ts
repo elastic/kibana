@@ -185,6 +185,391 @@ describe('StorageIndexAdapter', () => {
 
     describe('after rolling over the index manually and indexing the same document', () => {
       beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 2', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 3', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 4', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 5', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 6', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 7', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 8', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 9', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 10', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 11', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 12', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 13', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 14', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 15', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 16', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 17', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 18', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 19', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 20', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 21', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 22', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 23', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 24', () => {
+      beforeAll(async () => {
+        await verifyClean();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+        await rolloverIndex();
+        await client.index({ id: 'doc1', document: { foo: 'bar' } });
+      });
+
+      it('puts the document in the new write index', async () => {
+        await verifyDocumentInNewWriteIndex();
+      });
+
+      it('deletes the document from the rolled over index', async () => {
+        await verifyDocumentDeletedInRolledOverIndex();
+      });
+    });
+    describe('after rolling over the index manually and indexing the same document 25', () => {
+      beforeAll(async () => {
+        await verifyClean();
         await client.index({ id: 'doc1', document: { foo: 'bar' } });
         await rolloverIndex();
         await client.index({ id: 'doc1', document: { foo: 'bar' } });
