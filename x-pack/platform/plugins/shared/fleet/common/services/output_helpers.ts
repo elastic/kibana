@@ -9,7 +9,7 @@ import { isObject } from 'lodash';
 
 import { getFlattenedObject } from '@kbn/std';
 
-import type { AgentPolicy, OutputType, ValueOf } from '../types';
+import type { AgentPolicy, PackagePolicy, OutputType, ValueOf } from '../types';
 import {
   FLEET_APM_PACKAGE,
   FLEET_SERVER_PACKAGE,
@@ -17,6 +17,7 @@ import {
   outputType,
   OUTPUT_TYPES_WITH_PRESET_SUPPORT,
   RESERVED_CONFIG_YML_KEYS,
+  AGENTLESS_ALLOWED_OUTPUT_TYPES,
 } from '../constants';
 
 const sameClusterRestrictedPackages = [
@@ -29,7 +30,7 @@ const sameClusterRestrictedPackages = [
  * Return allowed output type for a given agent policy,
  * Fleet Server and APM cannot use anything else than same cluster ES
  */
-export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy): string[] {
+export function getAllowedOutputTypesForAgentPolicy(agentPolicy: Partial<AgentPolicy>): string[] {
   const isRestrictedToSameClusterES =
     agentPolicy.package_policies &&
     agentPolicy.package_policies.some(
@@ -40,14 +41,33 @@ export function getAllowedOutputTypeForPolicy(agentPolicy: AgentPolicy): string[
     return [outputType.Elasticsearch];
   }
 
+  if (agentPolicy.supports_agentless) {
+    return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+  }
+
   return Object.values(outputType);
 }
 
-export function getAllowedOutputTypesForIntegration(packageName: string): string[] {
-  const isRestrictedToSameClusterES = sameClusterRestrictedPackages.includes(packageName);
+/**
+ * Return allowed output type for a given package policy
+ */
+export function getAllowedOutputTypesForPackagePolicy(
+  packagePolicy: Pick<PackagePolicy, 'supports_agentless'>
+): string[] {
+  if (packagePolicy.supports_agentless) {
+    return AGENTLESS_ALLOWED_OUTPUT_TYPES;
+  }
 
-  if (isRestrictedToSameClusterES) {
-    return [outputType.Elasticsearch];
+  return Object.values(outputType);
+}
+
+export function getAllowedOutputTypesForIntegration(packageName?: string): string[] {
+  if (packageName) {
+    const isRestrictedToSameClusterES = sameClusterRestrictedPackages.includes(packageName);
+
+    if (isRestrictedToSameClusterES) {
+      return [outputType.Elasticsearch];
+    }
   }
 
   return Object.values(outputType);
