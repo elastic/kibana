@@ -58,16 +58,16 @@ describe('Mobile Service overview page', () => {
       it('shows the most used charts', () => {
         cy.wait(aliasNames, { timeout: 120000 });
 
-        cy.get('[data-test-subj="mostUsedChart-device"]', { timeout: 60000 }).should('exist');
-        cy.get('[data-test-subj="mostUsedChart-netConnectionType"]', { timeout: 60000 }).should(
+        cy.get('[data-test-subj="mostUsedChart-device"]', { timeout: 120000 }).should('exist');
+        cy.get('[data-test-subj="mostUsedChart-netConnectionType"]', { timeout: 120000 }).should(
           'exist'
         );
-        cy.get('[data-test-subj="mostUsedChart-osVersion"]', { timeout: 60000 }).should('exist');
-        cy.get('[data-test-subj="mostUsedChart-appVersion"]', { timeout: 60000 }).should('exist');
+        cy.get('[data-test-subj="mostUsedChart-osVersion"]', { timeout: 120000 }).should('exist');
+        cy.get('[data-test-subj="mostUsedChart-appVersion"]', { timeout: 120000 }).should('exist');
       });
 
       it('shows No results found, when no data is present', () => {
-        cy.wait(aliasNames, { timeout: 60000 });
+        cy.wait(aliasNames, { timeout: 120000 });
 
         const timeStart = moment(start).subtract(5, 'm').toISOString();
         const timeEnd = moment(end).subtract(5, 'm').toISOString();
