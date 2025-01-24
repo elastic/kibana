@@ -10,7 +10,6 @@
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
 import { ObservedSize } from 'use-resize-observer/polyfilled';
-import { cloneDeep } from 'lodash';
 import {
   ActivePanel,
   GridAccessMode,
@@ -24,7 +23,6 @@ import { getSampleLayout } from './sample_layout';
 const DASHBOARD_MARGIN_SIZE = 8;
 const DASHBOARD_GRID_HEIGHT = 20;
 const DASHBOARD_GRID_COLUMN_COUNT = 48;
-const proposedGridLayout$ = new BehaviorSubject<GridLayoutData>(getSampleLayout());
 
 export const gridSettings = {
   gutterSize: DASHBOARD_MARGIN_SIZE,
@@ -44,8 +42,8 @@ const runtimeSettings$ = new BehaviorSubject<RuntimeGridSettings>({
 export const gridLayoutStateManagerMock: GridLayoutStateManager = {
   expandedPanelId$: new BehaviorSubject<string | undefined>(undefined),
   isMobileView$: new BehaviorSubject<boolean>(false),
-  proposedGridLayout$,
-  gridLayout$: cloneDeep(proposedGridLayout$),
+  gridLayout$: new BehaviorSubject<GridLayoutData>(getSampleLayout()),
+  proposedGridLayout$: new BehaviorSubject<GridLayoutData | undefined>(undefined),
   runtimeSettings$,
   panelRefs: { current: [] },
   rowRefs: { current: [] },

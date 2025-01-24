@@ -53,14 +53,14 @@ export const GridLayout = ({
   });
 
   const [rowCount, setRowCount] = useState<number>(
-    gridLayoutStateManager.proposedGridLayout$.getValue().length
+    gridLayoutStateManager.gridLayout$.getValue().length
   );
 
   /**
-   * Update the `proposedGridLayout$` behaviour subject in response to the `layout` prop changing
+   * Update the `gridLayout$` behaviour subject in response to the `layout` prop changing
    */
   useEffect(() => {
-    if (!isLayoutEqual(layout, gridLayoutStateManager.proposedGridLayout$.getValue())) {
+    if (!isLayoutEqual(layout, gridLayoutStateManager.gridLayout$.getValue())) {
       const newLayout = cloneDeep(layout);
       /**
        * the layout sent in as a prop is not guaranteed to be valid (i.e it may have floating panels) -
@@ -69,7 +69,6 @@ export const GridLayout = ({
       newLayout.forEach((row, rowIndex) => {
         newLayout[rowIndex] = resolveGridRow(row);
       });
-      gridLayoutStateManager.proposedGridLayout$.next(newLayout);
       gridLayoutStateManager.gridLayout$.next(newLayout);
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -83,7 +82,7 @@ export const GridLayout = ({
      * The only thing that should cause the entire layout to re-render is adding a new row;
      * this subscription ensures this by updating the `rowCount` state when it changes.
      */
-    const rowCountSubscription = gridLayoutStateManager.proposedGridLayout$
+    const rowCountSubscription = gridLayoutStateManager.gridLayout$
       .pipe(
         skip(1), // we initialized `rowCount` above, so skip the initial emit
         map((newLayout) => newLayout.length),

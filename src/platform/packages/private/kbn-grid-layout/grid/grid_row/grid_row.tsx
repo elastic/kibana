@@ -9,7 +9,7 @@
 
 import { cloneDeep } from 'lodash';
 import React, { forwardRef, useEffect, useMemo, useRef, useState } from 'react';
-import { map, pairwise, skip } from 'rxjs';
+import { map, pairwise, skip, combineLatest } from 'rxjs';
 import { css } from '@emotion/react';
 
 import { DragPreview } from '../drag_preview';
@@ -29,7 +29,8 @@ export interface GridRowProps {
 
 export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
   ({ rowIndex, renderPanelContents, gridLayoutStateManager }, gridRef) => {
-    const currentRow = gridLayoutStateManager.proposedGridLayout$.value[rowIndex];
+    const currentRow = (gridLayoutStateManager.proposedGridLayout$.value ??
+      gridLayoutStateManager.gridLayout$.value)[rowIndex];
 
     const [panelIds, setPanelIds] = useState<string[]>(Object.keys(currentRow.panels));
     const [panelIdsInOrder, setPanelIdsInOrder] = useState<string[]>(() =>
@@ -73,13 +74,17 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
          * - Collapsed state
          * - Panel IDs (adding/removing/replacing, but not reordering)
          */
-        const rowStateSubscription = gridLayoutStateManager.proposedGridLayout$
+        const rowStateSubscription = combineLatest([
+          gridLayoutStateManager.proposedGridLayout$,
+          gridLayoutStateManager.gridLayout$,
+        ])
           .pipe(
-            map((gridLayout) => {
+            map(([proposedGridLayout, gridLayout]) => {
+              const displayedGridLayout = proposedGridLayout ?? gridLayout;
               return {
-                title: gridLayout[rowIndex].title,
-                isCollapsed: gridLayout[rowIndex].isCollapsed,
-                panelIds: Object.keys(gridLayout[rowIndex].panels),
+                title: displayedGridLayout[rowIndex].title,
+                isCollapsed: displayedGridLayout[rowIndex].isCollapsed,
+                panelIds: Object.keys(displayedGridLayout[rowIndex].panels),
               };
             }),
             pairwise()
@@ -98,7 +103,8 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
               setPanelIds(newRowData.panelIds);
               setPanelIdsInOrder(
                 getKeysInOrder(
-                  gridLayoutStateManager.proposedGridLayout$.getValue()[rowIndex].panels
+                  (gridLayoutStateManager.proposedGridLayout$.getValue() ??
+                    gridLayoutStateManager.gridLayout$.getValue())[rowIndex].panels
                 )
               );
             }
@@ -167,9 +173,8 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
           <GridRowHeader
             isCollapsed={isCollapsed}
             toggleIsCollapsed={() => {
-              const newLayout = cloneDeep(gridLayoutStateManager.proposedGridLayout$.value);
+              const newLayout = cloneDeep(gridLayoutStateManager.gridLayout$.value);
               newLayout[rowIndex].isCollapsed = !newLayout[rowIndex].isCollapsed;
-              gridLayoutStateManager.proposedGridLayout$.next(newLayout);
               gridLayoutStateManager.gridLayout$.next(newLayout);
             }}
             rowTitle={rowTitle}

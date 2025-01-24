@@ -57,8 +57,8 @@ export interface ActivePanel {
 }
 
 export interface GridLayoutStateManager {
-  proposedGridLayout$: BehaviorSubject<GridLayoutData>;
   gridLayout$: BehaviorSubject<GridLayoutData>;
+  proposedGridLayout$: BehaviorSubject<GridLayoutData | undefined>; // temporary state for layout during drag and drop operations
   expandedPanelId$: BehaviorSubject<string | undefined>;
   isMobileView$: BehaviorSubject<boolean>;
   accessMode$: BehaviorSubject<GridAccessMode>;
