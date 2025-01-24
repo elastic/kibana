@@ -18,6 +18,8 @@ import type { Logger } from '@kbn/logging';
 import { ChatPromptTemplate } from '@langchain/core/prompts';
 import { FakeLLM } from '@langchain/core/utils/testing';
 import { createOpenAIFunctionsAgent } from 'langchain/agents';
+import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import { getDefaultAssistantGraph } from '../server/lib/langchain/graphs/default_assistant_graph/graph';
 import { getDefaultAttackDiscoveryGraph } from '../server/lib/attack_discovery/graphs/default_attack_discovery_graph';
 
@@ -49,11 +51,13 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     streamRunnable: false,
   });
   const graph = getDefaultAssistantGraph({
+    actionsClient: actionsClientMock.create(),
     agentRunnable,
     logger,
     createLlmInstance,
     tools: [],
     replacements: {},
+    savedObjectsClient: savedObjectsClientMock.create(),
   });
   return graph.getGraph();
 }
@@ -67,6 +71,11 @@ async function getAttackDiscoveryGraph(logger: Logger): Promise<Drawable> {
     llm: mockLlm as unknown as ActionsClientLlm,
     logger,
     replacements: {},
+    prompts: {
+      default: '',
+      continue: '',
+      refine: '',
+    },
     size: 20,
   });
 

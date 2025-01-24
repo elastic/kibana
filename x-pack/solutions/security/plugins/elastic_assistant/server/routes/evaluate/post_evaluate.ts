@@ -200,6 +200,7 @@ export const postEvaluateRoute = (
                 langSmithProject,
                 logger,
                 runName,
+                savedObjectsClient,
                 size,
               });
             } catch (err) {
@@ -295,14 +296,15 @@ export const postEvaluateRoute = (
               );
 
               const defaultSystemPrompt = await getPrompt({
-                savedObjectsClient,
-                provider: llmType,
+                actionsClient,
+                connector,
+                connectorId: connector.id,
                 // use oss as model when using openai and oss
-                // else let the resolveProviderAndModel logic determine the model
+                // else let the resolveProviderAndModel logic determine the model from connector
                 model: llmType === 'openai' && isOssModel ? 'oss' : undefined,
                 promptId: promptDictionary.systemPrompt,
-                actionsClient,
-                connectorId: connector.id,
+                provider: llmType,
+                savedObjectsClient,
               });
 
               const agentRunnable = isOpenAI

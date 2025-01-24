@@ -7,7 +7,7 @@
 
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger } from '@kbn/core/server';
+import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
 import { ApiConfig, AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import { ActionsClientLlm } from '@kbn/langchain/server';
@@ -15,6 +15,7 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { Document } from '@langchain/core/documents';
 
+import { getPrompt, promptDictionary } from '../../../../../lib/prompt';
 import { getDefaultAttackDiscoveryGraph } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph';
 import {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
@@ -38,6 +39,7 @@ export const invokeAttackDiscoveryGraph = async ({
   latestReplacements,
   logger,
   onNewReplacements,
+  savedObjectsClient,
   size,
   start,
 }: {
@@ -54,6 +56,7 @@ export const invokeAttackDiscoveryGraph = async ({
   latestReplacements: Replacements;
   logger: Logger;
   onNewReplacements: (newReplacements: Replacements) => void;
+  savedObjectsClient: SavedObjectsClientContract;
   start?: string;
   size: number;
 }): Promise<{
@@ -89,6 +92,41 @@ export const invokeAttackDiscoveryGraph = async ({
     throw new Error('LLM is required for attack discoveries');
   }
 
+  const defaultPrompt = await getPrompt({
+    actionsClient,
+    connectorId: apiConfig.connectorId,
+    // if in future oss has different prompt, add it as model here
+    model,
+    promptId: promptDictionary.attackDiscoveryDefault,
+    provider: llmType,
+    savedObjectsClient,
+  });
+
+  const refinePrompt = await getPrompt({
+    actionsClient,
+    connectorId: apiConfig.connectorId,
+    // if in future oss has different prompt, add it as model here
+    model,
+    promptId: promptDictionary.attackDiscoveryRefine,
+    provider: llmType,
+    savedObjectsClient,
+  });
+
+  const continuePrompt = await getPrompt({
+    actionsClient,
+    connectorId: apiConfig.connectorId,
+    // if in future oss has different prompt, add it as model here
+    model,
+    promptId: promptDictionary.attackDiscoveryContinue,
+    provider: llmType,
+    savedObjectsClient,
+  });
+  console.log('prompts ==>', {
+    default: defaultPrompt,
+    refine: refinePrompt,
+    continue: continuePrompt,
+  });
+
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
     anonymizationFields,
@@ -98,6 +136,11 @@ export const invokeAttackDiscoveryGraph = async ({
     llm,
     logger,
     onNewReplacements,
+    prompts: {
+      continue: continuePrompt,
+      default: defaultPrompt,
+      refine: refinePrompt,
+    },
     replacements: latestReplacements,
     size,
     start,

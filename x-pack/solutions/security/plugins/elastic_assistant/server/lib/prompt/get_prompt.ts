@@ -8,17 +8,19 @@
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
+import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { ElasticModelDictionary, Prompt } from './types';
 import { localPrompts } from './local_prompt_object';
 import { getLlmType } from '../../routes/utils';
 import { promptSavedObjectType } from '../../../common/constants';
 interface GetPromptArgs {
-  savedObjectsClient: SavedObjectsClientContract;
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  connector?: Connector;
+  connectorId: string;
+  model?: string;
   promptId: string;
   provider?: string;
-  model?: string;
-  actionsClient: PublicMethodsOf<ActionsClient>;
-  connectorId: string;
+  savedObjectsClient: SavedObjectsClientContract;
 }
 const elasticModelDictionary: ElasticModelDictionary = {
   'rainbow-sprinkles': {
@@ -27,19 +29,22 @@ const elasticModelDictionary: ElasticModelDictionary = {
   },
 };
 
+// provide either model + provider or connector to avoid additional calls to get connector
 export const getPrompt = async ({
-  savedObjectsClient,
-  promptId,
-  model: providedModel,
-  provider: providedProvider,
   actionsClient,
+  connector,
   connectorId,
+  model: providedModel,
+  promptId,
+  provider: providedProvider,
+  savedObjectsClient,
 }: GetPromptArgs): Promise<string> => {
   const { provider, model } = await resolveProviderAndModel(
     providedProvider,
     providedModel,
     connectorId,
-    actionsClient
+    actionsClient,
+    connector
   );
 
   const prompts = await savedObjectsClient.find<Prompt>({
@@ -51,7 +56,7 @@ export const getPrompt = async ({
 
   return (
     findPromptEntry(
-      prompts.saved_objects.map((p) => p.attributes),
+      prompts?.saved_objects.map((p) => p.attributes) || [],
       promptId,
       provider,
       model
@@ -63,12 +68,13 @@ const resolveProviderAndModel = async (
   providedProvider: string | undefined,
   providedModel: string | undefined,
   connectorId: string,
-  actionsClient: PublicMethodsOf<ActionsClient>
+  actionsClient: PublicMethodsOf<ActionsClient>,
+  providedConnector?: Connector
 ): Promise<{ provider?: string; model?: string }> => {
   let model = providedModel;
   let provider = providedProvider;
   if (!provider || !model || provider === 'inference') {
-    const connector = await actionsClient.get({ id: connectorId });
+    const connector = providedConnector || (await actionsClient.get({ id: connectorId }));
 
     if (provider === 'inference' && connector.config) {
       provider = connector.config.provider || provider;

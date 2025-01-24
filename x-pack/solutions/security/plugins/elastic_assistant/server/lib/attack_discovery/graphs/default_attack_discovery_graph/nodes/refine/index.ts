@@ -34,6 +34,7 @@ export const getRefineNode = ({
     const {
       attackDiscoveryPrompt,
       combinedRefinements,
+      continuePrompt,
       generationAttempts,
       hallucinationFailures,
       maxGenerationAttempts,
@@ -51,6 +52,7 @@ export const getRefineNode = ({
       const query = getCombinedRefinePrompt({
         attackDiscoveryPrompt,
         combinedRefinements,
+        continuePrompt,
         refinePrompt,
         unrefinedResults,
       });

@@ -48,11 +48,11 @@ export async function runAgent({
   let userPrompt = '';
   if (state.llmType === 'gemini') {
     userPrompt = await getPrompt({
-      savedObjectsClient,
-      provider: 'gemini',
-      promptId: promptDictionary.userPrompt,
       actionsClient,
       connectorId: state.connectorId,
+      promptId: promptDictionary.userPrompt,
+      provider: 'gemini',
+      savedObjectsClient,
     });
   }
   const agentOutcome = await agentRunnable

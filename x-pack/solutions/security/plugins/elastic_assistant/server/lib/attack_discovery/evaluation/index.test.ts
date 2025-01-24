@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import { savedObjectsClientMock } from '@kbn/core/server/mocks';
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { elasticsearchServiceMock } from '@kbn/core-elasticsearch-server-mocks';
@@ -46,7 +46,7 @@ jest.mock('./helpers/get_evaluator_llm', () => {
     getEvaluatorLlm: jest.fn().mockResolvedValue(mockLlm),
   };
 });
-
+const savedObjectsClient = savedObjectsClientMock.create();
 const actionsClient = {
   get: jest.fn(),
 } as unknown as ActionsClient;
@@ -126,6 +126,7 @@ describe('evaluateAttackDiscovery', () => {
       langSmithProject,
       logger,
       runName,
+      savedObjectsClient,
       size: 20,
     });
 

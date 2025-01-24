@@ -7,6 +7,9 @@
 
 import { Prompt } from './types';
 import {
+  ATTACK_DISCOVERY_CONTINUE,
+  ATTACK_DISCOVERY_DEFAULT,
+  ATTACK_DISCOVERY_REFINE,
   BEDROCK_SYSTEM_PROMPT,
   DEFAULT_SYSTEM_PROMPT,
   GEMINI_SYSTEM_PROMPT,
@@ -17,6 +20,9 @@ import {
 export const promptDictionary = {
   systemPrompt: 'systemPrompt-default',
   userPrompt: 'userPrompt-default',
+  attackDiscoveryDefault: 'attackDiscovery-default',
+  attackDiscoveryRefine: 'attackDiscovery-refine',
+  attackDiscoveryContinue: 'attackDiscovery-continue',
 };
 
 export const localPrompts: Prompt[] = [
@@ -60,6 +66,24 @@ export const localPrompts: Prompt[] = [
     provider: 'gemini',
     prompt: {
       default: GEMINI_USER_PROMPT,
+    },
+  },
+  {
+    promptId: promptDictionary.attackDiscoveryDefault,
+    prompt: {
+      default: ATTACK_DISCOVERY_DEFAULT,
+    },
+  },
+  {
+    promptId: promptDictionary.attackDiscoveryRefine,
+    prompt: {
+      default: ATTACK_DISCOVERY_REFINE,
+    },
+  },
+  {
+    promptId: promptDictionary.attackDiscoveryContinue,
+    prompt: {
+      default: ATTACK_DISCOVERY_CONTINUE,
     },
   },
 ];

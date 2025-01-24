@@ -32,6 +32,11 @@ export interface GetDefaultAttackDiscoveryGraphParams {
   llm: ActionsClientLlm;
   logger?: Logger;
   onNewReplacements?: (replacements: Replacements) => void;
+  prompts: {
+    continue: string;
+    default: string;
+    refine: string;
+  };
   replacements?: Replacements;
   size: number;
   start?: string;
@@ -55,6 +60,7 @@ export const getDefaultAttackDiscoveryGraph = ({
   llm,
   logger,
   onNewReplacements,
+  prompts,
   replacements,
   size,
   start,
@@ -64,7 +70,7 @@ export const getDefaultAttackDiscoveryGraph = ({
   'generate' | 'refine' | 'retrieve_anonymized_alerts' | '__start__'
 > => {
   try {
-    const graphState = getDefaultGraphState({ end, filter, start });
+    const graphState = getDefaultGraphState({ end, filter, prompts, start });
 
     // get nodes:
     const retrieveAnonymizedAlertsNode = getRetrieveAnonymizedAlertsNode({

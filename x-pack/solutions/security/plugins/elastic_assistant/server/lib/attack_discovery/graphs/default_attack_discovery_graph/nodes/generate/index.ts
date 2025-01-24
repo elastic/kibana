@@ -34,6 +34,7 @@ export const getGenerateNode = ({
 
     const {
       attackDiscoveryPrompt,
+      continuePrompt,
       combinedGenerations,
       generationAttempts,
       generations,
@@ -50,6 +51,7 @@ export const getGenerateNode = ({
         anonymizedAlerts,
         attackDiscoveryPrompt,
         combinedMaybePartialResults: combinedGenerations,
+        continuePrompt,
       });
 
       const { chain, formatInstructions, llmType } = getChainWithFormatInstructions(llm);

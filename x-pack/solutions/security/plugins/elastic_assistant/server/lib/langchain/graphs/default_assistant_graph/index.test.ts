@@ -18,6 +18,7 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
+import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 jest.mock('./graph');
 jest.mock('./helpers');
 jest.mock('langchain/agents');
@@ -41,6 +42,14 @@ describe('callAssistantGraph', () => {
     },
   };
 
+  const savedObjectsClient: jest.Mocked<SavedObjectsClientContract> = {
+    find: jest.fn().mockResolvedValue({
+      page: 1,
+      per_page: 20,
+      total: 0,
+      saved_objects: [],
+    }),
+  };
   const defaultParams = {
     actionsClient: actionsClientMock.create(),
     alertsIndexPattern: 'test-pattern',
@@ -60,6 +69,7 @@ describe('callAssistantGraph', () => {
     onNewReplacements: jest.fn(),
     replacements: [],
     request: mockRequest,
+    savedObjectsClient,
     size: 1,
     systemPrompt: 'test-prompt',
     telemetry: {},
@@ -167,6 +177,12 @@ describe('callAssistantGraph', () => {
     });
 
     it('creates OpenAIToolsAgent for inference llmType', async () => {
+      defaultParams.actionsClient.get = jest.fn().mockResolvedValue({
+        config: {
+          provider: 'elastic',
+          providerConfig: { model_id: 'rainbow-sprinkles' },
+        },
+      });
       const params = { ...defaultParams, llmType: 'inference' };
       await callAssistantGraph(params);
 

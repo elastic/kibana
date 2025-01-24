@@ -16,13 +16,16 @@ import {
 } from '../../../../evaluation/__mocks__/mock_anonymized_alerts';
 import { getAnonymizedAlertsFromState } from './helpers/get_anonymized_alerts_from_state';
 import { getChainWithFormatInstructions } from '../helpers/get_chain_with_format_instructions';
-import { getDefaultAttackDiscoveryPrompt } from '../helpers/get_default_attack_discovery_prompt';
-import { getDefaultRefinePrompt } from '../refine/helpers/get_default_refine_prompt';
 import { GraphState } from '../../types';
 import {
   getParsedAttackDiscoveriesMock,
   getRawAttackDiscoveriesMock,
 } from '../../../../../../__mocks__/raw_attack_discoveries';
+import {
+  ATTACK_DISCOVERY_CONTINUE,
+  ATTACK_DISCOVERY_DEFAULT,
+  ATTACK_DISCOVERY_REFINE,
+} from '../../../../../prompt/prompts';
 
 const attackDiscoveryTimestamp = '2024-10-11T17:55:59.702Z';
 
@@ -49,10 +52,11 @@ let mockLlm: ActionsClientLlm;
 
 const initialGraphState: GraphState = {
   attackDiscoveries: null,
-  attackDiscoveryPrompt: getDefaultAttackDiscoveryPrompt(),
+  attackDiscoveryPrompt: ATTACK_DISCOVERY_DEFAULT,
   anonymizedAlerts: [...mockAnonymizedAlerts],
   combinedGenerations: '',
   combinedRefinements: '',
+  continuePrompt: ATTACK_DISCOVERY_CONTINUE,
   errors: [],
   generationAttempts: 0,
   generations: [],
@@ -61,7 +65,7 @@ const initialGraphState: GraphState = {
   maxHallucinationFailures: 5,
   maxRepeatedGenerations: 3,
   refinements: [],
-  refinePrompt: getDefaultRefinePrompt(),
+  refinePrompt: ATTACK_DISCOVERY_REFINE,
   replacements: {
     ...mockAnonymizedAlertsReplacements,
   },
