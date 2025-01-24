@@ -14,7 +14,7 @@ import { getSpaceId } from './utils/get_space_id';
 import { fetchSloHealthRoute } from './fetch_health';
 import { getSloSettingsRoute } from './get_slo_settings';
 import { createSLORoute } from './create_slo';
-import { inspectSLORoute } from './inspect';
+import { inspectSLORoute } from './inspect_slo';
 import { updateSLORoute } from './update_slo';
 import { deleteSLORoute } from './delete_slo';
 import { enableSLORoute } from './enable_slo';
