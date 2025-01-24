@@ -17,6 +17,7 @@ import type { DataView, DataViewListItem } from '@kbn/data-views-plugin/common';
 import type { Filter, TimeRange } from '@kbn/es-query';
 import type { DataTableRecord } from '@kbn/discover-utils/types';
 import type { UnifiedHistogramVisContext } from '@kbn/unified-histogram-plugin/public';
+import { differenceBy } from 'lodash';
 
 interface InternalStateDataRequestParams {
   timeRangeAbsolute?: TimeRange;
@@ -148,18 +149,12 @@ export function getInternalStateContainer() {
         },
       appendAdHocDataViews:
         (prevState: InternalState) => (dataViewsAdHoc: DataView | DataView[]) => {
-          // check for already existing data views
-          const concatList = (
-            Array.isArray(dataViewsAdHoc) ? dataViewsAdHoc : [dataViewsAdHoc]
-          ).filter((dataView) => {
-            return !prevState.adHocDataViews.find((el: DataView) => el.id === dataView.id);
-          });
-          if (!concatList.length) {
-            return prevState;
-          }
+          const newDataViews = Array.isArray(dataViewsAdHoc) ? dataViewsAdHoc : [dataViewsAdHoc];
+          const existingDataViews = differenceBy(prevState.adHocDataViews, newDataViews, 'id');
+
           return {
             ...prevState,
-            adHocDataViews: prevState.adHocDataViews.concat(dataViewsAdHoc),
+            adHocDataViews: existingDataViews.concat(newDataViews),
           };
         },
       replaceAdHocDataViewWithId:

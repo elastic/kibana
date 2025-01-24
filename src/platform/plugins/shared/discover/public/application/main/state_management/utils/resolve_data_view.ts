@@ -54,7 +54,11 @@ export async function loadDataView({
       // If passed a spec for a persisted data view, reassign the fetchId
       fetchId = dataViewSpec.id!;
     } else {
-      // If passed an ad hoc data view spec, create and return the data view
+      // If passed an ad hoc data view spec, clear the instance cache
+      // to avoid conflicts, then create and return the data view
+      if (dataViewSpec.id) {
+        dataViews.clearInstanceCache(dataViewSpec.id);
+      }
       const createdAdHocDataView = await dataViews.create(dataViewSpec);
       return {
         loadedDataView: createdAdHocDataView,
@@ -183,9 +187,10 @@ export const loadAndResolveDataView = async ({
   const { dataViews, toastNotifications } = services;
   const { adHocDataViews, savedDataViews } = internalStateContainer.getState();
 
-  // Check ad hoc data views first, then attempt to load one if none is found
+  // Check ad hoc data views first, unless a data view spec is supplied,
+  // then attempt to load one if none is found
   let fallback = false;
-  let dataView = adHocDataViews.find((dv) => dv.id === dataViewId);
+  let dataView = dataViewSpec ? undefined : adHocDataViews.find((dv) => dv.id === dataViewId);
 
   if (!dataView) {
     const dataViewData = await loadDataView({

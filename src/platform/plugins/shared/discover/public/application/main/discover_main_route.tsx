@@ -135,8 +135,11 @@ export function DiscoverMainRoute({
         ]);
 
         const persistedDataViewsExist = hasUserDataViewValue && defaultDataViewExists;
+        const adHocDataViewsExist =
+          stateContainer.internalState.getState().adHocDataViews.length > 0;
+        const locationStateHasDataViewSpec = Boolean(historyLocationState?.dataViewSpec);
         const canAccessWithAdHocDataViews =
-          hasESDataValue && stateContainer.internalState.getState().adHocDataViews.length > 0;
+          hasESDataValue && (adHocDataViewsExist || locationStateHasDataViewSpec);
 
         if (persistedDataViewsExist || canAccessWithAdHocDataViews) {
           return true;
@@ -154,7 +157,7 @@ export function DiscoverMainRoute({
         return false;
       }
     },
-    [data.dataViews, savedSearchId, stateContainer]
+    [data.dataViews, historyLocationState?.dataViewSpec, savedSearchId, stateContainer]
   );
 
   const loadSavedSearch = useCallback(
