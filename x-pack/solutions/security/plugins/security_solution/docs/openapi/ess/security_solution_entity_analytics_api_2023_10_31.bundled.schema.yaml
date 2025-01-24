@@ -315,6 +315,10 @@ paths:
                   type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp.
+                  type: string
         description: Schema for the entity store initialization
         required: true
       responses:
@@ -426,6 +430,10 @@ paths:
                   type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp for the entity type.
+                  type: string
         description: Schema for the engine initialization
         required: true
       responses:
@@ -448,6 +456,18 @@ paths:
           required: true
           schema:
             $ref: '#/components/schemas/EntityType'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp for the entity type.
+                  type: string
+        description: Schema for the engine start
+        required: false
       responses:
         '200':
           content:
@@ -1004,6 +1024,8 @@ components:
           $ref: '#/components/schemas/IndexPattern'
         status:
           $ref: '#/components/schemas/EngineStatus'
+        timestampField:
+          type: string
         type:
           $ref: '#/components/schemas/EntityType'
       required:
@@ -1143,6 +1165,12 @@ components:
           required:
             - name
             - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         host:
           type: object
           properties:
@@ -1181,7 +1209,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - host
         - entity
     IdField:
@@ -1283,6 +1310,12 @@ components:
           required:
             - name
             - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         service:
           type: object
           properties:
@@ -1293,7 +1326,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - service
         - entity
     StoreStatus:
@@ -1339,6 +1371,12 @@ components:
           required:
             - name
             - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         user:
           type: object
           properties:
@@ -1373,7 +1411,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - user
         - entity
   securitySchemes:
