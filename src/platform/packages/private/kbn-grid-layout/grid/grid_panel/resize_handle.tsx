@@ -11,30 +11,38 @@ import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+<<<<<<< HEAD
 import { PanelInteractionEvent, UserInteractionEvent } from '../types';
+=======
+import { GridLayoutStateManager } from '../types';
+import { useGridLayoutEvents } from '../use_grid_layout_events';
+>>>>>>> 02455ffe3a6e ([Dashboard][Collapsable panels] Enable touch between panel sections and refactor events flow  (#206941))
 
 export const ResizeHandle = ({
-  interactionStart,
+  gridLayoutStateManager,
+  rowIndex,
+  panelId,
 }: {
-  interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
+  gridLayoutStateManager: GridLayoutStateManager;
+  rowIndex: number;
+  panelId: string;
 }) => {
   const { euiTheme } = useEuiTheme();
+<<<<<<< HEAD
+=======
+  const startInteraction = useGridLayoutEvents({
+    interactionType: 'resize',
+    gridLayoutStateManager,
+    panelId,
+    rowIndex,
+  });
+>>>>>>> 02455ffe3a6e ([Dashboard][Collapsable panels] Enable touch between panel sections and refactor events flow  (#206941))
 
   return (
     <button
+      onMouseDown={startInteraction}
+      onTouchStart={startInteraction}
       className="kbnGridPanel--resizeHandle"
-      onMouseDown={(e) => {
-        interactionStart('resize', e);
-      }}
-      onMouseUp={(e) => {
-        interactionStart('drop', e);
-      }}
-      onTouchStart={(e) => {
-        interactionStart('resize', e);
-      }}
-      onTouchEnd={(e) => {
-        interactionStart('drop', e);
-      }}
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',
       })}
@@ -56,6 +64,7 @@ export const ResizeHandle = ({
         .kbnGridPanel--expanded & {
           display: none;
         }
+        touch-action: none;
       `}
     />
   );
