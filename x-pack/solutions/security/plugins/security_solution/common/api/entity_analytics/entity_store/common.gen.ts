@@ -38,7 +38,7 @@ export const EngineDescriptor = z.object({
   fieldHistoryLength: z.number().int(),
   lookbackPeriod: z
     .string()
-    .regex(/[smh]$/)
+    .regex(/[smdh]$/)
     .optional()
     .default('24h'),
   error: z.object({}).optional(),

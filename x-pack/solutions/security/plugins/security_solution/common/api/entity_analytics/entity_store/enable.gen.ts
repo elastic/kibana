@@ -29,7 +29,7 @@ export const InitEntityStoreRequestBody = z.object({
    */
   lookbackPeriod: z
     .string()
-    .regex(/[smh]$/)
+    .regex(/[smdh]$/)
     .optional()
     .default('24h'),
   indexPattern: IndexPattern.optional(),

@@ -35,7 +35,7 @@ components:
         lookbackPeriod: 
           type: string
           default: 24h
-          pattern: '[smh]$'
+          pattern: '[smdh]$'
         error:
           type: object
 
