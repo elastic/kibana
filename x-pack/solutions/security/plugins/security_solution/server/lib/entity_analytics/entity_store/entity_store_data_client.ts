@@ -91,6 +91,7 @@ import {
   createKeywordBuilderPipeline,
   deleteKeywordBuilderPipeline,
 } from '../../asset_inventory/ingest_pipelines';
+import { DEFAULT_INTERVAL } from './task/constants';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -203,7 +204,13 @@ export class EntityStoreDataClient {
   }
 
   public async enable(
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityStoreRequestBody,
+    {
+      indexPattern = '',
+      filter = '',
+      fieldHistoryLength = 10,
+      entityTypes,
+      enrichPolicyExecutionInterval,
+    }: InitEntityStoreRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityStoreResponse> {
     if (!this.options.taskManager) {
@@ -215,11 +222,20 @@ export class EntityStoreDataClient {
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
     const { experimentalFeatures } = this.options;
-    const enginesTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+    const enabledEntityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+
+    // When entityTypes param is defined it only enables the engines that are provided
+    const enginesTypes = entityTypes
+      ? (entityTypes as EntityType[]).filter((type) => enabledEntityTypes.includes(type))
+      : enabledEntityTypes;
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
-        this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
+        this.init(
+          entity,
+          { indexPattern, filter, fieldHistoryLength, enrichPolicyExecutionInterval },
+          { pipelineDebugMode }
+        )
       )
     );
 
@@ -277,7 +293,12 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
+    {
+      indexPattern = '',
+      filter = '',
+      fieldHistoryLength = 10,
+      enrichPolicyExecutionInterval = DEFAULT_INTERVAL,
+    }: InitEntityEngineRequestBody,
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
     const { experimentalFeatures } = this.options;
@@ -334,6 +355,7 @@ export class EntityStoreDataClient {
     this.asyncSetup(
       entityType,
       fieldHistoryLength,
+      enrichPolicyExecutionInterval,
       this.options.taskManager,
       indexPattern,
       filter,
@@ -349,6 +371,7 @@ export class EntityStoreDataClient {
   private async asyncSetup(
     entityType: EntityType,
     fieldHistoryLength: number,
+    enrichPolicyExecutionInterval: string,
     taskManager: TaskManagerStartContract,
     indexPattern: string,
     filter: string,
@@ -437,6 +460,7 @@ export class EntityStoreDataClient {
         namespace,
         logger,
         taskManager,
+        interval: enrichPolicyExecutionInterval,
       });
 
       this.log(`debug`, entityType, `Started entity store field retention enrich task`);
