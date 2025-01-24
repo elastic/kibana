@@ -31,14 +31,11 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
   const { title, description } =
     clashType === CLASH_TYPE.MAPPING
       ? {
-          title: i18n.translate(
-            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
-            {
-              defaultMessage: 'Incompatible mapping',
-            }
-          ),
+          title: i18n.translate('xpack.dataVisualizer.file.fileClashWarning.mappingClashTitle', {
+            defaultMessage: 'Incompatible mapping',
+          }),
           description: i18n.translate(
-            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+            'xpack.dataVisualizer.file.fileClashWarning.mappingClashDescription',
             {
               defaultMessage: 'Mappings in the selected files are not compatible with each other',
             }
@@ -46,14 +43,11 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
         }
       : clashType === CLASH_TYPE.FORMAT
       ? {
-          title: i18n.translate(
-            'xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedDescription',
-            {
-              defaultMessage: 'Incompatible file formats',
-            }
-          ),
+          title: i18n.translate('xpack.dataVisualizer.file.fileClashWarning.fileFormatClashTitle', {
+            defaultMessage: 'Incompatible file formats',
+          }),
           description: i18n.translate(
-            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+            'xpack.dataVisualizer.file.fileClashWarning.fileFormatClashDescription',
             {
               defaultMessage:
                 'The selected files must have the same format. e.g. all CSV or all log files',
@@ -62,13 +56,13 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
         }
       : {
           title: i18n.translate(
-            'xpack.dataVisualizer.file.importSummary.documentsCouldNotBeImportedDescription',
+            'xpack.dataVisualizer.file.fileClashWarning.fileFormatNotSupportedTitle',
             {
               defaultMessage: 'File format not supported',
             }
           ),
           description: i18n.translate(
-            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+            'xpack.dataVisualizer.file.fileClashWarning.fileFormatNotSupportedDescription',
             {
               defaultMessage: 'Some of the selected files are not supported for upload.',
             }
@@ -81,7 +75,7 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
         <p>{description}</p>
         <EuiButton onClick={() => removeClashingFiles()} color="danger" size="s" fill>
           <FormattedMessage
-            id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.closeButton"
+            id="xpack.ml.dataVisualizer.file.fileClashWarning.deleteAllButtonLabel"
             defaultMessage="Delete all"
           />
         </EuiButton>

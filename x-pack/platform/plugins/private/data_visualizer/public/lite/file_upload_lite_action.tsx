@@ -58,11 +58,5 @@ export function createOpenFileUploadLiteAction(
     async isCompatible() {
       return true;
     },
-    // async isCompatible({ dataView, field }: CreateCategorizationADJobContext) {
-    //   return (
-    //     dataView.timeFieldName !== undefined &&
-    //     dataView.fields.find((f) => f.name === field.name) !== undefined
-    //   );
-    // },
   };
 }

@@ -73,10 +73,6 @@ export const IndexInput: FC<Props> = ({ setIndexName, setIndexValidationStatus, 
         <EuiFieldText
           fullWidth
           value={indexNameLocal}
-          // disabled={
-          //   uploadStatus.overallImportStatus === STATUS.STARTED ||
-          //   uploadStatus.overallImportStatus === STATUS.COMPLETED
-          // }
           onChange={(e) => setIndexNameLocal(e.target.value)}
           placeholder={i18n.translate(
             'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',

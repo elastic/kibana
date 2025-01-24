@@ -36,7 +36,6 @@ export type AnalyzedFile = AnalysisResults & {
   serverError: any;
   results: FindFileStructureResponse | null;
   explanation: string[] | undefined;
-  // mappingClash: boolean;
   importProgress: number;
   docCount: number;
   supportedFormat: boolean;
@@ -58,7 +57,6 @@ export class FileWrapper {
     fileCouldNotBeRead: false,
     fileCouldNotBeReadPermissionError: false,
     serverError: false,
-    // mappingClash: false,
     importProgress: 0,
     docCount: 0,
     supportedFormat: true,

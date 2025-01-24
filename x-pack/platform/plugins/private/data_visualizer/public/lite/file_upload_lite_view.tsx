@@ -99,7 +99,7 @@ export const FileUploadLiteView: FC<Props> = ({
         <EuiTitle size="s">
           <h3>
             <FormattedMessage
-              id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.title"
+              id="xpack.dataVisualizer.file.uploadView.uploadFileTitle"
               defaultMessage="Upload a file"
             />
           </h3>
@@ -114,7 +114,7 @@ export const FileUploadLiteView: FC<Props> = ({
                 <EuiText>
                   <p>
                     <FormattedMessage
-                      id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.title"
+                      id="xpack.dataVisualizer.file.uploadView.uploadFileDescription"
                       defaultMessage="Upload your file, analyze its data, and optionally import the data into an index. The data can also be automatically vectorized using semantic text."
                     />
                   </p>
@@ -177,7 +177,7 @@ export const FileUploadLiteView: FC<Props> = ({
           <EuiFlexItem grow={false}>
             <EuiButtonEmpty iconType="cross" onClick={onClose} flush="left">
               <FormattedMessage
-                id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.closeButton"
+                id="xpack.dataVisualizer.file.uploadView.closeButton"
                 defaultMessage="Close"
               />
             </EuiButtonEmpty>
@@ -192,7 +192,7 @@ export const FileUploadLiteView: FC<Props> = ({
                 <EuiFlexItem>
                   <EuiButtonEmpty onClick={onClose} disabled={true}>
                     <FormattedMessage
-                      id="xpack.ml.embeddables.newJobFromPatternAnalysisFlyout.closeButton"
+                      id="xpack.dataVisualizer.file.uploadView.importingButton"
                       defaultMessage="Importing"
                     />
                   </EuiButtonEmpty>
@@ -204,7 +204,10 @@ export const FileUploadLiteView: FC<Props> = ({
                 disabled={indexName === '' || indexValidationStatus !== STATUS.COMPLETED}
                 onClick={onImportClick}
               >
-                Import
+                <FormattedMessage
+                  id="xpack.dataVisualizer.file.uploadView.importButton"
+                  defaultMessage="Import"
+                />
               </EuiButton>
             ) : null}
           </EuiFlexItem>

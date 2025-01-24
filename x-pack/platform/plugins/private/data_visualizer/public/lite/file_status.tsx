@@ -16,6 +16,8 @@ import {
   EuiButtonIcon,
   EuiProgress,
 } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { AnalyzedFile } from './file_manager/file_wrapper';
 import { STATUS, type UploadStatus } from './file_manager/file_manager';
 import { CLASH_TYPE } from './file_manager/merge_tools';
@@ -63,11 +65,7 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
                   <span>{fileStatus.fileSize}</span>
                 </EuiText>
               </EuiFlexItem>
-              {/* <EuiFlexItem grow={false}>
-            <EuiText size="xs">
-              <span>{fileStatus.fileSize}</span>
-            </EuiText>
-          </EuiFlexItem> */}
+
               <EuiFlexItem grow={2}>
                 <EuiFlexGroup gutterSize="none">
                   <EuiFlexItem grow={true} />
@@ -77,7 +75,12 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
                       iconType="trash"
                       size="xs"
                       color="danger"
-                      aria-label="remove file"
+                      aria-label={i18n.translate(
+                        'xpack.dataVisualizer.file.fileStatus.deleteFile',
+                        {
+                          defaultMessage: 'remove file',
+                        }
+                      )}
                     />
                   </EuiFlexItem>
                 </EuiFlexGroup>
@@ -90,7 +93,10 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
                   <>
                     <EuiSpacer size="s" />
                     <EuiText size="xs" color="danger">
-                      format clash
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.fileStatus.fileFormatClash"
+                        defaultMessage="File format different from other files"
+                      />
                     </EuiText>
                   </>
                 ) : null}
@@ -99,7 +105,10 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
                   <>
                     <EuiSpacer size="s" />
                     <EuiText size="xs" color="danger">
-                      mapping clash
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.fileStatus.mappingClash"
+                        defaultMessage="Mappings incompatible with other files"
+                      />
                     </EuiText>
                   </>
                 ) : null}
@@ -108,7 +117,10 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
                   <>
                     <EuiSpacer size="s" />
                     <EuiText size="xs" color="danger">
-                      unsupported format
+                      <FormattedMessage
+                        id="xpack.dataVisualizer.file.fileStatus.fileFormatNotSupported"
+                        defaultMessage="File format not supported"
+                      />
                     </EuiText>
                   </>
                 ) : null}
@@ -116,37 +128,6 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
             ) : null}
           </>
         )}
-
-        {/* <EuiFlexItem grow={true} />
-          <EuiFlexItem grow={false}>
-            <EuiButtonIcon
-              disabled={uploadStatus.overallImportStatus !== STATUS.NOT_STARTED}
-              onClick={deleteFile}
-              iconType="trash"
-              size="xs"
-              color="danger"
-              aria-label="remove file"
-            />
-          </EuiFlexItem>
-        </EuiFlexGroup>
-
-        {uploadStatus.overallImportStatus === STATUS.STARTED ||
-        uploadStatus.overallImportStatus === STATUS.COMPLETED ? (
-          <>
-            <EuiHorizontalRule margin="s" />
-            <EuiFlexGroup gutterSize="s" alignItems="center">
-              <EuiFlexItem grow={true}>
-                <EuiProgress
-                  label={'Importing'}
-                  valueText={true}
-                  value={Math.floor(fileStatus.importProgress)}
-                  max={100}
-                  size="s"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </>
-        ) : null} */}
       </EuiPanel>
       <EuiSpacer size="s" />
     </>

@@ -11,11 +11,6 @@ import React from 'react';
 import type { FileUploadResults } from './create_flyout';
 import { getFileDataVisualizerLiteWrapper } from './component_wrapper';
 
-// import type { DataViewField, DataView } from '@kbn/data-views-plugin/common';
-// import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-// import type { TimeRange } from '@kbn/es-query';
-// import { CreateJob } from './create_job';
-
 interface Props {
   onClose?: () => void;
   setUploadResults?: (results: FileUploadResults) => void;

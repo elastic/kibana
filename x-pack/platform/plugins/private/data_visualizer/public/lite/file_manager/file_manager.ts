@@ -16,6 +16,7 @@ import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
 import type { ImportResponse, IngestPipeline } from '@kbn/file-upload-plugin/common/types';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { i18n } from '@kbn/i18n';
 import type { AnalyzedFile } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
 import {
@@ -91,9 +92,9 @@ export class FileManager {
     private fileUpload: FileUploadStartApi,
     private http: HttpSetup,
     private dataViewsContract: DataViewsServicePublic,
-    private autoAddInference: string | null = null
+    private autoAddInferenceEndpointName: string | null = null
   ) {
-    this.autoAddSemanticTextField = this.autoAddInference !== null;
+    this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
 
     this.mappingsCheckSubscription = this.analysisStatus$.subscribe((statuses) => {
       const allFilesAnalyzed = statuses.every((status) => status.loaded);
@@ -279,7 +280,14 @@ export class FileManager {
     } catch (e) {
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
-        errors: [{ title: 'Error initializing index and ingest pipeline', error: e }],
+        errors: [
+          {
+            title: i18n.translate('xpack.dataVisualizer.file.fileManager.errorInitializing', {
+              defaultMessage: 'Error initializing index and ingest pipeline',
+            }),
+            error: e,
+          },
+        ],
       });
       return null;
     }
@@ -310,7 +318,14 @@ export class FileManager {
     } catch (error) {
       this.setStatus({
         overallImportStatus: STATUS.FAILED,
-        errors: [{ title: 'Error importing data', error }],
+        errors: [
+          {
+            title: i18n.translate('xpack.dataVisualizer.file.fileManager.errorImportingData', {
+              defaultMessage: 'Error importing data',
+            }),
+            error,
+          },
+        ],
       });
       return null;
     }
@@ -334,7 +349,14 @@ export class FileManager {
       if (dataViewResp.success === false) {
         this.setStatus({
           overallImportStatus: STATUS.FAILED,
-          errors: [{ title: 'Error creating data view', error: dataViewResp.error }],
+          errors: [
+            {
+              title: i18n.translate('xpack.dataVisualizer.file.fileManager.errorCreatingDataView', {
+                defaultMessage: 'Error creating data view',
+              }),
+              error: dataViewResp.error,
+            },
+          ],
         });
         return null;
       } else {
@@ -375,7 +397,14 @@ export class FileManager {
     } catch (error) {
       this.setStatus({
         modelDeployed: STATUS.FAILED,
-        errors: [{ title: 'Error deploying model', error }],
+        errors: [
+          {
+            title: i18n.translate('xpack.dataVisualizer.file.fileManager.errorDeployingModel', {
+              defaultMessage: 'Error deploying model',
+            }),
+            error,
+          },
+        ],
       });
     }
   }
@@ -388,12 +417,13 @@ export class FileManager {
     if (
       this.isTikaFormat() &&
       this.autoAddSemanticTextField &&
+      this.autoAddInferenceEndpointName !== null &&
       this.pipeline !== null &&
       this.mappings !== null
     ) {
       this.mappings.properties!.content = {
         type: 'semantic_text',
-        inference_id: '.elser-2-elasticsearch',
+        inference_id: this.autoAddInferenceEndpointName,
       };
 
       this.pipeline.processors.push({

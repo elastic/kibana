@@ -10,6 +10,7 @@ import React from 'react';
 import type { EuiStepStatus } from '@elastic/eui';
 import { EuiSpacer, EuiSteps } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
+import { i18n } from '@kbn/i18n';
 import type { AnalyzedFile } from './file_manager/file_wrapper';
 import { STATUS } from './file_manager/file_manager';
 import { type UploadStatus } from './file_manager/file_manager';
@@ -21,14 +22,6 @@ interface Props {
 }
 
 export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) => {
-  // overallImportStatus: STATUS.NOT_STARTED,
-  // indexCreated: STATUS.NOT_STARTED,
-  // pipelineCreated: STATUS.NOT_STARTED,
-  // modelDeployed: STATUS.NA,
-  // dataViewCreated: STATUS.NA,
-  // fileImport: STATUS.NOT_STARTED,
-  // filesStatus: [],
-
   const generateStatus = (statuses: STATUS[]): EuiStepStatus => {
     if (statuses.includes(STATUS.STARTED)) {
       return 'current';
@@ -50,18 +43,27 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       ? []
       : [
           {
-            title: 'Deploying model',
+            title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.deployingModel', {
+              defaultMessage: 'Deploying model',
+            }),
             children: <></>,
             status: generateStatus([uploadStatus.modelDeployed]),
           },
         ]),
     {
-      title: 'Creating index and ingest pipeline',
+      title: i18n.translate(
+        'xpack.dataVisualizer.file.overallUploadStatus.creatingIndexAndIngestPipeline',
+        {
+          defaultMessage: 'Creating index and ingest pipeline',
+        }
+      ),
       children: <></>,
       status: generateStatus([uploadStatus.indexCreated, uploadStatus.pipelineCreated]),
     },
     {
-      title: 'Uploading files',
+      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadingFiles', {
+        defaultMessage: 'Uploading files',
+      }),
       children: (
         <>
           {filesStatus.map((status, i) => (
@@ -79,12 +81,16 @@ export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) =>
       status: generateStatus([uploadStatus.fileImport]),
     },
     {
-      title: 'Creating data view',
+      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.creatingDataView', {
+        defaultMessage: 'Creating data view',
+      }),
       children: <></>,
       status: generateStatus([uploadStatus.dataViewCreated]),
     },
     {
-      title: 'Upload complete',
+      title: i18n.translate('xpack.dataVisualizer.file.overallUploadStatus.uploadComplete', {
+        defaultMessage: 'Upload complete',
+      }),
       children: <></>,
       status: uploadStatus.overallImportStatus === STATUS.COMPLETED ? 'complete' : 'incomplete',
     },

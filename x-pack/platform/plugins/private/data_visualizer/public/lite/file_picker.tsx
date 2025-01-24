@@ -35,7 +35,7 @@ export const FilePicker: FC<Props> = ({ fileManager: fm }) => {
       <EuiFormRow
         fullWidth
         helpText={i18n.translate(
-          'xpack.dataVisualizer.file.importView.indexNameContainsIllegalCharactersErrorMessage',
+          'xpack.dataVisualizer.file.aboutPanel.supportedFormatsDescription',
           {
             defaultMessage: 'Supported formats: PDF, TXT, MD, CSV, docx',
           }
@@ -49,7 +49,7 @@ export const FilePicker: FC<Props> = ({ fileManager: fm }) => {
           compressed
           multiple
           initialPromptText={i18n.translate(
-            'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
+            'xpack.dataVisualizer.file.filePicker.selectOrDragAndDropFiles',
             {
               defaultMessage: 'Select or drag and drop files',
             }
