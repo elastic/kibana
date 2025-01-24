@@ -121,8 +121,8 @@ pageLoadAssetSize:
   observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
-  presentationPanel: 26530
-  presentationUtil: 48292
+  presentationPanel: 11468
+  presentationUtil: 25000
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
