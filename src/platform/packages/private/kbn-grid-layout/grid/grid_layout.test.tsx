@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import React from 'react';
-import { render, screen, within } from '@testing-library/react';
+import { render, screen, waitFor, within } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { getSampleLayout } from './test_utils/sample_layout';
 import { GridLayout, GridLayoutProps } from './grid_layout';
@@ -22,13 +22,15 @@ import {
   touchStart,
 } from './test_utils/events';
 
+const onLayoutChange = jest.fn();
+
 const renderGridLayout = (propsOverrides: Partial<GridLayoutProps> = {}) => {
   const defaultProps: GridLayoutProps = {
     accessMode: 'EDIT',
     layout: getSampleLayout(),
     gridSettings,
     renderPanelContents: mockRenderPanelContents,
-    onLayoutChange: jest.fn(),
+    onLayoutChange,
   };
 
   const { rerender, ...rtlRest } = render(<GridLayout {...defaultProps} {...propsOverrides} />);
@@ -74,6 +76,42 @@ describe('GridLayout', () => {
 
   beforeEach(() => {
     jest.clearAllMocks();
+  });
+
+  it('`onLayoutChange` gets called when layout prop changes', async () => {
+    const layoutComponent = renderGridLayout();
+    onLayoutChange.mockClear();
+
+    const layout = getSampleLayout();
+
+    // if layout hasn't changed, don't call `onLayoutChange`
+    layoutComponent.rerender({
+      layout,
+    });
+    expect(onLayoutChange).not.toBeCalled();
+
+    // if layout **has** changed, call `onLayoutChange`
+    const newLayout = cloneDeep(layout);
+    newLayout[0] = {
+      ...newLayout[0],
+      panels: {
+        ...newLayout[0].panels,
+        panel1: {
+          id: 'panel1',
+          row: 100,
+          column: 0,
+          width: 12,
+          height: 6,
+        },
+      },
+    };
+
+    layoutComponent.rerender({
+      layout: newLayout,
+    });
+    await waitFor(() => {
+      expect(onLayoutChange).toBeCalledTimes(1);
+    });
   });
 
   it(`'renderPanelContents' is not called during dragging`, () => {
