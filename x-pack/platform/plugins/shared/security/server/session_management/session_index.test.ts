@@ -96,7 +96,10 @@ describe('Session index', () => {
 
       expect(mockElasticsearchClient.indices.deleteTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.putIndexTemplate).not.toHaveBeenCalled();
-      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
     });
 
@@ -216,7 +219,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
 
-      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
     });
 
     it('updates mappings for existing index without version in the meta', async () => {
@@ -237,7 +243,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
 
-      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
 
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: aliasName });
@@ -266,7 +275,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
 
-      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
 
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: aliasName });
@@ -295,7 +307,10 @@ describe('Session index', () => {
       expect(mockElasticsearchClient.indices.deleteIndexTemplate).not.toHaveBeenCalled();
       expect(mockElasticsearchClient.indices.create).not.toHaveBeenCalled();
 
-      expect(mockElasticsearchClient.indices.putAlias).not.toHaveBeenCalled();
+      expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledWith({
+        index: indexName,
+        name: aliasName,
+      });
 
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.getMapping).toHaveBeenCalledWith({ index: aliasName });
@@ -447,7 +462,7 @@ describe('Session index', () => {
         { meta: true }
       );
 
-      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.search).toHaveBeenCalledTimes(1);
@@ -1430,7 +1445,7 @@ describe('Session index', () => {
         metadata: { primaryTerm: 321, sequenceNumber: 654 },
       });
 
-      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(1);
+      expect(mockElasticsearchClient.indices.exists).toHaveBeenCalledTimes(2);
       expect(mockElasticsearchClient.indices.create).toHaveBeenCalledTimes(1);
       expect(mockElasticsearchClient.indices.putAlias).toHaveBeenCalledTimes(1);
 
