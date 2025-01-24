@@ -8,7 +8,7 @@
 import { ZodSchema, z } from '@kbn/zod';
 
 export function createIsNarrowSchema<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
-  base: TBaseSchema,
+  _base: TBaseSchema,
   narrow: TNarrowSchema
 ) {
   return <TValue extends z.input<TBaseSchema>>(
@@ -19,7 +19,7 @@ export function createIsNarrowSchema<TBaseSchema extends z.Schema, TNarrowSchema
 }
 
 export function createAsSchemaOrThrow<TBaseSchema extends z.Schema, TNarrowSchema extends z.Schema>(
-  base: TBaseSchema,
+  _base: TBaseSchema,
   narrow: TNarrowSchema
 ) {
   return <TValue extends z.input<TBaseSchema>>(
