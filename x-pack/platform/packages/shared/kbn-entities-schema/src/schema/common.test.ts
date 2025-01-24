@@ -63,7 +63,8 @@ describe('schemas', () => {
         destination: 'hostName',
       });
       expect(result.success).toBeTruthy();
-      expect(result.data).toEqual({
+      const resultData = result.success ? result.data : {};
+      expect(resultData).toEqual({
         source: 'host.name',
         destination: 'hostName',
         aggregation: { type: 'terms', limit: 10, lookbackPeriod: undefined },
@@ -93,22 +94,26 @@ describe('schemas', () => {
     it('should work with 1m', () => {
       const result = durationSchema.safeParse('1m');
       expect(result.success).toBeTruthy();
-      expect(result.data).toBe('1m');
+      const resultData = result.success ? result.data : {};
+      expect(resultData).toBe('1m');
     });
     it('should work with 10s', () => {
       const result = durationSchema.safeParse('10s');
       expect(result.success).toBeTruthy();
-      expect(result.data).toBe('10s');
+      const resultData = result.success ? result.data : {};
+      expect(resultData).toBe('10s');
     });
     it('should work with 999h', () => {
       const result = durationSchema.safeParse('999h');
       expect(result.success).toBeTruthy();
-      expect(result.data).toBe('999h');
+      const resultData = result.success ? result.data : {};
+      expect(resultData).toBe('999h');
     });
     it('should work with 90d', () => {
       const result = durationSchema.safeParse('90d');
       expect(result.success).toBeTruthy();
-      expect(result.data).toBe('90d');
+      const resultData = result.success ? result.data : {};
+      expect(resultData).toBe('90d');
     });
     it('should not work with 1ms', () => {
       const result = durationSchema.safeParse('1ms');

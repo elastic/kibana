@@ -156,6 +156,11 @@ export const getStructuredToolForIndexEntry = ({
     return { ...prev, [input.fieldName]: fieldType.describe(input.description) };
   }, {});
 
+  const schemaValue = z.object({
+    query: z.string().describe(indexEntry.queryDescription),
+    ...inputSchema,
+  });
+
   return new DynamicStructuredTool({
     name: indexEntry.name
       // Replace invalid characters with an empty string
@@ -163,10 +168,7 @@ export const getStructuredToolForIndexEntry = ({
       // Ensure it starts with a letter. If not, prepend 'a'
       .replace(/^[^a-zA-Z]/, 'a'),
     description: indexEntry.description,
-    schema: z.object({
-      query: z.string().describe(indexEntry.queryDescription),
-      ...inputSchema,
-    }),
+    schema: schemaValue,
     func: async (input, _, cbManager) => {
       logger.debug(
         () => `Generated ${indexEntry.name} Tool:input\n ${JSON.stringify(input, null, 2)}`
@@ -189,7 +191,8 @@ export const getStructuredToolForIndexEntry = ({
               {
                 semantic: {
                   field: indexEntry.field,
-                  query: input.query,
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  query: (input as any).query,
                 },
               },
             ],

@@ -76,10 +76,12 @@ export const createEndpointListItemRoute = (router: ListsPluginRouter): void => 
               type,
             });
 
-            const { success, data, error } = CreateEndpointListItemResponse.safeParse(createdList);
-            if (success === false) {
+            const listResponse = CreateEndpointListItemResponse.safeParse(createdList);
+            if (listResponse.success === false) {
+              const { error } = listResponse;
               return siemResponse.error({ body: stringifyZodError(error), statusCode: 500 });
             } else {
+              const { data } = listResponse;
               const listSizeError = await validateExceptionListSize(
                 exceptionLists,
                 ENDPOINT_LIST_ID,
