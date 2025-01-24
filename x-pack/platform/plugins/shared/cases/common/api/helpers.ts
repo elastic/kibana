@@ -48,10 +48,6 @@ export const getCaseCommentDeleteUrl = (caseId: string, commentId: string): stri
   return CASE_COMMENT_DELETE_URL.replace('{case_id}', caseId).replace('{comment_id}', commentId);
 };
 
-export const getCaseUserActionUrl = (id: string): string => {
-  return CASE_USER_ACTIONS_URL.replace('{case_id}', id);
-};
-
 export const getCaseUserActionStatsUrl = (id: string): string => {
   return INTERNAL_GET_CASE_USER_ACTIONS_STATS_URL.replace('{case_id}', id);
 };
