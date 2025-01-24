@@ -8,7 +8,6 @@
 import React from 'react';
 import {
   DragDropContextProps,
-  EuiButtonEmpty,
   EuiPanel,
   EuiResizableContainer,
   EuiSpacer,
@@ -72,15 +71,6 @@ export function StreamDetailEnrichmentContent({
     navigateToUrl: core.application.navigateToUrl,
     openConfirm: core.overlays.openConfirm,
   });
-
-  // const addProcessorFlyout = isAddProcessorOpen && (
-  //   <AddProcessorFlyout
-  //     key="add-processor"
-  //     definition={definition}
-  //     onClose={closeAddProcessor}
-  //     onAddProcessor={addProcessor}
-  //   />
-  // );
 
   const hasProcessors = processors.length > 0;
 
@@ -196,8 +186,7 @@ const ProcessorsHeader = () => {
       </EuiTitle>
       <EuiText component="p" size="xs">
         {i18n.translate('xpack.streams.streamDetailView.managementTab.enrichment.headingSubtitle', {
-          defaultMessage:
-            'Use processors to transform data before indexing. Drag and drop existing processors to update their execution order.',
+          defaultMessage: 'Drag and drop existing processors to update their execution order.',
         })}
       </EuiText>
     </EuiPanel>
