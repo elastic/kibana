@@ -7,12 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { UserMouseEvent, UserTouchEvent } from '../types';
+import { UserInteractionEvent } from '../types';
+import { isMouseEvent } from './mouse';
+import { isTouchEvent } from './touch';
 
-export const isTouchEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserTouchEvent => {
-  return 'touches' in e;
-};
+export { isMouseEvent, startMouseInteraction } from './mouse';
+export { isTouchEvent, startTouchInteraction } from './touch';
 
-export const isMouseEvent = (e: Event | React.UIEvent<HTMLElement>): e is UserMouseEvent => {
-  return 'clientX' in e;
-};
+export function getPointerPosition(e: UserInteractionEvent) {
+  if (!isMouseEvent(e) && !isTouchEvent(e)) {
+    throw new Error('Invalid event type');
+  }
+  return isTouchEvent(e) ? e.touches[0] : e;
+}
