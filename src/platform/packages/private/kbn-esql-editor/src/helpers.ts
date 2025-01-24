@@ -9,7 +9,7 @@
 
 import { useRef } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
-import { EuiThemeComputed } from '@elastic/eui';
+import { UseEuiTheme, euiShadow } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { CoreStart } from '@kbn/core/public';
@@ -313,33 +313,33 @@ export const onKeyDownResizeHandler = (
   }
 };
 
-export const getEditorOverwrites = (theme: EuiThemeComputed) => {
+export const getEditorOverwrites = (theme: UseEuiTheme<{}>) => {
   return css`
     .monaco-hover {
       display: block !important;
     }
     .margin-view-overlays .line-numbers {
-      color: ${theme.colors.textDisabled};
+      color: ${theme.euiTheme.colors.textDisabled};
     }
     .current-line ~ .line-numbers {
-      color: ${theme.colors.textSubdued};
+      color: ${theme.euiTheme.colors.textSubdued};
     }
 
     .suggest-widget,
     .suggest-details-container {
-      border-radius: ${theme.border.radius.medium};
-      border-bottom: ${theme.border.thin};
+      border-radius: ${theme.euiTheme.border.radius.medium};
+      ${euiShadow(theme, 'l')}
     }
 
     .suggest-details-container {
-      background-color: ${theme.colors.backgroundBasePlain};
+      background-color: ${theme.euiTheme.colors.backgroundBasePlain};
       line-height: 1.5rem;
     }
     .suggest-details {
-      padding-left: ${theme.size.s};
+      padding-left: ${theme.euiTheme.size.s};
     }
     .monaco-list .monaco-scrollable-element .monaco-list-row.focused {
-      border-radius: ${theme.border.radius.medium};
+      border-radius: ${theme.euiTheme.border.radius.medium};
     }
   `;
 };
