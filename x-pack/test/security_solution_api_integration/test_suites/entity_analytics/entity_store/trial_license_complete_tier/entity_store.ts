@@ -126,6 +126,7 @@ export default ({ getService }: FtrProviderContext) => {
               indexPattern: '',
               filter: '',
               fieldHistoryLength: 10,
+              lookbackPeriod: '24h',
             },
             {
               status: 'started',
@@ -133,6 +134,7 @@ export default ({ getService }: FtrProviderContext) => {
               indexPattern: '',
               filter: '',
               fieldHistoryLength: 10,
+              lookbackPeriod: '24h',
             },
           ]);
         });
