@@ -22,7 +22,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 
-import { ReindexStatus } from '../../../../../../../common/types';
+import { type EnrichedDeprecationInfo, ReindexStatus } from '../../../../../../../common/types';
 import { LoadingState } from '../../../../types';
 import type { ReindexState } from '../use_reindex_state';
 import { ReindexProgress } from './progress';
@@ -72,11 +72,12 @@ const buttonLabel = (status?: ReindexStatus) => {
  * Displays a flyout that shows the current reindexing status for a given index.
  */
 export const ChecklistFlyoutStep: React.FunctionComponent<{
+  deprecation: EnrichedDeprecationInfo;
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
   cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+}> = ({ deprecation, closeFlyout, reindexState, startReindex, cancelReindex }) => {
   const {
     services: {
       api,
@@ -197,6 +198,26 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               }}
             />
           </p>
+          {deprecation.frozen && (
+            <p>
+              <FormattedMessage
+                id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexFrozenIndex"
+                defaultMessage="Frozen indices will no longer be supported after upgrade, so this index be deleted as part the reindex operation. {docsLink}"
+                values={{
+                  docsLink: (
+                    <EuiLink target="_blank" href={docLinks.links.upgradeAssistant.unfreezeApi}>
+                      {i18n.translate(
+                        'xpack.upgradeAssistant.checkupTab.reindexing.flyout.learnMoreLinkLabel',
+                        {
+                          defaultMessage: 'Learn more',
+                        }
+                      )}
+                    </EuiLink>
+                  ),
+                }}
+              />
+            </p>
+          )}
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.readonlyCallout.backgroundResumeDetail"

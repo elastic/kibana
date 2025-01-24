@@ -178,5 +178,18 @@ export const getEnrichedDeprecations = async (
         ...enrichedDeprecation,
         correctiveAction,
       };
-    });
+    })
+    .filter((deprecation, _, elements) => {
+      if (deprecation.message.includes(`Index [${deprecation.index}] is a frozen index`)) {
+        // frozen indices are created in 7.x, so they are old / incompatible as well
+        // reindexing + deleting is required, so no need to bubble up this deprecation in the UI
+        const oldIndexDeprecation: EnrichedDeprecationInfo | undefined = elements.find((elem) => elem.type === 'index_settings' && elem.index === deprecation.index && elem.correctiveAction?.type === 'reindex');
+        if (oldIndexDeprecation) {
+          oldIndexDeprecation.frozen = true;
+          return false;
+        }
+      }
+
+      return true;
+    })
 };
