@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiTextProps } from '@elastic/eui';
 import {
   EuiFlexGroup,
   EuiFlexItem,
@@ -14,7 +15,6 @@ import {
   EuiStat,
   EuiText,
   EuiTextColor,
-  EuiTextProps,
   EuiToolTip,
 } from '@elastic/eui';
 import React from 'react';

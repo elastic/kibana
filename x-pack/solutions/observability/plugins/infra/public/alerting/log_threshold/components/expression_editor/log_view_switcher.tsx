@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiFlexItem, EuiFlexGroup, EuiExpression, EuiToolTip } from '@elastic/eui';
-import { ResolvedLogView } from '@kbn/logs-shared-plugin/common';
+import type { ResolvedLogView } from '@kbn/logs-shared-plugin/common';
 
 const description = i18n.translate('xpack.infra.logs.alertFlyout.logViewDescription', {
   defaultMessage: 'Log View',

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import cytoscape from 'cytoscape';
-import { CSSProperties } from 'react';
-import { EuiTheme } from '@kbn/kibana-react-plugin/common';
-import { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
+import type cytoscape from 'cytoscape';
+import type { CSSProperties } from 'react';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { ServiceAnomalyStats } from '../../../../common/anomaly_detection';
 import { SERVICE_NAME, SPAN_DESTINATION_SERVICE_RESOURCE } from '../../../../common/es_fields/apm';
 import {
   getServiceHealthStatusColor,
@@ -96,7 +96,7 @@ function isService(el: cytoscape.NodeSingular) {
   return el.data(SERVICE_NAME) !== undefined;
 }
 
-const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.Stylesheet[] => {
+const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.StylesheetJson => {
   const lineColor = theme.eui.euiColorMediumShade;
   return [
     {
@@ -174,15 +174,12 @@ const getStyle = (theme: EuiTheme, isTraceExplorerEnabled: boolean): cytoscape.S
         'source-arrow-shape': isIE11 ? 'none' : 'triangle',
         'source-arrow-color': lineColor,
         'target-arrow-shape': isIE11 ? 'none' : 'triangle',
-        // @ts-expect-error
         'source-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.euiSizeXS, 10),
         'target-distance-from-node': isIE11 ? undefined : parseInt(theme.eui.euiSizeXS, 10),
       },
     },
     {
       selector: 'edge[isInverseEdge]',
-      // @ts-expect-error DefinitelyTyped says visibility is "none" but it's
-      // actually "hidden"
       style: { visibility: 'hidden' },
     },
     {

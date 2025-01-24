@@ -38,14 +38,25 @@ import { createDataViewDataSource } from '../../../../../common/data_sources';
 function getStateContainer(savedSearch?: SavedSearch) {
   const stateContainer = getDiscoverStateMock({ isTimeBased: true, savedSearch });
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
-
-  stateContainer.appState.update({
+  const appState = {
     dataSource: createDataViewDataSource({ dataViewId: dataView?.id! }),
     interval: 'auto',
     hideChart: false,
-  });
+  };
+
+  stateContainer.appState.update(appState);
 
   stateContainer.internalState.transitions.setDataView(dataView);
+  stateContainer.internalState.transitions.setDataRequestParams({
+    timeRangeAbsolute: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+    timeRangeRelative: {
+      from: '2020-05-14T11:05:13.590',
+      to: '2020-05-14T11:20:13.590',
+    },
+  });
 
   return stateContainer;
 }
@@ -65,16 +76,7 @@ const mountComponent = async ({
   const dataView = savedSearch?.searchSource?.getField('index') as DataView;
 
   let services = discoverServiceMock;
-  services.data.query.timefilter.timefilter.getAbsoluteTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-  services.data.query.timefilter.timefilter.getTime = () => {
-    return { from: '2020-05-14T11:05:13.590', to: '2020-05-14T11:20:13.590' };
-  };
-  (services.data.query.queryString.getDefaultQuery as jest.Mock).mockReturnValue({
-    language: 'kuery',
-    query: '',
-  });
+
   (searchSourceInstanceMock.fetch$ as jest.Mock).mockImplementation(
     jest.fn().mockReturnValue(of({ rawResponse: { hits: { total: 2 } } }))
   );

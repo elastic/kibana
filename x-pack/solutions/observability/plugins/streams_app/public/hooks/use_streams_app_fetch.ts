@@ -11,6 +11,7 @@ import {
   useAbortableAsync,
 } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { omit } from 'lodash';
+import { isRequestAbortedError } from '@kbn/server-route-repository-client';
 import { useKibana } from './use_kibana';
 
 export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: boolean }> = (
@@ -25,7 +26,7 @@ export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: b
   const onError = (error: Error) => {
     let requestUrl: string | undefined;
 
-    if (!options?.disableToastOnError) {
+    if (!options?.disableToastOnError && !isRequestAbortedError(error)) {
       if (
         'body' in error &&
         typeof error.body === 'object' &&
@@ -54,6 +55,10 @@ export const useStreamsAppFetch: UseAbortableAsync<{}, { disableToastOnError?: b
           },
         }),
       });
+
+      // log to console to get the actual stack trace
+      // eslint-disable-next-line no-console
+      console.log(error);
     }
   };
 

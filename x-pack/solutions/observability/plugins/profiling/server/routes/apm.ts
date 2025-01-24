@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { schema, TypeOf } from '@kbn/config-schema';
+import type { TypeOf } from '@kbn/config-schema';
+import { schema } from '@kbn/config-schema';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { keyBy } from 'lodash';
-import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
+import type { RouteRegisterParameters } from '.';
+import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths } from '../../common';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { getClient } from './compat';

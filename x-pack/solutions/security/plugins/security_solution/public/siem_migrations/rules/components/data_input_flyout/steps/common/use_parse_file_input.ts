@@ -20,13 +20,13 @@ export const useParseFileInput = (onFileParsed: OnFileParsed) => {
 
   const parseFile = useCallback(
     (files: FileList | null) => {
-      if (!files) {
+      setError(undefined);
+
+      if (!files || files.length === 0) {
         return;
       }
 
-      setError(undefined);
-
-      const rulesFile = files[0];
+      const file = files[0];
       const reader = new FileReader();
 
       reader.onloadstart = () => setIsParsing(true);
@@ -68,7 +68,7 @@ export const useParseFileInput = (onFileParsed: OnFileParsed) => {
       reader.onerror = handleReaderError;
       reader.onabort = handleReaderError;
 
-      reader.readAsText(rulesFile);
+      reader.readAsText(file);
     },
     [onFileParsed]
   );

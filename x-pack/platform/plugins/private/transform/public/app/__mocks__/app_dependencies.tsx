@@ -27,6 +27,7 @@ import type { AppDependencies } from '../app_dependencies';
 import type { SavedObjectsManagementPluginStart } from '@kbn/saved-objects-management-plugin/public';
 import { settingsServiceMock } from '@kbn/core-ui-settings-browser-mocks';
 import { unifiedSearchPluginMock } from '@kbn/unified-search-plugin/public/mocks';
+import { userProfileServiceMock } from '@kbn/core-user-profile-browser-mocks';
 
 const coreSetup = coreMock.createSetup();
 const coreStart = coreMock.createStart();
@@ -92,6 +93,7 @@ const appDependencies: AppDependencies = {
   storage: { get: jest.fn() } as unknown as Storage,
   overlays: coreStart.overlays,
   theme: themeServiceMock.createStartContract(),
+  userProfile: userProfileServiceMock.createStart(),
   http: coreSetup.http,
   history: {} as ScopedHistory,
   share: { urlGenerators: { getUrlGenerator: jest.fn() } } as unknown as SharePluginStart,

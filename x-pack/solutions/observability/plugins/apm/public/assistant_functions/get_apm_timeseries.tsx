@@ -19,7 +19,7 @@ import type {
   GetApmTimeseriesFunctionArguments,
   GetApmTimeseriesFunctionResponse,
 } from '../../server/assistant_functions/get_apm_timeseries';
-import { Coordinate, TimeSeries } from '../../typings/timeseries';
+import type { Coordinate, TimeSeries } from '../../typings/timeseries';
 import { ApmThemeProvider } from '../components/routing/app_root';
 import {
   ChartType,

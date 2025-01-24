@@ -5,17 +5,16 @@
  * 2.0.
  */
 
-import styled from 'styled-components';
-import { EuiButtonGroup } from '@elastic/eui';
+import { css } from '@emotion/react';
 
 import { INCOMPATIBLE_TAB_ID, SAME_FAMILY_TAB_ID } from '../../../constants';
 
-export const StyledHistoricalResultsCheckFieldsButtonGroup = styled(EuiButtonGroup)`
-  min-width: 50%;
-  button[data-test-subj='${INCOMPATIBLE_TAB_ID}'] {
-    flex-grow: 1;
-  }
-  button[data-test-subj='${SAME_FAMILY_TAB_ID}'] {
-    flex-grow: 1;
-  }
-`;
+export const historicalResultsCheckFieldsButtonGroupCss = css({
+  minWidth: '50%',
+  [`button[data-test-subj='${INCOMPATIBLE_TAB_ID}']`]: {
+    flexGrow: 1,
+  },
+  [`button[data-test-subj='${SAME_FAMILY_TAB_ID}']`]: {
+    flexGrow: 1,
+  },
+});

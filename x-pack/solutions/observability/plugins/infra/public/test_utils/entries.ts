@@ -6,7 +6,7 @@
  */
 
 import faker from 'faker';
-import { LogEntry, LogViewColumnConfiguration } from '@kbn/logs-shared-plugin/common';
+import type { LogEntry, LogViewColumnConfiguration } from '@kbn/logs-shared-plugin/common';
 
 export function generateFakeEntries(
   count: number,

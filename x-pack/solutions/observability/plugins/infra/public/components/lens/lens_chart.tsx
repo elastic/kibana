@@ -13,8 +13,8 @@ import {
   EuiLink,
   type EuiPanelProps,
 } from '@elastic/eui';
-import { Action } from '@kbn/ui-actions-plugin/public';
-import { UserMessage } from '@kbn/lens-plugin/public';
+import type { Action } from '@kbn/ui-actions-plugin/public';
+import type { UserMessage } from '@kbn/lens-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { css } from '@emotion/react';
 import { useLensAttributes, type UseLensAttributesParams } from '../../hooks/use_lens_attributes';
@@ -35,7 +35,6 @@ const DEFAULT_DISABLED_ACTIONS = [
 export type LensChartProps = BaseChartProps &
   Pick<EuiPanelProps, 'borderRadius'> & {
     toolTip?: React.ReactElement<TooltipContentProps>;
-    reloadRequestTime?: number;
     description?: string;
   } & {
     lensAttributes: UseLensAttributesParams;
@@ -55,7 +54,7 @@ export const LensChart = React.memo(
     onFilter,
     overrides,
     toolTip,
-    reloadRequestTime,
+    lastReloadRequestTime,
     disableTriggers = false,
     height = MIN_HEIGHT,
     loading = false,
@@ -71,7 +70,7 @@ export const LensChart = React.memo(
       timeRange: dateRange,
       query,
       filters,
-      lastReloadRequestTime: reloadRequestTime,
+      lastReloadRequestTime,
     });
 
     const handleBeforeBadgesRender = useCallback((messages: UserMessage[]) => {
@@ -141,7 +140,7 @@ export const LensChart = React.memo(
         query={query}
         overrides={overrides}
         onBrushEnd={onBrushEnd}
-        lastReloadRequestTime={reloadRequestTime}
+        lastReloadRequestTime={lastReloadRequestTime}
         onFilter={onFilter}
         onBeforeBadgesRender={handleBeforeBadgesRender}
       />

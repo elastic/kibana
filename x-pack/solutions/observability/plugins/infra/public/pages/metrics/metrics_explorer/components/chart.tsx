@@ -5,16 +5,8 @@
  * 2.0.
  */
 
-import {
-  Axis,
-  BrushEndListener,
-  Chart,
-  niceTimeFormatter,
-  Position,
-  Settings,
-  TooltipProps,
-  Tooltip,
-} from '@elastic/charts';
+import type { BrushEndListener, TooltipProps } from '@elastic/charts';
+import { Axis, Chart, niceTimeFormatter, Position, Settings, Tooltip } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem, EuiTitle, EuiToolTip } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { first, last } from 'lodash';
@@ -23,14 +15,14 @@ import React, { useCallback, useMemo } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useTimelineChartTheme } from '../../../../hooks/use_timeline_chart_theme';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
-import { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
+import type { MetricsExplorerSeries } from '../../../../../common/http_api/metrics_explorer';
 import { useKibanaUiSetting } from '../../../../hooks/use_kibana_ui_setting';
-import {
+import type {
   MetricsExplorerChartOptions,
   MetricsExplorerOptions,
   MetricsExplorerTimeOptions,
-  MetricsExplorerYAxisMode,
 } from '../hooks/use_metrics_explorer_options';
+import { MetricsExplorerYAxisMode } from '../hooks/use_metrics_explorer_options';
 import { MetricsExplorerChartContextMenu } from './chart_context_menu';
 import { ChartTitle } from './chart_title';
 import { MetricsExplorerEmptyChart } from './empty_chart';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { renderHook, act } from '@testing-library/react-hooks';
+import { renderHook, act, waitFor } from '@testing-library/react';
 import * as api from './api';
 import { useToasts } from '../common/lib/kibana';
 import type { AppMockRenderer } from '../common/mock';
@@ -41,7 +41,7 @@ describe('usePostObservables', () => {
 
   it('calls the api when invoked with the correct parameters', async () => {
     const spy = jest.spyOn(api, 'postObservable');
-    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
+    const { result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -49,14 +49,14 @@ describe('usePostObservables', () => {
       result.current.mutate(observableMock);
     });
 
-    await waitForNextUpdate();
-
-    expect(spy).toHaveBeenCalledWith({ observable: observableMock.observable }, mockCase.id);
+    await waitFor(() =>
+      expect(spy).toHaveBeenCalledWith({ observable: observableMock.observable }, mockCase.id)
+    );
   });
 
   it('invalidates the queries correctly', async () => {
     const queryClientSpy = jest.spyOn(appMockRender.queryClient, 'invalidateQueries');
-    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
+    const { result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -64,13 +64,11 @@ describe('usePostObservables', () => {
       result.current.mutate(observableMock);
     });
 
-    await waitForNextUpdate();
-
-    expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView());
+    await waitFor(() => expect(queryClientSpy).toHaveBeenCalledWith(casesQueriesKeys.caseView()));
   });
 
   it('does shows a success toaster', async () => {
-    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
+    const { result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -78,9 +76,7 @@ describe('usePostObservables', () => {
       result.current.mutate(observableMock);
     });
 
-    await waitForNextUpdate();
-
-    expect(addSuccess).toHaveBeenCalled();
+    await waitFor(() => expect(addSuccess).toHaveBeenCalled());
   });
 
   it('shows a toast error when the api return an error', async () => {
@@ -88,7 +84,7 @@ describe('usePostObservables', () => {
       .spyOn(api, 'postObservable')
       .mockRejectedValue(new Error('usePostObservables: Test error'));
 
-    const { waitForNextUpdate, result } = renderHook(() => usePostObservable(mockCase.id), {
+    const { result } = renderHook(() => usePostObservable(mockCase.id), {
       wrapper: appMockRender.AppWrapper,
     });
 
@@ -96,8 +92,6 @@ describe('usePostObservables', () => {
       result.current.mutate(observableMock);
     });
 
-    await waitForNextUpdate();
-
-    expect(addError).toHaveBeenCalled();
+    await waitFor(() => expect(addError).toHaveBeenCalled());
   });
 });

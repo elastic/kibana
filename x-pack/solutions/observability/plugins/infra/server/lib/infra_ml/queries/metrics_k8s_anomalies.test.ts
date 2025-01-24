@@ -6,7 +6,7 @@
  */
 
 import { createMetricsK8sAnomaliesQuery } from './metrics_k8s_anomalies';
-import { Sort, Pagination } from '../../../../common/http_api/infra_ml';
+import type { Sort, Pagination } from '../../../../common/http_api/infra_ml';
 
 describe('createMetricsK8sAnomaliesQuery', () => {
   const jobIds = ['kibana-metrics-ui-default-default-k8s_memory_usage'];

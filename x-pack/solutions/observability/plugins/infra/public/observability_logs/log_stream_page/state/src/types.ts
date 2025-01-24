@@ -5,28 +5,28 @@
  * 2.0.
  */
 
-import { TimeRange } from '@kbn/es-query';
+import type { TimeRange } from '@kbn/es-query';
 import type { LogViewStatus } from '@kbn/logs-shared-plugin/common';
 import type {
   LogViewContextWithError,
   LogViewContextWithResolvedLogView,
   LogViewNotificationEvent,
 } from '@kbn/logs-shared-plugin/public';
-import { TimeKey } from '../../../../../common/time';
-import {
+import type { TimeKey } from '../../../../../common/time';
+import type {
   JumpToTargetPositionEvent,
   LogStreamPositionContext,
   ReportVisiblePositionsEvent,
   VisiblePositions,
 } from '../../../log_stream_position_state';
-import { LogStreamPositionNotificationEvent } from '../../../log_stream_position_state/src/notifications';
-import {
+import type { LogStreamPositionNotificationEvent } from '../../../log_stream_position_state/src/notifications';
+import type {
   LogStreamQueryContextWithTime,
   ParsedQuery,
   UpdateRefreshIntervalEvent,
   UpdateTimeRangeEvent,
 } from '../../../log_stream_query_state';
-import { LogStreamQueryNotificationEvent } from '../../../log_stream_query_state/src/notifications';
+import type { LogStreamQueryNotificationEvent } from '../../../log_stream_query_state/src/notifications';
 
 export interface ReceivedInitialQueryParametersEvent {
   type: 'RECEIVED_INITIAL_QUERY_PARAMETERS';

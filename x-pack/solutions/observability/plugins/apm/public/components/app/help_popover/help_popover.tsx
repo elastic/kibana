@@ -5,17 +5,11 @@
  * 2.0.
  */
 
-import React, { ReactNode } from 'react';
+import type { ReactNode } from 'react';
+import React from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  EuiButtonEmpty,
-  EuiButtonIcon,
-  EuiLinkButtonProps,
-  EuiPopover,
-  EuiPopoverProps,
-  EuiPopoverTitle,
-  EuiText,
-} from '@elastic/eui';
+import type { EuiLinkButtonProps, EuiPopoverProps } from '@elastic/eui';
+import { EuiButtonEmpty, EuiButtonIcon, EuiPopover, EuiPopoverTitle, EuiText } from '@elastic/eui';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 
 const PopoverContent = euiStyled(EuiText)`

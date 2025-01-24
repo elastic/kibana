@@ -23,7 +23,7 @@ The `kibana_admin` role or equivalent is required to manage **Spaces**.
 === Create a space
 
 [[spaces-control-feature-visibility]]
-You can have up to 100 spaces. 
+You can have up to 1,000 spaces by default. The maximum number of spaces can be configured by the `xpack.spaces.maxSpaces` setting (refer to <<spaces-settings-kb, Spaces settings in {kib}>>).
 
 . Select *Create space* and provide a name, description, and URL identifier.
 +

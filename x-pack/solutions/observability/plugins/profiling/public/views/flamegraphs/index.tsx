@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { EuiPageHeaderContentProps } from '@elastic/eui';
+import type { EuiPageHeaderContentProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';

@@ -5,12 +5,16 @@
  * 2.0.
  */
 
+import {
+  getHostRiskIndex,
+  getRiskIndex,
+  getUserRiskIndex,
+} from '../../../../../../common/search_strategy';
 import { createHostRiskEnrichments } from './enrichment_by_type/host_risk';
-
 import { createUserRiskEnrichments } from './enrichment_by_type/user_risk';
-
 import {
   createHostAssetCriticalityEnrichments,
+  createServiceAssetCriticalityEnrichments,
   createUserAssetCriticalityEnrichments,
 } from './enrichment_by_type/asset_criticality';
 import { getAssetCriticalityIndex } from '../../../../../../common/entity_analytics/asset_criticality';
@@ -21,7 +25,7 @@ import type {
 } from './types';
 import { applyEnrichmentsToEvents } from './utils/transforms';
 import { isIndexExist } from './utils/is_index_exist';
-import { getHostRiskIndex, getUserRiskIndex } from '../../../../../../common/search_strategy';
+import { createServiceRiskEnrichments } from './enrichment_by_type/service_risk';
 
 export const enrichEvents: EnrichEventsFunction = async ({
   services,
@@ -44,16 +48,21 @@ export const enrichEvents: EnrichEventsFunction = async ({
       });
     }
 
-    const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist] = await Promise.all([
-      isIndexExist({
-        services,
-        index: getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
-      }),
-      isIndexExist({
-        services,
-        index: getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
-      }),
-    ]);
+    const [isHostRiskScoreIndexExist, isUserRiskScoreIndexExist, isServiceRiskScoreIndexExist] =
+      await Promise.all([
+        isIndexExist({
+          services,
+          index: getHostRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
+        }),
+        isIndexExist({
+          services,
+          index: getUserRiskIndex(spaceId, true, isNewRiskScoreModuleInstalled),
+        }),
+        isIndexExist({
+          services,
+          index: getRiskIndex(spaceId, true),
+        }),
+      ]);
 
     if (isHostRiskScoreIndexExist) {
       enrichments.push(
@@ -66,10 +75,21 @@ export const enrichEvents: EnrichEventsFunction = async ({
         })
       );
     }
-
     if (isUserRiskScoreIndexExist) {
       enrichments.push(
         createUserRiskEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+          isNewRiskScoreModuleInstalled,
+        })
+      );
+    }
+
+    if (isServiceRiskScoreIndexExist) {
+      enrichments.push(
+        createServiceRiskEnrichments({
           services,
           logger,
           events,
@@ -94,6 +114,14 @@ export const enrichEvents: EnrichEventsFunction = async ({
       );
       enrichments.push(
         createHostAssetCriticalityEnrichments({
+          services,
+          logger,
+          events,
+          spaceId,
+        })
+      );
+      enrichments.push(
+        createServiceAssetCriticalityEnrichments({
           services,
           logger,
           events,

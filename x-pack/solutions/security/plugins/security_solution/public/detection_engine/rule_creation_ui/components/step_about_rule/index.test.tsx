@@ -191,7 +191,7 @@ describe('StepAboutRuleComponent', () => {
 
     await act(async () => {
       wrapper
-        .find('[data-test-subj="detectionEngineStepAboutThreatIndicatorPath"] input')
+        .find('[data-test-subj="ruleThreatMatchIndicatorPath"] input')
         .first()
         .simulate('change', { target: { value: '' } });
 

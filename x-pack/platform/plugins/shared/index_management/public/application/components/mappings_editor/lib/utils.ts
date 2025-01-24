@@ -8,7 +8,7 @@
 import { v4 as uuidv4 } from 'uuid';
 
 import { cloneDeep } from 'lodash';
-import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { InferenceServiceSettings } from '@elastic/elasticsearch/lib/api/types';
 import { LocalInferenceServiceSettings } from '@kbn/ml-trained-models-utils/src/constants/trained_models';
 import {
   ChildFieldName,
@@ -689,7 +689,7 @@ export const getAllFieldTypesFromState = (allFields: Fields): DataType[] => {
 };
 
 export function isSemanticTextField(field: Partial<Field>): field is SemanticTextField {
-  return Boolean(field.inference_id && field.type === 'semantic_text');
+  return field.type === 'semantic_text';
 }
 
 /**

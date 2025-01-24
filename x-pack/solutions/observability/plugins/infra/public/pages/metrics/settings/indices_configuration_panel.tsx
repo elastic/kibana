@@ -19,13 +19,14 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { rulesLocatorID, RulesParams } from '@kbn/observability-plugin/public';
+import type { RulesParams } from '@kbn/observability-plugin/public';
+import { rulesLocatorID } from '@kbn/observability-plugin/public';
 import {
   METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
   METRIC_THRESHOLD_ALERT_TYPE_ID,
 } from '@kbn/rule-data-utils';
 import { METRICS_INDEX_PATTERN } from '../../../../common/constants';
-import { InputFieldProps } from './input_fields';
+import type { InputFieldProps } from './input_fields';
 import { useKibanaContextForPlugin } from '../../../hooks/use_kibana';
 
 interface IndicesConfigurationPanelProps {

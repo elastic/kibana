@@ -8,9 +8,12 @@
 import { times } from 'lodash';
 import { loggerMock, type MockedLogger } from '@kbn/logging-mocks';
 import { elasticsearchServiceMock } from '@kbn/core/server/mocks';
+import { LATEST_MANIFEST_FORMAT_VERSION } from '@kbn/product-doc-common';
 import { internalElserInferenceId } from '../../../../common/consts';
 import type { ZipArchive } from '../utils/zip_archive';
 import { populateIndex } from './populate_index';
+
+const LEGACY_SEMANTIC_TEXT_VERSION = '1.0.0';
 
 const createMockArchive = (entries: Record<string, string>): ZipArchive => {
   return {
@@ -44,6 +47,7 @@ describe('populateIndex', () => {
 
     await populateIndex({
       indexName: '.foo',
+      manifestVersion: LATEST_MANIFEST_FORMAT_VERSION,
       archive,
       log,
       esClient,
@@ -59,6 +63,7 @@ describe('populateIndex', () => {
 
     await populateIndex({
       indexName: '.foo',
+      manifestVersion: LATEST_MANIFEST_FORMAT_VERSION,
       archive,
       log,
       esClient,
@@ -79,12 +84,54 @@ describe('populateIndex', () => {
   it('rewrites the inference_id of semantic fields', async () => {
     const archive = createMockArchive({
       'content/content-0.ndjson': JSON.stringify({
+        semantic: 'foo',
+        _inference_fields: {
+          semantic: {
+            inference: {
+              inference_id: '.some-inference',
+            },
+          },
+        },
+      }),
+    });
+
+    await populateIndex({
+      indexName: '.foo',
+      manifestVersion: LATEST_MANIFEST_FORMAT_VERSION,
+      archive,
+      log,
+      esClient,
+    });
+
+    expect(esClient.bulk).toHaveBeenCalledTimes(1);
+    expect(esClient.bulk).toHaveBeenCalledWith({
+      refresh: false,
+      operations: [
+        { index: { _index: '.foo' } },
+        {
+          semantic: 'foo',
+          _inference_fields: {
+            semantic: {
+              inference: {
+                inference_id: internalElserInferenceId,
+              },
+            },
+          },
+        },
+      ],
+    });
+  });
+
+  it('rewrites the inference_id of semantic fields for legacy semantic_field', async () => {
+    const archive = createMockArchive({
+      'content/content-0.ndjson': JSON.stringify({
         semantic: { text: 'foo', inference: { inference_id: '.some-inference' } },
       }),
     });
 
     await populateIndex({
       indexName: '.foo',
+      manifestVersion: LEGACY_SEMANTIC_TEXT_VERSION,
       archive,
       log,
       esClient,

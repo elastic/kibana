@@ -4,8 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
 
 export function apmMlJobsQuery(jobs: ApmMlJob[]) {
   if (!jobs.length) {

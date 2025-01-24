@@ -189,10 +189,7 @@ module.exports = {
         exclude: /node_modules/,
       },
       {
-        test: [
-          require.resolve('@elastic/eui/es/components/drag_and_drop'),
-          require.resolve('highlight.js'),
-        ],
+        test: [require.resolve('@elastic/eui/es/components/drag_and_drop')],
         use: require.resolve('null-loader'),
       },
       {

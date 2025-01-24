@@ -11,6 +11,12 @@ export const registerInternalSearchableTypesRoute = (router: GlobalSearchRouter)
   router.get(
     {
       path: '/internal/global_search/searchable_types',
+      security: {
+        authz: {
+          enabled: false,
+          reason: 'This route is opted out from authorization',
+        },
+      },
       validate: false,
     },
     async (ctx, req, res) => {

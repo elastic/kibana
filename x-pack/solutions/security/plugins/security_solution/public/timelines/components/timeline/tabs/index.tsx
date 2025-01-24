@@ -44,6 +44,7 @@ import { initializeTimelineSettings } from '../../../store/actions';
 import { selectTimelineById, selectTimelineESQLSavedSearchId } from '../../../store/selectors';
 import { fetchNotesBySavedObjectIds, selectSortedNotesBySavedObjectId } from '../../../../notes';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 const HideShowContainer = styled.div.attrs<{ $isVisible: boolean; isOverflowYScroll: boolean }>(
   ({ $isVisible = false, isOverflowYScroll = false }) => ({
@@ -107,20 +108,14 @@ const ActiveTimelineTab = memo<ActiveTimelineTabProps>(
     timelineType,
     showTimeline,
   }) => {
-    const { isTimelineEsqlEnabledByFeatureFlag, isEsqlAdvancedSettingEnabled } =
-      useEsqlAvailability();
+    const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
     const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
       selectTimelineESQLSavedSearchId(state, timelineId)
     );
-    const shouldShowESQLTab = useMemo(() => {
-      // disabling esql feature from feature flag should unequivocally hide the tab
-      // irrespective of the fact that the advanced setting is enabled or
-      // not or existing esql query is present or not
-      if (!isTimelineEsqlEnabledByFeatureFlag) {
-        return false;
-      }
-      return isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null;
-    }, [isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag, timelineESQLSavedSearch]);
+    const shouldShowESQLTab = useMemo(
+      () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
+      [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
+    );
     const getTab = useCallback(
       (tab: TimelineTabs) => {
         switch (tab) {
@@ -246,8 +241,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
   const getAppNotes = useMemo(() => getNotesSelector(), []);
   const getTimelineNoteIds = useMemo(() => getNoteIdsSelector(), []);
   const getTimelinePinnedEventNotes = useMemo(() => getEventIdToNoteIdsSelector(), []);
-  const { isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag } =
-    useEsqlAvailability();
+  const { isEsqlAdvancedSettingEnabled } = useEsqlAvailability();
 
   const timelineESQLSavedSearch = useShallowEqualSelector((state) =>
     selectTimelineESQLSavedSearchId(state, timelineId)
@@ -263,15 +257,10 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
 
   const activeTab = useShallowEqualSelector((state) => getActiveTab(state, timelineId));
   const showTimeline = useShallowEqualSelector((state) => getShowTimeline(state, timelineId));
-  const shouldShowESQLTab = useMemo(() => {
-    // disabling esql feature from feature flag should unequivocally hide the tab
-    // irrespective of the fact that the advanced setting is enabled or
-    // not or existing esql query is present or not
-    if (!isTimelineEsqlEnabledByFeatureFlag) {
-      return false;
-    }
-    return isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null;
-  }, [isEsqlAdvancedSettingEnabled, isTimelineEsqlEnabledByFeatureFlag, timelineESQLSavedSearch]);
+  const shouldShowESQLTab = useMemo(
+    () => isEsqlAdvancedSettingEnabled || timelineESQLSavedSearch != null,
+    [isEsqlAdvancedSettingEnabled, timelineESQLSavedSearch]
+  );
 
   const numberOfPinnedEvents = useShallowEqualSelector((state) =>
     getNumberOfPinnedEvents(state, timelineId)
@@ -308,6 +297,11 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
     () => timelineSavedObjectId.length > 0,
     [timelineSavedObjectId]
   );
+
+  const {
+    notesPrivileges: { read: canSeeNotes },
+    timelinePrivileges: { read: canSeePinnedTab },
+  } = useUserPrivileges();
 
   // new note system
   const fetchNotes = useCallback(
@@ -445,7 +439,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
             data-test-subj={`timelineTabs-${TimelineTabs.notes}`}
             onClick={setNotesAsActiveTab}
             isSelected={activeTab === TimelineTabs.notes}
-            disabled={timelineType === TimelineTypeEnum.template}
+            disabled={!canSeeNotes || timelineType === TimelineTypeEnum.template}
             key={TimelineTabs.notes}
           >
             <span>{i18n.NOTES_TAB}</span>
@@ -456,7 +450,7 @@ const TabsContentComponent: React.FC<BasicTimelineTab> = ({
           <StyledEuiTab
             data-test-subj={`timelineTabs-${TimelineTabs.pinned}`}
             onClick={setPinnedAsActiveTab}
-            disabled={timelineType === TimelineTypeEnum.template}
+            disabled={!canSeePinnedTab || timelineType === TimelineTypeEnum.template}
             isSelected={activeTab === TimelineTabs.pinned}
             key={TimelineTabs.pinned}
           >

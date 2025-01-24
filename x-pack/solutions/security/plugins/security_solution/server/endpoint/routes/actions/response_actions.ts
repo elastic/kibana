@@ -469,7 +469,9 @@ function isThirdPartyFeatureDisabled(
   return (
     (agentType === 'sentinel_one' && !experimentalFeatures.responseActionsSentinelOneV1Enabled) ||
     (agentType === 'crowdstrike' &&
-      !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled)
+      !experimentalFeatures.responseActionsCrowdstrikeManualHostIsolationEnabled) ||
+    (agentType === 'microsoft_defender_endpoint' &&
+      !experimentalFeatures.responseActionsMSDefenderEndpointEnabled)
   );
 }
 

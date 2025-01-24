@@ -56,8 +56,10 @@ export function register(fileKindRouter: FileKindRouter, fileKind: FileKind) {
       {
         path: FILES_API_ROUTES.fileKind.getUpdateRoute(fileKind.id),
         validate: { ...rt },
-        options: {
-          tags: fileKind.http.update.tags,
+        security: {
+          authz: {
+            requiredPrivileges: fileKind.http.update.requiredPrivileges,
+          },
         },
       },
       handler

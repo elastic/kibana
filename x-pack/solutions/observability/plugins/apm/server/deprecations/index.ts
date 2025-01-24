@@ -5,15 +5,15 @@
  * 2.0.
  */
 
-import { GetDeprecationsContext, DeprecationsDetails } from '@kbn/core/server';
+import type { GetDeprecationsContext, DeprecationsDetails } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import {
   getCloudAgentPolicy,
   getApmPackagePolicy,
 } from '../routes/fleet/get_cloud_apm_package_policy';
-import { APMRouteHandlerResources } from '../routes/apm_routes/register_apm_server_routes';
+import type { APMRouteHandlerResources } from '../routes/apm_routes/register_apm_server_routes';
 
 export function getDeprecations({
   cloudSetup,

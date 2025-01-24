@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import type { EuiAccordionProps } from '@elastic/eui';
 import {
   EuiAccordion,
-  EuiAccordionProps,
   EuiFlexGroup,
   EuiFlexItem,
   EuiIcon,
@@ -18,11 +18,12 @@ import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { transparentize } from 'polished';
 import React, { useEffect, useRef } from 'react';
 import { WindowScroller, AutoSizer } from 'react-virtualized';
-import { areEqual, ListChildComponentProps, VariableSizeList as List } from 'react-window';
+import type { ListChildComponentProps } from 'react-window';
+import { areEqual, VariableSizeList as List } from 'react-window';
 import { asBigNumber } from '../../../../../../../common/utils/formatters';
 import { useTheme } from '../../../../../../hooks/use_theme';
-import { Margins } from '../../../../../shared/charts/timeline';
-import {
+import type { Margins } from '../../../../../shared/charts/timeline';
+import type {
   IWaterfallNodeFlatten,
   IWaterfall,
   IWaterfallSpanOrTransaction,

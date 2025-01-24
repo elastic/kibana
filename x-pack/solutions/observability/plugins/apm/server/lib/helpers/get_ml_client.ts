@@ -5,9 +5,9 @@
  * 2.0.
  */
 
-import { MlAnomalyDetectors, MlMlSystem, MlModules } from '@kbn/ml-plugin/server';
+import type { MlAnomalyDetectors, MlMlSystem, MlModules } from '@kbn/ml-plugin/server';
 import { isActivePlatinumLicense } from '../../../common/license_check';
-import { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
+import type { MinimalAPMRouteHandlerResources } from '../../routes/apm_routes/register_apm_server_routes';
 
 export interface MlClient {
   mlSystem: MlMlSystem;

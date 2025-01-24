@@ -24,6 +24,7 @@ import {
   useGeneratedHtmlId,
 } from '@elastic/eui';
 import type { EuiTabbedContentTab, EuiTabbedContentProps, EuiFlyoutProps } from '@elastic/eui';
+import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
 
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleOverviewTab, useOverviewTabSections } from './rule_overview_tab';
@@ -124,15 +125,47 @@ interface RuleDetailsFlyoutProps {
 }
 
 export function RuleDetailsFlyout({
+  id,
+  dataTestSubj,
+  ...props
+}: RuleDetailsFlyoutProps): JSX.Element {
+  const prebuiltRulesFlyoutTitleId = useGeneratedHtmlId({
+    prefix: 'prebuiltRulesFlyoutTitle',
+  });
+
+  return (
+    <EuiFlyout
+      id={id}
+      size={props.size}
+      onClose={props.closeFlyout}
+      key="prebuilt-rules-flyout"
+      paddingSize="l"
+      data-test-subj={dataTestSubj}
+      aria-labelledby={prebuiltRulesFlyoutTitleId}
+      ownFocus
+    >
+      <KibanaSectionErrorBoundary sectionName={i18n.RULE_DETAILS_FLYOUT_LABEL}>
+        <RuleDetailsFlyoutContent {...props} titleId={prebuiltRulesFlyoutTitleId} />
+      </KibanaSectionErrorBoundary>
+    </EuiFlyout>
+  );
+}
+
+const DEFAULT_EXTRA_TABS: EuiTabbedContentTab[] = [];
+
+type RuleDetailsFlyoutContentProps = Omit<RuleDetailsFlyoutProps, 'id' | 'dataTestSubj'> & {
+  titleId?: string;
+};
+
+function RuleDetailsFlyoutContent({
   rule,
   ruleActions,
   subHeader,
   size = 'm',
-  extraTabs = [],
-  dataTestSubj,
-  id,
+  extraTabs = DEFAULT_EXTRA_TABS,
+  titleId,
   closeFlyout,
-}: RuleDetailsFlyoutProps): JSX.Element {
+}: RuleDetailsFlyoutContentProps): JSX.Element {
   const { expandedOverviewSections, toggleOverviewSection } = useOverviewTabSections();
 
   const overviewTab: EuiTabbedContentTab = useMemo(
@@ -192,24 +225,11 @@ export function RuleDetailsFlyout({
     setSelectedTabId(tab.id);
   };
 
-  const prebuiltRulesFlyoutTitleId = useGeneratedHtmlId({
-    prefix: 'prebuiltRulesFlyoutTitle',
-  });
-
   return (
-    <EuiFlyout
-      id={id}
-      size={size}
-      onClose={closeFlyout}
-      key="prebuilt-rules-flyout"
-      paddingSize="l"
-      data-test-subj={dataTestSubj}
-      aria-labelledby={prebuiltRulesFlyoutTitleId}
-      ownFocus
-    >
+    <>
       <EuiFlyoutHeader>
         <EuiTitle size="m">
-          <h2 id={prebuiltRulesFlyoutTitleId}>{rule.name}</h2>
+          <h2 id={titleId}>{rule.name}</h2>
         </EuiTitle>
         <EuiSpacer size="s" />
         {subHeader && (
@@ -236,6 +256,6 @@ export function RuleDetailsFlyout({
           <EuiFlexItem grow={false}>{ruleActions}</EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
-    </EuiFlyout>
+    </>
   );
 }

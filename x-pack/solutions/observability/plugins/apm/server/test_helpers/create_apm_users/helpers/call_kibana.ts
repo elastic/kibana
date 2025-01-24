@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import axios, { AxiosRequestConfig, AxiosError } from 'axios';
-import { once } from 'lodash';
-import { Elasticsearch, Kibana } from '../create_apm_users';
+import type { AxiosRequestConfig, AxiosError } from 'axios';
+import axios from 'axios';
+import type { Elasticsearch, Kibana } from '../create_apm_users';
 
 const DEFAULT_HEADERS = {
   'kbn-xsrf': 'true',
@@ -33,7 +33,7 @@ export async function callKibana<T>({
   return data;
 }
 
-const getBaseUrl = once(async (kibanaHostname: string) => {
+const getBaseUrl = async (kibanaHostname: string) => {
   try {
     await axios.request({
       url: kibanaHostname,
@@ -51,7 +51,7 @@ const getBaseUrl = once(async (kibanaHostname: string) => {
     throw e;
   }
   return kibanaHostname;
-});
+};
 
 export function isAxiosError(e: AxiosError | Error): e is AxiosError {
   return 'isAxiosError' in e;

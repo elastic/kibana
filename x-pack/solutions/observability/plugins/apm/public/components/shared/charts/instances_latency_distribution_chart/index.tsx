@@ -5,17 +5,19 @@
  * 2.0.
  */
 
+import type {
+  ElementClickListener,
+  GeometryValue,
+  TooltipInfo,
+  TooltipProps,
+} from '@elastic/charts';
 import {
   Axis,
   BubbleSeries,
   Chart,
-  ElementClickListener,
-  GeometryValue,
   Position,
   ScaleType,
   Settings,
-  TooltipInfo,
-  TooltipProps,
   TooltipType,
   Tooltip,
 } from '@elastic/charts';
@@ -27,9 +29,9 @@ import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { usePreviousPeriodLabel } from '../../../../hooks/use_previous_period_text';
 import { SERVICE_NODE_NAME } from '../../../../../common/es_fields/apm';
 import { asTransactionRate, getDurationFormatter } from '../../../../../common/utils/formatters';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { useTheme } from '../../../../hooks/use_theme';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import * as urlHelpers from '../../links/url_helpers';
 import { ChartContainer } from '../chart_container';
 import { getResponseTimeTickFormatter } from '../transaction_charts/helper';

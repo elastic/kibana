@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { EuiSwitchEvent } from '@elastic/eui';
 import {
   EuiButtonEmpty,
   EuiButton,
@@ -16,7 +17,6 @@ import {
   EuiPopoverTitle,
   EuiSpacer,
   EuiSwitch,
-  EuiSwitchEvent,
   EuiSelect,
   EuiRange,
   EuiFlexGroup,
@@ -25,9 +25,10 @@ import {
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import React, { SyntheticEvent, useState, useCallback, useEffect } from 'react';
+import type { SyntheticEvent } from 'react';
+import React, { useState, useCallback, useEffect } from 'react';
 import { first, last } from 'lodash';
-import { EuiRangeProps, EuiSelectProps } from '@elastic/eui';
+import type { EuiRangeProps, EuiSelectProps } from '@elastic/eui';
 import type { WaffleLegendOptions } from '../../hooks/use_waffle_options';
 import {
   type InfraWaffleMapBounds,

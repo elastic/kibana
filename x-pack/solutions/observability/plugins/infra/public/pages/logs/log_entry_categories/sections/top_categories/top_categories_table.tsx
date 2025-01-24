@@ -5,21 +5,22 @@
  * 2.0.
  */
 
-import { Criteria, EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import type { Criteria, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable } from '@elastic/eui';
 import numeral from '@elastic/numeral';
 import { i18n } from '@kbn/i18n';
 import React, { useMemo, useCallback } from 'react';
 import useSet from 'react-use/lib/useSet';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
-import {
-  categoriesSortRT,
+import type { PersistedLogViewReference } from '@kbn/logs-shared-plugin/common';
+import type {
   LogEntryCategory,
   LogEntryCategoryDataset,
   LogEntryCategoryHistogram,
 } from '../../../../../../common/log_analysis';
-import { TimeRange } from '../../../../../../common/time';
+import { categoriesSortRT } from '../../../../../../common/log_analysis';
+import type { TimeRange } from '../../../../../../common/time';
 import { RowExpansionButton } from '../../../../../components/basic_table';
 import { AnomalySeverityIndicatorList } from './anomaly_severity_indicator_list';
 import { CategoryDetailsRow } from './category_details_row';
@@ -27,7 +28,7 @@ import { RegularExpressionRepresentation } from '../../../../../components/loggi
 import { DatasetActionsList } from './datasets_action_list';
 import { DatasetsList } from './datasets_list';
 import { LogEntryCountSparkline } from './log_entry_count_sparkline';
-import { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_results';
+import type { SortOptions, ChangeSortOptions } from '../../use_log_entry_categories_results';
 
 export const TopCategoriesTable = euiStyled(
   ({

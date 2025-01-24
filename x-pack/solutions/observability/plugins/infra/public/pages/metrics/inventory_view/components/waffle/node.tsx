@@ -9,11 +9,11 @@ import React from 'react';
 
 import { first } from 'lodash';
 import { EuiPopover, EuiToolTip } from '@elastic/eui';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
 import { useBoolean } from '@kbn/react-hooks';
 import { useUiSetting } from '@kbn/kibana-react-plugin/public';
 import { enableInfrastructureContainerAssetView } from '@kbn/observability-plugin/common';
-import {
+import type {
   InfraWaffleMapBounds,
   InfraWaffleMapNode,
   InfraWaffleMapOptions,

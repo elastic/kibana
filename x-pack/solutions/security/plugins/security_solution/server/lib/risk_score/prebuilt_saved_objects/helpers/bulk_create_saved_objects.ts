@@ -10,7 +10,7 @@ import type { Logger } from '@kbn/core/server';
 
 import { v4 as uuidv4 } from 'uuid';
 import { i18n } from '@kbn/i18n';
-import { RiskScoreEntity } from '../../../../../common/search_strategy';
+import { EntityType } from '../../../../../common/search_strategy';
 import * as savedObjectsToCreate from '../saved_object';
 import type { BulkCreateSavedObjectsResult, SavedObjectTemplate } from '../types';
 import { createRiskScoreTag } from './create_risk_score_tag';
@@ -29,7 +29,7 @@ export const bulkCreateSavedObjects = async <T = SavedObjectTemplate>({
   const regex = /<REPLACE-WITH-SPACE>/g;
 
   const riskScoreEntity =
-    savedObjectTemplate === 'userRiskScoreDashboards' ? RiskScoreEntity.user : RiskScoreEntity.host;
+    savedObjectTemplate === 'userRiskScoreDashboards' ? EntityType.user : EntityType.host;
 
   const tagResponse = await createRiskScoreTag({
     riskScoreEntity,

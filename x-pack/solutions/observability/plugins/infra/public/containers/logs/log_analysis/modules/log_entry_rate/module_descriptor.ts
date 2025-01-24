@@ -8,17 +8,16 @@
 import { i18n } from '@kbn/i18n';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { HttpHandler } from '@kbn/core/public';
-import { IdFormat } from '../../../../../../common/http_api/latest';
+import type { IdFormat } from '../../../../../../common/http_api/latest';
+import type { DatasetFilter, LogEntryRateJobType } from '../../../../../../common/log_analysis';
 import {
   bucketSpan,
-  DatasetFilter,
   getJobId,
   logEntryRateJobType,
-  LogEntryRateJobType,
   logEntryRateJobTypes,
   partitionField,
 } from '../../../../../../common/log_analysis';
-import { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
+import type { ModuleDescriptor, ModuleSourceConfiguration } from '../../log_analysis_module_types';
 import { cleanUpJobsAndDatafeeds } from '../../log_analysis_cleanup';
 import { callJobsSummaryAPI } from '../../api/ml_get_jobs_summary_api';
 import { callGetMlModuleAPI } from '../../api/ml_get_module';

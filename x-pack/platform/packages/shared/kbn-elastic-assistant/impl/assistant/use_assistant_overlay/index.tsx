@@ -82,9 +82,10 @@ export const useAssistantOverlay = (
    */
   replacements?: Replacements | null
 ): UseAssistantOverlay => {
-  const { http } = useAssistantContext();
+  const { http, inferenceEnabled } = useAssistantContext();
   const { data: connectors } = useLoadConnectors({
     http,
+    inferenceEnabled,
   });
 
   const defaultConnector = useMemo(() => getDefaultConnector(connectors), [connectors]);

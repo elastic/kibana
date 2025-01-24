@@ -46,7 +46,7 @@ export const registerUpdateInsightsRoute = (
         },
       },
       withEndpointAuthz(
-        { all: ['canReadSecuritySolution'] },
+        { all: ['canWriteWorkflowInsights'] },
         endpointContext.logFactory.get('workflowInsights'),
         updateInsightsRouteHandler(endpointContext)
       )

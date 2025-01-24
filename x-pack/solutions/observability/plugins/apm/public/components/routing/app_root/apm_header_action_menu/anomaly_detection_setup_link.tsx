@@ -6,7 +6,7 @@
  */
 
 import { EuiLoadingSpinner } from '@elastic/eui';
-import { IconType } from '@elastic/eui';
+import type { IconType } from '@elastic/eui';
 import { EuiHeaderLink, EuiIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';

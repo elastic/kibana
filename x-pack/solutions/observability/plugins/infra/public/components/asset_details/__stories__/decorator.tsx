@@ -11,7 +11,8 @@ import {
   KibanaContextProvider,
   type KibanaReactContextValue,
 } from '@kbn/kibana-react-plugin/public';
-import { Observable, of } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { of } from 'rxjs';
 import { action } from '@storybook/addon-actions';
 import type { DecoratorFn } from '@storybook/react';
 import { useParameter } from '@storybook/addons';
@@ -21,7 +22,7 @@ import type { IKibanaSearchRequest, ISearchOptions } from '@kbn/search-types';
 import type { SearchSessionState } from '@kbn/data-plugin/public';
 import type { Theme } from '@elastic/charts/dist/utils/themes/theme';
 import { defaultLogViewAttributes } from '@kbn/logs-shared-plugin/common';
-import { DataView, DataViewField } from '@kbn/data-views-plugin/common';
+import type { DataView, DataViewField } from '@kbn/data-views-plugin/common';
 import { MemoryRouter } from 'react-router-dom';
 import { AlertPrefillProvider } from '../../../alerting/use_alert_prefill';
 import { PluginConfigProvider } from '../../../containers/plugin_config_context';

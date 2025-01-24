@@ -62,27 +62,6 @@ export const getSavedQueryCheckboxLabelWithoutName = () =>
     }
   );
 
-export const THREAT_MATCH_INDEX_HELPER_TEXT = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.threatMatchingIcesHelperDescription',
-  {
-    defaultMessage: 'Select threat indices',
-  }
-);
-
-export const THREAT_MATCH_REQUIRED = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredError',
-  {
-    defaultMessage: 'At least one indicator match is required.',
-  }
-);
-
-export const THREAT_MATCH_EMPTIES = i18n.translate(
-  'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.customThreatQueryFieldRequiredEmptyError',
-  {
-    defaultMessage: 'All matches require both a field and threat index field.',
-  }
-);
-
 export const SOURCE = i18n.translate(
   'xpack.securitySolution.detectionEngine.createRule.stepDefineRule.source',
   {

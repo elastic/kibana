@@ -15,9 +15,9 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React, { useMemo } from 'react';
-import { FormElement } from './form_elements';
+import type { FormElement } from './form_elements';
 import { getFormRowProps, getStringInputFieldProps } from './form_field_props';
-import { FormValidationError } from './validation_errors';
+import type { FormValidationError } from './validation_errors';
 
 export const NameConfigurationPanel = React.memo<{
   isLoading: boolean;

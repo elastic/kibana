@@ -6,7 +6,6 @@
  */
 import React from 'react';
 import { EuiFlexGroup, EuiFlexItem, EuiSpacer } from '@elastic/eui';
-import { LEGACY_LIGHT_THEME } from '@elastic/charts';
 import { EuiPanel } from '@elastic/eui';
 import {
   ALERT_CONTEXT,
@@ -15,11 +14,11 @@ import {
   ALERT_START,
 } from '@kbn/rule-data-utils';
 import moment from 'moment';
-import { useTheme } from '@emotion/react';
 import { EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { getPaddedAlertTimeRange } from '@kbn/observability-get-padded-alert-time-range-util';
 import { get, identity } from 'lodash';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { useLogView } from '@kbn/logs-shared-plugin/public';
 import { useKibanaContextForPlugin } from '../../../../hooks/use_kibana';
 import {
@@ -29,7 +28,7 @@ import {
   isRatioRule,
   type PartialCriterion,
 } from '../../../../../common/alerting/logs/log_threshold';
-import { AlertDetailsAppSectionProps } from './types';
+import type { AlertDetailsAppSectionProps } from './types';
 import { Threshold } from '../../../common/components/threshold';
 import { LogRateAnalysis } from './components/log_rate_analysis';
 import { LogThresholdCountChart, LogThresholdRatioChart } from './components/threhsold_chart';
@@ -39,7 +38,7 @@ const formatThreshold = (threshold: number) => String(threshold);
 
 const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) => {
   const { logsShared } = useKibanaContextForPlugin().services;
-  const theme = useTheme();
+  const baseTheme = useElasticChartsTheme();
   const timeRange = getPaddedAlertTimeRange(alert.fields[ALERT_START]!, alert.fields[ALERT_END]);
   const alertEnd = alert.fields[ALERT_END] ? moment(alert.fields[ALERT_END]).valueOf() : undefined;
   const interval = `${rule.params.timeSize}${rule.params.timeUnit}`;
@@ -93,8 +92,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                // @ts-expect-error this chart needs to be migrated to the new chart theming system, comment should be removed once https://github.com/elastic/kibana/issues/202138 is resolved
-                chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
+                chartProps={{ baseTheme }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id={'threshold-ratio-chart'}
                 thresholds={[rule.params.count.value]}
@@ -161,8 +159,7 @@ const AlertDetailsAppSection = ({ rule, alert }: AlertDetailsAppSectionProps) =>
               <EuiSpacer size="s" />
               <Threshold
                 title={`Threshold breached`}
-                // @ts-expect-error this chart needs to be migrated to the new chart theming system, comment should be removed once https://github.com/elastic/kibana/issues/202138 is resolved
-                chartProps={{ theme, baseTheme: LEGACY_LIGHT_THEME }}
+                chartProps={{ baseTheme }}
                 comparator={ComparatorToi18nSymbolsMap[rule.params.count.comparator]}
                 id="logCountThreshold"
                 thresholds={[rule.params.count.value]}

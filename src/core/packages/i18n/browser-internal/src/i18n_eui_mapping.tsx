@@ -1822,5 +1822,19 @@ export const getEuiContextMapping = (): EuiTokensObject => {
       defaultMessage: 'Select listbox',
       description: 'Accessible label for Super Selects without a visible label.',
     }),
+    'euiFieldValueSelectionFilter.buttonLabelHint': i18n.translate(
+      'core.euiFieldValueSelectionFilter.buttonLabelHint',
+      {
+        defaultMessage: 'Selection',
+      }
+    ),
+    'euiCodeBlockFullScreen.ariaLabel': i18n.translate('core.euiCodeBlockFullScreen.ariaLabel', {
+      defaultMessage: 'Expanded code block',
+    }),
+    'euiCodeBlock.label': ({ language }: EuiValues) =>
+      i18n.translate('core.euiCodeBlock.label', {
+        defaultMessage: '{language} code block:',
+        values: { language },
+      }),
   };
 };

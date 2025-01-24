@@ -8,12 +8,12 @@
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import {
-  FieldStats,
+import type {
   FieldStatsServices,
   FieldStatsProps,
   FieldStatsState,
 } from '@kbn/unified-field-list/src/components/field_stats';
+import { FieldStats } from '@kbn/unified-field-list/src/components/field_stats';
 import {
   FieldPopover,
   FieldPopoverHeader,
@@ -26,7 +26,7 @@ import {
 } from '@kbn/unified-field-list/src/components/field_stats';
 import { EuiHorizontalRule, EuiText, EuiSpacer, EuiLoadingSpinner } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import numeral from '@elastic/numeral';
 import { termQuery } from '../../../../../common/utils/term_query';

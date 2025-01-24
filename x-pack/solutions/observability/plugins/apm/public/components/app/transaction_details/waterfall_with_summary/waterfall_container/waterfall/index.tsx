@@ -7,7 +7,7 @@
 
 import { EuiButtonEmpty, EuiCallOut } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { History } from 'history';
+import type { History } from 'history';
 import React, { useMemo, useState } from 'react';
 import { useHistory } from 'react-router-dom';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
@@ -22,7 +22,7 @@ import { getAgentMarks } from '../marks/get_agent_marks';
 import { getErrorMarks } from '../marks/get_error_marks';
 import { AccordionWaterfall } from './accordion_waterfall';
 import { WaterfallFlyout } from './waterfall_flyout';
-import { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
+import type { IWaterfall, IWaterfallItem } from './waterfall_helpers/waterfall_helpers';
 
 const Container = euiStyled.div`
   transition: 0.1s padding ease;

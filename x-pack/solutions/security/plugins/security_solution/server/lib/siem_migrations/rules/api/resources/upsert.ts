@@ -7,6 +7,7 @@
 
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import partition from 'lodash/partition';
 import { ResourceIdentifier } from '../../../../../../common/siem_migrations/rules/resources';
 import {
   UpsertRuleMigrationResourcesRequestBody,
@@ -17,6 +18,7 @@ import { SIEM_RULE_MIGRATION_RESOURCES_PATH } from '../../../../../../common/sie
 import type { SecuritySolutionPluginRouter } from '../../../../../types';
 import type { CreateRuleMigrationResourceInput } from '../../data/rule_migrations_data_resources_client';
 import { withLicense } from '../util/with_license';
+import { processLookups } from '../util/lookups';
 
 export const registerSiemRuleMigrationsResourceUpsertRoute = (
   router: SecuritySolutionPluginRouter,
@@ -27,6 +29,7 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
       path: SIEM_RULE_MIGRATION_RESOURCES_PATH,
       access: 'internal',
       security: { authz: { requiredPrivileges: ['securitySolution'] } },
+      options: { body: { maxBytes: 26214400 } }, // rise payload limit to 25MB
     })
     .addVersion(
       {
@@ -57,14 +60,17 @@ export const registerSiemRuleMigrationsResourceUpsertRoute = (
               return res.notFound({ body: { message: 'Migration not found' } });
             }
 
-            // Upsert identified resource documents with content
-            const ruleMigrations = resources.map<CreateRuleMigrationResourceInput>((resource) => ({
+            const [lookups, macros] = partition(resources, { type: 'lookup' });
+            const processedLookups = await processLookups(lookups, ruleMigrationsClient);
+            const resourcesUpsert = [...macros, ...processedLookups].map((resource) => ({
               ...resource,
               migration_id: migrationId,
             }));
-            await ruleMigrationsClient.data.resources.upsert(ruleMigrations);
 
-            // Create identified resource documents without content to keep track of them
+            // Upsert the resources
+            await ruleMigrationsClient.data.resources.upsert(resourcesUpsert);
+
+            // Create identified resource documents to keep track of them (without content)
             const resourceIdentifier = new ResourceIdentifier(rule.original_rule.vendor);
             const resourcesToCreate = resourceIdentifier
               .fromResources(resources)

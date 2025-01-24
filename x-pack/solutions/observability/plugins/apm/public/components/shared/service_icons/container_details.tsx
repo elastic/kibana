@@ -5,11 +5,12 @@
  * 2.0.
  */
 
-import { EuiDescriptionList, EuiDescriptionListProps, EuiBadge } from '@elastic/eui';
+import type { EuiDescriptionListProps } from '@elastic/eui';
+import { EuiDescriptionList, EuiBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { asInteger } from '../../../../common/utils/formatters';
-import { APIReturnType } from '../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../services/rest/create_call_apm_api';
 
 type ServiceDetailsReturnType =
   APIReturnType<'GET /internal/apm/services/{serviceName}/metadata/details'>;

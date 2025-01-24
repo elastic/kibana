@@ -10,7 +10,7 @@ import type { HttpSetup } from '@kbn/core/public';
 import type { StartRenderServices } from '../../../types';
 import { INTERNAL_RISK_SCORE_URL } from '../../../../common/constants';
 
-import { RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType } from '../../../../common/search_strategy';
 import {
   HOST_RISK_SCORES_ENABLED_TITLE,
   INSTALLATION_ERROR,
@@ -19,7 +19,7 @@ import {
 } from './translations';
 
 interface Options {
-  riskScoreEntity: RiskScoreEntity;
+  riskScoreEntity: EntityType;
 }
 
 type Response = Record<string, { success?: boolean; error?: Error }>;
@@ -74,7 +74,7 @@ export const installRiskScore = ({
         notifications.toasts.addSuccess({
           'data-test-subj': `${options.riskScoreEntity}EnableSuccessToast`,
           title:
-            options.riskScoreEntity === RiskScoreEntity.user
+            options.riskScoreEntity === EntityType.user
               ? USER_RISK_SCORES_ENABLED_TITLE
               : HOST_RISK_SCORES_ENABLED_TITLE,
           text: RISK_SCORES_ENABLED_TEXT(resp.success.join(', ')),

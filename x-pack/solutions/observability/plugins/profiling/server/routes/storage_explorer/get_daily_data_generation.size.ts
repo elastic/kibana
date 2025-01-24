@@ -4,9 +4,9 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
 import { kqlQuery } from '@kbn/observability-plugin/server';
-import { ProfilingESClient } from '../../utils/create_profiling_es_client';
+import type { ProfilingESClient } from '../../utils/create_profiling_es_client';
 
 export function getEstimatedSizeForDocumentsInIndex({
   allIndicesStats,

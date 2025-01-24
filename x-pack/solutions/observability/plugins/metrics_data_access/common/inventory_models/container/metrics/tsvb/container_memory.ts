@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
+import type { TSVBMetricModelCreator, TSVBMetricModel } from '../../../types';
 
 export const containerMemory: TSVBMetricModelCreator = (
   timeField,

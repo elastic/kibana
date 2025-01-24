@@ -17,7 +17,7 @@ import {
   getDocsGenerator,
   setupScenarioRunner,
   sumFirstNValues,
-} from './tsdb_logsdb_helpers';
+} from '../tsdb_logsdb_helpers';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const { common, lens, dashboard } = getPageObjects(['common', 'lens', 'dashboard']);

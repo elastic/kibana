@@ -24,7 +24,7 @@ import { esqlResultToPlainObjects } from '../esql_result_to_plain_objects';
 type SearchRequest = ESSearchRequest & {
   index: string | string[];
   track_total_hits: number | boolean;
-  size: number | boolean;
+  size: number;
 };
 
 export interface EsqlOptions {
@@ -112,10 +112,12 @@ export function createObservabilityEsClient({
   client,
   logger,
   plugin,
+  labels,
 }: {
   client: ElasticsearchClient;
   logger: Logger;
-  plugin: string;
+  plugin?: string;
+  labels?: Record<string, string>;
 }): ObservabilityElasticsearchClient {
   // wraps the ES calls in a named APM span for better analysis
   // (otherwise it would just eg be a _search span)
@@ -129,7 +131,8 @@ export function createObservabilityEsClient({
       {
         name: operationName,
         labels: {
-          plugin,
+          ...labels,
+          ...(plugin ? { plugin } : {}),
         },
       },
       callback,

@@ -8,12 +8,8 @@ import React from 'react';
 import { ViewMode } from '@kbn/embeddable-plugin/public';
 import { useEuiTheme } from '@elastic/eui';
 import { useKibanaContextForPlugin } from '../../../../../../hooks/use_kibana';
-import {
-  createLensDefinitionForCountChart,
-  IndexPattern,
-  Threshold,
-  Timerange,
-} from './create_lens_definition';
+import type { IndexPattern, Threshold, Timerange } from './create_lens_definition';
+import { createLensDefinitionForCountChart } from './create_lens_definition';
 
 interface LogThresholdCountChartProps {
   index: IndexPattern;

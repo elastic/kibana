@@ -125,11 +125,11 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
   const licenseService = useLicense();
   const [isUninstallCommandFlyoutOpen, setIsUninstallCommandFlyoutOpen] = useState(false);
   const policyHasElasticDefend = useMemo(() => hasElasticDefend(agentPolicy), [agentPolicy]);
-  const isManagedorAgentlessPolicy =
-    agentPolicy.is_managed === true || agentPolicy?.supports_agentless === true;
+  const isManagedPolicy = agentPolicy.is_managed === true;
+  const isManagedorAgentlessPolicy = isManagedPolicy || agentPolicy?.supports_agentless === true;
 
   const userHasAccessToAllPolicySpaces = useMemo(
-    () => 'space_ids' in agentPolicy && !agentPolicy.space_ids?.includes(UNKNOWN_SPACE),
+    () => ('space_ids' in agentPolicy ? !agentPolicy.space_ids?.includes(UNKNOWN_SPACE) : true),
     [agentPolicy]
   );
 
@@ -664,7 +664,7 @@ export const AgentPolicyAdvancedOptionsContent: React.FunctionComponent<Props> =
           isDisabled={disabled}
         >
           <EuiSuperSelect
-            disabled={disabled || isManagedorAgentlessPolicy}
+            disabled={disabled || isManagedPolicy}
             valueOfSelected={agentPolicy.data_output_id || DEFAULT_SELECT_VALUE}
             fullWidth
             isLoading={isLoadingOptions}

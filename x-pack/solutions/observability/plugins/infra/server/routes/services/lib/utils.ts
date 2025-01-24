@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { RouteValidationError, RouteValidationResultFactory } from '@kbn/core/server';
+import type { RouteValidationError, RouteValidationResultFactory } from '@kbn/core/server';
 
 type ValidateStringAssetFiltersReturn = [{ error: RouteValidationError }] | [null, any];
 

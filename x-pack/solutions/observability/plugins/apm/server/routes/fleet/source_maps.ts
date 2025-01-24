@@ -4,12 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { CoreStart, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
+import type { CoreStart, ElasticsearchClient, SavedObjectsClientContract } from '@kbn/core/server';
 import { promisify } from 'util';
 import { unzip } from 'zlib';
-import { Artifact } from '@kbn/fleet-plugin/server';
-import { SourceMap } from '../source_maps/route';
-import { APMPluginStartDependencies } from '../../types';
+import type { Artifact } from '@kbn/fleet-plugin/server';
+import type { SourceMap } from '../source_maps/route';
+import type { APMPluginStartDependencies } from '../../types';
 import { getApmPackagePolicies } from './get_apm_package_policies';
 import { getPackagePolicyWithSourceMap } from './get_package_policy_decorators';
 

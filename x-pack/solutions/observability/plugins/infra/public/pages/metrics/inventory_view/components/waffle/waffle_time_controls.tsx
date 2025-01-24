@@ -7,9 +7,11 @@
 
 import { EuiButton, EuiDatePicker, EuiFlexGroup, EuiFlexItem, EuiToolTip } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
-import moment, { Moment } from 'moment';
+import type { Moment } from 'moment';
+import moment from 'moment';
 import React, { useCallback } from 'react';
-import { withTheme, EuiTheme } from '@kbn/kibana-react-plugin/common';
+import type { EuiTheme } from '@kbn/kibana-react-plugin/common';
+import { withTheme } from '@kbn/kibana-react-plugin/common';
 import { convertIntervalToString } from '../../../../../utils/convert_interval_to_string';
 import { useWaffleTimeContext } from '../../hooks/use_waffle_time';
 

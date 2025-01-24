@@ -15,10 +15,8 @@ import {
   SectionSubtitle,
   SectionTitle,
 } from '@kbn/observability-shared-plugin/public';
-import {
-  AllDatasetsLocatorParams,
-  ALL_DATASETS_LOCATOR_ID,
-} from '@kbn/deeplinks-observability/locators';
+import type { AllDatasetsLocatorParams } from '@kbn/deeplinks-observability/locators';
+import { ALL_DATASETS_LOCATOR_ID } from '@kbn/deeplinks-observability/locators';
 import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
 import {
   ASSET_DETAILS_LOCATOR_ID,

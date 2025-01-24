@@ -32,11 +32,11 @@ as uiSettings within the code.
 |The aiAssistantManagementSelection plugin manages the Ai Assistant management section.
 
 
-|{kib-repo}blob/{branch}/src/plugins/bfetch/README.md[bfetch]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/bfetch/README.md[bfetch]
 |bfetch allows to batch HTTP requests and streams responses back.
 
 
-|{kib-repo}blob/{branch}/src/plugins/charts/README.md[charts]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/charts/README.md[charts]
 |The Charts plugin is a way to create easier integration of shared colors, themes, types and other utilities across all Kibana charts and visualizations.
 
 
@@ -61,7 +61,7 @@ as uiSettings within the code.
 - Adds a dashboard embeddable that can be used in other applications.
 
 
-|{kib-repo}blob/{branch}/src/plugins/data/README.mdx[data]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/data/README.mdx[data]
 |The data plugin provides common data access services, such as search and query, for solutions and application developers.
 
 
@@ -114,11 +114,11 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |This plugin contains reusable code in the form of self-contained modules (or libraries). Each of these modules exports a set of functionality relevant to the domain of the module.
 
 
-|{kib-repo}blob/{branch}/src/plugins/event_annotation/README.md[eventAnnotation]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/event_annotation/README.md[eventAnnotation]
 |The Event Annotation service contains expressions for event annotations
 
 
-|{kib-repo}blob/{branch}/src/plugins/event_annotation_listing/README.md[eventAnnotationListing]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/event_annotation_listing/README.md[eventAnnotationListing]
 |This plugin contains the library listing page for event annotation groups.
 
 
@@ -126,11 +126,11 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Error plugin adds an error renderer to the expression plugin. The renderer will display the error image.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_gauge[expressionGauge]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_gauge[expressionGauge]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_heatmap[expressionHeatmap]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_heatmap[expressionHeatmap]
 |WARNING: Missing README.
 
 
@@ -138,7 +138,7 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Image plugin adds an image renderer to the expression plugin. The renderer will display the given image.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_legacy_metric/README.md[expressionLegacyMetricVis]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_legacy_metric/README.md[expressionLegacyMetricVis]
 |Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
 
 
@@ -146,11 +146,11 @@ This API doesn't support angular, for registering angular dev tools, bootstrap a
 |Expression Metric plugin adds a metric renderer and function to the expression plugin.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_metric/README.md[expressionMetricVis]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_metric/README.md[expressionMetricVis]
 |Expression MetricVis plugin adds a metric renderer and function to the expression plugin. The renderer will display the metric chart.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_partition_vis/README.md[expressionPartitionVis]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_partition_vis/README.md[expressionPartitionVis]
 |Expression Partition Visualization plugin adds a partitionVis renderer and pieVis, mosaicVis, treemapVis, waffleVis functions to the expression plugin. The renderer will display the pie, waffle, treemap and mosaic charts.
 
 
@@ -188,11 +188,11 @@ for use in their own application.
 |Expression Shape plugin adds a shape function to the expression plugin and an associated renderer. The renderer will display the given shape with selected decorations.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_tagcloud/README.md[expressionTagcloud]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_tagcloud/README.md[expressionTagcloud]
 |Expression Tagcloud plugin adds a tagcloud renderer and function to the expression plugin. The renderer will display the Wordcloud chart.
 
 
-|{kib-repo}blob/{branch}/src/plugins/chart_expressions/expression_xy/README.md[expressionXY]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/chart_expressions/expression_xy/README.md[expressionXY]
 |Expression XY plugin adds a xy renderer and function to the expression plugin. The renderer will display the xy chart.
 
 
@@ -370,11 +370,11 @@ In general this plugin provides:
 It manages its own state and data fetching, and can easily be dropped into pages with minimal setup.
 
 
-|{kib-repo}blob/{branch}/src/plugins/unified_search/README.md[unifiedSearch]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/unified_search/README.md[unifiedSearch]
 |Contains all the components of Kibana's unified search experience. Specifically:
 
 
-|{kib-repo}blob/{branch}/src/plugins/url_forwarding/README.md[urlForwarding]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/url_forwarding/README.md[urlForwarding]
 |This plugins contains helpers to redirect legacy URLs. It can be used to forward old URLs to their new counterparts.
 
 
@@ -382,17 +382,17 @@ It manages its own state and data fetching, and can easily be dropped into pages
 |The Usage Collection Service defines a set of APIs for other plugins to report the usage of their features. At the same time, it provides necessary the APIs for other services (i.e.: telemetry, monitoring, ...) to consume that usage data.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_default_editor/README.md[visDefaultEditor]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_default_editor/README.md[visDefaultEditor]
 |The default editor is used in most primary visualizations, e.x. Area, Data table, Pie, etc.
 It acts as a container for a particular visualization and options tabs. Contains the default "Data" tab in public/components/sidebar/data_tab.tsx.
 The plugin exposes the static DefaultEditorController class to consume.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/gauge[visTypeGauge]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/gauge[visTypeGauge]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/heatmap[visTypeHeatmap]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/heatmap[visTypeHeatmap]
 |WARNING: Missing README.
 
 
@@ -400,43 +400,43 @@ The plugin exposes the static DefaultEditorController class to consume.
 |The markdown visualization that can be used to place text panels on dashboards.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/metric[visTypeMetric]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/metric[visTypeMetric]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/pie[visTypePie]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/pie[visTypePie]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/table/README.md[visTypeTable]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/table/README.md[visTypeTable]
 |Contains the data table visualization, that allows presenting data in a simple table format.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/tagcloud[visTypeTagcloud]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/tagcloud[visTypeTagcloud]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/timelion/README.md[visTypeTimelion]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/timelion/README.md[visTypeTimelion]
 |Contains the timelion visualization and the timelion backend.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/timeseries[visTypeTimeseries]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/timeseries[visTypeTimeseries]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/vega[visTypeVega]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/vega[visTypeVega]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/vislib[visTypeVislib]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/vislib[visTypeVislib]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/vis_types/xy[visTypeXy]
+|{kib-repo}blob/{branch}/src/platform/plugins/private/vis_types/xy[visTypeXy]
 |WARNING: Missing README.
 
 
-|{kib-repo}blob/{branch}/src/plugins/visualizations[visualizations]
+|{kib-repo}blob/{branch}/src/platform/plugins/shared/visualizations[visualizations]
 |WARNING: Missing README.
 
 
@@ -500,7 +500,7 @@ It was removed, but the plugin was left behind to register no longer used config
 |This plugin currently only exists to provide custom fleet policy UX for a set of new BPF LSM features. The first feature being container "drift prevention".
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/cloud_integrations/cloud_experiments/README.mdx[cloudExperiments]
 |[!NOTE]
 This plugin no-longer exposes any evaluation APIs. Refer to <DocLink id="kibFeatureFlagsService" /> for more information about how to interact with feature flags.
 
@@ -534,7 +534,7 @@ Plugin server-side only. Plugin has three main functions:
 |Page where users can see the quality of their log data sets.
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/dataset_quality/README.md[datasetQuality]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/dataset_quality/README.md[datasetQuality]
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
@@ -572,7 +572,7 @@ security and spaces filtering.
 |This plugin provides Kibana user interfaces for managing the Enterprise Search solution and its products, App Search and Workplace Search.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/entities_data_access/README.md[entitiesDataAccess]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/entities_data_access/README.md[entitiesDataAccess]
 |Exposes services to access entities data.
 
 
@@ -580,7 +580,7 @@ security and spaces filtering.
 |This plugin provides access to observed entity data, such as information about hosts, pods, containers, services, and more.
 
 
-|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/observability_solution/entity_manager_app/README.md[entityManagerApp]
+|{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/entity_manager_app/README.md[entityManagerApp]
 |This plugin provides a user interface to interact with the Entity Manager.
 
 
@@ -622,7 +622,7 @@ or dashboards from the Kibana instance, from both server and client-side plugins
 |The globalSearchProviders plugin provides Kibana default search providers for the GlobalSearch plugin.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/graph/README.md[graph]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/graph/README.md[graph]
 |This is the main source folder of the Graph plugin. It contains all of the Kibana server and client source code. x-pack/test/functional/apps/graph contains additional functional tests.
 
 
@@ -643,6 +643,10 @@ Index Management by running this series of requests in Console:
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/inference/README.md[inference]
 |The inference plugin is a central place to handle all interactions with the Elasticsearch Inference API and
 external LLM APIs. Its goals are:
+
+
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/inference_endpoint/README.md[inferenceEndpoint]
+|A Kibana plugin
 
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/infra/README.md[infra]
@@ -674,7 +678,7 @@ the infrastructure monitoring use-case within Kibana.
 |This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/lens/readme.md[lens]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/lens/readme.md[lens]
 |Lens is a visualization editor allowing to quickly and easily configure compelling visualizations to use on dashboards and canvas workpads.
 
 
@@ -699,7 +703,7 @@ using the CURL scripts in the scripts folder.
 |This plugin contains various LLM tasks.
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/logs_data_access/README.md[logsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_data_access/README.md[logsDataAccess]
 |Exposes services to access logs data.
 
 
@@ -707,7 +711,7 @@ using the CURL scripts in the scripts folder.
 |This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/logs_shared/README.md[logsShared]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_shared/README.md[logsShared]
 |Exposes the shared components and APIs to access and visualize logs.
 
 
@@ -808,7 +812,7 @@ Elastic.
 |Welcome to the home of the runtime field editor and everything related to runtime fields!
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/saved_objects_tagging/README.md[savedObjectsTagging]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/saved_objects_tagging/README.md[savedObjectsTagging]
 |Add tagging capability to saved objects
 
 
@@ -854,6 +858,10 @@ It uses Chromium and Puppeteer underneath to run the browser in headless mode.
 by sending a search API with profile: true enabled in the request body. The response contains
 detailed information on how Elasticsearch executed the search request. People use this information
 to understand why a search request might be slow.
+
+
+|{kib-repo}blob/{branch}/x-pack/solutions/search/plugins/search_synonyms/README.md[searchSynonyms]
+|A plugin to manage synonyms in Elasticsearch through Synonyms APIs through Kibana.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/security/README.md[security]
@@ -966,7 +974,7 @@ As a developer you can reuse and extend built-in alerts and actions UI functiona
 in their infrastructure.
 
 
-|{kib-repo}blob/{branch}/x-pack/plugins/drilldowns/url_drilldown/README.md[urlDrilldown]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/private/drilldowns/url_drilldown/README.md[urlDrilldown]
 |NOTE: This plugin contains implementation of URL drilldown. For drilldowns infrastructure code refer to ui_actions_enhanced plugin.
 
 
@@ -981,7 +989,7 @@ in their infrastructure.
 |===
 
 include::{kibana-root}/src/platform/plugins/shared/dashboard/README.asciidoc[leveloffset=+1]
-include::{kibana-root}/src/plugins/expressions/README.asciidoc[leveloffset=+1]
+include::{kibana-root}/src/platform/plugins/shared/expressions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/src/platform/plugins/shared/ui_actions/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/platform/plugins/shared/dashboard_enhanced/README.asciidoc[leveloffset=+1]
 include::{kibana-root}/x-pack/platform/plugins/shared/embeddable_enhanced/README.asciidoc[leveloffset=+1]

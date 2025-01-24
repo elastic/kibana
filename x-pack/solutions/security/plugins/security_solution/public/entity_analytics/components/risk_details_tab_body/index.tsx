@@ -25,7 +25,7 @@ import { TopRiskScoreContributors } from '../top_risk_score_contributors';
 import { TopRiskScoreContributorsAlerts } from '../top_risk_score_contributors_alerts';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 import type { HostRiskScore, UserRiskScore } from '../../../../common/search_strategy';
-import { buildEntityNameFilter, RiskScoreEntity } from '../../../../common/search_strategy';
+import { EntityType, buildEntityNameFilter } from '../../../../common/search_strategy';
 import type { UsersComponentsQueryProps } from '../../../explore/users/pages/navigation/types';
 import type { HostsComponentsQueryProps } from '../../../explore/hosts/pages/navigation/types';
 import { useDashboardHref } from '../../../common/hooks/use_dashboard_href';
@@ -43,25 +43,25 @@ const StyledEuiFlexGroup = styled(EuiFlexGroup)`
 
 type ComponentsQueryProps = HostsComponentsQueryProps | UsersComponentsQueryProps;
 
-const getDashboardTitle = (riskEntity: RiskScoreEntity) =>
-  riskEntity === RiskScoreEntity.host ? RISKY_HOSTS_DASHBOARD_TITLE : RISKY_USERS_DASHBOARD_TITLE;
+const getDashboardTitle = (riskEntity: EntityType) =>
+  riskEntity === EntityType.host ? RISKY_HOSTS_DASHBOARD_TITLE : RISKY_USERS_DASHBOARD_TITLE;
 
 const RiskDetailsTabBodyComponent: React.FC<
   Pick<ComponentsQueryProps, 'startDate' | 'endDate' | 'setQuery' | 'deleteQuery'> & {
     entityName: string;
-    riskEntity: RiskScoreEntity;
+    riskEntity: EntityType;
   }
 > = ({ entityName, startDate, endDate, setQuery, deleteQuery, riskEntity }) => {
   const queryId = useMemo(
     () =>
-      riskEntity === RiskScoreEntity.host
+      riskEntity === EntityType.host
         ? HostRiskScoreQueryId.HOST_DETAILS_RISK_SCORE
         : UserRiskScoreQueryId.USER_DETAILS_RISK_SCORE,
     [riskEntity]
   );
 
   const severitySelectionRedux = useDeepEqualSelector((state: State) =>
-    riskEntity === RiskScoreEntity.host
+    riskEntity === EntityType.host
       ? hostsSelectors.hostRiskScoreSeverityFilterSelector()(state, hostsModel.HostsType.details)
       : usersSelectors.userRiskScoreSeverityFilterSelector()(state)
   );
@@ -82,7 +82,7 @@ const RiskDetailsTabBodyComponent: React.FC<
     useQueryToggle(`${queryId} contributors`);
 
   const filterQuery = useMemo(
-    () => (entityName ? buildEntityNameFilter([entityName], riskEntity) : {}),
+    () => (entityName ? buildEntityNameFilter(riskEntity, [entityName]) : {}),
     [entityName, riskEntity]
   );
 
@@ -99,7 +99,7 @@ const RiskDetailsTabBodyComponent: React.FC<
   const rules = useMemo(() => {
     const lastRiskItem = data && data.length > 0 ? data[data.length - 1] : null;
     if (lastRiskItem) {
-      return riskEntity === RiskScoreEntity.host
+      return riskEntity === EntityType.host
         ? (lastRiskItem as HostRiskScore).host.risk.rule_risks
         : (lastRiskItem as UserRiskScore).user.risk.rule_risks;
     }
@@ -187,10 +187,8 @@ const RiskDetailsTabBodyComponent: React.FC<
             <EuiFlexItem grow={2}>
               <RiskScoreOverTime
                 from={startDate}
-                loading={loading}
                 queryId={queryId}
                 riskEntity={riskEntity}
-                riskScore={data}
                 title={i18n.RISK_SCORE_OVER_TIME(riskEntity)}
                 to={endDate}
                 toggleQuery={toggleOverTimeQuery}

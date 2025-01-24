@@ -17,7 +17,11 @@
   },
   "action_task_params": {
     "dynamic": false,
-    "properties": {}
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      }
+    }
   },
   "ad_hoc_run_params": {
     "dynamic": false,
@@ -1620,6 +1624,10 @@
           }
         }
       },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
+      },
       "data_output_id": {
         "type": "keyword"
       },
@@ -1989,6 +1997,10 @@
             "type": "keyword"
           }
         }
+      },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
@@ -3650,6 +3662,9 @@
         "type": "keyword"
       },
       "partition": {
+        "type": "integer"
+      },
+      "priority": {
         "type": "integer"
       },
       "retryAt": {

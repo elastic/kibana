@@ -5,7 +5,8 @@
  * 2.0.
  */
 import { convertToBuiltInComparators } from '@kbn/observability-plugin/common';
-import { Aggregators, MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import type { MetricExpressionParams } from '../../../../../common/alerting/metrics';
+import { Aggregators } from '../../../../../common/alerting/metrics';
 import { createConditionScript } from './create_condition_script';
 import { createLastPeriod } from './wrap_in_period';
 

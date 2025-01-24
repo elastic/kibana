@@ -7,7 +7,7 @@
 import * as t from 'io-ts';
 import { either } from 'fp-ts/lib/Either';
 import { i18n } from '@kbn/i18n';
-import { PackagePolicyVars, SettingsRow } from '../typings';
+import type { PackagePolicyVars, SettingsRow } from '../typings';
 import { isSettingsFormValid, OPTIONAL_LABEL } from '../settings_form/utils';
 
 const arrayRegex = new RegExp(/[\[\]]/);

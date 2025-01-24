@@ -58,7 +58,7 @@ export const OptionsListPopoverSuggestions = ({
     api.invalidSelections$,
     api.availableOptions$,
     api.totalCardinality$,
-    api.dataLoading,
+    api.dataLoading$,
     api.fieldFormatter,
     api.parentApi.allowExpensiveQueries$
   );

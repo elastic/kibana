@@ -15,7 +15,7 @@ import { DataView } from '@kbn/data-views-plugin/common';
 import { DATA_VIEW_SAVED_OBJECT_TYPE } from '@kbn/data-views-plugin/public';
 import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import { i18n } from '@kbn/i18n';
-import { initializeTitles, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
+import { initializeTitleManager, useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyDataViewPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { euiThemeVars } from '@kbn/ui-theme';
 import {
@@ -70,7 +70,7 @@ export const getFieldListFactory = (
     },
     buildEmbeddable: async (initialState, buildApi) => {
       const subscriptions = new Subscription();
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(initialState);
+      const titleManager = initializeTitleManager(initialState);
 
       // set up data views
       const [allDataViews, defaultDataViewId] = await Promise.all([
@@ -106,8 +106,8 @@ export const getFieldListFactory = (
 
       const api = buildApi(
         {
-          ...titlesApi,
-          dataViews: dataViews$,
+          ...titleManager.api,
+          dataViews$,
           selectedFields: selectedFieldNames$,
           serializeState: () => {
             const dataViewId = selectedDataViewId$.getValue();
@@ -122,7 +122,7 @@ export const getFieldListFactory = (
               : [];
             return {
               rawState: {
-                ...serializeTitles(),
+                ...titleManager.serialize(),
                 // here we skip serializing the dataViewId, because the reference contains that information.
                 selectedFieldNames: selectedFieldNames$.getValue(),
               },
@@ -131,7 +131,7 @@ export const getFieldListFactory = (
           },
         },
         {
-          ...titleComparators,
+          ...titleManager.comparators,
           dataViewId: [selectedDataViewId$, (value) => selectedDataViewId$.next(value)],
           selectedFieldNames: [
             selectedFieldNames$,

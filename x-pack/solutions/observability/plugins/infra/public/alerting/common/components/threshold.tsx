@@ -10,7 +10,7 @@ import { Chart, Metric, Settings } from '@elastic/charts';
 import { EuiIcon, EuiPanel, useEuiBackgroundColor } from '@elastic/eui';
 import type { PartialTheme, Theme } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
-import { COMPARATORS } from '@kbn/alerting-comparators';
+import type { COMPARATORS } from '@kbn/alerting-comparators';
 
 export interface ChartProps {
   theme?: PartialTheme;

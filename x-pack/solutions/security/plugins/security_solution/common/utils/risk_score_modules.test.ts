@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { RiskScoreEntity } from '../search_strategy';
+import { EntityType } from '../search_strategy';
 import {
   getCreateLatestTransformOptions,
   getCreateMLHostPivotTransformOptions,
@@ -37,7 +37,7 @@ import {
 
 const mockSpaceId = 'customSpaceId';
 
-describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('Risk Score Modules', (entity) => {
+describe.each([[EntityType.host], [EntityType.user]])('Risk Score Modules', (entity) => {
   test(`getRiskScorePivotTransformId - ${entity}`, () => {
     const id = getRiskScorePivotTransformId(entity, mockSpaceId);
     expect(id).toMatchInlineSnapshot(`"ml_${entity}riskscore_pivot_transform_customSpaceId"`);
@@ -119,7 +119,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('Risk Score Modu
     entity.charAt(0).toUpperCase() + entity.slice(1)
   }PivotTransformOptions`, () => {
     const fn =
-      entity === RiskScoreEntity.host
+      entity === EntityType.host
         ? getCreateMLHostPivotTransformOptions
         : getCreateMLUserPivotTransformOptions;
     const options = fn({
@@ -129,7 +129,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('Risk Score Modu
   });
   test(`getRisk${entity.charAt(0).toUpperCase() + entity.slice(1)}CreateLevelScriptOptions`, () => {
     const fn =
-      entity === RiskScoreEntity.host
+      entity === EntityType.host
         ? getRiskHostCreateLevelScriptOptions
         : getRiskUserCreateLevelScriptOptions;
     const options = fn();
@@ -137,7 +137,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('Risk Score Modu
   });
   test(`getRisk${entity.charAt(0).toUpperCase() + entity.slice(1)}CreateMapScriptOptions`, () => {
     const fn =
-      entity === RiskScoreEntity.host
+      entity === EntityType.host
         ? getRiskHostCreateMapScriptOptions
         : getRiskUserCreateMapScriptOptions;
     const options = fn();
@@ -147,7 +147,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('Risk Score Modu
     entity.charAt(0).toUpperCase() + entity.slice(1)
   }CreateReduceScriptOptions`, () => {
     const fn =
-      entity === RiskScoreEntity.host
+      entity === EntityType.host
         ? getRiskHostCreateReduceScriptOptions
         : getRiskUserCreateReduceScriptOptions;
     const options = fn();
@@ -157,7 +157,7 @@ describe.each([[RiskScoreEntity.host], [RiskScoreEntity.user]])('Risk Score Modu
   /**
    * User risk score doesn't have init script, so we only check for host
    */
-  if (entity === RiskScoreEntity.host) {
+  if (entity === EntityType.host) {
     test(`getRiskHostCreateInitScriptOptions`, () => {
       const options = getRiskHostCreateInitScriptOptions();
       expect(options).toMatchSnapshot();

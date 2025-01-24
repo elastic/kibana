@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
-import { Filter } from '../../../../../../common/custom_link/custom_link_types';
+import type { Filter } from '../../../../../../common/custom_link/custom_link_types';
 import { useApmPluginContext } from '../../../../../context/apm_plugin/use_apm_plugin_context';
 import { FiltersSection } from './filters_section';
 import { FlyoutFooter } from './flyout_footer';

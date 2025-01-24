@@ -4,7 +4,8 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { MetricDatum, MetricTrendShape } from '@elastic/charts';
+import type { MetricWTrend } from '@elastic/charts';
+import { MetricTrendShape } from '@elastic/charts';
 import { i18n } from '@kbn/i18n';
 import { EuiIcon, EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner } from '@elastic/eui';
 import React, { useCallback } from 'react';
@@ -105,7 +106,7 @@ export function MobileLocationStats({
     [comparisonEnabled, previousPeriodLabel]
   );
 
-  const metrics: MetricDatum[] = [
+  const metrics: MetricWTrend[] = [
     {
       color: euiTheme.eui.euiColorLightestShade,
       title: i18n.translate('xpack.apm.mobile.location.metrics.http.requests.title', {
@@ -117,7 +118,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('visBarHorizontal'),
       value: currentPeriod?.mostRequests.location ?? NOT_AVAILABLE_LABEL,
-      trend: currentPeriod?.mostRequests.timeseries,
+      trend: currentPeriod?.mostRequests.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -131,7 +132,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('bug'),
       value: currentPeriod?.mostCrashes.location ?? NOT_AVAILABLE_LABEL,
-      trend: currentPeriod?.mostCrashes.timeseries,
+      trend: currentPeriod?.mostCrashes.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -145,7 +146,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('timeslider'),
       value: currentPeriod?.mostSessions.location ?? NOT_AVAILABLE_LABEL,
-      trend: currentPeriod?.mostSessions.timeseries,
+      trend: currentPeriod?.mostSessions.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -159,7 +160,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('launch'),
       value: currentPeriod?.mostLaunches.location ?? NOT_AVAILABLE_LABEL,
-      trend: currentPeriod?.mostLaunches.timeseries,
+      trend: currentPeriod?.mostLaunches.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
   ];

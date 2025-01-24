@@ -5,14 +5,12 @@
  * 2.0.
  */
 
-import {
+import type {
   EMSFileSourceDescriptor,
   LayerDescriptor as BaseLayerDescriptor,
   VectorLayerDescriptor as BaseVectorLayerDescriptor,
-  AGG_TYPE,
-  LAYER_TYPE,
-  SOURCE_TYPES,
 } from '@kbn/maps-plugin/common';
+import { AGG_TYPE, LAYER_TYPE, SOURCE_TYPES } from '@kbn/maps-plugin/common';
 import { v4 as uuidv4 } from 'uuid';
 import type { MapsStartApi } from '@kbn/maps-plugin/public';
 import { i18n } from '@kbn/i18n';

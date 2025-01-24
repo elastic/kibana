@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import { IToasts } from '@kbn/core-notifications-browser';
-import { IKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
+import type { IToasts } from '@kbn/core-notifications-browser';
+import type { IKbnUrlStateStorage } from '@kbn/kibana-utils-plugin/public';
+import { withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
 import * as Array from 'fp-ts/lib/Array';
 import * as Either from 'fp-ts/lib/Either';
 import { identity, pipe } from 'fp-ts/lib/function';
 import * as rt from 'io-ts';
-import { InvokeCreator } from 'xstate';
+import type { InvokeCreator } from 'xstate';
 import {
   defaultFilterStateKey,
   defaultPositionStateKey,

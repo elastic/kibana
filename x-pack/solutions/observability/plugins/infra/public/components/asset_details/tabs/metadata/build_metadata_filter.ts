@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { buildPhrasesFilter, buildPhraseFilter, FilterStateStore } from '@kbn/es-query';
+import type { FilterStateStore } from '@kbn/es-query';
+import { buildPhrasesFilter, buildPhraseFilter } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/common';
 
 export function buildMetadataFilter({

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { ApmDocumentType } from '../../../../common/document_type';
 import {
@@ -14,7 +14,7 @@ import {
   SPAN_DESTINATION_SERVICE_RESPONSE_TIME_SUM,
 } from '../../../../common/es_fields/apm';
 import { RollupInterval } from '../../../../common/rollup';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 import { fetchSeries } from './fetch_timeseries';
 
 export async function getExitSpanLatency({

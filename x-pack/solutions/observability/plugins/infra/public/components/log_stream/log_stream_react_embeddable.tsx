@@ -5,19 +5,20 @@
  * 2.0.
  */
 
-import React, { FC, PropsWithChildren, useEffect, useMemo, useState } from 'react';
+import type { FC, PropsWithChildren } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { EuiCallOut, EuiLink } from '@elastic/eui';
-import { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
+import type { ReactEmbeddableFactory } from '@kbn/embeddable-plugin/public';
 import {
   initializeTimeRange,
-  initializeTitles,
+  initializeTitleManager,
   useFetchContext,
 } from '@kbn/presentation-publishing';
 import { LogStream } from '@kbn/logs-shared-plugin/public';
-import { AppMountParameters, CoreStart } from '@kbn/core/public';
+import type { AppMountParameters, CoreStart } from '@kbn/core/public';
 import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
-import { Query } from '@kbn/es-query';
+import type { Query } from '@kbn/es-query';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import { euiThemeVars } from '@kbn/ui-theme';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
@@ -26,7 +27,7 @@ import type { LogStreamApi, LogStreamSerializedState, Services } from './types';
 import { datemathToEpochMillis } from '../../utils/datemath';
 import { LOG_STREAM_EMBEDDABLE } from './constants';
 import { useKibanaContextForPluginProvider } from '../../hooks/use_kibana';
-import { InfraClientStartDeps, InfraClientStartExports } from '../../types';
+import type { InfraClientStartDeps, InfraClientStartExports } from '../../types';
 
 export function getLogStreamEmbeddableFactory(services: Services) {
   const factory: ReactEmbeddableFactory<
@@ -38,24 +39,24 @@ export function getLogStreamEmbeddableFactory(services: Services) {
     deserializeState: (state) => state.rawState,
     buildEmbeddable: async (state, buildApi) => {
       const timeRangeContext = initializeTimeRange(state);
-      const { titlesApi, titleComparators, serializeTitles } = initializeTitles(state);
+      const titleManager = initializeTitleManager(state);
 
       const api = buildApi(
         {
           ...timeRangeContext.api,
-          ...titlesApi,
+          ...titleManager.api,
           serializeState: () => {
             return {
               rawState: {
                 ...timeRangeContext.serialize(),
-                ...serializeTitles(),
+                ...titleManager.serialize(),
               },
             };
           },
         },
         {
           ...timeRangeContext.comparators,
-          ...titleComparators,
+          ...titleManager.comparators,
         }
       );
 

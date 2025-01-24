@@ -360,6 +360,10 @@ export class ConsolePageObject extends FtrService {
     });
   }
 
+  public async copyVariableToClipboard(name: string) {
+    await this.testSubjects.click(`variableCopyButton-${name}`);
+  }
+
   public async getVariables() {
     const table = await this.testSubjects.find('variablesTable');
     const rows = await table.findAllByClassName('euiTableRow');

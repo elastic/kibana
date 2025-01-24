@@ -21,7 +21,7 @@ import {
 } from '@elastic/charts';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { useBaseChartTheme } from '../../../../../../hooks/use_base_chart_theme';
+import { useElasticChartsTheme } from '@kbn/charts-theme';
 import { WaterfallChartFixedAxisContainer } from './styles';
 import { WaterfallChartMarkers } from './waterfall_marker/waterfall_markers';
 
@@ -32,7 +32,7 @@ interface Props {
 }
 
 export const WaterfallChartFixedAxis = ({ tickFormat, domain, barStyleAccessor }: Props) => {
-  const baseChartTheme = useBaseChartTheme();
+  const baseChartTheme = useElasticChartsTheme();
   const { euiTheme } = useEuiTheme();
 
   return (

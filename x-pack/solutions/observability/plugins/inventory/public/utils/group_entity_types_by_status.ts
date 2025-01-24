@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { EntityType } from '../../common/rt_types';
+import type { EntityType } from '../../common/rt_types';
 
 export function groupEntityTypesByStatus(entityTypes: EntityType) {
   const entityTypesKeys = Object.keys(entityTypes);

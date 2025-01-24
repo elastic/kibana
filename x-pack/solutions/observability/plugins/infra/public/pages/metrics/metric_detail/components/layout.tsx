@@ -6,8 +6,8 @@
  */
 
 import React from 'react';
-import { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
-import { LayoutProps } from '../types';
+import type { InventoryItemType } from '@kbn/metrics-data-access-plugin/common';
+import type { LayoutProps } from '../types';
 import { AwsEC2Layout } from './layouts/aws_ec2_layout';
 import { AwsRDSLayout } from './layouts/aws_rds_layout';
 import { AwsS3Layout } from './layouts/aws_s3_layout';

@@ -7,11 +7,12 @@
 
 import type { Logger } from '@kbn/core/server';
 import type { InferenceClient } from '@kbn/inference-plugin/server';
-import { SiemMigrationRuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
+import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
 import { getEsqlKnowledgeBase } from '../../../../../util/esql_knowledge_base_caller';
 import type { GraphNode } from '../../types';
 import { SIEM_RULE_MIGRATION_CIM_ECS_MAP } from './cim_ecs_map';
 import { ESQL_TRANSLATE_ECS_MAPPING_PROMPT } from './prompts';
+import { cleanMarkdown, generateAssistantComment } from '../../../../../util/comments';
 
 interface GetEcsMappingNodeParams {
   inferenceClient: InferenceClient;
@@ -47,7 +48,7 @@ export const getEcsMappingNode = ({
 
     return {
       response,
-      comments: [ecsSummary],
+      comments: [generateAssistantComment(cleanMarkdown(ecsSummary))],
       translation_finalized: true,
       translation_result: translationResult,
       elastic_rule: {
@@ -58,9 +59,9 @@ export const getEcsMappingNode = ({
   };
 };
 
-const getTranslationResult = (esqlQuery: string): SiemMigrationRuleTranslationResult => {
-  if (esqlQuery.match(/\[(macro):[\s\S]*\]/)) {
-    return SiemMigrationRuleTranslationResult.PARTIAL;
+const getTranslationResult = (esqlQuery: string): RuleTranslationResult => {
+  if (esqlQuery.match(/\[(macro|lookup):[\s\S]*\]/)) {
+    return RuleTranslationResult.PARTIAL;
   }
-  return SiemMigrationRuleTranslationResult.FULL;
+  return RuleTranslationResult.FULL;
 };

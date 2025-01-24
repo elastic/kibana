@@ -13,6 +13,10 @@ import { formatDurationFromTimeUnitChar } from '@kbn/observability-plugin/common
 import { ML_ANOMALY_SEVERITY } from '@kbn/ml-anomaly-utils/anomaly_severity';
 import { ML_ANOMALY_THRESHOLD } from '@kbn/ml-anomaly-utils/anomaly_threshold';
 import { ApmRuleType } from '@kbn/rule-data-utils';
+import type { ErrorCountRuleParams } from '@kbn/response-ops-rule-params/error_count';
+import type { TransactionDurationRuleParams } from '@kbn/response-ops-rule-params/transaction_duration';
+import type { AnomalyRuleParams } from '@kbn/response-ops-rule-params/apm_anomaly';
+import type { TransactionErrorRateRuleParams } from '@kbn/response-ops-rule-params/transaction_error_rate';
 import {
   ERROR_GROUP_ID,
   ERROR_GROUP_NAME,
@@ -30,6 +34,13 @@ export enum AggregationType {
   Avg = 'avg',
   P95 = '95th',
   P99 = '99th',
+}
+
+export interface ApmRuleParamsType {
+  [ApmRuleType.TransactionDuration]: TransactionDurationRuleParams;
+  [ApmRuleType.ErrorCount]: ErrorCountRuleParams;
+  [ApmRuleType.Anomaly]: AnomalyRuleParams;
+  [ApmRuleType.TransactionErrorRate]: TransactionErrorRateRuleParams;
 }
 
 export const THRESHOLD_MET_GROUP_ID = 'threshold_met';

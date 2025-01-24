@@ -17,15 +17,31 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
   const { router } = setupDeps;
 
   const useKibanaAccessControl = reporting.getDeprecatedAllowedRoles() === false; // true if Reporting's deprecated access control feature is disabled
-  const kibanaAccessControlTags = useKibanaAccessControl ? ['access:generateReport'] : [];
+  const kibanaAccessControlTags = useKibanaAccessControl ? ['generateReport'] : [];
 
   const registerPublicPostGenerationEndpoint = () => {
     const path = `${PUBLIC_ROUTES.GENERATE_PREFIX}/{exportType}`;
     router.post(
       {
         path,
+        security: {
+          authz: {
+            ...(kibanaAccessControlTags.length
+              ? {
+                  requiredPrivileges: kibanaAccessControlTags,
+                }
+              : {
+                  enabled: false,
+                  reason:
+                    'This route is opted out from authorization because of the kibana access control flag',
+                }),
+          },
+        },
         validate: RequestHandler.getValidation(),
-        options: { tags: kibanaAccessControlTags, access: 'public' },
+        options: {
+          tags: kibanaAccessControlTags.map((controlAccessTag) => `access:${controlAccessTag}`),
+          access: 'public',
+        },
       },
       authorizedUserPreRouting(reporting, async (user, context, req, res) => {
         try {
@@ -57,6 +73,12 @@ export function registerGenerationRoutesPublic(reporting: ReportingCore, logger:
     router.get(
       {
         path: `${PUBLIC_ROUTES.GENERATE_PREFIX}/{p*}`,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: false,
         options: { access: 'public' },
       },

@@ -8,10 +8,12 @@
 import React from 'react';
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import {
+import type {
   InfraFormatter,
   InfraWaffleMapBounds,
   InfraWaffleMapLegend,
+} from '../../../../../common/inventory/types';
+import {
   SteppedGradientLegendRT,
   StepLegendRT,
   GradientLegendRT,

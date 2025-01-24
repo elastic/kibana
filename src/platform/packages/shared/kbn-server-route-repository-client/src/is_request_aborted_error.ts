@@ -9,6 +9,6 @@
 
 import { get } from 'lodash';
 
-export function isRequestAbortedError(error: unknown): error is Error {
+export function isRequestAbortedError(error: unknown): error is Error & { name: 'AbortError' } {
   return get(error, 'name') === 'AbortError';
 }

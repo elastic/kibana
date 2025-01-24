@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { CoreStart, KibanaRequest } from '@kbn/core/server';
+import type { CoreStart, KibanaRequest } from '@kbn/core/server';
 
 export function isSuperuser({
   coreStart,

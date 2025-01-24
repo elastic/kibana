@@ -7,6 +7,7 @@
 
 import React, { useCallback } from 'react';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { CenteredLoadingSpinner } from '../../../../../../common/components/centered_loading_spinner';
 import { useKibana } from '../../../../../../common/lib/kibana/kibana_react';
 import { useDefinedLocalStorage } from '../../../../hooks/use_stored_state';
 import type { OnboardingCardComponent } from '../../../../../types';
@@ -35,9 +36,15 @@ export const AIConnectorCard: OnboardingCardComponent<AIConnectorCardMetadata> =
     [setComplete, setStoredConnectorId]
   );
 
-  const connectors = checkCompleteMetadata?.connectors;
-  const canExecuteConnectors = checkCompleteMetadata?.canExecuteConnectors;
-  const canCreateConnectors = checkCompleteMetadata?.canCreateConnectors;
+  if (!checkCompleteMetadata) {
+    return (
+      <OnboardingCardContentPanel>
+        <CenteredLoadingSpinner />
+      </OnboardingCardContentPanel>
+    );
+  }
+
+  const { connectors, canExecuteConnectors, canCreateConnectors } = checkCompleteMetadata;
 
   return (
     <OnboardingCardContentPanel>

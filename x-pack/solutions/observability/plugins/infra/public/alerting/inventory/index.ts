@@ -7,17 +7,15 @@
 
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { RuleTypeParams } from '@kbn/alerting-plugin/common';
-import { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
+import type { RuleTypeParams } from '@kbn/alerting-plugin/common';
+import type { ObservabilityRuleTypeModel } from '@kbn/observability-plugin/public';
 import type { LocatorPublic } from '@kbn/share-plugin/common';
 import type {
   AssetDetailsLocatorParams,
   InventoryLocatorParams,
 } from '@kbn/observability-shared-plugin/common';
-import {
-  InventoryMetricConditions,
-  METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID,
-} from '../../../common/alerting/metrics';
+import type { InventoryMetricConditions } from '../../../common/alerting/metrics';
+import { METRIC_INVENTORY_THRESHOLD_ALERT_TYPE_ID } from '../../../common/alerting/metrics';
 import { validateMetricThreshold } from './components/validation';
 import { getRuleFormat } from './rule_data_formatters';
 

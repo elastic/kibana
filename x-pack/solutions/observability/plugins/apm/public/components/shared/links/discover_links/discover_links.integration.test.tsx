@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { Location } from 'history';
+import type { Location } from 'history';
 import React from 'react';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
-import { Span } from '../../../../../typings/es_schemas/ui/span';
-import { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
+import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import type { Span } from '../../../../../typings/es_schemas/ui/span';
+import type { Transaction } from '../../../../../typings/es_schemas/ui/transaction';
 import * as useAdHocApmDataView from '../../../../hooks/use_adhoc_apm_data_view';
 import { getRenderedHref } from '../../../../utils/test_helpers';
 import { DiscoverErrorLink } from './discover_error_link';

@@ -5,13 +5,13 @@
  * 2.0.
  */
 
-import {
-  ControlGroupRenderer,
+import type {
   ControlGroupRendererApi,
   ControlGroupRuntimeState,
   DataControlApi,
 } from '@kbn/controls-plugin/public';
-import { DataView } from '@kbn/data-views-plugin/public';
+import { ControlGroupRenderer } from '@kbn/controls-plugin/public';
+import type { DataView } from '@kbn/data-views-plugin/public';
 import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
 import { useControlPanels } from '@kbn/observability-shared-plugin/public';
@@ -60,7 +60,7 @@ export const ControlsContent: React.FC<Props> = ({
         Object.keys(children).map((childId) => {
           const child = children[childId] as DataControlApi;
           child.CustomPrependComponent = () => (
-            <ControlTitle title={child.panelTitle.getValue()} embeddableId={childId} />
+            <ControlTitle title={child.title$.getValue()} embeddableId={childId} />
           );
         });
       });

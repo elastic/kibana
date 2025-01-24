@@ -6,16 +6,16 @@
  */
 
 import { loggerMock } from '@kbn/logging-mocks';
-import { SavedObjectsClientContract } from '@kbn/core/server';
+import type { SavedObjectsClientContract } from '@kbn/core/server';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
-import { MetricsExplorerViewAttributes } from '../../../common/metrics_explorer_views';
+import type { MetricsExplorerViewAttributes } from '../../../common/metrics_explorer_views';
 
-import { InfraSource } from '../../lib/sources';
+import type { InfraSource } from '../../lib/sources';
 import { createInfraSourcesMock } from '../../lib/sources/mocks';
 import { metricsExplorerViewSavedObjectName } from '../../saved_objects/metrics_explorer_view';
 import { MetricsExplorerViewsClient } from './metrics_explorer_views_client';
 import { createMetricsExplorerViewMock } from '../../../common/metrics_explorer_views/metrics_explorer_view.mock';
-import { UpdateMetricsExplorerViewAttributesRequestPayload } from '../../../common/http_api/latest';
+import type { UpdateMetricsExplorerViewAttributesRequestPayload } from '../../../common/http_api/latest';
 
 describe('MetricsExplorerViewsClient class', () => {
   const mockFindMetricsExplorerList = (

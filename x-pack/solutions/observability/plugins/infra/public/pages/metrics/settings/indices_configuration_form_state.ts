@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { ReactNode, useCallback, useMemo, useState } from 'react';
+import type { ReactNode } from 'react';
+import { useCallback, useMemo, useState } from 'react';
 
 import {
   aggregateValidationErrors,

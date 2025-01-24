@@ -6,7 +6,7 @@
  */
 
 import React, { useState } from 'react';
-import { DataView } from '@kbn/data-views-plugin/common';
+import type { DataView } from '@kbn/data-views-plugin/common';
 import { EuiSpacer } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
 import { EmbeddedMap } from './embedded_map';

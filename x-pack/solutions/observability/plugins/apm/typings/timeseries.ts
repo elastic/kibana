@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AccessorFn,
   AreaSeriesStyle,
   Fit,
@@ -15,7 +15,7 @@ import {
   SeriesColorAccessorFn,
   SeriesColorsArray,
 } from '@elastic/charts';
-import { Maybe } from './common';
+import type { Maybe } from './common';
 
 export interface Coordinate {
   x: number;

@@ -6,7 +6,7 @@
  */
 
 import { euiStyled } from '@kbn/kibana-react-plugin/common';
-import {
+import type {
   LogEntriesSummaryBucket,
   LogEntriesSummaryHighlightsBucket,
   LogEntryTime,

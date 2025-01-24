@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ApmFetchDataResponse, FetchDataParams } from '@kbn/observability-plugin/public';
+import type { ApmFetchDataResponse, FetchDataParams } from '@kbn/observability-plugin/public';
 import { callApmApi } from './create_call_apm_api';
 
 export const fetchObservabilityOverviewPageData = async ({

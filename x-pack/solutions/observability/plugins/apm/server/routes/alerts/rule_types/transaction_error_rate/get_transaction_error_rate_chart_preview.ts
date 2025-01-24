@@ -14,21 +14,19 @@ import {
   EVENT_OUTCOME,
 } from '../../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../../common/utils/environment_query';
-import { AlertParams, PreviewChartResponse } from '../../route';
+import type { AlertParams, PreviewChartResponse } from '../../route';
 import {
   getSearchTransactionsEvents,
   getBackwardCompatibleDocumentTypeFilter,
   getProcessorEventForTransactions,
 } from '../../../../lib/helpers/transactions';
-import { APMConfig } from '../../../..';
-import { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../../..';
+import type { APMEventClient } from '../../../../lib/helpers/create_es_client/create_apm_event_client';
 import { EventOutcome } from '../../../../../common/event_outcome';
 import { getGroupByTerms } from '../utils/get_groupby_terms';
 import { getAllGroupByFields } from '../../../../../common/rules/get_all_groupby_fields';
-import {
-  BarSeriesDataMap,
-  getFilteredBarSeries,
-} from '../utils/get_filtered_series_for_preview_chart';
+import type { BarSeriesDataMap } from '../utils/get_filtered_series_for_preview_chart';
+import { getFilteredBarSeries } from '../utils/get_filtered_series_for_preview_chart';
 
 export async function getTransactionErrorRateChartPreview({
   config,
