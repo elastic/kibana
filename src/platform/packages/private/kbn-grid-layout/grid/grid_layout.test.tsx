@@ -79,16 +79,20 @@ describe('GridLayout', () => {
   it(`'renderPanelContents' is not called during dragging`, () => {
     renderGridLayout();
 
-    expect(mockRenderPanelContents).toHaveBeenCalledTimes(expectedInitPanelIdsInOrder.length); // renderPanelContents is called ONLY ONCE for each of 10 panels on initial render
+    // assert that renderPanelContents has been called ONLY ONCE for each of 10 panels on initial render
+    expect(mockRenderPanelContents).toHaveBeenCalledTimes(expectedInitPanelIdsInOrder.length);
     jest.clearAllMocks();
 
     const panelHandle = getPanelHandle('panel1');
     mouseStartDragging(panelHandle);
     mouseMoveTo({ clientX: 256, clientY: 128 });
-    expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called during dragging
+
+     // assert that renderPanelContents has not been called during dragging
+    expect(mockRenderPanelContents).toHaveBeenCalledTimes(0);
 
     mouseDrop(panelHandle);
-    expect(mockRenderPanelContents).toHaveBeenCalledTimes(0); // renderPanelContents should not be called after reordering
+     // assert that renderPanelContents has not been called after reordering
+    expect(mockRenderPanelContents).toHaveBeenCalledTimes(0);
   });
 
   it('panel gets active when dragged', () => {
