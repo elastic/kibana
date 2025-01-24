@@ -22,16 +22,20 @@ import { DASHBOARD_GRID_HEIGHT, DASHBOARD_MARGIN_SIZE } from './constants';
 import { DashboardGridItem } from './dashboard_grid_item';
 import { useLayoutStyles } from './use_layout_styles';
 
-export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTMLElement }) => {
+export const DashboardGrid = ({
+  dashboardContainerRef,
+}: {
+  dashboardContainerRef?: React.MutableRefObject<HTMLElement | null>;
+}) => {
   const dashboardApi = useDashboardApi();
   const layoutStyles = useLayoutStyles();
   const panelRefs = useRef<{ [panelId: string]: React.Ref<HTMLDivElement> }>({});
 
   const [expandedPanelId, panels, useMargins, viewMode] = useBatchedPublishingSubjects(
-    dashboardApi.expandedPanelId,
+    dashboardApi.expandedPanelId$,
     dashboardApi.panels$,
     dashboardApi.settings.useMargins$,
-    dashboardApi.viewMode
+    dashboardApi.viewMode$
   );
 
   const appFixedViewport = useAppFixedViewport();
@@ -103,11 +107,11 @@ export const DashboardGrid = ({ dashboardContainer }: { dashboardContainer?: HTM
           type={type}
           setDragHandles={setDragHandles}
           appFixedViewport={appFixedViewport}
-          dashboardContainer={dashboardContainer}
+          dashboardContainerRef={dashboardContainerRef}
         />
       );
     },
-    [appFixedViewport, dashboardApi, dashboardContainer]
+    [appFixedViewport, dashboardApi, dashboardContainerRef]
   );
 
   const memoizedgridLayout = useMemo(() => {

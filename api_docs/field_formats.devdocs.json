@@ -5643,7 +5643,7 @@
         "label": "FieldFormatsContentType",
         "description": [],
         "signature": [
-          "\"html\" | \"text\""
+          "\"text\" | \"html\""
         ],
         "path": "src/platform/plugins/shared/field_formats/common/types.ts",
         "deprecated": false,
@@ -6028,7 +6028,7 @@
         "label": "HTML_CONTEXT_TYPE",
         "description": [],
         "signature": [
-          "\"html\" | \"text\""
+          "\"text\" | \"html\""
         ],
         "path": "src/platform/plugins/shared/field_formats/common/content_types/html_content_type.ts",
         "deprecated": false,
@@ -6439,7 +6439,7 @@
         "label": "TEXT_CONTEXT_TYPE",
         "description": [],
         "signature": [
-          "\"html\" | \"text\""
+          "\"text\" | \"html\""
         ],
         "path": "src/platform/plugins/shared/field_formats/common/content_types/text_content_type.ts",
         "deprecated": false,
