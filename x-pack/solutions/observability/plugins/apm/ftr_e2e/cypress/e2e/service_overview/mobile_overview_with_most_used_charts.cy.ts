@@ -47,11 +47,11 @@ describe('Mobile Service overview page', () => {
 
   describe('Mobile service overview with charts', () => {
     beforeEach(() => {
-      cy.loginAsEditorUser();
-      cy.visitKibana(apmMobileServiceOverview);
       apiRequestsToIntercept.map(({ endpoint, aliasName }) => {
         cy.intercept('GET', endpoint).as(aliasName);
       });
+      cy.loginAsEditorUser();
+      cy.visitKibana(apmMobileServiceOverview);
     });
 
     describe('accessing android service page', () => {
