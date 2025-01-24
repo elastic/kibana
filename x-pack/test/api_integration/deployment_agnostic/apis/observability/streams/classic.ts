@@ -128,14 +128,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      expect(effectiveLifecycle).to.eql(
-        isServerless
-          ? { type: 'dlm' }
-          : {
-              policy: 'logs',
-              type: 'ilm',
-            }
-      );
+      expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
 
       expect(elasticsearchAssets).to.eql([
         {
