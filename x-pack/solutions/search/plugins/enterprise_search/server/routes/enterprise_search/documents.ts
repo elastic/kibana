@@ -9,7 +9,7 @@ import { schema } from '@kbn/config-schema';
 
 import { ErrorCode } from '../../../common/types/error_codes';
 import { getDocument } from '../../lib/indices/document/get_document';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isNotFoundException } from '../../utils/identify_exceptions';
 
