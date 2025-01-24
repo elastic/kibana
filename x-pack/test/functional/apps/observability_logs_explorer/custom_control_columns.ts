@@ -6,7 +6,7 @@
  */
 
 import { log, timerange } from '@kbn/apm-synthtrace-client';
-import expect from '@kbn/expect';
+import expect from '@kbn/expect/expect';
 import moment from 'moment';
 import { FtrProviderContext } from './config';
 
@@ -164,7 +164,11 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
             .timestamp(timestamp)
             .defaults({
               'error.exception': {
-                stacktrace: 'Error message in error.exception.stacktrace',
+                stacktrace: [
+                  {
+                    abs_path: 'abs_path',
+                  },
+                ],
               },
               'service.name': 'node-service',
             });
@@ -187,7 +191,11 @@ function generateLogsData({ to, count = 1 }: { to: string; count?: number }) {
             .timestamp(timestamp)
             .defaults({
               'error.log': {
-                stacktrace: 'Error message in error.log.stacktrace',
+                stacktrace: [
+                  {
+                    abs_path: 'abs_path',
+                  },
+                ],
               },
               'service.name': 'node-service',
             });
