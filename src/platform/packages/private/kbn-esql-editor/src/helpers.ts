@@ -327,7 +327,7 @@ export const getEditorOverwrites = (theme: EuiThemeComputed) => {
 
     .suggest-widget,
     .suggest-details-container {
-      @include euiBottomShadow;
+  
       border-radius: ${theme.border.radius.medium};
       border-bottom: ${theme.border.thin};
     }
