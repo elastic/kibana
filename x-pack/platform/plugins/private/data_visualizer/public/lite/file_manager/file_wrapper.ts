@@ -172,6 +172,9 @@ export class FileWrapper {
   public getFormat() {
     return this.analyzedFile$.getValue().results?.format;
   }
+  public getData() {
+    return this.analyzedFile$.getValue().data;
+  }
 
   public async import(id: string, index: string, pipelineId: string, mappings: any, pipeline: any) {
     this.setStatus({ importStatus: STATUS.STARTED });
@@ -181,12 +184,22 @@ export class FileWrapper {
       multilineStartPattern: this.analyzedFile$.getValue().results!.multiline_start_pattern,
     });
     importer.initializeWithoutCreate(index, mappings, pipeline);
-    importer.read(this.analyzedFile$.getValue().data!);
-    const resp = await importer.import(id, index, pipelineId, (p) => {
-      this.setStatus({ importProgress: p });
-    });
-    this.setStatus({ docCount: resp.docCount, importStatus: STATUS.COMPLETED });
-    return resp;
+    const data = this.getData();
+    if (data === null) {
+      this.setStatus({ importStatus: STATUS.FAILED });
+      return;
+    }
+    importer.read(data);
+    try {
+      const resp = await importer.import(id, index, pipelineId, (p) => {
+        this.setStatus({ importProgress: p });
+      });
+      this.setStatus({ docCount: resp.docCount, importStatus: STATUS.COMPLETED });
+      return resp;
+    } catch (error) {
+      this.setStatus({ importStatus: STATUS.FAILED });
+      return;
+    }
   }
 }
 

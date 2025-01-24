@@ -51,7 +51,7 @@ export const FilePicker: FC<Props> = ({ fileManager: fm }) => {
           initialPromptText={i18n.translate(
             'xpack.dataVisualizer.file.aboutPanel.selectOrDragAndDropFileDescription',
             {
-              defaultMessage: 'Select or drag and drop a file',
+              defaultMessage: 'Select or drag and drop files',
             }
           )}
           onChange={(files) => onFilePickerChange(files)}

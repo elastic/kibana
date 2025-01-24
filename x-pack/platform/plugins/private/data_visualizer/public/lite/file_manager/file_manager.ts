@@ -14,7 +14,7 @@ import { switchMap, combineLatest, BehaviorSubject } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
-import type { IngestPipeline } from '@kbn/file-upload-plugin/common/types';
+import type { ImportResponse, IngestPipeline } from '@kbn/file-upload-plugin/common/types';
 import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { AnalyzedFile } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
@@ -50,6 +50,7 @@ export interface UploadStatus {
   filesStatus: AnalyzedFile[];
   fileClashes: FileClash[];
   formatMix: boolean;
+  errors: Array<{ title: string; error: any }>;
 }
 
 export class FileManager {
@@ -82,6 +83,7 @@ export class FileManager {
     filesStatus: [],
     fileClashes: [],
     formatMix: false,
+    errors: [],
   });
 
   constructor(
@@ -248,39 +250,68 @@ export class FileManager {
       indexCreated: STATUS.STARTED,
       pipelineCreated: STATUS.STARTED,
     });
-    const initializeImportResp = await this.importer.initializeImport(
-      indexName,
-      this.settings,
-      this.mappings,
-      this.pipeline
-    );
-    this.timeFieldName = this.importer.getTimeField();
-    const indexCreated = initializeImportResp.index !== undefined;
-    const pipelineCreated = initializeImportResp.pipelineId !== undefined;
-    this.setStatus({
-      indexCreated: indexCreated ? STATUS.COMPLETED : STATUS.FAILED,
-      pipelineCreated: pipelineCreated ? STATUS.COMPLETED : STATUS.FAILED,
-    });
 
-    if (!indexCreated || !pipelineCreated) {
+    let indexCreated = false;
+    let pipelineCreated = false;
+    let initializeImportResp: ImportResponse | undefined;
+
+    try {
+      initializeImportResp = await this.importer.initializeImport(
+        indexName,
+        this.settings,
+        this.mappings,
+        this.pipeline
+      );
+      this.timeFieldName = this.importer.getTimeField();
+      indexCreated = initializeImportResp.index !== undefined;
+      pipelineCreated = initializeImportResp.pipelineId !== undefined;
+      this.setStatus({
+        indexCreated: indexCreated ? STATUS.COMPLETED : STATUS.FAILED,
+        pipelineCreated: pipelineCreated ? STATUS.COMPLETED : STATUS.FAILED,
+      });
+
+      if (initializeImportResp.error) {
+        throw initializeImportResp.error;
+      }
+    } catch (e) {
+      this.setStatus({
+        overallImportStatus: STATUS.FAILED,
+        errors: [{ title: 'Error initializing index and ingest pipeline', error: e }],
+      });
       return null;
     }
+
+    if (!indexCreated || !pipelineCreated || !initializeImportResp) {
+      return null;
+    }
+
     this.setStatus({
       fileImport: STATUS.STARTED,
     });
+
     // import data
     const files = this.getFiles();
-    await Promise.all(
-      files.map(async (file) => {
-        await file.import(
-          initializeImportResp.id,
-          indexName,
-          initializeImportResp.pipelineId!,
-          this.mappings,
-          this.pipeline
-        );
-      })
-    );
+
+    try {
+      await Promise.all(
+        files.map(async (file) => {
+          await file.import(
+            initializeImportResp!.id,
+            indexName,
+            initializeImportResp!.pipelineId!,
+            this.mappings,
+            this.pipeline
+          );
+        })
+      );
+    } catch (error) {
+      this.setStatus({
+        overallImportStatus: STATUS.FAILED,
+        errors: [{ title: 'Error importing data', error }],
+      });
+      return null;
+    }
+
     this.setStatus({
       fileImport: STATUS.COMPLETED,
     });
@@ -295,11 +326,19 @@ export class FileManager {
       dataViewResp = await createKibanaDataView(
         dataViewName,
         this.dataViewsContract,
-        this.timeFieldName
+        this.timeFieldName ?? undefined
       );
-      this.setStatus({
-        dataViewCreated: STATUS.COMPLETED,
-      });
+      if (dataViewResp.success === false) {
+        this.setStatus({
+          overallImportStatus: STATUS.FAILED,
+          errors: [{ title: 'Error creating data view', error: dataViewResp.error }],
+        });
+        return null;
+      } else {
+        this.setStatus({
+          dataViewCreated: STATUS.COMPLETED,
+        });
+      }
     }
 
     this.setStatus({
