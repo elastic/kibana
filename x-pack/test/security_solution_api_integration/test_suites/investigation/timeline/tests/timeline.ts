@@ -6,11 +6,15 @@
  */
 
 import expect from '@kbn/expect';
-import { SavedTimeline, TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
-import { TIMELINE_URL, TIMELINES_URL } from '@kbn/security-solution-plugin/common/constants';
+import { TimelineTypeEnum } from '@kbn/security-solution-plugin/common/api/timeline';
 import TestAgent from 'supertest/lib/agent';
 import { FtrProviderContextWithSpaces } from '../../../../ftr_provider_context_with_spaces';
-import { createBasicTimeline, createBasicTimelineTemplate } from '../../utils/timelines';
+import {
+  createBasicTimeline,
+  createBasicTimelineTemplate,
+  getTimelines,
+  resolveTimeline,
+} from '../../utils/timelines';
 
 export default function ({ getService }: FtrProviderContextWithSpaces) {
   const utils = getService('securitySolutionUtils');
@@ -25,9 +29,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         const titleToSaved = 'hello timeline';
         await createBasicTimeline(supertest, titleToSaved);
 
-        const resp = await supertest.get(TIMELINES_URL).set('kbn-xsrf', 'true');
-
-        const timelines = resp.body.timeline;
+        const {
+          body: { timeline: timelines },
+        } = await getTimelines(supertest);
 
         expect(timelines.length).to.greaterThan(0);
       });
@@ -36,11 +40,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         const titleToSaved = 'hello timeline';
         await createBasicTimeline(supertest, titleToSaved);
 
-        const resp = await supertest
-          .get(`${TIMELINES_URL}?page_size=1&page_index=1`)
-          .set('kbn-xsrf', 'true');
-
-        const timelines = resp.body.timeline;
+        const {
+          body: { timeline: timelines },
+        } = await getTimelines(supertest, { page_size: '1', page_index: '1' });
 
         expect(timelines.length).to.equal(1);
       });
@@ -49,11 +51,9 @@ export default function ({ getService }: FtrProviderContextWithSpaces) {
         const titleToSaved = 'hello timeline template';
         await createBasicTimelineTemplate(supertest, titleToSaved);
 
-        const resp = await supertest
-          .get(`${TIMELINES_URL}?timeline_type=template`)
-          .set('kbn-xsrf', 'true');
-
-        const templates: SavedTimeline[] = resp.body.timeline;
+        const {
+          body: { timeline: templates },
+        } = await getTimelines(supertest, { timeline_type: 'template' });
 
         expect(templates.length).to.greaterThan(0);
         expect(

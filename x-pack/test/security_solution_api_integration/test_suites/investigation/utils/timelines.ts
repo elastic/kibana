@@ -14,6 +14,7 @@ import {
   CreateTimelinesResponse,
   DeleteTimelinesRequestBody,
   GetTimelinesResponse,
+  GetTimelinesRequestQuery,
   PatchTimelineRequestBody,
   PersistFavoriteRouteRequestBody,
   PersistFavoriteRouteResponse,
@@ -111,12 +112,20 @@ export const createBasicTimelineTemplate = async (
 };
 
 export const getTimelines = async (
-  supertest: SuperTest.Agent
-): Promise<SuperTestResponse<GetTimelinesResponse>> =>
-  await supertest
-    .get(TIMELINES_URL)
-    .set('kbn-xsrf', 'true')
-    .set('elastic-api-version', '2023-10-31');
+  supertest: SuperTest.Agent,
+  options?: GetTimelinesRequestQuery
+): Promise<SuperTestResponse<GetTimelinesResponse>> => {
+  let url: string = TIMELINES_URL;
+
+  if (options) {
+    url += '?';
+    for (const [key, value] of Object.entries(options)) {
+      url += `${key}=${value}&`;
+    }
+  }
+
+  return await supertest.get(url).set('kbn-xsrf', 'true').set('elastic-api-version', '2023-10-31');
+};
 
 export const resolveTimeline = async (
   supertest: SuperTest.Agent,
