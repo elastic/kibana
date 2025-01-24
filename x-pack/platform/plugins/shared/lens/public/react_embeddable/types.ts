@@ -14,7 +14,6 @@ import type {
 } from '@kbn/es-query';
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
 import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { PublishesESQLVariables } from '@kbn/esql-variables-types';
 import type {
   HasEditCapabilities,
   HasLibraryTransforms,
@@ -531,6 +530,19 @@ export interface ControlGroupApi {
   addNewPanel: (panelState: Record<string, unknown>) => void;
 }
 
-export interface DashboardApi extends PresentationContainer, PublishesESQLVariables {
+interface ESQLVariablesCompatibleDashboardApi {
+  esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
   controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  children$: PublishingSubject<{ [key: string]: unknown }>;
 }
+
+export const isApiESQLVariablesCompatible = (
+  api: unknown | null
+): api is ESQLVariablesCompatibleDashboardApi => {
+  return Boolean(
+    api &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.esqlVariables$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined
+  );
+};

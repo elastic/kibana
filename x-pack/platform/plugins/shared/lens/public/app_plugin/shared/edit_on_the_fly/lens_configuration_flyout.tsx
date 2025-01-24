@@ -54,6 +54,7 @@ import { SuggestionPanel } from '../../../editor_frame_service/editor_frame/sugg
 import { useApplicationUserMessages } from '../../get_application_user_messages';
 import { trackSaveUiCounterEvents } from '../../../lens_ui_telemetry';
 import { ESQLDataGridAccordion } from './esql_data_grid_accordion';
+import { isApiESQLVariablesCompatible } from '../../../react_embeddable/types';
 
 export function LensEditConfigurationFlyout({
   attributes,
@@ -79,7 +80,7 @@ export function LensEditConfigurationFlyout({
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
   hideTimeFilterInfo,
-  dashboardApi,
+  parentApi,
   panelId,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
@@ -99,9 +100,15 @@ export function LensEditConfigurationFlyout({
   const datasourceState = attributes.state.datasourceStates[datasourceId];
   const activeDatasource = datasourceMap[datasourceId];
 
-  const dashboardPanels = useStateFromPublishingSubject(dashboardApi?.children$);
-  const controlGroupApi = useStateFromPublishingSubject(dashboardApi?.controlGroupApi$);
-  const esqlVariables = useStateFromPublishingSubject(dashboardApi?.esqlVariables$);
+  const dashboardPanels = useStateFromPublishingSubject(
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.children$ : undefined
+  );
+  const controlGroupApi = useStateFromPublishingSubject(
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.controlGroupApi$ : undefined
+  );
+  const esqlVariables = useStateFromPublishingSubject(
+    isApiESQLVariablesCompatible(parentApi) ? parentApi?.esqlVariables$ : undefined
+  );
 
   const { datasourceStates, visualization, isLoading, annotationGroups, searchSessionId } =
     useLensSelector((state) => state.lens);

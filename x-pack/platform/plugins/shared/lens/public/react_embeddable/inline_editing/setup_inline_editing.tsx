@@ -18,7 +18,6 @@ import {
   LensInternalApi,
   LensRuntimeState,
   TypedLensSerializedState,
-  DashboardApi,
 } from '../types';
 import { PanelManagementApi } from './panel_management';
 import { getStateManagementForInlineEditing } from './state_management';
@@ -139,7 +138,7 @@ export function prepareInlineEditPanel(
           }
         }}
         hideTimeFilterInfo={hideTimeFilterInfo}
-        dashboardApi={parentApi as DashboardApi}
+        parentApi={parentApi}
       />
     );
   };
