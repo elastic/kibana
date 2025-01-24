@@ -125,7 +125,6 @@ import {
   InstallMigrationRulesRequestBodyInput,
 } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { InstallPrepackedTimelinesRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/install_prepackaged_timelines/install_prepackaged_timelines_route.gen';
-import { InstallTranslatedMigrationRulesRequestParamsInput } from '@kbn/security-solution-plugin/common/siem_migrations/model/api/rules/rule_migration.gen';
 import { ListEntitiesRequestQueryInput } from '@kbn/security-solution-plugin/common/api/entity_analytics/entity_store/entities/list_entities.gen';
 import { PatchRuleRequestBodyInput } from '@kbn/security-solution-plugin/common/api/detection_engine/rule_management/crud/patch_rule/patch_rule_route.gen';
 import { PatchTimelineRequestBodyInput } from '@kbn/security-solution-plugin/common/api/timeline/patch_timelines/patch_timeline_route.gen';
@@ -1235,27 +1234,6 @@ finalize it.
         .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .send(props.body as object);
     },
-    /**
-     * Installs all translated migration rules
-     */
-    installTranslatedMigrationRules(
-      props: InstallTranslatedMigrationRulesProps,
-      kibanaSpace: string = 'default'
-    ) {
-      return supertest
-        .post(
-          routeWithNamespace(
-            replaceParams(
-              '/internal/siem_migrations/rules/{migration_id}/install_translated',
-              props.params
-            ),
-            kibanaSpace
-          )
-        )
-        .set('kbn-xsrf', 'true')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana');
-    },
     internalUploadAssetCriticalityRecords(kibanaSpace: string = 'default') {
       return supertest
         .post(routeWithNamespace('/internal/asset_criticality/upload_csv', kibanaSpace))
@@ -1892,9 +1870,6 @@ export interface InstallMigrationRulesProps {
 }
 export interface InstallPrepackedTimelinesProps {
   body: InstallPrepackedTimelinesRequestBodyInput;
-}
-export interface InstallTranslatedMigrationRulesProps {
-  params: InstallTranslatedMigrationRulesRequestParamsInput;
 }
 export interface ListEntitiesProps {
   query: ListEntitiesRequestQueryInput;
