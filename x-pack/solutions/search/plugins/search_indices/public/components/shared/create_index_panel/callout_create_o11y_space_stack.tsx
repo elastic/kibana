@@ -16,22 +16,20 @@ export const CreateIndexPanelCreateO11ySpaceBtn = () => {
   }, [http]);
 
   return (
-    <>
-      <EuiButtonEmpty
-        color="text"
-        iconSide="right"
-        iconType="popout"
-        data-test-subj="createO11ySpaceBtn"
-        href={o11yCreateSpaceLink}
-        target="_blank"
-      >
-        {i18n.translate(
-          'xpack.searchIndices.shared.createIndex.observabilityCallout.createO11ySpace.button',
-          {
-            defaultMessage: 'Create an Observability space',
-          }
-        )}
-      </EuiButtonEmpty>
-    </>
+    <EuiButtonEmpty
+      color="text"
+      iconSide="right"
+      iconType="popout"
+      data-test-subj="createO11ySpaceBtn"
+      href={o11yCreateSpaceLink}
+      target="_blank"
+    >
+      {i18n.translate(
+        'xpack.searchIndices.shared.createIndex.observabilityCallout.createO11ySpace.button',
+        {
+          defaultMessage: 'Create an Observability space',
+        }
+      )}
+    </EuiButtonEmpty>
   );
 };
