@@ -41,7 +41,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await searchSessions.deleteAllSearchSessions();
     });
 
-    it('when the session is saved, keepAlive is extended and search is saved into the session saved object, when session is extended, searches are also extended', async () => {
+    it('until session is saved search keepAlive is short, when it is saved, keepAlive is extended and search is saved into the session saved object, when session is extended, searches are also extended', async () => {
       await dashboard.loadSavedDashboard('Not Delayed');
       await dashboard.waitForRenderComplete();
       await searchSessions.expectState('completed');
@@ -55,6 +55,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       const asyncExpirationTimeBeforeSessionWasSaved =
         await searchSessions.getAsyncSearchExpirationTime(asyncSearchId);
+      expect(asyncExpirationTimeBeforeSessionWasSaved).to.be.lessThan(
+        Date.now() + 1000 * 60,
+        'expiration time should be less then a minute from now'
+      );
 
       await searchSessions.save();
       await searchSessions.expectState('backgroundCompleted');
