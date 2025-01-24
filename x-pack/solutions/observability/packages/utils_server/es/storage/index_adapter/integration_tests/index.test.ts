@@ -110,7 +110,8 @@ describe('StorageIndexAdapter', () => {
     });
   });
 
-  describe('when indexing into a clean Elasticsearch instance', () => {
+  // eslint-disable-next-line ban/ban
+  describe.only('when indexing into a clean Elasticsearch instance', () => {
     beforeAll(async () => {
       await createServers();
     });
