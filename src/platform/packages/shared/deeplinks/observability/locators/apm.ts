@@ -42,5 +42,6 @@ export const TRACES_EXPLORER_WATERFALL_LOCATOR = 'TRACES_EXPLORER_WATERFALL_LOCA
 export interface TracesExplorerWaterfallLocatorParams extends SerializableRecord {
   rangeFrom?: string;
   rangeTo?: string;
-  errorId: string;
+  errorId?: string;
+  spanId?: string;
 }

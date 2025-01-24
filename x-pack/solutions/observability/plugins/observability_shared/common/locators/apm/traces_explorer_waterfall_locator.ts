@@ -25,8 +25,13 @@ export class TracesExplorerWaterfallLocatorDefinition
     rangeTo,
     serviceName,
     errorId,
+    spanId,
   }: TracesExplorerWaterfallLocatorParams) => {
-    const query = errorId ? `error.id:"${errorId}"` : '';
+    const queryParams = [];
+    if (errorId) queryParams.push(`error.id:"${errorId}"`);
+    if (spanId) queryParams.push(`span.id:"${spanId}"`);
+    const query = queryParams.join('&');
+
     const params = { rangeFrom, rangeTo, serviceName, query };
     return {
       app: 'apm',

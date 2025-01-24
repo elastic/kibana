@@ -13,18 +13,21 @@ import { css } from '@emotion/react';
 import { useDiscoverServices } from '../../../../../hooks/use_discover_services';
 
 interface TracesExplorerWaterfallLinkProps {
-  errorId: string;
+  errorId?: string;
+  spanId?: string;
 }
 
 export const TracesExplorerWaterfallLink: React.FC<TracesExplorerWaterfallLinkProps> = ({
   errorId,
+  spanId,
 }: TracesExplorerWaterfallLinkProps) => {
   const { share, data } = useDiscoverServices();
   const timeFilter = data.query.timefilter.timefilter.getTime();
   const traceExplorerWaterfallLocator = share?.url.locators.get<{
     rangeFrom: string;
     rangeTo: string;
-    errorId: string;
+    errorId?: string;
+    spanId?: string;
   }>('TRACES_EXPLORER_WATERFALL_LOCATOR');
 
   return (
@@ -33,6 +36,7 @@ export const TracesExplorerWaterfallLink: React.FC<TracesExplorerWaterfallLinkPr
         rangeFrom: timeFilter.from,
         rangeTo: timeFilter.to,
         errorId,
+        spanId,
       })}
       target="_blank"
       data-test-subj=""
