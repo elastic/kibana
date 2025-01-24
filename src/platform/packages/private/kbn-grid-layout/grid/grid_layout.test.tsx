@@ -87,11 +87,11 @@ describe('GridLayout', () => {
     mouseStartDragging(panelHandle);
     mouseMoveTo({ clientX: 256, clientY: 128 });
 
-     // assert that renderPanelContents has not been called during dragging
+    // assert that renderPanelContents has not been called during dragging
     expect(mockRenderPanelContents).toHaveBeenCalledTimes(0);
 
     mouseDrop(panelHandle);
-     // assert that renderPanelContents has not been called after reordering
+    // assert that renderPanelContents has not been called after reordering
     expect(mockRenderPanelContents).toHaveBeenCalledTimes(0);
   });
 
