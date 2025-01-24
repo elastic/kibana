@@ -15,6 +15,7 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -46,6 +47,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
   // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
   // The intent is to trigger a code review from the Core team to review the SO type changes.
+  // The number of types in the hashMap should never be reduced, it can only increase.
+  // Removing saved object types is forbidden after 8.8.
   it('detecting migration related changes in registered types', () => {
     const allTypes = typeRegistry.getAllTypes();
 
@@ -105,7 +108,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "file": "6b65ae5899b60ebe08656fd163ea532e557d3c98",
         "file-upload-usage-collection-telemetry": "06e0a8c04f991e744e09d03ab2bd7f86b2088200",
         "fileShare": "5be52de1747d249a221b5241af2838264e19aaa1",
-        "fleet-agent-policies": "908765a33aab066f4ac09446686b2d884aceed00",
+        "fleet-agent-policies": "4a5c6477d2a61121e95ea9865ed1403a28c38706",
         "fleet-fleet-server-host": "69be15f6b6f2a2875ad3c7050ddea7a87f505417",
         "fleet-message-signing-keys": "93421f43fed2526b59092a4e3c65d64bc2266c0f",
         "fleet-package-policies": "0206c20f27286787b91814a2e7872f06dc1e8e47",
@@ -121,7 +124,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infra-custom-dashboards": "1a5994f2e05bb8a1609825ddbf5012f77c5c67f3",
         "infrastructure-monitoring-log-view": "5f86709d3c27aed7a8379153b08ee5d3d90d77f5",
         "infrastructure-ui-source": "113182d6895764378dfe7fa9fa027244f3a457c4",
-        "ingest-agent-policies": "c1818c4119259908875b4c777ae62b11ba0585cd",
+        "ingest-agent-policies": "57ebfb047cf0b81c6fa0ceed8586fa7199c7c5e2",
         "ingest-download-sources": "279a68147e62e4d8858c09ad1cf03bd5551ce58d",
         "ingest-outputs": "55988d5f778bbe0e76caa7e6468707a0a056bdd8",
         "ingest-package-policies": "60d43f475f91417d14d9df05476acf2e63e99435",
@@ -185,5 +188,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "52b32b47ee576f554ac77cb1d5896dfbcfe9a1fb",
       }
     `);
+    expect(Object.keys(hashMap).length).toEqual(SAVED_OBJECT_TYPES_COUNT);
   });
 });

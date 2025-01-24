@@ -9,8 +9,8 @@
 
 import { apiIsPresentationContainer } from '@kbn/presentation-containers';
 import {
-  apiPublishesPanelDescription,
-  apiPublishesPanelTitle,
+  apiPublishesDescription,
+  apiPublishesTitle,
   apiPublishesSavedObjectId,
 } from '@kbn/presentation-publishing';
 import { LinksParentApi } from '../types';
@@ -18,5 +18,5 @@ import { LinksParentApi } from '../types';
 export const isParentApiCompatible = (parentApi: unknown): parentApi is LinksParentApi =>
   apiIsPresentationContainer(parentApi) &&
   apiPublishesSavedObjectId(parentApi) &&
-  apiPublishesPanelTitle(parentApi) &&
-  apiPublishesPanelDescription(parentApi);
+  apiPublishesTitle(parentApi) &&
+  apiPublishesDescription(parentApi);

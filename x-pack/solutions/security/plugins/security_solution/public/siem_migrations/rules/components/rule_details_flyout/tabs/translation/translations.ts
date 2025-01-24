@@ -85,11 +85,18 @@ export const CALLOUT_TRANSLATED_RULE_TITLE = i18n.translate(
   }
 );
 
+export const CALLOUT_MAPPED_TRANSLATED_RULE_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.mappedTranslatedRuleCalloutTitle',
+  {
+    defaultMessage:
+      'This rule was mapped to an Elastic authored rule. Click Install & enable rule to complete migration. You can fine-tune it later.',
+  }
+);
+
 export const CALLOUT_PARTIALLY_TRANSLATED_RULE_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutTitle',
   {
-    defaultMessage:
-      'Parts of the query couldn’t be translated, please complete to Install the rule and finish migrating.',
+    defaultMessage: 'Part of the query could not be translated.',
   }
 );
 
@@ -97,15 +104,14 @@ export const CALLOUT_PARTIALLY_TRANSLATED_RULE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutDescription',
   {
     defaultMessage:
-      'In order to save this SIEM Rule to Elastic, you’ll need to finish the query and define the rule severity below. Complete the required fields and finalize the query to save as Rule. Or if you need help, please reach out to Elastic support.',
+      'To save this rule, finish writing the query. If you need help, please contact Elastic support.',
   }
 );
 
 export const CALLOUT_NOT_TRANSLATED_RULE_TITLE = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.notTranslatedRuleCalloutTitle',
   {
-    defaultMessage:
-      'This query couldn’t be translated, please complete to Install the rule and finish migrating.',
+    defaultMessage: 'This query couldn’t be translated.',
   }
 );
 
@@ -113,6 +119,21 @@ export const CALLOUT_NOT_TRANSLATED_RULE_DESCRIPTION = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.notTranslatedRuleCalloutDescription',
   {
     defaultMessage:
-      'When a query cannot be partially translated, there could be a misalignment in features between the SIEM product.',
+      'This might be caused by feature differences between SIEM products. If possible, update the rule manually.',
+  }
+);
+
+export const CALLOUT_TRANSLATED_RULE_INFO_TITLE = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutTitle',
+  {
+    defaultMessage: 'Translation successful. Install the rule to customize it.',
+  }
+);
+
+export const CALLOUT_TRANSLATED_RULE_INFO_DESCRIPTION = i18n.translate(
+  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.partiallyTranslatedRuleCalloutDescription',
+  {
+    defaultMessage:
+      'After you install the rule, you can modify or update it with full access to all features.',
   }
 );

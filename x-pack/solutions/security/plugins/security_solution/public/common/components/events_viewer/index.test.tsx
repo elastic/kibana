@@ -12,7 +12,7 @@ import { render } from '@testing-library/react';
 import { TestProviders } from '../../mock';
 
 import { mockEventViewerResponse } from './mock';
-import { StatefulEventsViewer, type EventsViewerProps } from '.';
+import { type EventsViewerProps, StatefulEventsViewer } from '.';
 import { eventsDefaultModel } from './default_model';
 import { EntityType } from '@kbn/timelines-plugin/common';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
@@ -54,18 +54,17 @@ const to = '2019-08-26T22:10:56.791Z';
 const ACTION_BUTTON_COUNT = 4;
 
 const testProps: EventsViewerProps = {
+  bulkActions: false,
   defaultModel: eventsDefaultModel,
   end: to,
   entityType: EntityType.EVENTS,
   indexNames: [],
-  tableId: TableId.test,
   leadingControlColumns: getDefaultControlColumn(ACTION_BUTTON_COUNT),
   renderCellValue: DefaultCellRenderer,
   rowRenderers: defaultRowRenderers,
   sourcererScope: SourcererScopeName.default,
   start: from,
-  bulkActions: false,
-  hasCrudPermissions: true,
+  tableId: TableId.test,
 };
 describe('StatefulEventsViewer', () => {
   beforeAll(() => {
@@ -93,7 +92,7 @@ describe('StatefulEventsViewer', () => {
       </TestProviders>
     );
 
-    expect(wrapper.find(`[data-test-subj="hoverVisibilityContainer"]`).exists()).toBeTruthy();
+    expect(wrapper.find(`[data-test-subj="inspect-icon-button"]`).exists()).toBeTruthy();
   });
 
   test('it closes field editor when unmounted', () => {
@@ -119,7 +118,7 @@ describe('StatefulEventsViewer', () => {
       <TestProviders>
         <StatefulEventsViewer
           {...testProps}
-          additionalRightMenuOptions={[<p data-test-subj="right-option" />]}
+          topRightMenuOptions={[<p data-test-subj="right-option" />]}
         />
       </TestProviders>
     );

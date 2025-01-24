@@ -7,20 +7,6 @@
 
 import { i18n } from '@kbn/i18n';
 
-export const SHOW_HOSTS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.show',
-  {
-    defaultMessage: 'Show hosts',
-  }
-);
-
-export const HIDE_HOSTS_RISK_SCORE = i18n.translate(
-  'xpack.securitySolution.riskScore.riskScorePreview.hosts.hide',
-  {
-    defaultMessage: 'Hide hosts',
-  }
-);
-
 export const SHOW_USERS_RISK_SCORE = i18n.translate(
   'xpack.securitySolution.riskScore.riskScorePreview.users.show',
   {
@@ -215,6 +201,13 @@ export const RISK_ENGINE_NEXT_RUN_TIME = (timeInMinutes: string) =>
     defaultMessage: `Next engine run in {timeInMinutes}`,
     values: { timeInMinutes },
   });
+
+export const RISK_ENGINE_STATUS_SWITCH_LABEL = i18n.translate(
+  'xpack.securitySolution.riskScore.riskEngineStatus',
+  {
+    defaultMessage: 'Risk engine status',
+  }
+);
 
 export const RUN_RISK_SCORE_ENGINE = i18n.translate('xpack.securitySolution.riskScore.runEngine', {
   defaultMessage: 'Run Engine',

@@ -14,8 +14,8 @@ import {
   EntityDetailsLeftPanelTab,
 } from '../../shared/components/left_panel/left_panel_header';
 import { HostDetailsPanelKey } from '../../host_details_left';
-import { HostPanelKey } from '..';
 import { createTelemetryServiceMock } from '../../../../common/lib/telemetry/telemetry_service.mock';
+import { HostPanelKey } from '../../shared/constants';
 
 jest.mock('@kbn/expandable-flyout');
 jest.mock('../../../../common/hooks/use_experimental_features');
