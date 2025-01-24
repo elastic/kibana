@@ -399,7 +399,7 @@ export function KnowledgeBaseTab() {
       <EuiSpacer size="l" />
 
       <EuiFlexItem grow className={centerMaxWidthClassName}>
-        <WelcomeMessageKnowledgeBase connectors={connectors} knowledgeBase={knowledgeBase} />
+        <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
