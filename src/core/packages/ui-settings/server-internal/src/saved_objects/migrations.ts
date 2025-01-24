@@ -10,7 +10,6 @@
 import type {
   SavedObjectUnsanitizedDoc,
   SavedObjectSanitizedDoc,
-  SavedObjectMigrationMap,
   SavedObjectsModelVersionMap,
 } from '@kbn/core-saved-objects-server';
 
@@ -31,7 +30,7 @@ export const modelVersions: SavedObjectsModelVersionMap = {
  * Migrations using legacy upgrade mechanism, do not add to or remove from this map.
  * Future migrations should live in modelVersions map.
  */
-export const migrations: SavedObjectMigrationMap = {
+export const migrations = {
   '7.9.0': (doc: SavedObjectUnsanitizedDoc<any>): SavedObjectSanitizedDoc<any> => ({
     ...doc,
     ...(doc.attributes && {
