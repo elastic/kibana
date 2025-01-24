@@ -18,7 +18,6 @@ import {
   EuiHeader,
   EuiHeaderSection,
   EuiPageTemplate,
-  EuiText,
 } from '@elastic/eui';
 
 import type { NavigationTreeDefinitionUI } from '@kbn/core-chrome-browser';
@@ -27,7 +26,6 @@ import mdx from '../../README.mdx';
 import type { NavigationServices } from '../types';
 import { NavigationProvider } from '../services';
 import { Navigation } from './navigation';
-import { ContentProvider } from './components/panel';
 
 const storybookMock = new NavigationStorybookMock();
 
@@ -90,1043 +88,438 @@ const NavigationWrapper: FC<Props & Omit<Partial<EuiCollapsibleNavBetaProps>, 'c
   );
 };
 
-const groupExamplesNavigationTree: NavigationTreeDefinitionUI = {
+const navigationTreeWithGroups: NavigationTreeDefinitionUI = {
   id: 'es',
   body: [
     // My custom project
     {
-      id: 'example_projet',
-      title: 'Example project',
-      icon: 'logoObservability',
-      defaultIsCollapsed: false,
-      path: 'example_projet',
-      children: [
-        {
-          id: 'blockGroup',
-          path: 'example_projet.blockGroup',
-          title: 'Block group',
-          children: [
-            {
-              id: 'item1',
-              title: 'Item 1',
-              href: '/app/kibana',
-              path: 'group1.item1',
-            },
-            {
-              id: 'item2',
-              title: 'Item 2',
-              href: '/app/kibana',
-              path: 'group1.item2',
-            },
-            {
-              id: 'item3',
-
-              title: 'Item 3',
-              href: '/app/kibana',
-              path: 'group1.item3',
-            },
-          ],
-        },
-        {
-          id: 'accordionGroup',
-          path: 'example_projet.accordionGroup',
-          title: 'Accordion group',
-          renderAs: 'accordion',
-          children: [
-            {
-              id: 'item1',
-              title: 'Item 1',
-              href: '/app/kibana',
-              path: 'group1.item1',
-            },
-            {
-              id: 'item2',
-              title: 'Item 2',
-              href: '/app/kibana',
-              path: 'group1.item1',
-            },
-            {
-              id: 'item3',
-              title: 'Item 3',
-              href: '/app/kibana',
-              path: 'group1.item1',
-            },
-          ],
-        },
-        {
-          id: 'groupWithouTitle',
-          path: 'example_projet.groupWithouTitle',
-          title: '',
-          children: [
-            {
-              id: 'item1',
-              title: 'Block group',
-              href: '/app/kibana',
-              path: 'group1.item1',
-            },
-            {
-              id: 'item2',
-              title: 'without',
-              href: '/app/kibana',
-              path: 'group1.item1',
-            },
-            {
-              id: 'item3',
-              title: 'title',
-              href: '/app/kibana',
-              path: 'group1.item1',
-            },
-          ],
-        },
-        {
-          id: 'panelGroup',
-          href: '/app/kibana',
-          title: 'Panel group',
-          path: 'example_projet.panelGroup',
-          renderAs: 'panelOpener',
-          children: [
-            {
-              id: 'group1',
-              title: 'Group 1',
-              path: 'panelGroup.group1',
-              children: [
-                {
-                  id: 'logs',
-                  href: '/app/kibana',
-                  path: 'group1.item1',
-                  title: 'Logs',
-                },
-                {
-                  id: 'signals',
-                  title: 'Signals',
-                  href: '/app/kibana',
-                  path: 'group1.item1',
-                },
-                {
-                  id: 'signals-2',
-                  title: 'Signals - should NOT appear',
-                  href: '/app/kibana',
-                  path: 'group1.item1',
-                  sideNavStatus: 'hidden', // Should not appear
-                },
-                {
-                  id: 'tracing',
-                  title: 'Tracing',
-                  href: '/app/kibana',
-                  path: 'group1.item1',
-                },
-              ],
-            },
-            {
-              id: 'group2',
-              title: 'Group 2',
-              path: 'panelGroup.group2',
-              children: [
-                {
-                  id: 'item1',
-                  path: 'panelGroup.group2.item1',
-                  href: '/app/kibana',
-                  title: 'Some link title',
-                },
-              ],
-            },
-          ],
-        },
-      ],
-    },
-  ],
-};
-
-export const GroupsExamples = (args: NavigationServices) => {
-  const services = storybookMock.getServices({
-    ...args,
-    recentlyAccessed$: of([
-      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
-      { label: 'Another example', link: '/app/example/5235', id: '5235' },
-    ]),
-  });
-
-  return (
-    <NavigationWrapper>
-      {({ isCollapsed }) => (
-        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation navigationTree$={of(groupExamplesNavigationTree)} />
-        </NavigationProvider>
-      )}
-    </NavigationWrapper>
-  );
-};
-
-const navigationTree: NavigationTreeDefinitionUI = {
-  id: 'es',
-  body: [
-    // My custom project
-    {
-      type: 'recentlyAccessed',
-      defaultIsCollapsed: true,
-      // Override the default recently accessed items with our own
-      recentlyAccessed$: of([
-        {
-          label: 'My own recent item',
-          id: '1234',
-          link: '/app/example/39859',
-        },
-        {
-          label: 'I also own this',
-          id: '4567',
-          link: '/app/example/39859',
-        },
-      ]),
-    },
-    {
-      id: 'example_projet',
-      title: 'Example project',
-      icon: 'logoObservability',
-      defaultIsCollapsed: false,
-      path: 'example_projet',
+      id: 'example_project',
+      path: 'example_project',
+      title: 'Solution name',
+      isCollapsible: false,
+      icon: 'logoElastic',
       children: [
         {
           id: 'item1',
+          path: 'example_project.item1',
+          title: 'Item 01',
           href: '/app/kibana',
-          path: 'example_projet.item1',
-          title: 'Get started',
-        },
-        {
-          title: 'Group 1',
-          id: 'group1',
-          path: 'example_projet.group1',
-          children: [
-            {
-              id: 'item1',
-              title: 'Item 1',
-              href: '/app/kibana',
-              path: 'example_projet.group1.item1',
-            },
-            {
-              id: 'item2',
-              title: 'Item 2',
-              href: '/app/kibana',
-              path: 'example_projet.group1.item1',
-            },
-            {
-              id: 'item3',
-              title: 'Item 3',
-              href: '/app/kibana',
-              path: 'example_projet.group1.item1',
-            },
-          ],
+          icon: 'iInCircle',
         },
         {
           id: 'item2',
-          title: 'Alerts',
+          path: 'example_project.item2',
+          title: 'Item 02',
           href: '/app/kibana',
-          path: 'example_projet.item2',
+          icon: 'iInCircle',
         },
         {
-          id: 'item2-2',
-          title: 'Item should NOT appear!!',
-          sideNavStatus: 'hidden', // Should not appear
-          href: '/app/kibana',
-          path: 'example_projet.item2-2',
-        },
-        {
-          id: 'item3',
-          title: 'Some other node',
-          href: '/app/kibana',
-          path: 'example_projet.item3',
-        },
-        {
-          id: 'group:settingsAsNavItem',
-          title: 'Settings as nav Item',
-          href: '/app/kibana',
-          path: 'example_projet.group:settingsAsNavItem',
-          renderAs: 'item', // Render just like any other item, even if it has children
+          id: 'section1',
+          path: 'example_project.section1',
+          title: 'Section one',
           children: [
             {
-              id: 'logs',
-              title: 'Logs',
-              href: '/app/kibana',
-              path: 'example_projet.group:settingsAsNavItem.logs',
-            },
-            {
-              id: 'signals',
-              title: 'Signals',
-              href: '/app/kibana',
-              path: 'example_projet.group:settingsAsNavItem.signals',
-            },
-            {
-              id: 'signalsHidden',
-              title: 'Signals - should NOT appear',
-              sideNavStatus: 'hidden', // Should not appear
-              href: '/app/kibana',
-              path: 'example_projet.group:settingsAsNavItem.signalsHidden',
-            },
-            {
-              id: 'tracing',
-              title: 'Tracing',
-              href: '/app/kibana',
-              path: 'example_projet.group:settingsAsNavItem.tracing',
-            },
-          ],
-        },
-        {
-          id: 'group:settingsAsPanelOpener',
-          title: 'Settings panel opener',
-          path: 'example_projet.group:settingsAsPanelOpener',
-          renderAs: 'panelOpener',
-          children: [
-            {
-              id: 'group1',
-              title: 'Group 1',
-              path: 'example_projet.group:settingsAsPanelOpener.group1',
+              id: 'item1',
+              path: 'example_project.section1.item1',
+              title: 'Item 03',
+              icon: 'iInCircle',
+              renderAs: 'panelOpener',
               children: [
+                // FIXME: group mixed with items causes crash
+                // {
+                //   id: 'sub1',
+                //   path: 'example_project.section1.item1.sub1',
+                //   title: 'Item 11',
+                //   href: '/app/kibana',
+                //   icon: 'iInCircle',
+                // },
+                // {
+                //   id: 'sub2',
+                //   path: 'example_project.section1.item1.sub2',
+                //   title: 'Item 12',
+                //   href: '/app/kibana',
+                //   icon: 'iInCircle',
+                // },
+                // {
+                //   id: 'sub3',
+                //   path: 'example_project.section1.item1.sub3',
+                //   title: 'Item 13',
+                //   href: '/app/kibana',
+                //   icon: 'iInCircle',
+                // },
                 {
-                  id: 'logs',
-                  title: 'Logs',
-                  href: '/app/kibana',
-                  path: 'example_projet.group:settingsAsPanelOpener.group1.logs',
-                },
-                {
-                  id: 'signals',
-                  title: 'Signals',
-                  href: '/app/kibana',
-                  path: 'example_projet.group:settingsAsPanelOpener.group1.signals',
-                },
-                {
-                  id: 'signals-2',
-                  title: 'Signals - should NOT appear',
-                  sideNavStatus: 'hidden', // Should not appear
-                  href: '/app/kibana',
-                  path: 'example_projet.group:settingsAsPanelOpener.group1.signals',
-                },
-                {
-                  id: 'tracing',
-                  title: 'Tracing',
-                  href: '/app/kibana',
-                  path: 'example_projet.group:settingsAsPanelOpener.group1.tracing',
-                },
-              ],
-            },
-            {
-              id: 'group2',
-              title: 'Group 2',
-              path: 'example_projet.group:settingsAsPanelOpener.group2',
-              children: [
-                {
-                  id: 'nestedGroup',
-                  title: 'Nested group',
-                  renderAs: 'item',
-                  path: 'example_projet.group:settingsAsPanelOpener.group2.nestedGroup',
-                  href: '/app/kibana',
+                  id: 'section1',
+                  path: 'example_project.section1.item1.section1',
+                  title: 'Section one',
                   children: [
                     {
-                      id: 'item1',
-                      path: 'example_projet.group:settingsAsPanelOpener.group2.nestedGroup.item1',
-                      title: 'Hidden - should NOT appear',
+                      id: 'sub1',
+                      path: 'example_project.section1.item1.section1.sub1',
+                      title: 'Item 14',
+                      href: '/app/kibana',
+                      icon: 'iInCircle',
+                    },
+                    {
+                      id: 'sub2',
+                      path: 'example_project.section1.item1.section1.sub2',
+                      title: 'Item 15',
+                      href: '/app/kibana',
+                      icon: 'iInCircle',
+                    },
+                    {
+                      id: 'sub3',
+                      path: 'example_project.section1.item1.section1.sub3',
+                      title: 'Item 16',
+                      href: '/app/kibana',
+                      icon: 'iInCircle',
+                    },
+                  ],
+                },
+                {
+                  id: 'section2',
+                  path: 'example_project.section1.item1.section2',
+                  title: 'Section two',
+                  children: [
+                    {
+                      id: 'sub1',
+                      path: 'example_project.section1.item1.section2.sub1',
+                      title: 'Item 17',
+                      href: '/app/kibana',
+                      icon: 'iInCircle',
+                    },
+                    {
+                      id: 'sub2',
+                      path: 'example_project.section1.item1.section2.sub2',
+                      title: 'Just if we want to bring back those icons at some point',
+                      href: '/app/kibana',
+                      icon: 'dashboardApp',
+                    },
+                    {
+                      id: 'sub3',
+                      path: 'example_project.section1.item1.section2.sub3',
+                      title: 'Item 18',
+                      href: '/app/kibana',
+                      icon: 'iInCircle',
+                    },
+                  ],
+                },
+                {
+                  id: 'section2',
+                  path: 'example_project.section1.item1.section2',
+                  title: 'Item 19',
+                  icon: 'iInCircle',
+                  renderAs: 'accordion',
+                  children: [
+                    {
+                      id: 'sub1',
+                      path: 'example_project.section1.item1.section2.sub1',
+                      title: 'Item-Beta',
+                      href: '/app/kibana',
+                    },
+                    {
+                      id: 'sub2',
+                      path: 'example_project.section1.item1.section2.sub2',
+                      title: 'Item-Labs',
+                      href: '/app/kibana',
+                    },
+                  ],
+                },
+                {
+                  id: 'section3',
+                  title: 'Parent item, opened',
+                  path: 'example_project.section1.item1.section3',
+                  icon: 'iInCircle',
+                  renderAs: 'accordion',
+                  children: [
+                    {
+                      id: 'sub1',
+                      path: 'example_project.section1.item1.section3.sub1',
+                      title: 'Item 20',
+                      href: '/app/kibana',
+                    },
+                    {
+                      id: 'sub2',
+                      path: 'example_project.section1.item1.section3.sub2',
+                      title: 'Item 21',
+                      href: '/app/kibana',
+                    },
+                    {
+                      id: 'sub3',
+                      path: 'example_project.section1.item1.section3.sub3',
+                      title: 'Item 22',
+                      href: '/app/kibana',
                     },
                   ],
                 },
               ],
             },
             {
-              id: 'group3',
-              title: '',
-              path: 'example_projet.group:settingsAsPanelOpener.group3',
+              id: 'item2',
+              path: 'example_project.section1.item2',
+              title: 'Item 04',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item3',
+              title: 'Item 05',
+              path: 'example_project.section1.item3',
+              icon: 'iInCircle',
+              renderAs: 'panelOpener',
               children: [
                 {
-                  id: 'nestedGroup',
-                  title: 'Just an item in a group',
-                  path: 'example_projet.group:settingsAsPanelOpener.group3.nestedGroup',
+                  id: 'sub1',
+                  path: 'example_project.section1.item3.sub1',
+                  title: 'Item 23',
                   href: '/app/kibana',
+                  icon: 'iInCircle',
                 },
               ],
             },
           ],
         },
         {
-          id: 'group:settingsIsHidden',
-          title: 'Settings - should NOT appear', // sideNavStatus is 'hidden'
-          sideNavStatus: 'hidden',
-          path: 'example_projet.group:settingsIsHidden',
+          id: 'section2',
+          title: 'Section two',
+          path: 'example_project.section2',
           children: [
             {
-              id: 'logs',
-              title: 'Logs',
+              id: 'item1',
+              icon: 'iInCircle',
+              title: 'Item 06',
+              path: 'example_project.section2.item1',
+              renderAs: 'panelOpener',
+              children: [
+                {
+                  id: 'sub1',
+                  path: 'example_project.section2.item1.sub1',
+                  title: 'Item 24',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
+              ],
+            },
+            {
+              id: 'item2',
+              path: 'example_project.section2.item2',
+              title: 'Item 07',
               href: '/app/kibana',
-              path: 'example_projet.group:settingsIsHidden.logs',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item3',
+              path: 'example_project.section2.item3',
+              title: 'Item 08',
+              href: '/app/kibana',
+              icon: 'iInCircle',
             },
           ],
         },
         {
-          id: 'group:settingsWithChildrenHidden',
-          title: 'Settings - should NOT appear', // All children are hidden
-          path: 'example_projet.group:settingsWithChildrenHidden',
+          id: 'section3',
+          title: 'Standalone item with long name',
+          path: 'example_project.section3',
+          icon: 'iInCircle',
+          renderAs: 'panelOpener',
           children: [
             {
-              id: 'logs',
-              title: 'Logs',
-              sideNavStatus: 'hidden',
+              id: 'item1',
+              path: 'example_project.section3.item1',
+              title: 'Item 25',
               href: '/app/kibana',
-              path: 'example_projet.group:settingsWithChildrenHidden.logs',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item2',
+              path: 'example_project.section3.item2',
+              title: 'Item 26',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item3',
+              path: 'example_project.section3.item3',
+              title: 'Item 27',
+              href: '/app/kibana',
+              icon: 'iInCircle',
             },
           ],
         },
-      ],
-    },
-    {
-      id: 'linkAtRootLevel',
-      title: 'Custom link at root level',
-      href: '/app/kibana',
-      path: 'linkAtRootLevel',
-    },
-    {
-      id: 'groupRenderAsItem',
-      title: 'Test group render as Item',
-      renderAs: 'item',
-      href: '/app/kibana',
-      path: 'groupRenderAsItem',
-      children: [
+        {
+          id: 'section4',
+          title: 'Item 09',
+          path: 'example_project.section4',
+          renderAs: 'accordion',
+          icon: 'iInCircle',
+          children: [
+            {
+              id: 'item1',
+              path: 'example_project.section4.item1',
+              title: 'Item-Beta',
+              href: '/app/kibana',
+              withBadge: true, // FIXME: show "beta" badge in circle
+            },
+            {
+              id: 'item2',
+              path: 'example_project.section4.item2',
+              title: 'Item-Labs',
+              href: '/app/kibana',
+              withBadge: true, // FIXME: show "beaker" badge
+            },
+            {
+              id: 'item3',
+              path: 'example_project.section4.item3',
+              title: 'Item 27 - name plus badge & icon',
+              renderAs: 'panelOpener',
+              children: [
+                {
+                  id: 'sub1',
+                  path: 'example_project.section4.item3.sub1',
+                  title: 'Item 28',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
+              ],
+            },
+          ],
+          appendHorizontalRule: true,
+        },
+        {
+          id: 'section5',
+          title: 'Parent item, closed',
+          path: 'footer.section5',
+          renderAs: 'accordion',
+          icon: 'iInCircle',
+          children: [
+            {
+              id: 'item1',
+              path: 'footer.section5.item1',
+              title: 'Item 29',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item2',
+              path: 'footer.section5.item2',
+              title: 'Item 30',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item3',
+              path: 'footer.section5.item3',
+              title: 'Item 31',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item4',
+              icon: 'iInCircle',
+              title: 'Sub-Accordion',
+              path: 'footer.section5.item4',
+              renderAs: 'accordion',
+              children: [
+                {
+                  id: 'sub1',
+                  path: 'footer.section5.item4.sub1',
+                  title: 'Item 32',
+                  href: '/app/kibana',
+                  icon: 'iInCircle',
+                },
+              ],
+            },
+          ],
+        },
         {
           id: 'item1',
-          title: 'Item 1',
+          path: 'footer.item1',
+          title: 'Item 10',
+          icon: 'iInCircle',
           href: '/app/kibana',
-          path: 'groupRenderAsItem.item1',
+        },
+        {
+          id: 'section6',
+          title: 'Parent item, opened',
+          path: 'footer.section6',
+          renderAs: 'accordion',
+          icon: 'iInCircle',
+          defaultIsCollapsed: false,
+          children: [
+            {
+              id: 'item1',
+              path: 'footer.section6.item1',
+              title: 'Item 33',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item2',
+              path: 'footer.section6.item2',
+              title: 'Item 34',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+            },
+            {
+              id: 'item3',
+              path: 'footer.section6.item3',
+              title: 'Item 35',
+              href: '/app/kibana',
+              icon: 'iInCircle',
+              openInNewTab: true, // FIXME: show "popout" icon aligned to the right
+            },
+          ],
         },
       ],
-    },
-    {
-      id: 'linkAtRootLevelWithIcon',
-      icon: 'logoElastic',
-      title: 'Link at root level + icon',
-      href: '/app/kibana',
-      path: 'linkAtRootLevelWithIcon',
     },
   ],
   footer: [
     {
-      type: 'recentlyAccessed',
-      defaultIsCollapsed: true,
-      // Override the default recently accessed items with our own
-      recentlyAccessed$: of([
-        {
-          label: 'My own recent item',
-          id: '1234',
-          link: '/app/example/39859',
-        },
-        {
-          label: 'I also own this',
-          id: '4567',
-          link: '/app/example/39859',
-        },
-      ]),
+      id: 'footer1',
+      path: 'footer1',
+      title: 'Get started',
+      href: '/app/kibana',
+      icon: 'launch',
     },
-  ],
-};
-
-export const ComplexObjectDefinition = (args: NavigationServices) => {
-  const services = storybookMock.getServices({
-    ...args,
-    recentlyAccessed$: of([
-      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
-      { label: 'Another example', link: '/app/example/5235', id: '5235' },
-    ]),
-  });
-
-  return (
-    <NavigationWrapper>
-      {({ isCollapsed }) => (
-        <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation navigationTree$={of(navigationTree)} />
-        </NavigationProvider>
-      )}
-    </NavigationWrapper>
-  );
-};
-
-const panelContentProvider: ContentProvider = (id: string) => {
-  if (id === 'example_projet.group:openpanel1') {
-    return; // Use default title & content
-  }
-
-  if (id === 'example_projet.group:openpanel2') {
-    // Custom content
-    return {
-      content: ({ closePanel }) => {
-        return (
-          <div>
-            <EuiText>This is a custom component to render in the panel.</EuiText>
-            <EuiButton onClick={() => closePanel()}>Close panel</EuiButton>
-          </div>
-        );
-      },
-    };
-  }
-
-  if (id === 'example_projet.group:openpanel3') {
-    return {
-      title: <div style={{ backgroundColor: 'yellow', fontWeight: 600 }}>Custom title</div>,
-    };
-  }
-};
-
-const navigationTreeWithPanels: NavigationTreeDefinitionUI = {
-  id: 'es',
-  body: [
-    // My custom project
     {
-      id: 'example_projet',
-      title: 'Example project',
-      icon: 'logoObservability',
-      defaultIsCollapsed: false,
-      isCollapsible: false,
-      path: 'example_projet',
+      id: 'footer2',
+      path: 'footer2',
+      title: 'Recent',
+      icon: 'clock',
+      renderAs: 'accordion',
       children: [
         {
-          id: 'item1',
+          id: 'recent1',
+          path: 'footer2.recent1',
+          title: '[Logs] Web traffic',
+          icon: 'dashboardApp',
           href: '/app/kibana',
-          path: 'example_projet.item1',
-          title: 'Get started',
         },
+      ],
+    },
+    {
+      id: 'footer3',
+      path: 'footer3',
+      title: 'Settings',
+      icon: 'gear',
+      renderAs: 'accordion',
+      children: [
         {
-          id: 'item2',
+          id: 'settings1',
+          path: 'footer3.settings1',
+          title: 'Trained models',
           href: '/app/kibana',
-          path: 'example_projet.item2',
-          title: 'Alerts',
         },
         {
-          // Panel with default content
-          // Groups with title
-          id: 'group:openpanel1',
-          title: 'Open panel (1)',
+          id: 'settings2',
+          path: 'footer3.settings2',
+          title: 'Project management',
           renderAs: 'panelOpener',
-          href: '/app/kibana',
-          path: 'example_projet.group:openpanel1',
           children: [
             {
-              id: 'group1',
-              title: 'Group 1',
-              path: 'example_projet.group:openpanel1.group1',
-              children: [
-                {
-                  id: 'item1',
-                  href: '/app/kibana',
-                  path: 'example_projet.group:openpanel1.group1.item1',
-                  title: 'Logs',
-                  icon: 'logoObservability',
-                },
-                {
-                  id: 'item2',
-                  href: '/app/kibana',
-                  path: 'example_projet.group:openpanel1.group1.item2',
-                  title: 'Signals xxxxxx',
-                  openInNewTab: true,
-                },
-                {
-                  id: 'item3',
-                  href: '/app/kibana',
-                  path: 'example_projet.group:openpanel1.group1.item3',
-                  title: 'Tracing',
-                  withBadge: true, // Default to "Beta" badge
-                },
-              ],
-            },
-            {
-              id: 'group2',
-              path: 'example_projet.group:openpanel1.group2',
-              title: 'Group 2',
-              children: [
-                {
-                  id: 'group2:settings.logs',
-                  href: '/app/kibana',
-                  path: 'example_projet.group:openpanel1.group2.group2:settings.logs',
-                  title: 'Logs',
-                },
-                {
-                  id: 'group2:settings.signals',
-                  href: '/app/kibana',
-                  path: 'example_projet.group:openpanel1.group2.group2:settings.signals',
-                  title: 'Signals',
-                },
-                {
-                  id: 'group2:settings.tracing',
-                  href: '/app/kibana',
-                  path: 'example_projet.group:openpanel1.group2.group2:settings.tracing',
-                  title: 'Tracing',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          // Panel with default content
-          // Groups with **not** title
-          id: 'group.openpanel2',
-          title: 'Open panel (2)',
-          renderAs: 'panelOpener',
-          path: 'example_projet.group.openpanel2',
-          children: [
-            {
-              id: 'group1',
-              path: 'example_projet.group.openpanel2.group1',
-              title: '',
-              appendHorizontalRule: true, // Add a separator after the group
-              children: [
-                {
-                  id: 'logs',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel2.group1.logs',
-                  title: 'Logs',
-                },
-                {
-                  id: 'signals',
-                  title: 'Signals',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel2.group1.signals',
-                },
-                {
-                  id: 'tracing',
-                  title: 'Tracing',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel2.group1.tracing',
-                  withBadge: true, // Default to "Beta" badge
-                },
-              ],
-            },
-            {
-              id: 'group2',
-              path: 'example_projet.group.openpanel2.group2',
-              title: '',
-              children: [
-                {
-                  id: 'logs',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel2.group2.logs',
-                  title: 'Logs',
-                },
-                {
-                  id: 'signals',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel2.group2.signals',
-                  title: 'Signals',
-                },
-                {
-                  id: 'tracing',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel2.group2.tracing',
-                  title: 'Tracing',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          // Panel with default content
-          // Accordion to wrap groups
-          id: 'group.openpanel3',
-          title: 'Open panel (3)',
-          renderAs: 'panelOpener',
-          path: 'example_projet.group.openpanel3',
-          children: [
-            {
-              id: 'group1',
-              title: '',
-              path: 'example_projet.group.openpanel3.group1',
-              appendHorizontalRule: true,
-              children: [
-                {
-                  id: 'logs',
-                  title: 'Logs',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel3.group1.logs',
-                },
-                {
-                  id: 'signals',
-                  title: 'Signals',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel3.group1.signals',
-                },
-                {
-                  id: 'tracing',
-                  title: 'Tracing',
-                  withBadge: true, // Default to "Beta" badge
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel3.group1.tracing',
-                },
-              ],
-            },
-            // Groups with accordion
-            {
-              id: 'group2',
-              title: 'MANAGEMENT',
-              renderAs: 'accordion',
-              path: 'example_projet.group.openpanel3.group2',
-              children: [
-                {
-                  id: 'group2-A',
-                  title: 'Group 1',
-                  path: 'example_projet.group.openpanel3.group2.group2-A',
-                  children: [
-                    {
-                      id: 'logs',
-                      title: 'Logs',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel3.group2.group2-A.logs',
-                    },
-                    {
-                      id: 'signals',
-                      title: 'Signals',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel3.group2.group2-A.signals',
-                    },
-                    {
-                      id: 'tracing',
-                      title: 'Tracing',
-                      withBadge: true, // Default to "Beta" badge
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel3.group2.group2-A.tracing',
-                    },
-                  ],
-                },
-                {
-                  id: 'group2-B',
-                  title: 'Group 2 (marked as collapsible)',
-                  renderAs: 'accordion',
-                  path: 'example_projet.group.openpanel3.group2.group2-B',
-                  children: [
-                    {
-                      id: 'logs',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel3.group2.group2-B.logs',
-                      title: 'Logs',
-                    },
-                    {
-                      id: 'signals',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel3.group2.group2-B.signals',
-                      title: 'Signals',
-                    },
-                    {
-                      id: 'tracing',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel3.group2.group2-B.tracing',
-                      title: 'Tracing',
-                    },
-                  ],
-                },
-                {
-                  id: 'group2-C',
-                  title: 'Group 3',
-                  path: 'example_projet.group.openpanel3.group2.group2-C',
-                  children: [
-                    {
-                      id: 'logs',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel3.group2.group2-C.logs',
-                      title: 'Logs',
-                    },
-                    {
-                      id: 'signals',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel3.group2.group2-C.signals',
-                      title: 'Signals',
-                    },
-                    {
-                      id: 'tracing',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel3.group2.group2-C.tracing',
-                      title: 'Tracing',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          // Panel with nav group title that acts like nav items
-          id: 'group.openpanel4',
-          title: 'Open panel (4) - sideNavStatus',
-          renderAs: 'panelOpener',
-          path: 'example_projet.group.openpanel4',
-          children: [
-            {
-              id: 'root',
-              path: 'example_projet.group.openpanel4.root',
-              title: '',
-              children: [
-                {
-                  id: 'groupAsItem1',
-                  title: 'Group renders as "item" (1)',
-                  renderAs: 'item',
-                  path: 'example_projet.group.openpanel4.root.groupAsItem1',
-                  children: [
-                    {
-                      id: 'logs',
-                      title: 'Logs',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.root.groupAsItem1.logs',
-                    },
-                    {
-                      id: 'signals',
-                      title: 'Signals',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.root.groupAsItem1.signals',
-                    },
-                  ],
-                },
-                {
-                  id: 'logs',
-                  title: 'Item 2',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel4.root.logs',
-                },
-                {
-                  id: 'logs2',
-                  title: 'Item should NOT appear!', // Should not appear
-                  sideNavStatus: 'hidden',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel4.root.logs2',
-                },
-                {
-                  title: 'Group should NOT appear!',
-                  id: 'logs3',
-                  sideNavStatus: 'hidden', // This group should not appear
-                  path: 'example_projet.group.openpanel4.root.logs3',
-                  children: [
-                    {
-                      id: 'logs',
-                      title: 'Logs',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.root.logs3.logs',
-                    },
-                    {
-                      id: 'signals',
-                      title: 'Signals',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.root.logs3.signals',
-                    },
-                  ],
-                },
-                {
-                  title: 'Group renders as "item" (2)',
-                  id: 'group2.renderAsItem',
-                  renderAs: 'item',
-                  path: 'example_projet.group.openpanel4.root.group2.renderAsItem',
-                  children: [
-                    {
-                      id: 'logs',
-                      title: 'Logs',
-                      sideNavStatus: 'hidden',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.root.group2.renderAsItem.logs',
-                    },
-                    {
-                      id: 'signals',
-                      title: 'Signals',
-                      sideNavStatus: 'hidden',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.root.group2.renderAsItem.signals',
-                    },
-                    {
-                      id: 'tracing',
-                      title: 'Tracing',
-                      sideNavStatus: 'hidden',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.root.group2.renderAsItem.tracing',
-                    },
-                  ],
-                },
-              ],
-            },
-            // Groups with accordion
-            {
-              id: 'group2',
-              title: 'MANAGEMENT',
-              renderAs: 'accordion',
-              path: 'example_projet.group.openpanel4.group2',
-              children: [
-                {
-                  id: 'group2-A',
-                  title: 'Group 1',
-                  path: 'example_projet.group.openpanel4.group2.group2-A',
-                  children: [
-                    {
-                      id: 'logs',
-                      title: 'Logs',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.group2.group2-A.logs',
-                    },
-                    {
-                      id: 'signals',
-                      title: 'Signals',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.group2.group2-A.signals',
-                    },
-                    {
-                      id: 'tracing',
-                      title: 'Tracing',
-                      withBadge: true, // Default to "Beta" badge
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.group2.group2-A.tracing',
-                    },
-                  ],
-                },
-                {
-                  id: 'root-groupB',
-                  path: 'example_projet.group.openpanel4.group2.root-groupB',
-                  title: '',
-                  children: [
-                    {
-                      id: 'group2-B',
-                      title: 'Group renders as "item" (3)',
-                      renderAs: 'item', // This group renders as a normal item
-                      path: 'example_projet.group.openpanel4.group2.root-groupB.group2-B',
-                      children: [
-                        {
-                          id: 'logs',
-                          title: 'Logs',
-                          href: '/app/kibana',
-                          path: 'example_projet.group.openpanel4.group2.root-groupB.group2-B.logs',
-                        },
-                        {
-                          id: 'signals',
-                          title: 'Signals',
-                          href: '/app/kibana',
-                          path: 'example_projet.group.openpanel4.group2.root-groupB.group2-B.signals',
-                        },
-                        {
-                          id: 'tracing',
-                          title: 'Tracing',
-                          href: '/app/kibana',
-                          path: 'example_projet.group.openpanel4.group2.root-groupB.group2-B.tracing',
-                        },
-                      ],
-                    },
-                  ],
-                },
-                {
-                  id: 'group2-C',
-                  title: 'Group 3',
-                  path: 'example_projet.group.openpanel4.group2.group2-C',
-                  children: [
-                    {
-                      id: 'logs',
-                      title: 'Logs',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.group2.group2-C.logs',
-                    },
-                    {
-                      id: 'groupAsItem',
-                      title: 'Yet another group as item',
-                      renderAs: 'item',
-                      path: 'example_projet.group.openpanel4.group2.group2-C.groupAsItem',
-                      children: [
-                        {
-                          id: 'logs',
-                          title: 'Logs',
-                          href: '/app/kibana',
-                          path: 'example_projet.group.openpanel4.group2.group2-C.groupAsItem.logs',
-                        },
-                        {
-                          id: 'signals',
-                          title: 'Signals',
-                          href: '/app/kibana',
-                          path: 'example_projet.group.openpanel4.group2.group2-C.groupAsItem.signals',
-                        },
-                      ],
-                    },
-                    {
-                      id: 'signals',
-                      title: 'Signals',
-                      href: '/app/kibana',
-                      path: 'example_projet.group.openpanel4.group2.group2-C.signals',
-                    },
-                  ],
-                },
-              ],
-            },
-          ],
-        },
-        {
-          // Panel where all children are hidden. The "open panel" icon should NOT
-          // appear next to the node title
-          id: 'group.openpanel5',
-          title: 'Open panel (5) - all children hidden',
-          renderAs: 'panelOpener',
-          path: 'example_projet.group.openpanel5',
-          children: [
-            {
-              id: 'test1',
-              title: 'Test 1',
-              sideNavStatus: 'hidden',
+              id: 'management1',
+              path: 'footer3.settings2.management1',
+              title: 'Data views',
               href: '/app/kibana',
-              path: 'example_projet.group.openpanel5.test1',
-            },
-            {
-              id: 'test2',
-              title: 'Some group',
-              path: '',
-              children: [
-                {
-                  id: 'item1',
-                  title: 'My first group item',
-                  sideNavStatus: 'hidden',
-                  href: '/app/kibana',
-                  path: 'example_projet.group.openpanel5.test2.item1',
-                },
-              ],
-            },
-          ],
-        },
-        {
-          id: 'group.openpanel6',
-          title: 'Open panel (custom content)',
-          renderAs: 'panelOpener',
-          path: 'example_projet.group.openpanel6',
-          children: [
-            {
-              id: 'logs',
-              title: 'Logs',
-              href: '/app/kibana',
-              path: 'example_projet.group.openpanel6.logs',
-            },
-            {
-              id: 'signals',
-              title: 'Signals',
-              href: '/app/kibana',
-              path: 'example_projet.group.openpanel6.signals',
-            },
-            {
-              id: 'tracing',
-              title: 'Tracing',
-              href: '/app/kibana',
-              path: 'example_projet.group.openpanel6.tracing',
-            },
-          ],
-        },
-        {
-          id: 'group.openpanel7',
-          title: 'Open panel (custom title)',
-          renderAs: 'panelOpener',
-          path: 'example_projet.group.openpanel7',
-          children: [
-            {
-              id: 'logs',
-              title: 'Those links',
-              href: '/app/kibana',
-              path: 'example_projet.group.openpanel7.logs',
-            },
-            {
-              id: 'signals',
-              title: 'are automatically',
-              href: '/app/kibana',
-              path: 'example_projet.group.openpanel7.signals',
-            },
-            {
-              id: 'tracing',
-              title: 'generated',
-              href: '/app/kibana',
-              path: 'example_projet.group.openpanel7.tracing',
             },
           ],
         },
@@ -1135,23 +528,14 @@ const navigationTreeWithPanels: NavigationTreeDefinitionUI = {
   ],
 };
 
-export const ObjectDefinitionWithPanel = (args: NavigationServices) => {
-  const services = storybookMock.getServices({
-    ...args,
-    recentlyAccessed$: of([
-      { label: 'This is an example', link: '/app/example/39859', id: '39850' },
-      { label: 'Another example', link: '/app/example/5235', id: '5235' },
-    ]),
-  });
+export const GeneralLayoutStructure = (args: NavigationServices) => {
+  const services = storybookMock.getServices(args);
 
   return (
     <NavigationWrapper>
       {({ isCollapsed }) => (
         <NavigationProvider {...services} isSideNavCollapsed={isCollapsed}>
-          <Navigation
-            navigationTree$={of(navigationTreeWithPanels)}
-            panelContentProvider={panelContentProvider}
-          />
+          <Navigation navigationTree$={of(navigationTreeWithGroups)} />
         </NavigationProvider>
       )}
     </NavigationWrapper>
@@ -1166,5 +550,5 @@ export default {
       page: mdx,
     },
   },
-  component: ComplexObjectDefinition,
-} as ComponentMeta<typeof ComplexObjectDefinition>;
+  component: GeneralLayoutStructure,
+} as ComponentMeta<typeof GeneralLayoutStructure>;
