@@ -14,7 +14,7 @@ import * as hooks from '../../../../hooks/use_es_doc_search';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { buildDataTableRecord } from '@kbn/discover-utils';
 import { ApmStacktrace } from './apm_stacktrace';
-import { EuiThemeProvider } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { ExceptionStacktrace, PlaintextStacktrace, Stacktrace } from '@kbn/event-stacktrace';
 
 const mockDataView = {
