@@ -61,7 +61,6 @@ export const useAgentless = () => {
 export function useSetupTechnology({
   setNewAgentPolicy,
   newAgentPolicy,
-  updateAgentPolicies,
   updatePackagePolicy,
   setSelectedPolicyTab,
   packageInfo,
@@ -71,7 +70,6 @@ export function useSetupTechnology({
 }: {
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
-  updateAgentPolicies: (policies: AgentPolicy[]) => void;
   updatePackagePolicy: (policy: Partial<NewPackagePolicy>) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
@@ -129,9 +127,14 @@ export function useSetupTechnology({
       name: agentlessPolicyName,
       global_data_tags: getGlobaDataTags(packageInfo),
     };
+
+    const agentlessPolicy = getAgentlessPolicy(packageInfo);
+    if (agentlessPolicy) {
+      nextNewAgentlessPolicy.agentless = agentlessPolicy;
+    }
+
     setCurrentAgentPolicy(nextNewAgentlessPolicy);
     setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
-    updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
     updatePackagePolicy({
       supports_agentless: true,
     });
@@ -148,7 +151,6 @@ export function useSetupTechnology({
     };
     setCurrentAgentPolicy(nextNewAgentlessPolicy);
     setNewAgentPolicy(nextNewAgentlessPolicy);
-    updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
     updatePackagePolicy({
       supports_agentless: false,
     });
@@ -203,4 +205,27 @@ const getGlobaDataTags = (packageInfo?: PackageInfo) => {
       value: agentlessInfo.team,
     },
   ];
+};
+
+const getAgentlessPolicy = (packageInfo?: PackageInfo) => {
+  if (
+    !packageInfo?.policy_templates &&
+    !packageInfo?.policy_templates?.some((policy) => policy.deployment_modes)
+  ) {
+    return;
+  }
+  const agentlessPolicyTemplate = packageInfo.policy_templates.find(
+    (policy) => policy.deployment_modes
+  );
+
+  // assumes that all the policy templates agentless deployments modes indentify have the same organization, division and team
+  const agentlessInfo = agentlessPolicyTemplate?.deployment_modes?.agentless;
+
+  if (!agentlessInfo?.resources) {
+    return;
+  }
+
+  return {
+    resources: agentlessInfo.resources,
+  };
 };
