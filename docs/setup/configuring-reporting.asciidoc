@@ -34,13 +34,6 @@ to enable the {kib} server to have screenshotting capabilities.
 * <<reporting-elasticsearch-configuration>>
 
 [float]
-[[reporting-elasticsearch-configuration]]
-=== Ensure {es} allows built-in templates
-Reporting relies on {es} to install a mapping template for the data stream that stores reports. Ensure that {es} allows built-in
-templates to be installed by keeping the `stack.templates.enabled` setting at the default value of `true`. For more information, see
-{ref}/index-management-settings.html#stack-templates-enabled[Index management settings].
-
-[float]
 [[grant-user-access]]
 === Grant users access to reporting
 When security is enabled, you grant users access to {report-features} with <<kibana-privileges, {kib} application privileges>>, which allow you to create custom roles that control the spaces and applications where users generate reports.
@@ -259,3 +252,10 @@ PDF/PNG reporting to reach {kib} over a local interface, while also allowing the
 outward-facing network interfaces, as it makes the {kib} server accessible from any network interface on the
 machine. Make sure that no firewall rules or other routing rules prevent local services from accessing this
 address.
+
+[float]
+[[reporting-elasticsearch-configuration]]
+=== Ensure {es} allows built-in templates
+Reporting relies on {es} to install a mapping template for the data stream that stores reports. Ensure that {es} allows built-in
+templates to be installed by keeping the `stack.templates.enabled` setting at the default value of `true`. For more information, see
+{ref}/index-management-settings.html#stack-templates-enabled[Index management settings].
