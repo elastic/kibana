@@ -10,9 +10,9 @@
 import React from 'react';
 import { render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { AddPanelFlyout } from './add_panel_flyout';
 import { DashboardApi } from '../../../../dashboard_api/types';
-import { IntlProvider } from '@kbn/i18n-react';
 
 jest.mock('../get_menu_item_groups', () => ({}));
 
