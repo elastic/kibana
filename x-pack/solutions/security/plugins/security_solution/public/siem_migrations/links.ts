@@ -19,7 +19,8 @@ export const siemMigrationsLinks: LinkItem = {
   id: SecurityPageName.siemMigrationsRules,
   title: SIEM_MIGRATIONS_RULES,
   description: i18n.translate('xpack.securitySolution.appLinks.siemMigrationsRulesDescription', {
-    defaultMessage: 'SIEM Rule Migrations.',
+    defaultMessage:
+      'Our generative AI powered SIEM migration tool automates some of the most time consuming migrations tasks and processed.',
   }),
   landingIcon: SiemMigrationsIcon,
   path: SIEM_MIGRATIONS_RULES_PATH,
