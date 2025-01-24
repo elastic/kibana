@@ -67,9 +67,9 @@ export function initializeInternalApi(
     activeData: undefined,
   });
 
-  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
-    ? parentApi.esqlVariables$
-    : undefined;
+  const [esqlVariables$] = buildObservableVariable(
+    apiPublishesESQLVariables(parentApi) ? parentApi.esqlVariables$ : []
+  );
 
   // No need to expose anything at public API right now, that would happen later on
   // where each initializer will pick what it needs and publish it

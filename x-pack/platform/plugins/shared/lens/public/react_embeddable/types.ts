@@ -418,7 +418,7 @@ export type LensInternalApi = Simplify<
   Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
     PublishesDataViews &
     VisualizationContextHelper & {
-      esqlVariables$: PublishingSubject<ESQLControlVariable[]> | undefined;
+      esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
