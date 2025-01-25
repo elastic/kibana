@@ -11,7 +11,7 @@ import { i18n } from '@kbn/i18n';
 import { ConnectorIcon } from '@kbn/search-shared-ui';
 import { SearchEmptyPrompt, DecorativeHorizontalStepper } from '@kbn/search-shared-ui';
 import { SERVERLESS_ES_CONNECTORS_ID } from '@kbn/deeplinks-search/constants';
-import { BACK_LABEL } from '../../../../common/i18n_string';
+import { BACK_LABEL, COMING_SOON_LABEL } from '../../../../common/i18n_string';
 import { useKibanaServices } from '../../hooks/use_kibana';
 import { useConnectorTypes } from '../../hooks/api/use_connector_types';
 import { useAssetBasePath } from '../../hooks/use_asset_base_path';
@@ -46,6 +46,7 @@ export const ElasticManagedConnectorsEmptyPrompt: React.FC = () => {
         }
       )}
       isComingSoon
+      comingSoonLabel={COMING_SOON_LABEL}
       body={
         <EuiFlexGroup
           alignItems="stretch"
