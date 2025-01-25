@@ -9,7 +9,7 @@
 
 import React from 'react';
 import { BehaviorSubject } from 'rxjs';
-import {
+import type {
   AppMountParameters,
   AppUpdater,
   CoreSetup,
@@ -22,23 +22,23 @@ import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
-import { SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
+import { type SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
-import { buildServices, UrlTracker } from './build_services';
+import { buildServices, type UrlTracker } from './build_services';
 import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
-  DiscoverContextAppLocator,
+  type DiscoverContextAppLocator,
   DiscoverContextAppLocatorDefinition,
 } from './application/context/services/locator';
 import {
-  DiscoverSingleDocLocator,
+  type DiscoverSingleDocLocator,
   DiscoverSingleDocLocatorDefinition,
 } from './application/doc/locator';
 import {
-  DiscoverAppLocator,
+  type DiscoverAppLocator,
   DiscoverAppLocatorDefinition,
   DiscoverESQLLocatorDefinition,
 } from '../common';
@@ -51,14 +51,16 @@ import {
 import { getESQLSearchProvider } from './global_search/search_provider';
 import { HistoryService } from './history_service';
 import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
-import { DiscoverSetup, DiscoverSetupPlugins, DiscoverStart, DiscoverStartPlugins } from './types';
+import type {
+  DiscoverSetup,
+  DiscoverSetupPlugins,
+  DiscoverStart,
+  DiscoverStartPlugins,
+} from './types';
 import { deserializeState } from './embeddable/utils/serialization_utils';
 import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
-import { RootProfileService } from './context_awareness/profiles/root_profile';
-import { DataSourceProfileService } from './context_awareness/profiles/data_source_profile';
-import { DocumentProfileService } from './context_awareness/profiles/document_profile';
-import { ProfilesManager } from './context_awareness/profiles_manager';
 import { DiscoverEBTManager } from './services/discover_ebt_manager';
+import type { ProfilesManager } from './context_awareness';
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -271,12 +273,12 @@ export class DiscoverPlugin
       );
     }
 
-    const getDiscoverServicesInternal = () => {
+    const getDiscoverServicesInternal = async () => {
       const ebtManager = new DiscoverEBTManager(); // It is not initialized outside of Discover
       return this.getDiscoverServices(
         core,
         plugins,
-        this.createEmptyProfilesManager({ ebtManager }),
+        await this.createEmptyProfilesManager({ ebtManager }),
         ebtManager
       );
     };
@@ -295,12 +297,30 @@ export class DiscoverPlugin
     }
   }
 
-  private createProfileServices() {
+  private async createProfileServices(ebtManager: DiscoverEBTManager) {
+    const {
+      RootProfileService,
+      DataSourceProfileService,
+      DocumentProfileService,
+      ProfilesManager,
+    } = await import('./context_awareness/plugin_imports');
+
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
     const documentProfileService = new DocumentProfileService();
+    const profilesManager = new ProfilesManager(
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService,
+      ebtManager
+    );
 
-    return { rootProfileService, dataSourceProfileService, documentProfileService };
+    return {
+      rootProfileService,
+      dataSourceProfileService,
+      documentProfileService,
+      profilesManager,
+    };
   }
 
   private async createProfilesManager({
@@ -312,37 +332,28 @@ export class DiscoverPlugin
     plugins: DiscoverStartPlugins;
     ebtManager: DiscoverEBTManager;
   }) {
-    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
-    const { rootProfileService, dataSourceProfileService, documentProfileService } =
-      this.createProfileServices();
-
-    const enabledExperimentalProfileIds = this.experimentalFeatures.enabledProfiles ?? [];
-
-    const profilesManager = new ProfilesManager(
+    const {
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
-      ebtManager
-    );
+      profilesManager,
+    } = await this.createProfileServices(ebtManager);
+    const { registerProfileProviders } = await import('./context_awareness/profile_providers');
 
     await registerProfileProviders({
       rootProfileService,
       dataSourceProfileService,
       documentProfileService,
-      enabledExperimentalProfileIds,
+      enabledExperimentalProfileIds: this.experimentalFeatures.enabledProfiles ?? [],
       services: this.getDiscoverServices(core, plugins, profilesManager, ebtManager),
     });
 
     return profilesManager;
   }
 
-  private createEmptyProfilesManager({ ebtManager }: { ebtManager: DiscoverEBTManager }) {
-    return new ProfilesManager(
-      new RootProfileService(),
-      new DataSourceProfileService(),
-      new DocumentProfileService(),
-      ebtManager
-    );
+  private async createEmptyProfilesManager({ ebtManager }: { ebtManager: DiscoverEBTManager }) {
+    const { profilesManager } = await this.createProfileServices(ebtManager);
+    return profilesManager;
   }
 
   private getDiscoverServices = (
@@ -378,7 +389,6 @@ export class DiscoverPlugin
 
     const getDiscoverServicesForEmbeddable = async () => {
       const [coreStart, deps] = await core.getStartServices();
-
       const profilesManager = await this.createProfilesManager({
         core: coreStart,
         plugins: deps,
