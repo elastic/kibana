@@ -10,7 +10,7 @@ import { RuleSnoozeSchedule } from '../../types';
 
 const MAX_TIMESTAMP = 8640000000000000;
 
-export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
+export function getActiveSnoozeIfExist(snooze: RuleSnoozeSchedule) {
   const { duration, rRule, id } = snooze;
   if (duration === -1)
     return {
@@ -49,7 +49,7 @@ export function isSnoozeActive(snooze: RuleSnoozeSchedule) {
     if (now < lastOccurrenceEndTime)
       return { lastOccurrence, snoozeEndTime: new Date(lastOccurrenceEndTime), id };
   } catch (e) {
-    throw new Error(`Failed to process RRule ${rRule}: ${e}`);
+    return null;
   }
 
   return null;
