@@ -27,7 +27,7 @@ import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
-import { buildServices, type UrlTracker } from './build_services';
+import type { UrlTracker } from './build_services';
 import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
@@ -64,6 +64,10 @@ import type { DiscoverEBTManager } from './services/discover_ebt_manager';
 import type { ProfilesManager } from './context_awareness';
 
 const getAsyncImports = () => import('./plugin_imports');
+const getEmptyEbtManager = once(async () => {
+  const { DiscoverEBTManager } = await getAsyncImports();
+  return new DiscoverEBTManager(); // It is not initialized outside of Discover
+});
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -191,22 +195,11 @@ export class DiscoverPlugin
         const ebtManager = await getEbtManager();
         ebtManager.onDiscoverAppMounted();
 
-        const services = buildServices({
+        const services = await this.getDiscoverServicesWithProfiles({
           core: coreStart,
           plugins: discoverStartPlugins,
-          context: this.initializerContext,
-          locator: this.locator!,
-          contextLocator: this.contextLocator!,
-          singleDocLocator: this.singleDocLocator!,
-          history: this.historyService.getHistory(),
-          scopedHistory: this.scopedHistory,
-          urlTracker: this.urlTracker!,
-          profilesManager: await this.createProfilesManager({
-            core: coreStart,
-            plugins: discoverStartPlugins,
-            ebtManager,
-          }),
           ebtManager,
+          scopedHistory: this.scopedHistory,
           setHeaderActionMenu: params.setHeaderActionMenu,
         });
 
@@ -284,14 +277,9 @@ export class DiscoverPlugin
     }
 
     const getDiscoverServicesInternal = async () => {
-      const { DiscoverEBTManager } = await getAsyncImports();
-      const ebtManager = new DiscoverEBTManager(); // It is not initialized outside of Discover
-      return this.getDiscoverServices(
-        core,
-        plugins,
-        await this.createEmptyProfilesManager({ ebtManager }),
-        ebtManager
-      );
+      const ebtManager = await getEmptyEbtManager();
+      const { profilesManager } = await this.createProfileServices(ebtManager);
+      return this.getDiscoverServices({ core, plugins, profilesManager, ebtManager });
     };
 
     return {
@@ -334,14 +322,18 @@ export class DiscoverPlugin
     };
   }
 
-  private async createProfilesManager({
+  private async getDiscoverServicesWithProfiles({
     core,
     plugins,
     ebtManager,
+    scopedHistory,
+    setHeaderActionMenu,
   }: {
     core: CoreStart;
     plugins: DiscoverStartPlugins;
     ebtManager: DiscoverEBTManager;
+    scopedHistory?: ScopedHistory;
+    setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) {
     const {
       rootProfileService,
@@ -349,6 +341,14 @@ export class DiscoverPlugin
       documentProfileService,
       profilesManager,
     } = await this.createProfileServices(ebtManager);
+    const services = await this.getDiscoverServices({
+      core,
+      plugins,
+      profilesManager,
+      ebtManager,
+      scopedHistory,
+      setHeaderActionMenu,
+    });
     const { registerProfileProviders } = await import('./context_awareness/profile_providers');
 
     await registerProfileProviders({
@@ -356,23 +356,28 @@ export class DiscoverPlugin
       dataSourceProfileService,
       documentProfileService,
       enabledExperimentalProfileIds: this.experimentalFeatures.enabledProfiles ?? [],
-      services: this.getDiscoverServices(core, plugins, profilesManager, ebtManager),
+      services,
     });
 
-    return profilesManager;
+    return services;
   }
 
-  private async createEmptyProfilesManager({ ebtManager }: { ebtManager: DiscoverEBTManager }) {
-    const { profilesManager } = await this.createProfileServices(ebtManager);
-    return profilesManager;
-  }
-
-  private getDiscoverServices = (
-    core: CoreStart,
-    plugins: DiscoverStartPlugins,
-    profilesManager: ProfilesManager,
-    ebtManager: DiscoverEBTManager
-  ) => {
+  private getDiscoverServices = async ({
+    core,
+    plugins,
+    profilesManager,
+    ebtManager,
+    scopedHistory,
+    setHeaderActionMenu,
+  }: {
+    core: CoreStart;
+    plugins: DiscoverStartPlugins;
+    profilesManager: ProfilesManager;
+    ebtManager: DiscoverEBTManager;
+    scopedHistory?: ScopedHistory;
+    setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
+  }) => {
+    const { buildServices } = await getAsyncImports();
     return buildServices({
       core,
       plugins,
@@ -381,18 +386,15 @@ export class DiscoverPlugin
       contextLocator: this.contextLocator!,
       singleDocLocator: this.singleDocLocator!,
       history: this.historyService.getHistory(),
+      scopedHistory,
       urlTracker: this.urlTracker!,
       profilesManager,
       ebtManager,
+      setHeaderActionMenu,
     });
   };
 
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
-    const getEbtManager = once(async () => {
-      const { DiscoverEBTManager } = await getAsyncImports();
-      return new DiscoverEBTManager(); // It is not initialized outside of Discover
-    });
-
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
       return {
@@ -403,13 +405,12 @@ export class DiscoverPlugin
 
     const getDiscoverServicesForEmbeddable = async () => {
       const [coreStart, deps] = await core.getStartServices();
-      const ebtManager = await getEbtManager();
-      const profilesManager = await this.createProfilesManager({
+      const ebtManager = await getEmptyEbtManager();
+      return this.getDiscoverServicesWithProfiles({
         core: coreStart,
         plugins: deps,
         ebtManager,
       });
-      return this.getDiscoverServices(coreStart, deps, profilesManager, ebtManager);
     };
 
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
