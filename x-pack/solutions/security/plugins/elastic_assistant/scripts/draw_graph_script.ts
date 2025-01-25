@@ -20,6 +20,17 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import { createOpenAIFunctionsAgent } from 'langchain/agents';
 import { actionsClientMock } from '@kbn/actions-plugin/server/actions_client/actions_client.mock';
 import { savedObjectsClientMock } from '@kbn/core/server/mocks';
+import {
+  AD_GENERATION_DETAILS_MARKDOWN,
+  AD_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+  AD_GENERATION_INSIGHTS,
+  AD_GENERATION_MITRE_ATTACK_TACTICS,
+  AD_GENERATION_SUMMARY_MARKDOWN,
+  AD_GENERATION_TITLE,
+  ATTACK_DISCOVERY_CONTINUE,
+  ATTACK_DISCOVERY_DEFAULT,
+  ATTACK_DISCOVERY_REFINE,
+} from '../server/lib/prompt/prompts';
 import { getDefaultAssistantGraph } from '../server/lib/langchain/graphs/default_assistant_graph/graph';
 import { getDefaultAttackDiscoveryGraph } from '../server/lib/attack_discovery/graphs/default_attack_discovery_graph';
 
@@ -72,9 +83,15 @@ async function getAttackDiscoveryGraph(logger: Logger): Promise<Drawable> {
     logger,
     replacements: {},
     prompts: {
-      default: '',
-      continue: '',
-      refine: '',
+      default: ATTACK_DISCOVERY_DEFAULT,
+      refine: ATTACK_DISCOVERY_REFINE,
+      continue: ATTACK_DISCOVERY_CONTINUE,
+      detailsMarkdown: AD_GENERATION_DETAILS_MARKDOWN,
+      entitySummaryMarkdown: AD_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+      mitreAttackTactics: AD_GENERATION_MITRE_ATTACK_TACTICS,
+      summaryMarkdown: AD_GENERATION_SUMMARY_MARKDOWN,
+      title: AD_GENERATION_TITLE,
+      insights: AD_GENERATION_INSIGHTS,
     },
     size: 20,
   });

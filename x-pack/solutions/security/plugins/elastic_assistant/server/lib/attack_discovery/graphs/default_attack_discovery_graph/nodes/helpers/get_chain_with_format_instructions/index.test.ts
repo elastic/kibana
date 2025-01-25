@@ -9,6 +9,23 @@ import { FakeLLM } from '@langchain/core/utils/testing';
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 
 import { getChainWithFormatInstructions } from '.';
+import {
+  AD_GENERATION_DETAILS_MARKDOWN,
+  AD_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+  AD_GENERATION_INSIGHTS,
+  AD_GENERATION_MITRE_ATTACK_TACTICS,
+  AD_GENERATION_SUMMARY_MARKDOWN,
+  AD_GENERATION_TITLE,
+} from '../../../../../../prompt/prompts';
+
+const prompts = {
+  detailsMarkdown: AD_GENERATION_DETAILS_MARKDOWN,
+  entitySummaryMarkdown: AD_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+  mitreAttackTactics: AD_GENERATION_MITRE_ATTACK_TACTICS,
+  summaryMarkdown: AD_GENERATION_SUMMARY_MARKDOWN,
+  title: AD_GENERATION_TITLE,
+  insights: AD_GENERATION_INSIGHTS,
+};
 
 describe('getChainWithFormatInstructions', () => {
   const mockLlm = new FakeLLM({
@@ -32,7 +49,7 @@ Here is the JSON Schema instance your output must adhere to. Include the enclosi
 \`\`\`
 `;
 
-    const chainWithFormatInstructions = getChainWithFormatInstructions(mockLlm);
+    const chainWithFormatInstructions = getChainWithFormatInstructions(mockLlm, prompts);
     expect(chainWithFormatInstructions).toEqual({
       chain: expect.any(Object),
       formatInstructions: expectedFormatInstructions,

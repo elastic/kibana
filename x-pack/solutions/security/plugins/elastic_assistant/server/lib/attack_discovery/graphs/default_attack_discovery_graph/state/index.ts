@@ -9,6 +9,7 @@ import { AttackDiscovery, Replacements } from '@kbn/elastic-assistant-common';
 import type { Document } from '@langchain/core/documents';
 import type { StateGraphArgs } from '@langchain/langgraph';
 
+import { AttackDiscoveryPrompts } from '../nodes/helpers/prompts';
 import {
   DEFAULT_MAX_GENERATION_ATTEMPTS,
   DEFAULT_MAX_HALLUCINATION_FAILURES,
@@ -19,11 +20,7 @@ import type { GraphState } from '../types';
 export interface Options {
   end?: string;
   filter?: Record<string, unknown> | null;
-  prompts: {
-    continue: string;
-    default: string;
-    refine: string;
-  };
+  prompts: AttackDiscoveryPrompts;
   start?: string;
 }
 

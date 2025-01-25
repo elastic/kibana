@@ -5,10 +5,27 @@
  * 2.0.
  */
 import { getOutputParser } from '.';
+import {
+  AD_GENERATION_DETAILS_MARKDOWN,
+  AD_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+  AD_GENERATION_INSIGHTS,
+  AD_GENERATION_MITRE_ATTACK_TACTICS,
+  AD_GENERATION_SUMMARY_MARKDOWN,
+  AD_GENERATION_TITLE,
+} from '../../../../../../prompt/prompts';
+
+const prompts = {
+  detailsMarkdown: AD_GENERATION_DETAILS_MARKDOWN,
+  entitySummaryMarkdown: AD_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+  mitreAttackTactics: AD_GENERATION_MITRE_ATTACK_TACTICS,
+  summaryMarkdown: AD_GENERATION_SUMMARY_MARKDOWN,
+  title: AD_GENERATION_TITLE,
+  insights: AD_GENERATION_INSIGHTS,
+};
 
 describe('getOutputParser', () => {
   it('returns a structured output parser with the expected format instructions', () => {
-    const outputParser = getOutputParser();
+    const outputParser = getOutputParser(prompts);
 
     const expected = `You must format your output as a JSON value that adheres to a given \"JSON Schema\" instance.
 

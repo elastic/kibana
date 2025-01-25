@@ -5,11 +5,11 @@
  * 2.0.
  */
 
-import { getPrompt, getPromptsByFeature } from './get_prompt';
+import { getPrompt, getPromptsByGroupId } from './get_prompt';
 import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import { BEDROCK_SYSTEM_PROMPT, DEFAULT_SYSTEM_PROMPT, GEMINI_USER_PROMPT } from './prompts';
-import { promptDictionary, promptFeatureId } from './local_prompt_object';
+import { promptDictionary, promptGroupId } from './local_prompt_object';
 
 jest.mock('@kbn/core-saved-objects-api-server');
 jest.mock('@kbn/actions-plugin/server');
@@ -372,16 +372,21 @@ describe('get_prompt', () => {
     });
   });
 
-  describe('getPromptsByFeature', () => {
+  describe('getPromptsByGroupId', () => {
     it('returns prompts matching the provided promptIds', async () => {
-      const result = await getPromptsByFeature({
+      const result = await getPromptsByGroupId({
         savedObjectsClient,
         promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
-        promptFeatureId: promptFeatureId.aiAssistant,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
         model: 'gpt-4o',
         actionsClient,
         connectorId: 'connector-123',
+      });
+      expect(savedObjectsClient.find).toHaveBeenCalledWith({
+        type: 'security-ai-prompt',
+        searchFields: ['promptId'],
+        search: `${promptGroupId.aiAssistant}-*`,
       });
 
       expect(result).toEqual([
@@ -397,10 +402,10 @@ describe('get_prompt', () => {
     });
 
     it('returns prompts matching the provided promptIds for gemini', async () => {
-      const result = await getPromptsByFeature({
+      const result = await getPromptsByGroupId({
         savedObjectsClient,
         promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
-        promptFeatureId: promptFeatureId.aiAssistant,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'gemini',
         actionsClient,
         connectorId: 'connector-123',
@@ -419,10 +424,10 @@ describe('get_prompt', () => {
     });
 
     it('returns prompts matching the provided promptIds when connector is given', async () => {
-      const result = await getPromptsByFeature({
+      const result = await getPromptsByGroupId({
         savedObjectsClient,
         promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
-        promptFeatureId: promptFeatureId.aiAssistant,
+        promptGroupId: promptGroupId.aiAssistant,
         connector: {
           actionTypeId: '.gemini',
           config: {
@@ -450,10 +455,10 @@ describe('get_prompt', () => {
       ]);
     });
     it('returns prompts matching the provided promptIds when inference connector is given', async () => {
-      const result = await getPromptsByFeature({
+      const result = await getPromptsByGroupId({
         savedObjectsClient,
         promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
-        promptFeatureId: promptFeatureId.aiAssistant,
+        promptGroupId: promptGroupId.aiAssistant,
         connector: {
           actionTypeId: '.inference',
           config: {

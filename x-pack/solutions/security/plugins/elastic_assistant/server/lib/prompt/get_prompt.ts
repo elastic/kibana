@@ -22,8 +22,8 @@ interface GetPromptArgs {
   provider?: string;
   savedObjectsClient: SavedObjectsClientContract;
 }
-interface GetPromptsByFeatureArgs extends Omit<GetPromptArgs, 'promptId'> {
-  promptFeatureId: string;
+interface GetPromptsByGroupIdArgs extends Omit<GetPromptArgs, 'promptId'> {
+  promptGroupId: string;
   promptIds: string[];
 }
 const elasticModelDictionary: ElasticModelDictionary = {
@@ -41,21 +41,21 @@ type PromptArray = Array<{ promptId: string; prompt: string }>;
  * @param connector - connector, provide if available. No need to provide model and provider in this case
  * @param connectorId - connector id
  * @param model - model. No need to provide if connector provided
- * @param promptFeatureId - feature id, should be common across promptIds
- * @param promptIds - prompt ids with shared promptFeatureId
+ * @param promptGroupId - feature id, should be common across promptIds
+ * @param promptIds - prompt ids with shared promptGroupId
  * @param provider  - provider. No need to provide if connector provided
  * @param savedObjectsClient - saved objects client
  */
-export const getPromptsByFeature = async ({
+export const getPromptsByGroupId = async ({
   actionsClient,
   connector,
   connectorId,
   model: providedModel,
-  promptFeatureId,
+  promptGroupId,
   promptIds,
   provider: providedProvider,
   savedObjectsClient,
-}: GetPromptsByFeatureArgs): Promise<PromptArray> => {
+}: GetPromptsByGroupIdArgs): Promise<PromptArray> => {
   const { provider, model } = await resolveProviderAndModel(
     providedProvider,
     providedModel,
@@ -67,7 +67,7 @@ export const getPromptsByFeature = async ({
   const prompts = await savedObjectsClient.find<Prompt>({
     type: promptSavedObjectType,
     searchFields: ['promptId'],
-    search: `${promptFeatureId}-*`,
+    search: `${promptGroupId}-*`,
   });
   const promptsOnly = prompts?.saved_objects.map((p) => p.attributes) || [];
 

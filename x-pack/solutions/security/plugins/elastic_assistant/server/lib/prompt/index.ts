@@ -5,5 +5,5 @@
  * 2.0.
  */
 
-export { getPrompt, getPromptsByFeature } from './get_prompt';
+export { getPrompt, getPromptsByGroupId } from './get_prompt';
 export { promptDictionary } from './local_prompt_object';

@@ -15,8 +15,6 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { Document } from '@langchain/core/documents';
 
-import { promptFeatureId } from '../../../../../lib/prompt/local_prompt_object';
-import { getPromptsByFeature, promptDictionary } from '../../../../../lib/prompt';
 import { getDefaultAttackDiscoveryGraph } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph';
 import {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
@@ -25,6 +23,7 @@ import {
 import { GraphState } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/types';
 import { throwIfErrorCountsExceeded } from '../throw_if_error_counts_exceeded';
 import { getLlmType } from '../../../../utils';
+import { getAttackDiscoveryPrompts } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 
 export const invokeAttackDiscoveryGraph = async ({
   actionsClient,
@@ -93,38 +92,16 @@ export const invokeAttackDiscoveryGraph = async ({
     throw new Error('LLM is required for attack discoveries');
   }
 
-  const attackDiscoveryPrompts = await getPromptsByFeature({
+  const attackDiscoveryPrompts = await getAttackDiscoveryPrompts({
     actionsClient,
     connectorId: apiConfig.connectorId,
     // if in future oss has different prompt, add it as model here
     model,
-    promptFeatureId: promptFeatureId.attackDiscovery,
-    promptIds: [
-      promptDictionary.attackDiscoveryDefault,
-      promptDictionary.attackDiscoveryRefine,
-      promptDictionary.attackDiscoveryContinue,
-    ],
     provider: llmType,
     savedObjectsClient,
   });
 
-  const defaultPrompt =
-    attackDiscoveryPrompts.find(
-      (prompt) => prompt.promptId === promptDictionary.attackDiscoveryDefault
-    )?.prompt || '';
-  const refinePrompt =
-    attackDiscoveryPrompts.find(
-      (prompt) => prompt.promptId === promptDictionary.attackDiscoveryRefine
-    )?.prompt || '';
-  const continuePrompt =
-    attackDiscoveryPrompts.find(
-      (prompt) => prompt.promptId === promptDictionary.attackDiscoveryContinue
-    )?.prompt || '';
-  console.log('prompts ==>', {
-    default: defaultPrompt,
-    refine: refinePrompt,
-    continue: continuePrompt,
-  });
+  console.log('prompts ==>', attackDiscoveryPrompts);
 
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
@@ -135,11 +112,7 @@ export const invokeAttackDiscoveryGraph = async ({
     llm,
     logger,
     onNewReplacements,
-    prompts: {
-      continue: continuePrompt,
-      default: defaultPrompt,
-      refine: refinePrompt,
-    },
+    prompts: attackDiscoveryPrompts,
     replacements: latestReplacements,
     size,
     start,

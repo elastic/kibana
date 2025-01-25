@@ -16,7 +16,7 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
 import { PublicMethodsOf } from '@kbn/utility-types';
 
-import { getPrompt, promptDictionary } from '../../prompt';
+import { getAttackDiscoveryPrompts } from '../graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from './constants';
 import { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
@@ -94,27 +94,10 @@ export const evaluateAttackDiscovery = async ({
           traceOptions,
         });
 
-        const defaultPrompt = await getPrompt({
+        const attackDiscoveryPrompts = await getAttackDiscoveryPrompts({
           actionsClient,
-          connector,
           connectorId: connector.id,
-          promptId: promptDictionary.attackDiscoveryDefault,
-          savedObjectsClient,
-        });
-
-        const refinePrompt = await getPrompt({
-          actionsClient,
           connector,
-          connectorId: connector.id,
-          promptId: promptDictionary.attackDiscoveryRefine,
-          savedObjectsClient,
-        });
-
-        const continuePrompt = await getPrompt({
-          actionsClient,
-          connector,
-          connectorId: connector.id,
-          promptId: promptDictionary.attackDiscoveryContinue,
           savedObjectsClient,
         });
 
@@ -124,11 +107,7 @@ export const evaluateAttackDiscovery = async ({
           esClient,
           llm,
           logger,
-          prompts: {
-            continue: continuePrompt,
-            default: defaultPrompt,
-            refine: refinePrompt,
-          },
+          prompts: attackDiscoveryPrompts,
           size,
         });
 

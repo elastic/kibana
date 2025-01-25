@@ -8,6 +8,7 @@
 import type { ActionsClientLlm } from '@kbn/langchain/server';
 import type { Logger } from '@kbn/core/server';
 
+import { GenerationPrompts } from '../helpers/prompts';
 import { discardPreviousGenerations } from './helpers/discard_previous_generations';
 import { extractJson } from '../helpers/extract_json';
 import { getAnonymizedAlertsFromState } from './helpers/get_anonymized_alerts_from_state';
@@ -23,9 +24,11 @@ import type { GraphState } from '../../types';
 export const getGenerateNode = ({
   llm,
   logger,
+  prompts,
 }: {
   llm: ActionsClientLlm;
   logger?: Logger;
+  prompts: GenerationPrompts;
 }): ((state: GraphState) => Promise<GraphState>) => {
   const generate = async (state: GraphState): Promise<GraphState> => {
     logger?.debug(() => `---GENERATE---`);
@@ -54,7 +57,7 @@ export const getGenerateNode = ({
         continuePrompt,
       });
 
-      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions(llm);
+      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions(llm, prompts);
 
       logger?.debug(
         () => `generate node is invoking the chain (${llmType}), attempt ${generationAttempts}`
@@ -114,6 +117,7 @@ export const getGenerateNode = ({
         llmType,
         logger,
         nodeName: 'generate',
+        prompts,
       });
 
       // use the unrefined results if we already reached the max number of retries:
