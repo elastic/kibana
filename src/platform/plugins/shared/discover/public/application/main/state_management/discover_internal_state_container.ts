@@ -213,3 +213,16 @@ export function getInternalStateContainer() {
     { freeze: (state) => state }
   );
 }
+
+export const selectDataViewsForPicker = ({
+  savedDataViews,
+  adHocDataViews: originalAdHocDataViews,
+  defaultProfileAdHocDataViewIds,
+}: InternalState) => {
+  const managedDataViews = originalAdHocDataViews.filter(
+    ({ id }) => id && defaultProfileAdHocDataViewIds.includes(id)
+  );
+  const adHocDataViews = differenceBy(originalAdHocDataViews, managedDataViews, 'id');
+
+  return { savedDataViews, managedDataViews, adHocDataViews };
+};
