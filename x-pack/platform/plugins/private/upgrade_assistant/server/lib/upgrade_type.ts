@@ -10,12 +10,17 @@ export interface UpgradeTypeParams {
   current: SemVer;
   target: string;
 }
-// returns null if the versions are the same
-// returns releaseType: major, premajor, minor, preminor, patch, prepatch, or prerelease. We only care about major or minor
-// returns undefined if target isn't supplied or version jump > 1
+
+/**
+ *
+ * @param {SemVer} current kibana version
+ * @param {string} target version to upgrade to
+ * @returns {semver.ReleaseType | null | undefined} null if same version, undefined if target version is out of bounds
+ */
 export const getUpgradeType = ({ current, target }: UpgradeTypeParams) => {
   const targetVersion = semver.coerce(target)!;
-  if (targetVersion && targetVersion.major - current.major > 1) {
+  const versionDiff = targetVersion.major - current.major;
+  if (versionDiff > 1 || versionDiff < 0) {
     return;
   }
   return semver.diff(current, semver.coerce(target)!);

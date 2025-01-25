@@ -45,14 +45,8 @@ export function registerUpgradeStatusRoute({
       },
     },
     versionCheckHandlerWrapper(async ({ core }, request, response) => {
-      // console.log('WHAT IS THE CURRENT VERSION AS PASSED IN HERE?', current);
-      // console.log('WHAT IS THE CURRENT VERSION TYPE AS PASSED IN HERE?', typeof current);
-      // console.log('Do we have a query? request.query', request.query);
-      // console.log('Do we have a defaultTarget? ', defaultTarget);
       const targetVersion = request.query?.targetVersion || `${defaultTarget}`;
-      // returns null if identical versions, undefined if version diff > 1, otherwise ReleaseType
       const upgradeType = getUpgradeType({ current, target: targetVersion });
-      // handle null and undefined upgrade Types.
       if (!upgradeType) return response.forbidden();
 
       try {

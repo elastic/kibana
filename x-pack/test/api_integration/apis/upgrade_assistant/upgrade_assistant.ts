@@ -120,7 +120,7 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    describe.only('GET /api/upgrade_assistant/status', () => {
+    describe('GET /api/upgrade_assistant/status', () => {
       it('returns a successful response', async () => {
         const { body } = await supertest
           .get('/api/upgrade_assistant/status')
@@ -180,13 +180,18 @@ export default function ({ getService }: FtrProviderContext) {
           })
           .set('kbn-xsrf', 'xxx')
           .expect(403);
+        expect(body.message).to.be('Forbidden');
+      });
 
-        const expectedResponseKeys = ['readyForUpgrade', 'details'];
-        // We're not able to easily test different upgrade status scenarios (there are tests with mocked data to handle this)
-        // so, for now, we simply verify the response returns the expected format
-        expectedResponseKeys.forEach((key) => {
-          expect(body[key]).to.not.equal(undefined);
-        });
+      it('returns 403 forbidden error when attempting to downgrade', async () => {
+        const { body } = await supertest
+          .get('/api/upgrade_assistant/status')
+          .query({
+            targetVersion: '8.0.0',
+          })
+          .set('kbn-xsrf', 'xxx')
+          .expect(403);
+        expect(body.message).to.be('Forbidden');
       });
     });
   });

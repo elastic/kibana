@@ -262,7 +262,7 @@ describe('Status API', () => {
     });
   });
 
-  describe('GET /api/upgrade_assistant/status for non-manjor upgrade', () => {
+  describe('GET /api/upgrade_assistant/status for non-major upgrade', () => {
     const registerRoutes = (featureSetOverrides: Partial<FeatureSet> = {}) => {
       const mockRouter = createMockRouter();
       const routeDependencies: any = {
