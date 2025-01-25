@@ -7,7 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { RootProfileService } from './profiles/root_profile';
-export { DataSourceProfileService } from './profiles/data_source_profile';
-export { DocumentProfileService } from './profiles/document_profile';
-export { ProfilesManager } from './profiles_manager';
+export { DiscoverEBTManager } from './services/discover_ebt_manager';
+export { RootProfileService } from './context_awareness/profiles/root_profile';
+export { DataSourceProfileService } from './context_awareness/profiles/data_source_profile';
+export { DocumentProfileService } from './context_awareness/profiles/document_profile';
+export { ProfilesManager } from './context_awareness/profiles_manager';

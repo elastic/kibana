@@ -24,6 +24,7 @@ import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { type SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
+import { once } from 'lodash';
 import { PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import { buildServices, type UrlTracker } from './build_services';
@@ -59,8 +60,10 @@ import type {
 } from './types';
 import { deserializeState } from './embeddable/utils/serialization_utils';
 import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
-import { DiscoverEBTManager } from './services/discover_ebt_manager';
+import type { DiscoverEBTManager } from './services/discover_ebt_manager';
 import type { ProfilesManager } from './context_awareness';
+
+const getAsyncImports = () => import('./plugin_imports');
 
 /**
  * Contains Discover, one of the oldest parts of Kibana
@@ -148,11 +151,17 @@ export class DiscoverPlugin
     this.urlTracker = { setTrackedUrl, restorePreviousUrl, setTrackingEnabled };
     this.stopUrlTracking = stopUrlTracker;
 
-    const ebtManager = new DiscoverEBTManager();
-    ebtManager.initialize({
-      core,
-      shouldInitializeCustomContext: true,
-      shouldInitializeCustomEvents: true,
+    const getEbtManager = once(async () => {
+      const { DiscoverEBTManager } = await getAsyncImports();
+      const ebtManager = new DiscoverEBTManager();
+
+      ebtManager.initialize({
+        core,
+        shouldInitializeCustomContext: true,
+        shouldInitializeCustomEvents: true,
+      });
+
+      return ebtManager;
     });
 
     core.application.register({
@@ -179,6 +188,7 @@ export class DiscoverPlugin
           window.dispatchEvent(new HashChangeEvent('hashchange'));
         });
 
+        const ebtManager = await getEbtManager();
         ebtManager.onDiscoverAppMounted();
 
         const services = buildServices({
@@ -274,6 +284,7 @@ export class DiscoverPlugin
     }
 
     const getDiscoverServicesInternal = async () => {
+      const { DiscoverEBTManager } = await getAsyncImports();
       const ebtManager = new DiscoverEBTManager(); // It is not initialized outside of Discover
       return this.getDiscoverServices(
         core,
@@ -303,7 +314,7 @@ export class DiscoverPlugin
       DataSourceProfileService,
       DocumentProfileService,
       ProfilesManager,
-    } = await import('./context_awareness/plugin_imports');
+    } = await import('./plugin_imports');
 
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
@@ -377,7 +388,10 @@ export class DiscoverPlugin
   };
 
   private registerEmbeddable(core: CoreSetup<DiscoverStartPlugins>, plugins: DiscoverSetupPlugins) {
-    const ebtManager = new DiscoverEBTManager(); // It is not initialized outside of Discover
+    const getEbtManager = once(async () => {
+      const { DiscoverEBTManager } = await getAsyncImports();
+      return new DiscoverEBTManager(); // It is not initialized outside of Discover
+    });
 
     const getStartServices = async () => {
       const [coreStart, deps] = await core.getStartServices();
@@ -389,6 +403,7 @@ export class DiscoverPlugin
 
     const getDiscoverServicesForEmbeddable = async () => {
       const [coreStart, deps] = await core.getStartServices();
+      const ebtManager = await getEbtManager();
       const profilesManager = await this.createProfilesManager({
         core: coreStart,
         plugins: deps,
