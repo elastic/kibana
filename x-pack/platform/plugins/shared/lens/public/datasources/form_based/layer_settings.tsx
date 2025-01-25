@@ -21,9 +21,12 @@ const samplingValues = [
   {
     label: '.001%',
     value: 0.00001,
-    accessibleLabel: i18n.translate('xpack.lens.randomSampling.ui.sliderControl.tickLabels.0.00001', {
-      defaultMessage: 'Point zero zero one percent, most performant',
-    }),
+    accessibleLabel: i18n.translate(
+      'xpack.lens.randomSampling.ui.sliderControl.tickLabels.0.00001',
+      {
+        defaultMessage: 'Point zero zero one percent, most performant',
+      }
+    ),
   },
   {
     label: '.01%',
