@@ -15,6 +15,7 @@ import {
   CoreSetup,
   AnalyticsServiceSetup,
   CustomRequestHandlerContext,
+  ElasticsearchClient,
   IRouter,
   KibanaRequest,
   Logger,
@@ -26,7 +27,6 @@ import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { ElasticsearchClient } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
   DefendInsightsPostRequestBody,
