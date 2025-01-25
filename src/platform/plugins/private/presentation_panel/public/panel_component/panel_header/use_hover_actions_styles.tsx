@@ -39,7 +39,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
               z-index: ${euiTheme.levels.menu};
             }
           `}
-      v
+
       container: hoverActionsAnchor / size;
       border-radius: ${euiTheme.border.radius.medium};
       position: relative;
@@ -60,11 +60,9 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       }
 
       &:hover .embPanel__hoverActions,
-      &:focus .embPanel__hoverActions,
       &:has(:focus-visible) .embPanel__hoverActions,
       &.embPanel__hoverActionsAnchor--lockHoverActions .embPanel__hoverActions,
       .embPanel__hoverActions:hover,
-      .embPanel__hoverActions:focus,
       .embPanel__hoverActions:has(:focus-visible) {
         z-index: ${euiTheme.levels.menu};
         opacity: 1;
@@ -111,7 +109,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       & > * {
         height: ${euiTheme.size.xl};
 
-        &:not(.breakpoint) {
+        &:not(#embPanel__hoverActionsBreakpoint) {
           flex: 0; // do not grow
           pointer-events: all; // re-enable pointer events for non-breakpoint children
           // style children that are **not** the breakpoint
@@ -122,23 +120,23 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         }
       }
 
-      & > .breakpoint {
+      & > #embPanel__hoverActionsBreakpoint {
         flex: 1; // grow to fill remaining space between left and right action groups
       }
 
       // start of action group
-      & > *:first-child:not(.breakpoint),
-      & > .breakpoint + * {
+      & > *:first-child:not(#embPanel__hoverActionsBreakpoint),
+      & > #embPanel__hoverActionsBreakpoint + * {
         border-left: var(--internalBorderStyle);
-        border-top-left-radius: ${euiTheme.border.radius.medium};
+        border-top-left-radius: ${euiTheme.border.radius.medium} !important;
         padding-left: var(--paddingAroundAction);
       }
 
       // end of action group
-      & > *:has(+ .breakpoint),
+      & > *:has(+ #embPanel__hoverActionsBreakpoint),
       & > *:last-child {
         border-right: var(--internalBorderStyle);
-        border-top-right-radius: ${euiTheme.border.radius.medium};
+        border-top-right-radius: ${euiTheme.border.radius.medium} !important;
         padding-right: var(--paddingAroundAction);
       }
 

@@ -439,7 +439,7 @@ export const PresentationPanelHoverActions = ({
       {api && hasHoverActions && (
         <div className={classNames('embPanel__hoverActions', className)} css={hoverActionStyles}>
           {dragHandle}
-          <div className="breakpoint" />
+          <div id="embPanel__hoverActionsBreakpoint" />
           {showNotifications && notificationElements}
           {showDescription && (
             <EuiIconTip

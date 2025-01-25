@@ -84,6 +84,11 @@ export const useLayoutStyles = () => {
       .kbnGridPanel--active {
         // overwrite the border style on panels + hover actions for active panels
         --hoverActionsBorderStyle: var(--dashboardActivePanelBorderStyle);
+
+        // prevent the hover actions transition when active to prevent "blip" on resize
+        .embPanel__hoverActions {
+          transition: none;
+        }
       }
     `;
   }, [euiTheme]);
