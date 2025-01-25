@@ -26,6 +26,7 @@ import { observableIntoEventSourceStream } from '@kbn/sse-utils-server';
 import { isZod } from '@kbn/zod';
 import { merge, omit } from 'lodash';
 import { Observable, isObservable } from 'rxjs';
+import { assertAllParsableSchemas } from '@kbn/zod-helpers';
 import { makeZodValidationObject } from './make_zod_validation_object';
 import { validateAndDecodeParams } from './validate_and_decode_params';
 import { noParamsValidationObject, passThroughValidationObject } from './validation_objects';
@@ -60,6 +61,19 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
     const options: DefaultRouteCreateOptions = 'options' in route ? route.options : {};
 
     const { method, pathname, version } = parseEndpoint(endpoint);
+
+    if (isZod(params)) {
+      const dangerousSchemas = assertAllParsableSchemas(params);
+      if (dangerousSchemas.size > 0) {
+        for (const { key, schema } of dangerousSchemas) {
+          const typeName = schema._def.typeName;
+
+          logger.warn(
+            `Warning for ${endpoint}: schema ${typeName} at ${key} is not inspectable and could lead to runtime exceptions, convert it to a support schema`
+          );
+        }
+      }
+    }
 
     const wrappedHandler = async (
       context: RequestHandlerContext,

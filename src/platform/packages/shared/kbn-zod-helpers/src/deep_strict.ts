@@ -10,11 +10,10 @@
 import { Schema, z, ZodFirstPartySchemaTypes, ZodFirstPartyTypeKind, ZodIssueCode } from '@kbn/zod';
 import { difference, isPlainObject, forEach, isArray, castArray } from 'lodash';
 
-/*
-  Type that tracks validated keys, and fails when the input value
-  has keys that have not been validated.
-*/
-
+/**
+ * These types are not unpackable, they mark a property as handled,
+ * but any nested keys will result in runtime failures
+ */
 const primitiveTypes = [
   ZodFirstPartyTypeKind.ZodString,
   ZodFirstPartyTypeKind.ZodBoolean,
@@ -25,8 +24,16 @@ const primitiveTypes = [
   ZodFirstPartyTypeKind.ZodLiteral,
   ZodFirstPartyTypeKind.ZodEnum,
   ZodFirstPartyTypeKind.ZodNativeEnum,
-  ZodFirstPartyTypeKind.ZodUnknown,
 ] as const;
+
+/**
+ * any() and unknown() will result in warnings,
+ * as we don't really know what to do with them
+ * and they can lead to unexpected behavior at
+ * runtime, such as failing on excess keys for
+ * objects
+ */
+const dangerousTypes = [ZodFirstPartyTypeKind.ZodAny, ZodFirstPartyTypeKind.ZodUnknown] as const;
 
 const typeNames = [
   ZodFirstPartyTypeKind.ZodObject,
@@ -39,12 +46,15 @@ const typeNames = [
   ZodFirstPartyTypeKind.ZodRecord,
   ZodFirstPartyTypeKind.ZodDefault,
   ZodFirstPartyTypeKind.ZodLazy,
+  ZodFirstPartyTypeKind.ZodNullable,
   ...primitiveTypes,
+  ...dangerousTypes,
 ] as const;
 
 type ParsableType = (typeof typeNames)[number];
 
 type PrimitiveParsableType = (typeof primitiveTypes)[number];
+type DangerousParsableType = (typeof dangerousTypes)[number];
 
 type ParsableSchema = Extract<ZodFirstPartySchemaTypes, { _def: { typeName: ParsableType } }>;
 type PrimitiveParsableSchema = Extract<
@@ -52,38 +62,65 @@ type PrimitiveParsableSchema = Extract<
   { _def: { typeName: PrimitiveParsableType } }
 >;
 
-function isParsableSchema(schema: z.Schema): schema is ParsableSchema {
+type DangerousParsableSchema = Extract<
+  ZodFirstPartySchemaTypes,
+  { _def: { typeName: DangerousParsableType } }
+>;
+
+function getTypeName(schema: z.Schema): string | undefined {
   const typeName =
     'typeName' in schema._def && typeof schema._def.typeName === 'string'
       ? schema._def.typeName
       : undefined;
 
-  return typeNames.includes(typeName as ParsableType);
+  return typeName;
 }
-function assertIsParsableSchema(schema: z.Schema): asserts schema is ParsableSchema {
+
+function isParsableSchema(schema: z.Schema): schema is ParsableSchema {
+  const typeName = getTypeName(schema);
+  return !!typeName && typeNames.includes(typeName as ParsableType);
+}
+
+function assertIsParsableSchema(schema: z.Schema, key: string): asserts schema is ParsableSchema {
   if (isParsableSchema(schema)) {
     return;
   }
 
   throw new Error(
-    'Unsupported schema: ' + ('typeName' in schema._def ? schema._def.typeName : 'unknown type')
+    `Unsupported schema at ${key}: ${
+      'typeName' in schema._def ? schema._def.typeName : 'unknown type'
+    }`
   );
 }
 
 function isPrimitiveParsableSchema(schema: z.Schema): schema is PrimitiveParsableSchema {
-  if ('typeName' in schema._def && typeof schema._def.typeName === 'string') {
-    return primitiveTypes.includes(schema._def.typeName as PrimitiveParsableType);
-  }
-  return false;
+  const typeName = getTypeName(schema);
+  return !!typeName && primitiveTypes.includes(typeName as PrimitiveParsableType);
 }
 
-function validateSchemas(outerSchema: z.Schema): void {
+function isDangerousParsableSchema(schema: z.Schema): schema is DangerousParsableSchema {
+  const typeName = getTypeName(schema);
+  return !!typeName && dangerousTypes.includes(typeName as DangerousParsableType);
+}
+/**
+ * Asserts that the schema is recursively parsable (ie, it is
+ * composed entirely of parsable schemas)
+ */
+export function assertAllParsableSchemas(
+  outerSchema: z.Schema
+): Set<{ key: string; schema: DangerousParsableSchema }> {
+  // track processed schemas, to prevent self-referencing schemas
+  // instantiated with z.lazy() to create recursion errors
   const processed: Set<Schema> = new Set();
+  // track dangerous schemas and their path
+  const dangerous: Set<{ key: string; schema: DangerousParsableSchema }> = new Set();
 
-  assertKnownSchemas(outerSchema);
+  innerAssertAllParsableSchemas(outerSchema, '');
 
-  function assertKnownSchemas(schema: z.Schema): void {
-    assertIsParsableSchema(schema);
+  return dangerous;
+
+  function innerAssertAllParsableSchemas(schema: z.Schema, key: string): void {
+    assertIsParsableSchema(schema, key);
 
     if (processed.has(schema)) {
       return;
@@ -95,47 +132,55 @@ function validateSchemas(outerSchema: z.Schema): void {
       return;
     }
 
+    if (isDangerousParsableSchema(schema)) {
+      dangerous.add({ key, schema });
+      return;
+    }
+
     const def = schema._def;
 
     switch (def.typeName) {
       case ZodFirstPartyTypeKind.ZodObject:
-        return Object.values(def.shape()).forEach((innerSchema) =>
-          assertKnownSchemas(innerSchema as z.Schema)
+        return Object.entries(def.shape()).forEach(([prop, innerSchema]) =>
+          innerAssertAllParsableSchemas(innerSchema as z.Schema, key ? `${key}.${prop}` : prop)
         );
       case ZodFirstPartyTypeKind.ZodOptional:
-        return assertKnownSchemas(def.innerType);
+        return innerAssertAllParsableSchemas(def.innerType, key);
       case ZodFirstPartyTypeKind.ZodArray:
-        return assertKnownSchemas(def.type);
+        return innerAssertAllParsableSchemas(def.type, key);
 
       case ZodFirstPartyTypeKind.ZodUnion:
       case ZodFirstPartyTypeKind.ZodDiscriminatedUnion:
         const schemas: z.Schema[] = def.options;
-        return schemas.forEach((innerSchema) => assertKnownSchemas(innerSchema));
+        return schemas.forEach((innerSchema) => innerAssertAllParsableSchemas(innerSchema, key));
 
       case z.ZodFirstPartyTypeKind.ZodIntersection:
-        assertKnownSchemas(def.left);
-        assertKnownSchemas(def.right);
+        innerAssertAllParsableSchemas(def.left, key);
+        innerAssertAllParsableSchemas(def.right, key);
         return;
 
       case z.ZodFirstPartyTypeKind.ZodEffects:
-        return assertKnownSchemas(def.schema);
+        return innerAssertAllParsableSchemas(def.schema, key);
 
       case z.ZodFirstPartyTypeKind.ZodRecord:
-        return assertKnownSchemas(def.valueType);
+        return innerAssertAllParsableSchemas(def.valueType, key);
 
       case ZodFirstPartyTypeKind.ZodDefault:
-        return assertKnownSchemas(def.innerType);
+        return innerAssertAllParsableSchemas(def.innerType, key);
 
       case ZodFirstPartyTypeKind.ZodLazy:
-        return assertKnownSchemas(def.getter());
+        return innerAssertAllParsableSchemas(def.getter(), key);
+
+      case ZodFirstPartyTypeKind.ZodNullable:
+        return innerAssertAllParsableSchemas(def.innerType, key);
     }
   }
 }
 
 function getHandlingSchemas(schema: z.Schema, key: string, value: object): z.Schema[] {
-  assertIsParsableSchema(schema);
+  assertIsParsableSchema(schema, key);
 
-  if (isPrimitiveParsableSchema(schema)) {
+  if (isPrimitiveParsableSchema(schema) || isDangerousParsableSchema(schema)) {
     return [];
   }
 
@@ -152,6 +197,8 @@ function getHandlingSchemas(schema: z.Schema, key: string, value: object): z.Sch
     case ZodFirstPartyTypeKind.ZodUnion:
     case ZodFirstPartyTypeKind.ZodDiscriminatedUnion:
       const types: z.Schema[] = def.options;
+      // for union types, we should only return the first matching union type
+      // to make sure unmatching union types don't mark a key as handled
       const matched = types.find((type) => type.safeParse(value).success);
       return matched ? getHandlingSchemas(matched, key, value) : [];
 
@@ -172,6 +219,9 @@ function getHandlingSchemas(schema: z.Schema, key: string, value: object): z.Sch
 
     case ZodFirstPartyTypeKind.ZodLazy:
       return [def.getter()];
+
+    case ZodFirstPartyTypeKind.ZodNullable:
+      return [def.innerType];
   }
 }
 
@@ -234,8 +284,14 @@ function getHandledKeys<T extends Record<string, unknown>>(
 }
 
 export function DeepStrict<TSchema extends z.Schema>(schema: TSchema) {
-  validateSchemas(schema);
+  assertAllParsableSchemas(schema);
 
+  /**
+   * We use preprocess and not superRefine because unknown keys are
+   * stripped before the latter is called, meaning we can no longer
+   * validate. There is a catch here: if any types do any transformation,
+   * we might match the wrong union type.
+   */
   return z.preprocess((value, context) => {
     const keys = getHandledKeys(schema, value as Record<string, unknown>);
 
