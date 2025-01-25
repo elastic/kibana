@@ -670,12 +670,16 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
     handleSetupTechnologyChange,
     isAgentlessEnabled,
     defaultSetupTechnology,
+    integrationToEnable,
+    setIntegrationToEnable,
   }) => {
     const integrationParam = useParams<{ integration: CloudSecurityPolicyTemplate }>().integration;
-    const integration = SUPPORTED_POLICY_TEMPLATES.includes(integrationParam)
-      ? integrationParam
-      : undefined;
-    const isParentSecurityPosture = !integration;
+    const integration =
+      integrationToEnable &&
+      SUPPORTED_POLICY_TEMPLATES.includes(integrationToEnable as CloudSecurityPolicyTemplate)
+        ? integrationToEnable
+        : undefined;
+    const isParentSecurityPosture = !integrationParam;
     // Handling validation state
     const [isValid, setIsValid] = useState(true);
     const { cloud } = useKibana().services;
@@ -823,6 +827,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       }
 
       setEnabledPolicyInput(input.type);
+      setIntegrationToEnable?.(input.policy_template);
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [setupTechnology]);
 
@@ -838,7 +843,7 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       packagePolicyList: packagePolicyList?.items,
       isEditPage,
       isLoading,
-      integration,
+      integration: integration as CloudSecurityPolicyTemplate,
       newPolicy,
       updatePolicy,
       setCanFetchIntegration,
@@ -887,12 +892,15 @@ export const CspPolicyTemplateForm = memo<PackagePolicyReplaceDefineStepExtensio
       <>
         {isEditPage && <EditScreenStepTitle />}
         {/* Defines the enabled policy template */}
-        {!integration && (
+        {isParentSecurityPosture && (
           <>
             <PolicyTemplateSelector
               selectedTemplate={input.policy_template}
               policy={newPolicy}
-              setPolicyTemplate={(template) => setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template])}
+              setPolicyTemplate={(template) => {
+                setEnabledPolicyInput(DEFAULT_INPUT_TYPE[template]);
+                setIntegrationToEnable?.(template);
+              }}
               disabled={isEditPage}
             />
             <EuiSpacer size="l" />
