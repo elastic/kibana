@@ -94,6 +94,7 @@ export function getTestSuiteFactory(context: DeploymentAgnosticFtrProviderContex
             'logs',
             'observabilityCases',
             'observabilityCasesV2',
+            'observabilityCasesV3',
             'securitySolutionAssistant',
             'securitySolutionAttackDiscovery',
             'securitySolutionCases',
