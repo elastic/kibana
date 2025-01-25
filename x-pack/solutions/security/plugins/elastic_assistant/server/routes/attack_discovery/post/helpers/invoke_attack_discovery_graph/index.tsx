@@ -101,8 +101,6 @@ export const invokeAttackDiscoveryGraph = async ({
     savedObjectsClient,
   });
 
-  console.log('prompts ==>', attackDiscoveryPrompts);
-
   const graph = getDefaultAttackDiscoveryGraph({
     alertsIndexPattern,
     anonymizationFields,

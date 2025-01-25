@@ -15,7 +15,7 @@ export const promptSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'text',
     },
     promptId: {
-      // text mapping in order to search by ${promptId-*}
+      // text mapping in order to search by ${promptGroupId-*}
       type: 'text',
     },
     provider: {
@@ -41,7 +41,7 @@ export const promptType: SavedObjectsType = {
   hidden: false,
   management: {
     importableAndExportable: true,
-    visibleInManagement: true,
+    visibleInManagement: false,
   },
   namespaceType: 'agnostic',
   mappings: promptSavedObjectMappings,
