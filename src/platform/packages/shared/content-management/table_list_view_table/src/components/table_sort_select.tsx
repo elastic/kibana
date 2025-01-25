@@ -30,7 +30,7 @@ type SortItem = EuiSelectableOption & {
   direction: Direction;
 };
 
-export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt';
+export type SortColumnField = 'updatedAt' | 'attributes.title' | 'accessedAt' | string;
 
 const i18nText = {
   accessedDescSort: i18n.translate(
@@ -65,15 +65,26 @@ const i18nText = {
   }),
 };
 
+export interface CustomSortingOptions {
+  field: string;
+  sortingLabels: TableColumnSortSelectOption[];
+}
+interface TableColumnSortSelectOption {
+  label: string;
+  direction: 'asc' | 'desc';
+}
+
 interface Props {
   hasUpdatedAtMetadata: boolean;
   hasRecentlyAccessedMetadata: boolean;
   tableSort: State['tableSort'];
+  customSortingOptions?: CustomSortingOptions;
   onChange?: (column: SortColumnField, direction: Direction) => void;
 }
 
 export function TableSortSelect({
   tableSort,
+  customSortingOptions,
   hasUpdatedAtMetadata,
   hasRecentlyAccessedMetadata,
   onChange,
@@ -96,6 +107,19 @@ export function TableSortSelect({
         append: <EuiIcon type="sortDown" />,
       },
     ];
+
+    if (customSortingOptions) {
+      opts = opts.concat(
+        customSortingOptions.sortingLabels.map(({ label, direction }) => {
+          return {
+            column: customSortingOptions.field,
+            label,
+            direction,
+            append: direction === 'asc' ? <EuiIcon type="sortUp" /> : <EuiIcon type="sortDown" />,
+          };
+        })
+      );
+    }
 
     if (hasRecentlyAccessedMetadata) {
       opts = [
@@ -202,7 +226,7 @@ export function TableSortSelect({
         };
       });
     });
-  }, [tableSort]);
+  }, [customSortingOptions, tableSort]);
 
   return (
     <EuiPopover
