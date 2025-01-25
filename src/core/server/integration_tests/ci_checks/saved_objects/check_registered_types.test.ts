@@ -157,6 +157,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "search": "0aa6eefb37edd3145be340a8b67779c2ca578b22",
         "search-session": "b2fcd840e12a45039ada50b1355faeafa39876d1",
         "search-telemetry": "b568601618744720b5662946d3103e3fb75fe8ee",
+        "security-ai-prompt": "4054bd77ec583706bdb892dcf8db5684b9e6d49a",
         "security-rule": "07abb4d7e707d91675ec0495c73816394c7b521f",
         "security-solution-signals-migration": "9d99715fe5246f19de2273ba77debd2446c36bb1",
         "siem-detection-engine-rule-actions": "54f08e23887b20da7c805fab7c60bc67c428aff9",
