@@ -15,7 +15,8 @@ import { PublicMethodsOf } from '@kbn/utility-types';
 import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import type { Document } from '@langchain/core/documents';
 
-import { getPrompt, promptDictionary } from '../../../../../lib/prompt';
+import { promptFeatureId } from '../../../../../lib/prompt/local_prompt_object';
+import { getPromptsByFeature, promptDictionary } from '../../../../../lib/prompt';
 import { getDefaultAttackDiscoveryGraph } from '../../../../../lib/attack_discovery/graphs/default_attack_discovery_graph';
 import {
   ATTACK_DISCOVERY_GRAPH_RUN_NAME,
@@ -92,35 +93,33 @@ export const invokeAttackDiscoveryGraph = async ({
     throw new Error('LLM is required for attack discoveries');
   }
 
-  const defaultPrompt = await getPrompt({
+  const attackDiscoveryPrompts = await getPromptsByFeature({
     actionsClient,
     connectorId: apiConfig.connectorId,
     // if in future oss has different prompt, add it as model here
     model,
-    promptId: promptDictionary.attackDiscoveryDefault,
+    promptFeatureId: promptFeatureId.attackDiscovery,
+    promptIds: [
+      promptDictionary.attackDiscoveryDefault,
+      promptDictionary.attackDiscoveryRefine,
+      promptDictionary.attackDiscoveryContinue,
+    ],
     provider: llmType,
     savedObjectsClient,
   });
 
-  const refinePrompt = await getPrompt({
-    actionsClient,
-    connectorId: apiConfig.connectorId,
-    // if in future oss has different prompt, add it as model here
-    model,
-    promptId: promptDictionary.attackDiscoveryRefine,
-    provider: llmType,
-    savedObjectsClient,
-  });
-
-  const continuePrompt = await getPrompt({
-    actionsClient,
-    connectorId: apiConfig.connectorId,
-    // if in future oss has different prompt, add it as model here
-    model,
-    promptId: promptDictionary.attackDiscoveryContinue,
-    provider: llmType,
-    savedObjectsClient,
-  });
+  const defaultPrompt =
+    attackDiscoveryPrompts.find(
+      (prompt) => prompt.promptId === promptDictionary.attackDiscoveryDefault
+    )?.prompt || '';
+  const refinePrompt =
+    attackDiscoveryPrompts.find(
+      (prompt) => prompt.promptId === promptDictionary.attackDiscoveryRefine
+    )?.prompt || '';
+  const continuePrompt =
+    attackDiscoveryPrompts.find(
+      (prompt) => prompt.promptId === promptDictionary.attackDiscoveryContinue
+    )?.prompt || '';
   console.log('prompts ==>', {
     default: defaultPrompt,
     refine: refinePrompt,

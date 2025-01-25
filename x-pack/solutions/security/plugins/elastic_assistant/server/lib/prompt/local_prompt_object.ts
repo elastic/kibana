@@ -16,13 +16,19 @@ import {
   GEMINI_USER_PROMPT,
   STRUCTURED_SYSTEM_PROMPT,
 } from './prompts';
+export const promptFeatureId = {
+  attackDiscovery: 'attackDiscovery',
+  aiAssistant: 'aiAssistant',
+};
 
+// preface all prompts with 'promptFeatureId.id' to allow searching by promptFeatureId
 export const promptDictionary = {
-  systemPrompt: 'systemPrompt-default',
-  userPrompt: 'userPrompt-default',
-  attackDiscoveryDefault: 'attackDiscovery-default',
-  attackDiscoveryRefine: 'attackDiscovery-refine',
-  attackDiscoveryContinue: 'attackDiscovery-continue',
+  systemPrompt: `${promptFeatureId.aiAssistant}-systemPrompt`,
+  userPrompt: `${promptFeatureId.aiAssistant}-userPrompt`,
+  // preface all attack discovery prompts with 'attackDiscovery' to allow searching like attackDiscovery-*
+  attackDiscoveryDefault: `${promptFeatureId.attackDiscovery}-default`,
+  attackDiscoveryRefine: `${promptFeatureId.attackDiscovery}-refine`,
+  attackDiscoveryContinue: `${promptFeatureId.attackDiscovery}-continue`,
 };
 
 export const localPrompts: Prompt[] = [

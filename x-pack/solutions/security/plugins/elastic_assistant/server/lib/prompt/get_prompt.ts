@@ -22,6 +22,10 @@ interface GetPromptArgs {
   provider?: string;
   savedObjectsClient: SavedObjectsClientContract;
 }
+interface GetPromptsByFeatureArgs extends Omit<GetPromptArgs, 'promptId'> {
+  promptFeatureId: string;
+  promptIds: string[];
+}
 const elasticModelDictionary: ElasticModelDictionary = {
   'rainbow-sprinkles': {
     provider: 'bedrock',
@@ -29,7 +33,67 @@ const elasticModelDictionary: ElasticModelDictionary = {
   },
 };
 
-// provide either model + provider or connector to avoid additional calls to get connector
+type PromptArray = Array<{ promptId: string; prompt: string }>;
+/**
+ * Get prompts by feature
+ * provide either model + provider or connector to avoid additional calls to get connector
+ * @param actionsClient - actions client
+ * @param connector - connector, provide if available. No need to provide model and provider in this case
+ * @param connectorId - connector id
+ * @param model - model. No need to provide if connector provided
+ * @param promptFeatureId - feature id, should be common across promptIds
+ * @param promptIds - prompt ids with shared promptFeatureId
+ * @param provider  - provider. No need to provide if connector provided
+ * @param savedObjectsClient - saved objects client
+ */
+export const getPromptsByFeature = async ({
+  actionsClient,
+  connector,
+  connectorId,
+  model: providedModel,
+  promptFeatureId,
+  promptIds,
+  provider: providedProvider,
+  savedObjectsClient,
+}: GetPromptsByFeatureArgs): Promise<PromptArray> => {
+  const { provider, model } = await resolveProviderAndModel(
+    providedProvider,
+    providedModel,
+    connectorId,
+    actionsClient,
+    connector
+  );
+
+  const prompts = await savedObjectsClient.find<Prompt>({
+    type: promptSavedObjectType,
+    searchFields: ['promptId'],
+    search: `${promptFeatureId}-*`,
+  });
+  const promptsOnly = prompts?.saved_objects.map((p) => p.attributes) || [];
+
+  return promptIds.map((promptId) => ({
+    promptId,
+    prompt:
+      findPromptEntry(
+        promptsOnly.filter((p) => p.promptId === promptId) || [],
+        promptId,
+        provider,
+        model
+      ) || '',
+  }));
+};
+
+/**
+ * Get prompt by promptId
+ * provide either model + provider or connector to avoid additional calls to get connector
+ * @param actionsClient - actions client
+ * @param connector - connector, provide if available. No need to provide model and provider in this case
+ * @param connectorId - connector id
+ * @param model - model. No need to provide if connector provided
+ * @param promptId - prompt id
+ * @param provider  - provider. No need to provide if connector provided
+ * @param savedObjectsClient - saved objects client
+ */
 export const getPrompt = async ({
   actionsClient,
   connector,

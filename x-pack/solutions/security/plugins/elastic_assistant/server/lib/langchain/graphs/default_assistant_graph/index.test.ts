@@ -18,7 +18,7 @@ import {
   createStructuredChatAgent,
   createToolCallingAgent,
 } from 'langchain/agents';
-import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
+import { savedObjectsClientMock } from '@kbn/core-saved-objects-api-server-mocks';
 jest.mock('./graph');
 jest.mock('./helpers');
 jest.mock('langchain/agents');
@@ -42,14 +42,13 @@ describe('callAssistantGraph', () => {
     },
   };
 
-  const savedObjectsClient: jest.Mocked<SavedObjectsClientContract> = {
-    find: jest.fn().mockResolvedValue({
-      page: 1,
-      per_page: 20,
-      total: 0,
-      saved_objects: [],
-    }),
-  };
+  const savedObjectsClient = savedObjectsClientMock.create();
+  savedObjectsClient.find = jest.fn().mockResolvedValue({
+    page: 1,
+    per_page: 20,
+    total: 0,
+    saved_objects: [],
+  });
   const defaultParams = {
     actionsClient: actionsClientMock.create(),
     alertsIndexPattern: 'test-pattern',
