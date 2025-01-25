@@ -7,7 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { Schema, z, ZodFirstPartySchemaTypes, ZodFirstPartyTypeKind, ZodIssueCode } from '@kbn/zod';
+import {
+  Schema,
+  z,
+  ZodAny,
+  ZodEffects,
+  ZodFirstPartySchemaTypes,
+  ZodFirstPartyTypeKind,
+  ZodIssueCode,
+  ZodTypeAny,
+} from '@kbn/zod';
 import { difference, isPlainObject, forEach, isArray, castArray } from 'lodash';
 
 /**
@@ -62,10 +71,9 @@ type PrimitiveParsableSchema = Extract<
   { _def: { typeName: PrimitiveParsableType } }
 >;
 
-type DangerousParsableSchema = Extract<
-  ZodFirstPartySchemaTypes,
-  { _def: { typeName: DangerousParsableType } }
->;
+type DangerousParsableSchema =
+  | Extract<ZodFirstPartySchemaTypes, { _def: { typeName: DangerousParsableType } }>
+  | ZodEffects<ZodTypeAny>;
 
 function getTypeName(schema: z.Schema): string | undefined {
   const typeName =
@@ -98,7 +106,9 @@ function isPrimitiveParsableSchema(schema: z.Schema): schema is PrimitiveParsabl
   return !!typeName && primitiveTypes.includes(typeName as PrimitiveParsableType);
 }
 
-function isDangerousParsableSchema(schema: z.Schema): schema is DangerousParsableSchema {
+function isDangerousParsableSchema(
+  schema: z.Schema
+): schema is Exclude<DangerousParsableSchema, ZodEffects<z.ZodAny>> {
   const typeName = getTypeName(schema);
   return !!typeName && dangerousTypes.includes(typeName as DangerousParsableType);
 }
@@ -160,6 +170,9 @@ export function assertAllParsableSchemas(
         return;
 
       case z.ZodFirstPartyTypeKind.ZodEffects:
+        if (def.effect.type === 'transform') {
+          dangerous.add({ key, schema: schema as ZodEffects<ZodAny> });
+        }
         return innerAssertAllParsableSchemas(def.schema, key);
 
       case z.ZodFirstPartyTypeKind.ZodRecord:

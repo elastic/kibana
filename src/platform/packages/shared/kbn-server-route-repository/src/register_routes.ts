@@ -68,9 +68,15 @@ export function registerRoutes<TDependencies extends Record<string, any>>({
         for (const { key, schema } of dangerousSchemas) {
           const typeName = schema._def.typeName;
 
-          logger.warn(
-            `Warning for ${endpoint}: schema ${typeName} at ${key} is not inspectable and could lead to runtime exceptions, convert it to a support schema`
-          );
+          if (typeName === 'ZodEffects') {
+            logger.warn(
+              `Warning for ${endpoint}: schema ${typeName} at ${key} has transforming effects and could lead to unexpected behaviour`
+            );
+          } else {
+            logger.warn(
+              `Warning for ${endpoint}: schema ${typeName} at ${key} is not inspectable and could lead to runtime exceptions, convert it to a support schema`
+            );
+          }
         }
       }
     }
