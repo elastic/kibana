@@ -141,7 +141,6 @@ export class UpgradeAssistantServerPlugin implements Plugin {
         featureSet: this.initialFeatureSet,
         isSecurityEnabled: () => security !== undefined && security.license.isEnabled(),
       },
-      // versionService,
       current: versionService.getCurrentVersion(),
       defaultTarget: versionService.getNextMajorVersion(),
     };

@@ -12,9 +12,8 @@ export interface UpgradeTypeParams {
 }
 
 /**
- *
  * @param {SemVer} current kibana version
- * @param {string} target version to upgrade to
+ * @param {string} target version to upgrade to, defaults to next major
  * @returns {semver.ReleaseType | null | undefined} null if same version, undefined if target version is out of bounds
  */
 export const getUpgradeType = ({ current, target }: UpgradeTypeParams) => {
