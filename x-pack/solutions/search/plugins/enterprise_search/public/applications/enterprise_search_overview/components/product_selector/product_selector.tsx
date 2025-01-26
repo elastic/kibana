@@ -52,6 +52,7 @@ export const ProductSelector: React.FC = () => {
         grow
         offset={0}
         customPageSections
+        data-test-subj="enterpriseSearchOverviewPage"
         isLoading={isCheckingOnboardingStatus}
       >
         <TrialCallout />
