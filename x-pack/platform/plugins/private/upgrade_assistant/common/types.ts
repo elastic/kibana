@@ -244,9 +244,9 @@ export interface CloudBackupStatus {
 
 export interface ESUpgradeStatus {
   totalCriticalDeprecations: number;
-  migrationsDeprecations: EnrichedDeprecationInfo[]; // Health
+  migrationsDeprecations: EnrichedDeprecationInfo[];
   totalCriticalHealthIssues: number;
-  enrichedHealthIndicators: EnrichedDeprecationInfo[]; // Deprecations
+  enrichedHealthIndicators: EnrichedDeprecationInfo[];
 }
 
 export interface ResolveIndexResponseFromES {

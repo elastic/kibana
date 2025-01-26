@@ -70,7 +70,7 @@ describe('getESUpgradeStatus', () => {
 
   it('returns the correct shape of data', async () => {
     const resp = await getESUpgradeStatus(esClient, featureSet);
-    expect(resp).toMatchSnapshot(); // expect this to fail
+    expect(resp).toMatchSnapshot();
   });
 
   it('returns totalCriticalDeprecations > 0 when critical issues found', async () => {
@@ -132,7 +132,6 @@ describe('getESUpgradeStatus', () => {
       totalCriticalHealthIssues,
       enrichedHealthIndicators,
     } = upgradeStatus;
-    // expect(upgradeStatus.deprecations).toHaveLength(0);
     expect([...migrationsDeprecations, ...enrichedHealthIndicators]).toHaveLength(0);
     expect(totalCriticalDeprecations).toBe(0);
     expect(totalCriticalHealthIssues).toBe(0);
@@ -257,8 +256,6 @@ describe('getESUpgradeStatus', () => {
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
-    // totalCriticalDeprecations;
-    // totalCriticalHealthIssues;
     expect(upgradeStatus.totalCriticalHealthIssues + upgradeStatus.totalCriticalDeprecations).toBe(
       2
     );
