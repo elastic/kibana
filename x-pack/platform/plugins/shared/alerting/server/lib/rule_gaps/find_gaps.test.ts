@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findGaps, findAllGaps } from './find_gaps';
+import { findGaps } from './find_gaps';
 import { gapStatus } from '../../../common/constants/gap_status';
 import { loggerMock } from '@kbn/logging-mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
