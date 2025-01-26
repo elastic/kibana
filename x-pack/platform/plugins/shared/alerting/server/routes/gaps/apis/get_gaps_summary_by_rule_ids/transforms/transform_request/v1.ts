@@ -7,13 +7,13 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { GetGapsSummaryByRuleIdsParams } from '../../../../../../application/rule/methods/get_gaps_summary_by_rule_ids/types';
-import { GetGapsSummaryByRuleIdsQueryV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
+import { GetGapsSummaryByRuleIdsBodyV1 } from '../../../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 
 export const transformRequest = ({
   rule_ids,
   start,
   end,
-}: GetGapsSummaryByRuleIdsQueryV1): GetGapsSummaryByRuleIdsParams => ({
+}: GetGapsSummaryByRuleIdsBodyV1): GetGapsSummaryByRuleIdsParams => ({
   ruleIds: rule_ids,
   start,
   end,

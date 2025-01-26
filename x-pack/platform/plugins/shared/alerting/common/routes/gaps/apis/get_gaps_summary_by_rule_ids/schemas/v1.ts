@@ -6,7 +6,7 @@
  */
 import { schema } from '@kbn/config-schema';
 
-export const getGapsSummaryByRuleIdsQuerySchema = schema.object(
+export const getGapsSummaryByRuleIdsBodySchema = schema.object(
   {
     end: schema.string(),
     start: schema.string(),
@@ -14,17 +14,18 @@ export const getGapsSummaryByRuleIdsQuerySchema = schema.object(
   },
   {
     validate({ start, end }) {
-      if (start) {
-        const parsedStart = Date.parse(start);
-        if (isNaN(parsedStart)) {
-          return `[start]: query start must be valid date`;
-        }
+      const parsedStart = Date.parse(start);
+      if (isNaN(parsedStart)) {
+        return `[start]: query start must be valid date`;
       }
-      if (end) {
-        const parsedEnd = Date.parse(end);
-        if (isNaN(parsedEnd)) {
-          return `[end]: query end must be valid date`;
-        }
+
+      const parsedEnd = Date.parse(end);
+      if (isNaN(parsedEnd)) {
+        return `[end]: query end must be valid date`;
+      }
+
+      if (parsedStart >= parsedEnd) {
+        return `[start]: query start must be before end`;
       }
     },
   }

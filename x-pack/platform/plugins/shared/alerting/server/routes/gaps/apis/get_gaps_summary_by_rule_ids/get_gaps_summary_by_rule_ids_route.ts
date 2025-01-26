@@ -6,8 +6,8 @@
  */
 import { IRouter } from '@kbn/core/server';
 import {
-  getGapsSummaryByRuleIdsQuerySchemaV1,
-  GetGapsSummaryByRuleIdsQueryV1,
+  getGapsSummaryByRuleIdsBodySchemaV1,
+  GetGapsSummaryByRuleIdsBodyV1,
   GetGapsSummaryByRuleIdsResponseV1,
 } from '../../../../../common/routes/gaps/apis/get_gaps_summary_by_rule_ids';
 import { ILicenseState } from '../../../../lib';
@@ -26,7 +26,7 @@ export const getGapsSummaryByRuleIdsRoute = (
     {
       path: `${INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH}`,
       validate: {
-        body: getGapsSummaryByRuleIdsQuerySchemaV1,
+        body: getGapsSummaryByRuleIdsBodySchemaV1,
       },
       options: {
         access: 'internal',
@@ -36,7 +36,7 @@ export const getGapsSummaryByRuleIdsRoute = (
       verifyAccessAndContext(licenseState, async function (context, req, res) {
         const alertingContext = await context.alerting;
         const rulesClient = await alertingContext.getRulesClient();
-        const body: GetGapsSummaryByRuleIdsQueryV1 = req.body;
+        const body: GetGapsSummaryByRuleIdsBodyV1 = req.body;
         const result = await rulesClient.getGapsSummaryByRuleIds(transformRequestV1(body));
         const response: GetGapsSummaryByRuleIdsResponseV1 = {
           body: transformResponseV1(result),

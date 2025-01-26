@@ -6,9 +6,9 @@
  */
 
 import type { TypeOf } from '@kbn/config-schema';
-import { getGapsSummaryByRuleIdsQuerySchema, getGapsSummaryByRuleIdsResponseSchema } from '..';
+import { getGapsSummaryByRuleIdsBodySchema, getGapsSummaryByRuleIdsResponseSchema } from '..';
 
-export type GetGapsSummaryByRuleIdsQuery = TypeOf<typeof getGapsSummaryByRuleIdsQuerySchema>;
+export type GetGapsSummaryByRuleIdsBody = TypeOf<typeof getGapsSummaryByRuleIdsBodySchema>;
 export type GetGapsSummaryByRuleIdsResponseBody = TypeOf<
   typeof getGapsSummaryByRuleIdsResponseSchema
 >;

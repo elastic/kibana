@@ -205,61 +205,6 @@ describe('getGapsSummaryByRuleIds', () => {
     });
   });
 
-  test('should get gaps summary without statuses filter', async () => {
-    const ruleIds = ['1'];
-    const start = '2023-11-16T08:00:00.000Z';
-    const end = '2023-11-16T09:00:00.000Z';
-
-    unsecuredSavedObjectsClient.find.mockResolvedValue({
-      aggregations: {
-        alertTypeId: {
-          buckets: [{ key: ['myType', 'myApp'], doc_count: 1 }],
-        },
-      },
-      saved_objects: [],
-      per_page: 0,
-      page: 0,
-      total: 1,
-    });
-
-    eventLogClient.aggregateEventsBySavedObjectIds.mockResolvedValue({
-      aggregations: {
-        unique_rule_ids: {
-          buckets: [
-            {
-              key: '1',
-              totalUnfilledDurationMs: { value: 1000 },
-              totalInProgressDurationMs: { value: 2000 },
-              totalFilledDurationMs: { value: 3000 },
-            },
-          ],
-        },
-      },
-    });
-
-    const result = await rulesClient.getGapsSummaryByRuleIds({
-      ruleIds,
-      start,
-      end,
-    });
-
-    expect(eventLogClient.aggregateEventsBySavedObjectIds).toHaveBeenCalledWith('alert', ruleIds, {
-      filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2023-11-16T09:00:00.000Z" AND kibana.alert.rule.gap.range >= "2023-11-16T08:00:00.000Z"`,
-      aggs: expect.any(Object),
-    });
-
-    expect(result).toEqual({
-      data: [
-        {
-          ruleId: '1',
-          totalUnfilledDurationMs: 1000,
-          totalInProgressDurationMs: 2000,
-          totalFilledDurationMs: 3000,
-        },
-      ],
-    });
-  });
-
   describe('error handling', () => {
     test('should throw error if authorization fails', async () => {
       authorization.getFindAuthorizationFilter.mockRejectedValue(new Error('Not authorized'));

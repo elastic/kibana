@@ -6,22 +6,22 @@
  */
 
 export {
-  getGapsSummaryByRuleIdsQuerySchema,
+  getGapsSummaryByRuleIdsBodySchema,
   getGapsSummaryByRuleIdsResponseSchema,
 } from './schemas/latest';
 export type {
-  GetGapsSummaryByRuleIdsQuery,
+  GetGapsSummaryByRuleIdsBody,
   GetGapsSummaryByRuleIdsResponse,
   GetGapsSummaryByRuleIdsResponseBody,
 } from './types/latest';
 
 export {
-  getGapsSummaryByRuleIdsQuerySchema as getGapsSummaryByRuleIdsQuerySchemaV1,
+  getGapsSummaryByRuleIdsBodySchema as getGapsSummaryByRuleIdsBodySchemaV1,
   getGapsSummaryByRuleIdsResponseSchema as getGapsSummaryByRuleIdsResponseSchemaV1,
 } from './schemas/v1';
 
 export type {
-  GetGapsSummaryByRuleIdsQuery as GetGapsSummaryByRuleIdsQueryV1,
+  GetGapsSummaryByRuleIdsBody as GetGapsSummaryByRuleIdsBodyV1,
   GetGapsSummaryByRuleIdsResponse as GetGapsSummaryByRuleIdsResponseV1,
   GetGapsSummaryByRuleIdsResponseBody as GetGapsSummaryByRuleIdsResponseBodyV1,
 } from './types/v1';
