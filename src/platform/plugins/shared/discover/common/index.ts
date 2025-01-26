@@ -10,12 +10,12 @@
 export const PLUGIN_ID = 'discover';
 export const APP_ICON = 'discoverApp';
 
-export { DISCOVER_APP_LOCATOR, DiscoverAppLocatorDefinition } from './app_locator';
+export { DISCOVER_APP_LOCATOR } from './app_locator';
 export type {
   DiscoverAppLocator,
   DiscoverAppLocatorParams,
   MainHistoryLocationState,
 } from './app_locator';
+export { appLocatorGetLocationCommon } from './app_locator_get_location';
 
-export { DiscoverESQLLocatorDefinition } from './esql_locator';
 export type { DiscoverESQLLocator, DiscoverESQLLocatorParams } from './esql_locator';

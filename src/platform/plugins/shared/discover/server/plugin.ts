@@ -13,9 +13,9 @@ import type { EmbeddableSetup } from '@kbn/embeddable-plugin/server';
 import type { HomeServerPluginSetup } from '@kbn/home-plugin/server';
 import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/common';
 import type { SharePluginSetup } from '@kbn/share-plugin/server';
-import { PluginInitializerContext } from '@kbn/core/server';
+import type { PluginInitializerContext } from '@kbn/core/server';
 import type { DiscoverServerPluginStart, DiscoverServerPluginStartDeps } from '.';
-import { DiscoverAppLocatorDefinition } from '../common';
+import { DISCOVER_APP_LOCATOR, appLocatorGetLocationCommon } from '../common';
 import { capabilitiesProvider } from './capabilities_provider';
 import { createSearchEmbeddableFactory } from './embeddable';
 import { initializeLocatorServices } from './locator';
@@ -49,9 +49,12 @@ export class DiscoverServerPlugin
     }
 
     if (plugins.share) {
-      plugins.share.url.locators.create(
-        new DiscoverAppLocatorDefinition({ useHash: false, setStateToKbnUrl })
-      );
+      plugins.share.url.locators.create({
+        id: DISCOVER_APP_LOCATOR,
+        getLocation: (params) => {
+          return appLocatorGetLocationCommon({ useHash: false, setStateToKbnUrl }, params);
+        },
+      });
     }
 
     plugins.embeddable.registerEmbeddableFactory(createSearchEmbeddableFactory());

@@ -20,29 +20,25 @@ import type {
 } from '@kbn/core/public';
 import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
-import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
 import { SEARCH_EMBEDDABLE_TYPE } from '@kbn/discover-utils';
 import { type SavedSearchAttributes, SavedSearchType } from '@kbn/saved-search-plugin/common';
 import { i18n } from '@kbn/i18n';
 import { once } from 'lodash';
-import { PLUGIN_ID } from '../common';
+import { DISCOVER_ESQL_LOCATOR } from '@kbn/deeplinks-analytics';
+import { DISCOVER_APP_LOCATOR, PLUGIN_ID } from '../common';
 import { registerFeature } from './register_feature';
 import type { UrlTracker } from './build_services';
-import { ViewSavedSearchAction } from './embeddable/actions/view_saved_search_action';
+import { ACTION_VIEW_SAVED_SEARCH } from './embeddable/actions/view_saved_search_action';
 import { initializeKbnUrlTracking } from './utils/initialize_kbn_url_tracking';
 import {
   type DiscoverContextAppLocator,
-  DiscoverContextAppLocatorDefinition,
+  DISCOVER_CONTEXT_APP_LOCATOR,
 } from './application/context/services/locator';
 import {
   type DiscoverSingleDocLocator,
-  DiscoverSingleDocLocatorDefinition,
+  DISCOVER_SINGLE_DOC_LOCATOR,
 } from './application/doc/locator';
-import {
-  type DiscoverAppLocator,
-  DiscoverAppLocatorDefinition,
-  DiscoverESQLLocatorDefinition,
-} from '../common';
+import { type DiscoverAppLocator } from '../common';
 import { defaultCustomizationContext } from './customizations';
 import { SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER } from './embeddable/constants';
 import {
@@ -50,7 +46,6 @@ import {
   type DiscoverContainerProps,
 } from './components/discover_container';
 import { getESQLSearchProvider } from './global_search/search_provider';
-import { HistoryService } from './history_service';
 import type { ConfigSchema, ExperimentalFeatures } from '../server/config';
 import type {
   DiscoverSetup,
@@ -58,14 +53,19 @@ import type {
   DiscoverStart,
   DiscoverStartPlugins,
 } from './types';
-import { deserializeState } from './embeddable/utils/serialization_utils';
 import { DISCOVER_CELL_ACTIONS_TRIGGER } from './context_awareness/types';
 import type { DiscoverEBTManager } from './services/discover_ebt_manager';
 import type { ProfilesManager } from './context_awareness';
 
-const getAsyncImports = () => import('./plugin_imports');
+const getSharedServices = () => import('./plugin_imports/shared_services');
+
+const getHistoryService = once(async () => {
+  const { HistoryService } = await getSharedServices();
+  return new HistoryService();
+});
+
 const getEmptyEbtManager = once(async () => {
-  const { DiscoverEBTManager } = await getAsyncImports();
+  const { DiscoverEBTManager } = await getSharedServices();
   return new DiscoverEBTManager(); // It is not initialized outside of Discover
 });
 
@@ -77,7 +77,6 @@ export class DiscoverPlugin
   implements Plugin<DiscoverSetup, DiscoverStart, DiscoverSetupPlugins, DiscoverStartPlugins>
 {
   private readonly appStateUpdater = new BehaviorSubject<AppUpdater>(() => ({}));
-  private readonly historyService = new HistoryService();
   private readonly experimentalFeatures: ExperimentalFeatures;
 
   private scopedHistory?: ScopedHistory<unknown>;
@@ -105,35 +104,45 @@ export class DiscoverPlugin
     if (plugins.share) {
       const useHash = core.uiSettings.get('state:storeInSessionStorage');
 
-      this.locator = plugins.share.url.locators.create(
-        new DiscoverAppLocatorDefinition({ useHash, setStateToKbnUrl })
-      );
-      this.contextLocator = plugins.share.url.locators.create(
-        new DiscoverContextAppLocatorDefinition({ useHash })
-      );
-      this.singleDocLocator = plugins.share.url.locators.create(
-        new DiscoverSingleDocLocatorDefinition()
-      );
+      this.locator = plugins.share.url.locators.create({
+        id: DISCOVER_APP_LOCATOR,
+        getLocation: async (params) => {
+          const { appLocatorGetLocation } = await import('./app_locator_get_location');
+          return appLocatorGetLocation({ useHash }, params);
+        },
+      });
+
+      this.contextLocator = plugins.share.url.locators.create({
+        id: DISCOVER_CONTEXT_APP_LOCATOR,
+        getLocation: async (params) => {
+          const { contextAppLocatorGetLocation } = await import(
+            './application/context/services/locator_get_location'
+          );
+          return contextAppLocatorGetLocation({ useHash }, params);
+        },
+      });
+
+      this.singleDocLocator = plugins.share.url.locators.create({
+        id: DISCOVER_SINGLE_DOC_LOCATOR,
+        getLocation: async (params) => {
+          const { singleDocLocatorGetLocation } = await import(
+            './application/doc/locator_get_location'
+          );
+          return singleDocLocatorGetLocation(params);
+        },
+      });
     }
 
     if (plugins.globalSearch) {
-      const enableESQL = core.uiSettings.get(ENABLE_ESQL);
       plugins.globalSearch.registerResultProvider(
-        getESQLSearchProvider(
-          enableESQL,
-          core.getStartServices().then(
-            ([
-              {
-                application: { capabilities },
-              },
-            ]) => capabilities
-          ),
-          core.getStartServices().then((deps) => {
-            const { data } = deps[1];
-            return data;
-          }),
-          this.locator
-        )
+        getESQLSearchProvider({
+          isESQLEnabled: core.uiSettings.get(ENABLE_ESQL),
+          locator: this.locator,
+          getServices: async () => {
+            const [coreStart, startPlugins] = await core.getStartServices();
+            return [coreStart, startPlugins];
+          },
+        })
       );
     }
 
@@ -156,7 +165,7 @@ export class DiscoverPlugin
     this.stopUrlTracking = stopUrlTracker;
 
     const getEbtManager = once(async () => {
-      const { DiscoverEBTManager } = await getAsyncImports();
+      const { DiscoverEBTManager } = await getSharedServices();
       const ebtManager = new DiscoverEBTManager();
 
       ebtManager.initialize({
@@ -183,7 +192,7 @@ export class DiscoverPlugin
         // Store the current scoped history so initializeKbnUrlTracking can access it
         this.scopedHistory = params.history;
 
-        this.historyService.syncHistoryLocations();
+        (await getHistoryService()).syncHistoryLocations();
         appMounted();
 
         // dispatch synthetic hash change event to update hash history objects
@@ -259,21 +268,32 @@ export class DiscoverPlugin
   }
 
   start(core: CoreStart, plugins: DiscoverStartPlugins): DiscoverStart {
-    const viewSavedSearchAction = new ViewSavedSearchAction(core.application, this.locator!);
-
-    plugins.uiActions.addTriggerAction('CONTEXT_MENU_TRIGGER', viewSavedSearchAction);
+    plugins.uiActions.addTriggerActionAsync(
+      'CONTEXT_MENU_TRIGGER',
+      ACTION_VIEW_SAVED_SEARCH,
+      async () => {
+        const { ViewSavedSearchAction } = await import(
+          './embeddable/actions/view_saved_search_action'
+        );
+        return new ViewSavedSearchAction(core.application, this.locator!);
+      }
+    );
     plugins.uiActions.registerTrigger(SEARCH_EMBEDDABLE_CELL_ACTIONS_TRIGGER);
     plugins.uiActions.registerTrigger(DISCOVER_CELL_ACTIONS_TRIGGER);
 
     const isEsqlEnabled = core.uiSettings.get(ENABLE_ESQL);
 
     if (plugins.share && this.locator && isEsqlEnabled) {
-      plugins.share?.url.locators.create(
-        new DiscoverESQLLocatorDefinition({
-          discoverAppLocator: this.locator,
-          dataViews: plugins.dataViews,
-        })
-      );
+      plugins.share?.url.locators.create({
+        id: DISCOVER_ESQL_LOCATOR,
+        getLocation: async () => {
+          const { esqlLocatorGetLocation } = await import('../common/esql_locator_get_location');
+          return esqlLocatorGetLocation({
+            discoverAppLocator: this.locator!,
+            dataViews: plugins.dataViews,
+          });
+        },
+      });
     }
 
     const getDiscoverServicesInternal = async () => {
@@ -302,7 +322,7 @@ export class DiscoverPlugin
       DataSourceProfileService,
       DocumentProfileService,
       ProfilesManager,
-    } = await import('./plugin_imports');
+    } = await import('./plugin_imports/shared_services');
 
     const rootProfileService = new RootProfileService();
     const dataSourceProfileService = new DataSourceProfileService();
@@ -377,7 +397,7 @@ export class DiscoverPlugin
     scopedHistory?: ScopedHistory;
     setHeaderActionMenu?: AppMountParameters['setHeaderActionMenu'];
   }) => {
-    const { buildServices } = await getAsyncImports();
+    const { buildServices } = await getSharedServices();
     return buildServices({
       core,
       plugins,
@@ -385,7 +405,7 @@ export class DiscoverPlugin
       locator: this.locator!,
       contextLocator: this.contextLocator!,
       singleDocLocator: this.singleDocLocator!,
-      history: this.historyService.getHistory(),
+      history: (await getHistoryService()).getHistory(),
       scopedHistory,
       urlTracker: this.urlTracker!,
       profilesManager,
@@ -416,6 +436,7 @@ export class DiscoverPlugin
     plugins.embeddable.registerAddFromLibraryType<SavedSearchAttributes>({
       onAdd: async (container, savedObject) => {
         const services = await getDiscoverServicesForEmbeddable();
+        const { deserializeState } = await import('./embeddable/utils/serialization_utils');
         const initialState = await deserializeState({
           serializedState: {
             rawState: { savedObjectId: savedObject.id },
@@ -423,6 +444,7 @@ export class DiscoverPlugin
           },
           discoverServices: services,
         });
+
         container.addNewPanel({
           panelType: SEARCH_EMBEDDABLE_TYPE,
           initialState,

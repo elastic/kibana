@@ -11,9 +11,9 @@ import type { ApplicationStart } from '@kbn/core/public';
 import { i18n } from '@kbn/i18n';
 import type { EmbeddableApiContext } from '@kbn/presentation-publishing';
 import type { Action } from '@kbn/ui-actions-plugin/public';
-
 import type { DiscoverAppLocator } from '../../../common';
 import { getDiscoverLocatorParams } from '../utils/get_discover_locator_params';
+import { compatibilityCheck } from './view_saved_search_compatibility_check';
 
 export const ACTION_VIEW_SAVED_SEARCH = 'ACTION_VIEW_SAVED_SEARCH';
 
@@ -28,7 +28,6 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
   ) {}
 
   async execute({ embeddable }: EmbeddableApiContext): Promise<void> {
-    const { compatibilityCheck } = await import('./view_saved_search_compatibility_check');
     if (!compatibilityCheck(embeddable)) {
       return;
     }
@@ -53,7 +52,7 @@ export class ViewSavedSearchAction implements Action<EmbeddableApiContext> {
       (capabilities.discover_v2.show as boolean) || (capabilities.discover_v2.save as boolean);
 
     if (!hasDiscoverPermissions) return false; // early return to delay async import until absolutely necessary
-    const { compatibilityCheck } = await import('./view_saved_search_compatibility_check');
+
     return compatibilityCheck(embeddable);
   }
 }

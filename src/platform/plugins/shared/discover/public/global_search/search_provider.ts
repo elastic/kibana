@@ -7,14 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ApplicationStart } from '@kbn/core/public';
-import { from, of } from 'rxjs';
-import { i18n } from '@kbn/i18n';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
+import type { CoreStart } from '@kbn/core/public';
+import { defer } from 'rxjs';
 import type { GlobalSearchResultProvider } from '@kbn/global-search-plugin/public';
-import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import { getInitialESQLQuery } from '@kbn/esql-utils';
 import type { DiscoverAppLocator } from '../../common';
+import type { DiscoverStartPlugins } from '../types';
 
 /**
  * Global search provider adding an ES|QL and ESQL entry.
@@ -22,69 +19,17 @@ import type { DiscoverAppLocator } from '../../common';
  *
  * It navigates to Discover with a default query extracted from the default dataview
  */
-export const getESQLSearchProvider: (
-  isESQLEnabled: boolean,
-  uiCapabilities: Promise<ApplicationStart['capabilities']>,
-  data: Promise<DataPublicPluginStart>,
-  locator?: DiscoverAppLocator
-) => GlobalSearchResultProvider = (isESQLEnabled, uiCapabilities, data, locator) => ({
+export const getESQLSearchProvider = (options: {
+  isESQLEnabled: boolean;
+  locator?: DiscoverAppLocator;
+  getServices: () => Promise<[CoreStart, DiscoverStartPlugins]>;
+}): GlobalSearchResultProvider => ({
   id: 'esql',
-  find: ({ term = '', types, tags }) => {
-    if (tags || (types && !types.includes('application')) || !locator || !isESQLEnabled) {
-      return of([]);
-    }
-
-    return from(
-      Promise.all([uiCapabilities, data]).then(async ([{ navLinks }, { dataViews }]) => {
-        if (!navLinks.discover) {
-          return [];
-        }
-        const title = i18n.translate('discover.globalSearch.esqlSearchTitle', {
-          defaultMessage: 'Create ES|QL queries',
-          description: 'ES|QL is a product name and should not be translated',
-        });
-        const defaultDataView = await dataViews.getDefaultDataView({ displayErrors: false });
-
-        if (!defaultDataView) {
-          return [];
-        }
-
-        const params = {
-          query: {
-            esql: getInitialESQLQuery(defaultDataView),
-          },
-          dataViewSpec: defaultDataView?.toSpec(),
-        };
-
-        const discoverLocation = await locator?.getLocation(params);
-
-        term = term.toLowerCase();
-        let score = 0;
-
-        if (term === 'es|ql' || term === 'esql') {
-          score = 100;
-        } else if (term && ('es|ql'.includes(term) || 'esql'.includes(term))) {
-          score = 90;
-        }
-
-        if (score === 0) return [];
-
-        return [
-          {
-            id: 'esql',
-            title,
-            type: 'application',
-            icon: 'logoKibana',
-            meta: {
-              categoryId: DEFAULT_APP_CATEGORIES.kibana.id,
-              categoryLabel: DEFAULT_APP_CATEGORIES.kibana.label,
-            },
-            score,
-            url: `/app/${discoverLocation.app}${discoverLocation.path}`,
-          },
-        ];
-      })
-    );
+  find: (...findParams) => {
+    return defer(async () => {
+      const { searchProviderFind } = await import('./search_provider_find');
+      return searchProviderFind(options, ...findParams);
+    });
   },
   getSearchableTypes: () => ['application'],
 });
