@@ -128,7 +128,7 @@ const updateGapBatch = async (
       .map((gap) => {
         if (!gap.internalFields) return null;
         return {
-          gap: gap.getEsObject(),
+          gap: gap.toObject(),
           internalFields: gap.internalFields,
         };
       })

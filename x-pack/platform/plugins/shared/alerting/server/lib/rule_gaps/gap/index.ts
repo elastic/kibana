@@ -152,7 +152,7 @@ export class Gap {
   /**
    * Returns the gap object for es
    */
-  public getEsObject(): GapBase {
+  public toObject(): GapBase {
     return {
       range: denormalizeInterval(this.range),
       filled_intervals: this.filledIntervals.map(denormalizeInterval),

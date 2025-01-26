@@ -417,12 +417,7 @@ export class AlertingEventLogger {
     });
 
     this.eventLogger.logEvent(
-      createGapRecord(
-        this.context,
-        this.ruleData,
-        this.relatedSavedObjects,
-        gapToReport.getEsObject()
-      )
+      createGapRecord(this.context, this.ruleData, this.relatedSavedObjects, gapToReport.toObject())
     );
   }
 

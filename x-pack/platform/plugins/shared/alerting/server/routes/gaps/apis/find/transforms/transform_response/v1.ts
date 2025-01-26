@@ -30,7 +30,7 @@ export const transformResponse = ({
       }
       return {
         _id: gap.internalFields._id,
-        ...gap.getEsObject(),
+        ...gap.toObject(),
         '@timestamp': gap.timestamp,
       };
     })

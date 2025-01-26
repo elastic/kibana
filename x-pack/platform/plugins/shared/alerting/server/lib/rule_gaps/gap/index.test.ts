@@ -165,14 +165,14 @@ describe('Gap Class Tests', () => {
     expect(state.totalGapDurationMs).toBe(HOUR_MS);
   });
 
-  it('returns correct ES object via getEsObject()', () => {
+  it('returns correct ES object via toObject()', () => {
     const filled: StringInterval = {
       gte: '2024-01-01T00:10:00.000Z',
       lte: '2024-01-01T00:20:00.000Z',
     };
     const gap = new Gap({ range: baseRange, filledIntervals: [filled] });
 
-    const esObject = gap.getEsObject();
+    const esObject = gap.toObject();
     expect(esObject.range).toEqual(baseRange);
     expect(esObject.filled_intervals).toHaveLength(1);
     expect(esObject.in_progress_intervals).toHaveLength(0);
@@ -182,7 +182,7 @@ describe('Gap Class Tests', () => {
     expect(esObject.filled_duration_ms).toBe(10 * 60 * 1000);
   });
 
-  it('returns correct ES object via getEsObject() after filling', () => {
+  it('returns correct ES object via toObject() after filling', () => {
     const gap = new Gap({ range: baseRange });
 
     gap.addInProgress({
@@ -194,7 +194,7 @@ describe('Gap Class Tests', () => {
       lte: new Date('2024-01-01T00:50:00.000Z'),
     });
 
-    const esObject = gap.getEsObject();
+    const esObject = gap.toObject();
     expect(esObject.range).toEqual(baseRange);
     expect(esObject.filled_intervals).toHaveLength(1);
     expect(esObject.in_progress_intervals).toHaveLength(1);

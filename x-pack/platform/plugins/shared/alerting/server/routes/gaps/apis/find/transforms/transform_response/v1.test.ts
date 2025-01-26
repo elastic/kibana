@@ -36,7 +36,7 @@ describe('transformResponse v1', () => {
         {
           _id: 'test-gap-id',
           '@timestamp': '2024-01-01T00:00:00.000Z',
-          ...gap.getEsObject(),
+          ...gap.toObject(),
         },
       ],
     });
@@ -129,12 +129,12 @@ describe('transformResponse v1', () => {
     expect(result.data[0]).toEqual({
       _id: 'gap-1',
       '@timestamp': '2024-01-01T00:00:00.000Z',
-      ...gap1.getEsObject(),
+      ...gap1.toObject(),
     });
     expect(result.data[1]).toEqual({
       _id: 'gap-2',
       '@timestamp': '2024-01-01T00:00:00.000Z',
-      ...gap2.getEsObject(),
+      ...gap2.toObject(),
     });
   });
 });
