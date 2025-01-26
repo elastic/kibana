@@ -20,24 +20,6 @@ import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 export async function fillGapById(context: RulesClientContext, params: FillGapByIdParams) {
   try {
-    const eventLogClient = await context.getEventLogClient();
-    const gaps = await findGapsById({
-      params: {
-        gapIds: [params.gapId],
-        page: 1,
-        perPage: 1,
-        ruleId: params.ruleId,
-      },
-      eventLogClient,
-      logger: context.logger,
-    });
-
-    const gap = gaps[0];
-
-    if (!gap) {
-      throw Boom.notFound(`Gap not found for ruleId ${params.ruleId} and gapId ${params.gapId}`);
-    }
-
     const rule = (await getRule(context, {
       id: params.ruleId,
       includeLegacyId: true,
@@ -59,6 +41,24 @@ export async function fillGapById(context: RulesClientContext, params: FillGapBy
         })
       );
       throw error;
+    }
+
+    const eventLogClient = await context.getEventLogClient();
+    const gaps = await findGapsById({
+      params: {
+        gapIds: [params.gapId],
+        page: 1,
+        perPage: 1,
+        ruleId: params.ruleId,
+      },
+      eventLogClient,
+      logger: context.logger,
+    });
+
+    const gap = gaps[0];
+
+    if (!gap) {
+      throw Boom.notFound(`Gap not found for ruleId ${params.ruleId} and gapId ${params.gapId}`);
     }
 
     const gapState = gap.getState();
