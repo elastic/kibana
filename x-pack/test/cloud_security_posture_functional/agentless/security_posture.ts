@@ -6,6 +6,7 @@
  */
 
 import expect from '@kbn/expect';
+import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 import type { FtrProviderContext } from '../ftr_provider_context';
 import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
 // eslint-disable-next-line import/no-default-export
