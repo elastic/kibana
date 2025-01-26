@@ -109,9 +109,9 @@ const ruleEventVerbs: Record<RuleAuditAction, VerbsTuple> = {
     'got rules with gaps',
   ],
   rule_get_gaps_summary_by_rule_ids: [
-    'get gaps info by rule ids',
-    'getting gaps info by rule ids',
-    'got gaps info by rule ids',
+    'get gaps summary by rule ids',
+    'getting gaps summary by rule ids',
+    'got gaps summary by rule ids',
   ],
 };
 

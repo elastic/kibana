@@ -87,7 +87,7 @@ describe('getGapsSummaryByRuleIds', () => {
     });
   });
 
-  test('should successfully get gaps info for rules', async () => {
+  test('should successfully get gaps summary for rules', async () => {
     const ruleIds = ['1', '2'];
     const start = '2023-11-16T08:00:00.000Z';
     const end = '2023-11-16T09:00:00.000Z';
@@ -205,7 +205,7 @@ describe('getGapsSummaryByRuleIds', () => {
     });
   });
 
-  test('should get gaps info without statuses filter', async () => {
+  test('should get gaps summary without statuses filter', async () => {
     const ruleIds = ['1'];
     const start = '2023-11-16T08:00:00.000Z';
     const end = '2023-11-16T09:00:00.000Z';
@@ -286,7 +286,7 @@ describe('getGapsSummaryByRuleIds', () => {
         kibana: {
           saved_object: undefined,
         },
-        message: 'Failed attempt to get gaps info by rule ids a rule',
+        message: 'Failed attempt to get gaps summary by rule ids a rule',
       });
     });
 
@@ -309,7 +309,7 @@ describe('getGapsSummaryByRuleIds', () => {
           start: '2023-11-16T08:00:00.000Z',
           end: '2023-11-16T09:00:00.000Z',
         })
-      ).rejects.toThrow('No rules matching ids 1 found to get gaps info');
+      ).rejects.toThrow('No rules matching ids 1 found to get gaps summary');
     });
 
     test('should throw error if rule type authorization fails', async () => {
@@ -349,7 +349,7 @@ describe('getGapsSummaryByRuleIds', () => {
         kibana: {
           saved_object: undefined,
         },
-        message: 'Failed attempt to get gaps info by rule ids a rule',
+        message: 'Failed attempt to get gaps summary by rule ids a rule',
       });
     });
   });
