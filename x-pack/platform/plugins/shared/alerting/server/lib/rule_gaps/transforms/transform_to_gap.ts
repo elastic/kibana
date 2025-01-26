@@ -8,9 +8,9 @@ import { QueryEventsBySavedObjectResult } from '@kbn/event-log-plugin/server';
 import { Gap } from '../gap';
 import { StringInterval } from '../types';
 
-type PotenialInterval = { lte?: string; gte?: string } | undefined;
+type PotentialInterval = { lte?: string; gte?: string } | undefined;
 
-const validateInterval = (interval: PotenialInterval): StringInterval | null => {
+const validateInterval = (interval: PotentialInterval): StringInterval | null => {
   if (!interval?.gte || !interval?.lte) return null;
 
   return {
@@ -19,7 +19,7 @@ const validateInterval = (interval: PotenialInterval): StringInterval | null => 
   };
 };
 
-const validateIntervals = (intervals: PotenialInterval[] | undefined): StringInterval[] =>
+const validateIntervals = (intervals: PotentialInterval[] | undefined): StringInterval[] =>
   (intervals?.map(validateInterval)?.filter((interval) => interval !== null) as StringInterval[]) ??
   [];
 
