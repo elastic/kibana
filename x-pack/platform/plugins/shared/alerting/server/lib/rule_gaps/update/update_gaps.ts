@@ -11,7 +11,7 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import { findGaps } from '../find_gaps';
-import { findGapById } from '../find_gap_by_id';
+import { findGapsById } from '../find_gaps_by_id';
 import { Gap } from '../gap';
 import { gapStatus } from '../../../../common/constants';
 import { BackfillSchedule } from '../../../application/backfill/result/types';
@@ -35,11 +35,54 @@ interface UpdateGapsParams {
 
 const CONFLICT_STATUS_CODE = 409;
 const MAX_RETRIES = 3;
+const PAGE_SIZE = 500;
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-const updateSingleGap = async (
+export const prepareGapForUpdate = async (
   gap: Gap,
+  {
+    backfillSchedule,
+    savedObjectsRepository,
+    shouldRefetchAllBackfills,
+    backfillClient,
+    actionsClient,
+    ruleId,
+  }: {
+    backfillSchedule?: BackfillSchedule[];
+    savedObjectsRepository: ISavedObjectsRepository;
+    shouldRefetchAllBackfills?: boolean;
+    backfillClient: BackfillClient;
+    actionsClient: ActionsClient;
+    ruleId: string;
+  }
+) => {
+  const hasFailedBackfillTask = backfillSchedule?.some(
+    (scheduleItem) =>
+      scheduleItem.status === adHocRunStatus.ERROR || scheduleItem.status === adHocRunStatus.TIMEOUT
+  );
+
+  if (backfillSchedule && !hasFailedBackfillTask) {
+    updateGapFromSchedule({
+      gap,
+      backfillSchedule,
+    });
+  }
+
+  if (hasFailedBackfillTask || !backfillSchedule || shouldRefetchAllBackfills) {
+    await calculateGapStateFromAllBackfills({
+      gap,
+      savedObjectsRepository,
+      ruleId,
+      backfillClient,
+      actionsClient,
+    });
+  }
+
+  return gap;
+};
+
+const updateGapBatch = async (
+  gaps: Gap[],
   {
     backfillSchedule,
     savedObjectsRepository,
@@ -50,6 +93,7 @@ const updateSingleGap = async (
     logger,
     ruleId,
     eventLogClient,
+    retryCount = 0,
   }: {
     backfillSchedule?: BackfillSchedule[];
     savedObjectsRepository: ISavedObjectsRepository;
@@ -60,85 +104,102 @@ const updateSingleGap = async (
     logger: Logger;
     ruleId: string;
     eventLogClient: IEventLogClient;
+    retryCount?: number;
   }
-) => {
-  let currentGap = gap;
-  let retryCount = 0;
+): Promise<boolean> => {
+  try {
+    // Prepare all gaps for update
+    const updatedGaps = [];
+    for (const gap of gaps) {
+      // we do async request only if there errors in backfill or no backfill schedule
+      const updatedGap = await prepareGapForUpdate(gap, {
+        backfillSchedule,
+        savedObjectsRepository,
+        shouldRefetchAllBackfills,
+        backfillClient,
+        actionsClient,
+        ruleId,
+      });
+      updatedGaps.push(updatedGap);
+    }
 
-  while (retryCount <= MAX_RETRIES) {
-    try {
-      // If we're retrying, refetch the latest gap state
-      if (retryCount > 0 && currentGap.internalFields) {
-        const updatedGap = await findGapById({
-          eventLogClient,
-          logger,
-          params: {
-            gapId: currentGap.internalFields._id,
-            ruleId,
-          },
-        });
+    // Convert gaps to the format expected by updateDocuments
+    const gapsToUpdate = updatedGaps
+      .map((gap) => {
+        if (!gap.internalFields) return null;
+        return {
+          gap: gap.getEsObject(),
+          internalFields: gap.internalFields,
+        };
+      })
+      .filter((gap): gap is NonNullable<typeof gap> => gap !== null);
 
-        if (!updatedGap) {
-          logger.warn(
-            `Gap ${currentGap.internalFields._id} not found during retry, it was removed by another process`
-          );
-          return;
-        }
-        currentGap = updatedGap;
+    if (gapsToUpdate.length === 0) {
+      return true;
+    }
+
+    // Attempt bulk update
+    const bulkResponse = await alertingEventLogger.updateGaps(gapsToUpdate);
+
+    if (bulkResponse.errors) {
+      if (retryCount >= MAX_RETRIES) {
+        logger.error(
+          `Failed to update ${bulkResponse.items.length} gaps after ${MAX_RETRIES} retries due to conflicts`
+        );
+        return false;
       }
+      const retryDelaySec: number = Math.min(Math.pow(2, retryCount), 30);
+      await delay(retryDelaySec * 1000 * Math.random());
 
-      const hasFailedBackfillTask = backfillSchedule?.some(
-        (scheduleItem) =>
-          scheduleItem.status === adHocRunStatus.ERROR ||
-          scheduleItem.status === adHocRunStatus.TIMEOUT
-      );
+      const failedUpdatesIds =
+        bulkResponse?.items
+          .filter((item) => item.update?.status === CONFLICT_STATUS_CODE)
+          .map((item) => item.update?._id)
+          .filter((id): id is string => id !== undefined && id !== null) ?? [];
 
-      if (backfillSchedule && !hasFailedBackfillTask) {
-        updateGapFromSchedule({
-          gap: currentGap,
-          backfillSchedule,
-        });
-      }
-
-      if (hasFailedBackfillTask || !backfillSchedule || shouldRefetchAllBackfills) {
-        await calculateGapStateFromAllBackfills({
-          gap: currentGap,
-          savedObjectsRepository,
+      // Fetch latest versions of failed gaps
+      const gapsToRetry = await findGapsById({
+        eventLogClient,
+        logger,
+        params: {
+          gapIds: failedUpdatesIds,
           ruleId,
+          page: 1,
+          perPage: PAGE_SIZE,
+        },
+      });
+
+      if (gapsToRetry.length > 0) {
+        // Retry failed gaps
+        return updateGapBatch(gapsToRetry, {
+          backfillSchedule,
+          savedObjectsRepository,
+          shouldRefetchAllBackfills,
           backfillClient,
           actionsClient,
+          alertingEventLogger,
+          logger,
+          ruleId,
+          eventLogClient,
+          retryCount: retryCount + 1,
         });
       }
-
-      const esGap = currentGap.getEsObject();
-      const internalFields = currentGap.internalFields;
-
-      if (internalFields) {
-        await alertingEventLogger.updateGap({
-          internalFields,
-          gap: esGap,
-        });
-      }
-      return;
-    } catch (e) {
-      if (e.statusCode === CONFLICT_STATUS_CODE) {
-        retryCount++;
-        if (retryCount > MAX_RETRIES) {
-          logger.error(
-            `Failed to update gap: ${currentGap?.internalFields?._id} after ${MAX_RETRIES} retries due to conflicts`
-          );
-          throw e;
-        }
-        // Use exponential backoff with some randomness: 2s, 4s, 8s
-        const retryDelaySec = Math.min(Math.pow(2, retryCount), 30);
-        await delay(retryDelaySec * 1000 * Math.random());
-        continue;
-      }
-      throw e;
     }
+
+    return true;
+  } catch (e) {
+    logger.error(`Failed to update gap batch: ${e.message}`);
+    return false;
   }
 };
 
+/**
+ * Update gaps for a given rule
+ * Trying to fetch gaps in batches
+ * Prepare them for update
+ * Update them in bulk
+ * If there are conflicts, retry the failed gaps
+ */
 export const updateGaps = async (params: UpdateGapsParams) => {
   const {
     ruleId,
@@ -161,7 +222,6 @@ export const updateGaps = async (params: UpdateGapsParams) => {
   try {
     const alertingEventLogger = new AlertingEventLogger(eventLogger);
     let currentPage = 1;
-    const perPage = 10000;
     let hasErrors = false;
 
     while (true) {
@@ -173,33 +233,30 @@ export const updateGaps = async (params: UpdateGapsParams) => {
           start: start.toISOString(),
           end: end.toISOString(),
           page: currentPage,
-          perPage,
+          perPage: PAGE_SIZE,
           statuses: [gapStatus.PARTIALLY_FILLED, gapStatus.UNFILLED],
         },
       });
 
-      for (const gap of gaps) {
-        try {
-          await updateSingleGap(gap, {
-            backfillSchedule,
-            savedObjectsRepository,
-            shouldRefetchAllBackfills,
-            backfillClient,
-            actionsClient,
-            alertingEventLogger,
-            logger,
-            ruleId,
-            eventLogClient,
-          });
-        } catch (e) {
+      if (gaps.length > 0) {
+        const success = await updateGapBatch(gaps, {
+          backfillSchedule,
+          savedObjectsRepository,
+          shouldRefetchAllBackfills,
+          backfillClient,
+          actionsClient,
+          alertingEventLogger,
+          logger,
+          ruleId,
+          eventLogClient,
+        });
+
+        if (!success) {
           hasErrors = true;
-          logger.error(`Failed to update gap: ${e.message}`);
-          // Continue with other gaps even if one fails
-          continue;
         }
       }
 
-      if (gaps.length === 0 || gaps.length < perPage) {
+      if (gaps.length === 0 || gaps.length < PAGE_SIZE) {
         break;
       }
 

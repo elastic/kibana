@@ -72,7 +72,7 @@ export async function getGapsSummaryByRuleIds(
 
     const buckets = aggregations?.alertTypeId?.buckets;
     if (buckets === undefined || !buckets.length) {
-      throw Boom.badRequest(`No rules matching ids ${ruleIds} found to get gaps info`);
+      throw Boom.badRequest(`No rules matching ids ${ruleIds} found to get gaps summary`);
     }
 
     await pMap(
@@ -159,7 +159,7 @@ export async function getGapsSummaryByRuleIds(
 
     return result;
   } catch (err) {
-    const errorMessage = `Failed to find gaps info for rules`;
+    const errorMessage = `Failed to find gaps summary for rules`;
     context.logger.error(`${errorMessage} - ${err}`);
     throw Boom.boomify(err, { message: errorMessage });
   }

@@ -102,6 +102,7 @@ describe('fillGapByIdRoute', () => {
             updated_at: '2019-02-12T21:01:22.479Z',
             revision: 0,
             id: 'rule-1',
+            actions: [],
           },
           space_id: 'default',
           start: '2023-11-16T08:00:00.000Z',

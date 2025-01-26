@@ -10,6 +10,7 @@ import { Logger } from '@kbn/core/server';
 import { merge } from 'lodash';
 
 import { coerce } from 'semver';
+import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { Plugin } from './plugin';
 import { EsContext } from './es';
 import { EventLogService } from './event_log_service';
@@ -108,22 +109,28 @@ export class EventLogger implements IEventLogger {
     }
   }
 
-  async updateEvent(internalFields: InternalFields, event: IEvent): Promise<void> {
-    const doc: Required<Doc> = {
-      index: this.esContext.esNames.dataStream,
-      body: event,
-      internalFields,
-    };
+  async updateEvents(
+    events: Array<{ internalFields: InternalFields; event: IEvent }>
+  ): Promise<BulkResponse> {
+    const dataStream = this.esContext.esNames.dataStream;
 
-    if (this.eventLogService.isIndexingEntries()) {
-      const result = await updateEventDoc(this.esContext, doc);
+    const docs: Array<Required<Doc>> = events.map((event) => ({
+      index: dataStream,
+      body: event.event,
+      internalFields: event.internalFields,
+    }));
 
-      if (this.eventLogService.isLoggingEntries()) {
-        logUpdateEventDoc(this.systemLogger, doc);
-      }
-
-      return result;
+    if (!this.eventLogService.isIndexingEntries()) {
+      throw new Error('Faield to update events: Indexing is not enabled');
     }
+
+    const result = await updateEventDocs(this.esContext, docs);
+
+    if (this.eventLogService.isLoggingEntries()) {
+      logUpdateEventDoc(this.systemLogger, docs);
+    }
+
+    return result;
   }
 }
 
@@ -179,14 +186,17 @@ function logEventDoc(logger: Logger, doc: Doc): void {
   logger.info(`event logged: ${JSON.stringify(doc.body)}`);
 }
 
-function logUpdateEventDoc(logger: Logger, doc: Doc): void {
-  logger.info(`event updated: ${JSON.stringify(doc.body)}`);
+function logUpdateEventDoc(logger: Logger, docs: Array<Required<Doc>>): void {
+  logger.info(`event updated: ${JSON.stringify(docs.length)}`);
 }
 
 function indexEventDoc(esContext: EsContext, doc: Doc): void {
   esContext.esAdapter.indexDocument(doc);
 }
 
-async function updateEventDoc(esContext: EsContext, doc: Required<Doc>): Promise<void> {
-  return esContext.esAdapter.updateDocument(doc);
+async function updateEventDocs(
+  esContext: EsContext,
+  docs: Array<Required<Doc>>
+): Promise<BulkResponse> {
+  return esContext.esAdapter.updateDocuments(docs);
 }

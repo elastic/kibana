@@ -8,36 +8,41 @@
 import { IEventLogClient } from '@kbn/event-log-plugin/server';
 import { Logger } from '@kbn/core/server';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
-import { FindGapByIdParams } from './types';
+import { FindGapsByIdParams } from './types';
 import { Gap } from './gap';
 import { transformToGap } from './transforms/transform_to_gap';
 
-export const findGapById = async ({
+export const findGapsById = async ({
   eventLogClient,
   logger,
   params,
 }: {
   eventLogClient: IEventLogClient;
   logger: Logger;
-  params: FindGapByIdParams;
-}): Promise<Gap | null> => {
-  const { gapId, ruleId } = params;
+  params: FindGapsByIdParams;
+}): Promise<Gap[]> => {
+  const { gapIds, ruleId, page, perPage } = params;
   try {
+    const filter = gapIds.map((id) => `_id: ${id}`).join(' OR ');
     const gapsResponse = await eventLogClient.findEventsBySavedObjectIds(
       RULE_SAVED_OBJECT_TYPE,
       [ruleId],
       {
-        filter: `_id: ${gapId}`,
+        filter,
+        page,
+        per_page: perPage,
       }
     );
 
-    if (gapsResponse.total === 0) return null;
+    if (gapsResponse.total === 0) return [];
 
-    const gap = transformToGap(gapsResponse)[0];
+    const gaps = transformToGap(gapsResponse);
 
-    return gap;
+    return gaps;
   } catch (err) {
-    logger.error(`Failed to find gap by id ${gapId} for rule ${ruleId.toString()}: ${err.message}`);
+    logger.error(
+      `Failed to find gaps by id ${gapIds.join(',')} for rule ${ruleId.toString()}: ${err.message}`
+    );
     throw err;
   }
 };

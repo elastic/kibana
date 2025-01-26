@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { findGapById } from './find_gap_by_id';
+import { findGapsById } from './find_gaps_by_id';
 import { loggerMock } from '@kbn/logging-mocks';
 import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { Gap } from './gap';
@@ -34,7 +34,7 @@ const createMockGapEvent = () => ({
   },
 });
 
-describe('findGapById', () => {
+describe('findGapsById', () => {
   const mockLogger = loggerMock.create();
   const mockEventLogClient = eventLogClientMock.create();
 
@@ -50,12 +50,14 @@ describe('findGapById', () => {
       per_page: 1,
     });
 
-    await findGapById({
+    await findGapsById({
       eventLogClient: mockEventLogClient,
       logger: mockLogger,
       params: {
         ruleId: 'test-rule',
-        gapId: 'test-gap-id',
+        gapIds: ['test-gap-id'],
+        page: 1,
+        perPage: 10,
       },
     });
 
@@ -64,11 +66,13 @@ describe('findGapById', () => {
       ['test-rule'],
       expect.objectContaining({
         filter: '_id: test-gap-id',
+        page: 1,
+        per_page: 10,
       })
     );
   });
 
-  it('should transform response data to Gap object', async () => {
+  it('should transform response data to Gap objects', async () => {
     const mockResponse = {
       total: 1,
       data: [createMockGapEvent()],
@@ -78,22 +82,29 @@ describe('findGapById', () => {
 
     mockEventLogClient.findEventsBySavedObjectIds.mockResolvedValue(mockResponse);
 
-    const result = await findGapById({
+    const result = await findGapsById({
       eventLogClient: mockEventLogClient,
       logger: mockLogger,
-      params: { ruleId: 'test-rule', gapId: 'test-gap-id' },
+      params: {
+        ruleId: 'test-rule',
+        gapIds: ['test-gap-id'],
+        page: 1,
+        perPage: 10,
+      },
     });
 
-    expect(result).toBeInstanceOf(Gap);
-    expect(result?.range).toEqual({
+    expect(Array.isArray(result)).toBe(true);
+    expect(result.length).toBe(1);
+    expect(result[0]).toBeInstanceOf(Gap);
+    expect(result[0].range).toEqual({
       gte: new Date('2024-01-01'),
       lte: new Date('2024-01-02'),
     });
-    expect(result?.filledIntervals).toEqual([]);
-    expect(result?.inProgressIntervals).toEqual([]);
+    expect(result[0].filledIntervals).toEqual([]);
+    expect(result[0].inProgressIntervals).toEqual([]);
   });
 
-  it('should return null when gap is not found', async () => {
+  it('should return empty array when gaps are not found', async () => {
     mockEventLogClient.findEventsBySavedObjectIds.mockResolvedValue({
       total: 0,
       data: [],
@@ -101,13 +112,46 @@ describe('findGapById', () => {
       per_page: 1,
     });
 
-    const result = await findGapById({
+    const result = await findGapsById({
       eventLogClient: mockEventLogClient,
       logger: mockLogger,
-      params: { ruleId: 'test-rule', gapId: 'non-existent-gap' },
+      params: {
+        ruleId: 'test-rule',
+        gapIds: ['non-existent-gap'],
+        page: 1,
+        perPage: 10,
+      },
     });
 
-    expect(result).toBeNull();
+    expect(result).toEqual([]);
+  });
+
+  it('should handle multiple gap ids', async () => {
+    mockEventLogClient.findEventsBySavedObjectIds.mockResolvedValue({
+      total: 2,
+      data: [createMockGapEvent(), { ...createMockGapEvent(), _id: 'test-gap-id-2' }],
+      page: 1,
+      per_page: 10,
+    });
+
+    await findGapsById({
+      eventLogClient: mockEventLogClient,
+      logger: mockLogger,
+      params: {
+        ruleId: 'test-rule',
+        gapIds: ['test-gap-id', 'test-gap-id-2'],
+        page: 1,
+        perPage: 10,
+      },
+    });
+
+    expect(mockEventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledWith(
+      'alert',
+      ['test-rule'],
+      expect.objectContaining({
+        filter: '_id: test-gap-id OR _id: test-gap-id-2',
+      })
+    );
   });
 
   it('should handle errors and log them', async () => {
@@ -115,15 +159,20 @@ describe('findGapById', () => {
     mockEventLogClient.findEventsBySavedObjectIds.mockRejectedValue(error);
 
     await expect(
-      findGapById({
+      findGapsById({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
-        params: { ruleId: 'test-rule', gapId: 'test-gap-id' },
+        params: {
+          ruleId: 'test-rule',
+          gapIds: ['test-gap-id'],
+          page: 1,
+          perPage: 10,
+        },
       })
     ).rejects.toThrow(error);
 
     expect(mockLogger.error).toHaveBeenCalledWith(
-      expect.stringContaining('Failed to find gap by id test-gap-id for rule test-rule')
+      expect.stringContaining('Failed to find gaps by id test-gap-id for rule test-rule')
     );
   });
 });

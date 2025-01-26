@@ -7,7 +7,7 @@
 
 import { updateGaps } from './update_gaps';
 import { findGaps } from '../find_gaps';
-import { findGapById } from '../find_gap_by_id';
+import { findGapsById } from '../find_gaps_by_id';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
@@ -18,11 +18,10 @@ import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_clien
 import { savedObjectsRepositoryMock } from '@kbn/core/server/mocks';
 import { Gap } from '../gap';
 import { adHocRunStatus } from '../../../../common/constants';
-import { errors as EsErrors } from '@elastic/elasticsearch';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('../find_gaps');
-jest.mock('../find_gap_by_id');
+jest.mock('../find_gaps_by_id');
 jest.mock('./update_gap_from_schedule');
 jest.mock('./calculate_gaps_state');
 
@@ -51,7 +50,7 @@ describe('updateGaps', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     (findGaps as jest.Mock).mockResolvedValue({ data: [], total: 0 });
-    (findGapById as jest.Mock).mockResolvedValue(null);
+    (findGapsById as jest.Mock).mockResolvedValue([]);
   });
 
   describe('updateGaps', () => {
@@ -79,11 +78,11 @@ describe('updateGaps', () => {
           start: '2024-01-01T00:00:00.000Z',
           end: '2024-01-01T01:00:00.000Z',
           page: 1,
-          perPage: 10000,
+          perPage: 500,
           statuses: ['partially_filled', 'unfilled'],
         },
       });
-      expect(mockEventLogger.updateEvent).toHaveBeenCalled();
+      expect(mockEventLogger.updateEvents).toHaveBeenCalled();
     });
 
     it('should handle pagination', async () => {
@@ -104,12 +103,12 @@ describe('updateGaps', () => {
       ];
 
       // Mock first page with perPage items to trigger second page fetch
-      const firstPageGaps = Array(10000).fill(gaps[0]);
+      const firstPageGaps = Array(500).fill(gaps[0]);
       const secondPageGaps = [gaps[1]];
 
       (findGaps as jest.Mock)
-        .mockResolvedValueOnce({ data: firstPageGaps, total: 10001 })
-        .mockResolvedValueOnce({ data: secondPageGaps, total: 10001 });
+        .mockResolvedValueOnce({ data: firstPageGaps, total: 501 })
+        .mockResolvedValueOnce({ data: secondPageGaps, total: 501 });
 
       await updateGaps({
         ruleId: 'test-rule-id',
@@ -136,7 +135,7 @@ describe('updateGaps', () => {
           params: expect.objectContaining({ page: 2 }),
         })
       );
-      expect(mockEventLogger.updateEvent).toHaveBeenCalledTimes(10001);
+      expect(mockEventLogger.updateEvents).toHaveBeenCalledTimes(2);
     });
   });
 
@@ -165,17 +164,21 @@ describe('updateGaps', () => {
       const testGap = createTestGap();
       const updatedGap = createTestGap();
       (findGaps as jest.Mock).mockResolvedValue({ data: [testGap], total: 1 });
-      (findGapById as jest.Mock).mockResolvedValue(updatedGap);
+      (findGapsById as jest.Mock).mockResolvedValue([updatedGap]);
 
-      const conflictError = new EsErrors.ResponseError({
-        statusCode: 409,
-        body: { error: { type: 'version_conflict_engine_exception' } },
-        headers: {},
-        meta: {} as any,
-        warnings: [],
-      });
+      if (!testGap.internalFields?._id) {
+        throw new Error('Test gap should have internalFields._id');
+      }
 
-      mockEventLogger.updateEvent.mockRejectedValueOnce(conflictError).mockResolvedValue();
+      mockEventLogger.updateEvents
+        .mockResolvedValueOnce({
+          errors: true,
+          took: 1,
+          items: [
+            { update: { status: 409, _id: testGap.internalFields._id, _index: 'event-index' } },
+          ],
+        })
+        .mockResolvedValue({ errors: false, took: 1, items: [] });
 
       await updateGaps({
         ruleId: 'test-rule-id',
@@ -189,37 +192,37 @@ describe('updateGaps', () => {
         actionsClient: mockActionsClient,
       });
 
-      expect(findGapById).toHaveBeenCalledWith({
+      expect(findGapsById).toHaveBeenCalledWith({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
         params: {
-          gapId: testGap?.internalFields?._id,
+          gapIds: [testGap.internalFields._id],
           ruleId: 'test-rule-id',
+          page: 1,
+          perPage: 500,
         },
       });
-      expect(mockEventLogger.updateEvent).toHaveBeenCalledTimes(2);
+      expect(mockEventLogger.updateEvents).toHaveBeenCalledTimes(2);
     });
 
     it('should stop retrying after max attempts', async () => {
       const testGap = createTestGap();
       const updatedGap = createTestGap();
       (findGaps as jest.Mock).mockResolvedValue({ data: [testGap], total: 1 });
-      (findGapById as jest.Mock).mockResolvedValue(updatedGap);
+      (findGapsById as jest.Mock).mockResolvedValue([updatedGap]);
 
-      const conflictError = new EsErrors.ResponseError({
-        statusCode: 409,
-        body: { error: { type: 'version_conflict_engine_exception' } },
-        headers: {},
-        meta: {} as any,
-        warnings: [],
+      if (!testGap.internalFields?._id) {
+        throw new Error('Test gap should have internalFields._id');
+      }
+
+      // Mock updateGaps to fail with conflict error 3 times
+      mockEventLogger.updateEvents.mockResolvedValue({
+        errors: true,
+        took: 1,
+        items: [
+          { update: { status: 409, _id: testGap.internalFields._id, _index: 'event-index' } },
+        ],
       });
-
-      // Mock updateEvent to fail with conflict error 3 times
-      mockEventLogger.updateEvent
-        .mockRejectedValueOnce(conflictError)
-        .mockRejectedValueOnce(conflictError)
-        .mockRejectedValueOnce(conflictError)
-        .mockRejectedValueOnce(conflictError); // One more to ensure we stop at MAX_RETRIES
 
       await updateGaps({
         ruleId: 'test-rule-id',
@@ -233,9 +236,9 @@ describe('updateGaps', () => {
         actionsClient: mockActionsClient,
       });
 
-      expect(findGapById).toHaveBeenCalledTimes(3);
+      expect(findGapsById).toHaveBeenCalledTimes(3);
       expect(mockLogger.error).toHaveBeenCalledWith(
-        expect.stringContaining('Failed to update gap: test-id after 3 retries due to conflicts')
+        expect.stringContaining('Failed to update 1 gaps after 3 retries due to conflicts')
       );
     }, 15000);
   });

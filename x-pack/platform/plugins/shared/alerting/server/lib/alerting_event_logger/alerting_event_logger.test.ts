@@ -6,7 +6,7 @@
  */
 
 import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
-import { IEvent, SAVED_OBJECT_REL_PRIMARY, InternalFields } from '@kbn/event-log-plugin/server';
+import { IEvent, SAVED_OBJECT_REL_PRIMARY } from '@kbn/event-log-plugin/server';
 import { ActionsCompletion } from '@kbn/alerting-state-types';
 import {
   AlertingEventLogger,
@@ -1494,15 +1494,15 @@ describe('AlertingEventLogger', () => {
     });
   });
 
-  describe('updateGap()', () => {
-    const mockInternalFields: InternalFields = {
+  describe('updateGaps', () => {
+    const mockInternalFields = {
       _id: 'test-id',
       _index: 'test-index',
       _seq_no: 1,
       _primary_term: 1,
     };
 
-    const mockGap: GapBase = {
+    const mockGap = {
       status: 'filled' as const,
       range: {
         gte: '2022-05-05T15:59:54.480Z',
@@ -1522,19 +1522,24 @@ describe('AlertingEventLogger', () => {
       in_progress_duration_ms: 0,
     };
 
-    test('should call eventLogger.updateEvent with correct parameters', async () => {
+    test('should call eventLogger.updateEvents with correct parameters', async () => {
       alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
-      await alertingEventLogger.updateGap({ internalFields: mockInternalFields, gap: mockGap });
+      await alertingEventLogger.updateGaps([{ internalFields: mockInternalFields, gap: mockGap }]);
 
-      expect(eventLogger.updateEvent).toHaveBeenCalledWith(mockInternalFields, {
-        kibana: {
-          alert: {
-            rule: {
-              gap: mockGap,
+      expect(eventLogger.updateEvents).toHaveBeenCalledWith([
+        {
+          event: {
+            kibana: {
+              alert: {
+                rule: {
+                  gap: mockGap,
+                },
+              },
             },
           },
+          internalFields: mockInternalFields,
         },
-      });
+      ]);
     });
   });
 });

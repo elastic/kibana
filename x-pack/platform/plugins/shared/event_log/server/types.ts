@@ -11,6 +11,7 @@ import { KueryNode } from '@kbn/es-query';
 
 export type { IEvent, IValidatedEvent } from '../generated/schemas';
 export { EventSchema, ECS_VERSION } from '../generated/schemas';
+import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { IEvent } from '../generated/schemas';
 import { AggregateOptionsType, FindOptionsType } from './event_log_client';
 import {
@@ -86,5 +87,7 @@ export interface IEventLogger {
   logEvent(properties: IEvent): void;
   startTiming(event: IEvent, startTime?: Date): void;
   stopTiming(event: IEvent): void;
-  updateEvent(internalFields: InternalFields, event: IEvent): Promise<void>;
+  updateEvents(
+    events: Array<{ internalFields: InternalFields; event: IEvent }>
+  ): Promise<BulkResponse>;
 }

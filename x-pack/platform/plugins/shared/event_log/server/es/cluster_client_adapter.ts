@@ -13,7 +13,7 @@ import { Logger, ElasticsearchClient } from '@kbn/core/server';
 import util from 'util';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { fromKueryExpression, toElasticsearchQuery, KueryNode, nodeBuilder } from '@kbn/es-query';
-import { long } from '@elastic/elasticsearch/lib/api/types';
+import { BulkResponse, long } from '@elastic/elasticsearch/lib/api/types';
 import { IEvent, IValidatedEvent, SAVED_OBJECT_REL_PRIMARY } from '../types';
 import { AggregateOptionsType, FindOptionsType, QueryOptionsType } from '../event_log_client';
 import { ParsedIndexAlias } from './init';
@@ -157,22 +157,37 @@ export class ClusterClientAdapter<
     await this.docsBufferedFlushed;
   }
 
-  public async updateDocument(doc: Required<TDoc>) {
+  public async updateDocuments(docs: Array<Required<TDoc>>): Promise<BulkResponse> {
     const esClient = await this.elasticsearchClientPromise;
     try {
-      if (!doc.internalFields) {
-        throw new Error('Internal fields are required');
+      const bulkBody: Array<Record<string, unknown>> = [];
+
+      for (const doc of docs) {
+        if (!doc.internalFields) {
+          throw new Error('Internal fields are required');
+        }
+
+        bulkBody.push({
+          update: {
+            _id: doc.internalFields._id,
+            _index: doc.internalFields._index,
+            if_primary_term: doc.internalFields._primary_term,
+            if_seq_no: doc.internalFields._seq_no,
+          },
+        });
+        bulkBody.push({ doc: doc.body });
       }
-      await esClient.update({
-        doc: doc.body,
-        id: doc.internalFields._id,
-        index: doc.internalFields._index,
-        if_primary_term: doc.internalFields._primary_term,
-        if_seq_no: doc.internalFields._seq_no,
+
+      const response = await esClient.bulk({
+        body: bulkBody,
         refresh: 'wait_for',
       });
+
+      return response;
     } catch (e) {
-      this.logger.error(`error updating event: "${e.message}"; docs: ${JSON.stringify(doc)}`);
+      this.logger.error(
+        `error updating events in bulk: "${e.message}"; docs: ${JSON.stringify(docs)}`
+      );
       throw e;
     }
   }

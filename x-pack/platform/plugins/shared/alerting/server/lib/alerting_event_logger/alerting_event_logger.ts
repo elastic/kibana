@@ -12,6 +12,7 @@ import {
   SAVED_OBJECT_REL_PRIMARY,
   InternalFields,
 } from '@kbn/event-log-plugin/server';
+import { BulkResponse } from '@elastic/elasticsearch/lib/api/types';
 import { EVENT_LOG_ACTIONS } from '../../plugin';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import { RULE_SAVED_OBJECT_TYPE } from '../../saved_objects';
@@ -425,22 +426,26 @@ export class AlertingEventLogger {
     );
   }
 
-  public async updateGap({
-    internalFields,
-    gap,
-  }: {
-    internalFields: InternalFields;
-    gap: GapBase;
-  }): Promise<void> {
-    return this.eventLogger.updateEvent(internalFields, {
-      kibana: {
-        alert: {
-          rule: {
-            gap,
+  public async updateGaps(
+    docs: Array<{
+      gap: GapBase;
+      internalFields: InternalFields;
+    }>
+  ): Promise<BulkResponse> {
+    return this.eventLogger.updateEvents(
+      docs.map((doc) => ({
+        event: {
+          kibana: {
+            alert: {
+              rule: {
+                gap: doc.gap,
+              },
+            },
           },
         },
-      },
-    });
+        internalFields: doc.internalFields,
+      }))
+    );
   }
 }
 

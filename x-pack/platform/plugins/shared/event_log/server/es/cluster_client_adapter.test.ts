@@ -2301,7 +2301,7 @@ describe('getQueryBodyWithAuthFilter', () => {
   });
 });
 
-describe('updateDocument', () => {
+describe('updateDocuments', () => {
   test('should successfully update document with meta information', async () => {
     const doc = {
       body: { foo: 'updated' },
@@ -2314,28 +2314,43 @@ describe('updateDocument', () => {
       },
     };
 
-    clusterClient.update.mockResponse({
-      _index: 'test-index',
-      _id: 'test-id',
-      _version: 2,
-      result: 'updated',
-      _shards: {
-        total: 2,
-        successful: 1,
-        failed: 0,
-      },
-      _seq_no: 2,
-      _primary_term: 1,
+    clusterClient.bulk.mockResponse({
+      took: 15,
+      items: [
+        {
+          update: {
+            _index: 'test-index',
+            _id: 'test-id',
+            _version: 2,
+            result: 'updated',
+            status: 200,
+            _shards: {
+              total: 2,
+              successful: 1,
+              failed: 0,
+            },
+            _seq_no: 2,
+            _primary_term: 1,
+          },
+        },
+      ],
+      errors: false,
     });
 
-    await clusterClientAdapter.updateDocument(doc as unknown as Required<Doc>);
+    await clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>]);
 
-    expect(clusterClient.update).toHaveBeenCalledWith({
-      doc: doc.body,
-      id: doc.internalFields._id,
-      index: doc.internalFields._index,
-      if_primary_term: doc.internalFields._primary_term,
-      if_seq_no: doc.internalFields._seq_no,
+    expect(clusterClient.bulk).toHaveBeenCalledWith({
+      body: [
+        {
+          update: {
+            _id: doc.internalFields._id,
+            _index: doc.internalFields._index,
+            if_primary_term: doc.internalFields._primary_term,
+            if_seq_no: doc.internalFields._seq_no,
+          },
+        },
+        { doc: doc.body },
+      ],
       refresh: 'wait_for',
     });
   });
@@ -2347,11 +2362,13 @@ describe('updateDocument', () => {
     };
 
     await expect(
-      clusterClientAdapter.updateDocument(doc as unknown as Required<Doc>)
+      clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>])
     ).rejects.toThrowErrorMatchingInlineSnapshot('"Internal fields are required"');
 
     expect(logger.error).toHaveBeenCalledWith(
-      `error updating event: "Internal fields are required"; docs: ${JSON.stringify(doc)}`
+      `error updating events in bulk: "Internal fields are required"; docs: ${JSON.stringify([
+        doc,
+      ])}`
     );
   });
 
@@ -2368,14 +2385,14 @@ describe('updateDocument', () => {
     };
 
     const error = new Error('Update failed');
-    clusterClient.update.mockRejectedValue(error);
+    clusterClient.bulk.mockRejectedValue(error);
 
     await expect(
-      clusterClientAdapter.updateDocument(doc as unknown as Required<Doc>)
+      clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>])
     ).rejects.toThrowErrorMatchingInlineSnapshot(`"Update failed"`);
 
     expect(logger.error).toHaveBeenCalledWith(
-      `error updating event: "Update failed"; docs: ${JSON.stringify(doc)}`
+      `error updating events in bulk: "Update failed"; docs: ${JSON.stringify([doc])}`
     );
   });
 });

@@ -28,12 +28,12 @@ import { backfillClientMock } from '../../../../backfill_client/backfill_client.
 import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
 import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
 import { ConstructorOptions, RulesClient } from '../../../../rules_client';
-import { findGapById as findGapById } from '../../../../lib/rule_gaps/find_gap_by_id';
+import { findGapsById } from '../../../../lib/rule_gaps/find_gaps_by_id';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { getRule } from '../get/get_rule';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-jest.mock('../../../../lib/rule_gaps/find_gap_by_id');
+jest.mock('../../../../lib/rule_gaps/find_gaps_by_id');
 jest.mock('../../../backfill/methods/schedule');
 jest.mock('../get/get_rule');
 
@@ -121,7 +121,7 @@ describe('fillGapById', () => {
       const params = { ruleId: '1', gapId: 'gap1' };
       const gap = getMockGap();
 
-      (findGapById as jest.Mock).mockResolvedValue(gap);
+      (findGapsById as jest.Mock).mockResolvedValue([gap]);
       (scheduleBackfill as jest.Mock).mockResolvedValue('success');
 
       await rulesClient.fillGapById(params);
@@ -154,7 +154,7 @@ describe('fillGapById', () => {
       const params = { ruleId: '1', gapId: 'gap1' };
       const authError = new Error('Unauthorized');
       authorization.ensureAuthorized.mockRejectedValue(authError);
-      (findGapById as jest.Mock).mockResolvedValue(getMockGap());
+      (findGapsById as jest.Mock).mockResolvedValue([getMockGap()]);
 
       await expect(rulesClient.fillGapById(params)).rejects.toThrow('Unauthorized');
 
@@ -191,14 +191,20 @@ describe('fillGapById', () => {
       },
     ];
 
-    (findGapById as jest.Mock).mockResolvedValue(gap);
+    (findGapsById as jest.Mock).mockResolvedValue([gap]);
     (scheduleBackfill as jest.Mock).mockResolvedValue('success');
 
     const result = await rulesClient.fillGapById(params);
 
-    expect(findGapById).toHaveBeenCalledWith(
+    expect(findGapsById).toHaveBeenCalledWith(
       expect.objectContaining({
-        params,
+        params: {
+          gapIds: [params.gapId],
+          page: 1,
+          perPage: 1,
+          ruleId: params.ruleId,
+        },
+        eventLogClient: expect.any(Object),
         logger: expect.any(Object),
       })
     );
@@ -228,7 +234,7 @@ describe('fillGapById', () => {
       },
     ];
 
-    (findGapById as jest.Mock).mockResolvedValue(gap);
+    (findGapsById as jest.Mock).mockResolvedValue([gap]);
     (scheduleBackfill as jest.Mock).mockResolvedValue('success');
 
     const result = await rulesClient.fillGapById(params);
@@ -238,7 +244,7 @@ describe('fillGapById', () => {
   });
 
   it('throws error when gap is not found', async () => {
-    (findGapById as jest.Mock).mockResolvedValue(null);
+    (findGapsById as jest.Mock).mockResolvedValue([]);
 
     await expect(
       rulesClient.fillGapById({
@@ -250,7 +256,7 @@ describe('fillGapById', () => {
 
   it('handles errors from finding gap', async () => {
     const error = new Error('Failed to find gap');
-    (findGapById as jest.Mock).mockRejectedValue(error);
+    (findGapsById as jest.Mock).mockRejectedValue(error);
 
     await expect(
       rulesClient.fillGapById({
@@ -262,7 +268,7 @@ describe('fillGapById', () => {
 
   it('handles errors from scheduling backfill', async () => {
     const gap = getMockGap();
-    (findGapById as jest.Mock).mockResolvedValue(gap);
+    (findGapsById as jest.Mock).mockResolvedValue([gap]);
     (scheduleBackfill as jest.Mock).mockRejectedValue(new Error('Scheduling failed'));
 
     await expect(
@@ -279,15 +285,21 @@ describe('fillGapById', () => {
       unfilledIntervals: [],
     });
 
-    (findGapById as jest.Mock).mockResolvedValue(gap);
+    (findGapsById as jest.Mock).mockResolvedValue([gap]);
 
     await expect(rulesClient.fillGapById(params)).rejects.toThrowError(
       'No unfilled intervals found for ruleId 1'
     );
 
-    expect(findGapById).toHaveBeenCalledWith(
+    expect(findGapsById).toHaveBeenCalledWith(
       expect.objectContaining({
-        params,
+        params: {
+          gapIds: [params.gapId],
+          page: 1,
+          perPage: 1,
+          ruleId: params.ruleId,
+        },
+        eventLogClient: expect.any(Object),
         logger: expect.any(Object),
       })
     );

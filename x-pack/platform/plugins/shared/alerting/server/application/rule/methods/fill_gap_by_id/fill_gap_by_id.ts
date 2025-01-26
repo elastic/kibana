@@ -10,22 +10,29 @@ import Boom from '@hapi/boom';
 import { AlertingAuthorizationEntity, WriteOperations } from '../../../../authorization';
 import { RulesClientContext } from '../../../../rules_client';
 
-import { findGapById } from '../../../../lib/rule_gaps/find_gap_by_id';
-import { FindGapByIdParams } from '../../../../lib/rule_gaps/types';
+import { findGapsById } from '../../../../lib/rule_gaps/find_gaps_by_id';
+import { FillGapByIdParams } from './types';
 import { scheduleBackfill } from '../../../backfill/methods/schedule';
 import { ruleAuditEvent, RuleAuditAction } from '../../../../rules_client/common/audit_events';
 import { getRule } from '../get/get_rule';
 import { SanitizedRuleWithLegacyId } from '../../../../types';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
-export async function fillGapById(context: RulesClientContext, params: FindGapByIdParams) {
+export async function fillGapById(context: RulesClientContext, params: FillGapByIdParams) {
   try {
     const eventLogClient = await context.getEventLogClient();
-    const gap = await findGapById({
-      params,
+    const gaps = await findGapsById({
+      params: {
+        gapIds: [params.gapId],
+        page: 1,
+        perPage: 1,
+        ruleId: params.ruleId,
+      },
       eventLogClient,
       logger: context.logger,
     });
+
+    const gap = gaps[0];
 
     if (!gap) {
       throw Boom.notFound(`Gap not found for ruleId ${params.ruleId} and gapId ${params.gapId}`);

@@ -68,7 +68,9 @@ export const findGapsParamsSchema = schema.object(
   }
 );
 
-export const findGapByIdParamsSchema = schema.object({
-  gapId: schema.string(),
+export const findGapsByIdParamsSchema = schema.object({
+  gapIds: schema.arrayOf(schema.string()),
   ruleId: schema.string(),
+  page: schema.number({ defaultValue: 1, min: 1 }),
+  perPage: schema.number({ defaultValue: 10, min: 1 }),
 });
