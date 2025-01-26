@@ -70,7 +70,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it(`should show cspm with agentless option`, async () => {
-      //   const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
         AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
@@ -82,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
 
       expect(hasSetupTechnologySelector).to.be(true);
-      expect(hasAgentBased).to.be(true);
+      expect(hasAgentBased).to.be(false);
     });
   });
 }
