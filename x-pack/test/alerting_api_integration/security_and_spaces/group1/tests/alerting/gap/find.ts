@@ -261,7 +261,10 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
           it('should handle invalid parameters appropriately', async () => {
             const invalidBodies = [
               {
-                body: {},
+                body: {
+                  start: searchStart,
+                  end: searchEnd,
+                },
                 expectedError:
                   '[request body.rule_id]: expected value of type [string] but got [undefined]',
               },
@@ -280,6 +283,14 @@ export default function findGapsTests({ getService }: FtrProviderContext) {
                   end: 'invalid-date',
                 },
                 expectedError: '[request body]: [end]: query end must be valid date',
+              },
+              {
+                body: {
+                  rule_id: '1',
+                  start: searchStart,
+                  end: searchStart,
+                },
+                expectedError: '[request body]: [start]: query start must be before end',
               },
             ];
 

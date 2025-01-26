@@ -16,14 +16,12 @@ export const buildGapsFilter = ({
 }) => {
   const baseFilter = 'event.action: gap AND event.provider: alerting';
 
-  const rangeFilter =
-    end && start
-      ? `kibana.alert.rule.gap.range <= "${end}" AND kibana.alert.rule.gap.range >= "${start}"`
-      : null;
+  const endFilter = end ? `kibana.alert.rule.gap.range <= "${end}"` : null;
+  const startFilter = start ? `kibana.alert.rule.gap.range >= "${start}"` : null;
 
   const statusesFilter = statuses?.length
     ? `(${statuses.map((status) => `kibana.alert.rule.gap.status : ${status}`).join(' OR ')})`
     : null;
 
-  return [baseFilter, rangeFilter, statusesFilter].filter(Boolean).join(' AND ');
+  return [baseFilter, endFilter, startFilter, statusesFilter].filter(Boolean).join(' AND ');
 };

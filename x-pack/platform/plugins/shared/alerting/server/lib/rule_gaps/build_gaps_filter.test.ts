@@ -19,6 +19,20 @@ describe('buildGapsFilter', () => {
     );
   });
 
+  it('should build filter with only end date', () => {
+    expect(buildGapsFilter({ end: '2024-01-02' })).toBe(
+      'event.action: gap AND event.provider: alerting AND ' +
+        'kibana.alert.rule.gap.range <= "2024-01-02"'
+    );
+  });
+
+  it('should build filter with only start date', () => {
+    expect(buildGapsFilter({ start: '2024-01-01' })).toBe(
+      'event.action: gap AND event.provider: alerting AND ' +
+        'kibana.alert.rule.gap.range >= "2024-01-01"'
+    );
+  });
+
   it('should build filter with statuses', () => {
     expect(buildGapsFilter({ statuses: [gapStatus.UNFILLED] })).toBe(
       'event.action: gap AND event.provider: alerting AND ' +

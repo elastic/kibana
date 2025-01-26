@@ -35,11 +35,11 @@ export const gapBaseSchema = schema.object({
 
 export const findGapsParamsSchema = schema.object(
   {
-    end: schema.maybe(schema.string()),
+    end: schema.string(),
     page: schema.number({ defaultValue: 1, min: 1 }),
     perPage: schema.number({ defaultValue: 10, min: 0 }),
     ruleId: schema.string(),
-    start: schema.maybe(schema.string()),
+    start: schema.string(),
     sortField: schema.maybe(
       schema.oneOf([
         schema.literal('@timestamp'),
@@ -52,17 +52,19 @@ export const findGapsParamsSchema = schema.object(
   },
   {
     validate({ start, end }) {
-      if (start) {
-        const parsedStart = Date.parse(start);
-        if (isNaN(parsedStart)) {
-          return `[start]: query start must be valid date`;
-        }
+      const parsedStart = Date.parse(start);
+      const parsedEnd = Date.parse(end);
+
+      if (isNaN(parsedStart)) {
+        return `[start]: query start must be valid date`;
       }
-      if (end) {
-        const parsedEnd = Date.parse(end);
-        if (isNaN(parsedEnd)) {
-          return `[end]: query end must be valid date`;
-        }
+
+      if (isNaN(parsedEnd)) {
+        return `[end]: query end must be valid date`;
+      }
+
+      if (parsedStart >= parsedEnd) {
+        return `[start]: query start must be before end`;
       }
     },
   }

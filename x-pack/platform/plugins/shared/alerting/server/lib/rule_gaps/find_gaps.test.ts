@@ -93,6 +93,8 @@ describe('findGaps', () => {
         perPage: 10,
         sortField: 'kibana.alert.rule.gap.total_gap_duration_ms',
         sortOrder: 'asc',
+        start: '2024-01-01',
+        end: '2024-01-02',
       },
     });
 
@@ -118,7 +120,7 @@ describe('findGaps', () => {
     const result = await findGaps({
       eventLogClient: mockEventLogClient,
       logger: mockLogger,
-      params: { ruleId: 'test-rule', page: 1, perPage: 10 },
+      params: { ruleId: 'test-rule', page: 1, perPage: 10, start: '2024-01-01', end: '2024-01-02' },
     });
 
     expect(result.data[0]).toBeInstanceOf(Gap);
@@ -138,97 +140,18 @@ describe('findGaps', () => {
       findGaps({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
-        params: { ruleId: 'test-rule', page: 1, perPage: 10 },
+        params: {
+          ruleId: 'test-rule',
+          page: 1,
+          perPage: 10,
+          start: '2024-01-01',
+          end: '2024-01-02',
+        },
       })
     ).rejects.toThrow(error);
 
     expect(mockLogger.error).toHaveBeenCalledWith(
       expect.stringContaining('Failed to find gaps for rule test-rule')
     );
-  });
-});
-
-describe('findAllGaps', () => {
-  const mockLogger = loggerMock.create();
-  const mockEventLogClient = eventLogClientMock.create();
-
-  beforeEach(() => {
-    jest.resetAllMocks();
-  });
-
-  it('should fetch all pages of gaps', async () => {
-    mockEventLogClient.findEventsBySavedObjectIds
-      .mockResolvedValueOnce({
-        total: 15000,
-        data: Array(10000).fill(createMockGapEvent()),
-        page: 1,
-        per_page: 10000,
-      })
-      .mockResolvedValueOnce({
-        total: 15000,
-        data: Array(5000).fill(createMockGapEvent()),
-        page: 2,
-        per_page: 10000,
-      });
-
-    const result = await findAllGaps({
-      eventLogClient: mockEventLogClient,
-      logger: mockLogger,
-      params: {
-        ruleId: 'test-rule',
-        start: new Date('2024-01-01'),
-        end: new Date('2024-01-02'),
-      },
-    });
-
-    expect(result).toHaveLength(15000);
-    expect(mockEventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(2);
-  });
-
-  it('should stop fetching when no more data', async () => {
-    mockEventLogClient.findEventsBySavedObjectIds.mockResolvedValue({
-      total: 50,
-      data: Array(50).fill(createMockGapEvent()),
-      page: 1,
-      per_page: 10000,
-    });
-
-    const result = await findAllGaps({
-      eventLogClient: mockEventLogClient,
-      logger: mockLogger,
-      params: {
-        ruleId: 'test-rule',
-        start: new Date('2024-01-01'),
-        end: new Date('2024-01-02'),
-      },
-    });
-
-    expect(result).toHaveLength(50);
-    expect(mockEventLogClient.findEventsBySavedObjectIds).toHaveBeenCalledTimes(1);
-  });
-
-  it('should handle errors during pagination', async () => {
-    mockEventLogClient.findEventsBySavedObjectIds
-      .mockResolvedValueOnce({
-        total: 15000,
-        data: Array(10000).fill(createMockGapEvent()),
-        page: 1,
-        per_page: 10000,
-      })
-      .mockRejectedValueOnce(new Error('Pagination failed'));
-
-    await expect(
-      findAllGaps({
-        eventLogClient: mockEventLogClient,
-        logger: mockLogger,
-        params: {
-          ruleId: 'test-rule',
-          start: new Date('2024-01-01'),
-          end: new Date('2024-01-02'),
-        },
-      })
-    ).rejects.toThrow('Pagination failed');
-
-    expect(mockLogger.error).toHaveBeenCalled();
   });
 });

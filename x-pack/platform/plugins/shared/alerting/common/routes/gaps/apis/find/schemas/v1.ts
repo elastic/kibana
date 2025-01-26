@@ -9,11 +9,11 @@ import { gapsResponseSchemaV1 } from '../../../response';
 
 export const findGapsBodySchema = schema.object(
   {
-    end: schema.maybe(schema.string()),
+    end: schema.string(),
     page: schema.number({ defaultValue: 1, min: 1 }),
     per_page: schema.number({ defaultValue: 10, min: 1 }),
     rule_id: schema.string(),
-    start: schema.maybe(schema.string()),
+    start: schema.string(),
     sort_field: schema.maybe(
       schema.oneOf([
         schema.literal('@timestamp'),
@@ -34,17 +34,20 @@ export const findGapsBodySchema = schema.object(
   },
   {
     validate({ start, end }) {
+      const parsedStart = Date.parse(start);
+      const parsedEnd = Date.parse(end);
       if (start) {
-        const parsedStart = Date.parse(start);
         if (isNaN(parsedStart)) {
           return `[start]: query start must be valid date`;
         }
       }
       if (end) {
-        const parsedEnd = Date.parse(end);
         if (isNaN(parsedEnd)) {
           return `[end]: query end must be valid date`;
         }
+      }
+      if (parsedStart >= parsedEnd) {
+        return `[start]: query start must be before end`;
       }
     },
   }
