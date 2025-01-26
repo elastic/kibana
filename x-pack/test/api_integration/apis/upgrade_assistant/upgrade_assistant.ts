@@ -124,9 +124,6 @@ export default function ({ getService }: FtrProviderContext) {
       it('returns a successful response', async () => {
         const { body } = await supertest
           .get('/api/upgrade_assistant/status')
-          // .query({
-          //   targetVersion: '10.0.0',
-          // })
           .set('kbn-xsrf', 'xxx')
           .expect(200);
 

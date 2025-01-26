@@ -297,7 +297,6 @@ describe('ES deprecations table', () => {
     beforeEach(async () => {
       const noDeprecationsResponse = {
         totalCriticalDeprecations: 0,
-        // deprecations: [],
         migrationsDeprecations: [],
         totalCriticalHealthIssues: 0,
         enrichedHealthIndicators: [],

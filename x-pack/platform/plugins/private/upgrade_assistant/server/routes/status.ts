@@ -37,7 +37,6 @@ export function registerUpgradeStatusRoute({
         access: 'public',
         summary: `Get upgrade readiness status`,
       },
-      // validate: false,
       validate: {
         query: schema.object({
           targetVersion: schema.maybe(schema.string()),
