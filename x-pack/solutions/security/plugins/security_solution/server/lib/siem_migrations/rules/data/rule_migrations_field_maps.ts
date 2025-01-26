@@ -37,7 +37,10 @@ export const ruleMigrationsFieldMap: FieldMap<SchemaFieldMapKeys<Omit<RuleMigrat
   'elastic_rule.prebuilt_rule_id': { type: 'keyword', required: false },
   'elastic_rule.id': { type: 'keyword', required: false },
   translation_result: { type: 'keyword', required: false },
-  comments: { type: 'text', array: true, required: false },
+  comments: { type: 'object', array: true, required: false },
+  'comments.message': { type: 'keyword', required: true },
+  'comments.created_at': { type: 'date', required: true },
+  'comments.created_by': { type: 'keyword', required: true }, // use 'assistant' for llm
   updated_at: { type: 'date', required: false },
   updated_by: { type: 'keyword', required: false },
 };

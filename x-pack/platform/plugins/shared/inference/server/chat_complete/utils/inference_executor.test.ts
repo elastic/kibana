@@ -17,6 +17,7 @@ describe('createInferenceExecutor', () => {
     connectorId: 'foo',
     name: 'My Connector',
     type: InferenceConnectorType.OpenAI,
+    config: {},
   };
 
   beforeEach(() => {
