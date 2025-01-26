@@ -8,6 +8,7 @@ NOTE: The HTTP service is available both server and client side.
 The server-side HttpService allows server-side plugins to register endpoints with built-in support for request validation. These endpoints may be used by client-side code or be exposed as a public API for users. Most plugins integrate directly with this service.
 
 The service allows plugins to:
+
 * to extend the {kib} server with custom HTTP API.
 * to execute custom logic on an incoming request or server response.
 * implement custom authentication and authorization strategy.
