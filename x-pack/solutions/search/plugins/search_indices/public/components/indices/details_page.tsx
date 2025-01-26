@@ -79,12 +79,7 @@ export const SearchIndexDetailsPage = () => {
   }, [share, index]);
   const navigateToDiscover = useNavigateToDiscover(indexName);
 
-  const [hasDocuments, setHasDocuments] = useState<boolean>(false);
-  const [isDocumentsLoading, setDocumentsLoading] = useState<boolean>(true);
-  useEffect(() => {
-    setDocumentsLoading(isInitialLoading);
-    setHasDocuments(!(!isInitialLoading && indexDocuments?.results?.data.length === 0));
-  }, [indexDocuments, isInitialLoading, setHasDocuments, setDocumentsLoading]);
+  const hasDocuments = Boolean(isInitialLoading || indexDocuments?.results?.data.length);
 
   usePageChrome(indexName, [
     ...IndexManagementBreadcrumbs,
@@ -225,7 +220,7 @@ export const SearchIndexDetailsPage = () => {
                   <>
                     <EuiFlexItem>
                       <EuiButtonEmpty
-                        isLoading={isDocumentsLoading}
+                        isLoading={isInitialLoading}
                         data-test-subj="viewInDiscoverLink"
                         onClick={navigateToDiscover}
                       >
@@ -237,7 +232,7 @@ export const SearchIndexDetailsPage = () => {
                     </EuiFlexItem>
                     <EuiFlexItem>
                       <EuiButton
-                        isLoading={isDocumentsLoading}
+                        isLoading={isInitialLoading}
                         data-test-subj="useInPlaygroundLink"
                         onClick={navigateToPlayground}
                         iconType="launch"
@@ -255,7 +250,7 @@ export const SearchIndexDetailsPage = () => {
                     <EuiButtonEmpty
                       href={docLinks.links.apiReference}
                       target="_blank"
-                      isLoading={isDocumentsLoading}
+                      isLoading={isInitialLoading}
                       iconType="documentation"
                       data-test-subj="ApiReferenceDoc"
                     >
