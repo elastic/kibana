@@ -92,27 +92,4 @@ describe('retryTransientErrors', () => {
     await expect(retryTransientEsErrors(esCallMock, { logger })).rejects.toThrow(error);
     expect(esCallMock).toHaveBeenCalledTimes(1);
   });
-
-  it('retries with additional status codes when provided', async () => {
-    const customStatusCode = 409; // Conflict version
-    const error = new EsErrors.ResponseError({
-      statusCode: customStatusCode,
-      meta: {} as any,
-      warnings: [],
-      body: 'Conflict Version',
-    });
-    const esCallMock = jest.fn().mockRejectedValueOnce(error).mockResolvedValue('success');
-
-    expect(
-      await retryTransientEsErrors(esCallMock, {
-        logger,
-        additionalRetryableStatusCodes: [customStatusCode],
-      })
-    ).toEqual('success');
-    expect(esCallMock).toHaveBeenCalledTimes(2);
-    expect(logger.warn).toHaveBeenCalledTimes(1);
-    expect(logger.warn.mock.calls[0][0]).toMatch(
-      `Retrying Elasticsearch operation after [2s] due to error: ResponseError: Conflict Version`
-    );
-  });
 });
