@@ -56,6 +56,18 @@ describe('Inference Services', () => {
     expect(screen.getByTestId('euiSelectableList')).toBeInTheDocument();
   });
 
+  it('renders Elastic at top', async () => {
+    render(
+      <MockFormProvider>
+        <InferenceServiceFormFields http={httpMock} toasts={notificationsMock.toasts} />
+      </MockFormProvider>
+    );
+
+    await userEvent.click(screen.getByTestId('provider-select'));
+    const listItems = screen.getAllByTestId('provider');
+    expect(listItems[0]).toHaveTextContent('Elastic');
+  });
+
   it('renders selected provider fields - hugging_face', async () => {
     render(
       <MockFormProvider>
