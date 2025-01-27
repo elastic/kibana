@@ -114,6 +114,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
                 label={TECHNICAL_PREVIEW}
                 tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
                 size="s"
+                iconType={'beaker'}
                 data-test-subj={'workflow-insights-tech-preview-badge'}
               />
             </EuiFlexItem>
