@@ -20,6 +20,7 @@ import {
   deleteAllCaseItems,
   findCases,
   getAllComments,
+  getAllUserActions,
 } from '../../../../cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -182,13 +183,14 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('renders multiple attachment types correctly', async () => {
-        const attachments = await getAllComments({
+        const response = await getAllUserActions({
           supertest,
           caseId: originalCase.id,
         });
 
-        const externalRefAttachmentId = attachments[0].id;
-        const persistableStateAttachmentId = attachments[1].id;
+        const comments = response.filter((userAction) => userAction.type === 'comment');
+        const externalRefAttachmentId = comments[0].comment_id ?? undefined;
+        const persistableStateAttachmentId = comments[1].comment_id ?? undefined;
         await validateAttachment(AttachmentType.externalReference, externalRefAttachmentId);
         await validateAttachment(AttachmentType.persistableState, persistableStateAttachmentId);
 

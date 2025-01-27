@@ -9,6 +9,7 @@ import type SuperTest from 'supertest';
 import { CASES_INTERNAL_URL, CASES_URL } from '@kbn/cases-plugin/common/constants';
 import {
   getCaseFindAttachmentsUrl,
+  getCaseUserActionUrl,
   getCasesDeleteFileAttachmentsUrl,
 } from '@kbn/cases-plugin/common/api';
 import { Case, AttachmentType } from '@kbn/cases-plugin/common';
@@ -19,6 +20,7 @@ import {
   AttachmentPatchRequest,
   AttachmentsFindResponse,
   PostFileAttachmentRequest,
+  CaseUserActionsDeprecatedResponse,
 } from '@kbn/cases-plugin/common/types/api';
 import { Attachments, Attachment } from '@kbn/cases-plugin/common/types/domain';
 import { User } from '../authentication/types';
@@ -328,6 +330,29 @@ export const findAttachments = async ({
 }): Promise<AttachmentsFindResponse> => {
   const { body } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindAttachmentsUrl(caseId)}`)
+    .set('kbn-xsrf', 'true')
+    .query(query)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return body;
+};
+
+export const getAllUserActions = async ({
+  supertest,
+  caseId,
+  query = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  query?: Record<string, unknown>;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<CaseUserActionsDeprecatedResponse> => {
+  const { body } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseUserActionUrl(caseId)}`)
     .set('kbn-xsrf', 'true')
     .query(query)
     .auth(auth.user.username, auth.user.password)
