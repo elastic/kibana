@@ -5,12 +5,11 @@
  * 2.0.
  */
 
-export interface Prompt {
-  promptId: string;
-  prompt: {
-    default: string;
-  };
-  provider?: string;
-  model?: string;
-  description?: string;
-}
+import { ElasticModelDictionary } from './types';
+
+export const elasticModelDictionary: ElasticModelDictionary = {
+  'rainbow-sprinkles': {
+    provider: 'bedrock',
+    model: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
+  },
+};

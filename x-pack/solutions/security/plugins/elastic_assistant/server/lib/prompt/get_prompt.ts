@@ -9,7 +9,8 @@ import { SavedObjectsClientContract } from '@kbn/core-saved-objects-api-server';
 import { PublicMethodsOf } from '@kbn/utility-types';
 import { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
-import { ElasticModelDictionary, Prompt } from './types';
+import { elasticModelDictionary } from '@kbn/inference-common';
+import { Prompt } from './types';
 import { localPrompts } from './local_prompt_object';
 import { getLlmType } from '../../routes/utils';
 import { promptSavedObjectType } from '../../../common/constants';
@@ -26,12 +27,6 @@ interface GetPromptsByGroupIdArgs extends Omit<GetPromptArgs, 'promptId'> {
   promptGroupId: string;
   promptIds: string[];
 }
-const elasticModelDictionary: ElasticModelDictionary = {
-  'rainbow-sprinkles': {
-    provider: 'bedrock',
-    model: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
-  },
-};
 
 type PromptArray = Array<{ promptId: string; prompt: string }>;
 /**

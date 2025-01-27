@@ -5,12 +5,9 @@
  * 2.0.
  */
 
-export interface Prompt {
-  promptId: string;
-  prompt: {
-    default: string;
+export interface ElasticModelDictionary {
+  [key: string]: {
+    provider: string;
+    model: string;
   };
-  provider?: string;
-  model?: string;
-  description?: string;
 }
