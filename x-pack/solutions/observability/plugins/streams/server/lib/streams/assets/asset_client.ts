@@ -144,7 +144,7 @@ export class AssetClient {
 
     const assetIdsToRemove = existingAssetLinks
       .map((existingAssetLink) => existingAssetLink['asset.id'])
-      .filter((assetId) => !assetIds.includes(assetId));
+      .filter((assetId) => assetId != null && !assetIds.includes(assetId)) as string[];
 
     await Promise.all([
       ...newAssetIds.map((assetId) =>
@@ -204,7 +204,7 @@ export class AssetClient {
       },
     });
 
-    return assetsResponse.hits.hits.map((hit) => hit._source['asset.id']);
+    return assetsResponse.hits.hits.map((hit) => hit._source['asset.id'] as string);
   }
 
   async bulk(
@@ -270,7 +270,7 @@ export class AssetClient {
     assetLinks.forEach((assetLink) => {
       const assetType = assetLink['asset.type'] as AssetType;
       const assetId = assetLink['asset.id'];
-      idsByType[assetType].push(assetId);
+      if (assetId) idsByType[assetType].push(assetId);
     });
 
     const limiter = pLimit(10);
