@@ -51,7 +51,6 @@ export const getKnowledgeBaseIndicesRoute = (router: ElasticAssistantPluginRoute
             fields: '*',
             types: ['sparse_vector'],
             include_unmapped: true,
-            filters: '-parent',
             filter_path: 'fields.*.sparse_vector.indices',
           });
 
