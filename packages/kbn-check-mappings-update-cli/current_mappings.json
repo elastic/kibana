@@ -1707,6 +1707,30 @@
   },
   "fleet-fleet-server-host": {
     "properties": {
+      "certificate": {
+        "index": false,
+        "type": "keyword"
+      },
+      "certificate_authorities": {
+        "index": false,
+        "type": "keyword"
+      },
+      "certificate_key": {
+        "index": false,
+        "type": "keyword"
+      },
+      "es_certificate": {
+        "index": false,
+        "type": "keyword"
+      },
+      "es_certificate_authorities": {
+        "index": false,
+        "type": "keyword"
+      },
+      "es_certificate_key": {
+        "index": false,
+        "type": "keyword"
+      },
       "host_urls": {
         "index": false,
         "type": "keyword"

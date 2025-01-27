@@ -508,6 +508,12 @@
     "updated_by"
   ],
   "fleet-fleet-server-host": [
+    "certificate",
+    "certificate_authorities",
+    "certificate_key",
+    "es_certificate",
+    "es_certificate_authorities",
+    "es_certificate_key",
     "host_urls",
     "is_default",
     "is_internal",
