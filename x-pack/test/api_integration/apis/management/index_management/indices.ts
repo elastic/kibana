@@ -13,6 +13,7 @@ import { indicesHelpers } from './lib/indices.helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const { createIndex, deleteAllIndices, catIndex, indexStats } = indicesHelpers(getService);
 
   const {
@@ -38,6 +39,8 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body: indices } = await catIndex(indexName, 'i');
         expect(indices.map((indexItem) => indexItem.i)).to.contain(indexName);
+
+        await es.indices.delete({ index: indexName });
       });
 
       it('should require index name to be provided', async () => {
