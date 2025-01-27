@@ -170,12 +170,6 @@ export const getSourceLayer = (
   parentId: string,
   layerDetails: LayerMappingDetails
 ) => {
-  const euiVisColorPalette = euiPaletteColorBlind();
-
-  // NOTE: Condition to check between Borealis and Amsterdam as per
-  // https://elastic.slack.com/archives/C7QC1JV6F/p1734342538935879?thread_ts=1734342127.301789&cid=C7QC1JV6F
-  const isAmsterdam = dependencies.euiTheme.flags.hasVisColorAdjustment;
-
   return {
     sourceDescriptor: {
       id: uuidv4(),
@@ -195,7 +189,7 @@ export const getSourceLayer = (
         fillColor: {
           type: 'STATIC',
           options: {
-            color: euiVisColorPalette[isAmsterdam ? 1 : 2],
+            color: dependencies.euiTheme.colors.vis.euiColorVis4,
           },
         },
         lineColor: {
@@ -247,8 +241,6 @@ export const getDestinationLayer = (
   parentId: string,
   layerDetails: LayerMappingDetails
 ) => {
-  const euiVisColorPalette = euiPaletteColorBlind();
-
   return {
     sourceDescriptor: {
       id: uuidv4(),
@@ -268,7 +260,7 @@ export const getDestinationLayer = (
       properties: {
         fillColor: {
           type: 'STATIC',
-          options: { color: euiVisColorPalette[2] },
+          options: { color: dependencies.euiTheme.colors.vis.euiColorVis2 },
         },
         lineColor: {
           type: 'STATIC',
