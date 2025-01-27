@@ -13,8 +13,6 @@ import React from 'react';
 export const LegacyLogViewCallout: React.FC<{ upgradeAssistantUrl?: string }> = ({
   upgradeAssistantUrl,
 }) => {
-  // share.url.locators.get(id);
-
   const UpgradeAssistant = upgradeAssistantUrl ? (
     <EuiLink href={upgradeAssistantUrl}>{upgradeAssistantLabel}</EuiLink>
   ) : (
