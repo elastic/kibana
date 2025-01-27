@@ -361,8 +361,15 @@ const checkAndLoadIntegrationRoute = createDatasetQualityServerRoute({
   options: {
     tags: [],
   },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
   async handler(resources): Promise<CheckAndLoadIntegrationResponse> {
-    const { context, params, plugins, logger } = resources;
+    const { context, params, plugins, logger, request } = resources;
     const { dataStream } = params.path;
     const coreContext = await context.core;
 
@@ -370,7 +377,7 @@ const checkAndLoadIntegrationRoute = createDatasetQualityServerRoute({
     const esClient = coreContext.elasticsearch.client.asCurrentUser;
 
     const fleetPluginStart = await plugins.fleet.start();
-    const packageClient = fleetPluginStart.packageService.asInternalUser;
+    const packageClient = fleetPluginStart.packageService.asScoped(request);
 
     const integration = await checkAndLoadIntegration({
       esClient,
