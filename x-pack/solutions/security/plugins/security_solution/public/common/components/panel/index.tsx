@@ -28,6 +28,7 @@ import { EuiPanel } from '@elastic/eui';
  */
 type PanelProps = EuiPanelProps & {
   loading?: boolean;
+  height?: number;
 };
 
 export const Panel = styled(({ loading, ...props }: PanelProps) => (
