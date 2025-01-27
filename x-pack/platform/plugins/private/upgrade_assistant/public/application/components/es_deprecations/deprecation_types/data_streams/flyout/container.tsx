@@ -146,7 +146,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
         );
 
       case 'completed':
-        return <ReindexingCompletedFlyoutStep />;
+        return <ReindexingCompletedFlyoutStep meta={meta} />;
     }
   }, [flyoutStep, reindexState]);
 

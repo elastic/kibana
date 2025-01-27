@@ -633,7 +633,7 @@ export class SessionIndex {
     let indexExists = false;
     try {
       indexExists = await this.options.elasticsearchClient.indices.exists({
-        index: this.aliasName,
+        index: this.indexName,
       });
     } catch (err) {
       this.options.logger.error(`Failed to check if session index exists: ${err.message}`);
@@ -662,20 +662,6 @@ export class SessionIndex {
         }
       }
 
-      // Prior to https://github.com/elastic/kibana/pull/134900, sessions would be written directly against the session index.
-      // Now, we write sessions against a new session index alias. This call ensures that the alias exists, and is attached to the index.
-      // This operation is safe to repeat, even if the alias already exists. This seems safer than retrieving the index details, and inspecting
-      // it to see if the alias already exists.
-      try {
-        await this.options.elasticsearchClient.indices.putAlias({
-          index: this.indexName,
-          name: this.aliasName,
-        });
-      } catch (err) {
-        this.options.logger.error(`Failed to attach alias to session index: ${err.message}`);
-        throw err;
-      }
-
       return;
     }
 
@@ -683,11 +669,26 @@ export class SessionIndex {
       'Session index already exists. Attaching alias to the index and ensuring up-to-date mappings...'
     );
 
+    // Prior to https://github.com/elastic/kibana/pull/134900, sessions would be written directly against the session index.
+    // Now, we write sessions against a new session index alias. This call ensures that the alias exists, and is attached to the index.
+    // This operation is safe to repeat, even if the alias already exists. This seems safer than retrieving the index details, and inspecting
+    // it to see if the alias already exists.
+    try {
+      await this.options.elasticsearchClient.indices.putAlias({
+        index: this.indexName,
+        name: this.aliasName,
+      });
+    } catch (err) {
+      this.options.logger.error(`Failed to attach alias to session index: ${err.message}`);
+      throw err;
+    }
+
     let indexMappingsVersion: string | undefined;
     try {
       const indexMappings = await this.options.elasticsearchClient.indices.getMapping({
-        index: this.aliasName,
+        index: this.indexName,
       });
+
       indexMappingsVersion =
         indexMappings[this.indexName]?.mappings?._meta?.[
           SESSION_INDEX_MAPPINGS_VERSION_META_FIELD_NAME
@@ -705,7 +706,7 @@ export class SessionIndex {
       );
       try {
         await this.options.elasticsearchClient.indices.putMapping({
-          index: this.aliasName,
+          index: this.indexName,
           ...sessionIndexSettings.mappings,
         });
         this.options.logger.debug('Successfully updated session index mappings.');

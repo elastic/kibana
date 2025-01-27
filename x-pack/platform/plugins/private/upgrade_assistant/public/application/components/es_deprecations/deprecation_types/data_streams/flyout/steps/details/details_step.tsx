@@ -94,6 +94,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   } = useAppContext();
 
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
+  console.log('reindexState::', reindexState)
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
   const isCompleted = status === ReindexStatus.completed;
   const hasFetchFailed = status === ReindexStatus.fetchFailed;
@@ -204,7 +205,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
           <p>
             <FormattedMessage
               id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.reindexDescription"
-              defaultMessage="{readonlyBackingIndicesCount} total backing indices, and {totalBackingIndicesRequireingUpgrade} requires upgrade."
+              defaultMessage="{totalBackingIndices} total backing indices, and {totalBackingIndicesRequireingUpgrade} requires upgrade."
               values={{
                 totalBackingIndices: 2,
                 totalBackingIndicesRequireingUpgrade: 1,

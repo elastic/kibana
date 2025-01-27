@@ -136,7 +136,7 @@ export const dataStreamReindexServiceFactory = (
    * @param reindexOp
    */
   const startReindexing = async (reindexOp: DataStreamReindexSavedObject) => {
-    const { indexName } = reindexOp.attributes;
+    const { indexName, reindexOptions } = reindexOp.attributes;
 
     await esClient.transport.request({
       method: 'POST',
@@ -154,6 +154,7 @@ export const dataStreamReindexServiceFactory = (
       // index name is the name of the task ID
       reindexTaskId: indexName,
       reindexTaskPercComplete: 0,
+      reindexOptions,
     });
   };
 
@@ -168,10 +169,23 @@ export const dataStreamReindexServiceFactory = (
 
     console.log('taskId::', taskId);
     try {
-      const taskResponse = await esClient.transport.request<DataStreamReindexTaskStatusResponse>({
-        method: 'GET',
-        path: `/_migration/reindex/${taskId}/_status`,
-      });
+      const taskResponse: DataStreamReindexTaskStatusResponse = {
+        complete: false,
+        successes: 1,
+        total_indices_in_data_stream: 6,
+        errors: [{ index: 'mock_index1', message: 'error in mock_index1'}],
+        start_time_millis: 1,
+        total_indices_requiring_upgrade: 5,
+        in_progress: [{ index: 'mock_index1', total_doc_count: 1, reindexed_doc_count: 1 }],
+        pending: 3,
+      };
+
+      // const taskResponse = await esClient.transport.request<DataStreamReindexTaskStatusResponse>({
+      //   method: 'GET',
+      //   path: `/_migration/reindex/${taskId}/_status`,
+      // });
+
+
       console.log('taskResponse:', taskResponse);
 
       if (taskResponse.exception) {
@@ -238,6 +252,9 @@ export const dataStreamReindexServiceFactory = (
 
         // Do any other cleanup work necessary
         return await cleanupChanges(reindexOp);
+      } else {
+        // throw err if it is not a 404 (on task exceptions)
+        throw err;
       }
     }
     return reindexOp;
@@ -379,6 +396,7 @@ export const dataStreamReindexServiceFactory = (
           }
         } catch (e) {
           log.error(`Reindexing step failed: ${e instanceof Error ? e.stack : e.toString()}`);
+          console.log('caught errorrrr', e);
 
           // Trap the exception and add the message to the object so the UI can display it.
           lockedReindexOp = await actions.updateReindexOp(lockedReindexOp, {
@@ -441,7 +459,9 @@ export const dataStreamReindexServiceFactory = (
         throw error.indexNotFound(`No reindex operation found for index ${indexName}`);
       }
 
+      console.log('reindexOp.attributes:', reindexOp.attributes);
       if (!reindexOp.attributes.reindexOptions?.queueSettings) {
+        console.log('reindexOp.attributes.reindexOptions::', reindexOp.attributes.reindexOptions);
         throw error.reindexIsNotInQueue(`Reindex operation ${indexName} is not in the queue.`);
       }
 
@@ -455,6 +475,7 @@ export const dataStreamReindexServiceFactory = (
     },
 
     async cancelReindexing(indexName: string) {
+      console.log('attempting to cancel!!!', indexName);
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
@@ -467,11 +488,15 @@ export const dataStreamReindexServiceFactory = (
         );
       }
 
-      const resp = await esClient.tasks.cancel({
-        task_id: reindexOp.attributes.reindexTaskId!,
+      console.log('attempting to cancel!!!');
+      
+      const resp = await esClient.transport.request<{ acknowledged: boolean }>({
+        method: 'POST',
+        path: `/_migration/reindex/${reindexOp.attributes.reindexTaskId}/_cancel`,
       });
 
-      if (resp.node_failures && resp.node_failures.length > 0) {
+
+      if (!resp.acknowledged) {
         throw error.reindexCannotBeCancelled(`Could not cancel reindex.`);
       }
 

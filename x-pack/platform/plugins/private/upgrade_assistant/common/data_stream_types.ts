@@ -6,7 +6,7 @@
  */
 
 import { SavedObject } from '@kbn/core/server';
-import type { ReindexStatus } from './types';
+import type { QueueSettings, ReindexStatus } from './types';
 
 export const DATA_STREAM_REINDEX_OP_TYPE = 'upgrade-assistant-data-stream-reindex-operation';
 
@@ -59,6 +59,14 @@ export enum DataStreamReindexStep {
   reindexCompleted = 100,
 }
 
+export interface DataStreamReindexOptions {
+  /**
+   * Set this key to configure a reindex operation as part of a
+   * batch to be run in series.
+   */
+  queueSettings?: QueueSettings;
+}
+
 export interface DataStreamReindexOperation {
   indexName: string;
 
@@ -75,6 +83,8 @@ export interface DataStreamReindexOperation {
     inProgressCount: number;
     errorsCount: number;
   };
+
+  reindexOptions: DataStreamReindexOptions;
 }
 
 /**

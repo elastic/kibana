@@ -26,6 +26,7 @@ import type { ReindexState } from '../../../use_reindex_state';
 import { ReindexProgress } from '../../progress';
 import { useAppContext } from '../../../../../../../app_context';
 
+
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
     case ReindexStatus.failed:
@@ -89,6 +90,9 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   const hasReindexingFailed = status === ReindexStatus.failed;
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
+
+  const showButtons = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
+  const shouldShowPauseButton = showButtons && (status === ReindexStatus.inProgress);
 
   return (
     <Fragment>
@@ -197,21 +201,44 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                fill
-                color={status === ReindexStatus.paused ? 'warning' : 'primary'}
-                iconType={status === ReindexStatus.paused ? 'play' : undefined}
-                onClick={startReindex}
-                isLoading={loading}
-                disabled={loading || !hasRequiredPrivileges}
-                data-test-subj="startReindexingButton"
-              >
-                {buttonLabel(status)}
-              </EuiButton>
-            </EuiFlexItem>
-          )}
+          
+          <EuiFlexItem grow={false}>
+            <EuiFlexGroup gutterSize="s">
+              {shouldShowPauseButton && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color={'primary'}
+                    iconType={'pause'}
+                    onClick={cancelReindex}
+                    disabled={!hasRequiredPrivileges}
+                    data-test-subj="pauseReindexingButton"
+                  >
+                    <FormattedMessage
+                      id="xpack.upgradeAssistant.checkupTab.reindexing.flyout.checklistStep.pauseReindexButton.pauseReindexingLabel"
+                      defaultMessage="Pause reindexing"
+                    />
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+
+              {showButtons && (
+                <EuiFlexItem grow={false}>
+                  <EuiButton
+                    fill
+                    color={status === ReindexStatus.paused ? 'warning' : 'primary'}
+                    iconType={status === ReindexStatus.paused ? 'play' : undefined}
+                    onClick={startReindex}
+                    isLoading={loading}
+                    disabled={loading || !hasRequiredPrivileges}
+                    data-test-subj="startReindexingButton"
+                  >
+                    {buttonLabel(status)}
+                  </EuiButton>
+                </EuiFlexItem>
+              )}
+            </EuiFlexGroup>
+          </EuiFlexItem>
         </EuiFlexGroup>
       </EuiFlyoutFooter>
     </Fragment>

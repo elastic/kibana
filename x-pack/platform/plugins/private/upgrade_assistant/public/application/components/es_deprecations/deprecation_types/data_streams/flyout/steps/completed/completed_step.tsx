@@ -7,10 +7,16 @@
 
 import React from 'react';
 
-import { EuiFlyoutBody, EuiTitle } from '@elastic/eui';
+import { EuiFlyoutBody, EuiSpacer, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export const ReindexingCompletedFlyoutStep: React.FunctionComponent = () => {
+import { DataStreamMetadata } from '../../../../../../../../../common/types';
+
+interface Props {
+  meta: DataStreamMetadata;
+}
+
+export const ReindexingCompletedFlyoutStep: React.FunctionComponent<Props> = ({ meta }: Props) => {
   return (
     <>
       <EuiFlyoutBody>
@@ -22,7 +28,8 @@ export const ReindexingCompletedFlyoutStep: React.FunctionComponent = () => {
             />
           </h3>
         </EuiTitle>
-        <p>200 indices successfully reindexed</p>
+        <EuiSpacer size="m" />
+        <p>{meta.dataStreamTotalIndicesRequireUpgradeCount} indices successfully reindexed</p>
       </EuiFlyoutBody>
     </>
   );

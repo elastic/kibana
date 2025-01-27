@@ -10,7 +10,7 @@ import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
 import moment from 'moment';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
-import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
+import { DataStreamReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
 import { dataStreamReindexActionsFactory } from './data_stream_actions';
 import {
@@ -47,7 +47,7 @@ export class DataStreamReindexWorker {
   private static workerSingleton?: DataStreamReindexWorker;
   private readonly stop$ = new Subject<void>();
   private updateOperationLoopRunning: boolean = false;
-  private inProgressOps: ReindexSavedObject[] = [];
+  private inProgressOps: DataStreamReindexSavedObject[] = [];
   private readonly reindexService: DataStreamReindexService;
   private readonly log: Logger;
   private readonly security: SecurityPluginStart;
@@ -132,7 +132,7 @@ export class DataStreamReindexWorker {
   /**
    * Returns whether or not the given ReindexOperation is in the worker's queue.
    */
-  public includes = (reindexOp: ReindexSavedObject) => {
+  public includes = (reindexOp: DataStreamReindexSavedObject) => {
     return this.inProgressOps.map((o) => o.id).includes(reindexOp.id);
   };
 
@@ -184,9 +184,12 @@ export class DataStreamReindexWorker {
   private updateInProgressOps = async () => {
     try {
       const inProgressOps = await this.reindexService.findAllByStatus(ReindexStatus.inProgress);
+      console.log('inProgressOps::', inProgressOps);
       const { parallel, queue } = sortAndOrderReindexOperations(inProgressOps);
 
       let [firstOpInQueue] = queue;
+      console.log('parallel::', parallel)
+      console.log('firstOpInQueue::', firstOpInQueue)
 
       if (firstOpInQueue && !queuedOpHasStarted(firstOpInQueue)) {
         this.log.debug(
@@ -222,33 +225,13 @@ export class DataStreamReindexWorker {
     }
   };
 
-  private lastCheckedQueuedOpId: string | undefined;
-  private processNextStep = async (reindexOp: ReindexSavedObject): Promise<void> => {
+  private processNextStep = async (reindexOp: DataStreamReindexSavedObject): Promise<void> => {
     const credential = this.credentialStore.get(reindexOp);
 
     if (!credential) {
-      // If this is a queued reindex op, and we know there can only ever be one in progress at a
-      // given time, there is a small chance it may have just reached the front of the queue so
-      // we give it a chance to be updated by another worker with credentials by making this a
-      // noop once. If it has not been updated by the next loop we will mark it paused if it
-      // falls outside of PAUSE_WINDOW.
-      if (isQueuedOp(reindexOp)) {
-        if (this.lastCheckedQueuedOpId !== reindexOp.id) {
-          this.lastCheckedQueuedOpId = reindexOp.id;
-          return;
-        }
-      }
-      // This indicates that no Kibana nodes currently have credentials to update this job.
-      const now = moment();
-      const updatedAt = moment(reindexOp.updated_at);
-      if (updatedAt < now.subtract(PAUSE_WINDOW)) {
-        await this.reindexService.pauseReindexOperation(reindexOp.attributes.indexName);
-        return;
-      } else {
         // If it has been updated recently, we assume another node has the necessary credentials,
         // and this becomes a noop.
         return;
-      }
     }
 
     const service = this.getCredentialScopedReindexService(credential);
@@ -264,8 +247,8 @@ export class DataStreamReindexWorker {
  * stopping the worker from continuing to process more jobs.
  */
 const swallowExceptions =
-  (func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>, log: Logger) =>
-  async (reindexOp: ReindexSavedObject) => {
+  (func: (reindexOp: DataStreamReindexSavedObject) => Promise<DataStreamReindexSavedObject>, log: Logger) =>
+  async (reindexOp: DataStreamReindexSavedObject) => {
     try {
       return await func(reindexOp);
     } catch (e) {

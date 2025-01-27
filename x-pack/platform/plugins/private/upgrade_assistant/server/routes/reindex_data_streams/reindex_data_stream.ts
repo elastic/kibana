@@ -141,6 +141,7 @@ export function registerReindexDataStreamRoutes(
           body,
         });
       } catch (error) {
+        console.log('error in handler', error);
         if (error instanceof errors.ResponseError) {
           return handleEsError({ error, response });
         }
