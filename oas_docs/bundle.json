@@ -26098,12 +26098,7 @@
                   }
                 },
                 "required": [
-                  "proxy_id",
-                  "certificate",
-                  "certificate_key",
-                  "es_certificate_authorities",
-                  "es_certificate",
-                  "es_certificate_key"
+                  "proxy_id"
                 ],
                 "type": "object"
               }
