@@ -59,7 +59,7 @@ describe('Alerts', () => {
 
   describe('when rendered from Service view in APM app', () => {
     const ruleName = 'Error count threshold';
-    const confirmModalButtonSelector = '.euiModal button[data-test-subj=confirmModalConfirmButton]';
+    const confirmModalButtonSelector = '[data-test-subj=confirmModalConfirmButton]';
 
     it('alerts table is rendered correctly', () => {
       cy.loginAsEditorUser();
