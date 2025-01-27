@@ -13,8 +13,7 @@ import { DEFAULT_MAX_TABLE_QUERY_SIZE } from '../../../../common/constants';
 import type { BasicTableProps } from '.';
 import { PaginatedTable } from '.';
 import { getHostsColumns, mockData, rowItems, sortedHosts } from './index.mock';
-import { ThemeProvider } from 'styled-components';
-import { getMockTheme } from '../../../common/lib/kibana/kibana_react.mock';
+import { EuiThemeProvider } from '@elastic/eui';
 import { Direction } from '../../../../common/search_strategy';
 import { useQueryToggle } from '../../../common/containers/query_toggle';
 jest.mock('../../../common/containers/query_toggle');
@@ -23,17 +22,6 @@ jest.mock('react', () => {
   const r = jest.requireActual('react');
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   return { ...r, memo: (x: any) => x };
-});
-
-const mockTheme = getMockTheme({
-  eui: {
-    euiColorEmptyShade: '#ece',
-    euiSizeL: '10px',
-    euiBreakpoints: {
-      s: '450px',
-    },
-    euiSizeM: '10px',
-  },
 });
 
 describe('Paginated Table Component', () => {
@@ -78,9 +66,9 @@ describe('Paginated Table Component', () => {
 
     test('it renders the loading panel at the beginning ', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} headerCount={-1} loading={true} pageOfItems={[]} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(
@@ -90,9 +78,9 @@ describe('Paginated Table Component', () => {
 
     test('it renders the over loading panel after data has been in the table ', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} loading={true} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="loadingPanelPaginatedTable"]').exists()).toBeTruthy();
@@ -100,9 +88,9 @@ describe('Paginated Table Component', () => {
 
     test('it renders the correct amount of pages and starts at activePage: 0', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       const paginiationProps = wrapper
@@ -120,9 +108,9 @@ describe('Paginated Table Component', () => {
 
     test('it render popover to select new limit in table', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} limit={2} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"] button').first().simulate('click');
@@ -131,9 +119,9 @@ describe('Paginated Table Component', () => {
 
     test('it will NOT render popover to select new limit in table if props itemsPerRow is empty', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} itemsPerRow={[]} limit={2} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeFalsy();
@@ -142,7 +130,7 @@ describe('Paginated Table Component', () => {
     test('It should render a sort icon if sorting is defined', () => {
       const mockOnChange = jest.fn();
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable
             {...testProps}
             columns={sortedHosts}
@@ -150,7 +138,7 @@ describe('Paginated Table Component', () => {
             onChange={mockOnChange}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(wrapper.find('.euiTable thead tr th button svg')).toBeTruthy();
@@ -158,13 +146,13 @@ describe('Paginated Table Component', () => {
 
     test('Should display toast when user reaches end of results max', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable
             {...testProps}
             limit={DEFAULT_MAX_TABLE_QUERY_SIZE}
             totalCount={DEFAULT_MAX_TABLE_QUERY_SIZE * 3}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
       wrapper.find('button[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(updateActivePage.mock.calls.length).toEqual(0);
@@ -172,27 +160,27 @@ describe('Paginated Table Component', () => {
 
     test('Should show items per row if totalCount is greater than items', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} limit={DEFAULT_MAX_TABLE_QUERY_SIZE} totalCount={30} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
       expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeTruthy();
     });
 
     test('Should hide items per row if totalCount is less than items', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} limit={DEFAULT_MAX_TABLE_QUERY_SIZE} totalCount={1} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
       expect(wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"]').exists()).toBeFalsy();
     });
 
     test('Should hide pagination if totalCount is zero', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} limit={DEFAULT_MAX_TABLE_QUERY_SIZE} totalCount={0} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       expect(wrapper.find('[data-test-subj="numberedPagination"]').exists()).toBeFalsy();
@@ -202,9 +190,9 @@ describe('Paginated Table Component', () => {
   describe('Events', () => {
     test('should call updateActivePage with 1 when clicking to the first page', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
       wrapper.find('button[data-test-subj="pagination-button-next"]').first().simulate('click');
       expect(updateActivePage.mock.calls[0][0]).toEqual(1);
@@ -212,9 +200,9 @@ describe('Paginated Table Component', () => {
 
     test('Should call updateActivePage with 0 when you pick a new limit', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} limit={2} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
       wrapper.find('[data-test-subj="pagination-button-next"] button').first().simulate('click');
 
@@ -237,9 +225,9 @@ describe('Paginated Table Component', () => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       const ComponentWithContext = (props: BasicTableProps<any>) => {
         return (
-          <ThemeProvider theme={mockTheme}>
+          <EuiThemeProvider>
             <PaginatedTable {...props} />
-          </ThemeProvider>
+          </EuiThemeProvider>
         );
       };
 
@@ -256,9 +244,9 @@ describe('Paginated Table Component', () => {
 
     test('Should call updateLimitPagination when you pick a new limit', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} limit={2} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       wrapper.find('[data-test-subj="loadingMoreSizeRowPopover"] button').first().simulate('click');
@@ -270,7 +258,7 @@ describe('Paginated Table Component', () => {
     test('Should call onChange when you choose a new sort in the table', () => {
       const mockOnChange = jest.fn();
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable
             {...testProps}
             columns={sortedHosts}
@@ -278,7 +266,7 @@ describe('Paginated Table Component', () => {
             onChange={mockOnChange}
             sorting={{ direction: Direction.asc, field: 'node.host.name' }}
           />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
 
       wrapper.find('.euiTable thead tr th button').first().simulate('click');
@@ -293,9 +281,9 @@ describe('Paginated Table Component', () => {
   describe('Toggle query', () => {
     test('toggleQuery updates toggleStatus', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} setQuerySkip={mockSetQuerySkip} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
       wrapper.find('[data-test-subj="query-toggle-header"]').first().simulate('click');
       expect(mockSetToggle).toBeCalledWith(false);
@@ -304,9 +292,9 @@ describe('Paginated Table Component', () => {
 
     test('toggleStatus=true, render table', () => {
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
       expect(wrapper.find('[data-test-subj="paginated-basic-table"]').first().exists()).toEqual(
         true
@@ -317,9 +305,9 @@ describe('Paginated Table Component', () => {
       mockUseQueryToggle.mockReturnValue({ toggleStatus: false, setToggleStatus: mockSetToggle });
 
       const wrapper = mount(
-        <ThemeProvider theme={mockTheme}>
+        <EuiThemeProvider>
           <PaginatedTable {...testProps} />
-        </ThemeProvider>
+        </EuiThemeProvider>
       );
       expect(wrapper.find('[data-test-subj="paginated-basic-table"]').first().exists()).toEqual(
         false

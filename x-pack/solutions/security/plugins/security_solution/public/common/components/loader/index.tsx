@@ -8,44 +8,54 @@
 import type {
   // @ts-expect-error
   EuiLoadingSpinnerSize,
+  EuiFlexGroupProps,
 } from '@elastic/eui';
 import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, EuiText } from '@elastic/eui';
 import { rgba } from 'polished';
 import React from 'react';
-import styled, { css } from 'styled-components';
+import styled from '@emotion/styled';
+import { css } from '@emotion/react';
 
 const Aside = styled.aside<{ overlay?: boolean; overlayBackground?: string }>`
-  padding: ${({ theme }) => theme.eui.euiSizeM};
+  padding: ${({ theme: { euiTheme } }) => euiTheme.size.m};
 
-  ${({ overlay, overlayBackground, theme }) =>
+  ${({ overlay, overlayBackground, theme: { euiTheme } }) =>
     overlay &&
     css`
       background: ${overlayBackground
         ? rgba(overlayBackground, 0.9)
-        : rgba(theme.eui.euiColorEmptyShade, 0.9)};
+        : rgba(euiTheme.colors.emptyShade, 0.9)};
       bottom: 0;
       left: 0;
       position: absolute;
       right: 0;
       top: 0;
-      z-index: ${theme.eui.euiZLevel1};
+      z-index: ${euiTheme.levels.flyout};
     `}
 `;
-
+// z-index: ${theme.eui.euiZLevel1};
 Aside.displayName = 'Aside';
 
-const FlexGroup = styled(EuiFlexGroup).attrs(() => ({
+interface FlexGroupProps extends EuiFlexGroupProps {
+  overlay?: { overlay?: boolean };
+}
+
+const FlexGroup = styled(EuiFlexGroup, {
+  shouldForwardProp: (prop) => prop !== 'overlay',
+})<FlexGroupProps>(
+  ({ overlay }) =>
+    overlay?.overlay &&
+    css`
+      height: 100%;
+    `
+);
+
+FlexGroup.defaultProps = {
   alignItems: 'center',
   direction: 'column',
   gutterSize: 's',
   justifyContent: 'center',
-}))<{ overlay: { overlay?: boolean } }>`
-  ${({ overlay }) =>
-    overlay &&
-    css`
-      height: 100%;
-    `}
-`;
+};
 
 FlexGroup.displayName = 'FlexGroup';
 
