@@ -168,21 +168,23 @@ export class RiskScoreDataClient {
         esClient,
         template: {
           name: indexPatterns.template,
-          data_stream: { hidden: true },
-          index_patterns: [indexPatterns.alias],
-          composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
-          template: {
-            lifecycle: {},
-            settings: {
-              'index.mapping.total_fields.limit': totalFieldsLimit,
-              'index.default_pipeline': getIngestPipelineName(namespace),
+          body: {
+            data_stream: { hidden: true },
+            index_patterns: [indexPatterns.alias],
+            composed_of: [nameSpaceAwareMappingsComponentName(namespace)],
+            template: {
+              lifecycle: {},
+              settings: {
+                'index.mapping.total_fields.limit': totalFieldsLimit,
+                'index.default_pipeline': getIngestPipelineName(namespace),
+              },
+              mappings: {
+                dynamic: false,
+                _meta: indexMetadata,
+              },
             },
-            mappings: {
-              dynamic: false,
-              _meta: indexMetadata,
-            },
+            _meta: indexMetadata,
           },
-          _meta: indexMetadata,
         },
       });
 

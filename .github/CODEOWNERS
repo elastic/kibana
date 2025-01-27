@@ -368,7 +368,7 @@ src/platform/plugins/shared/data_view_management @elastic/kibana-data-discovery
 src/platform/packages/shared/kbn-data-view-utils @elastic/kibana-data-discovery
 src/platform/plugins/shared/data_views @elastic/kibana-data-discovery
 x-pack/platform/plugins/private/data_visualizer @elastic/ml-ui
-x-pack/platform/plugins/shared/observability_solution/dataset_quality @elastic/obs-ux-logs-team
+x-pack/platform/plugins/shared/dataset_quality @elastic/obs-ux-logs-team
 src/platform/packages/shared/kbn-datemath @elastic/kibana-data-discovery
 src/platform/packages/shared/deeplinks/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/shared/deeplinks/devtools @elastic/kibana-management
@@ -443,6 +443,7 @@ src/platform/packages/private/kbn-esql-editor @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-utils @elastic/kibana-esql
 src/platform/packages/shared/kbn-esql-validation-autocomplete @elastic/kibana-esql
 examples/esql_validation_example @elastic/kibana-esql
+src/platform/packages/shared/kbn-esql-variables-types @elastic/kibana-esql
 test/plugin_functional/plugins/eui_provider_dev_warning @elastic/appex-sharedux
 src/platform/packages/shared/kbn-event-annotation-common @elastic/kibana-visualizations
 src/platform/packages/shared/kbn-event-annotation-components @elastic/kibana-visualizations
@@ -589,9 +590,9 @@ examples/locator_examples @elastic/appex-sharedux
 examples/locator_explorer @elastic/appex-sharedux
 src/platform/packages/shared/kbn-logging @elastic/kibana-core
 src/platform/packages/shared/kbn-logging-mocks @elastic/kibana-core
-x-pack/platform/plugins/shared/observability_solution/logs_data_access @elastic/obs-ux-logs-team
+x-pack/platform/plugins/shared/logs_data_access @elastic/obs-ux-logs-team
 x-pack/solutions/observability/plugins/logs_explorer @elastic/obs-ux-logs-team
-x-pack/platform/plugins/shared/observability_solution/logs_shared @elastic/obs-ux-logs-team
+x-pack/platform/plugins/shared/logs_shared @elastic/obs-ux-logs-team
 x-pack/platform/plugins/private/logstash @elastic/logstash
 src/platform/packages/private/kbn-managed-content-badge @elastic/kibana-visualizations
 packages/kbn-managed-vscode-config @elastic/kibana-operations
@@ -819,6 +820,7 @@ x-pack/platform/packages/shared/security/plugin_types_common @elastic/kibana-sec
 x-pack/platform/packages/shared/security/plugin_types_public @elastic/kibana-security
 x-pack/platform/packages/shared/security/plugin_types_server @elastic/kibana-security
 x-pack/platform/packages/private/security/role_management_model @elastic/kibana-security
+x-pack/solutions/security/packages/connectors @elastic/security-threat-hunting-explore
 x-pack/solutions/security/packages/distribution_bar @elastic/kibana-cloud-security-posture
 x-pack/solutions/security/plugins/security_solution_ess @elastic/security-solution
 x-pack/solutions/security/packages/features @elastic/security-threat-hunting-explore

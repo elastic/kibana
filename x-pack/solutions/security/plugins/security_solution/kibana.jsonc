@@ -60,7 +60,8 @@
       "charts",
       "entityManager",
       "inference",
-      "productDocBase"
+      "productDocBase",
+      "telemetry"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -72,7 +73,6 @@
       "lists",
       "home",
       "management",
-      "telemetry",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",

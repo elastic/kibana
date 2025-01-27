@@ -534,7 +534,7 @@ Plugin server-side only. Plugin has three main functions:
 |Page where users can see the quality of their log data sets.
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/dataset_quality/README.md[datasetQuality]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/dataset_quality/README.md[datasetQuality]
 |In order to make ongoing maintenance of log collection easy we want to introduce the concept of data set quality, where users can easily get an overview on the data sets they have with information such as integration, size, last activity, among others.
 
 
@@ -703,7 +703,7 @@ using the CURL scripts in the scripts folder.
 |This plugin contains various LLM tasks.
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/logs_data_access/README.md[logsDataAccess]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_data_access/README.md[logsDataAccess]
 |Exposes services to access logs data.
 
 
@@ -711,7 +711,7 @@ using the CURL scripts in the scripts folder.
 |This plugin is home to the <LogsExplorer /> component and related types. It implements several of the underlying concepts that the Observability Logs Explorer app builds upon.
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/logs_shared/README.md[logsShared]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/logs_shared/README.md[logsShared]
 |Exposes the shared components and APIs to access and visualize logs.
 
 

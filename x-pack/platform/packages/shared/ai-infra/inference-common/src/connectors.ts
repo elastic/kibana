@@ -19,10 +19,21 @@ export const COMPLETION_TASK_TYPE = 'chat_completion';
 
 const allSupportedConnectorTypes = Object.values(InferenceConnectorType);
 
+/**
+ * Represents a stack connector that can be used for inference.
+ */
 export interface InferenceConnector {
+  /** the type of the connector, see {@link InferenceConnectorType} */
   type: InferenceConnectorType;
+  /** the name of the connector */
   name: string;
+  /** the id of the connector */
   connectorId: string;
+  /**
+   * configuration (without secrets) of the connector.
+   * the list of properties depends on the connector type (and subtype for inference)
+   */
+  config: Record<string, string>;
 }
 
 /**
