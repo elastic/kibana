@@ -5799,7 +5799,7 @@
         "tags": [],
         "label": "ValidationResult",
         "description": [],
-        "path": "packages/response-ops/rule_form/src/types.ts",
+        "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -5813,7 +5813,7 @@
             "signature": [
               "{ [x: string]: any; }"
             ],
-            "path": "packages/response-ops/rule_form/src/types.ts",
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

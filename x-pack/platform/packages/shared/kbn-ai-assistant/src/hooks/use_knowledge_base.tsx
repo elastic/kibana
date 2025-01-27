@@ -62,8 +62,8 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
           }
           setInstallError(error);
           notifications!.toasts.addError(error, {
-            title: i18n.translate('xpack.aiAssistant.errorSettingUpKnowledgeBase', {
-              defaultMessage: 'Could not set up Knowledge Base',
+            title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
+              defaultMessage: 'Could not create inference endpoint',
             }),
           });
         })

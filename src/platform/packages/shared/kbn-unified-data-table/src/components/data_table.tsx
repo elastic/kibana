@@ -210,6 +210,10 @@ export interface UnifiedDataTableProps {
    */
   showFullScreenButton?: boolean;
   /**
+   * Determines whether the keyboard shortcuts button should be displayed
+   */
+  showKeyboardShortcuts?: boolean;
+  /**
    * Manage user sorting control
    */
   isSortEnabled?: boolean;
@@ -448,6 +452,7 @@ export const UnifiedDataTable = ({
   searchTitle,
   settings,
   showTimeCol,
+  showKeyboardShortcuts = true,
   showFullScreenButton = true,
   sort,
   isSortEnabled = true,
@@ -1056,6 +1061,7 @@ export const UnifiedDataTable = ({
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showKeyboardShortcuts,
             showFullScreenSelector: showFullScreenButton,
           }
         : {
@@ -1063,9 +1069,17 @@ export const UnifiedDataTable = ({
             showSortSelector: isSortEnabled,
             additionalControls,
             showDisplaySelector,
+            showKeyboardShortcuts,
             showFullScreenSelector: showFullScreenButton,
           },
-    [defaultColumns, isSortEnabled, additionalControls, showDisplaySelector, showFullScreenButton]
+    [
+      defaultColumns,
+      isSortEnabled,
+      additionalControls,
+      showDisplaySelector,
+      showKeyboardShortcuts,
+      showFullScreenButton,
+    ]
   );
 
   const rowHeightsOptions = useRowHeightsOptions({

@@ -381,7 +381,7 @@ describe('action_type_form', () => {
     jest.useFakeTimers({ legacyFakeTimers: true });
     wrapper.find('[data-test-subj="action-group-error-icon"]').first().simulate('mouseOver');
     // Run the timers so the EuiTooltip will be visible
-    jest.runAllTimers();
+    jest.runOnlyPendingTimers();
     wrapper.update();
     expect(wrapper.find('.euiToolTipPopover').last().text()).toBe('Action contains errors.');
     // Clearing all mocks will also reset fake timers.

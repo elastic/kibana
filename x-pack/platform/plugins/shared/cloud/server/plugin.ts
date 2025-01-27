@@ -10,8 +10,12 @@ import type { CoreSetup, Plugin, PluginInitializerContext } from '@kbn/core/serv
 import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/server';
 import type { SolutionId } from '@kbn/core-chrome-browser';
 
-import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
+import { schema } from '@kbn/config-schema';
+import { parseNextURL } from '@kbn/std';
+
 import type { CloudConfigType } from './config';
+
+import { registerCloudDeploymentMetadataAnalyticsContext } from '../common/register_cloud_deployment_id_analytics_context';
 import { registerCloudUsageCollector } from './collectors';
 import { getIsCloudEnabled } from '../common/is_cloud_enabled';
 import { parseDeploymentIdFromDeploymentUrl } from '../common/parse_deployment_id_from_deployment_url';
@@ -21,7 +25,8 @@ import { getFullCloudUrl } from '../common/utils';
 import { readInstanceSizeMb } from './env';
 import { defineRoutes } from './routes';
 import { CloudRequestHandlerContext } from './routes/types';
-import { setupSavedObjects } from './saved_objects';
+import { CLOUD_DATA_SAVED_OBJECT_TYPE, setupSavedObjects } from './saved_objects';
+import { persistTokenCloudData } from './cloud_data';
 
 interface PluginsSetup {
   usageCollection?: UsageCollectionSetup;
@@ -200,6 +205,64 @@ export class CloudPlugin implements Plugin<CloudSetup, CloudStart> {
       projectType,
       orchestratorTarget,
     });
+    const basePath = core.http.basePath.serverBasePath;
+    core.http.resources.register(
+      {
+        path: '/app/cloud/onboarding',
+        validate: {
+          query: schema.maybe(
+            schema.object(
+              {
+                next: schema.maybe(schema.string()),
+                onboarding_token: schema.maybe(schema.string()),
+              },
+              { unknowns: 'ignore' }
+            )
+          ),
+        },
+        security: {
+          authz: {
+            enabled: false,
+            reason:
+              'Authorization at the API level isn’t required, as it’s implicitly enforced by the scoped `uiSettings` and `SavedObjects` clients used to handle the request.',
+          },
+        },
+      },
+      async (context, request, response) => {
+        const { uiSettings, savedObjects } = await context.core;
+        const defaultRoute = await uiSettings.client.get<string>('defaultRoute');
+        const nextCandidateRoute = parseNextURL(request.url.href);
+
+        const route = nextCandidateRoute === '/' ? defaultRoute : nextCandidateRoute;
+        // need to get reed of ../../ to make sure we will not be out of space basePath
+        const normalizedRoute = new URL(route, 'https://localhost');
+
+        const queryOnboardingToken = request.url.searchParams.get('onboarding_token');
+        const solutionType = this.config.onboarding?.default_solution;
+        if (queryOnboardingToken) {
+          core
+            .getStartServices()
+            .then(async ([coreStart]) => {
+              const soClient = savedObjects.getClient({
+                includedHiddenTypes: [CLOUD_DATA_SAVED_OBJECT_TYPE],
+              });
+
+              await persistTokenCloudData(soClient, {
+                logger: this.logger,
+                onboardingToken: queryOnboardingToken,
+                solutionType,
+              });
+            })
+            .catch((errorMsg) => this.logger.error(errorMsg));
+        }
+        // preserving of the hash is important for the navigation to work correctly with default route
+        return response.redirected({
+          headers: {
+            location: `${basePath}${normalizedRoute.pathname}${normalizedRoute.search}${normalizedRoute.hash}`,
+          },
+        });
+      }
+    );
 
     let decodedId: DecodedCloudId | undefined;
     if (this.config.id) {

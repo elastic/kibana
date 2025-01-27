@@ -8,7 +8,7 @@
 import React, { memo, useCallback } from 'react';
 import { css } from '@emotion/react';
 import { EuiLoadingSpinner } from '@elastic/eui';
-import type { Filter, TimeRange } from '@kbn/es-query';
+import type { Filter, Query, TimeRange } from '@kbn/es-query';
 import dateMath from '@kbn/datemath';
 import { useGetScopedSourcererDataView } from '../../../../sourcerer/components/use_get_sourcerer_data_view';
 import { SourcererScopeName } from '../../../../sourcerer/store/model';
@@ -48,7 +48,7 @@ export const GraphVisualization: React.FC = memo(() => {
   const originEventIds = eventIds.map((id) => ({ id, isAlert }));
   const { investigateInTimeline } = useInvestigateInTimeline();
   const openTimelineCallback = useCallback(
-    (filters: Filter[], timeRange: TimeRange) => {
+    (query: Query | undefined, filters: Filter[], timeRange: TimeRange) => {
       const from = dateMath.parse(timeRange.from);
       const to = dateMath.parse(timeRange.to);
 
@@ -65,6 +65,7 @@ export const GraphVisualization: React.FC = memo(() => {
 
       investigateInTimeline({
         keepDataView: true,
+        query,
         filters,
         timeRange: {
           from: normalizedTimeRange.from,
@@ -97,6 +98,7 @@ export const GraphVisualization: React.FC = memo(() => {
               },
             }}
             showInvestigateInTimeline={true}
+            showToggleSearch={true}
             onInvestigateInTimeline={openTimelineCallback}
           />
         </React.Suspense>

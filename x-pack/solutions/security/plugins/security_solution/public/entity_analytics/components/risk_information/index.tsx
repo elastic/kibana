@@ -32,7 +32,7 @@ import { BETA } from '../../../common/translations';
 import * as i18n from './translations';
 import { useOnOpenCloseHandler } from '../../../helper_hooks';
 import { RiskScoreLevel } from '../severity/common';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
+import type { EntityType } from '../../../../common/entity_analytics/types';
 import { RiskSeverity } from '../../../../common/search_strategy';
 import {
   CriticalityLevels,
@@ -105,7 +105,7 @@ const getCriticalityLevelTableColumns = (): Array<
 export const HOST_RISK_INFO_BUTTON_CLASS = 'HostRiskInformation__button';
 export const USER_RISK_INFO_BUTTON_CLASS = 'UserRiskInformation__button';
 
-export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: RiskScoreEntity }) => {
+export const RiskInformationButtonEmpty = ({ riskEntity }: { riskEntity: EntityType }) => {
   const [isFlyoutVisible, handleOnOpen, handleOnClose] = useOnOpenCloseHandler();
 
   return (
@@ -144,7 +144,7 @@ export const RiskInformationFlyout = ({ handleOnClose }: { handleOnClose: () => 
               label={BETA}
               size="s"
               css={css`
-                color: ${euiTheme.colors.text};
+                color: ${euiTheme.colors.textParagraph};
                 margin-top: ${euiTheme.size.xxs};
               `}
             />

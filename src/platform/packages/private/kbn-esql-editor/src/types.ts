@@ -15,6 +15,8 @@ import type { IndexManagementPluginSetup } from '@kbn/index-management-shared-ty
 import type { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
 import type { UsageCollectionStart } from '@kbn/usage-collection-plugin/public';
 import type { Storage } from '@kbn/kibana-utils-plugin/public';
+import type { UiActionsStart } from '@kbn/ui-actions-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 
 export interface ESQLEditorProps {
   /** The aggregate type query */
@@ -69,6 +71,40 @@ export interface ESQLEditorProps {
 
   /** The component by default focuses on the editor when it is mounted, this flag disables it**/
   disableAutoFocus?: boolean;
+  /** The editor supports the creation of controls,
+   * This flag should be set to true to display the "Create control" suggestion
+   **/
+  supportsControls?: boolean;
+  /** Function to be called after the control creation **/
+  onSaveControl?: (controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>;
+  /** Function to be called after cancelling the control creation **/
+  onCancelControl?: () => void;
+  /** The available ESQL variables from the page context this editor was opened in */
+  esqlVariables?: ESQLControlVariable[];
+}
+
+export interface JoinIndicesAutocompleteResult {
+  indices: JoinIndexAutocompleteItem[];
+}
+
+export interface JoinIndexAutocompleteItem {
+  name: string;
+  mode: 'lookup' | string;
+  aliases: string[];
+}
+
+interface ESQLVariableService {
+  areSuggestionsEnabled: boolean;
+  esqlVariables: ESQLControlVariable[];
+  enableSuggestions: () => void;
+  disableSuggestions: () => void;
+  clearVariables: () => void;
+  addVariable: (variable: ESQLControlVariable) => void;
+}
+
+export interface EsqlPluginStartBase {
+  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  variablesService: ESQLVariableService;
 }
 
 export interface ESQLEditorDeps {
@@ -76,7 +112,9 @@ export interface ESQLEditorDeps {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   storage: Storage;
+  uiActions: UiActionsStart;
   indexManagementApiService?: IndexManagementPluginSetup['apiService'];
   fieldsMetadata?: FieldsMetadataPublicStart;
   usageCollection?: UsageCollectionStart;
+  esql?: EsqlPluginStartBase;
 }

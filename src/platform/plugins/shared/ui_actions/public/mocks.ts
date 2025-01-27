@@ -33,6 +33,7 @@ const createStartContract = (): Start => {
     attachAction: jest.fn(),
     unregisterAction: jest.fn(),
     addTriggerAction: jest.fn(),
+    addTriggerActionAsync: jest.fn(),
     clear: jest.fn(),
     detachAction: jest.fn(),
     executeTriggerActions: jest.fn(),
@@ -41,14 +42,16 @@ const createStartContract = (): Start => {
     hasAction: jest.fn(),
     getTrigger: jest.fn(),
     hasTrigger: jest.fn(),
-    getTriggerActions: jest.fn((id: string) => []),
+    getTriggerActions: jest.fn(async (id: string) => []),
     getTriggerCompatibleActions: jest.fn((triggerId: string, context: object) =>
       Promise.resolve([] as Array<Action<object>>)
     ),
     getFrequentlyChangingActionsForTrigger: jest.fn(
-      (triggerId: string, context: object) => [] as Array<FrequentCompatibilityChangeAction<object>>
+      async (triggerId: string, context: object) =>
+        [] as Array<FrequentCompatibilityChangeAction<object>>
     ),
     registerAction: jest.fn(),
+    registerActionAsync: jest.fn(),
     registerTrigger: jest.fn(),
   };
 

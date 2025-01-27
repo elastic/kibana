@@ -88,6 +88,7 @@
       description: Password used for SASL authentication.
       required: false
       show_user: true
+      secret: true
     - name: kerberos_enabled
       type: bool
       title: Kerberos Enabled
@@ -120,6 +121,7 @@
       description: If you configured password for Auth Type, you have to provide a password for the selected principal.
       required: false
       show_user: false
+      secret: true
     - name: kerberos_keytab
       type: text
       title: Kerberos Keytab

@@ -5,6 +5,7 @@
  * 2.0.
  */
 import { VulnSeverity } from './types/vulnerabilities';
+import { MisconfigurationEvaluationStatus } from './types/misconfigurations';
 
 export const KSPM_POLICY_TEMPLATE = 'kspm';
 export const CSPM_POLICY_TEMPLATE = 'cspm';
@@ -48,7 +49,8 @@ export const VULNERABILITIES_SEVERITY: Record<VulnSeverity, VulnSeverity> = {
   UNKNOWN: 'UNKNOWN',
 };
 
-export const MISCONFIGURATION_STATUS: Record<string, string> = {
+export const MISCONFIGURATION_STATUS: Record<string, MisconfigurationEvaluationStatus> = {
   PASSED: 'passed',
   FAILED: 'failed',
+  UNKNOWN: 'unknown',
 };

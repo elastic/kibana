@@ -1378,6 +1378,66 @@ const dateDiffDefinition: FunctionDefinition = {
       params: [
         {
           name: 'unit',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
           type: 'text',
           optional: false,
         },
@@ -1389,6 +1449,66 @@ const dateDiffDefinition: FunctionDefinition = {
         {
           name: 'endTimestamp',
           type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'unit',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'startTimestamp',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'endTimestamp',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -1500,7 +1620,57 @@ const dateFormatDefinition: FunctionDefinition = {
       params: [
         {
           name: 'dateFormat',
+          type: 'date',
+          optional: true,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'dateFormat',
+          type: 'date_nanos',
+          optional: true,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'dateFormat',
           type: 'keyword',
+          optional: true,
+        },
+        {
+          name: 'date',
+          type: 'date',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'dateFormat',
+          type: 'keyword',
+          optional: true,
+        },
+        {
+          name: 'date',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'dateFormat',
+          type: 'text',
           optional: true,
         },
         {
@@ -1520,7 +1690,7 @@ const dateFormatDefinition: FunctionDefinition = {
         },
         {
           name: 'date',
-          type: 'date',
+          type: 'date_nanos',
           optional: false,
         },
       ],
@@ -3524,7 +3694,7 @@ const matchDefinition: FunctionDefinition = {
   name: 'match',
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.match', {
     defaultMessage:
-      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on text fields, as well as other field types like boolean, dates, and numeric types.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
+      'Use `MATCH` to perform a match query on the specified field.\nUsing `MATCH` is equivalent to using the `match` query in the Elasticsearch Query DSL.\n\nMatch can be used on fields from the text family like  text and  semantic_text,\nas well as other field types like keyword, boolean, dates, and numeric types.\n\nFor a simplified syntax, you can use the match operator `:` operator instead of `MATCH`.\n\n`MATCH` returns true if the provided query matches the row.',
   }),
   preview: true,
   alias: undefined,
@@ -4115,6 +4285,21 @@ const mvAppendDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
+          type: 'date_nanos',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'date_nanos',
+          optional: false,
+        },
+      ],
+      returnType: 'date_nanos',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
           type: 'double',
           optional: false,
         },
@@ -4205,6 +4390,21 @@ const mvAppendDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field1',
+          type: 'keyword',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'text',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
           type: 'long',
           optional: false,
         },
@@ -4225,11 +4425,41 @@ const mvAppendDefinition: FunctionDefinition = {
         },
         {
           name: 'field2',
+          type: 'keyword',
+          optional: false,
+        },
+      ],
+      returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'text',
+          optional: false,
+        },
+        {
+          name: 'field2',
           type: 'text',
           optional: false,
         },
       ],
       returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field1',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'field2',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
     },
     {
       params: [
@@ -4699,6 +4929,16 @@ const mvDedupeDefinition: FunctionDefinition = {
         },
       ],
       returnType: 'keyword',
+    },
+    {
+      params: [
+        {
+          name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
     },
     {
       params: [
@@ -5907,6 +6147,26 @@ const mvSliceDefinition: FunctionDefinition = {
       params: [
         {
           name: 'field',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'start',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'end',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'field',
           type: 'version',
           optional: false,
         },
@@ -7108,6 +7368,21 @@ const roundDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'double',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'double',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'integer',
           optional: false,
         },
@@ -7133,6 +7408,21 @@ const roundDefinition: FunctionDefinition = {
       params: [
         {
           name: 'number',
+          type: 'integer',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
+          optional: true,
+        },
+      ],
+      returnType: 'integer',
+    },
+    {
+      params: [
+        {
+          name: 'number',
           type: 'long',
           optional: false,
         },
@@ -7149,6 +7439,21 @@ const roundDefinition: FunctionDefinition = {
         {
           name: 'decimals',
           type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'long',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'long',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
           optional: true,
         },
       ],
@@ -7160,6 +7465,36 @@ const roundDefinition: FunctionDefinition = {
           name: 'number',
           type: 'unsigned_long',
           optional: false,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'integer',
+          optional: true,
+        },
+      ],
+      returnType: 'unsigned_long',
+    },
+    {
+      params: [
+        {
+          name: 'number',
+          type: 'unsigned_long',
+          optional: false,
+        },
+        {
+          name: 'decimals',
+          type: 'long',
+          optional: true,
         },
       ],
       returnType: 'unsigned_long',
@@ -9216,7 +9551,7 @@ const toDateNanosDefinition: FunctionDefinition = {
   description: i18n.translate('kbn-esql-validation-autocomplete.esql.definitions.to_date_nanos', {
     defaultMessage: 'Converts an input to a nanosecond-resolution date value (aka date_nanos).',
   }),
-  preview: true,
+  preview: false,
   alias: undefined,
   signatures: [
     {

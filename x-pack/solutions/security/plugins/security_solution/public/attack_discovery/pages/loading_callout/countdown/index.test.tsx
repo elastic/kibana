@@ -6,14 +6,14 @@
  */
 
 import moment from 'moment';
-
+import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 import { act, render, screen } from '@testing-library/react';
 import React from 'react';
 
 import { Countdown } from '.';
 import { TestProviders } from '../../../../common/mock';
+import { INFORMATION } from '../translations';
 import { APPROXIMATE_TIME_REMAINING } from './translations';
-import type { GenerationInterval } from '@kbn/elastic-assistant-common';
 
 describe('Countdown', () => {
   const connectorIntervals: GenerationInterval[] = [
@@ -80,5 +80,15 @@ describe('Countdown', () => {
     });
 
     expect(screen.getByTestId('timerText')).toHaveTextContent('00:59');
+  });
+
+  it('renders an accessible information button icon', () => {
+    render(
+      <TestProviders>
+        <Countdown approximateFutureTime={null} connectorIntervals={connectorIntervals} />
+      </TestProviders>
+    );
+
+    expect(screen.getByRole('button', { name: INFORMATION })).toBeInTheDocument();
   });
 });
