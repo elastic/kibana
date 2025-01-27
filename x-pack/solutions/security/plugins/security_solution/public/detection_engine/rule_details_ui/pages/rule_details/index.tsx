@@ -147,6 +147,7 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -287,7 +288,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const mlCapabilities = useMlCapabilities();
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-
+  const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
@@ -799,8 +800,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       theme={theme}
                     />
                     <EuiSpacer size="xl" />
-                    <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
-                    <EuiSpacer size="xl" />
+                    {storeGapsInEventLogEnabled && (
+                      <>
+                        <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
+                        <EuiSpacer size="xl" />
+                      </>
+                    )}
                     <RuleBackfillsInfo ruleId={ruleId} />
                   </>
                 </Route>
