@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export { EntSearchLogStream } from './log_stream';
+import type { EngineStatus } from '../../../../../../common/api/entity_analytics/entity_store/common.gen';
+
+export const isEngineLoading = (status: EngineStatus | undefined) =>
+  status === 'updating' || status === 'installing';
