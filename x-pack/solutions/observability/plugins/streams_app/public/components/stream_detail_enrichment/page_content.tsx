@@ -54,13 +54,14 @@ export function StreamDetailEnrichmentContent({
     deleteProcessor,
     resetChanges,
     saveChanges,
-    setProcessors,
+    orderProcessors,
     hasChanges,
     isSavingChanges,
   } = useDefinition(definition, refreshDefinition);
 
   const { error, isLoading, refreshSamples, simulation, samples } = useProcessingSimulator({
     definition,
+    processors,
     condition: {
       field: processors[0] ? getProcessorConfig(processors[0]).field : '',
       operator: 'exists',
@@ -70,7 +71,7 @@ export function StreamDetailEnrichmentContent({
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       const items = euiDragDropReorder(processors, source.index, destination.index);
-      setProcessors(items);
+      orderProcessors(items);
     }
   };
 

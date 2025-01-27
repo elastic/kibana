@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { useState, useMemo, useEffect } from 'react';
+import { useState, useMemo, useEffect, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useBoolean } from '@kbn/react-hooks';
@@ -18,8 +18,7 @@ import {
   ProcessorDefinition,
   getProcessorType,
 } from '@kbn/streams-schema';
-import { isEqual } from 'lodash';
-import { DetectedField } from '../types';
+import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { processorConverter } from '../utils';
 
@@ -36,6 +35,9 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   const [processors, setProcessors] = useState(() =>
     createProcessorsList(existingProcessorDefinitions)
   );
+
+  const initialProcessors = useRef(processors);
+
   const [fields, setFields] = useState(() =>
     isWiredReadStream(definition) ? definition.stream.ingest.wired.fields : {}
   );
@@ -47,11 +49,15 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
 
   useEffect(() => {
     // Reset processors when definition refreshes
-    setProcessors(createProcessorsList(definition.stream.ingest.processing));
+    const resetProcessors = createProcessorsList(definition.stream.ingest.processing);
+    setProcessors(resetProcessors);
+    initialProcessors.current = resetProcessors;
   }, [definition]);
 
   const hasChanges = useMemo(
-    () => processors.some((proc) => proc.status === 'draft' || proc.status === 'updated'),
+    () =>
+      processors.some((proc) => proc.status === 'draft' || proc.status === 'updated') ||
+      hasOrderChanged(processors, initialProcessors.current),
     [processors]
   );
 
@@ -80,12 +86,18 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
     );
   };
 
+  const orderProcessors = (udpatedProcessors: ProcessorDefinitionWithUIAttributes[]) => {
+    setProcessors(udpatedProcessors);
+  };
+
   const deleteProcessor = (id: string) => {
     setProcessors((prevProcs) => prevProcs.filter((proc) => proc.id !== id));
   };
 
   const resetChanges = () => {
-    setProcessors(createProcessorsList(existingProcessorDefinitions));
+    const resetProcessors = createProcessorsList(existingProcessorDefinitions);
+    setProcessors(resetProcessors);
+    initialProcessors.current = resetProcessors;
     setFields(isWiredReadStream(definition) ? definition.stream.ingest.wired.fields : {});
   };
 
@@ -135,6 +147,7 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
     addProcessor,
     updateProcessor,
     deleteProcessor,
+    orderProcessors,
     resetChanges,
     saveChanges,
     setProcessors,
@@ -146,6 +159,13 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
 
 const createProcessorsList = (processors: ProcessorDefinition[]) => {
   return processors.map((processor) => processorConverter.toUIDefinition(processor));
+};
+
+const hasOrderChanged = (
+  processors: ProcessorDefinitionWithUIAttributes[],
+  initialProcessors: ProcessorDefinitionWithUIAttributes[]
+) => {
+  return processors.some((processor, index) => processor.id !== initialProcessors[index].id);
 };
 
 const mergeFields = (

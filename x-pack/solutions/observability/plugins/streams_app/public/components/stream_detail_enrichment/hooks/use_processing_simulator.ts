@@ -8,7 +8,12 @@
 /* eslint-disable @typescript-eslint/naming-convention */
 
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
-import { ReadStreamDefinition, Condition, ProcessorDefinition } from '@kbn/streams-schema';
+import {
+  ReadStreamDefinition,
+  Condition,
+  ProcessorDefinition,
+  FieldDefinition,
+} from '@kbn/streams-schema';
 import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
@@ -28,18 +33,18 @@ export interface UseProcessingSimulatorReturnType {
   isLoading: boolean;
   refreshSamples: () => void;
   samples: Array<Record<PropertyKey, unknown>>;
-  simulate: (
-    processing: ProcessorDefinition,
-    detectedFields?: DetectedField[]
-  ) => Promise<Simulation | null>;
   simulation?: Simulation | null;
 }
 
 export const useProcessingSimulator = ({
   definition,
+  fields,
+  processors,
   condition,
 }: {
   definition: ReadStreamDefinition;
+  fields: FieldDefinition[];
+  processors: ProcessorDefinition[];
   condition?: Condition;
 }): UseProcessingSimulatorReturnType => {
   const { dependencies } = useKibana();
@@ -85,16 +90,11 @@ export const useProcessingSimulator = ({
 
   const sampleDocs = (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
 
-  const [{ loading: isLoadingSimulation, error, value }, simulate] = useAsyncFn(
+  const [{ loading: isLoadingSimulation, error, value }] = useAsyncFn(
     (processingDefinition: ProcessorDefinition, detectedFields?: DetectedField[]) => {
       if (!definition) {
         return Promise.resolve(null);
       }
-
-      const processorDefinition: ProcessorDefinition =
-        'grok' in processingDefinition
-          ? { grok: processingDefinition.grok }
-          : { dissect: processingDefinition.dissect };
 
       const detected_fields = detectedFields
         ? (detectedFields.filter(
@@ -108,7 +108,7 @@ export const useProcessingSimulator = ({
           path: { id: definition.name },
           body: {
             documents: sampleDocs,
-            processing: [processorDefinition],
+            processing: processors,
             detected_fields,
           },
         },
@@ -121,7 +121,6 @@ export const useProcessingSimulator = ({
     isLoading: isLoadingSamples || isLoadingSimulation,
     error: error as IHttpFetchError<ResponseErrorBody> | undefined,
     refreshSamples,
-    simulate,
     simulation: value,
     samples: sampleDocs,
   };

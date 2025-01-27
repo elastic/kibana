@@ -239,6 +239,10 @@ export function EditProcessorPanel({
           /* Allow text ellipsis in flex child nodes */
           css: css`
             min-width: 0;
+            &:is(:hover, :focus) {
+              cursor: grab;
+              text-decoration: none;
+            }
           `,
         }}
         forceState={isOpen ? 'open' : 'closed'}
