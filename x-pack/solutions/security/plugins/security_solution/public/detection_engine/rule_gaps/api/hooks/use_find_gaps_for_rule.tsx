@@ -9,7 +9,7 @@ import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { useCallback } from 'react';
 import type { FindGapsResponseBody } from '@kbn/alerting-plugin/common/routes/gaps/apis/find';
 import { findGapsForRule } from '../api';
-import type { Gap, GapStatus } from '../../types';
+import type { GapStatus } from '../../types';
 
 const FIND_GAPS_FOR_RULE = 'FIND_GAP_FOR_RULE';
 
