@@ -56,7 +56,7 @@ function RoutingExplorer({
                   },
                   {
                     label: 'HttpHandler (core.http.fetch) API docs',
-                    href: 'https://github.com/elastic/kibana/blob/8.3/docs/development/core/public/kibana-plugin-core-public.httphandler.md',
+                    href: 'https://docs.elastic.dev/kibana-dev-docs/api/kbn-core-http-browser#:~:text=HttpHandler',
                     iconType: 'logoGithub',
                     target: '_blank',
                     size: 's',
