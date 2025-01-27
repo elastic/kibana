@@ -24,10 +24,7 @@ import { TextPopover } from './titles_and_text_popover';
 import { getScaleType } from '../to_expression';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
-import {
-  AxesSettingsConfig,
-  type AxesSettingsConfigKeys,
-} from '../../../shared_components/axis/types';
+import type { AxesSettingsConfig, AxesSettingsConfigKeys } from '../../../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 
