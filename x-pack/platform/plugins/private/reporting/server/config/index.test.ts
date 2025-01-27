@@ -36,20 +36,16 @@ const applyReportingDeprecations = (settings: Record<string, any> = {}) => {
 };
 
 describe('deprecations', () => {
-  it('logs a warning of roles.enabled for defaults', () => {
+  it('does not log a warning of roles.enabled for defaults', () => {
     const { messages } = applyReportingDeprecations({});
-    expect(messages).toMatchInlineSnapshot(`
-      Array [
-        "The default mechanism for Reporting privileges will work differently in future versions, which will affect the behavior of this cluster. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
-      ]
-    `);
+    expect(messages).toMatchInlineSnapshot(`Array []`);
   });
 
-  it('logs a warning if roles.enabled: true is set', () => {
-    const { messages } = applyReportingDeprecations({ roles: { enabled: true } });
+  it(`logs a warning if roles.allow: ['my_reporting_role'] is set`, () => {
+    const { messages } = applyReportingDeprecations({ roles: { allow: ['my_reporting_role'] } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "The default mechanism for Reporting privileges will work differently in future versions, which will affect the behavior of this cluster. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
+        "The default mechanism for Reporting privileges will work differently in future versions, which will affect the behavior of this cluster. Remove \\"xpack.reporting.roles.allow\\" to adopt the future behavior before upgrading.",
       ]
     `);
   });
@@ -58,7 +54,6 @@ describe('deprecations', () => {
     const { messages } = applyReportingDeprecations({ csv: { enablePanelActionDownload: true } });
     expect(messages).toMatchInlineSnapshot(`
       Array [
-        "The default mechanism for Reporting privileges will work differently in future versions, which will affect the behavior of this cluster. Set \\"xpack.reporting.roles.enabled\\" to \\"false\\" to adopt the future behavior before upgrading.",
         "The \\"xpack.reporting.csv.enablePanelActionDownload\\" setting is deprecated.",
       ]
     `);
@@ -67,7 +62,6 @@ describe('deprecations', () => {
   it('does not log a warning recommended settings are used', () => {
     const { messages } = applyReportingDeprecations({
       csv: { enablePanelActionDownload: false },
-      roles: { enabled: false },
     });
     expect(messages).toMatchInlineSnapshot(`Array []`);
   });
