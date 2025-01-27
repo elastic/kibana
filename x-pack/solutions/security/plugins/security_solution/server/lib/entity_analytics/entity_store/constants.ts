@@ -11,6 +11,7 @@ import type {
   InitEntityEngineRequestBody,
   StoreStatus,
 } from '../../../../common/api/entity_analytics';
+import { DEFAULT_INTERVAL } from './task/constants';
 
 export const DEFAULT_LOOKBACK_PERIOD = '24h';
 export const DEFAULT_FIELD_HISTORY_LENGTH = 10;
@@ -30,11 +31,11 @@ export const defaultOptions: Expand<
   timeout: DEFAULT_TIMEOUT,
   frequency: DEFAULT_FREQUENCY,
   docsPerSecond: DEFAULT_DOCS_PER_SECOND,
-  // TODO: wait for Charlotte's PR
-  // lookbackPeriod: DEFAULT_LOOKBACK_PERIOD,
+  lookbackPeriod: DEFAULT_LOOKBACK_PERIOD,
   fieldHistoryLength: DEFAULT_FIELD_HISTORY_LENGTH,
   indexPattern: DEFAULT_INDEX_PATTERNS,
   filter: DEFAULT_KQL_FILTER,
+  enrichPolicyExecutionInterval: DEFAULT_INTERVAL,
 };
 
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
