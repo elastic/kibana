@@ -14,7 +14,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/delete_comment'));
     loadTestFile(require.resolve('./comments/find_comments'));
     loadTestFile(require.resolve('./comments/get_comment'));
-    loadTestFile(require.resolve('./comments/get_all_comments'));
     loadTestFile(require.resolve('./comments/patch_comment'));
     loadTestFile(require.resolve('./comments/post_comment'));
     loadTestFile(require.resolve('./files/post_file'));
@@ -26,7 +25,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./cases/reporters/get_reporters'));
     loadTestFile(require.resolve('./cases/status/get_status'));
     loadTestFile(require.resolve('./cases/tags/get_tags'));
-    loadTestFile(require.resolve('./user_actions/get_all_user_actions'));
     loadTestFile(require.resolve('./configure/get_configure'));
     loadTestFile(require.resolve('./configure/patch_configure'));
     loadTestFile(require.resolve('./configure/post_configure'));
