@@ -51,7 +51,7 @@ import {
   injectESQLQueryIntoLensLayers,
 } from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
-import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
+import { enrichLensAttributesWithTablesData, TIMESTAMP_COLUMN } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
@@ -502,7 +502,7 @@ export class LensVisService {
         fieldName: '',
         textBasedColumns: [
           {
-            id: 'timestamp',
+            id: TIMESTAMP_COLUMN,
             name: dateFieldLabel,
             meta: {
               type: 'date',
@@ -603,7 +603,7 @@ export class LensVisService {
 
     return appendToESQLQuery(
       safeQuery,
-      `| EVAL timestamp=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by timestamp${breakdown}${sortBy}`
+      `| EVAL ${TIMESTAMP_COLUMN}=DATE_TRUNC(${queryInterval}, ${dataView.timeFieldName}) | stats results = count(*) by ${TIMESTAMP_COLUMN}${breakdown}${sortBy}`
     );
   };
 

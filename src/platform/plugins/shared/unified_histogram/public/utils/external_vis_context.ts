@@ -17,6 +17,8 @@ import type { PieVisualizationState, Suggestion, XYState } from '@kbn/lens-plugi
 import { UnifiedHistogramSuggestionType, UnifiedHistogramVisContext } from '../types';
 import { removeTablesFromLensAttributes } from './lens_vis_from_table';
 
+export const TIMESTAMP_COLUMN = 'timestamp';
+
 export interface QueryParams {
   dataView: DataView;
   query?: Query | AggregateQuery;
@@ -109,7 +111,7 @@ const injectIntervalToDateTimeColumn = (
   columns: TextBasedLayerColumn[],
   dateFieldLabel: string
 ) => {
-  const dateColumn = columns.find((column) => column.columnId === 'timestamp');
+  const dateColumn = columns.find((column) => column.columnId === TIMESTAMP_COLUMN);
   if (dateColumn && dateColumn.label !== dateFieldLabel && dateColumn.customLabel) {
     dateColumn.label = dateFieldLabel;
   }
