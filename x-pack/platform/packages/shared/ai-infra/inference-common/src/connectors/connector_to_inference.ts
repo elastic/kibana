@@ -6,11 +6,9 @@
  */
 
 import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
-import {
-  createInferenceRequestError,
-  InferenceConnector,
-  isSupportedConnector,
-} from '@kbn/inference-common';
+import { createInferenceRequestError } from '../errors';
+import type { InferenceConnector } from './connectors';
+import { isSupportedConnector } from './is_supported_connector';
 
 /**
  * Converts an action connector to the internal inference connector format.

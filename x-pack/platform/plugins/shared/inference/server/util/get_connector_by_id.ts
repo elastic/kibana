@@ -6,8 +6,11 @@
  */
 
 import type { ActionsClient, ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
-import { createInferenceRequestError, type InferenceConnector } from '@kbn/inference-common';
-import { connectorToInference } from './connector_to_inference';
+import {
+  createInferenceRequestError,
+  connectorToInference,
+  type InferenceConnector,
+} from '@kbn/inference-common';
 
 /**
  * Retrieves a connector given the provided `connectorId` and asserts it's an inference connector

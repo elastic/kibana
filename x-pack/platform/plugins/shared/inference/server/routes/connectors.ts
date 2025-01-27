@@ -6,9 +6,12 @@
  */
 
 import type { CoreSetup, IRouter, RequestHandlerContext } from '@kbn/core/server';
-import { InferenceConnector, isSupportedConnectorType } from '@kbn/inference-common';
+import {
+  InferenceConnector,
+  isSupportedConnectorType,
+  connectorToInference,
+} from '@kbn/inference-common';
 import type { InferenceServerStart, InferenceStartDependencies } from '../types';
-import { connectorToInference } from '../util/connector_to_inference';
 
 export function registerConnectorsRoute({
   coreSetup,

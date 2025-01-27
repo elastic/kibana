@@ -76,7 +76,7 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
  * ```ts
  * const chatModel = new InferenceChatModel({
  *    chatComplete: inference.chatComplete,
- *    connectorId: someConnectorId,
+ *    connector: someConnector,
  * });
  *
  * // just use it as another langchain chatModel

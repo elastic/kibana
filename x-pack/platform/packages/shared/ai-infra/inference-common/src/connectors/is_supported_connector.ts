@@ -5,36 +5,14 @@
  * 2.0.
  */
 
-/**
- * The list of connector types that can be used with the inference APIs
- */
-export enum InferenceConnectorType {
-  OpenAI = '.gen-ai',
-  Bedrock = '.bedrock',
-  Gemini = '.gemini',
-  Inference = '.inference',
-}
+import {
+  InferenceConnectorType,
+  RawInferenceConnector,
+  RawConnector,
+  allSupportedConnectorTypes,
+} from './connectors';
 
 export const COMPLETION_TASK_TYPE = 'chat_completion';
-
-const allSupportedConnectorTypes = Object.values(InferenceConnectorType);
-
-/**
- * Represents a stack connector that can be used for inference.
- */
-export interface InferenceConnector {
-  /** the type of the connector, see {@link InferenceConnectorType} */
-  type: InferenceConnectorType;
-  /** the name of the connector */
-  name: string;
-  /** the id of the connector */
-  connectorId: string;
-  /**
-   * configuration (without secrets) of the connector.
-   * the list of properties depends on the connector type (and subtype for inference)
-   */
-  config: Record<string, string>;
-}
 
 /**
  * Checks if a given connector type is compatible for inference.
@@ -65,23 +43,4 @@ export function isSupportedConnector(connector: RawConnector): connector is RawI
     }
   }
   return true;
-}
-
-/**
- * Connector types are living in the actions plugin and we can't afford
- * having dependencies from this package to some mid-level plugin,
- * so we're just using our own connector mixin type.
- */
-export interface RawConnector {
-  id: string;
-  actionTypeId: string;
-  name: string;
-  config?: Record<string, any>;
-}
-
-interface RawInferenceConnector {
-  id: string;
-  actionTypeId: InferenceConnectorType;
-  name: string;
-  config?: Record<string, any>;
 }

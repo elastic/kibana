@@ -5,13 +5,8 @@
  * 2.0.
  */
 
-import {
-  InferenceConnectorType,
-  isSupportedConnectorType,
-  isSupportedConnector,
-  RawConnector,
-  COMPLETION_TASK_TYPE,
-} from './connectors';
+import { InferenceConnectorType, RawConnector, COMPLETION_TASK_TYPE } from './connectors';
+import { isSupportedConnectorType, isSupportedConnector } from './is_supported_connector';
 
 const createRawConnector = (parts: Partial<RawConnector>): RawConnector => {
   return {
@@ -36,8 +31,6 @@ describe('isSupportedConnectorType', () => {
 });
 
 describe('isSupportedConnector', () => {
-  // TODO
-
   it('returns true for OpenAI connectors', () => {
     expect(
       isSupportedConnector(createRawConnector({ actionTypeId: InferenceConnectorType.OpenAI }))
