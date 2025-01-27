@@ -33,7 +33,6 @@ const defaultEngineResponse: GetEntityStoreStatusResponse['engines'][0] = {
   status: 'started',
   fieldHistoryLength: 0,
   components: [defaultComponent],
-  lookbackPeriod: '',
 };
 
 describe('EngineStatusHeaderAction', () => {
