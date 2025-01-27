@@ -5,14 +5,14 @@
  * 2.0.
  */
 
+import { getAncestorsAndSelf } from '@kbn/streams-schema';
 import { ASSET_VERSION } from '../../../../common/constants';
 import { getProcessingPipelineName } from '../ingest_pipelines/name';
 import { getIndexTemplateName } from './name';
 
 export function generateIndexTemplate(id: string, isServerless: boolean) {
-  const composedOf = id.split('.').reduce((acc, _, index, array) => {
-    const parent = array.slice(0, index + 1).join('.');
-    return [...acc, `${parent}@stream.layer`];
+  const composedOf = getAncestorsAndSelf(id).reduce((acc, ancestorId) => {
+    return [...acc, `${ancestorId}@stream.layer`];
   }, [] as string[]);
 
   return {
