@@ -22,6 +22,7 @@ import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
 import {
   StreamDefinition,
+  getSegments,
   isDescendantOf,
   isUnwiredStreamDefinition,
   isWiredStreamDefinition,
@@ -41,12 +42,12 @@ export interface StreamTree {
 function asTrees(definitions: StreamDefinition[]) {
   const trees: StreamTree[] = [];
   const wiredDefinitions = definitions.filter((definition) => isWiredStreamDefinition(definition));
-  wiredDefinitions.sort((a, b) => a.name.split('.').length - b.name.split('.').length);
+  wiredDefinitions.sort((a, b) => getSegments(a.name).length - getSegments(b.name).length);
 
   wiredDefinitions.forEach((definition) => {
     let currentTree = trees;
     let existingNode: StreamTree | undefined;
-    const segments = definition.name.split('.');
+    const segments = getSegments(definition.name);
     // traverse the tree following the prefix of the current id.
     // once we reach the leaf, the current id is added as child - this works because the ids are sorted by depth
     while (
