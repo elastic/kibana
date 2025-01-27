@@ -517,10 +517,19 @@ export const getRuleRangeTuples = async ({
     0
   );
 
+  let gapRange;
+  if (remainingGapMilliseconds > 0 && previousStartedAt != null) {
+    gapRange = {
+      gte: previousStartedAt.toISOString(),
+      lte: moment(previousStartedAt).add(remainingGapMilliseconds).toDate().toISOString(),
+    };
+  }
+
   return {
     tuples: tuples.reverse(),
     remainingGap: moment.duration(remainingGapMilliseconds),
     warningStatusMessage,
+    gap: gapRange,
   };
 };
 
