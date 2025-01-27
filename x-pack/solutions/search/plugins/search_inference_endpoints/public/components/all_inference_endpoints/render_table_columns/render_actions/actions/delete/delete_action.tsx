@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React from 'react';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
 import { InferenceEndpointUI } from '../../../../types';
 import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
@@ -21,9 +21,7 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({
   onCancel,
   displayModal,
 }) => {
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(displayModal);
-
-  const { mutate: deleteEndpoint } = useDeleteEndpoint(() => setIsModalVisible(false));
+  const { mutate: deleteEndpoint } = useDeleteEndpoint(onCancel);
 
   const onConfirmDeletion = () => {
     if (!selectedEndpoint) {
@@ -38,7 +36,7 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({
 
   return (
     <>
-      {isModalVisible ? (
+      {displayModal ? (
         <ConfirmDeleteEndpointModal
           onCancel={onCancel}
           onConfirm={onConfirmDeletion}
