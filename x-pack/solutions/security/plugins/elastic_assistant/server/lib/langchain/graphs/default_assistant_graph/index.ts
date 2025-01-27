@@ -14,6 +14,7 @@ import {
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
+import { getModelOrOss } from '../../../../routes/helpers';
 import { getPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
 import { EsAnonymizationFieldsSchema } from '../../../../ai_assistant_data_clients/anonymization_fields/types';
@@ -136,7 +137,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     actionsClient,
     connectorId,
     // use oss as model when using openai and oss
-    model: llmType === 'openai' && isOssModel ? 'oss' : request.body.model,
+    model: getModelOrOss(llmType, isOssModel, request.body.model),
     promptId: promptDictionary.systemPrompt,
     provider: llmType,
     savedObjectsClient,
