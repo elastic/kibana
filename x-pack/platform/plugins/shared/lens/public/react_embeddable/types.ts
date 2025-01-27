@@ -13,6 +13,7 @@ import type {
   TimeRange,
 } from '@kbn/es-query';
 import type { Adapters, InspectorOptions } from '@kbn/inspector-plugin/public';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type {
   HasEditCapabilities,
   HasLibraryTransforms,
@@ -26,8 +27,8 @@ import type {
   PublishesUnifiedSearch,
   PublishesViewMode,
   PublishesRendered,
-  PublishesWritablePanelDescription,
-  PublishesWritablePanelTitle,
+  PublishesWritableDescription,
+  PublishesWritableTitle,
   PublishingSubject,
   SerializedTitles,
   ViewMode,
@@ -391,8 +392,8 @@ export type LensApi = Simplify<
     // Let the container know the used data views
     PublishesDataViews &
     // Let the container operate on panel title/description
-    PublishesWritablePanelTitle &
-    PublishesWritablePanelDescription &
+    PublishesWritableTitle &
+    PublishesWritableDescription &
     // This embeddable can narrow down specific triggers usage
     HasSupportedTriggers &
     PublishesDisabledActionIds &
@@ -417,6 +418,7 @@ export type LensInternalApi = Simplify<
   Pick<IntegrationCallbacks, 'updateAttributes' | 'updateOverrides'> &
     PublishesDataViews &
     VisualizationContextHelper & {
+      esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
       attributes$: PublishingSubject<LensRuntimeState['attributes']>;
       overrides$: PublishingSubject<LensOverrides['overrides']>;
       disableTriggers$: PublishingSubject<LensPanelProps['disableTriggers']>;
@@ -523,3 +525,24 @@ export type LensByReferenceInput = Omit<LensRendererPrivateProps, 'attributes'>;
 export type TypedLensByValueInput = Omit<LensRendererProps, 'savedObjectId'>;
 export type LensEmbeddableInput = LensByValueInput | LensByReferenceInput;
 export type LensEmbeddableOutput = LensApi;
+
+export interface ControlGroupApi {
+  addNewPanel: (panelState: Record<string, unknown>) => void;
+}
+
+interface ESQLVariablesCompatibleDashboardApi {
+  esqlVariables$: PublishingSubject<ESQLControlVariable[]>;
+  controlGroupApi$: PublishingSubject<ControlGroupApi | undefined>;
+  children$: PublishingSubject<{ [key: string]: unknown }>;
+}
+
+export const isApiESQLVariablesCompatible = (
+  api: unknown | null
+): api is ESQLVariablesCompatibleDashboardApi => {
+  return Boolean(
+    api &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.esqlVariables$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.controlGroupApi$ !== undefined &&
+      (api as ESQLVariablesCompatibleDashboardApi)?.children$ !== undefined
+  );
+};
