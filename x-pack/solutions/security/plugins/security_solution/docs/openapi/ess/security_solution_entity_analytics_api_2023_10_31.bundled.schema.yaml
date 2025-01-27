@@ -307,6 +307,8 @@ paths:
             schema:
               type: object
               properties:
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Interval'
                 entityTypes:
                   items:
                     $ref: '#/components/schemas/EntityType'
