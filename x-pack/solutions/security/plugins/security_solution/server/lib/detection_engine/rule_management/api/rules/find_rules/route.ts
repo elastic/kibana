@@ -8,13 +8,13 @@
 import type { IKibanaResponse, Logger } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
+import { gapStatus } from '@kbn/alerting-plugin/common';
 import { DETECTION_ENGINE_RULES_URL_FIND } from '../../../../../../../common/constants';
 import type { FindRulesResponse } from '../../../../../../../common/api/detection_engine/rule_management';
 import {
   FindRulesRequestQuery,
   validateFindRulesRequestQuery,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-
 import type { SecuritySolutionPluginRouter } from '../../../../../../types';
 import { findRules } from '../../../logic/search/find_rules';
 import { buildSiemResponse } from '../../../../routes/utils';
@@ -53,13 +53,14 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = await ctx.alerting.getRulesClient();
 
-          let ruleIds: string[] = [];
+          let ruleIds: string[] | undefined;
           if (query.gaps_range_start && query.gaps_range_end) {
             const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
               start: query.gaps_range_start,
               end: query.gaps_range_end,
+              statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
             });
-            ruleIds = ruleIdsWithGaps.ruleIds ?? [];
+            ruleIds = ruleIdsWithGaps.ruleIds;
           }
 
           const rules = await findRules({
@@ -70,7 +71,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
             sortOrder: query.sort_order,
             filter: query.filter,
             fields: query.fields,
-            ruleIds: ruleIds ?? [],
+            ruleIds,
           });
 
           const transformed = transformFindAlerts(rules);
