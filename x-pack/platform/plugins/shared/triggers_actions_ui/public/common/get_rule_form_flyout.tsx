@@ -38,10 +38,10 @@ export const getRuleFormFlyoutLazy = <MetaData extends RuleTypeMetaData = RuleTy
                 title={
                   <h2>
                     {isEdit
-                      ? i18n.translate('xpack.triggersActionsUi.ruleFormFlyout.loadingEditText', {
+                      ? i18n.translate('xpack.triggersActionsUI.ruleFormFlyout.loadingEditText', {
                           defaultMessage: 'Loading edit rule form',
                         })
-                      : i18n.translate('xpack.triggersActionsUi.ruleFormFlyout.loadingCreateText', {
+                      : i18n.translate('xpack.triggersActionsUI.ruleFormFlyout.loadingCreateText', {
                           defaultMessage: 'Loading create rule form',
                         })}
                   </h2>
