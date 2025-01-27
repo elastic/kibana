@@ -26084,14 +26084,9 @@
                     "type": "array"
                   },
                   "is_default": {
-                    "default": false,
                     "type": "boolean"
                   },
                   "is_internal": {
-                    "type": "boolean"
-                  },
-                  "is_preconfigured": {
-                    "default": false,
                     "type": "boolean"
                   },
                   "name": {
@@ -26103,8 +26098,12 @@
                   }
                 },
                 "required": [
-                  "name",
-                  "host_urls"
+                  "proxy_id",
+                  "certificate",
+                  "certificate_key",
+                  "es_certificate_authorities",
+                  "es_certificate",
+                  "es_certificate_key"
                 ],
                 "type": "object"
               }
