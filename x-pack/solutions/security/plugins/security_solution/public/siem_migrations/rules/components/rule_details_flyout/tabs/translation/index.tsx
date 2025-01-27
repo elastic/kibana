@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React from 'react';
 import {
   EuiAccordion,
   EuiBadge,
@@ -23,13 +23,13 @@ import { RuleTranslationResult } from '../../../../../../../common/siem_migratio
 import type { RuleResponse } from '../../../../../../../common/api/detection_engine';
 import type { RuleMigration } from '../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import { TranslationTabHeader } from './header';
-import { MigrationRuleQuery } from './migration_rule_query';
 import * as i18n from './translations';
 import {
   convertTranslationResultIntoColor,
   convertTranslationResultIntoText,
 } from '../../../../utils/translation_results';
 import { TranslationCallOut } from './callout';
+import { OriginalRuleQuery, TranslatedRuleQuery } from './query_details';
 
 interface TranslationTabProps {
   ruleMigration: RuleMigration;
@@ -42,38 +42,6 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
     const { euiTheme } = useEuiTheme();
 
     const isInstalled = !!ruleMigration.elastic_rule?.id;
-    const canEdit = !matchedPrebuiltRule && !isInstalled;
-
-    const originalRuleQueryComponent = useMemo(() => {
-      return (
-        <MigrationRuleQuery
-          title={i18n.SPLUNK_QUERY_TITLE}
-          ruleName={ruleMigration.original_rule.title}
-          query={ruleMigration.original_rule.query}
-          queryLanguage={ruleMigration.original_rule.query_language}
-          canEdit={false}
-        />
-      );
-    }, [ruleMigration]);
-
-    const translatedRuleQueryComponent = useMemo(() => {
-      let translatedQuery = ruleMigration.elastic_rule?.query ?? '';
-      let translatedQueryLanguage = ruleMigration.elastic_rule?.query_language ?? '';
-      if (matchedPrebuiltRule && matchedPrebuiltRule.type !== 'machine_learning') {
-        translatedQuery = matchedPrebuiltRule.query ?? '';
-        translatedQueryLanguage = matchedPrebuiltRule.language;
-      }
-      return (
-        <MigrationRuleQuery
-          title={i18n.ESQL_TRANSLATION_TITLE}
-          ruleName={matchedPrebuiltRule?.name ?? ruleMigration.elastic_rule?.title}
-          query={translatedQuery}
-          queryLanguage={translatedQueryLanguage}
-          canEdit={canEdit}
-          onTranslationUpdate={onTranslationUpdate}
-        />
-      );
-    }, [canEdit, matchedPrebuiltRule, onTranslationUpdate, ruleMigration]);
 
     return (
       <>
@@ -119,7 +87,9 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
               </EuiSplitPanel.Inner>
               <EuiSplitPanel.Inner grow>
                 <EuiFlexGroup gutterSize="s" alignItems="flexStart">
-                  <EuiFlexItem grow={1}>{originalRuleQueryComponent}</EuiFlexItem>
+                  <EuiFlexItem grow={1}>
+                    <OriginalRuleQuery ruleMigration={ruleMigration} />
+                  </EuiFlexItem>
                   <EuiFlexItem
                     grow={0}
                     css={css`
@@ -127,7 +97,13 @@ export const TranslationTab: React.FC<TranslationTabProps> = React.memo(
                       border-right: ${euiTheme.border.thin};
                     `}
                   />
-                  <EuiFlexItem grow={1}>{translatedRuleQueryComponent}</EuiFlexItem>
+                  <EuiFlexItem grow={1}>
+                    <TranslatedRuleQuery
+                      ruleMigration={ruleMigration}
+                      matchedPrebuiltRule={matchedPrebuiltRule}
+                      onTranslationUpdate={onTranslationUpdate}
+                    />
+                  </EuiFlexItem>
                 </EuiFlexGroup>
               </EuiSplitPanel.Inner>
             </EuiSplitPanel.Outer>

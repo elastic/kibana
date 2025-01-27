@@ -138,7 +138,7 @@ function validateFunctionLiteralArg(
   }
   if (isTimeIntervalItem(actualArg)) {
     // check first if it's a valid interval string
-    if (!inKnownTimeInterval(actualArg)) {
+    if (!inKnownTimeInterval(actualArg.unit)) {
       messages.push(
         getMessageFromId({
           messageId: 'unknownInterval',
@@ -1327,6 +1327,8 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
   getFieldsMetadata: [],
+  getVariablesByType: [],
+  canSuggestVariables: [],
   getJoinIndices: [],
 };
 
