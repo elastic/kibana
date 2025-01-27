@@ -15,7 +15,6 @@ import { postCaseRoute } from './cases/post_case';
 import { pushCaseRoute } from './cases/push_case';
 import { getReportersRoute } from './cases/reporters/get_reporters';
 import { getStatusRoute } from './stats/get_status';
-import { getUserActionsRoute } from './user_actions/get_all_user_actions';
 import type { CaseRoute } from './types';
 import { getTagsRoute } from './cases/tags/get_tags';
 import { deleteAllCommentsRoute } from './comments/delete_all_comments';
@@ -48,7 +47,6 @@ export const getExternalRoutes = ({
     postCaseRoute,
     pushCaseRoute,
     findUserActionsRoute,
-    getUserActionsRoute({ isServerless, docLinks }),
     getStatusRoute({ isServerless, docLinks }),
     getCasesByAlertIdRoute,
     getReportersRoute,
