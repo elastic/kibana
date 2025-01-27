@@ -3242,6 +3242,21 @@
       },
       {
         "parentPluginId": "securitySolution",
+        "id": "def-common.SECURITY_FEATURE_ID",
+        "type": "string",
+        "tags": [],
+        "label": "SECURITY_FEATURE_ID",
+        "description": [],
+        "signature": [
+          "\"siemV2\""
+        ],
+        "path": "x-pack/solutions/security/plugins/security_solution/common/constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "securitySolution",
         "id": "def-common.SENTINEL_ONE_ACTIVITY_INDEX_PATTERN",
         "type": "string",
         "tags": [],
@@ -3284,7 +3299,7 @@
           "\nA list of allowed values that can be used in `xpack.securitySolution.enableExperimental`.\nThis object is then used to validate and parse the value entered."
         ],
         "signature": [
-          "{ readonly alertSuppressionForSequenceEqlRuleEnabled: true; readonly excludePoliciesInFilterEnabled: false; readonly kubernetesEnabled: false; readonly donutChartEmbeddablesEnabled: false; readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionUploadEnabled: true; readonly automatedProcessActionsEnabled: true; readonly responseActionsSentinelOneV1Enabled: true; readonly responseActionsSentinelOneV2Enabled: true; readonly responseActionsSentinelOneGetFileEnabled: true; readonly responseActionsSentinelOneKillProcessEnabled: true; readonly responseActionsSentinelOneProcessesEnabled: true; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: true; readonly endpointManagementSpaceAwarenessEnabled: false; readonly securitySolutionNotesDisabled: false; readonly assistantModelEvaluation: false; readonly attackDiscoveryAlertFiltering: false; readonly newUserDetailsFlyoutManagedUser: false; readonly riskScoringPersistence: true; readonly riskScoringRoutesEnabled: true; readonly esqlRulesDisabled: false; readonly protectionUpdatesEnabled: true; readonly disableTimelineSaveTour: false; readonly riskEnginePrivilegesRouteEnabled: true; readonly sentinelOneDataInAnalyzerEnabled: true; readonly sentinelOneManualHostActionsEnabled: true; readonly crowdstrikeDataInAnalyzerEnabled: true; readonly responseActionsTelemetryEnabled: false; readonly jamfDataInAnalyzerEnabled: true; readonly graphVisualizationInFlyoutEnabled: false; readonly prebuiltRulesCustomizationEnabled: false; readonly malwareOnWriteScanOptionAvailable: true; readonly unifiedManifestEnabled: true; readonly valueListItemsModalEnabled: true; readonly filterProcessDescendantsForEventFiltersEnabled: true; readonly dataIngestionHubEnabled: false; readonly entityStoreDisabled: false; readonly serviceEntityStoreEnabled: false; readonly siemMigrationsEnabled: false; readonly defendInsights: false; readonly newExpandableFlyoutNavigationEnabled: false; readonly crowdstrikeRunScriptEnabled: false; readonly assetInventoryStoreEnabled: false; readonly assetInventoryUXEnabled: false; readonly responseActionsMSDefenderEndpointEnabled: false; }"
+          "{ readonly alertSuppressionForSequenceEqlRuleEnabled: true; readonly excludePoliciesInFilterEnabled: false; readonly kubernetesEnabled: false; readonly donutChartEmbeddablesEnabled: false; readonly previewTelemetryUrlEnabled: false; readonly extendedRuleExecutionLoggingEnabled: false; readonly socTrendsEnabled: false; readonly responseActionUploadEnabled: true; readonly automatedProcessActionsEnabled: true; readonly responseActionsSentinelOneV1Enabled: true; readonly responseActionsSentinelOneV2Enabled: true; readonly responseActionsSentinelOneGetFileEnabled: true; readonly responseActionsSentinelOneKillProcessEnabled: true; readonly responseActionsSentinelOneProcessesEnabled: true; readonly responseActionsCrowdstrikeManualHostIsolationEnabled: true; readonly endpointManagementSpaceAwarenessEnabled: false; readonly securitySolutionNotesDisabled: false; readonly assistantModelEvaluation: false; readonly attackDiscoveryAlertFiltering: false; readonly newUserDetailsFlyoutManagedUser: false; readonly riskScoringPersistence: true; readonly riskScoringRoutesEnabled: true; readonly esqlRulesDisabled: false; readonly protectionUpdatesEnabled: true; readonly disableTimelineSaveTour: false; readonly riskEnginePrivilegesRouteEnabled: true; readonly sentinelOneDataInAnalyzerEnabled: true; readonly sentinelOneManualHostActionsEnabled: true; readonly crowdstrikeDataInAnalyzerEnabled: true; readonly responseActionsTelemetryEnabled: false; readonly jamfDataInAnalyzerEnabled: true; readonly graphVisualizationInFlyoutEnabled: false; readonly prebuiltRulesCustomizationEnabled: false; readonly malwareOnWriteScanOptionAvailable: true; readonly unifiedManifestEnabled: true; readonly valueListItemsModalEnabled: true; readonly filterProcessDescendantsForEventFiltersEnabled: true; readonly dataIngestionHubEnabled: false; readonly entityStoreDisabled: false; readonly serviceEntityStoreEnabled: true; readonly siemMigrationsEnabled: false; readonly defendInsights: false; readonly newExpandableFlyoutNavigationEnabled: false; readonly crowdstrikeRunScriptEnabled: true; readonly assetInventoryStoreEnabled: false; readonly assetInventoryUXEnabled: false; readonly responseActionsMSDefenderEndpointEnabled: true; }"
         ],
         "path": "x-pack/solutions/security/plugins/security_solution/common/experimental_features.ts",
         "deprecated": false,
