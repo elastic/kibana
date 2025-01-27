@@ -8,7 +8,6 @@
  */
 
 import { uniq, uniqBy } from 'lodash';
-import type { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-variables-types';
 import type {
   AstProviderFn,
   ESQLAst,
@@ -90,7 +89,12 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import type { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
+import type {
+  ESQLCallbacks,
+  ESQLSourceResult,
+  ESQLControlVariable,
+  ESQLVariableType,
+} from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getQueryForFields,
