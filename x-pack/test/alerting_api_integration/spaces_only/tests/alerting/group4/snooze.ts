@@ -408,7 +408,7 @@ export default function createSnoozeRuleTests({ getService }: FtrProviderContext
       });
     });
 
-    describe('validation', () => {
+    describe('validation', function () {
       this.tags('skipFIPS');
       it('should return 400 if the id is not in a valid format', async () => {
         const { body: createdRule } = await supertest
