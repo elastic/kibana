@@ -26,10 +26,10 @@ import {
 import { ElasticsearchAsset, elasticsearchAssetSchema } from './common';
 import { createIsNarrowSchema, createAsSchemaOrThrow } from '../../helpers';
 import {
-  IngestStreamLifecycle,
   InheritedIngestStreamLifecycle,
-  ingestStreamLifecycleSchema,
+  UnwiredIngestStreamEffectiveLifecycle,
   inheritedIngestStreamLifecycleSchema,
+  unwiredIngestStreamEffectiveLifecycleSchema,
 } from './lifecycle';
 
 /**
@@ -82,7 +82,7 @@ interface UnwiredStreamGetResponse extends StreamGetResponseBase {
   stream: Omit<UnwiredStreamDefinition, 'name'>;
   elasticsearch_assets: ElasticsearchAsset[];
   data_stream_exists: boolean;
-  effective_lifecycle: IngestStreamLifecycle;
+  effective_lifecycle: UnwiredIngestStreamEffectiveLifecycle;
 }
 
 type IngestStreamGetResponse = WiredStreamGetResponse | UnwiredStreamGetResponse;
@@ -135,7 +135,7 @@ const unwiredStreamGetResponseSchema: z.Schema<UnwiredStreamGetResponse> = z.int
     stream: unwiredStreamDefinitionSchemaBase,
     elasticsearch_assets: z.array(elasticsearchAssetSchema),
     data_stream_exists: z.boolean(),
-    effective_lifecycle: ingestStreamLifecycleSchema,
+    effective_lifecycle: unwiredIngestStreamEffectiveLifecycleSchema,
   })
 );
 

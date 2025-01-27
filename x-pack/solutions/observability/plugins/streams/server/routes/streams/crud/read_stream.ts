@@ -16,7 +16,7 @@ import { IScopedClusterClient } from '@kbn/core/server';
 import { AssetClient } from '../../../lib/streams/assets/asset_client';
 import { StreamsClient } from '../../../lib/streams/client';
 import {
-  getDataStreamLifecycle,
+  getEffectiveDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
 import { findInheritedLifecycle } from '../../../lib/streams/helpers/lifecycle';
@@ -58,7 +58,7 @@ export async function readStream({
           })
         : [],
       data_stream_exists: !!dataStream,
-      effective_lifecycle: getDataStreamLifecycle(dataStream),
+      effective_lifecycle: getEffectiveDataStreamLifecycle(dataStream),
       dashboards,
       inherited_fields: {},
     };
