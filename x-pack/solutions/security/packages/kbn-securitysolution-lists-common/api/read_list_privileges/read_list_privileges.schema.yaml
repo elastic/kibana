@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Read list privileges API endpoint
+  title: Read value list privileges API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/privileges:
@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadListPrivileges
       x-codegen-enabled: true
-      summary: Get list privileges
+      summary: Get value list privileges
       responses:
         200:
           description: Successful response
@@ -27,6 +27,74 @@ paths:
                   - lists
                   - listItems
                   - is_authenticated
+              examples:
+                privileges:
+                  value:
+                    listItems:
+                      username: elastic
+                      has_all_requested: true
+                      cluster:
+                        all: true
+                        monitor_ml: true
+                        manage_transform: true
+                        manage_index_templates: true
+                        monitor_transform: true
+                        manage_ml: true
+                        monitor: true
+                        manage_pipeline: true
+                        manage_api_key: true
+                        manage_security: true
+                        manage_own_api_key: true
+                        manage: true
+                      index:
+                        .items-default:
+                          all: true
+                          create: true
+                          create_doc: true
+                          create_index: true
+                          delete: true
+                          delete_index: true
+                          index: true
+                          maintenance: true
+                          manage: true
+                          monitor: true
+                          read: true
+                          view_index_metadata: true
+                          write: true
+                      application: {}
+                    lists:
+                      username: elastic
+                      has_all_requested: true
+                      cluster:
+                        all: true
+                        monitor_ml: true
+                        manage_transform: true
+                        manage_index_templates: true
+                        monitor_transform: true
+                        manage_ml: true
+                        monitor: true
+                        manage_pipeline: true
+                        manage_api_key: true
+                        manage_security: true
+                        manage_own_api_key: true
+                        manage: true
+                      index:
+                        .lists-default:
+                          all: true
+                          create: true
+                          create_doc: true
+                          create_index: true
+                          delete: true
+                          delete_index: true
+                          index: true
+                          maintenance: true
+                          manage: true
+                          monitor: true
+                          read: true
+                          view_index_metadata: true
+                          write: true
+                      application: {}
+                    is_authenticated: true
         400:
           description: Invalid input data response
           content:
@@ -41,18 +109,35 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/lists/privileges] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:
