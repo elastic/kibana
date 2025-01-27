@@ -24296,12 +24296,8 @@ paths:
                   minItems: 1
                   type: array
                 is_default:
-                  default: false
                   type: boolean
                 is_internal:
-                  type: boolean
-                is_preconfigured:
-                  default: false
                   type: boolean
                 name:
                   type: string
@@ -24309,8 +24305,7 @@ paths:
                   nullable: true
                   type: string
               required:
-                - name
-                - host_urls
+                - proxy_id
       responses:
         '200':
           content:
