@@ -32,12 +32,24 @@ export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = ()
   handler: async ({ syntheticsEsClient, request, response }): Promise<Ping | undefined> => {
     const { from, to, monitorId, locationLabel } = request.query as GetPingsRouteRequest;
 
-    return await getLatestTestRun({
-      syntheticsEsClient,
-      from,
-      to,
-      monitorId,
-      locationLabel,
-    });
+    const getPing = (fromVal: string) => {
+      return getLatestTestRun({
+        syntheticsEsClient,
+        from: fromVal,
+        to: to || 'now',
+        monitorId,
+        locationLabel,
+      });
+    };
+
+    // we will try to get the latest ping from the last day,
+    // if it doesn't exist we will try to get the latest ping from the last week
+    const ping = await getPing(from || 'now-1d');
+
+    if (ping) {
+      return ping;
+    } else {
+      return await getPing('now-1w');
+    }
   },
 });
