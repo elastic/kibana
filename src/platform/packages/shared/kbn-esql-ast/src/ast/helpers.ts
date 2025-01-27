@@ -8,6 +8,7 @@
  */
 
 import type {
+  BinaryExpressionRenameOperator,
   BinaryExpressionWhereOperator,
   ESQLAstNode,
   ESQLBinaryExpression,
@@ -46,6 +47,11 @@ export const isWhereExpression = (
   node: unknown
 ): node is ESQLBinaryExpression<BinaryExpressionWhereOperator> =>
   isBinaryExpression(node) && node.name === 'where';
+
+export const isAsExpression = (
+  node: unknown
+): node is ESQLBinaryExpression<BinaryExpressionRenameOperator> =>
+  isBinaryExpression(node) && node.name === 'as';
 
 export const isFieldExpression = (
   node: unknown
