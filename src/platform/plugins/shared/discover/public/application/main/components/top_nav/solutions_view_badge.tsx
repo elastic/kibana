@@ -12,7 +12,6 @@ import { EuiBadge, EuiPopover, EuiPopoverFooter, EuiText, EuiLink } from '@elast
 import { FormattedMessage } from '@kbn/i18n-react';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
-import { SOLUTION_VIEW_CLASSIC } from '@kbn/spaces-plugin/common';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
 
 export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ badgeText }) => {
@@ -32,7 +31,7 @@ export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ b
   if (
     !services.spaces?.isSolutionViewEnabled ||
     !activeSpace ||
-    (activeSpace.solution && activeSpace.solution !== SOLUTION_VIEW_CLASSIC)
+    (activeSpace.solution && activeSpace.solution !== 'classic')
   ) {
     return null;
   }

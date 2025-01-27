@@ -55,7 +55,6 @@
       "kibanaReact",
       "unifiedSearch",
       "savedObjects",
-      "spaces",
     ],
     "extraPublicDirs": [
       "common"

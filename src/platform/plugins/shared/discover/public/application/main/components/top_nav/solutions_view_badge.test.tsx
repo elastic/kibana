@@ -9,7 +9,6 @@
 
 import React from 'react';
 import { of } from 'rxjs';
-import { DEFAULT_SPACE_ID, SOLUTION_VIEW_CLASSIC } from '@kbn/spaces-plugin/common';
 import { SolutionsViewBadge } from './solutions_view_badge';
 import { render } from '@testing-library/react';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -25,8 +24,8 @@ describe('SolutionsViewBadge', () => {
       spaces: {
         getActiveSpace$: jest.fn().mockReturnValue(
           of({
-            id: DEFAULT_SPACE_ID,
-            solution: SOLUTION_VIEW_CLASSIC,
+            id: 'default',
+            solution: 'classic',
           })
         ),
         isSolutionViewEnabled: true,
@@ -54,7 +53,7 @@ describe('SolutionsViewBadge', () => {
       spaces: {
         getActiveSpace$: jest.fn().mockReturnValue(
           of({
-            id: DEFAULT_SPACE_ID,
+            id: 'default',
             solution: 'oblt',
           })
         ),
@@ -97,8 +96,8 @@ describe('SolutionsViewBadge', () => {
       spaces: {
         getActiveSpace$: jest.fn().mockReturnValue(
           of({
-            id: DEFAULT_SPACE_ID,
-            solution: SOLUTION_VIEW_CLASSIC,
+            id: 'default',
+            solution: 'classic',
           })
         ),
         isSolutionViewEnabled: false,
