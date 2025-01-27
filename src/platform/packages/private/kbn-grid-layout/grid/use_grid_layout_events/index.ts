@@ -58,8 +58,9 @@ export const useGridLayoutEvents = ({
       const onEnd = () => commitAction(gridLayoutStateManager);
 
       const onBlur = () => {
+        console.log('onBlur');
         const {
-          interactionEvent$: { value: { id, targetRowIndex, type } = {} },
+          interactionEvent$: { value: { id, type, targetRowIndex } = {} },
         } = gridLayoutStateManager;
         // make sure the user hasn't started another interaction in the meantime
         if (id === panelId && rowIndex === targetRowIndex && type === interactionType) {

@@ -88,6 +88,7 @@ export const moveAction = (
 
   const previewRect = (() => {
     if (isKeyboardEvent(e)) {
+      console.log('runtimeSettings', runtimeSettings)
       return isResize
         ? getKeyboardResizePreviewRect({ e, interactionEvent, runtimeSettings })
         : getKeyboardDragPreviewRect({ e, interactionEvent, runtimeSettings });
