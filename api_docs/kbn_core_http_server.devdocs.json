@@ -8017,6 +8017,10 @@
                 "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
               },
               {
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
+              },
+              {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
@@ -12897,6 +12901,10 @@
               {
                 "plugin": "fleet",
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
+              },
+              {
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
               },
               {
                 "plugin": "maps",

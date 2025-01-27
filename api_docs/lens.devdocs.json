@@ -11,7 +11,7 @@
         "label": "isLensApi",
         "description": [],
         "signature": [
-          "(api: unknown) => api is { uuid: string; panelTitle: ",
+          "(api: unknown) => api is { uuid: string; title$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19,7 +19,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; hidePanelTitle: ",
+          "<string | undefined>; hideTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -27,7 +27,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; defaultPanelTitle?: ",
+          "<boolean | undefined>; defaultTitle$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -35,7 +35,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; dataLoading: ",
+          "<string | undefined> | undefined; dataLoading$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -43,7 +43,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; blockingError: ",
+          "<boolean | undefined>; blockingError$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -51,7 +51,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<Error | undefined>; panelDescription: ",
+          "<Error | undefined>; description$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -59,7 +59,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; defaultPanelDescription?: ",
+          "<string | undefined>; defaultDescription$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -67,7 +67,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; disabledActionIds: ",
+          "<string | undefined> | undefined; disabledActionIds$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -88,10 +88,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          ", \"hidePanelTitle\"> & ",
+          ", \"hideTitle$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -123,7 +123,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; unsavedChanges?: ",
+          " | undefined>; unsavedChanges$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -133,9 +133,9 @@
           },
           "<object | undefined> | undefined; resetUnsavedChanges?: (() => boolean) | undefined; serializeState: () => ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
@@ -655,7 +655,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean>; dataViews: ",
+          "<boolean>; dataViews$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -671,31 +671,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[] | undefined>; setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setPanelDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; libraryId$: ",
+          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
           },
-          "<string | undefined>; saveToLibrary: ((title: string) => Promise<string>) & ((title: string) => Promise<string>); getByValueRuntimeSnapshot: () => object; unlinkFromLibrary: () => void; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; getByReferenceState: (libraryId: string) => { id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; query?: ",
+          "<{ attributes?: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -711,7 +695,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined; filters?: ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -719,6 +703,20 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
+          "[]; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; }; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: string | null; } | undefined; savedObjectId?: string | undefined; references?: ",
+          "SavedObjectReference",
           "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
@@ -829,25 +827,39 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; palette?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; filters?: ",
           {
-            "pluginId": "@kbn/coloring",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
           },
-          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
+          "[] | undefined; query?: ",
           {
-            "pluginId": "uiActionsEnhanced",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; id?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -855,7 +867,41 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; palette?: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; getSerializedStateByValue: () => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<{ attributes?: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -891,48 +937,8 @@
           "SavedObjectReference",
           "[] | undefined; }; references: ",
           "SavedObjectReference",
-          "[]; visualizationType: string | null; }; abortController?: AbortController | undefined; sharingSavedObjectProps?: ",
-          "SharingSavedObjectProps",
-          " | undefined; managed?: boolean | undefined; }; getByValueState: () => { id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; query?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          " | undefined; filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
+          "[]; visualizationType: string | null; } | undefined; savedObjectId?: string | undefined; references?: ",
+          "SavedObjectReference",
           "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
@@ -1043,33 +1049,15 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; palette?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; filters?: ",
           {
-            "pluginId": "@kbn/coloring",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
           },
-          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          "[] | undefined; query?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -1085,29 +1073,49 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
+          " | undefined; timeRange?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; id?: string | undefined; renderMode?: ",
           {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
           },
-          "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
-          "[] | undefined; }; references: ",
-          "SavedObjectReference",
-          "[]; visualizationType: string | null; }; abortController?: AbortController | undefined; sharingSavedObjectProps?: ",
-          "SharingSavedObjectProps",
-          " | undefined; managed?: boolean | undefined; }; viewMode: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; palette?: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1123,7 +1131,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          ">; savedObjectId: ",
+          ">; savedObjectId$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16543,7 +16551,7 @@
         "label": "LensApi",
         "description": [],
         "signature": [
-          "{ uuid: string; panelTitle: ",
+          "{ uuid: string; title$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16551,7 +16559,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; hidePanelTitle: ",
+          "<string | undefined>; hideTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16559,7 +16567,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; defaultPanelTitle?: ",
+          "<boolean | undefined>; defaultTitle$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16567,7 +16575,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; dataLoading: ",
+          "<string | undefined> | undefined; dataLoading$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16575,7 +16583,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; blockingError: ",
+          "<boolean | undefined>; blockingError$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16583,7 +16591,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<Error | undefined>; panelDescription: ",
+          "<Error | undefined>; description$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16591,7 +16599,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; defaultPanelDescription?: ",
+          "<string | undefined>; defaultDescription$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16599,7 +16607,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; disabledActionIds: ",
+          "<string | undefined> | undefined; disabledActionIds$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16620,10 +16628,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          ", \"hidePanelTitle\"> & ",
+          ", \"hideTitle$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16655,7 +16663,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; unsavedChanges?: ",
+          " | undefined>; unsavedChanges$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -16665,9 +16673,9 @@
           },
           "<object | undefined> | undefined; resetUnsavedChanges?: (() => boolean) | undefined; serializeState: () => ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
@@ -17187,7 +17195,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean>; dataViews: ",
+          "<boolean>; dataViews$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17203,31 +17211,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[] | undefined>; setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setPanelDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; libraryId$: ",
+          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
           },
-          "<string | undefined>; saveToLibrary: ((title: string) => Promise<string>) & ((title: string) => Promise<string>); getByValueRuntimeSnapshot: () => object; unlinkFromLibrary: () => void; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; getByReferenceState: (libraryId: string) => { id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; query?: ",
+          "<{ attributes?: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -17243,7 +17235,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined; filters?: ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -17251,6 +17243,20 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
+          "[]; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; }; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: string | null; } | undefined; savedObjectId?: string | undefined; references?: ",
+          "SavedObjectReference",
           "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
@@ -17361,25 +17367,39 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; palette?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; filters?: ",
           {
-            "pluginId": "@kbn/coloring",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
           },
-          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
+          "[] | undefined; query?: ",
           {
-            "pluginId": "uiActionsEnhanced",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; id?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17387,7 +17407,41 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; palette?: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; getSerializedStateByValue: () => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<{ attributes?: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -17423,48 +17477,8 @@
           "SavedObjectReference",
           "[] | undefined; }; references: ",
           "SavedObjectReference",
-          "[]; visualizationType: string | null; }; abortController?: AbortController | undefined; sharingSavedObjectProps?: ",
-          "SharingSavedObjectProps",
-          " | undefined; managed?: boolean | undefined; }; getByValueState: () => { id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; query?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          " | undefined; filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
+          "[]; visualizationType: string | null; } | undefined; savedObjectId?: string | undefined; references?: ",
+          "SavedObjectReference",
           "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
@@ -17575,33 +17589,15 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; palette?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; filters?: ",
           {
-            "pluginId": "@kbn/coloring",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
           },
-          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          "[] | undefined; query?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -17617,29 +17613,49 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
+          " | undefined; timeRange?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; id?: string | undefined; renderMode?: ",
           {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
           },
-          "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
-          "[] | undefined; }; references: ",
-          "SavedObjectReference",
-          "[]; visualizationType: string | null; }; abortController?: AbortController | undefined; sharingSavedObjectProps?: ",
-          "SharingSavedObjectProps",
-          " | undefined; managed?: boolean | undefined; }; viewMode: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; palette?: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -17655,7 +17671,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          ">; savedObjectId: ",
+          ">; savedObjectId$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18881,7 +18897,7 @@
         "label": "LensEmbeddableOutput",
         "description": [],
         "signature": [
-          "{ uuid: string; panelTitle: ",
+          "{ uuid: string; title$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18889,7 +18905,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; hidePanelTitle: ",
+          "<string | undefined>; hideTitle$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18897,7 +18913,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; defaultPanelTitle?: ",
+          "<boolean | undefined>; defaultTitle$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18905,7 +18921,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; dataLoading: ",
+          "<string | undefined> | undefined; dataLoading$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18913,7 +18929,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean | undefined>; blockingError: ",
+          "<boolean | undefined>; blockingError$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18921,7 +18937,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<Error | undefined>; panelDescription: ",
+          "<Error | undefined>; description$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18929,7 +18945,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined>; defaultPanelDescription?: ",
+          "<string | undefined>; defaultDescription$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18937,7 +18953,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<string | undefined> | undefined; disabledActionIds: ",
+          "<string | undefined> | undefined; disabledActionIds$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18958,10 +18974,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          ", \"hidePanelTitle\"> & ",
+          ", \"hideTitle$\"> & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -18993,7 +19009,7 @@
             "section": "def-public.PhaseEvent",
             "text": "PhaseEvent"
           },
-          " | undefined>; unsavedChanges?: ",
+          " | undefined>; unsavedChanges$?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19003,9 +19019,9 @@
           },
           "<object | undefined> | undefined; resetUnsavedChanges?: (() => boolean) | undefined; serializeState: () => ",
           {
-            "pluginId": "@kbn/presentation-containers",
+            "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
-            "docId": "kibKbnPresentationContainersPluginApi",
+            "docId": "kibKbnPresentationPublishingPluginApi",
             "section": "def-public.SerializedPanelState",
             "text": "SerializedPanelState"
           },
@@ -19525,7 +19541,7 @@
             "section": "def-public.PublishingSubject",
             "text": "PublishingSubject"
           },
-          "<boolean>; dataViews: ",
+          "<boolean>; dataViews$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19541,31 +19557,15 @@
             "section": "def-common.DataView",
             "text": "DataView"
           },
-          "[] | undefined>; setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; setPanelDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; libraryId$: ",
+          "[] | undefined>; setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; setDescription: (newTitle: string | undefined) => void; supportedTriggers: () => string[]; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; saveToLibrary: (title: string) => Promise<string>; getSerializedStateByReference: (newId: string) => ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishingSubject",
-            "text": "PublishingSubject"
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
           },
-          "<string | undefined>; saveToLibrary: ((title: string) => Promise<string>) & ((title: string) => Promise<string>); getByValueRuntimeSnapshot: () => object; unlinkFromLibrary: () => void; canLinkToLibrary: () => Promise<boolean>; canUnlinkFromLibrary: () => Promise<boolean>; checkForDuplicateTitle: (newTitle: string, isTitleDuplicateConfirmed: boolean, onTitleDuplicate: () => void) => Promise<void>; getByReferenceState: (libraryId: string) => { id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; query?: ",
+          "<{ attributes?: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -19581,7 +19581,7 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          " | undefined; filters?: ",
+          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -19589,6 +19589,20 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
+          "[]; adHocDataViews?: Record<string, ",
+          {
+            "pluginId": "dataViews",
+            "scope": "common",
+            "docId": "kibDataViewsPluginApi",
+            "section": "def-common.DataViewSpec",
+            "text": "DataViewSpec"
+          },
+          "> | undefined; internalReferences?: ",
+          "SavedObjectReference",
+          "[] | undefined; }; references: ",
+          "SavedObjectReference",
+          "[]; visualizationType: string | null; } | undefined; savedObjectId?: string | undefined; references?: ",
+          "SavedObjectReference",
           "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
@@ -19699,25 +19713,39 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; palette?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; filters?: ",
           {
-            "pluginId": "@kbn/coloring",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
           },
-          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
+          "[] | undefined; query?: ",
           {
-            "pluginId": "uiActionsEnhanced",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Query",
+            "text": "Query"
           },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
+          " | ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.AggregateQuery",
+            "text": "AggregateQuery"
+          },
+          " | undefined; timeRange?: ",
+          {
+            "pluginId": "@kbn/es-query",
+            "scope": "common",
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
+          },
+          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; id?: string | undefined; renderMode?: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19725,7 +19753,41 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          " | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; palette?: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; getSerializedStateByValue: () => ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.SerializedPanelState",
+            "text": "SerializedPanelState"
+          },
+          "<{ attributes?: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -19761,48 +19823,8 @@
           "SavedObjectReference",
           "[] | undefined; }; references: ",
           "SavedObjectReference",
-          "[]; visualizationType: string | null; }; abortController?: AbortController | undefined; sharingSavedObjectProps?: ",
-          "SharingSavedObjectProps",
-          " | undefined; managed?: boolean | undefined; }; getByValueState: () => { id?: string | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; title?: string | undefined; description?: string | undefined; viewMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; timeRange?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.TimeRange",
-            "text": "TimeRange"
-          },
-          " | undefined; query?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Query",
-            "text": "Query"
-          },
-          " | ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.AggregateQuery",
-            "text": "AggregateQuery"
-          },
-          " | undefined; filters?: ",
-          {
-            "pluginId": "@kbn/es-query",
-            "scope": "common",
-            "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
-          },
+          "[]; visualizationType: string | null; } | undefined; savedObjectId?: string | undefined; references?: ",
+          "SavedObjectReference",
           "[] | undefined; overrides?: Partial<Record<\"chart\", { title?: string | undefined; description?: string | undefined; }>> | Partial<Record<\"settings\", { onResize?: \"ignore\" | undefined; theme?: ",
           "MakeOverridesSerializable",
           "<",
@@ -19913,33 +19935,15 @@
           },
           "<",
           "YDomainRange",
-          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; executionContext?: ",
-          "KibanaExecutionContext",
-          " | undefined; palette?: ",
+          " | undefined>; hide?: boolean | undefined; showOverlappingTicks?: boolean | undefined; showOverlappingLabels?: boolean | undefined; timeAxisLayerCount?: number | undefined; maximumFractionDigits?: number | undefined; tickFormat?: \"ignore\" | undefined; integersOnly?: boolean | undefined; labelFormat?: \"ignore\" | undefined; showDuplicatedTicks?: boolean | undefined; }>> | undefined; filters?: ",
           {
-            "pluginId": "@kbn/coloring",
+            "pluginId": "@kbn/es-query",
             "scope": "common",
-            "docId": "kibKbnColoringPluginApi",
-            "section": "def-common.PaletteOutput",
-            "text": "PaletteOutput"
+            "docId": "kibKbnEsQueryPluginApi",
+            "section": "def-common.Filter",
+            "text": "Filter"
           },
-          "<{ [key: string]: unknown; }> | undefined; lastReloadRequestTime?: number | undefined; hidePanelTitles?: boolean | undefined; enhancements?: { dynamicActions: ",
-          {
-            "pluginId": "uiActionsEnhanced",
-            "scope": "common",
-            "docId": "kibUiActionsEnhancedPluginApi",
-            "section": "def-common.DynamicActionsState",
-            "text": "DynamicActionsState"
-          },
-          "; } | undefined; disableTriggers?: boolean | undefined; searchSessionId?: string | undefined; syncColors?: boolean | undefined; syncCursor?: boolean | undefined; syncTooltips?: boolean | undefined; timeslice?: [number, number] | undefined; savedObjectId?: string | undefined; renderMode?: ",
-          {
-            "pluginId": "@kbn/presentation-publishing",
-            "scope": "public",
-            "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.ViewMode",
-            "text": "ViewMode"
-          },
-          " | undefined; forceDSL?: boolean | undefined; isNewPanel?: boolean | undefined; attributes: { title: string; description?: string | undefined; state: { datasourceStates: Record<string, unknown>; visualization: unknown; query: ",
+          "[] | undefined; query?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -19955,29 +19959,49 @@
             "section": "def-common.AggregateQuery",
             "text": "AggregateQuery"
           },
-          "; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; filters: ",
+          " | undefined; timeRange?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
             "docId": "kibKbnEsQueryPluginApi",
-            "section": "def-common.Filter",
-            "text": "Filter"
+            "section": "def-common.TimeRange",
+            "text": "TimeRange"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          " | undefined; timeslice?: [number, number] | undefined; searchSessionId?: string | undefined; lastReloadRequestTime?: number | undefined; id?: string | undefined; renderMode?: ",
           {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.DataViewSpec",
-            "text": "DataViewSpec"
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
           },
-          "> | undefined; internalReferences?: ",
-          "SavedObjectReference",
-          "[] | undefined; }; references: ",
-          "SavedObjectReference",
-          "[]; visualizationType: string | null; }; abortController?: AbortController | undefined; sharingSavedObjectProps?: ",
-          "SharingSavedObjectProps",
-          " | undefined; managed?: boolean | undefined; }; viewMode: ",
+          " | undefined; disableTriggers?: boolean | undefined; syncColors?: boolean | undefined; syncTooltips?: boolean | undefined; syncCursor?: boolean | undefined; palette?: ",
+          {
+            "pluginId": "@kbn/coloring",
+            "scope": "common",
+            "docId": "kibKbnColoringPluginApi",
+            "section": "def-common.PaletteOutput",
+            "text": "PaletteOutput"
+          },
+          "<{ [key: string]: unknown; }> | undefined; title?: string | undefined; description?: string | undefined; hidePanelTitles?: boolean | undefined; className?: string | undefined; style?: React.CSSProperties | undefined; viewMode?: ",
+          {
+            "pluginId": "@kbn/presentation-publishing",
+            "scope": "public",
+            "docId": "kibKbnPresentationPublishingPluginApi",
+            "section": "def-public.ViewMode",
+            "text": "ViewMode"
+          },
+          " | undefined; executionContext?: ",
+          "KibanaExecutionContext",
+          " | undefined; forceDSL?: boolean | undefined; enhancements?: { dynamicActions: ",
+          {
+            "pluginId": "uiActionsEnhanced",
+            "scope": "common",
+            "docId": "kibUiActionsEnhancedPluginApi",
+            "section": "def-common.DynamicActionsState",
+            "text": "DynamicActionsState"
+          },
+          "; } | undefined; isNewPanel?: boolean | undefined; }>; viewMode$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -19993,7 +20017,7 @@
             "section": "def-public.ViewMode",
             "text": "ViewMode"
           },
-          ">; savedObjectId: ",
+          ">; savedObjectId$: ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",

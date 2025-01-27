@@ -4531,6 +4531,21 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
+        "id": "def-common.DATASTREAM_TYPE_FIELD",
+        "type": "string",
+        "tags": [],
+        "label": "DATASTREAM_TYPE_FIELD",
+        "description": [],
+        "signature": [
+          "\"data_stream.type\""
+        ],
+        "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/discover-utils",
         "id": "def-common.DataTableColumnsMeta",
         "type": "Type",
         "tags": [],
@@ -4662,13 +4677,13 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.ERROR_EXCEPTION_STACKTRACE",
+        "id": "def-common.ERROR_EXCEPTION_STACKTRACE_ABS_PATH",
         "type": "string",
         "tags": [],
-        "label": "ERROR_EXCEPTION_STACKTRACE",
+        "label": "ERROR_EXCEPTION_STACKTRACE_ABS_PATH",
         "description": [],
         "signature": [
-          "\"error.exception.stacktrace\""
+          "\"error.exception.stacktrace.abs_path\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
@@ -4677,13 +4692,13 @@
       },
       {
         "parentPluginId": "@kbn/discover-utils",
-        "id": "def-common.ERROR_LOG_STACKTRACE",
+        "id": "def-common.ERROR_LOG_STACKTRACE_ABS_PATH",
         "type": "string",
         "tags": [],
-        "label": "ERROR_LOG_STACKTRACE",
+        "label": "ERROR_LOG_STACKTRACE_ABS_PATH",
         "description": [],
         "signature": [
-          "\"error.log.stacktrace\""
+          "\"error.log.stacktrace.abs_path\""
         ],
         "path": "src/platform/packages/shared/kbn-discover-utils/src/field_constants.ts",
         "deprecated": false,
