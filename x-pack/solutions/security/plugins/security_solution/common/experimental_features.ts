@@ -216,6 +216,15 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
+   * Enables the storing of gaps in the event log
+   */
+  manualRuleRunEnabled: false,
+
+  /**
+   * Enables the storing of gaps in the event log
+   */
+  storeGapsInEventLogEnabled: false,
+  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
