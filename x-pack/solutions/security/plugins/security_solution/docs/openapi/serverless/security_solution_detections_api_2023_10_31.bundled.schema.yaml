@@ -4537,6 +4537,19 @@ components:
           description: Duration in seconds of execution gap
           minimum: 0
           type: integer
+        gap_range:
+          description: Range of the execution gap
+          type: object
+          properties:
+            gte:
+              description: Start date of the execution gap
+              type: string
+            lte:
+              description: End date of the execution gap
+              type: string
+          required:
+            - gte
+            - lte
         total_enrichment_duration_ms:
           description: >-
             Total time spent enriching documents during current rule execution
