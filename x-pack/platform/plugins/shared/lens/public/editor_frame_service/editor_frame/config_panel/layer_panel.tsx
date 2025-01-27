@@ -97,6 +97,7 @@ export function LayerPanel(props: LayerPanelProps) {
     parentApi,
     panelId,
     closeFlyout,
+    canEditTextBasedQuery,
   } = props;
 
   const isInlineEditing = Boolean(props?.setIsInlineFlyoutVisible);
@@ -557,7 +558,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 }}
               />
             )}
-            {isTextBasedLanguage && (
+            {isTextBasedLanguage && canEditTextBasedQuery && (
               <EuiFlexItem grow={false} data-test-subj="InlineEditingESQLEditor">
                 <ESQLLangEditor
                   query={query as AggregateQuery}
@@ -594,7 +595,7 @@ export function LayerPanel(props: LayerPanelProps) {
                 />
               </EuiFlexItem>
             )}
-            {isTextBasedLanguage && dataGridAttrs && (
+            {isTextBasedLanguage && canEditTextBasedQuery && dataGridAttrs && (
               <ESQLDataGridAccordion
                 dataGridAttrs={dataGridAttrs}
                 isAccordionOpen={isESQLResultsAccordionOpen}

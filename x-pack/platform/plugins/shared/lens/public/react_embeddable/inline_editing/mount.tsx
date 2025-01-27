@@ -47,7 +47,6 @@ export function mountInlineEditPanel(
         paddingSize: 'm',
         maxWidth: 800,
         hideCloseButton: true,
-        isResizable: true,
         onClose: (overlayRef) => {
           overlayTracker?.clearOverlays();
           overlayRef.close();

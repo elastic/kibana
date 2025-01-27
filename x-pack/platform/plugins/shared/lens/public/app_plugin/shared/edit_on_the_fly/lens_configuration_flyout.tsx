@@ -321,6 +321,7 @@ export function LensEditConfigurationFlyout({
             closeFlyout={closeFlyout}
             parentApi={parentApi}
             panelId={panelId}
+            canEditTextBasedQuery={canEditTextBasedQuery}
           />
         </FlyoutWrapper>
       </>
@@ -439,6 +440,7 @@ export function LensEditConfigurationFlyout({
                   closeFlyout={closeFlyout}
                   parentApi={parentApi}
                   panelId={panelId}
+                  canEditTextBasedQuery={canEditTextBasedQuery}
                 />
                 <EuiSpacer />
               </>

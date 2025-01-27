@@ -52,6 +52,7 @@ export interface ConfigPanelWrapperProps {
   parentApi: unknown;
   panelId?: string;
   closeFlyout?: () => void;
+  canEditTextBasedQuery?: boolean;
 }
 
 export interface LayerPanelProps {
@@ -113,6 +114,7 @@ export interface LayerPanelProps {
   panelId?: string;
   parentApi?: unknown;
   closeFlyout?: () => void;
+  canEditTextBasedQuery?: boolean;
 }
 
 export interface LayerDatasourceDropProps {

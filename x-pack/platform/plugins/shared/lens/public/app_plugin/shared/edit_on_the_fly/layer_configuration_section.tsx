@@ -35,6 +35,7 @@ export function LayerConfiguration({
   parentApi,
   panelId,
   closeFlyout,
+  canEditTextBasedQuery,
 }: LayerConfigurationProps) {
   const dispatch = useLensDispatch();
   const { euiTheme } = useEuiTheme();
@@ -79,6 +80,7 @@ export function LayerConfiguration({
     parentApi,
     panelId,
     closeFlyout,
+    canEditTextBasedQuery,
   };
   return (
     <div

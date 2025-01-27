@@ -112,4 +112,5 @@ export interface LayerConfigurationProps {
   parentApi?: unknown;
   panelId?: string;
   closeFlyout?: () => void;
+  canEditTextBasedQuery?: boolean;
 }
