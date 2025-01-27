@@ -31,7 +31,7 @@ export interface InferenceConnector {
    * configuration (without secrets) of the connector.
    * the list of properties depends on the connector type (and subtype for inference)
    */
-  config: Record<string, string>;
+  config: Record<string, any>;
 }
 
 /**

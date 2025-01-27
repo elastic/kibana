@@ -103,6 +103,8 @@ export {
   InferenceConnectorType,
   isSupportedConnectorType,
   isSupportedConnector,
+  getConnectorDefaultModel,
+  getConnectorProvider,
   connectorToInference,
   type InferenceConnector,
 } from './src/connectors';

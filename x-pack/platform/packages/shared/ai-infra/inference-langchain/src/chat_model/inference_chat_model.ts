@@ -40,6 +40,8 @@ import {
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
   isToolValidationError,
+  getConnectorDefaultModel,
+  getConnectorProvider,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';
@@ -121,7 +123,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   }
 
   _llmType() {
-    // TODO
+    // TODO bedrock / gemini / openai / inference ?
     // ideally retrieve info from the inference API / connector
     // but the method is sync and we can't retrieve this info synchronously, so...
     return 'inference';
@@ -136,7 +138,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
   _identifyingParams() {
     return {
-      model_name: this.model,
+      model_name: this.model ?? getConnectorDefaultModel(this.connector),
       ...this.invocationParams({}),
     };
   }
@@ -148,9 +150,8 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   getLsParams(options: this['ParsedCallOptions']): LangSmithParams {
     const params = this.invocationParams(options);
     return {
-      // TODO: retrieve provider from connector config
-      ls_provider: 'inference',
-      ls_model_name: this.model,
+      ls_provider: `inference-${getConnectorProvider(this.connector)}`,
+      ls_model_name: options.model ?? this.model ?? getConnectorDefaultModel(this.connector),
       ls_model_type: 'chat',
       ls_temperature: params.temperature ?? undefined,
     };
@@ -221,9 +222,6 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
       }
       throw e;
     }
-
-    // TODO: ideally intercept and convert invalid tool call to OutputParserException
-    //       as this is used by the structured output parser.
 
     const generations: ChatGeneration[] = [];
     generations.push({
