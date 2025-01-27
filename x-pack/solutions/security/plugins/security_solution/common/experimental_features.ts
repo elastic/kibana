@@ -216,6 +216,15 @@ export const allowedExperimentalValues = Object.freeze({
   valueListItemsModalEnabled: true,
 
   /**
+   * Enables the storing of gaps in the event log
+   */
+  manualRuleRunEnabled: false,
+
+  /**
+   * Enables the storing of gaps in the event log
+   */
+  storeGapsInEventLogEnabled: false,
+  /**
    * Adds a new option to filter descendants of a process for Management / Event Filters
    */
   filterProcessDescendantsForEventFiltersEnabled: true,
@@ -234,7 +243,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
-  serviceEntityStoreEnabled: false,
+  serviceEntityStoreEnabled: true,
 
   /**
    * Enables the siem migrations feature
@@ -253,8 +262,9 @@ export const allowedExperimentalValues = Object.freeze({
 
   /**
    * Enables CrowdStrike's RunScript RTR command
+   * Release: 8.18/9.0
    */
-  crowdstrikeRunScriptEnabled: false,
+  crowdstrikeRunScriptEnabled: true,
 
   /**
    * Enables the Asset Inventory Entity Store feature.
@@ -268,9 +278,15 @@ export const allowedExperimentalValues = Object.freeze({
   assetInventoryUXEnabled: false,
 
   /**
-   * Enabled Microsoft Defender for  Endpoint actions client
+   * Enabled Microsoft Defender for  Endpoint actions: Isolate and Release.
+   * Release: 8.18/9.0
    */
-  responseActionsMSDefenderEndpointEnabled: false,
+  responseActionsMSDefenderEndpointEnabled: true,
+
+  /**
+   * Enables banner for informing users about changes in data collection.
+   */
+  eventCollectionDataReductionBannerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;

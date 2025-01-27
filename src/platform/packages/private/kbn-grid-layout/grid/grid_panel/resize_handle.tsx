@@ -7,41 +7,41 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { transparentize } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { UserInteractionEvent, PanelInteractionEvent } from '../types';
+import { GridLayoutStateManager } from '../types';
+import { useGridLayoutEvents } from '../use_grid_layout_events';
 
 export const ResizeHandle = ({
-  interactionStart,
+  gridLayoutStateManager,
+  rowIndex,
+  panelId,
 }: {
-  interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
+  gridLayoutStateManager: GridLayoutStateManager;
+  rowIndex: number;
+  panelId: string;
 }) => {
   const { euiTheme } = useEuiTheme();
+  const startInteraction = useGridLayoutEvents({
+    interactionType: 'resize',
+    gridLayoutStateManager,
+    panelId,
+    rowIndex,
+  });
+
   return (
     <button
-      className="kbnGridPanel__resizeHandle"
-      onMouseDown={(e) => {
-        interactionStart('resize', e);
-      }}
-      onMouseUp={(e) => {
-        interactionStart('drop', e);
-      }}
-      onTouchStart={(e) => {
-        interactionStart('resize', e);
-      }}
-      onTouchEnd={(e) => {
-        interactionStart('drop', e);
-      }}
+      onMouseDown={startInteraction}
+      onTouchStart={startInteraction}
+      className="kbnGridPanel--resizeHandle"
       aria-label={i18n.translate('kbnGridLayout.resizeHandle.ariaLabel', {
         defaultMessage: 'Resize panel',
       })}
       css={css`
         right: 0;
         bottom: 0;
-        opacity: 0;
         margin: -2px;
         position: absolute;
         width: ${euiTheme.size.l};
@@ -49,28 +49,15 @@ export const ResizeHandle = ({
         max-height: 100%;
         height: ${euiTheme.size.l};
         z-index: ${euiTheme.levels.toast};
-        transition: opacity 0.2s, border 0.2s;
-        border-radius: 7px 0 7px 0;
-        border-bottom: 2px solid ${euiTheme.colors.accentSecondary};
-        border-right: 2px solid ${euiTheme.colors.accentSecondary};
         &:hover,
         &:focus {
-          outline-style: none !important;
-          opacity: 1;
-          background-color: ${transparentize(euiTheme.colors.accentSecondary, 0.05)};
           cursor: se-resize;
         }
         .kbnGrid--static &,
         .kbnGridPanel--expanded & {
-          opacity: 0 !important;
           display: none;
         }
-        .kbnGridPanel__dragHandle:has(~ &:hover) {
-          opacity: 0 !important;
-        }
-        .kbnGridPanel__dragHandle:has(~ &:focus) {
-          opacity: 0 !important;
-        }
+        touch-action: none;
       `}
     />
   );

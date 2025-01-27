@@ -33,7 +33,7 @@ import { useObservedHost } from './hooks/use_observed_host';
 import { EntityDetailsLeftPanelTab } from '../shared/components/left_panel/left_panel_header';
 import { HostPreviewPanelFooter } from '../host_preview/footer';
 import { useNavigateToHostDetails } from './hooks/use_navigate_to_host_details';
-import { EntityType } from '../../../../common/entity_analytics/types';
+import { EntityIdentifierFields, EntityType } from '../../../../common/entity_analytics/types';
 
 export interface HostPanelProps extends Record<string, unknown> {
   contextID: string;
@@ -98,7 +98,7 @@ export const HostPanel = ({
   const { hasVulnerabilitiesFindings } = useHasVulnerabilities('host.name', hostName);
 
   const { hasNonClosedAlerts } = useNonClosedAlerts({
-    field: 'host.name',
+    field: EntityIdentifierFields.hostName,
     value: hostName,
     to,
     from,

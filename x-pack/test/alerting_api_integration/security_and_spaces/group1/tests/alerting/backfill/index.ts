@@ -17,5 +17,6 @@ export default function backfillTests({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./delete_rule'));
     loadTestFile(require.resolve('./task_runner'));
+    loadTestFile(require.resolve('./task_runner_with_actions'));
   });
 }
