@@ -392,6 +392,7 @@ export const updatePackagePolicyHandler: FleetRequestHandler<
         package: pkg ?? packagePolicy.package,
         inputs: restOfBody.inputs ?? packagePolicyInputs,
         vars: restOfBody.vars ?? packagePolicy.vars,
+        supports_agentless: restOfBody.supports_agentless ?? packagePolicy.supports_agentless,
       } as NewPackagePolicy;
 
       if (overrides) {

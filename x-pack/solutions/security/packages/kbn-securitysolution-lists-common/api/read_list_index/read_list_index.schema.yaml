@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Read list DS existence status API endpoint
+  title: Read value list DS existence status API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/index:
@@ -8,7 +8,7 @@ paths:
       x-labels: [serverless, ess]
       operationId: ReadListIndex
       x-codegen-enabled: true
-      summary: Get status of list data streams
+      summary: Get status of value list data streams
       description: Verify that `.lists` and `.items` data streams exist.
       responses:
         200:
@@ -37,6 +37,12 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
@@ -55,3 +61,8 @@ paths:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
