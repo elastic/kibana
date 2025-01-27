@@ -5,15 +5,15 @@
  * 2.0.
  */
 import { type Theme, useTheme } from '@emotion/react';
-import React from 'react';
+import React, { forwardRef } from 'react';
 
-import { ComponentType } from 'react';
-
-export const withAttrs =
-  (Component: ComponentType<any>, fn: (args: { theme: Theme; props: any }) => any) =>
-  (props: any) => {
+export const withAttrs = (
+  Component: React.ComponentType<any>,
+  fn: (args: { theme: Theme; props: any }) => any
+) =>
+  forwardRef((props: any, ref) => {
     const theme = useTheme();
     const attrs = fn({ theme, props });
 
-    return <Component {...props} {...attrs} />;
-  };
+    return <Component {...props} {...attrs} ref={ref} />;
+  });

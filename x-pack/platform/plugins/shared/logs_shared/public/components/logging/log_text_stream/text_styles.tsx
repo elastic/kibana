@@ -27,10 +27,10 @@ const getFontSize = (textscale: TextScale) => {
   }
 };
 
-export const useMonospaceTextStyle = (scale: TextScale, theme: EuiThemeComputed) => css`
-  font-family: ${theme.font.familyCode};
+export const useMonospaceTextStyle = (scale: TextScale, euiTheme: EuiThemeComputed) => css`
+  font-family: ${euiTheme.font.familyCode};
   font-size: ${useEuiFontSize(getFontSize(scale))};
-  line-height: ${theme.font.lineHeightMultiplier};
+  line-height: ${euiTheme.font.lineHeightMultiplier};
 `;
 
 export const hoveredContentStyle = (euiTheme: EuiThemeComputed) => css`
