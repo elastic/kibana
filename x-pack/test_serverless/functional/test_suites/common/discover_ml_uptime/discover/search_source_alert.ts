@@ -682,8 +682,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitFor('rule name value is correct', async () => {
-        await testSubjects.click('ruleFormStep-details');
-
         await testSubjects.setValue('ruleDetailsNameInput', newAlert);
         const ruleName = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
 
