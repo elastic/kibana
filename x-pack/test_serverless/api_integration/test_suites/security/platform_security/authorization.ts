@@ -2444,6 +2444,18 @@ export default function ({ getService }: FtrProviderContext) {
                 "api:securitySolution-readTrustedApplications",
                 "ui:siemV2/readTrustedApplications",
               ],
+              "workflow_insights_all": Array [
+                "login:",
+                "api:securitySolution-writeWorkflowInsights",
+                "api:securitySolution-readWorkflowInsights",
+                "ui:siemV2/writeWorkflowInsights",
+                "ui:siemV2/readWorkflowInsights",
+              ],
+              "workflow_insights_read": Array [
+                "login:",
+                "api:securitySolution-readWorkflowInsights",
+                "ui:siemV2/readWorkflowInsights",
+              ],
             },
           }
         `);

@@ -219,6 +219,8 @@ export default function ({ getService }: FtrProviderContext) {
               'file_operations_all',
               'execute_operations_all',
               'scan_operations_all',
+              'workflow_insights_all',
+              'workflow_insights_read',
             ],
             uptime: [
               'all',
