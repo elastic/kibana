@@ -33,9 +33,12 @@ const AlertsContextProviderComponent = ({ children }: PropsWithChildren) => {
 export const AlertsContextProvider = memo(AlertsContextProviderComponent);
 
 export const useAlertsContext = () => {
+  const fallbackRef = useRef<AlertsTableImperativeApi>(null);
   const value = useContext(AlertsContext);
   if (!value) {
-    throw new Error('Missing AlertsContextProvider');
+    return {
+      alertsTableRef: fallbackRef,
+    };
   }
   return value;
 };

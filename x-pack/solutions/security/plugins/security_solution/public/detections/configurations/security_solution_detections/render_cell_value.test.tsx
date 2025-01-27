@@ -73,7 +73,11 @@ describe('RenderCellValue', () => {
     const wrapper = mount(
       <TestProviders>
         <DragDropContextWrapper browserFields={mockBrowserFields}>
-          <CellValue {...props} scopeId={SourcererScopeName.default} tableType={TableId.test} />
+          <CellValue
+            {...props}
+            sourcererScope={SourcererScopeName.default}
+            tableType={TableId.test}
+          />
         </DragDropContextWrapper>
       </TestProviders>
     );

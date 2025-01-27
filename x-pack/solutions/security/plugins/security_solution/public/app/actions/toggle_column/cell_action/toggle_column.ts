@@ -68,6 +68,7 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
         return;
       }
 
+      // When the flyout was initiated from an alerts table, use its toggleColumn action
       if (metadata.alertsTableRef?.current && scopeId === TableId.alertsOnAlertsPage) {
         metadata.alertsTableRef.current.toggleColumn(field.name);
         return;
