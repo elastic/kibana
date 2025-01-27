@@ -11,6 +11,7 @@ import {
   defaultColumnHeaderType,
   tableDefaults,
   dataTableSelectors,
+  TableId,
 } from '@kbn/securitysolution-data-table';
 import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../../common/store';
@@ -64,6 +65,12 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
 
       const scopedActions = getScopedActions(scopeId);
       if (!scopedActions) {
+        return;
+      }
+
+      // When the flyout was initiated from an alerts table, use its toggleColumn action
+      if (metadata.alertsTableRef?.current && scopeId === TableId.alertsOnAlertsPage) {
+        metadata.alertsTableRef.current.toggleColumn(field.name);
         return;
       }
 
