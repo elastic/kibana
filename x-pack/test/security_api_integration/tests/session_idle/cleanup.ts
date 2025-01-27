@@ -261,7 +261,7 @@ export default function ({ getService }: FtrProviderContext) {
       expect(await getNumberOfSessionDocuments()).to.be(1);
     });
 
-    it.only('quietly fails if shards are unavailable', async function () {
+    it('quietly fails if shards are unavailable', async function () {
       this.timeout(100000);
 
       await supertest
