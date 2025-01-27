@@ -28,6 +28,20 @@ jest.mock('@kbn/elastic-assistant-common', () => {
   };
 });
 
+const defaultProps = {
+  stats: null,
+  connectorId: 'testConnectorId',
+  connectorsAreConfigured: true,
+  isDisabledActions: false,
+  isLoading: false,
+  localStorageAttackDiscoveryMaxAlerts: `${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`,
+  onCancel: jest.fn(),
+  onGenerate: jest.fn(),
+  onConnectorIdSelected: jest.fn(),
+  openFlyout: jest.fn(),
+  setLocalStorageAttackDiscoveryMaxAlerts: jest.fn(),
+};
+
 describe('Actions', () => {
   beforeEach(() => {
     (useAssistantAvailability as jest.Mock).mockReturnValue({
@@ -42,19 +56,7 @@ describe('Actions', () => {
   it('renders the connector selector', () => {
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={false}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onGenerate={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} />
       </TestProviders>
     );
 
@@ -68,19 +70,7 @@ describe('Actions', () => {
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={connectorsAreConfigured}
-          isDisabledActions={false}
-          isLoading={false}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onGenerate={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} connectorsAreConfigured={connectorsAreConfigured} />
       </TestProviders>
     );
 
@@ -94,19 +84,7 @@ describe('Actions', () => {
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={false}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={onGenerate}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} onGenerate={onGenerate} />
       </TestProviders>
     );
 
@@ -122,19 +100,7 @@ describe('Actions', () => {
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={isLoading}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} isLoading={isLoading} />
       </TestProviders>
     );
 
@@ -149,19 +115,7 @@ describe('Actions', () => {
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={isLoading}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={onCancel}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} isLoading={isLoading} onCancel={onCancel} />
       </TestProviders>
     );
 
@@ -176,19 +130,7 @@ describe('Actions', () => {
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId={connectorId}
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={false}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={jest.fn()}
-          openFlyout={jest.fn()}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} connectorId={connectorId} />
       </TestProviders>
     );
 
@@ -203,19 +145,7 @@ describe('Actions', () => {
 
     render(
       <TestProviders>
-        <Header
-          stats={null}
-          connectorId="testConnectorId"
-          connectorsAreConfigured={true}
-          isDisabledActions={false}
-          isLoading={false}
-          localStorageAttackDiscoveryMaxAlerts={`${DEFAULT_ATTACK_DISCOVERY_MAX_ALERTS}`}
-          onCancel={jest.fn()}
-          onConnectorIdSelected={jest.fn()}
-          onGenerate={jest.fn()}
-          openFlyout={openFlyout}
-          setLocalStorageAttackDiscoveryMaxAlerts={jest.fn()}
-        />
+        <Header {...defaultProps} openFlyout={openFlyout} />
       </TestProviders>
     );
 
