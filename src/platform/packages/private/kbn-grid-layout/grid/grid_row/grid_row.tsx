@@ -45,7 +45,10 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
       const { columnCount } = gridLayoutStateManager.runtimeSettings$.getValue();
       return css`
         grid-auto-rows: calc(var(--kbnGridRowHeight) * 1px);
-        grid-template-columns: repeat(${columnCount}, minmax(0, 1fr));
+        grid-template-columns: repeat(
+          ${columnCount},
+          calc((100% - (var(--kbnGridGutterSize) * ${columnCount - 1}px)) / ${columnCount})
+        );
         gap: calc(var(--kbnGridGutterSize) * 1px);
       `;
     }, [gridLayoutStateManager]);
