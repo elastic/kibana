@@ -144,3 +144,10 @@ export const ENDPOINT_DELETE_ACTION_LABEL = i18n.translate(
     defaultMessage: 'Delete endpoint',
   }
 );
+
+export const ENDPOINT_VIEW_ACTION_LABEL = i18n.translate(
+  'xpack.searchInferenceEndpoints.actions.viewEndpooint',
+  {
+    defaultMessage: 'View endpoint',
+  }
+);
