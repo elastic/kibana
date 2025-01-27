@@ -23,6 +23,7 @@ import { recallAndScore } from '../../utils/recall/recall_and_score';
 import { createObservabilityAIAssistantServerRoute } from '../create_observability_ai_assistant_server_route';
 import { assistantScopeType, functionRt, messageRt, screenContextRt } from '../runtime_types';
 import { ObservabilityAIAssistantRouteHandlerResources } from '../types';
+import { chatCompletePublicParamsSchema } from '../schemas';
 
 const chatCompleteBaseRt = t.type({
   body: t.intersection([
@@ -62,18 +63,6 @@ const chatCompleteInternalRt = t.intersection([
     body: t.type({
       screenContexts: t.array(screenContextRt),
       scopes: t.array(assistantScopeType),
-    }),
-  }),
-]);
-
-const chatCompletePublicRt = t.intersection([
-  chatCompleteBaseRt,
-  t.partial({
-    body: t.partial({
-      actions: t.array(functionRt),
-    }),
-    query: t.partial({
-      format: t.union([t.literal('default'), t.literal('openai')]),
     }),
   }),
 ]);
@@ -301,12 +290,17 @@ const chatCompleteRoute = createObservabilityAIAssistantServerRoute({
 
 const publicChatCompleteRoute = createObservabilityAIAssistantServerRoute({
   endpoint: 'POST /api/observability_ai_assistant/chat/complete 2023-10-31',
+  summary: 'Generate a chat completion',
+  description: `Creates a new chat completion via the Observability AI Assistant, returning the model's response based on the current conversation context. This endpoint also handles any tool requests within the conversation, which may trigger multiple calls to the underlying large language model (LLM).`,
   security: {
     authz: {
       requiredPrivileges: ['ai_assistant'],
     },
   },
-  params: chatCompletePublicRt,
+  params: chatCompletePublicParamsSchema,
+  options: {
+    tags: ['oas-tag:Observability AI assistant'],
+  },
   handler: async (resources): Promise<Readable> => {
     const { params, logger } = resources;
 
