@@ -49,7 +49,7 @@ export async function syncWiredStreamDefinitionObjects({
   definition: WiredStreamDefinition;
   isServerless: boolean;
 }) {
-  const componentTemplate = generateLayer(definition.name, definition);
+  const componentTemplate = generateLayer(definition.name, definition, isServerless);
   await upsertComponent({
     esClient: scopedClusterClient.asCurrentUser,
     logger,
