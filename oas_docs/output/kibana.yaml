@@ -1512,6 +1512,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: Total number of alerts created during last rule run.
                                     nullable: true
@@ -2416,6 +2430,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: Total number of alerts created during last rule run.
                                     nullable: true
@@ -3295,6 +3323,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: Total number of alerts created during last rule run.
                                     nullable: true
@@ -4271,6 +4313,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: Total number of alerts created during last rule run.
                                     nullable: true
@@ -5684,29 +5740,6 @@ paths:
                 $ref: '#/components/schemas/Cases_4xx_response'
           description: Authorization information is missing or invalid.
       summary: Delete all case comments and alerts
-      tags:
-        - cases
-    get:
-      deprecated: true
-      description: |
-        Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; instead, use the get case comment API, which requires a comment identifier in the path. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
-      operationId: getAllCaseCommentsDefaultSpace
-      parameters:
-        - $ref: '#/components/parameters/Cases_case_id'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Cases_case_response_properties'
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
-          description: Authorization information is missing or invalid.
-      summary: Get all case comments
       tags:
         - cases
     patch:
@@ -11875,6 +11908,11 @@ paths:
                   type: string
                 indexPattern:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: The lookback period for the entity store
+                  pattern: '[smdh]$'
+                  type: string
         description: Schema for the entity store initialization
         required: true
       responses:
@@ -54007,6 +54045,19 @@ components:
           description: Duration in seconds of execution gap
           minimum: 0
           type: integer
+        gap_range:
+          description: Range of the execution gap
+          type: object
+          properties:
+            gte:
+              description: Start date of the execution gap
+              type: string
+            lte:
+              description: End date of the execution gap
+              type: string
+          required:
+            - gte
+            - lte
         total_enrichment_duration_ms:
           description: Total time spent enriching documents during current rule execution cycle
           minimum: 0
@@ -57198,6 +57249,10 @@ components:
           type: string
         indexPattern:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        lookbackPeriod:
+          default: 24h
+          pattern: '[smdh]$'
+          type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
         type:
