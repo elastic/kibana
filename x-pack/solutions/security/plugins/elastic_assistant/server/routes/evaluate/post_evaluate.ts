@@ -30,6 +30,7 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 import {
   formatPrompt,
   formatPromptStructured,
@@ -176,6 +177,20 @@ export const postEvaluateRoute = (
             ids: connectorIds,
             throwIfSystemAction: false,
           });
+          const connectorsWithPrompts = await Promise.all(
+            connectors.map(async (connector) => {
+              const prompts = await getAttackDiscoveryPrompts({
+                actionsClient,
+                connectorId: connector.id,
+                connector,
+                savedObjectsClient,
+              });
+              return {
+                ...connector,
+                prompts,
+              };
+            })
+          );
 
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
@@ -190,7 +205,7 @@ export const postEvaluateRoute = (
                 actionsClient,
                 alertsIndexPattern,
                 attackDiscoveryGraphs,
-                connectors,
+                connectors: connectorsWithPrompts,
                 connectorTimeout: CONNECTOR_TIMEOUT,
                 datasetName,
                 esClient,
@@ -200,7 +215,6 @@ export const postEvaluateRoute = (
                 langSmithProject,
                 logger,
                 runName,
-                savedObjectsClient,
                 size,
               });
             } catch (err) {

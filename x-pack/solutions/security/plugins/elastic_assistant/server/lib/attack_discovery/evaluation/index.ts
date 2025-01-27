@@ -8,7 +8,7 @@
 import type { ActionsClient } from '@kbn/actions-plugin/server';
 import type { Connector } from '@kbn/actions-plugin/server/application/connector/types';
 import { ElasticsearchClient } from '@kbn/core-elasticsearch-server';
-import { Logger, SavedObjectsClientContract } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { AnonymizationFieldResponse } from '@kbn/elastic-assistant-common/impl/schemas/anonymization_fields/bulk_crud_anonymization_fields_route.gen';
 import type { LangChainTracer } from '@langchain/core/tracers/tracer_langchain';
 import { ActionsClientLlm } from '@kbn/langchain/server';
@@ -16,13 +16,16 @@ import { getLangSmithTracer } from '@kbn/langchain/server/tracers/langsmith';
 import { asyncForEach } from '@kbn/std';
 import { PublicMethodsOf } from '@kbn/utility-types';
 
-import { getAttackDiscoveryPrompts } from '../graphs/default_attack_discovery_graph/nodes/helpers/prompts';
+import { CombinedPrompts } from '../graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 import { DEFAULT_EVAL_ANONYMIZATION_FIELDS } from './constants';
 import { AttackDiscoveryGraphMetadata } from '../../langchain/graphs';
 import { DefaultAttackDiscoveryGraph } from '../graphs/default_attack_discovery_graph';
 import { getLlmType } from '../../../routes/utils';
 import { runEvaluations } from './run_evaluations';
 
+interface ConnectorWithPrompts extends Connector {
+  prompts: CombinedPrompts;
+}
 export const evaluateAttackDiscovery = async ({
   actionsClient,
   attackDiscoveryGraphs,
@@ -38,14 +41,13 @@ export const evaluateAttackDiscovery = async ({
   langSmithProject,
   logger,
   runName,
-  savedObjectsClient,
   size,
 }: {
   actionsClient: PublicMethodsOf<ActionsClient>;
   attackDiscoveryGraphs: AttackDiscoveryGraphMetadata[];
   alertsIndexPattern: string;
   anonymizationFields?: AnonymizationFieldResponse[];
-  connectors: Connector[];
+  connectors: ConnectorWithPrompts[];
   connectorTimeout: number;
   datasetName: string;
   esClient: ElasticsearchClient;
@@ -55,7 +57,6 @@ export const evaluateAttackDiscovery = async ({
   langSmithProject: string | undefined;
   logger: Logger;
   runName: string;
-  savedObjectsClient: SavedObjectsClientContract;
   size: number;
 }): Promise<void> => {
   await asyncForEach(attackDiscoveryGraphs, async ({ getDefaultAttackDiscoveryGraph }) => {
@@ -69,57 +70,48 @@ export const evaluateAttackDiscovery = async ({
         projectName: string | undefined;
         tracers: LangChainTracer[];
       };
-    }> = await Promise.all(
-      connectors.map(async (connector) => {
-        const llmType = getLlmType(connector.actionTypeId);
+    }> = connectors.map((connector) => {
+      const llmType = getLlmType(connector.actionTypeId);
 
-        const traceOptions = {
-          projectName: langSmithProject,
-          tracers: [
-            ...getLangSmithTracer({
-              apiKey: langSmithApiKey,
-              projectName: langSmithProject,
-              logger,
-            }),
-          ],
-        };
+      const traceOptions = {
+        projectName: langSmithProject,
+        tracers: [
+          ...getLangSmithTracer({
+            apiKey: langSmithApiKey,
+            projectName: langSmithProject,
+            logger,
+          }),
+        ],
+      };
 
-        const llm = new ActionsClientLlm({
-          actionsClient,
-          connectorId: connector.id,
-          llmType,
-          logger,
-          temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
-          timeout: connectorTimeout,
-          traceOptions,
-        });
+      const llm = new ActionsClientLlm({
+        actionsClient,
+        connectorId: connector.id,
+        llmType,
+        logger,
+        temperature: 0, // zero temperature for attack discovery, because we want structured JSON output
+        timeout: connectorTimeout,
+        traceOptions,
+      });
 
-        const attackDiscoveryPrompts = await getAttackDiscoveryPrompts({
-          actionsClient,
-          connectorId: connector.id,
-          connector,
-          savedObjectsClient,
-        });
+      const graph = getDefaultAttackDiscoveryGraph({
+        alertsIndexPattern,
+        anonymizationFields,
+        esClient,
+        llm,
+        logger,
+        prompts: connector.prompts,
+        size,
+      });
 
-        const graph = getDefaultAttackDiscoveryGraph({
-          alertsIndexPattern,
-          anonymizationFields,
-          esClient,
-          llm,
-          logger,
-          prompts: attackDiscoveryPrompts,
-          size,
-        });
-
-        return {
-          connector,
-          graph,
-          llmType,
-          name: `${runName} - ${connector.name} - ${evaluationId} - Attack discovery`,
-          traceOptions,
-        };
-      })
-    );
+      return {
+        connector,
+        graph,
+        llmType,
+        name: `${runName} - ${connector.name} - ${evaluationId} - Attack discovery`,
+        traceOptions,
+      };
+    });
 
     // run the evaluations for each graph:
     await runEvaluations({
