@@ -8,12 +8,12 @@
 import { ALL_VALUE } from '@kbn/slo-schema';
 import {
   getSLOPipelineId,
-  SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
+  SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX,
   SLO_RESOURCES_VERSION,
 } from '../../../common/constants';
 import { SLODefinition } from '../../domain/models';
 
-export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
+export const getSLIPipelineTemplate = (slo: SLODefinition) => ({
   id: getSLOPipelineId(slo.id, slo.revision),
   description: `Ingest pipeline for SLO rollup data [id: ${slo.id}, revision: ${slo.revision}]`,
   processors: [
@@ -44,7 +44,7 @@ export const getSLOPipelineTemplate = (slo: SLODefinition) => ({
     {
       date_index_name: {
         field: '@timestamp',
-        index_name_prefix: SLO_INGEST_PIPELINE_INDEX_NAME_PREFIX,
+        index_name_prefix: SLI_INGEST_PIPELINE_INDEX_NAME_PREFIX,
         date_rounding: 'M',
         date_formats: ['UNIX_MS', 'ISO8601', "yyyy-MM-dd'T'HH:mm:ss.SSSXX"],
       },

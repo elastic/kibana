@@ -5,12 +5,13 @@
  * 2.0.
  */
 import type { ClusterPutComponentTemplateRequest } from '@elastic/elasticsearch/lib/api/types';
-import { SLO_RESOURCES_VERSION } from '../../../common/constants';
+import {
+  SLO_RESOURCES_VERSION,
+  SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+} from '../../../common/constants';
 
-export const getSLOSummaryMappingsTemplate = (
-  name: string
-): ClusterPutComponentTemplateRequest => ({
-  name,
+export const SUMMARY_MAPPINGS_TEMPLATE: ClusterPutComponentTemplateRequest = {
+  name: SUMMARY_COMPONENT_TEMPLATE_MAPPINGS_NAME,
   template: {
     mappings: {
       properties: {
@@ -240,4 +241,4 @@ export const getSLOSummaryMappingsTemplate = (
     managed: true,
     managed_by: 'observability',
   },
-});
+};

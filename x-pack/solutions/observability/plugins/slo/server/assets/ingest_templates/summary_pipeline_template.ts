@@ -11,7 +11,7 @@ import { IBasePath } from '@kbn/core-http-server';
 import { getSLOSummaryPipelineId, SLO_RESOURCES_VERSION } from '../../../common/constants';
 import { SLODefinition } from '../../domain/models';
 
-export const getSLOSummaryPipelineTemplate = (
+export const getSummaryPipelineTemplate = (
   slo: SLODefinition,
   spaceId: string,
   basePath: IBasePath
