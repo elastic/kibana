@@ -27,28 +27,16 @@ import { useGetRuleIdsWithGaps } from '../../api/hooks/use_get_rule_ids_with_gap
 import { defaultRangeValue, GapRangeValue } from '../../constants';
 
 export const RulesWithGapsOverviewPanel = () => {
-  const [showRulesWithGaps, setShowRulesWithGaps] = useState(false);
   const {
     state: {
-      filterOptions: { gapSearchRange },
+      filterOptions: { gapSearchRange, showRulesWithGaps },
     },
     actions: { setFilterOptions },
   } = useRulesTableContext();
-  const { data } = useGetRuleIdsWithGaps(
-    {
-      gapRange: gapSearchRange ?? defaultRangeValue,
-      statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
-    },
-    {
-      onSuccess: (result) => {
-        if (showRulesWithGaps) {
-          setFilterOptions({
-            showRulesWithGaps: true,
-          });
-        }
-      },
-    }
-  );
+  const { data } = useGetRuleIdsWithGaps({
+    gapRange: gapSearchRange ?? defaultRangeValue,
+    statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
+  });
   const [isPopoverOpen, setPopover] = useState(false);
 
   const rangeValueToLabel = {
@@ -77,9 +65,6 @@ export const RulesWithGapsOverviewPanel = () => {
   );
 
   const handleShowRulesWithGapsFilterButtonClick = (value: boolean) => {
-    setShowRulesWithGaps(value);
-    if (!data) return;
-
     setFilterOptions({
       showRulesWithGaps: value,
     });
