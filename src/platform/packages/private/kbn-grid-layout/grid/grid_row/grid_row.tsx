@@ -54,7 +54,6 @@ export const GridRow = ({
     `;
   }, [gridLayoutStateManager]);
 
-
   useEffect(
     () => {
       /** Update the styles of the grid row via a subscription to prevent re-renders */
