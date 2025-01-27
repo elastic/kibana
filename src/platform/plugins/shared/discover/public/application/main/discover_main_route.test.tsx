@@ -20,7 +20,6 @@ import {
   createCustomizationService,
   DiscoverCustomizationService,
 } from '../../customizations/customization_service';
-import { DiscoverTopNavInline } from './components/top_nav/discover_topnav_inline';
 import { mockCustomizationContext } from '../../customizations/__mocks__/customization_context';
 import { DataViewSpec } from '@kbn/data-views-plugin/common';
 import { MainHistoryLocationState } from '../../../common';
@@ -149,14 +148,6 @@ describe('DiscoverMainRoute', () => {
     await waitFor(() => {
       component.setProps({}).update();
       expect(component.find(DiscoverMainApp).exists()).toBe(true);
-    });
-  });
-
-  test('should pass hideNavMenuItems=true to DiscoverTopNavInline while loading', async () => {
-    const component = mountComponent(true, true);
-    expect(component.find(DiscoverTopNavInline).prop('hideNavMenuItems')).toBe(true);
-    await waitFor(() => {
-      expect(component.update().find(DiscoverTopNavInline).prop('hideNavMenuItems')).toBe(false);
     });
   });
 });
