@@ -27,73 +27,53 @@ Aggregation-based visualizations include the following limitations:
 [cols="50, 50"]
 |===
 
-a| *Area*
-
-Displays data points, connected by a line, where the area between the line and axes are shaded.
+| *Area*: Displays data points, connected by a line, where the area between the line and axes are shaded.
 Use area charts to compare two or more categories over time, and display the magnitude of trends.
 
 | image:images/area.png[Area chart]
 
-a| *Data table*
-
-Displays your aggregation results in a tabular format. Use data tables to display server configuration details, track counts, min,
+| *Data table*: Displays your aggregation results in a tabular format. Use data tables to display server configuration details, track counts, min,
 or max values for a specific field, and monitor the status of key services.
 
 | image:images/data_table.png[Data table]
 
-a| *Gauge*
-
-Displays your data along a scale that changes color according to where your data falls on the expected scale. Use the gauge to show how metric
+| *Gauge*: Displays your data along a scale that changes color according to where your data falls on the expected scale. Use the gauge to show how metric
 values relate to reference threshold values, or determine how a specified field is performing versus how it is expected to perform.
 
 | image:images/gauge.png[Gauge]
 
-a| *Goal*
-
-Displays how your metric progresses toward a fixed goal. Use the goal to display an easy to read visual of the status of your goal progression.
+| *Goal*: Displays how your metric progresses toward a fixed goal. Use the goal to display an easy to read visual of the status of your goal progression.
 
 | image:images/goal.png[Goal]
 
-a| *Heat map*
-
-Displays graphical representations of data where the individual values are represented by colors. Use heat maps when your data set includes
+| *Heat map*: Displays graphical representations of data where the individual values are represented by colors. Use heat maps when your data set includes
 categorical data. For example, use a heat map to see the flights of origin countries compared to destination countries using the sample flight data.
 
 | image:images/heat_map.png[Heat map]
 
-a| *Horizontal Bar*
-
-Displays bars side-by-side where each bar represents a category. Use bar charts to compare data across a
+| *Horizontal Bar*: Displays bars side-by-side where each bar represents a category. Use bar charts to compare data across a
 large number of categories, display data that includes categories with negative values, and easily identify
 the categories that represent the highest and lowest values. {kib} also supports vertical bar charts.
 
 | image:images/bar.png[Bar chart]
 
-a| *Line*
-
-Displays data points that are connected by a line. Use line charts to visualize a sequence of values, discover
+| *Line*: Displays data points that are connected by a line. Use line charts to visualize a sequence of values, discover
 trends over time, and forecast future values.
 
 | image:images/line.png[Line chart]
 
-a| *Metric*
-
-Displays a single numeric value for an aggregation. Use the metric visualization when you have a numeric value that is powerful enough to tell
+| *Metric*: Displays a single numeric value for an aggregation. Use the metric visualization when you have a numeric value that is powerful enough to tell
 a story about your data.
 
 | image:images/metric.png[Metric]
 
-a| *Pie*
-
-Displays slices that represent a data category, where the slice size is proportional to the quantity it represents.
+| *Pie*: Displays slices that represent a data category, where the slice size is proportional to the quantity it represents.
 Use pie charts to show comparisons between multiple categories, illustrate the dominance of one category over others,
 and show percentage or proportional data.
 
 | image:images/pie.png[Pie chart]
 
-a| *Tag cloud*
-
-Graphical representations of how frequently a word appears in the source text. Use tag clouds to easily produce a summary of large documents and
+| *Tag cloud*: Graphical representations of how frequently a word appears in the source text. Use tag clouds to easily produce a summary of large documents and
 create visual art for a specific topic.
 
 | image:images/tag_cloud.png[Tag cloud]
@@ -112,19 +92,19 @@ Choose the type of visualization you want to create, then use the editor to conf
 
 .. Select the data source you want to visualize.
 +
-NOTE: There is no performance impact on the data source you select. For example, saved Discover sessions perform the same as {data-sources}. 
+NOTE: There is no performance impact on the data source you select. For example, saved Discover sessions perform the same as {data-sources}.
 
-. Add the <<aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*. 
+. Add the <<aggregation-reference,aggregations>> you want to visualize using the editor, then click *Update*.
 +
 NOTE: For the *Date Histogram* to use an *auto interval*, the date field must match the primary time field of the {data-source}.
 
-. To change the order, drag and drop the aggregations in the editor. 
-+ 
+. To change the order, drag and drop the aggregations in the editor.
++
 [role="screenshot"]
 image:images/bar-chart-tutorial-3.png[Option to change the order of aggregations]
 
 . To customize the series colors, click the series in the legend, then select the color you want to use.
-+ 
++
 [role="screenshot"]
 image:images/aggregation-based-color-picker.png[Color picker]
 
@@ -149,7 +129,7 @@ Add the sample web logs data that you'll use to create the bar chart, then creat
 [float]
 ===== Open and set up the aggregation-based bar chart
 
-Open the *Aggregation based* editor and change the time range. 
+Open the *Aggregation based* editor and change the time range.
 
 . On the dashboard, click *All types > Aggregation based*, select *Vertical bar*, then select *Kibana Sample Data Logs*.
 
@@ -237,6 +217,3 @@ To save the panel to the dashboard:
 .. On the *Panel settings* window, select *Show title*.
 
 .. Enter the *Title*, then click *Save*.
-
-
-
