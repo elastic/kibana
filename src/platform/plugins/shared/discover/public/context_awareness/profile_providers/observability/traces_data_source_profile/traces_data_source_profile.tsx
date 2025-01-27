@@ -56,14 +56,21 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
           ? `${params.record.flattened['parent.id'] ? 'Span' : 'Transaction'}`
           : isLog
           ? 'Log'
-          : '';
+          : null;
+
+        if (!tabTitle) {
+          return {
+            title: `Record #${recordId}`,
+            docViewsRegistry: (registry) => registry,
+          };
+        }
 
         return {
           title: `Record #${recordId}`,
           docViewsRegistry: (registry) => {
             registry.add({
               id: 'doc_view_overview',
-              title: `${tabTitle} overview`,
+              title: `${tabTitle} Overview`,
               order: 0,
               component: () => {
                 const serviceName = params.record.flattened['service.name'];
