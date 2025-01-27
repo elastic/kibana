@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import type { ActionResult as ActionConnector } from '@kbn/actions-plugin/server';
 import { createInferenceRequestError } from '../errors';
-import type { InferenceConnector } from './connectors';
+import type { InferenceConnector, RawConnector } from './connectors';
 import { isSupportedConnector } from './is_supported_connector';
 
 /**
@@ -15,7 +14,7 @@ import { isSupportedConnector } from './is_supported_connector';
  *
  * The function will throw if the provided connector is not compatible
  */
-export const connectorToInference = (connector: ActionConnector): InferenceConnector => {
+export const connectorToInference = (connector: RawConnector): InferenceConnector => {
   if (!isSupportedConnector(connector)) {
     throw createInferenceRequestError(
       `Connector '${connector.id}' of type '${connector.actionTypeId}' not recognized as a supported connector`,
