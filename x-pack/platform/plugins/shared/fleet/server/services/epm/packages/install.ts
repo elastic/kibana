@@ -83,6 +83,7 @@ import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
+import { logMemoryUsage } from '../../memory_usage';
 
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
@@ -494,7 +495,7 @@ async function installPackageFromRegistry({
           useStreaming,
         }),
       ]);
-
+    logMemoryUsage('After get package');
     const packageInstallContext: PackageInstallContext = {
       packageInfo,
       assetsMap,
@@ -878,6 +879,8 @@ export type InstallPackageParams = {
  * Entrypoint function for installing packages; this function gets also called by the POST epm/packages handler
  */
 export async function installPackage(args: InstallPackageParams): Promise<InstallResult> {
+  logMemoryUsage('START package install');
+
   if (!('installSource' in args)) {
     throw new FleetError('installSource is required');
   }
@@ -941,6 +944,8 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
       retryFromLastState,
     });
+    logMemoryUsage('END package install');
+
     return response;
   } else if (args.installSource === 'upload') {
     const {
