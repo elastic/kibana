@@ -9,12 +9,8 @@
 
 import React from 'react';
 import { render, fireEvent, screen, waitFor } from '@testing-library/react';
-import {
-  InTableSearchInput,
-  INPUT_TEST_SUBJ,
-  BUTTON_PREV_TEST_SUBJ,
-  BUTTON_NEXT_TEST_SUBJ,
-} from './in_table_search_input';
+import { InTableSearchInput } from './in_table_search_input';
+import { INPUT_TEST_SUBJ, BUTTON_PREV_TEST_SUBJ, BUTTON_NEXT_TEST_SUBJ } from './constants';
 
 describe('InTableSearchInput', () => {
   it('renders input', async () => {
