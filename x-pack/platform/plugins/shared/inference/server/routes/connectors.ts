@@ -49,6 +49,7 @@ export function registerConnectorsRoute({
             connectorId: connector.id,
             name: connector.name,
             type: connector.actionTypeId as InferenceConnectorType,
+            config: connector.config ?? {},
           };
         });
 

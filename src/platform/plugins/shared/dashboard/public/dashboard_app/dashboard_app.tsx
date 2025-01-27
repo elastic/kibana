@@ -16,7 +16,6 @@ import { v4 as uuidv4 } from 'uuid';
 import { DASHBOARD_APP_LOCATOR } from '@kbn/deeplinks-analytics';
 import { useExecutionContext } from '@kbn/kibana-react-plugin/public';
 import { createKbnUrlStateStorage, withNotifyOnErrors } from '@kbn/kibana-utils-plugin/public';
-
 import { ViewMode } from '@kbn/presentation-publishing';
 import { DashboardApi, DashboardCreationOptions } from '..';
 import { SharedDashboardState } from '../../common';

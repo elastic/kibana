@@ -19,6 +19,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import moment from 'moment';
+import { isEqual } from 'lodash';
 import { CodeEditor, CodeEditorProps } from '@kbn/code-editor';
 import type { CoreStart } from '@kbn/core/public';
 import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
@@ -30,8 +31,9 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
+import { ESQLRealField, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {
@@ -59,6 +61,25 @@ import './overwrite.scss';
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
 
+const triggerControl = async (
+  queryString: string,
+  variableType: ESQLVariableType,
+  position: monaco.Position | null | undefined,
+  uiActions: ESQLEditorDeps['uiActions'],
+  esqlVariables?: ESQLControlVariable[],
+  onSaveControl?: ESQLEditorProps['onSaveControl'],
+  onCancelControl?: ESQLEditorProps['onCancelControl']
+) => {
+  await uiActions.getTrigger('ESQL_CONTROL_TRIGGER').exec({
+    queryString,
+    variableType,
+    cursorPosition: position,
+    esqlVariables,
+    onSaveControl,
+    onCancelControl,
+  });
+};
+
 export const ESQLEditor = memo(function ESQLEditor({
   query,
   onTextLangQueryChange,
@@ -78,6 +99,10 @@ export const ESQLEditor = memo(function ESQLEditor({
   hasOutline,
   displayDocumentationAsFlyout,
   disableAutoFocus,
+  onSaveControl,
+  onCancelControl,
+  supportsControls,
+  esqlVariables,
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
@@ -91,8 +116,10 @@ export const ESQLEditor = memo(function ESQLEditor({
     core,
     fieldsMetadata,
     uiSettings,
+    uiActions,
   } = kibana.services;
 
+  const variablesService = kibana.services?.esql?.variablesService;
   const histogramBarTarget = uiSettings?.get('histogram:barTarget') ?? 50;
   const [code, setCode] = useState<string>(query.esql ?? '');
   // To make server side errors less "sticky", register the state of the code when submitting
@@ -125,15 +152,6 @@ export const ESQLEditor = memo(function ESQLEditor({
     errors: serverErrors ? parseErrors(serverErrors, code) : [],
     warnings: serverWarning ? parseWarning(serverWarning) : [],
   });
-  // contains only client side validation messages
-  const [clientParserMessages, setClientParserMessages] = useState<{
-    errors: MonacoMessage[];
-    warnings: MonacoMessage[];
-  }>({
-    errors: [],
-    warnings: [],
-  });
-  const hideHistoryComponent = hideQueryHistory;
   const onQueryUpdate = useCallback(
     (value: string) => {
       onTextLangQueryChange({ esql: value } as AggregateQuery);
@@ -196,6 +214,23 @@ export const ESQLEditor = memo(function ESQLEditor({
     }
   }, [code, query.esql]);
 
+  // Enable the variables service if the feature is supported in the consumer app
+  useEffect(() => {
+    if (supportsControls) {
+      variablesService?.enableSuggestions();
+
+      const variables = variablesService?.esqlVariables;
+      if (!isEqual(variables, esqlVariables)) {
+        variablesService?.clearVariables();
+        esqlVariables?.forEach((variable) => {
+          variablesService?.addVariable(variable);
+        });
+      }
+    } else {
+      variablesService?.disableSuggestions();
+    }
+  }, [variablesService, supportsControls, esqlVariables]);
+
   const toggleHistory = useCallback((status: boolean) => {
     setIsHistoryOpen(status);
   }, []);
@@ -237,6 +272,45 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   monaco.editor.registerCommand('esql.timepicker.choose', (...args) => {
     openTimePickerPopover();
+  });
+
+  monaco.editor.registerCommand('esql.control.time_literal.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.TIME_LITERAL,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
+  });
+
+  monaco.editor.registerCommand('esql.control.fields.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.FIELDS,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
+  });
+
+  monaco.editor.registerCommand('esql.control.values.create', async (...args) => {
+    const position = editor1.current?.getPosition();
+    await triggerControl(
+      query.esql,
+      ESQLVariableType.VALUES,
+      position,
+      uiActions,
+      esqlVariables,
+      onSaveControl,
+      onCancelControl
+    );
   });
 
   const styles = esqlEditorStyles(
@@ -382,13 +456,20 @@ export const ESQLEditor = memo(function ESQLEditor({
       },
       // @ts-expect-error To prevent circular type import, type defined here is partial of full client
       getFieldsMetadata: fieldsMetadata?.getClient(),
+      getVariablesByType: (type: ESQLVariableType) => {
+        return variablesService?.esqlVariables.filter((variable) => variable.type === type);
+      },
+      canSuggestVariables: () => {
+        return variablesService?.areSuggestionsEnabled ?? false;
+      },
       getJoinIndices: kibana.services?.esql?.getJoinIndicesAutocomplete,
     };
     return callbacks;
   }, [
+    fieldsMetadata,
+    dataSourcesCache,
     query.esql,
     memoizedSources,
-    dataSourcesCache,
     dataViews,
     core,
     esqlFieldsCache,
@@ -397,7 +478,7 @@ export const ESQLEditor = memo(function ESQLEditor({
     abortController,
     indexManagementApiService,
     histogramBarTarget,
-    fieldsMetadata,
+    variablesService,
     kibana.services?.esql?.getJoinIndicesAutocomplete,
   ]);
 
@@ -439,30 +520,26 @@ export const ESQLEditor = memo(function ESQLEditor({
     };
   }, [esqlCallbacks, code]);
 
-  const clientParserStatus = clientParserMessages.errors?.length
-    ? 'error'
-    : clientParserMessages.warnings.length
-    ? 'warning'
-    : 'success';
-
   useEffect(() => {
-    const validateQuery = async () => {
+    const setQueryToTheCache = async () => {
       if (editor1?.current) {
         const parserMessages = await parseMessages();
-        setClientParserMessages({
-          errors: parserMessages?.errors ?? [],
-          warnings: parserMessages?.warnings ?? [],
+        const clientParserStatus = parserMessages.errors?.length
+          ? 'error'
+          : parserMessages.warnings.length
+          ? 'warning'
+          : 'success';
+
+        addQueriesToCache({
+          queryString: code,
+          status: clientParserStatus,
         });
       }
     };
     if (isQueryLoading || isLoading) {
-      validateQuery();
-      addQueriesToCache({
-        queryString: code,
-        status: clientParserStatus,
-      });
+      setQueryToTheCache();
     }
-  }, [clientParserStatus, isLoading, isQueryLoading, parseMessages, code]);
+  }, [isLoading, isQueryLoading, parseMessages, code]);
 
   const queryValidation = useCallback(
     async ({ active }: { active: boolean }) => {
@@ -499,11 +576,6 @@ export const ESQLEditor = memo(function ESQLEditor({
           'Unified search',
           parsedErrors.length ? parsedErrors : []
         );
-        const parserMessages = await parseMessages();
-        setClientParserMessages({
-          errors: parserMessages?.errors ?? [],
-          warnings: parserMessages?.warnings ?? [],
-        });
         return;
       } else {
         queryValidation(subscription).catch(() => {});
@@ -776,7 +848,7 @@ export const ESQLEditor = memo(function ESQLEditor({
         isLanguageComponentOpen={isLanguageComponentOpen}
         setIsLanguageComponentOpen={setIsLanguageComponentOpen}
         measuredContainerWidth={measuredEditorWidth}
-        hideQueryHistory={hideHistoryComponent}
+        hideQueryHistory={hideQueryHistory}
         resizableContainerButton={resizableContainerButton}
         resizableContainerHeight={resizableContainerHeight}
         displayDocumentationAsFlyout={displayDocumentationAsFlyout}
