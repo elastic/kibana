@@ -72,6 +72,8 @@ export interface RetrieveDocumentationResultDoc {
   content: string;
   /** true if content exceeded max token length and had to go through token reduction */
   summarized: boolean;
+  /** the raw score from the underlying ES query */
+  score: number;
 }
 
 /**

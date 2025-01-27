@@ -6,7 +6,12 @@
  */
 
 import { serverUnavailable } from '@hapi/boom';
-import type { CoreSetup, ElasticsearchClient, IUiSettingsClient } from '@kbn/core/server';
+import type {
+  CoreSetup,
+  ElasticsearchClient,
+  IUiSettingsClient,
+  KibanaRequest,
+} from '@kbn/core/server';
 import type { Logger } from '@kbn/logging';
 import { orderBy } from 'lodash';
 import { encode } from 'gpt-tokenizer';
@@ -30,6 +35,7 @@ import { ObservabilityAIAssistantPluginStartDependencies } from '../../types';
 import { ObservabilityAIAssistantConfig } from '../../config';
 
 interface Dependencies {
+  request: KibanaRequest;
   core: CoreSetup<ObservabilityAIAssistantPluginStartDependencies>;
   esClient: {
     asInternalUser: ElasticsearchClient;
@@ -127,6 +133,34 @@ export class KnowledgeBaseService {
     }));
   }
 
+  recallFromProductDocumentation = async ({
+    queries,
+  }: {
+    queries: Array<{ text: string; boost?: number }>;
+  }): Promise<RecalledEntry[]> => {
+    const [_, { llmTasks }] = await this.dependencies.core.getStartServices();
+    if (await llmTasks.retrieveDocumentationAvailable()) {
+      const results = await llmTasks.retrieveDocumentation({
+        searchTerm: queries[0].text,
+        connectorId: 'none',
+        request: this.dependencies.request,
+        tokenReductionStrategy: 'highlight',
+        max: 5,
+        maxDocumentTokens: 500,
+      });
+      return results.documents.map<RecalledEntry>((doc) => {
+        return {
+          id: doc.url,
+          text: doc.content,
+          score: doc.score,
+          labels: {},
+        };
+      });
+    } else {
+      return [];
+    }
+  };
+
   recall = async ({
     user,
     queries,
@@ -152,7 +186,7 @@ export class KnowledgeBaseService {
       () => `Recalling entries from KB for queries: "${JSON.stringify(queries)}"`
     );
 
-    const [documentsFromKb, documentsFromConnectors] = await Promise.all([
+    const [documentsFromKb, documentsFromConnectors, documentsFromProductDoc] = await Promise.all([
       this.recallFromKnowledgeBase({
         user,
         queries,
@@ -175,27 +209,35 @@ export class KnowledgeBaseService {
         this.dependencies.logger.debug(error);
         return [];
       }),
+      this.recallFromProductDocumentation({ queries }).catch((error) => {
+        this.dependencies.logger.debug('Error getting data from product documentation');
+        this.dependencies.logger.debug(error);
+        return [];
+      }),
     ]);
 
     this.dependencies.logger.debug(
-      `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
+      () => `documentsFromKb: ${JSON.stringify(documentsFromKb.slice(0, 5), null, 2)}`
     );
     this.dependencies.logger.debug(
-      `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
+      () =>
+        `documentsFromConnectors: ${JSON.stringify(documentsFromConnectors.slice(0, 5), null, 2)}`
+    );
+    this.dependencies.logger.debug(
+      () =>
+        `documentsFromProductDoc: ${JSON.stringify(documentsFromProductDoc.slice(0, 5), null, 2)}`
     );
 
     const sortedEntries = orderBy(
-      documentsFromKb.concat(documentsFromConnectors),
+      [...documentsFromKb, ...documentsFromConnectors, ...documentsFromProductDoc],
       'score',
       'desc'
     ).slice(0, limit.size ?? 20);
 
     const maxTokens = limit.tokens ?? 4_000;
 
-    let tokenCount = 0;
-
     const returnedEntries: RecalledEntry[] = [];
-
+    let tokenCount = 0;
     for (const entry of sortedEntries) {
       returnedEntries.push(entry);
       tokenCount += encode(entry.text).length;
