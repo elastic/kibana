@@ -272,11 +272,27 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   conversationInterceptor.waitForIntercept(),
                 ]);
 
-                await titleSimulator.next('My title');
+                await titleSimulator.next({
+                  content: '',
+                  tool_calls: [
+                    {
+                      id: 'id',
+                      index: 0,
+                      function: {
+                        name: 'title_conversation',
+                        arguments: JSON.stringify({ title: 'My title' }),
+                      },
+                    },
+                  ],
+                });
+
+                await titleSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
 
                 await titleSimulator.complete();
 
                 await conversationSimulator.next('My response');
+
+                await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
 
                 await conversationSimulator.complete();
 
@@ -343,6 +359,8 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   const conversationSimulator = await conversationInterceptor.waitForIntercept();
 
                   await conversationSimulator.next('My second response');
+
+                  await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
 
                   await conversationSimulator.complete();
 
@@ -450,6 +468,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   await conversationSimulator.next(
                     'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.'
                   );
+
+                  await conversationSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
+
                   await conversationSimulator.complete();
 
                   await header.waitUntilLoadingHasFinished();

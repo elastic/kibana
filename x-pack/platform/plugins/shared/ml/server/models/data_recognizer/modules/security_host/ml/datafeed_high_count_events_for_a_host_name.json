@@ -1,0 +1,33 @@
+{
+  "job_id": "JOB_ID",
+  "indices": [
+    "INDEX_PATTERN_NAME"
+  ],
+  "max_empty_searches": 10,
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "event.category"
+          }
+        },
+        {
+          "exists": {
+            "field": "host.name"
+          }
+        },
+        {
+          "exists": {
+            "field": "event.dataset"
+          }
+        },
+        {
+          "term": {
+            "event.outcome": "success"
+          }
+        }
+      ]
+    }
+  }
+}

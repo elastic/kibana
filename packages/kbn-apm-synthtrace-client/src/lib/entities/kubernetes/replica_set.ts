@@ -27,9 +27,9 @@ export function k8sReplicaSetEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
-      'entity.type': 'replica_set',
+      'entity.definition_id': 'replica_set',
+      'entity.type': 'replicaset',
       'kubernetes.replicaset.name': name,
-      'kubernetes.replicaset.uid': uid,
       'kubernetes.namespace': clusterName,
       'entity.id': entityId,
       ...others,
@@ -37,7 +37,8 @@ export function k8sReplicaSetEntity({
   }
 
   return new K8sEntity(schema, {
-    'entity.type': 'replica_set',
+    'entity.definition_id': 'replica_set',
+    'entity.type': 'replicaset',
     'k8s.replicaset.name': name,
     'k8s.replicaset.uid': uid,
     'k8s.cluster.name': clusterName,

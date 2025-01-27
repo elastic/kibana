@@ -11,9 +11,11 @@
         "label": "GridLayout",
         "description": [],
         "signature": [
-          "({ layout, gridSettings, renderPanelContents, onLayoutChange, }: GridLayoutProps) => React.JSX.Element"
+          "({ layout, gridSettings, renderPanelContents, onLayoutChange, expandedPanelId, accessMode, className, }: ",
+          "GridLayoutProps",
+          ") => React.JSX.Element"
         ],
-        "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_layout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,12 +24,12 @@
             "id": "def-public.GridLayout.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n}",
+            "label": "{\n  layout,\n  gridSettings,\n  renderPanelContents,\n  onLayoutChange,\n  expandedPanelId,\n  accessMode = 'EDIT',\n  className,\n}",
             "description": [],
             "signature": [
               "GridLayoutProps"
             ],
-            "path": "packages/kbn-grid-layout/grid/grid_layout.tsx",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/grid_layout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +64,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-grid-layout/grid/utils/equality_checks.ts",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/utils/equality_checks.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -82,7 +84,7 @@
                 "text": "GridLayoutData"
               }
             ],
-            "path": "packages/kbn-grid-layout/grid/utils/equality_checks.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/utils/equality_checks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -103,7 +105,7 @@
                 "text": "GridLayoutData"
               }
             ],
-            "path": "packages/kbn-grid-layout/grid/utils/equality_checks.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/utils/equality_checks.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,7 +134,7 @@
           " extends ",
           "GridRect"
         ],
-        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -143,7 +145,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -157,7 +159,7 @@
         "tags": [],
         "label": "GridRowData",
         "description": [],
-        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -168,7 +170,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -179,7 +181,7 @@
             "tags": [],
             "label": "isCollapsed",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -201,7 +203,7 @@
               },
               "; }"
             ],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -215,7 +217,7 @@
         "tags": [],
         "label": "GridSettings",
         "description": [],
-        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -226,7 +228,7 @@
             "tags": [],
             "label": "gutterSize",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -237,7 +239,7 @@
             "tags": [],
             "label": "rowHeight",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -248,7 +250,7 @@
             "tags": [],
             "label": "columnCount",
             "description": [],
-            "path": "packages/kbn-grid-layout/grid/types.ts",
+            "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -258,6 +260,21 @@
     ],
     "enums": [],
     "misc": [
+      {
+        "parentPluginId": "@kbn/grid-layout",
+        "id": "def-public.GridAccessMode",
+        "type": "Type",
+        "tags": [],
+        "label": "GridAccessMode",
+        "description": [],
+        "signature": [
+          "\"VIEW\" | \"EDIT\""
+        ],
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
       {
         "parentPluginId": "@kbn/grid-layout",
         "id": "def-public.GridLayoutData",
@@ -275,7 +292,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-grid-layout/grid/types.ts",
+        "path": "src/platform/packages/private/kbn-grid-layout/grid/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -27,7 +27,7 @@
         "description": [
           "\n"
         ],
-        "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+        "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+            "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -55,7 +55,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -73,7 +73,7 @@
             "signature": [
               "(path: \"/_ml/anomaly_detectors/{job_id}\" | \"/_ml/datafeeds/{datafeed_id}\" | \"/_transform/{transform_id}\" | \"/_ml/data_frame/analytics/{id}\", method: string, props?: string[] | undefined, schema?: object | undefined) => Promise<any>"
             ],
-            "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+            "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -87,7 +87,7 @@
                 "signature": [
                   "\"/_ml/anomaly_detectors/{job_id}\" | \"/_ml/datafeeds/{datafeed_id}\" | \"/_transform/{transform_id}\" | \"/_ml/data_frame/analytics/{id}\""
                 ],
-                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -102,7 +102,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -117,7 +117,7 @@
                 "signature": [
                   "string[] | undefined"
                 ],
-                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -132,7 +132,7 @@
                 "signature": [
                   "object | undefined"
                 ],
-                "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+                "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -152,7 +152,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "x-pack/packages/ml/json_schemas/src/json_schema_service.ts",
+            "path": "x-pack/platform/packages/private/ml/json_schemas/src/json_schema_service.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],

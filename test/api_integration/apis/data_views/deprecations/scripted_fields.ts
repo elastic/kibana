@@ -10,7 +10,8 @@
 import expect from '@kbn/expect';
 import type { DeprecationsGetResponse } from '@kbn/core/server';
 import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
-import { FtrProviderContext } from '../../../ftr_provider_context';
+import type { DeprecationDetailsMessage } from '@kbn/core-deprecations-common';
+import type { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
@@ -75,7 +76,9 @@ export default function ({ getService }: FtrProviderContext) {
       );
 
       expect(dataPluginDeprecations.length).to.be(1);
-      expect(dataPluginDeprecations[0].message).to.contain(title);
+      expect((dataPluginDeprecations[0].message as DeprecationDetailsMessage).content).to.contain(
+        title
+      );
     });
   });
 }

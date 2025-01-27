@@ -58,6 +58,9 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         `--server.ssl.key=${KBN_KEY_PATH}`,
         `--server.ssl.certificate=${KBN_CERT_PATH}`,
         `--server.ssl.redirectHttpFromPort=${redirectPort}`,
+        // supertest is configured with http1 so it fails when redirecting
+        // to an http2 server
+        `--server.protocol=http1`,
       ],
     },
   };

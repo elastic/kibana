@@ -45,14 +45,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     it('shows a list of records of indices with date & date_nanos fields in the right order', async function () {
-      const isLegacy = await discover.useLegacyTable();
       const rowData1 = await discover.getDocTableIndex(1);
       expect(rowData1).to.contain('Jan 1, 2019 @ 12:10:30.124000000');
-      const rowData2 = await discover.getDocTableIndex(isLegacy ? 3 : 2);
+      const rowData2 = await discover.getDocTableIndex(2);
       expect(rowData2).to.contain('Jan 1, 2019 @ 12:10:30.123498765');
-      const rowData3 = await discover.getDocTableIndex(isLegacy ? 5 : 3);
+      const rowData3 = await discover.getDocTableIndex(3);
       expect(rowData3).to.contain('Jan 1, 2019 @ 12:10:30.123456789');
-      const rowData4 = await discover.getDocTableIndex(isLegacy ? 7 : 4);
+      const rowData4 = await discover.getDocTableIndex(4);
       expect(rowData4).to.contain('Jan 1, 2019 @ 12:10:30.123000000');
     });
   });

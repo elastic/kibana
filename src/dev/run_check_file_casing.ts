@@ -26,6 +26,12 @@ run(async ({ log }) => {
       // so it's still super slow. This prevents loading the files
       // and still relies on gitignore to final ignores
       '**/node_modules',
+      // temporarily allow non-snake case for module names
+      // during relocation packages and plugins
+      // in the context of Sustainable Kibana Architecture
+      'src/platform/**',
+      'x-pack/platform/**',
+      'x-pack/solutions/**',
     ],
   });
 

@@ -223,7 +223,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         )
         .expect(200);
 
-      objectRemover.add(createdRule.id, 'alert', 'alerts');
+      objectRemover.add(createdRule.id, 'rule', 'alerting');
 
       await retry.try(async () => {
         const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
@@ -265,7 +265,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
         )
         .expect(200);
 
-      objectRemover.add(createdRule.id, 'alert', 'alerts');
+      objectRemover.add(createdRule.id, 'rule', 'alerting');
 
       await retry.try(async () => {
         const { alerts: alertInstances } = await getAlertSummary(createdRule.id);
@@ -449,7 +449,7 @@ export default ({ getPageObjects, getPageObject, getService }: FtrProviderContex
       const infoIcon = await testSubjects.find('ruleInterval-config-icon-0');
       await infoIcon.click();
 
-      await testSubjects.click('cancelSaveEditedRuleButton');
+      await testSubjects.click('rulePageFooterCancelButton');
     });
 
     it('should delete all selection', async () => {

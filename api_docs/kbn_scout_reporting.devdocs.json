@@ -1,0 +1,642 @@
+{
+  "id": "@kbn/scout-reporting",
+  "client": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutEventsReport",
+        "type": "Class",
+        "tags": [],
+        "label": "ScoutEventsReport",
+        "description": [
+          "\n"
+        ],
+        "signature": [
+          {
+            "pluginId": "@kbn/scout-reporting",
+            "scope": "common",
+            "docId": "kibKbnScoutReportingPluginApi",
+            "section": "def-common.ScoutEventsReport",
+            "text": "ScoutEventsReport"
+          },
+          " extends ",
+          "ScoutReport"
+        ],
+        "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutEventsReport.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutEventsReport.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutEventsReport.eventLogPath",
+            "type": "string",
+            "tags": [],
+            "label": "eventLogPath",
+            "description": [],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutEventsReport.logEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "logEvent",
+            "description": [
+              "\nLogs an event to be processed by this reporter\n"
+            ],
+            "signature": [
+              "(event: ",
+              "ScoutReportEvent",
+              ") => void"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutEventsReport.logEvent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "event",
+                "description": [
+                  "- Event to record"
+                ],
+                "signature": [
+                  "ScoutReportEvent"
+                ],
+                "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutEventsReport.save",
+            "type": "Function",
+            "tags": [],
+            "label": "save",
+            "description": [
+              "\nSave the report to a non-ephemeral location\n"
+            ],
+            "signature": [
+              "(destination: string) => void"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutEventsReport.save.$1",
+                "type": "string",
+                "tags": [],
+                "label": "destination",
+                "description": [
+                  "- Full path to the save location. Must not exist."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-scout-reporting/src/reporting/report/events/report.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutFailureReport",
+        "type": "Class",
+        "tags": [],
+        "label": "ScoutFailureReport",
+        "description": [],
+        "signature": [
+          {
+            "pluginId": "@kbn/scout-reporting",
+            "scope": "common",
+            "docId": "kibKbnScoutReportingPluginApi",
+            "section": "def-common.ScoutFailureReport",
+            "text": "ScoutFailureReport"
+          },
+          " extends ",
+          "ScoutReport"
+        ],
+        "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutFailureReport.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutFailureReport.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "log",
+                "description": [],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/tooling-log",
+                    "scope": "common",
+                    "docId": "kibKbnToolingLogPluginApi",
+                    "section": "def-common.ToolingLog",
+                    "text": "ToolingLog"
+                  },
+                  " | undefined"
+                ],
+                "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": false
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutFailureReport.testFailuresPath",
+            "type": "string",
+            "tags": [],
+            "label": "testFailuresPath",
+            "description": [],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutFailureReport.logEvent",
+            "type": "Function",
+            "tags": [],
+            "label": "logEvent",
+            "description": [
+              "\nLogs a failure to be processed by this reporter\n"
+            ],
+            "signature": [
+              "(failure: ",
+              {
+                "pluginId": "@kbn/scout-reporting",
+                "scope": "common",
+                "docId": "kibKbnScoutReportingPluginApi",
+                "section": "def-common.TestFailure",
+                "text": "TestFailure"
+              },
+              ") => void"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutFailureReport.logEvent.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "failure",
+                "description": [
+                  "- test failure to record"
+                ],
+                "signature": [
+                  {
+                    "pluginId": "@kbn/scout-reporting",
+                    "scope": "common",
+                    "docId": "kibKbnScoutReportingPluginApi",
+                    "section": "def-common.TestFailure",
+                    "text": "TestFailure"
+                  }
+                ],
+                "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.ScoutFailureReport.save",
+            "type": "Function",
+            "tags": [],
+            "label": "save",
+            "description": [
+              "\nSave the report to a non-ephemeral location\n"
+            ],
+            "signature": [
+              "(destination: string) => void"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/scout-reporting",
+                "id": "def-common.ScoutFailureReport.save.$1",
+                "type": "string",
+                "tags": [],
+                "label": "destination",
+                "description": [
+                  "- Full path to the save location. Must not exist."
+                ],
+                "signature": [
+                  "string"
+                ],
+                "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/report.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.generateTestRunId",
+        "type": "Function",
+        "tags": [],
+        "label": "generateTestRunId",
+        "description": [],
+        "signature": [
+          "() => string"
+        ],
+        "path": "packages/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.getTestIDForTitle",
+        "type": "Function",
+        "tags": [],
+        "label": "getTestIDForTitle",
+        "description": [],
+        "signature": [
+          "(title: string) => string"
+        ],
+        "path": "packages/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.getTestIDForTitle.$1",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "packages/kbn-scout-reporting/src/helpers/test_id_generator.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.scoutFailedTestsReporter",
+        "type": "Function",
+        "tags": [],
+        "label": "scoutFailedTestsReporter",
+        "description": [],
+        "signature": [
+          "(options?: ",
+          "ScoutPlaywrightReporterOptions",
+          " | undefined) => ",
+          "ReporterDescription"
+        ],
+        "path": "packages/kbn-scout-reporting/src/reporting/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.scoutFailedTestsReporter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "ScoutPlaywrightReporterOptions",
+              " | undefined"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.scoutPlaywrightReporter",
+        "type": "Function",
+        "tags": [],
+        "label": "scoutPlaywrightReporter",
+        "description": [],
+        "signature": [
+          "(options?: ",
+          "ScoutPlaywrightReporterOptions",
+          " | undefined) => ",
+          "ReporterDescription"
+        ],
+        "path": "packages/kbn-scout-reporting/src/reporting/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.scoutPlaywrightReporter.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "options",
+            "description": [],
+            "signature": [
+              "ScoutPlaywrightReporterOptions",
+              " | undefined"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.TestFailure",
+        "type": "Interface",
+        "tags": [],
+        "label": "TestFailure",
+        "description": [],
+        "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.suite",
+            "type": "string",
+            "tags": [],
+            "label": "suite",
+            "description": [],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.target",
+            "type": "string",
+            "tags": [],
+            "label": "target",
+            "description": [],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.command",
+            "type": "string",
+            "tags": [],
+            "label": "command",
+            "description": [],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.location",
+            "type": "string",
+            "tags": [],
+            "label": "location",
+            "description": [],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.owner",
+            "type": "Array",
+            "tags": [],
+            "label": "owner",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.plugin",
+            "type": "Object",
+            "tags": [],
+            "label": "plugin",
+            "description": [],
+            "signature": [
+              "{ id: string; visibility: string; group: string; } | undefined"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.duration",
+            "type": "number",
+            "tags": [],
+            "label": "duration",
+            "description": [],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.error",
+            "type": "Object",
+            "tags": [],
+            "label": "error",
+            "description": [],
+            "signature": [
+              "{ message?: string | undefined; stack_trace?: string | undefined; }"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.stdout",
+            "type": "string",
+            "tags": [],
+            "label": "stdout",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout-reporting",
+            "id": "def-common.TestFailure.attachments",
+            "type": "Array",
+            "tags": [],
+            "label": "attachments",
+            "description": [],
+            "signature": [
+              "{ name: string; path?: string | undefined; contentType: string; }[]"
+            ],
+            "path": "packages/kbn-scout-reporting/src/reporting/report/failed_test/test_failure.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "enums": [
+      {
+        "parentPluginId": "@kbn/scout-reporting",
+        "id": "def-common.ScoutReportEventAction",
+        "type": "Enum",
+        "tags": [],
+        "label": "ScoutReportEventAction",
+        "description": [
+          "\nScout reporter event type"
+        ],
+        "path": "packages/kbn-scout-reporting/src/reporting/report/events/event.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "misc": [],
+    "objects": []
+  }
+}

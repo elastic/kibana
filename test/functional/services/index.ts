@@ -30,7 +30,6 @@ import {
   DashboardDrilldownPanelActionsProvider,
   DashboardDrilldownsManageProvider,
 } from './dashboard';
-import { DocTableService } from './doc_table';
 import { EmbeddingService } from './embedding';
 import { FilterBarService } from './filter_bar';
 import { FlyoutService } from './flyout';
@@ -62,7 +61,6 @@ export const services = {
   ...commonFunctionalUIServices,
   filterBar: FilterBarService,
   queryBar: QueryBarService,
-  docTable: DocTableService,
   png: PngService,
   screenshots: ScreenshotsService,
   snapshots: SnapshotsService,

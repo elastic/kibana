@@ -12,27 +12,28 @@ import { Serializable } from '../../serializable';
 
 const identityFieldsMap: Record<Schema, Record<string, string[]>> = {
   ecs: {
-    pod: ['kubernetes.pod.name'],
+    pod: ['kubernetes.pod.uid'],
     cluster: ['orchestrator.cluster.name'],
-    cron_job: ['kubernetes.cronjob.name'],
-    daemon_set: ['kubernetes.daemonset.name'],
+    cronjob: ['kubernetes.cronjob.name'],
+    daemonset: ['kubernetes.daemonset.name'],
     deployment: ['kubernetes.deployment.name'],
     job: ['kubernetes.job.name'],
     node: ['kubernetes.node.name'],
-    replica_set: ['kubernetes.replicaset.name'],
-    stateful_set: ['kubernetes.statefulset.name'],
+    replicaset: ['kubernetes.replicaset.name'],
+    statefulset: ['kubernetes.statefulset.name'],
+    service: ['kubernetes.service.name'],
     container: ['kubernetes.container.id'],
   },
-  semconv: {
-    pod: ['k8s.pod.name'],
+  otel: {
+    pod: ['k8s.pod.uid'],
     cluster: ['k8s.cluster.uid'],
-    cron_job: ['k8s.cronjob.name'],
-    daemon_set: ['k8s.daemonset.name'],
-    deployment: ['k8s.deployment.name'],
-    job: ['k8s.job.name'],
+    cronjob: ['k8s.cronjob.uid'],
+    daemonset: ['k8s.daemonset.uid'],
+    deployment: ['k8s.deployment.uid'],
+    job: ['k8s.job.uid'],
     node: ['k8s.node.uid'],
-    replica_set: ['k8s.replicaset.name'],
-    stateful_set: ['k8s.statefulset.name'],
+    replicaset: ['k8s.replicaset.uid'],
+    statefulset: ['k8s.statefulset.uid'],
     container: ['container.id'],
   },
 };
@@ -41,10 +42,17 @@ export class K8sEntity extends Serializable<EntityFields> {
   constructor(schema: Schema, fields: EntityFields) {
     const entityType = fields['entity.type'];
     if (entityType === undefined) {
-      throw new Error(`Entity type not defined: ${entityType}`);
+      throw new Error(`Entity type not defined`);
     }
 
-    const entityTypeWithSchema = `kubernetes_${entityType}_${schema}`;
+    const entityDefinitionId = fields['entity.definition_id'];
+    if (entityDefinitionId === undefined) {
+      throw new Error(`Entity definition id not defined`);
+    }
+
+    const entityDefinitionWithSchema = `kubernetes_${entityDefinitionId}_${
+      schema === 'ecs' ? schema : 'semconv'
+    }`;
     const identityFields = identityFieldsMap[schema][entityType];
     if (identityFields === undefined || identityFields.length === 0) {
       throw new Error(
@@ -54,8 +62,8 @@ export class K8sEntity extends Serializable<EntityFields> {
 
     super({
       ...fields,
-      'entity.type': entityTypeWithSchema,
-      'entity.definition_id': `builtin_${entityTypeWithSchema}`,
+      'entity.type': `k8s.${entityType}.${schema}`,
+      'entity.definition_id': `builtin_${entityDefinitionWithSchema}`,
       'entity.identity_fields': identityFields,
       'entity.display_name': getDisplayName({ identityFields, fields }),
       'entity.definition_version': '1.0.0',

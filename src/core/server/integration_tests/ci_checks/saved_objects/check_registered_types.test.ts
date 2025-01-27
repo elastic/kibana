@@ -15,6 +15,7 @@ import {
   createRootWithCorePlugins,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
+import { SAVED_OBJECT_TYPES_COUNT } from '@kbn/core-saved-objects-server-internal';
 
 describe('checking migration metadata changes on all registered SO types', () => {
   let esServer: TestElasticsearchUtils;
@@ -46,6 +47,8 @@ describe('checking migration metadata changes on all registered SO types', () =>
   // This test is meant to fail when any change is made in registered types that could potentially impact the SO migration.
   // Just update the snapshot by running this test file via jest_integration with `-u` and push the update.
   // The intent is to trigger a code review from the Core team to review the SO type changes.
+  // The number of types in the hashMap should never be reduced, it can only increase.
+  // Removing saved object types is forbidden after 8.8.
   it('detecting migration related changes in registered types', () => {
     const allTypes = typeRegistry.getAllTypes();
 
@@ -57,9 +60,9 @@ describe('checking migration metadata changes on all registered SO types', () =>
     expect(hashMap).toMatchInlineSnapshot(`
       Object {
         "action": "0e6fc0b74c7312a8c11ff6b14437b93a997358b8",
-        "action_task_params": "b50cb5c8a493881474918e8d4985e61374ca4c30",
-        "ad_hoc_run_params": "d4e3c5c794151d0a4f5c71e886b2aa638da73ad2",
-        "alert": "556a03378f5ee1c31593c3a37c66b54555ee14ff",
+        "action_task_params": "2e475d8b62e2de50b77f58cda309efb537e1d543",
+        "ad_hoc_run_params": "c7419760e878207231c3c8a25ec4d78360e07bf7",
+        "alert": "c5a135d2aca71f56103e9ccba00d6675b0586c82",
         "api_key_pending_invalidation": "8f5554d1984854011b8392d9a6f7ef985bcac03c",
         "apm-custom-dashboards": "b67128f78160c288bd7efe25b2da6e2afd5e82fc",
         "apm-indices": "8a2d68d415a4b542b26b0d292034a28ffac6fed4",
@@ -73,7 +76,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "canvas-element": "cdedc2123eb8a1506b87a56b0bcce60f4ec08bc8",
         "canvas-workpad": "9d82aafb19586b119e5c9382f938abe28c26ca5c",
         "canvas-workpad-template": "c077b0087346776bb3542b51e1385d172cb24179",
-        "cases": "5433a9f1277f8f17bbc4fd20d33b1fc6d997931e",
+        "cases": "91771732e2e488e4c1b1ac468057925d1c6b32b5",
         "cases-comments": "5cb0a421588831c2a950e50f486048b8aabbae25",
         "cases-configure": "44ed7b8e0f44df39516b8870589b89e32224d2bf",
         "cases-connector-mappings": "f9d1ac57e484e69506c36a8051e4d61f4a8cfd25",
@@ -105,10 +108,10 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "file": "6b65ae5899b60ebe08656fd163ea532e557d3c98",
         "file-upload-usage-collection-telemetry": "06e0a8c04f991e744e09d03ab2bd7f86b2088200",
         "fileShare": "5be52de1747d249a221b5241af2838264e19aaa1",
-        "fleet-agent-policies": "f57d3b70e4175a19a18f18ee72a379ceec82e1fc",
+        "fleet-agent-policies": "4a5c6477d2a61121e95ea9865ed1403a28c38706",
         "fleet-fleet-server-host": "69be15f6b6f2a2875ad3c7050ddea7a87f505417",
         "fleet-message-signing-keys": "93421f43fed2526b59092a4e3c65d64bc2266c0f",
-        "fleet-package-policies": "8be2cabfed89e103e0d413f2900e9cf6cd31bc68",
+        "fleet-package-policies": "0206c20f27286787b91814a2e7872f06dc1e8e47",
         "fleet-preconfiguration-deletion-record": "c52ea1e13c919afe8a5e8e3adbb7080980ecc08e",
         "fleet-proxy": "6cb688f0d2dd856400c1dbc998b28704ff70363d",
         "fleet-setup-lock": "0dc784792c79b5af5a6e6b5dcac06b0dbaa90bde",
@@ -121,10 +124,10 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "infra-custom-dashboards": "1a5994f2e05bb8a1609825ddbf5012f77c5c67f3",
         "infrastructure-monitoring-log-view": "5f86709d3c27aed7a8379153b08ee5d3d90d77f5",
         "infrastructure-ui-source": "113182d6895764378dfe7fa9fa027244f3a457c4",
-        "ingest-agent-policies": "5e95e539826a40ad08fd0c1d161da0a4d86ffc6d",
+        "ingest-agent-policies": "57ebfb047cf0b81c6fa0ceed8586fa7199c7c5e2",
         "ingest-download-sources": "279a68147e62e4d8858c09ad1cf03bd5551ce58d",
         "ingest-outputs": "55988d5f778bbe0e76caa7e6468707a0a056bdd8",
-        "ingest-package-policies": "dfa7b1045a2667a822181f40f012786724492439",
+        "ingest-package-policies": "60d43f475f91417d14d9df05476acf2e63e99435",
         "ingest_manager_settings": "111a616eb72627c002029c19feb9e6c439a10505",
         "inventory-view": "b8683c8e352a286b4aca1ab21003115a4800af83",
         "kql-telemetry": "93c1d16c1a0dfca9c8842062cf5ef8f62ae401ad",
@@ -132,7 +135,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "lens": "5cfa2c52b979b4f8df56dd13c477e152183468b9",
         "lens-ui-telemetry": "8c47a9e393861f76e268345ecbadfc8a5fb1e0bd",
         "links": "1dd432cc94619a513b75cec43660a50be7aadc90",
-        "maintenance-window": "bf36863f5577c2d22625258bdad906eeb4cccccc",
+        "maintenance-window": "b84d9e0b3f89be0ae4b6fe1af6e38b4cd2554931",
         "map": "76c71023bd198fb6b1163b31bafd926fe2ceb9da",
         "metrics-data-source": "81b69dc9830699d9ead5ac8dcb9264612e2a3c89",
         "metrics-explorer-view": "98cf395d0e87b89ab63f173eae16735584a8ff42",
@@ -170,7 +173,7 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "synthetics-private-location": "8cecc9e4f39637d2f8244eb7985c0690ceab24be",
         "synthetics-privates-locations": "f53d799d5c9bc8454aaa32c6abc99a899b025d5c",
         "tag": "e2544392fe6563e215bb677abc8b01c2601ef2dc",
-        "task": "3c89a7c918d5b896a5f8800f06e9114ad7e7aea3",
+        "task": "ca8020259e46f713965a754ffae286c02d3cf05d",
         "telemetry": "7b00bcf1c7b4f6db1192bb7405a6a63e78b699fd",
         "threshold-explorer-view": "175306806f9fc8e13fcc1c8953ec4ba89bda1b70",
         "ui-metric": "d227284528fd19904e9d972aea0a13716fc5fe24",
@@ -185,5 +188,6 @@ describe('checking migration metadata changes on all registered SO types', () =>
         "workplace_search_telemetry": "52b32b47ee576f554ac77cb1d5896dfbcfe9a1fb",
       }
     `);
+    expect(Object.keys(hashMap).length).toEqual(SAVED_OBJECT_TYPES_COUNT);
   });
 });

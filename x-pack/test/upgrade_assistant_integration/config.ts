@@ -38,8 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     },
     esTestCluster: {
       ...xPackFunctionalTestsConfig.get('esTestCluster'),
-      // this archive can not be loaded into 8.0+
-      // dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
+      dataArchive: path.resolve(__dirname, './fixtures/data_archives/upgrade_assistant.zip'),
     },
   };
 }

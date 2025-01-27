@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import { testHasEmbeddedConsole } from './embedded_console';
 
@@ -23,22 +23,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const ml = getService('ml');
 
   describe('Serverless Inference Management UI', function () {
+    // see details: https://github.com/elastic/kibana/issues/204539
+    this.tags(['failsOnMKI']);
     const endpoint = 'endpoint-1';
     const taskType = 'sparse_embedding';
     const modelConfig = {
-      service: 'elser',
+      service: 'elasticsearch',
       service_settings: {
         num_allocations: 1,
         num_threads: 1,
+        model_id: '.elser_model_2',
       },
     };
 
     before(async () => {
       await pageObjects.svlCommonPage.loginWithRole('developer');
-    });
-
-    after(async () => {
-      await ml.api.cleanMlIndices();
     });
 
     beforeEach(async () => {
@@ -62,7 +61,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('delete action', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/204507
+    describe.skip('delete action', () => {
       const usageIndex = 'elser_index';
       beforeEach(async () => {
         await ml.api.createInferenceEndpoint(endpoint, taskType, modelConfig);
@@ -95,6 +95,12 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await ml.api.createIndex(usageIndex, indexMapping);
 
         await pageObjects.svlSearchInferenceManagementPage.InferenceTabularPage.expectEndpointWithUsageTobeDelete();
+      });
+    });
+
+    describe('create inference flyout', () => {
+      it('renders successfully', async () => {
+        await pageObjects.svlSearchInferenceManagementPage.AddInferenceFlyout.expectInferenceEndpointToBeVisible();
       });
     });
 

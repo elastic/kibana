@@ -43,7 +43,7 @@
           "ReferenceMaps",
           ", parentCommand: string | undefined) => boolean | undefined"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -63,7 +63,7 @@
                 "text": "ESQLSingleAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -80,7 +80,7 @@
               "FunctionParameterType",
               "; optional?: boolean | undefined; supportsWildcard?: boolean | undefined; constantOnly?: boolean | undefined; fieldsOnly?: boolean | undefined; acceptedValues?: string[] | undefined; literalSuggestions?: string[] | undefined; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -95,7 +95,7 @@
             "signature": [
               "ReferenceMaps"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -110,7 +110,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -153,7 +153,7 @@
           },
           "[]>"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/variables.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/variables.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -173,7 +173,7 @@
                 "text": "ESQLAst"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/variables.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/variables.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -196,7 +196,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/variables.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/variables.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -211,7 +211,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/variables.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/variables.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -272,7 +272,7 @@
           },
           "[]>"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -286,7 +286,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -317,7 +317,7 @@
               },
               ")[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -338,7 +338,7 @@
                 "text": "AstProviderFn"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -353,7 +353,7 @@
             "signature": [
               "CodeActionOptions"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -375,7 +375,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/actions.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -402,7 +402,7 @@
           },
           "<string>[]"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -427,7 +427,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -438,7 +438,7 @@
             "tags": [],
             "label": "options",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -452,7 +452,7 @@
                 "signature": [
                   "\"agg\" | \"builtin\" | \"eval\" | (\"agg\" | \"builtin\" | \"eval\")[]"
                 ],
-                "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -496,6 +496,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           "ESQLStringLiteral",
           "; option: ",
@@ -530,6 +532,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -572,6 +576,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -614,6 +620,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -754,6 +762,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; node: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -870,6 +880,8 @@
             "section": "def-common.ESQLAstMetricsCommand",
             "text": "ESQLAstMetricsCommand"
           },
+          " | ",
+          "ESQLAstJoinCommand",
           "; option: ",
           {
             "pluginId": "@kbn/esql-ast",
@@ -972,7 +984,7 @@
           },
           " | undefined; }"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/context.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -986,7 +998,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/context.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1007,7 +1019,7 @@
                 "text": "ESQLAst"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/context.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1022,7 +1034,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/context.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1071,7 +1083,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1093,7 +1105,7 @@
               " | ",
               "ESQLIdentifier"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1110,7 +1122,7 @@
               "ReferenceMaps",
               ", \"fields\" | \"variables\">"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1137,7 +1149,7 @@
           },
           "<string>"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1151,7 +1163,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1178,7 +1190,7 @@
           },
           "<string> | undefined"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1192,7 +1204,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1235,7 +1247,7 @@
           },
           ">>; }"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1249,7 +1261,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1271,7 +1283,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1298,7 +1310,7 @@
           },
           " | undefined"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1312,7 +1324,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1341,7 +1353,7 @@
           },
           ", { withTypes, capitalize }: { withTypes: boolean; capitalize?: boolean | undefined; }) => { declaration: string; }[]"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1361,7 +1373,7 @@
                 "text": "FunctionDefinition"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1373,7 +1385,7 @@
             "tags": [],
             "label": "{ withTypes, capitalize }",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1384,7 +1396,7 @@
                 "tags": [],
                 "label": "withTypes",
                 "description": [],
-                "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1398,7 +1410,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1426,7 +1438,7 @@
           },
           " | undefined) => { getPolicies: () => Promise<{ name: string; sourceIndices: string[]; matchField: string; enrichFields: string[]; }[]>; getPolicyMetadata: (policyName: string) => Promise<{ name: string; sourceIndices: string[]; matchField: string; enrichFields: string[]; } | undefined>; }"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1447,7 +1459,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1466,7 +1478,7 @@
         "signature": [
           "({ fromCommand, timeField, }: { fromCommand: string; timeField?: string | undefined; }) => { label: string; description: string; queryString: string; }[]"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1477,7 +1489,7 @@
             "tags": [],
             "label": "{\n  fromCommand,\n  timeField,\n}",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1488,7 +1500,7 @@
                 "tags": [],
                 "label": "fromCommand",
                 "description": [],
-                "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1502,7 +1514,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/recommended_queries/templates.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1532,7 +1544,7 @@
           "ESQLSourceResult",
           "[]>"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1553,7 +1565,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/resources_helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1580,7 +1592,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1600,7 +1612,7 @@
                 "text": "ESQLAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1629,7 +1641,7 @@
           "FunctionSubtype",
           ", string> | undefined) => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1652,7 +1664,7 @@
               "FunctionSubtype",
               ", string> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1679,7 +1691,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1699,7 +1711,7 @@
                 "text": "ESQLAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1726,7 +1738,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1746,7 +1758,7 @@
                 "text": "ESQLAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1773,7 +1785,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1793,7 +1805,7 @@
                 "text": "ESQLAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1820,7 +1832,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1840,7 +1852,7 @@
                 "text": "ESQLAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1867,7 +1879,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1887,7 +1899,7 @@
                 "text": "ESQLAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1914,7 +1926,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1934,7 +1946,7 @@
                 "text": "ESQLAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1961,7 +1973,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1981,7 +1993,7 @@
                 "text": "ESQLAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2002,7 +2014,7 @@
           "ReasonTypes",
           " | undefined; }"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2016,7 +2028,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2031,7 +2043,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2046,7 +2058,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2073,7 +2085,7 @@
           },
           ") => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2093,7 +2105,7 @@
                 "text": "ESQLAstItem"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2122,7 +2134,7 @@
           "FunctionSubtype",
           ", string>) => string"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2145,7 +2157,7 @@
               "FunctionSubtype",
               ", string>"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2164,7 +2176,7 @@
         "signature": [
           "(text: string, { dashSupported }: { dashSupported?: boolean | undefined; }) => boolean"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2178,7 +2190,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2190,7 +2202,7 @@
             "tags": [],
             "label": "{ dashSupported }",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2204,7 +2216,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -2250,7 +2262,7 @@
           },
           "[]>"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2264,7 +2276,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2279,7 +2291,7 @@
             "signature": [
               "number"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2294,7 +2306,7 @@
             "signature": [
               "EditorContext"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2315,7 +2327,7 @@
                 "text": "AstProviderFn"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2337,7 +2349,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/autocomplete.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2378,7 +2390,7 @@
           "ValidationResult",
           ">"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/validation/validation.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2392,7 +2404,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/validation.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2413,7 +2425,7 @@
                 "text": "AstProviderFn"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/validation.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2428,7 +2440,7 @@
             "signature": [
               "ValidationOptions"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/validation.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2450,7 +2462,7 @@
               },
               " | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/validation.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/validation.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -2493,7 +2505,7 @@
           },
           "[]"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/utils.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2507,7 +2519,7 @@
             "signature": [
               "\"error\" | \"warning\""
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/utils.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2538,7 +2550,7 @@
               },
               ")[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/utils.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2556,7 +2568,7 @@
         "tags": [],
         "label": "CodeAction",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2567,7 +2579,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2582,7 +2594,7 @@
               "EditorError",
               "[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2596,7 +2608,7 @@
             "signature": [
               "\"quickfix\""
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2612,7 +2624,7 @@
               "EditorError",
               "; text: string; }[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/code_actions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2638,7 +2650,7 @@
           "CommandBaseDefinition",
           "<CommandName>"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2652,7 +2664,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2682,7 +2694,7 @@
               },
               "[]) | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2703,7 +2715,7 @@
                   },
                   "<string>"
                 ],
-                "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2721,7 +2733,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2744,13 +2756,13 @@
               },
               "[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": [
               {
                 "plugin": "@kbn/monaco",
-                "path": "packages/kbn-monaco/src/esql/lib/hover/hover.ts"
+                "path": "src/platform/packages/shared/kbn-monaco/src/esql/lib/hover/hover.ts"
               }
             ]
           },
@@ -2773,7 +2785,7 @@
               },
               "<string>[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": true,
             "trackAdoption": false,
             "references": []
@@ -2788,7 +2800,7 @@
         "tags": [],
         "label": "CommandModeDefinition",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2799,7 +2811,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2810,7 +2822,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2824,7 +2836,7 @@
             "signature": [
               "{ name: string; description: string; }[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2838,7 +2850,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2864,7 +2876,7 @@
           "CommandBaseDefinition",
           "<CommandName>"
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2878,7 +2890,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2889,7 +2901,7 @@
             "tags": [],
             "label": "optional",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2903,7 +2915,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2941,7 +2953,7 @@
               },
               "[]) | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2961,7 +2973,7 @@
                     "text": "ESQLCommandOption"
                   }
                 ],
-                "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2983,7 +2995,7 @@
                   },
                   "<string>"
                 ],
-                "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2998,7 +3010,7 @@
                 "signature": [
                   "unknown"
                 ],
-                "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3016,7 +3028,7 @@
         "tags": [],
         "label": "ESQLCallbacks",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3032,7 +3044,7 @@
               "ESQLSourceResult",
               "> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3054,7 +3066,7 @@
               },
               "> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3068,7 +3080,7 @@
             "signature": [
               "CallbackFn<{}, { name: string; sourceIndices: string[]; matchField: string; enrichFields: string[]; }> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3082,7 +3094,7 @@
             "signature": [
               "(() => Promise<{ histogramBarTarget: number; }>) | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -3100,9 +3112,27 @@
               "PartialFieldsMetadataClient",
               "> | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ESQLCallbacks.getJoinIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "getJoinIndices",
+            "description": [],
+            "signature": [
+              "(() => Promise<{ indices: ",
+              "JoinIndexAutocompleteItem",
+              "[]; }>) | undefined"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/shared/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           }
         ],
         "initialIsOpen": false
@@ -3114,7 +3144,7 @@
         "tags": [],
         "label": "ESQLPolicy",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3125,7 +3155,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3139,7 +3169,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3150,7 +3180,7 @@
             "tags": [],
             "label": "matchField",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3164,7 +3194,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3178,7 +3208,7 @@
         "tags": [],
         "label": "ESQLRealField",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3189,7 +3219,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3203,7 +3233,7 @@
             "signature": [
               "\"boolean\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"unsupported\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\""
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3217,7 +3247,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3231,7 +3261,7 @@
             "signature": [
               "{ description?: string | undefined; } | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3245,7 +3275,7 @@
         "tags": [],
         "label": "ESQLVariable",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3256,7 +3286,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3270,7 +3300,7 @@
             "signature": [
               "\"boolean\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"keyword\" | \"text\" | \"date\" | \"date_nanos\" | \"version\" | \"integer\" | \"long\" | \"double\" | \"unsigned_long\" | \"unsupported\" | \"null\" | \"cartesian_point\" | \"cartesian_shape\" | \"counter_integer\" | \"counter_long\" | \"counter_double\" | \"time_literal\" | \"time_duration\" | \"date_period\""
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3290,7 +3320,7 @@
                 "text": "ESQLLocation"
               }
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3304,7 +3334,7 @@
         "tags": [],
         "label": "FunctionDefinition",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3318,7 +3348,7 @@
             "signature": [
               "\"agg\" | \"builtin\" | \"eval\""
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3332,7 +3362,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3346,7 +3376,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3357,7 +3387,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3371,7 +3401,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3382,7 +3412,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3396,7 +3426,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3410,7 +3440,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3428,7 +3458,7 @@
               "FunctionReturnType",
               "; }[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3442,7 +3472,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3474,7 +3504,7 @@
               },
               "[]) | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -3497,7 +3527,7 @@
                   "FunctionSubtype",
                   ", string>"
                 ],
-                "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+                "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -3515,7 +3545,7 @@
         "tags": [],
         "label": "Literals",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3526,7 +3556,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3537,7 +3567,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3551,7 +3581,7 @@
         "tags": [],
         "label": "SuggestionRawDefinition",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3562,7 +3592,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3573,7 +3603,7 @@
             "tags": [],
             "label": "text",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3587,7 +3617,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3603,7 +3633,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3619,7 +3649,7 @@
             "signature": [
               "\"Value\" | \"Text\" | \"Operator\" | \"Field\" | \"Method\" | \"Function\" | \"Variable\" | \"Class\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3632,7 +3662,7 @@
             "description": [
               "\nA very short description for the suggestion entry that can be shown on the UI next to the label"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3648,7 +3678,7 @@
             "signature": [
               "{ value: string; } | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3664,7 +3694,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3680,7 +3710,7 @@
             "signature": [
               "{ title: string; id: string; } | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3696,7 +3726,7 @@
             "signature": [
               "{ start: number; end: number; } | undefined"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3710,7 +3740,7 @@
         "tags": [],
         "label": "ValidationErrors",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3724,7 +3754,7 @@
             "signature": [
               "{ message: string; type: { name: string; argType: string; value: string | number | Date; givenType: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3738,7 +3768,7 @@
             "signature": [
               "{ message: string; type: { fn: string; numArgs: number; passedArgs: number; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3752,7 +3782,7 @@
             "signature": [
               "{ message: string; type: { fn: string; numArgs: number; passedArgs: number; extraArgs: number; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3766,7 +3796,7 @@
             "signature": [
               "{ message: string; type: { fn: string; numArgs: number; passedArgs: number; missingArgs: number; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3780,7 +3810,7 @@
             "signature": [
               "{ message: string; type: { name: string | number; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3794,7 +3824,7 @@
             "signature": [
               "{ message: string; type: { name: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3808,7 +3838,7 @@
             "signature": [
               "{ message: string; type: { name: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3822,7 +3852,7 @@
             "signature": [
               "{ message: string; type: { name: string; argType: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3836,7 +3866,7 @@
             "signature": [
               "{ message: string; type: { name: string; command: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3850,7 +3880,7 @@
             "signature": [
               "{ message: string; type: { name: string; command: string; option: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3864,7 +3894,7 @@
             "signature": [
               "{ message: string; type: { name: string; value: string; supportedOptions: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3878,7 +3908,7 @@
             "signature": [
               "{ message: string; type: { field: string; fieldType: string; newType: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3892,7 +3922,7 @@
             "signature": [
               "{ message: string; type: { command: string; type: string; typeCount: number; givenType: string; column: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3906,7 +3936,7 @@
             "signature": [
               "{ message: string; type: { command: string; option: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3920,7 +3950,7 @@
             "signature": [
               "{ message: string; type: { command: string; option: string; type: string; givenValue: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3934,7 +3964,7 @@
             "signature": [
               "{ message: string; type: { value: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3948,7 +3978,7 @@
             "signature": [
               "{ message: string; type: { command: string; value: string; type: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3962,7 +3992,7 @@
             "signature": [
               "{ message: string; type: { name: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3976,7 +4006,7 @@
             "signature": [
               "{ message: string; type: { type: string; value: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3990,7 +4020,7 @@
             "signature": [
               "{ message: string; type: { command: string; value: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4004,7 +4034,7 @@
             "signature": [
               "{ message: string; type: { name: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4018,7 +4048,7 @@
             "signature": [
               "{ message: string; type: { field: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4032,7 +4062,7 @@
             "signature": [
               "{ message: string; type: { setting: string; expected: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4046,7 +4076,7 @@
             "signature": [
               "{ message: string; type: { command: string; value: string; expected: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4060,7 +4090,7 @@
             "signature": [
               "{ message: string; type: { function: string; command: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4074,7 +4104,7 @@
             "signature": [
               "{ message: string; type: { fn: string; given: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4088,7 +4118,7 @@
             "signature": [
               "{ message: string; type: {}; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4102,7 +4132,7 @@
             "signature": [
               "{ message: string; type: { value: string; availableFields: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4116,7 +4146,7 @@
             "signature": [
               "{ message: string; type: { value: string | number; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4130,7 +4160,7 @@
             "signature": [
               "{ message: string; type: { commandName: string; expression: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4144,7 +4174,7 @@
             "signature": [
               "{ message: string; type: { commandName: string; expression: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4158,7 +4188,7 @@
             "signature": [
               "{ message: string; type: { nestedAgg: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4172,7 +4202,21 @@
             "signature": [
               "{ message: string; type: { fn: string; }; }"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/esql-validation-autocomplete",
+            "id": "def-common.ValidationErrors.invalidJoinIndex",
+            "type": "Object",
+            "tags": [],
+            "label": "invalidJoinIndex",
+            "description": [],
+            "signature": [
+              "{ message: string; type: { identifier: string; }; }"
+            ],
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -4199,7 +4243,7 @@
             "text": "ValidationErrors"
           }
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/validation/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/validation/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4214,7 +4258,7 @@
         "signature": [
           "\"Value\" | \"Text\" | \"Operator\" | \"Field\" | \"Method\" | \"Function\" | \"Variable\" | \"Class\" | \"Constant\" | \"Keyword\" | \"Reference\" | \"Snippet\" | \"Issue\""
         ],
-        "path": "packages/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/autocomplete/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4228,7 +4272,7 @@
         "tags": [],
         "label": "ENRICH_MODES",
         "description": [],
-        "path": "packages/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
+        "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -4239,7 +4283,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4250,7 +4294,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4261,7 +4305,7 @@
             "tags": [],
             "label": "prefix",
             "description": [],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -4275,7 +4319,7 @@
             "signature": [
               "{ name: string; description: string; }[]"
             ],
-            "path": "packages/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
+            "path": "src/platform/packages/shared/kbn-esql-validation-autocomplete/src/definitions/settings.ts",
             "deprecated": false,
             "trackAdoption": false
           }

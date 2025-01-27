@@ -15,7 +15,7 @@
           "\nGraph component renders a graph visualization using ReactFlow.\nIt takes nodes and edges as input and provides interactive controls\nfor panning, zooming, and manipulating the graph.\n"
         ],
         "signature": [
-          "({ nodes, edges, interactive, isLocked, ...rest }: ",
+          "React.NamedExoticComponent<",
           {
             "pluginId": "@kbn/cloud-security-posture-graph",
             "scope": "public",
@@ -23,36 +23,67 @@
             "section": "def-public.GraphProps",
             "text": "GraphProps"
           },
-          ") => React.JSX.Element"
+          ">"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
         "deprecated": false,
         "trackAdoption": false,
+        "returnComment": [
+          "The rendered Graph component."
+        ],
         "children": [
           {
             "parentPluginId": "@kbn/cloud-security-posture-graph",
             "id": "def-public.Graph.$1",
-            "type": "Object",
+            "type": "Uncategorized",
             "tags": [],
-            "label": "{\n  nodes,\n  edges,\n  interactive,\n  isLocked = false,\n  ...rest\n}",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/cloud-security-posture-graph",
-                "scope": "public",
-                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
-                "section": "def-public.GraphProps",
-                "text": "GraphProps"
-              }
+            "label": "props",
+            "description": [
+              "- The properties for the Graph component."
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
             "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
+            "trackAdoption": false
           }
         ],
-        "returnComment": [
-          "The rendered Graph component."
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.GraphInvestigation",
+        "type": "Function",
+        "tags": [],
+        "label": "GraphInvestigation",
+        "description": [
+          "\nGraph investigation view allows the user to expand nodes and view related entities."
+        ],
+        "signature": [
+          "React.NamedExoticComponent<",
+          "GraphInvestigationProps",
+          ">"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph_investigation/graph_investigation.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "returnComment": [],
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphInvestigation.$1",
+            "type": "Uncategorized",
+            "tags": [],
+            "label": "props",
+            "description": [],
+            "signature": [
+              "P"
+            ],
+            "path": "node_modules/@types/react/ts5.0/index.d.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
         ],
         "initialIsOpen": false
       },
@@ -68,7 +99,7 @@
           "GraphPopoverProps",
           ") => React.JSX.Element | null"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -82,13 +113,100 @@
             "signature": [
               "GraphPopoverProps"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
           }
         ],
         "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.isEntityNode",
+        "type": "Function",
+        "tags": [],
+        "label": "isEntityNode",
+        "description": [],
+        "signature": [
+          "(node: ",
+          {
+            "pluginId": "@kbn/cloud-security-posture-graph",
+            "scope": "public",
+            "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+            "section": "def-public.NodeViewModel",
+            "text": "NodeViewModel"
+          },
+          ") => boolean"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.isEntityNode.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "node",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/cloud-security-posture-graph",
+                "scope": "public",
+                "docId": "kibKbnCloudSecurityPostureGraphPluginApi",
+                "section": "def-public.NodeViewModel",
+                "text": "NodeViewModel"
+              }
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/index.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/cloud-security-posture-graph",
+        "id": "def-public.useFetchGraphData",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetchGraphData",
+        "description": [
+          "\nHook to fetch event's graph visualization data.\n"
+        ],
+        "signature": [
+          "({ req, options, }: ",
+          "UseFetchGraphDataParams",
+          ") => ",
+          "UseFetchGraphDataResult"
+        ],
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/hooks/use_fetch_graph_data.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.useFetchGraphData.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  req,\n  options,\n}",
+            "description": [],
+            "signature": [
+              "UseFetchGraphDataParams"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/hooks/use_fetch_graph_data.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [
+          "The result of the hook."
+        ],
         "initialIsOpen": false
       },
       {
@@ -102,7 +220,7 @@
           "(id: string) => ",
           "GraphPopoverState"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -116,7 +234,7 @@
             "signature": [
               "string"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/use_graph_popover.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -142,9 +260,9 @@
             "section": "def-public.EdgeViewModel",
             "text": "EdgeViewModel"
           },
-          " extends Record<string, unknown>,Readonly<{} & { source: string; id: string; color: \"warning\" | \"primary\" | \"danger\"; target: string; }>"
+          " extends Record<string, unknown>,Readonly<{ type?: \"dashed\" | \"solid\" | undefined; } & { source: string; id: string; color: \"warning\" | \"primary\" | \"danger\"; target: string; }>"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -167,7 +285,7 @@
           },
           " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; } & { id: string; shape: \"ellipse\" | \"rectangle\" | \"hexagon\" | \"pentagon\" | \"diamond\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -182,7 +300,7 @@
               "ExpandButtonClickCallback",
               " | undefined"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -197,7 +315,7 @@
               "NodeClickCallback",
               " | undefined"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -222,7 +340,7 @@
           " extends ",
           "CommonProps"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -245,7 +363,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -268,7 +386,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -281,7 +399,7 @@
             "description": [
               "\nDetermines whether the graph is interactive (allows panning, zooming, etc.).\nWhen set to false, the graph is locked and user interactions are disabled, effectively putting it in view-only mode."
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -297,7 +415,23 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.GraphProps.children",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "children",
+            "description": [
+              "\nAdditional children to be rendered inside the graph component."
+            ],
+            "signature": [
+              "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/graph/graph.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -321,7 +455,7 @@
           },
           " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; } & { id: string; shape: \"group\"; }>,BaseNodeDataViewModel"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -344,7 +478,7 @@
           },
           " extends Record<string, unknown>,Readonly<{ label?: string | undefined; icon?: string | undefined; parentId?: string | undefined; } & { id: string; shape: \"label\"; color: \"warning\" | \"primary\" | \"danger\"; }>,BaseNodeDataViewModel"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -359,7 +493,22 @@
               "ExpandButtonClickCallback",
               " | undefined"
             ],
-            "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/cloud-security-posture-graph",
+            "id": "def-public.LabelNodeViewModel.nodeClick",
+            "type": "Function",
+            "tags": [],
+            "label": "nodeClick",
+            "description": [],
+            "signature": [
+              "NodeClickCallback",
+              " | undefined"
+            ],
+            "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -387,7 +536,7 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ", string>, \"id\" | \"data\" | \"draggable\" | \"width\" | \"height\" | \"selectable\" | \"selected\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\" | \"deletable\"> & Required<Pick<",
+          ", string>, \"id\" | \"data\" | \"width\" | \"height\" | \"parentId\" | \"sourcePosition\" | \"targetPosition\" | \"dragHandle\"> & Required<Pick<",
           "Node",
           "<",
           {
@@ -397,9 +546,9 @@
             "section": "def-public.NodeViewModel",
             "text": "NodeViewModel"
           },
-          ", string>, \"type\" | \"zIndex\" | \"dragging\">> & { isConnectable: boolean; positionAbsoluteX: number; positionAbsoluteY: number; }"
+          ", string>, \"type\" | \"draggable\" | \"selectable\" | \"selected\" | \"zIndex\" | \"dragging\" | \"deletable\">> & { isConnectable: boolean; positionAbsoluteX: number; positionAbsoluteY: number; }"
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -436,7 +585,7 @@
             "text": "LabelNodeViewModel"
           }
         ],
-        "path": "x-pack/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
+        "path": "x-pack/solutions/security/packages/kbn-cloud-security-posture/graph/src/components/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

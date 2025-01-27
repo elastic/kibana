@@ -42,7 +42,7 @@
           },
           " extends Error"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/request_error.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/request_error.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,7 +60,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/request_error.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/request_error.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -80,7 +80,7 @@
                     "text": "MLErrorObject"
                   }
                 ],
-                "path": "x-pack/packages/ml/error_utils/src/request_error.ts",
+                "path": "x-pack/platform/packages/shared/ml/error_utils/src/request_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -101,7 +101,7 @@
                     "text": "ErrorType"
                   }
                 ],
-                "path": "x-pack/packages/ml/error_utils/src/request_error.ts",
+                "path": "x-pack/platform/packages/shared/ml/error_utils/src/request_error.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -134,7 +134,7 @@
           },
           ") => string"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/process_errors.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/process_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -154,7 +154,7 @@
                 "text": "ErrorType"
               }
             ],
-            "path": "x-pack/packages/ml/error_utils/src/process_errors.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/process_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -190,7 +190,7 @@
             "text": "MLErrorObject"
           }
         ],
-        "path": "x-pack/packages/ml/error_utils/src/process_errors.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/process_errors.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -210,7 +210,7 @@
                 "text": "ErrorType"
               }
             ],
-            "path": "x-pack/packages/ml/error_utils/src/process_errors.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/process_errors.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -233,7 +233,7 @@
         "signature": [
           "(error: any) => boolean"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -247,7 +247,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -270,7 +270,7 @@
         "signature": [
           "(error: any) => boolean"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -284,7 +284,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -307,7 +307,7 @@
         "signature": [
           "(error: any) => boolean"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -321,7 +321,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -344,7 +344,7 @@
         "signature": [
           "(error: any) => boolean"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -358,7 +358,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -382,7 +382,7 @@
         "description": [
           "\nInterface holding error message"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -397,7 +397,7 @@
             "description": [
               "\nmessage"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -417,7 +417,7 @@
         "description": [
           "\nML Error Object"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -435,7 +435,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -450,7 +450,7 @@
             "description": [
               "\nmessage"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -468,7 +468,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -487,7 +487,7 @@
               "ErrorResponseBase",
               " | undefined"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -518,16 +518,10 @@
             "text": "MLHttpFetchErrorBase"
           },
           "<T> extends ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.IHttpFetchError",
-            "text": "IHttpFetchError"
-          },
+          "IHttpFetchError",
           "<T>"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -545,7 +539,7 @@
             "signature": [
               "T"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -565,7 +559,7 @@
         "description": [
           "\nML Response error"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -580,7 +574,7 @@
             "description": [
               "\nstatusCode"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -595,7 +589,7 @@
             "description": [
               "\nerror"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -610,7 +604,7 @@
             "description": [
               "\nmessage"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -630,7 +624,7 @@
               "ErrorResponseBase",
               "; } | undefined"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -663,7 +657,7 @@
             "text": "ErrorMessage"
           }
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -678,7 +672,7 @@
             "description": [
               "\nquery"
             ],
-            "path": "x-pack/packages/ml/error_utils/src/types.ts",
+            "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -715,7 +709,7 @@
           "Boom",
           "<any> | undefined"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -734,7 +728,7 @@
         "signature": [
           "ErrorResponseBase"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -754,7 +748,7 @@
           "ErrorCauseKeys",
           " & { [property: string]: any; }"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -789,7 +783,7 @@
           },
           ">"
         ],
-        "path": "x-pack/packages/ml/error_utils/src/types.ts",
+        "path": "x-pack/platform/packages/shared/ml/error_utils/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -3,42 +3,39 @@
 This directory serves as a centralized location to place the security solution tests that run in Serverless and ESS environments.
 
 ## Subdirectories
-
-1. `config` stores base configurations specific to both the Serverless and ESS environments, These configurations build upon the base configuration provided by `xpack/test_serverless` and `x-pack-api_integrations`, incorporating additional settings such as environment variables and tagging options.
-
-
-2. `test_suites` directory now houses all the tests along with their utility functions. As an initial step,
-we have introduced the `detection_response` directory to consolidate all the integration tests related to detection and response APIs.
-
+- `config` stores base configurations specific to both the Serverless and ESS environments, These configurations build upon the base configuration provided by `xpack/test_serverless` and `x-pack-api_integrations`, incorporating additional settings such as environment variables and tagging options.
+- `es_archive` and `es_archive_path_builder` directories contain the data that can be used by the tests
+- `scripts` directory contains various scripts used to run the tests
+- `test_suites` directory houses all the tests along with their utility functions. As an initial step, we have introduced the `detection_response` directory to consolidate all the integration tests related to detection and response APIs.
 
 ## Overview
 
-- In this directory, Mocha tagging is utilized to assign tags to specific test suites and individual test cases. This tagging system enables the ability to selectively apply tags to test suites and test cases, facilitating the exclusion of specific test cases within a test suite as needed.
+Test suites and cases are prefixed with specific tags to determine their execution in particular environments or to exclude them from specific environments:
+* `@ess`: Runs in an ESS environment (on-prem installation) as part of the CI validation on PRs.
 
-- Test suites and cases are prefixed with specific tags to determine their execution in particular environments or to exclude them from specific environments. 
+* `@serverless`: Runs in an simulated serverless environment as part of the CI validation on PRs and in the periodic pipeline.
 
-- We are using the following tags:
-   * `@ess`: Runs in an ESS environment (on-prem installation) as part of the CI validation on PRs.
+* `@serverlessQA`: Runs in the Kibana QA quality gate.
 
-   * `@serverless`: Runs in the first quality gate and in the periodic pipeline.
+* `@skipInEss`: Skipped for ESS environment.
+* `@skipInServerless`: Skipped for all quality gates and periodic pipeline.
+* `@skipInServerlessMKI`: Skipped from being executed in any MKI environment (periodic pipeline and Kibana QA quality gate), but executed as part of the first quality gate if the `@serverless` tag is present.
 
-   * `@serverlessQA`: Runs in the Kibana QA quality gate.
+For example:
+```typescript
+// tests in this suite will run in both Ess and Serverless on every PRs as well as on the first quality gate and the periodic pipeline
+describe('@serverless @ess create_rules', () => {
+    describe('creating rules', () => {
+       it('my first test', async () => { ... });
+       it('my second test', async () => { ... });
+    });
 
-   * `@skipInEss`: Skipped for ESS environment.
-
-   * `@skipInServerless`: Skipped for all quality gates, CI and periodic pipeline.
-
-   * `@skipInServerlessMKI`: Skipped for all the MKI environments. 
-
-ex:
-```
- describe('@serverless @ess create_rules', () => { ==> tests in this suite will run in both Ess and Serverless
-   describe('creating rules', () => {}); 
-
-  // This test is skipped due to flakiness in serverless environments: https://github.com/elastic/kibana/issues/497777
-   describe('@skipInServerless missing timestamps', () => {}); ==> tests in this suite will be excluded in Serverless
-
- ```
+    // tests in this suite will be excluded in Serverless on every PRs as well as on the first quality gate and the periodic pipeline
+    describe('@skipInServerless missing timestamps', () => {
+       it('another test', async () => { ... });
+    });
+});
+``` 
 
 # Adding new security area's tests
 
@@ -53,7 +50,8 @@ The default project type configuration in Serverless is complete. If for the nee
 
 There are already configurations in the `./scripts/api_configs.json` which you can follow in order to add yours when it is needed. The currently supported configuration, allows **ONLY** the PLIs to be configured. Thus, experimental feature flags **are not yet supported** and the test should be skipped until further notice. 
 
-**NOTE**: If a target script living in `package.json` file, does not require any further configuration, then the entry in `./scripts/api_configs.json` file, **can be omitted!**
+> **Note:**
+>If a target script living in `package.json` file, does not require any further configuration, then the entry in `./scripts/api_configs.json` file, **can be omitted!**
 
 # Testing locally 
 
@@ -80,41 +78,39 @@ In this project, you can run various commands to execute tests and workflows, ea
       - Description: Runs the tests for the Detections Response area with the default license.
 
 
+2. Executes particular sets of test suites linked to the designated environment and license:
 
- 2. Executes particular sets of test suites linked to the designated environment and license:
+    The command structure follows this pattern:
 
-     The command structure follows this pattern:
+     - `<folder>`: The test folder or workflow you want to run.
+     - `<projectType>`: The type of project to pick the relevant configurations, either "serverless" or "ess."
+       - "serverless" and "ess" help determine the configuration specific to the chosen test.
+     - `<environment>`: The testing environment, such as "serverlessEnv," "essEnv," or "qaEnv."
+       - When using "serverlessEnv,.." in the script, it appends the correct grep command for filtering tests in the serverless  testing environment.
+       - "serverlessEnv,..." is used to customize the test execution based on the serverless environment.
 
-      - `<folder>`: The test folder or workflow you want to run.
-      - `<projectType>`: The type of project to pick the relevant configurations, either "serverless" or "ess."
-        - "serverless" and "ess" help determine the configuration specific to the chosen test.
-      - `<environment>`: The testing environment, such as "serverlessEnv," "essEnv," or "qaEnv."
-        - When using "serverlessEnv,.." in the script, it appends the correct grep command for filtering tests in the serverless  testing environment.
-        - "serverlessEnv,..." is used to customize the test execution based on the serverless environment.
+ Here are some command examples for "exceptions" which defined under the "detection_engine" area using the default license:
 
-      
-      Here are some command examples for "exceptions" which defined under the "detection_engine" area using the default license:
-
-      1. **Run the server for "exception_workflows" in the "serverlessEnv" environment:**
-         ```shell
-         npm run initialize-server:dr:default exceptions/workflows serverless
-         ```
-      2. **To run tests for the "exception_workflows" using the serverless runner in the "serverlessEnv" environment, you can use the following command:**
-         ```shell
-         npm run run-tests:dr:default exceptions/workflows serverless serverlessEnv
-         ```
-      3. **Run tests for "exception_workflows" using the serverless runner in the "qaEnv" environment:**
-         ```shell
-         npm run run-tests:dr:default exceptions/workflows serverless qaPeriodicEnv
-         ```
-      4. **Run the server for "exception_workflows" in the "essEnv" environment:**
-         ```shell
-         npm run initialize-server:dr:default exceptions/workflows ess   
-         ```
-      5. **Run tests for "exception_workflows" using the ess runner in the "essEnv" environment:**
-         ```shell
-         npm run run-tests:dr:default exceptions/workflows ess essEnv
-         ```
+- Run the server for "exception_workflows" in the "serverlessEnv" environment:
+  ```shell
+  npm run initialize-server:dr:default exceptions/workflows serverless
+  ```
+- To run tests for the "exception_workflows" using the serverless runner in the "serverlessEnv" environment, you can use the following command:
+  ```shell
+  npm run run-tests:dr:default exceptions/workflows serverless serverlessEnv
+  ```
+- Run tests for "exception_workflows" using the serverless runner in the "qaEnv" environment:
+  ```shell
+  npm run run-tests:dr:default exceptions/workflows serverless qaPeriodicEnv
+  ```
+- Run the server for "exception_workflows" in the "essEnv" environment:
+  ```shell
+  npm run initialize-server:dr:default exceptions/workflows ess
+  ```
+- Run tests for "exception_workflows" using the ess runner in the "essEnv" environment:
+  ```shell
+  npm run run-tests:dr:default exceptions/workflows ess essEnv
+  ```
 
 ## Testing with serverless roles
 
@@ -126,28 +122,29 @@ All API calls using the returned instance will inject the required auth headers.
 
 **On ESS, `createSuperTest` returns a basic `supertest` instance without headers.*
 
-```js
+```typescript
 import TestAgent from 'supertest/lib/agent';
 
 export default ({ getService }: FtrProviderContext) => {
-   const utils = getService('securitySolutionUtils');
+  const utils = getService('securitySolutionUtils');
 
-   describe('@ess @serverless my_test', () => {
-      let supertest: TestAgent;
+  describe('@ess @serverless my_test', () => {
+    let supertest: TestAgent;
 
-      before(async () => {
-         supertest = await utils.createSuperTest('admin');
-      });
-   ...
+    before(async () => {
+      supertest = await utils.createSuperTest('admin');
+    });
+    ...
+  });
+});
 ```
 
 If you need to use multiple roles in a single test, you can instantiate multiple `supertest` versions.
-```js
+```typescript
 before(async () => {
    adminSupertest = await utils.createSuperTest('admin');
    viewerSupertest = await utils.createSuperTest('viewer');
 });
-...
 ```
 
 The helper keeps track of only one active session per role. So, if you instantiate `supertest` twice for the same role, the first instance will have an invalid API key.

@@ -25,6 +25,7 @@ import {
   CASE_USER_ACTION_SAVED_OBJECT,
   INTERNAL_CASE_METRICS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
+  INTERNAL_CASE_SIMILAR_CASES_URL,
 } from '@kbn/cases-plugin/common/constants';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
 import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
@@ -40,6 +41,8 @@ import {
   CaseCustomField,
 } from '@kbn/cases-plugin/common/types/domain';
 import {
+  AddObservableRequest,
+  UpdateObservableRequest,
   AlertResponse,
   CaseResolveResponse,
   CasesBulkGetResponse,
@@ -48,7 +51,17 @@ import {
   CasesStatusResponse,
   CustomFieldPutRequest,
   GetRelatedCasesByAlertResponse,
+  SimilarCasesSearchRequest,
+  CasesSimilarResponse,
+  UserActionFindRequest,
+  UserActionInternalFindResponse,
 } from '@kbn/cases-plugin/common/types/api';
+import {
+  getCaseCreateObservableUrl,
+  getCaseUpdateObservableUrl,
+  getCaseDeleteObservableUrl,
+  getCaseFindUserActionsUrl,
+} from '@kbn/cases-plugin/common/api';
 import { User } from '../authentication/types';
 import { superUser } from '../authentication/users';
 import { getSpaceUrlPrefix, setupAuth } from './helpers';
@@ -845,4 +858,145 @@ export const replaceCustomField = async ({
     .expect(expectedHttpCode);
 
   return theCustomField;
+};
+
+export const addObservable = async ({
+  supertest,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+  caseId,
+}: {
+  supertest: SuperTest.Agent;
+  params: AddObservableRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+  caseId: string;
+}): Promise<Case> => {
+  const apiCall = supertest.post(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseCreateObservableUrl(caseId)}`
+  );
+
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: updatedCase } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return updatedCase;
+};
+
+export const updateObservable = async ({
+  supertest,
+  params,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+  caseId,
+  observableId,
+}: {
+  supertest: SuperTest.Agent;
+  params: UpdateObservableRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+  caseId: string;
+  observableId: string;
+}): Promise<Case> => {
+  const apiCall = supertest.patch(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseUpdateObservableUrl(caseId, observableId)}`
+  );
+  void setupAuth({ apiCall, headers, auth });
+
+  const { body: updatedCase } = await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send(params)
+    .expect(expectedHttpCode);
+
+  return updatedCase;
+};
+
+export const deleteObservable = async ({
+  supertest,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  headers = {},
+  caseId,
+  observableId,
+}: {
+  supertest: SuperTest.Agent;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null } | null;
+  headers?: Record<string, string | string[]>;
+  caseId: string;
+  observableId: string;
+}): Promise<void> => {
+  const apiCall = supertest.delete(
+    `${getSpaceUrlPrefix(auth?.space)}${getCaseDeleteObservableUrl(caseId, observableId)}`
+  );
+  void setupAuth({ apiCall, headers, auth });
+
+  await apiCall
+    .set('kbn-xsrf', 'true')
+    .set('x-elastic-internal-origin', 'foo')
+    .set(headers)
+    .send()
+    .expect(expectedHttpCode);
+};
+
+export const similarCases = async ({
+  supertest,
+  body,
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+  caseId,
+}: {
+  supertest: SuperTest.Agent;
+  body: SimilarCasesSearchRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+  caseId: string;
+}): Promise<CasesSimilarResponse> => {
+  const { body: res } = await supertest
+    .post(
+      `${getSpaceUrlPrefix(auth.space)}${INTERNAL_CASE_SIMILAR_CASES_URL.replace(
+        '{case_id}',
+        caseId
+      )}`
+    )
+    .auth(auth.user.username, auth.user.password)
+    .set('kbn-xsrf', 'true')
+    .send({ ...body })
+    .expect(expectedHttpCode);
+
+  return res;
+};
+
+export const findInternalCaseUserActions = async ({
+  supertest,
+  caseID,
+  options = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseID: string;
+  options?: UserActionFindRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<UserActionInternalFindResponse> => {
+  const { body: userActions } = await supertest
+    .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindUserActionsUrl(caseID)}`)
+    .query(options)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return userActions;
 };

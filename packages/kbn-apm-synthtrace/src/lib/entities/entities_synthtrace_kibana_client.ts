@@ -34,7 +34,7 @@ export class EntitiesSynthtraceKibanaClient {
     });
     const entityDefinition: EntityDefinitionResponse = await response.json();
 
-    const hasEntityDefinitionsInstalled = entityDefinition.definitions.find(
+    const hasEntityDefinitionsInstalled = entityDefinition.definitions?.find(
       (definition) => definition.type === 'service'
     )?.state.installed;
 

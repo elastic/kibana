@@ -1,0 +1,35 @@
+{
+  "type": "icmp",
+  "locations": ["dev"],
+  "journey_id": "",
+  "enabled": true,
+  "alert": {
+    "status": {
+      "enabled": true
+    }
+  },
+  "schedule": {
+    "number": "3",
+    "unit": "m"
+  },
+  "config_id": "",
+  "service.name": "example-service-name",
+  "tags": [
+    "tagT1",
+    "tagT2"
+  ],
+  "timeout": "16",
+  "hosts": "192.33.22.111:3333",
+  "wait": "1",
+  "name": "Test HTTP Monitor 04",
+  "namespace": "testnamespace",
+  "origin": "ui",
+  "form_monitor_type": "icmp",
+  "id": "",
+  "hash": "",
+  "mode": "any",
+  "ipv4": true,
+  "ipv6": true,
+  "params": "",
+  "max_attempts": 2
+}

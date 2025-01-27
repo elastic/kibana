@@ -58,6 +58,14 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
   }
 
   describe('Latency', () => {
+    let apmSynthtraceEsClient: ApmSynthtraceEsClient;
+
+    before(async () => {
+      apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
+    });
+
+    after(() => apmSynthtraceEsClient.clean());
+
     describe('when data is not loaded ', () => {
       it('handles the empty state', async () => {
         const response = await fetchLatencyCharts();
@@ -75,10 +83,8 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
       const GO_DEV_RATE = 20;
       const GO_PROD_DURATION = 1000;
       const GO_DEV_DURATION = 500;
-      let apmSynthtraceEsClient: ApmSynthtraceEsClient;
 
       before(async () => {
-        apmSynthtraceEsClient = await synthtrace.createApmSynthtraceEsClient();
         const serviceGoProdInstance = apm
           .service({ name: serviceName, environment: 'production', agentName: 'go' })
           .instance('instance-a');
@@ -86,7 +92,7 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
           .service({ name: serviceName, environment: 'development', agentName: 'go' })
           .instance('instance-b');
 
-        await apmSynthtraceEsClient.index([
+        return apmSynthtraceEsClient.index([
           timerange(start, end)
             .ratePerMinute(GO_PROD_RATE)
             .generator((timestamp) =>

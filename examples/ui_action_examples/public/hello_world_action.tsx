@@ -14,7 +14,7 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 
 export const ACTION_HELLO_WORLD = 'ACTION_HELLO_WORLD';
 
-type StartServices = Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme'>;
+type StartServices = Pick<CoreStart, 'overlays' | 'analytics' | 'i18n' | 'theme' | 'userProfile'>;
 
 export const createHelloWorldActionDefinition = (
   getStartServices: () => Promise<StartServices>

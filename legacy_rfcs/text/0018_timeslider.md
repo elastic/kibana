@@ -82,7 +82,7 @@ export interface TimesliderProps {
 
 Any change to `timeslice`, either by dragging the handles of the timeslider, or pressing the back or forward buttons, calls the `onTimesliceChanged` handler.
 
-Since the initial use is inside Maps, the initial location of this React-component is inside the Maps plugin, `x-pack/plugins/maps/public/timeslider`.
+Since the initial use is inside Maps, the initial location of this React-component is inside the Maps plugin, `x-pack/platform/plugins/shared/maps/public/timeslider`.
 
 Nonetheless, this UI-component should be easily "cut-and-pastable" to another location.
 

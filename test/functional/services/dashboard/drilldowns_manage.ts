@@ -115,7 +115,9 @@ export function DashboardDrilldownsManageProvider({ getService }: FtrProviderCon
     }
 
     async fillInURLTemplate(destinationURLTemplate: string) {
-      const monaco = await find.byCssSelector('.urlTemplateEditor__container .monaco-editor');
+      const monaco = await find.byCssSelector(
+        '[data-test-subj="url-template-editor-container"] .monaco-editor'
+      );
       await monaco.clickMouseButton();
       await this.eraseInput(300);
       await browser.pressKeys(destinationURLTemplate);

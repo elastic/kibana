@@ -544,7 +544,7 @@ describe(
           const { threshold } = THRESHOLD_RULE_INDEX_PATTERN['security-rule'] as {
             threshold: Threshold;
           };
-          assertThresholdPropertyShown(threshold.value);
+          assertThresholdPropertyShown(threshold);
 
           const { index } = THRESHOLD_RULE_INDEX_PATTERN['security-rule'] as { index: string[] };
           assertIndexPropertyShown(index);
@@ -952,7 +952,7 @@ describe(
           const { threshold } = UPDATED_THRESHOLD_RULE_INDEX_PATTERN['security-rule'] as {
             threshold: Threshold;
           };
-          assertThresholdPropertyShown(threshold.value);
+          assertThresholdPropertyShown(threshold);
 
           const { index } = UPDATED_THRESHOLD_RULE_INDEX_PATTERN['security-rule'] as {
             index: string[];

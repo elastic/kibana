@@ -1,0 +1,63 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Header should render normally 1`] = `
+<div
+  class="euiFlexGroup emotion-euiFlexGroup-responsive-l-flexStart-center-row"
+>
+  <div
+    class="euiFlexItem emotion-euiFlexItem-grow-1"
+  >
+    <div
+      class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+    >
+      <p
+        class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+      >
+        <span
+          aria-hidden="true"
+          class="emotion-euiCallOut__icon"
+          color="inherit"
+          data-euiicon-type="warning"
+        />
+        Scripted fields are deprecated
+      </p>
+      <div
+        class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+      />
+      <div
+        class="euiText emotion-euiText-s-euiTextColor-default"
+      >
+        <span>
+          Use 
+          <button
+            class="euiLink emotion-euiLink-primary"
+            type="button"
+          >
+            runtime fields
+          </button>
+           instead of scripted fields. Runtime fields support Painless scripting and provide greater flexibility. You can also use the 
+          <button
+            class="euiLink emotion-euiLink-primary"
+            type="button"
+          >
+            Elasticsearch Query Language (ES|QL)
+          </button>
+           to compute values directly at query time.
+        </span>
+      </div>
+    </div>
+    <div
+      class="euiSpacer euiSpacer--m emotion-euiSpacer-m"
+    />
+    <div
+      class="euiText emotion-euiText-s"
+    >
+      <p>
+        <span>
+          Scripted fields can be used in visualizations and displayed in documents. However, they cannot be searched.
+        </span>
+      </p>
+    </div>
+  </div>
+</div>
+`;

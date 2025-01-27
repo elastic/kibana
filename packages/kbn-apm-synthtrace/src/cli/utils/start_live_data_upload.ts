@@ -52,7 +52,7 @@ export async function startLiveDataUpload({
     });
   }
 
-  const bucketSizeInMs = 1000 * 60;
+  const bucketSizeInMs = runOptions.liveBucketSize;
   let requestedUntil = start;
 
   let currentStreams: PassThrough[] = [];

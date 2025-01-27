@@ -27,7 +27,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const filterBar = getService('filterBar');
 
-  describe('Dashboard to TSVB to Lens', function describeIndexTests() {
+  // FLAKY: https://github.com/elastic/kibana/issues/179307
+  describe.skip('Dashboard to TSVB to Lens', function describeIndexTests() {
     before(async () => {
       await visualize.initTests();
     });
@@ -117,7 +118,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const titles = await dashboard.getPanelTitles();
       expect(titles[0]).to.be(`${visTitle} (converted)`);
 
-      await panelActions.expectNotLinkedToLibrary(titles[0], true);
+      await panelActions.expectNotLinkedToLibrary(titles[0]);
       await dashboardBadgeActions.expectExistsTimeRangeBadgeAction();
       await panelActions.removePanel();
     });

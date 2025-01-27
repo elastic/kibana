@@ -17,22 +17,22 @@ const log = new ToolingLog({
 });
 
 describe(`enumeratePatterns`, () => {
-  it(`should resolve x-pack/plugins/screenshotting/server/browsers/extract/unzip.ts to kibana-screenshotting`, () => {
+  it(`should resolve x-pack/platform/plugins/shared/screenshotting/server/browsers/extract/unzip.ts to kibana-screenshotting`, () => {
     const actual = enumeratePatterns(REPO_ROOT)(log)(
-      new Map([['x-pack/plugins/screenshotting', ['kibana-screenshotting']]])
+      new Map([['x-pack/platform/plugins/shared/screenshotting', ['kibana-screenshotting']]])
     );
 
     expect(actual.flat()).toContain(
-      'x-pack/plugins/screenshotting/server/browsers/extract/unzip.ts kibana-screenshotting'
+      'x-pack/platform/plugins/shared/screenshotting/server/browsers/extract/unzip.ts kibana-screenshotting'
     );
   });
-  it(`should resolve src/plugins/charts/common/static/color_maps/color_maps.ts to kibana-app`, () => {
+  it(`should resolve src/platform/plugins/shared/charts/common/static/color_maps/color_maps.ts to kibana-app`, () => {
     const actual = enumeratePatterns(REPO_ROOT)(log)(
-      new Map([['src/plugins/charts/common/static/color_maps', ['kibana-app']]])
+      new Map([['src/platform/plugins/shared/charts/common/static/color_maps', ['kibana-app']]])
     );
 
     expect(actual.flat()).toContain(
-      'src/plugins/charts/common/static/color_maps/color_maps.ts kibana-app'
+      'src/platform/plugins/shared/charts/common/static/color_maps/color_maps.ts kibana-app'
     );
   });
 });

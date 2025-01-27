@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-file-picker",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-file-picker",
-        "id": "def-common.FilePicker",
+        "id": "def-public.FilePicker",
         "type": "Function",
         "tags": [],
         "label": "FilePicker",
@@ -30,20 +14,20 @@
           "(props: ",
           {
             "pluginId": "@kbn/shared-ux-file-picker",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxFilePickerPluginApi",
-            "section": "def-common.Props",
+            "section": "def-public.Props",
             "text": "Props"
           },
           "<string>) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/file/file_picker/impl/src/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
-            "id": "def-common.FilePicker.$1",
+            "id": "def-public.FilePicker.$1",
             "type": "Object",
             "tags": [],
             "label": "props",
@@ -51,14 +35,14 @@
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-file-picker",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxFilePickerPluginApi",
-                "section": "def-common.Props",
+                "section": "def-public.Props",
                 "text": "Props"
               },
               "<string>"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -71,7 +55,7 @@
     "interfaces": [
       {
         "parentPluginId": "@kbn/shared-ux-file-picker",
-        "id": "def-common.Props",
+        "id": "def-public.Props",
         "type": "Interface",
         "tags": [],
         "label": "Props",
@@ -79,20 +63,20 @@
         "signature": [
           {
             "pluginId": "@kbn/shared-ux-file-picker",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxFilePickerPluginApi",
-            "section": "def-common.Props",
+            "section": "def-public.Props",
             "text": "Props"
           },
           "<Kind>"
         ],
-        "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+        "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
-            "id": "def-common.Props.kind",
+            "id": "def-public.Props.kind",
             "type": "Uncategorized",
             "tags": [],
             "label": "kind",
@@ -102,13 +86,13 @@
             "signature": [
               "Kind"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
-            "id": "def-common.Props.shouldAllowDelete",
+            "id": "def-public.Props.shouldAllowDelete",
             "type": "Function",
             "tags": [],
             "label": "shouldAllowDelete",
@@ -126,13 +110,13 @@
               },
               "<unknown>) => boolean) | undefined"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-file-picker",
-                "id": "def-common.Props.shouldAllowDelete.$1",
+                "id": "def-public.Props.shouldAllowDelete.$1",
                 "type": "Object",
                 "tags": [],
                 "label": "file",
@@ -147,7 +131,7 @@
                   },
                   "<unknown>"
                 ],
-                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -157,7 +141,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
-            "id": "def-common.Props.onClose",
+            "id": "def-public.Props.onClose",
             "type": "Function",
             "tags": [],
             "label": "onClose",
@@ -167,7 +151,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -175,7 +159,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
-            "id": "def-common.Props.onDone",
+            "id": "def-public.Props.onDone",
             "type": "Function",
             "tags": [],
             "label": "onDone",
@@ -193,13 +177,13 @@
               },
               "<unknown>[]) => void"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-file-picker",
-                "id": "def-common.Props.onDone.$1",
+                "id": "def-public.Props.onDone.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "files",
@@ -214,7 +198,7 @@
                   },
                   "<unknown>[]"
                 ],
-                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -224,7 +208,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
-            "id": "def-common.Props.onUpload",
+            "id": "def-public.Props.onUpload",
             "type": "Function",
             "tags": [],
             "label": "onUpload",
@@ -235,20 +219,20 @@
               "((done: ",
               {
                 "pluginId": "@kbn/shared-ux-file-upload",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxFileUploadPluginApi",
-                "section": "def-common.DoneNotification",
+                "section": "def-public.DoneNotification",
                 "text": "DoneNotification"
               },
               "<unknown>[]) => void) | undefined"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
               {
                 "parentPluginId": "@kbn/shared-ux-file-picker",
-                "id": "def-common.Props.onUpload.$1",
+                "id": "def-public.Props.onUpload.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "done",
@@ -256,14 +240,14 @@
                 "signature": [
                   {
                     "pluginId": "@kbn/shared-ux-file-upload",
-                    "scope": "common",
+                    "scope": "public",
                     "docId": "kibKbnSharedUxFileUploadPluginApi",
-                    "section": "def-common.DoneNotification",
+                    "section": "def-public.DoneNotification",
                     "text": "DoneNotification"
                   },
                   "<unknown>[]"
                 ],
-                "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+                "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -273,7 +257,7 @@
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
-            "id": "def-common.Props.uploadMeta",
+            "id": "def-public.Props.uploadMeta",
             "type": "Unknown",
             "tags": [],
             "label": "uploadMeta",
@@ -283,13 +267,13 @@
             "signature": [
               "unknown"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
-            "id": "def-common.Props.pageSize",
+            "id": "def-public.Props.pageSize",
             "type": "number",
             "tags": [],
             "label": "pageSize",
@@ -299,13 +283,13 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/shared-ux-file-picker",
-            "id": "def-common.Props.multiple",
+            "id": "def-public.Props.multiple",
             "type": "CompoundType",
             "tags": [
               "default"
@@ -317,7 +301,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/file/file_picker/impl/src/file_picker.tsx",
+            "path": "src/platform/packages/shared/shared-ux/file/file_picker/impl/src/file_picker.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -325,6 +309,22 @@
         "initialIsOpen": false
       }
     ],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
     "enums": [],
     "misc": [],
     "objects": []

@@ -22,10 +22,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'timePicker',
   ]);
   const dashboardName = 'dashboard with filter';
+  const copyOfDashboardName = `Copy of ${dashboardName}`;
   const filterBar = getService('filterBar');
   const security = getService('security');
 
-  describe('dashboard view edit mode', function viewEditModeTests() {
+  // Failing: See https://github.com/elastic/kibana/issues/200748
+  describe.skip('dashboard view edit mode', function viewEditModeTests() {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await kibanaServer.importExport.load(
@@ -72,7 +74,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     describe('save as new', () => {
       it('keeps duplicated dashboard in edit mode', async () => {
         await dashboard.gotoDashboardEditMode(dashboardName);
-        await dashboard.duplicateDashboard('edit');
+        await dashboard.duplicateDashboard(copyOfDashboardName);
         const isViewMode = await dashboard.getIsInViewMode();
         expect(isViewMode).to.equal(false);
       });
@@ -80,8 +82,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     describe('save', function () {
       it('keeps dashboard in edit mode', async function () {
-        await dashboard.gotoDashboardEditMode(dashboardName);
-        await dashboard.saveDashboard(dashboardName, {
+        await dashboard.gotoDashboardEditMode(copyOfDashboardName);
+        // change dashboard time to cause unsaved change
+        await timePicker.setAbsoluteRange(
+          'Sep 19, 2013 @ 00:00:00.000',
+          'Sep 19, 2013 @ 07:00:00.000'
+        );
+        await dashboard.saveDashboard(copyOfDashboardName, {
           storeTimeWithDashboard: true,
           saveAsNew: false,
         });

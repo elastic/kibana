@@ -13,7 +13,7 @@
         "signature": [
           "(props: { showShadow?: boolean | undefined; showBorder?: boolean | undefined; dataTestSubj?: string | undefined; }) => React.JSX.Element"
         ],
-        "path": "packages/kbn-panel-loader/index.tsx",
+        "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -24,7 +24,7 @@
             "tags": [],
             "label": "props",
             "description": [],
-            "path": "packages/kbn-panel-loader/index.tsx",
+            "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -38,7 +38,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/kbn-panel-loader/index.tsx",
+                "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -52,7 +52,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/kbn-panel-loader/index.tsx",
+                "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -66,7 +66,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "packages/kbn-panel-loader/index.tsx",
+                "path": "src/platform/packages/private/kbn-panel-loader/index.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }

@@ -48,53 +48,59 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   let connectorId: string;
 
   const createSourceIndex = () =>
-    es.index({
-      index: SOURCE_DATA_VIEW,
-      body: {
-        settings: { number_of_shards: 1 },
-        mappings: {
-          properties: {
-            '@timestamp': { type: 'date' },
-            message: { type: 'keyword' },
-          },
-        },
-      },
-    });
+    retry.try(() =>
+      createIndex(SOURCE_DATA_VIEW, {
+        '@timestamp': { type: 'date' },
+        message: { type: 'keyword' },
+      })
+    );
 
-  const generateNewDocs = async (docsNumber: number) => {
+  const createOutputDataIndex = () =>
+    retry.try(() =>
+      createIndex(OUTPUT_DATA_VIEW, {
+        rule_id: { type: 'text' },
+        rule_name: { type: 'text' },
+        alert_id: { type: 'text' },
+        context_link: { type: 'text' },
+      })
+    );
+
+  async function createIndex(index: string, properties: unknown) {
+    try {
+      await es.index({
+        index,
+        body: {
+          settings: { number_of_shards: 1 },
+          mappings: { properties },
+        },
+      });
+    } catch (e) {
+      log.error(`Failed to create index "${index}" with error "${e.message}"`);
+    }
+  }
+
+  async function generateNewDocs(docsNumber: number, index = SOURCE_DATA_VIEW) {
     const mockMessages = Array.from({ length: docsNumber }, (_, i) => `msg-${i}`);
     const dateNow = new Date();
     const dateToSet = new Date(dateNow);
     dateToSet.setMinutes(dateNow.getMinutes() - 10);
-    for (const message of mockMessages) {
-      await es.transport.request({
-        path: `/${SOURCE_DATA_VIEW}/_doc`,
-        method: 'POST',
-        body: {
-          '@timestamp': dateToSet.toISOString(),
-          message,
-        },
-      });
+    try {
+      await Promise.all(
+        mockMessages.map((message) =>
+          es.transport.request({
+            path: `/${index}/_doc`,
+            method: 'POST',
+            body: {
+              '@timestamp': dateToSet.toISOString(),
+              message,
+            },
+          })
+        )
+      );
+    } catch (e) {
+      log.error(`Failed to generate new docs in "${index}" with error "${e.message}"`);
     }
-  };
-
-  const createOutputDataIndex = () =>
-    es.index({
-      index: OUTPUT_DATA_VIEW,
-      body: {
-        settings: {
-          number_of_shards: 1,
-        },
-        mappings: {
-          properties: {
-            rule_id: { type: 'text' },
-            rule_name: { type: 'text' },
-            alert_id: { type: 'text' },
-            context_link: { type: 'text' },
-          },
-        },
-      },
-    });
+  }
 
   const deleteAlerts = (alertIds: string[]) =>
     asyncForEach(alertIds, async (alertId: string) => {
@@ -216,7 +222,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
   const openDiscoverAlertFlyout = async () => {
     await testSubjects.click('discoverAlertsButton');
-    await testSubjects.click('discoverCreateAlertButton');
+    // Different create rule buttons in serverless
+    if (await testSubjects.exists('discoverCreateAlertButton')) {
+      await testSubjects.click('discoverCreateAlertButton');
+    } else {
+      await testSubjects.click('discoverAppMenuCustomThresholdRule');
+    }
   };
 
   const openManagementAlertFlyout = async () => {
@@ -366,8 +377,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   describe('Search source Alert', function () {
-    // see details: https://github.com/elastic/kibana/issues/193842
-    this.tags(['failsOnMKI', 'skipSvlOblt']);
+    // Failing: https://github.com/elastic/kibana/issues/203045
+    // Failing: https://github.com/elastic/kibana/issues/207865
+    this.tags(['skipSvlOblt', 'skipSvlSearch']);
+
     before(async () => {
       await security.testUser.setRoles(['discover_alert']);
       await PageObjects.svlCommonPage.loginAsAdmin();
@@ -502,7 +515,13 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await testSubjects.click('thresholdPopover');
       await testSubjects.setValue('alertThresholdInput0', '1');
-      await testSubjects.click('saveEditedRuleButton');
+
+      // Different save buttons in serverless
+      if (await testSubjects.exists('saveEditedRuleButton')) {
+        await testSubjects.click('saveEditedRuleButton');
+      } else {
+        await testSubjects.click('rulePageFooterSaveButton');
+      }
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await openAlertResults(RULE_NAME);
@@ -535,9 +554,9 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       // change title
       await testSubjects.click('editIndexPatternButton');
-      await testSubjects.setValue('createIndexPatternTitleInput', 'search-s', {
-        clearWithKeyboard: true,
-        typeCharByChar: true,
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await retry.try(async () => {
+        await PageObjects.settings.setIndexPatternField('search-s*');
       });
       await testSubjects.click('saveIndexPatternButton');
       await testSubjects.click('confirmModalConfirmButton');
@@ -652,8 +671,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
 
       await retry.waitFor('rule name value is correct', async () => {
-        await testSubjects.setValue('ruleNameInput', newAlert);
-        const ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+        let ruleName;
+        // Rule name input is different in serverless
+        if (await testSubjects.exists('ruleNameInput')) {
+          await testSubjects.setValue('ruleNameInput', newAlert);
+          ruleName = await testSubjects.getAttribute('ruleNameInput', 'value');
+        } else {
+          await testSubjects.setValue('ruleDetailsNameInput', newAlert);
+          ruleName = await testSubjects.getAttribute('ruleDetailsNameInput', 'value');
+        }
         return ruleName === newAlert;
       });
 
@@ -677,7 +703,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await comboBox.set('ruleFormConsumerSelect', 'Stack Rules');
       }
 
-      await testSubjects.click('saveRuleButton');
+      // Save rule button is different in serverless
+      if (await testSubjects.exists('saveRuleButton')) {
+        await testSubjects.click('saveRuleButton');
+      } else {
+        await testSubjects.click('rulePageFooterSaveButton');
+      }
 
       await retry.waitFor('confirmation modal', async () => {
         return await testSubjects.exists('confirmModalConfirmButton');

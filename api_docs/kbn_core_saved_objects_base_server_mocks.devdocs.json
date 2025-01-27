@@ -20,13 +20,7 @@
         "description": [],
         "signature": [
           "() => jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-saved-objects-base-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreSavedObjectsBaseServerInternalPluginApi",
-            "section": "def-server.IDocumentMigrator",
-            "text": "IDocumentMigrator"
-          },
+          "IDocumentMigrator",
           ">"
         ],
         "path": "packages/core/saved-objects/core-saved-objects-base-server-mocks/src/document_migrator.mock.ts",
@@ -61,13 +55,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectsSerializer",
-                "text": "ISavedObjectsSerializer"
-              },
+              "ISavedObjectsSerializer",
               ">"
             ],
             "path": "packages/core/saved-objects/core-saved-objects-base-server-mocks/src/serializer.mock.ts",
@@ -99,13 +87,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-saved-objects-server",
-                "scope": "server",
-                "docId": "kibKbnCoreSavedObjectsServerPluginApi",
-                "section": "def-server.ISavedObjectTypeRegistry",
-                "text": "ISavedObjectTypeRegistry"
-              },
+              "ISavedObjectTypeRegistry",
               " & Pick<",
               "SavedObjectTypeRegistry",
               ", \"registerType\">>"

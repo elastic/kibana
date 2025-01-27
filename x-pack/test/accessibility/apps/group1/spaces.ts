@@ -54,6 +54,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await PageObjects.spaceSelector.clickCreateSpace();
       await PageObjects.spaceSelector.clickEnterSpaceName();
       await PageObjects.spaceSelector.addSpaceName('space_a');
+      await PageObjects.spaceSelector.changeSolutionView('classic');
       await a11y.testAppSnapshot();
     });
 
@@ -90,6 +91,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await PageObjects.spaceSelector.clickCreateSpace();
         await PageObjects.spaceSelector.clickEnterSpaceName();
         await PageObjects.spaceSelector.addSpaceName('space_b');
+        await PageObjects.spaceSelector.changeSolutionView('classic');
         await PageObjects.spaceSelector.clickSaveSpaceCreation();
         await PageObjects.common.navigateToApp('home');
         await PageObjects.spaceSelector.openSpacesNav();

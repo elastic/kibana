@@ -1,0 +1,218 @@
+openapi: 3.0.0
+info:
+  title: Workflow Insights API
+  version: '1'
+paths:
+  /internal/api/endpoint/workflow_insights:
+    get:
+      summary: Retrieve workflow insights
+      operationId: GetWorkflowInsights
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      x-internal: true
+      parameters:
+        - name: size
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: from
+          in: query
+          required: false
+          schema:
+            type: integer
+        - name: ids
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: categories
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - endpoint
+        - name: types
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - incompatible_antivirus
+                - noisy_process_tree
+        - name: sourceTypes
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - llm-connector
+        - name: sourceIds
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: targetTypes
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - endpoint
+        - name: targetIds
+          in: query
+          required: false
+          schema:
+            type: array
+            items:
+              type: string
+        - name: actionTypes
+          in: query
+          required: true
+          schema:
+            type: array
+            items:
+              type: string
+              enum:
+                - refreshed
+                - remediated
+                - suppressed
+                - dismissed
+
+      responses:
+        '200':
+          description: OK
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'
+
+  /internal/api/endpoint/workflow_insights/{insightId}:
+    put:
+      summary: Update a workflow insight
+      operationId: UpdateWorkflowInsight
+      x-codegen-enabled: true
+      x-labels: [ess, serverless]
+      x-internal: true
+      parameters:
+        - name: insightId
+          in: path
+          required: true
+          schema:
+            type: string
+            minLength: 1
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                '@timestamp':
+                  type: string
+                message:
+                  type: string
+                category:
+                  type: string
+                  enum:
+                    - endpoint
+                type:
+                  type: string
+                  enum:
+                    - incompatible_antivirus
+                    - noisy_process_tree
+                source:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - llm-connector
+                    id:
+                      type: string
+                    data_range_start:
+                      type: string
+                    data_range_end:
+                      type: string
+                target:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - endpoint
+                    ids:
+                      type: array
+                      items:
+                        type: string
+                action:
+                  type: object
+                  properties:
+                    type:
+                      type: string
+                      enum:
+                        - refreshed
+                        - remediated
+                        - suppressed
+                        - dismissed
+                    timestamp:
+                      type: string
+                value:
+                  type: string
+                remediation:
+                  type: object
+                  properties:
+                    exception_list_items:
+                      type: array
+                      items:
+                        type: object
+                        properties:
+                          list_id:
+                            type: string
+                          name:
+                            type: string
+                          description:
+                            type: string
+                          entries:
+                            type: array
+                            items: {}
+                          tags:
+                            type: array
+                            items:
+                              type: string
+                          os_types:
+                            type: array
+                            items:
+                              type: string
+                metadata:
+                  type: object
+                  properties:
+                    notes:
+                      type: object
+                      additionalProperties:
+                        type: string
+                    message_variables:
+                      type: array
+                      items:
+                        type: string
+
+      responses:
+        '200':
+          description: Updated successfully
+          content:
+            application/json:
+              schema:
+                $ref: '../model/schema/common.schema.yaml#/components/schemas/SuccessResponse'

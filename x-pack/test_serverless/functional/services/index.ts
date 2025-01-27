@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { ComboBoxService } from '@kbn/test-suites-src/functional/services/combo_box';
 import { services as deploymentAgnosticFunctionalServices } from './deployment_agnostic_services';
 import { services as svlSharedServices } from '../../shared/services';
 import { SvlCommonNavigationServiceProvider } from './svl_common_navigation';
@@ -35,4 +36,6 @@ export const services = {
   // log services
   svlLogsSynthtraceClient: LogsSynthtraceProvider,
   alertingApi: SvlApiIntegrationSvcs.alertingApi,
+  // EUI components
+  comboBox: ComboBoxService,
 };

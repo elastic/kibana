@@ -142,14 +142,14 @@ To match indices starting with `logstash-`, but exclude those starting with `log
 all clusters having a name starting with `cluster_`:
 
 ```ts
-`cluster_*:logstash-*,cluster_*:-logstash-old*`
+cluster_*:logstash-*,cluster_*:-logstash-old*
 ```
 
 Excluding a cluster avoids sending any network calls to that cluster.
 To exclude a cluster with the name `cluster_one`:
 
 ```ts
-`cluster_*:logstash-*,-cluster_one:*`
+cluster_*:logstash-*,-cluster_one:*
 ```
 
 Once you configure a {data-source} to use the {ccs} syntax, all searches and
@@ -166,7 +166,7 @@ clusters or indicies from cross-cluster search].
 When you delete a {data-source}, you cannot recover the associated field formatters, runtime fields, source filters,
 and field popularity data. Deleting a {data-source} does not remove any indices or data documents from {es}.
 
-WARNING: Deleting a {data-source} breaks all visualizations, saved searches, and other saved objects that reference the data view.
+WARNING: Deleting a {data-source} breaks all visualizations, saved Discover sessions, and other saved objects that reference the data view.
 
 . Go to the **Data Views** management page using the navigation menu or the <<kibana-navigation-search,global search field>>.
 

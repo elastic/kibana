@@ -368,7 +368,7 @@ export class MyPlugin implements Plugin {
 By default, when security is enabled, endpoints require the user to be authenticated to be accessed,
 and will return a `401 - Unauthorized` otherwise.
 
-It is possible to disable this requirement using the `authRequired` option of the route.
+It is possible to disable this requirement using the `security.authc.enabled` option of the route.
 
 ```ts
 import type { CoreSetup, Plugin } from '@kbn/core/server';
@@ -380,8 +380,11 @@ export class MyPlugin implements Plugin {
       {
         path: '/api/my_plugin/get_object',
         validate: false,
-        options: {
-          authRequired: false,
+        security: {
+          authc: {
+            enabled: false,
+            reason: 'This endpoint does not require authentication',
+          },
         },
       },
       async (context, request, response) => {
@@ -394,7 +397,7 @@ export class MyPlugin implements Plugin {
 }
 ```
 
-Note that in addition to `true` and `false`, `authRequired` accepts a third value, `'optional'`. When used,
+Note that in addition to `true` and `false`, `security.authc.enabled` accepts a third value, `'optional'`. When used,
 Kibana will try to authenticate the user but will allow access to the endpoint regardless of the result. In that
 case, the developer needs to manually checks if the user is authenticated via `request.auth.isAuthenticated`.
 
@@ -416,8 +419,11 @@ export class MyPlugin implements Plugin {
       {
         path: '/api/my_plugin/get_object',
         validate: false,
-        options: {
-          authRequired: false,
+        security: {
+          authc: {
+            enabled: false,
+            reason: 'This endpoint does not require authentication',
+          },
         },
       },
       async (context, request, response) => {

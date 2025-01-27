@@ -1,0 +1,44 @@
+{
+  "project": "test-suite",
+  "keep_stale": true,
+  "monitors": [
+    {
+      "locations": [ "dev" ],
+      "type": "tcp",
+      "id": "gmail-smtp",
+      "name": "GMail SMTP",
+      "hosts": [ "smtp.gmail.com:587" ],
+      "schedule": 1,
+      "tags": [ "service:smtp", "org:google" ],
+      "privateLocations": [ ],
+      "hash": "ekrjelkjrelkjre",
+      "ssl.verification_mode": "strict"
+    },
+    {
+      "locations": [ "dev" ],
+      "type": "tcp",
+      "id": "always-down",
+      "name": "Always Down",
+      "hosts": "localhost:18278",
+      "schedule": 1,
+      "tags": "tag1,tag2",
+      "privateLocations": [  ],
+      "hash": "ekrjelkjrelkjre"
+    },
+    {
+      "locations": [ "dev" ],
+      "type": "tcp",
+      "id": "always-down",
+      "name": "Always Down",
+      "hosts": ["localhost", "anotherhost"],
+      "ports": ["5698"],
+      "schedule": 1,
+      "tags": "tag1,tag2",
+      "privateLocations": [ ],
+      "unsupportedKey": {
+        "nestedUnsupportedKey": "unnsuportedValue"
+      },
+      "hash": "ekrjelkjrelkjre"
+    }
+  ]
+}

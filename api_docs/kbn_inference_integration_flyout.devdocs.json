@@ -29,7 +29,7 @@
         "signature": [
           "({ supportedNlpModels, nlpImportModel }: { supportedNlpModels: string; nlpImportModel: string; }) => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/inference_integration_flyout/components/eland_python_client.tsx",
+        "path": "x-pack/platform/packages/private/ml/inference_integration_flyout/components/eland_python_client.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "{ supportedNlpModels: string; nlpImportModel: string; }"
             ],
-            "path": "x-pack/packages/ml/inference_integration_flyout/components/eland_python_client.tsx",
+            "path": "x-pack/platform/packages/private/ml/inference_integration_flyout/components/eland_python_client.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,7 +64,7 @@
           "InferenceFlyoutProps",
           ") => React.JSX.Element"
         ],
-        "path": "x-pack/packages/ml/inference_integration_flyout/components/inference_flyout_wrapper.tsx",
+        "path": "x-pack/platform/packages/private/ml/inference_integration_flyout/components/inference_flyout_wrapper.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -78,7 +78,7 @@
             "signature": [
               "InferenceFlyoutProps"
             ],
-            "path": "x-pack/packages/ml/inference_integration_flyout/components/inference_flyout_wrapper.tsx",
+            "path": "x-pack/platform/packages/private/ml/inference_integration_flyout/components/inference_flyout_wrapper.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -96,7 +96,7 @@
         "tags": [],
         "label": "ModelConfig",
         "description": [],
-        "path": "x-pack/packages/ml/inference_integration_flyout/types.ts",
+        "path": "x-pack/platform/packages/private/ml/inference_integration_flyout/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -107,7 +107,7 @@
             "tags": [],
             "label": "service",
             "description": [],
-            "path": "x-pack/packages/ml/inference_integration_flyout/types.ts",
+            "path": "x-pack/platform/packages/private/ml/inference_integration_flyout/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -121,7 +121,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/packages/ml/inference_integration_flyout/types.ts",
+            "path": "x-pack/platform/packages/private/ml/inference_integration_flyout/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

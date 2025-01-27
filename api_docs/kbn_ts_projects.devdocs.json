@@ -215,6 +215,22 @@
           },
           {
             "parentPluginId": "@kbn/ts-projects",
+            "id": "def-common.TsProject.isEsm",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isEsm",
+            "description": [
+              "the package is esm or not"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "packages/kbn-ts-projects/ts_project.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/ts-projects",
             "id": "def-common.TsProject.rootImportReq",
             "type": "string",
             "tags": [],

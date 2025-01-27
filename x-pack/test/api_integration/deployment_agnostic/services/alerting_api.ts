@@ -5,16 +5,13 @@
  * 2.0.
  */
 
-import type {
-  AggregationsAggregate,
-  SearchResponse,
-} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { AggregationsAggregate, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import { MetricThresholdParams } from '@kbn/infra-plugin/common/alerting/metrics';
 import { ThresholdParams } from '@kbn/observability-plugin/common/custom_threshold_rule/types';
-import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/schema';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { errors, type Client } from '@elastic/elasticsearch';
 import type { TryWithRetriesOptions } from '@kbn/ftr-common-functional-services';
+import { ApmRuleParamsType } from '@kbn/apm-plugin/common/rules/apm_rule_types';
 import { v4 as uuidv4 } from 'uuid';
 import moment from 'moment';
 import { DeploymentAgnosticFtrProviderContext } from '../ftr_provider_context';
@@ -942,14 +939,16 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       ruleId,
       expectedStatus,
       roleAuthc,
+      spaceId,
     }: {
       ruleId: string;
       expectedStatus: string;
       roleAuthc: RoleCredentials;
+      spaceId?: string;
     }) {
       return await retry.tryForTime(retryTimeout, async () => {
         const response = await supertestWithoutAuth
-          .get(`/api/alerting/rule/${ruleId}`)
+          .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule/${ruleId}`)
           .set(roleAuthc.apiKeyHeader)
           .set(samlAuth.getInternalRequestHeader())
           .timeout(requestTimeout);
@@ -1034,13 +1033,15 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       name,
       indexName,
       roleAuthc,
+      spaceId,
     }: {
       name: string;
       indexName: string;
       roleAuthc: RoleCredentials;
+      spaceId?: string;
     }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/actions/connector`)
+        .post(`${spaceId ? '/s/' + spaceId : ''}/api/actions/connector`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -1063,6 +1064,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       schedule,
       consumer,
       roleAuthc,
+      spaceId,
     }: {
       ruleTypeId: string;
       name: string;
@@ -1080,9 +1082,10 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       schedule?: { interval: string };
       consumer: string;
       roleAuthc: RoleCredentials;
+      spaceId?: string;
     }) {
       const { body } = await supertestWithoutAuth
-        .post(`/api/alerting/rule`)
+        .post(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rule`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader())
         .send({
@@ -1118,17 +1121,17 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       });
     },
 
-    async findInRules(roleAuthc: RoleCredentials, ruleId: string) {
+    async findInRules(roleAuthc: RoleCredentials, ruleId: string, spaceId?: string) {
       const response = await supertestWithoutAuth
-        .get('/api/alerting/rules/_find')
+        .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rules/_find`)
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
       return response.body.data.find((obj: any) => obj.id === ruleId);
     },
 
-    async searchRules(roleAuthc: RoleCredentials, filter: string) {
+    async searchRules(roleAuthc: RoleCredentials, filter: string, spaceId?: string) {
       return supertestWithoutAuth
-        .get('/api/alerting/rules/_find')
+        .get(`${spaceId ? '/s/' + spaceId : ''}/api/alerting/rules/_find`)
         .query({ filter })
         .set(roleAuthc.apiKeyHeader)
         .set(samlAuth.getInternalRequestHeader());
@@ -1141,7 +1144,7 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
         .set(samlAuth.getInternalRequestHeader());
     },
 
-    async deleteRules({ roleAuthc, filter }: { roleAuthc: RoleCredentials; filter: string }) {
+    async deleteRules({ roleAuthc, filter = '' }: { roleAuthc: RoleCredentials; filter?: string }) {
       const response = await this.searchRules(roleAuthc, filter);
       return Promise.all(
         response.body.data.map((rule: any) => this.deleteRuleById({ roleAuthc, ruleId: rule.id }))
@@ -1186,14 +1189,14 @@ export function AlertingApiProvider({ getService }: DeploymentAgnosticFtrProvide
       connectorIndexName,
     }: {
       roleAuthc: RoleCredentials;
-      ruleId: string;
+      ruleId?: string;
       consumer?: string;
       alertIndexName?: string;
       connectorIndexName?: string;
     }) {
       return Promise.allSettled([
         // Delete the rule by ID
-        this.deleteRuleById({ roleAuthc, ruleId }),
+        ruleId ? this.deleteRuleById({ roleAuthc, ruleId }) : this.deleteRules({ roleAuthc }),
         // Delete all documents in the alert index if specified
         alertIndexName
           ? es.deleteByQuery({

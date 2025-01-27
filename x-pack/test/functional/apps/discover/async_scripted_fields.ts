@@ -58,7 +58,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await settings.navigateTo();
         await settings.clickKibanaIndexPatterns();
         await settings.createIndexPattern('logsta');
-        await settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await settings.addScriptedField(
           'sharedFail',
@@ -114,7 +113,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await settings.clickKibanaIndexPatterns();
         await settings.clickIndexPatternLogstash();
         const startingCount = parseInt(await settings.getScriptedFieldsTabCount(), 10);
-        await settings.clickScriptedFieldsTab();
         await log.debug('add scripted field');
         await settings.addScriptedField(
           'goodScript',

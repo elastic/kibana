@@ -20,13 +20,7 @@
         "description": [],
         "signature": [
           "() => jest.Mocked<",
-          {
-            "pluginId": "@kbn/core-elasticsearch-client-server-internal",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchClientServerInternalPluginApi",
-            "section": "def-server.AgentStatsProvider",
-            "text": "AgentStatsProvider"
-          },
+          "AgentStatsProvider",
           ">"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/agent_manager.mocks.ts",
@@ -1416,13 +1410,7 @@
               "<",
               "default",
               ">; } & ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
@@ -2635,13 +2623,7 @@
               "<",
               "default",
               ">; } & ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
@@ -3808,13 +3790,7 @@
               "<",
               "default",
               ">; } & ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
@@ -4981,13 +4957,7 @@
               "<",
               "default",
               ">; } & ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              }
+              "ElasticsearchClient"
             ],
             "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
             "deprecated": false,
@@ -5008,37 +4978,13 @@
         "description": [],
         "signature": [
           "{ close: jest.MockInstance<Promise<void>, [], unknown>; readonly asInternalUser: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          },
+          "ElasticsearchClient",
           "; asScoped: jest.MockInstance<",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.IScopedClusterClient",
-            "text": "IScopedClusterClient"
-          },
+          "IScopedClusterClient",
           ", [request: ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ScopeableRequest",
-            "text": "ScopeableRequest"
-          },
+          "ScopeableRequest",
           "], unknown>; } & ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ICustomClusterClient",
-            "text": "ICustomClusterClient"
-          },
+          "ICustomClusterClient",
           " & ",
           {
             "pluginId": "@kbn/core-elasticsearch-client-server-mocks",
@@ -6245,13 +6191,7 @@
           "<",
           "default",
           ">; } & ",
-          {
-            "pluginId": "@kbn/core-elasticsearch-server",
-            "scope": "server",
-            "docId": "kibKbnCoreElasticsearchServerPluginApi",
-            "section": "def-server.ElasticsearchClient",
-            "text": "ElasticsearchClient"
-          }
+          "ElasticsearchClient"
         ],
         "path": "packages/core/elasticsearch/core-elasticsearch-client-server-mocks/src/mocks.ts",
         "deprecated": false,

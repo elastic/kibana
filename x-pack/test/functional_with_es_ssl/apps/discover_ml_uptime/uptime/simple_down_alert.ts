@@ -83,7 +83,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     it('has created a valid simple alert with expected parameters', async () => {
       let alert: any;
       await retry.tryForTime(15000, async () => {
-        const apiResponse = await supertest.get(`/api/alerts/_find?search=Simple status alert`);
+        const apiResponse = await supertest.get(
+          `/api/alerting/rules/_find?search=Simple status alert`
+        );
         const alertsFromThisTest = apiResponse.body.data.filter(({ params }: { params: any }) =>
           params.search.includes(monitorId)
         );
@@ -91,10 +93,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         alert = alertsFromThisTest[0];
       });
 
-      const { actions, alertTypeId, consumer, tags } = alert ?? {};
+      const { actions, rule_type_id: alertTypeId, consumer, tags } = alert ?? {};
       expect(actions).to.eql([
         {
-          actionTypeId: '.slack',
+          connector_type_id: '.slack',
           group: 'recovered',
           params: {
             message: MonitorStatusTranslations.defaultRecoveryMessage,
@@ -103,7 +105,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           uuid: actions[0].uuid,
         },
         {
-          actionTypeId: '.slack',
+          connector_type_id: '.slack',
           group: 'xpack.uptime.alerts.actionGroups.monitorStatus',
           params: {
             message: MonitorStatusTranslations.defaultActionMessage,

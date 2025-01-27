@@ -313,6 +313,7 @@ kibana_vars=(
     xpack.observability.unsafe.alertDetails.uptime.enabled
     xpack.observability.unsafe.alertDetails.observability.enabled
     xpack.observability.unsafe.thresholdRule.enabled
+    xpack.productDocBase.artifactRepositoryUrl
     xpack.reporting.capture.browser.autoDownload
     xpack.reporting.capture.browser.chromium.disableSandbox
     xpack.reporting.capture.browser.chromium.maxScreenshotDimension

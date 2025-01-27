@@ -38,7 +38,7 @@
           " extends ",
           "BaseParams"
         ],
-        "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -62,7 +62,7 @@
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; }"
             ],
-            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -87,7 +87,7 @@
               },
               ">"
             ],
-            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -112,7 +112,7 @@
           " extends ",
           "BasePayload"
         ],
-        "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -136,7 +136,7 @@
               "LayoutSelectorDictionary",
               "> | undefined; zoom?: number | undefined; }"
             ],
-            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -147,7 +147,7 @@
             "tags": [],
             "label": "forceNow",
             "description": [],
-            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -172,7 +172,7 @@
               },
               ">[]"
             ],
-            "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+            "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -193,7 +193,7 @@
           "BaseParamsPNG & ",
           "BaseParams"
         ],
-        "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -208,7 +208,7 @@
         "signature": [
           "\"PNGV2\""
         ],
-        "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -223,7 +223,7 @@
         "signature": [
           "\"pngV2\""
         ],
-        "path": "packages/kbn-reporting/export_types/png_common/constants.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -239,7 +239,7 @@
           "BaseParamsPNG & ",
           "BasePayload"
         ],
-        "path": "packages/kbn-reporting/export_types/png_common/index.ts",
+        "path": "src/platform/packages/private/kbn-reporting/export_types/png_common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

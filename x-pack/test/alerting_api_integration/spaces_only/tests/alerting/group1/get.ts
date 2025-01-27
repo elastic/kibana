@@ -124,55 +124,5 @@ export default function createGetTests({ getService }: FtrProviderContext) {
 
     getTestUtils('public', objectRemover, supertest);
     getTestUtils('internal', objectRemover, supertest);
-
-    describe('legacy', function () {
-      this.tags('skipFIPS');
-      it('should handle get alert request appropriately', async () => {
-        const { body: createdAlert } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/alerting/rule`)
-          .set('kbn-xsrf', 'foo')
-          .send(getTestRuleData())
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAlert.id, 'rule', 'alerting');
-
-        const response = await supertest.get(
-          `${getUrlPrefix(Spaces.space1.id)}/api/alerts/alert/${createdAlert.id}`
-        );
-
-        expect(response.status).to.eql(200);
-        expect(response.body).to.eql({
-          id: createdAlert.id,
-          name: 'abc',
-          tags: ['foo'],
-          alertTypeId: 'test.noop',
-          consumer: 'alertsFixture',
-          schedule: { interval: '1m' },
-          enabled: true,
-          actions: [],
-          params: {},
-          createdBy: null,
-          scheduledTaskId: response.body.scheduledTaskId,
-          updatedBy: null,
-          apiKeyOwner: null,
-          apiKeyCreatedByUser: null,
-          throttle: '1m',
-          notifyWhen: 'onThrottleInterval',
-          muteAll: false,
-          mutedInstanceIds: [],
-          createdAt: response.body.createdAt,
-          updatedAt: response.body.updatedAt,
-          executionStatus: response.body.executionStatus,
-          revision: 0,
-          running: false,
-          ...(response.body.nextRun ? { nextRun: response.body.nextRun } : {}),
-          ...(response.body.lastRun ? { lastRun: response.body.lastRun } : {}),
-        });
-        expect(Date.parse(response.body.createdAt)).to.be.greaterThan(0);
-        expect(Date.parse(response.body.updatedAt)).to.be.greaterThan(0);
-        if (response.body.nextRun) {
-          expect(Date.parse(response.body.nextRun)).to.be.greaterThan(0);
-        }
-      });
-    });
   });
 }

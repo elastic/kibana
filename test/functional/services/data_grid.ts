@@ -499,14 +499,6 @@ export class DataGridService extends FtrService {
     return await detailsRow.findAllByTestSubject('~docTableRowAction');
   }
 
-  public async getAnchorDetailsRow(): Promise<WebElementWrapper> {
-    const table = await this.getTable();
-
-    return await table.findByCssSelector(
-      '[data-test-subj~="docTableAnchorRow"] + [data-test-subj~="docTableDetailsRow"]'
-    );
-  }
-
   public async openColMenuByField(field: string) {
     await this.retry.waitFor('header cell action being displayed', async () => {
       // to prevent flakiness
@@ -669,24 +661,6 @@ export class DataGridService extends FtrService {
       'a',
     ]);
     await sampleSizeInput.type(String(newValue));
-  }
-
-  public async getDetailsRow(): Promise<WebElementWrapper> {
-    const detailRows = await this.getDetailsRows();
-    return detailRows[0];
-  }
-
-  public async getTableDocViewRow(
-    detailsRow: WebElementWrapper,
-    fieldName: string
-  ): Promise<WebElementWrapper> {
-    return await detailsRow.findByTestSubject(`~tableDocViewRow-${fieldName}`);
-  }
-
-  public async getRemoveInclusiveFilterButton(
-    tableDocViewRow: WebElementWrapper
-  ): Promise<WebElementWrapper> {
-    return await tableDocViewRow.findByTestSubject(`~removeInclusiveFilterButton`);
   }
 
   public async showFieldCellActionInFlyout(fieldName: string, actionName: string): Promise<void> {

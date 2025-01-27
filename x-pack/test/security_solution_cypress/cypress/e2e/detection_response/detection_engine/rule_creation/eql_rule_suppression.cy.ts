@@ -38,7 +38,7 @@ const SUPPRESS_BY_FIELDS = ['agent.type'];
 describe(
   'Detection Rule Creation - EQL Rules - With Alert Suppression',
   {
-    tags: ['@ess', '@serverless', '@skipInServerlessMKI'],
+    tags: ['@ess', '@skipInServerlessMKI'],
   },
   () => {
     describe('with non-sequence queries', () => {

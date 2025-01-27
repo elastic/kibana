@@ -23,6 +23,7 @@ export function k8sContainerEntity({
 }) {
   if (schema === 'ecs') {
     return new K8sEntity(schema, {
+      'entity.definition_id': 'container',
       'entity.type': 'container',
       'kubernetes.container.id': id,
       'entity.id': entityId,
@@ -31,6 +32,7 @@ export function k8sContainerEntity({
   }
 
   return new K8sEntity(schema, {
+    'entity.definition_id': 'container',
     'entity.type': 'container',
     'container.id': id,
     'entity.id': entityId,

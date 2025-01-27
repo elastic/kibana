@@ -1,0 +1,30 @@
+# HASH
+
+The HASH function computes the hash of a given input using a specified algorithm.
+
+## Syntax
+
+`HASH(algorithm, input)`
+
+### Parameters
+
+#### algorithm
+
+The hash algorithm to be used.
+
+The supported algorithms are:
+- "MD5"
+- "SHA-1"
+- "SHA-256"
+
+#### input
+
+The value to be hashed.
+
+## Examples
+
+```esql
+FROM messages
+| EVAL hashed_content = HASH("SHA-1", content)
+| KEEP message_id, hashed_content
+```

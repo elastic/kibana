@@ -34,7 +34,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dataViews = getService('dataViews');
   const testSubjects = getService('testSubjects');
   const security = getService('security');
-  const docTable = getService('docTable');
   const defaultSettings = {
     defaultIndex: 'logstash-*',
     hideAnnouncements: true,
@@ -228,7 +227,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await timePicker.setDefaultAbsoluteRangeViaUiSettings();
           await kibanaServer.uiSettings.update({
             ...defaultSettings,
-            'doc_table:legacy': false,
             'doc_table:hideTimeColumn': hideTimeFieldColumnSetting,
           });
           await common.navigateToApp('discover');
@@ -317,103 +315,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
               savedSearchSuffix: savedSearchSuffix + 'ESQL',
               isEsqlMode: true,
             });
-          });
-        });
-
-        // These tests are skipped as they take a lot of time to run. Temporary unskip them to validate current functionality if necessary.
-        describe.skip('legacy table', () => {
-          beforeEach(async () => {
-            await kibanaServer.uiSettings.update({
-              ...defaultSettings,
-              'doc_table:hideTimeColumn': hideTimeFieldColumnSetting,
-              'doc_table:legacy': true,
-            });
-            await common.navigateToApp('discover');
-            await discover.waitUntilSearchingHasFinished();
-          });
-
-          it('should render initial columns correctly', async () => {
-            // no columns
-            await discover.loadSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}`);
-            await discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['Summary'] : ['@timestamp', 'Summary']
-            );
-
-            await discover.loadSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}-`);
-            await discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(['Summary']);
-
-            await discover.loadSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}ESQL`);
-            await discover.waitUntilSearchingHasFinished();
-            expect(await dataGrid.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['Summary'] : ['@timestamp', 'Summary']
-            );
-
-            await discover.loadSavedSearch(`${SEARCH_NO_COLUMNS}${savedSearchSuffix}ESQLdrop`);
-            await discover.waitUntilSearchingHasFinished();
-            expect(await dataGrid.getHeaderFields()).to.eql(['Summary']);
-
-            // only @timestamp is selected
-            await discover.loadSavedSearch(`${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}`);
-            await discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['@timestamp'] : ['@timestamp', '@timestamp']
-            );
-
-            await discover.loadSavedSearch(`${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}-`);
-            await discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(['@timestamp']);
-
-            await discover.loadSavedSearch(`${SEARCH_WITH_ONLY_TIMESTAMP}${savedSearchSuffix}ESQL`);
-            await discover.waitUntilSearchingHasFinished();
-            expect(await dataGrid.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting ? ['@timestamp'] : ['@timestamp', 'Summary']
-            );
-          });
-
-          it('should render selected columns correctly', async () => {
-            // with selected columns
-            await discover.loadSavedSearch(`${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}`);
-            await discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting
-                ? ['bytes', 'extension']
-                : ['@timestamp', 'bytes', 'extension']
-            );
-
-            await discover.loadSavedSearch(`${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}-`);
-            await discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(['bytes', 'extension']);
-
-            await discover.loadSavedSearch(
-              `${SEARCH_WITH_SELECTED_COLUMNS}${savedSearchSuffix}ESQL`
-            );
-            await discover.waitUntilSearchingHasFinished();
-            expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension']);
-
-            // with selected columns and @timestamp
-            await discover.loadSavedSearch(
-              `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}`
-            );
-            await discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(
-              hideTimeFieldColumnSetting
-                ? ['bytes', 'extension', '@timestamp']
-                : ['@timestamp', 'bytes', 'extension', '@timestamp']
-            );
-
-            await discover.loadSavedSearch(
-              `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}-`
-            );
-            await discover.waitUntilSearchingHasFinished();
-            expect(await docTable.getHeaderFields()).to.eql(['bytes', 'extension', '@timestamp']);
-
-            await discover.loadSavedSearch(
-              `${SEARCH_WITH_SELECTED_COLUMNS_AND_TIMESTAMP}${savedSearchSuffix}ESQL`
-            );
-            await discover.waitUntilSearchingHasFinished();
-            expect(await dataGrid.getHeaderFields()).to.eql(['bytes', 'extension', '@timestamp']);
           });
         });
       });

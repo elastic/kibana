@@ -8,6 +8,10 @@ xpack.observabilityLogsExplorer.enabled: false
 xpack.observability.enabled: false
 xpack.observabilityAIAssistant.enabled: false
 xpack.search.notebooks.enabled: false
+xpack.searchPlayground.enabled: false
+xpack.searchInferenceEndpoints.enabled: false
+xpack.inventory.enabled: false
+xpack.searchIndices.enabled: false
 
 ## Fine-tune the security solution feature privileges. Also, refer to `serverless.yml` for the project-agnostic overrides.
 xpack.features.overrides:
@@ -19,6 +23,33 @@ xpack.features.overrides:
   ml:
     category: "security"
     order: 1101
+  ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
+  siemV2:
+    privileges:
+      ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
+      ### Visualize features.
+      all.composedOf:
+        - feature: "discover"
+          privileges: [ "all" ]
+        - feature: "dashboard"
+          privileges: [ "all" ]
+        - feature: "visualize"
+          privileges: [ "all" ]
+        - feature: "maps"
+          privileges: [ "all" ]
+      # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
+      # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
+      ### Dashboard, and Visualize apps.
+      read.composedOf:
+        - feature: "discover"
+          privileges: [ "read" ]
+        - feature: "dashboard"
+          privileges: [ "read" ]
+        - feature: "visualize"
+          privileges: [ "read" ]
+        - feature: "maps"
+          privileges: [ "read" ]
+
   ### Security's feature privileges are fine-tuned to grant access to Discover, Dashboard, Maps, and Visualize apps.
   siem:
     privileges:
@@ -84,17 +115,26 @@ xpack.fleet.internal.registry.excludePackages: [
     'synthetics',
     'synthetics_dashboards',
 
-    # Removed in 8.11 integrations
+    # Deprecated security integrations
+    'bluecoat',
     'cisco',
-    'microsoft',
-    'symantec',
     'cyberark',
+    'cylance',
+    'f5',
+    'fortinet_forticlient',
+    'juniper_junos',
+    'juniper_netscreen',
+    'microsoft',
+    'netscout',
+    'radware',
+    'symantec',
+    'tomcat',
 
     # ML integrations
     'dga',
 
     # Unsupported in serverless
-    'cloud-defend',
+    'cloud_defend',
   ]
 # fleet_server package installed to publish agent metrics
 xpack.fleet.packages:

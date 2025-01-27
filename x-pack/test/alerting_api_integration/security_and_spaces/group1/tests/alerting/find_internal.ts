@@ -13,7 +13,13 @@ import {
   ML_ANOMALY_DETECTION_RULE_TYPE_ID,
   OBSERVABILITY_THRESHOLD_RULE_TYPE_ID,
 } from '@kbn/rule-data-utils';
-import { SuperuserAtSpace1, UserAtSpaceScenarios, StackAlertsOnly } from '../../../scenarios';
+import { Space } from '../../../../common/types';
+import {
+  Space1AllAtSpace1,
+  StackAlertsOnly,
+  SuperuserAtSpace1,
+  UserAtSpaceScenarios,
+} from '../../../scenarios';
 import { getUrlPrefix, getTestRuleData, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -31,40 +37,13 @@ export default function createFindTests({ getService }: FtrProviderContext) {
 
     for (const scenario of UserAtSpaceScenarios) {
       const { user, space } = scenario;
+
       describe(scenario.id, () => {
         it('should handle find alert request appropriately', async () => {
-          const { body: createdAction } = await supertest
-            .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send({
-              name: 'MY action',
-              connector_type_id: 'test.noop',
-              config: {},
-              secrets: {},
-            })
-            .expect(200);
-
           const { body: createdAlert } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
             .set('kbn-xsrf', 'foo')
-            .send(
-              getTestRuleData({
-                actions: [
-                  {
-                    group: 'default',
-                    id: createdAction.id,
-                    params: {},
-                    frequency: {
-                      summary: false,
-                      notify_when: 'onThrottleInterval',
-                      throttle: '1m',
-                    },
-                  },
-                ],
-                notify_when: undefined,
-                throttle: undefined,
-              })
-            )
+            .send(getTestRuleData())
             .expect(200);
           objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
 
@@ -108,37 +87,23 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 consumer: 'alertsFixture',
                 schedule: { interval: '1m' },
                 enabled: true,
-                actions: [
-                  {
-                    group: 'default',
-                    id: createdAction.id,
-                    connector_type_id: 'test.noop',
-                    params: {},
-                    uuid: match.actions[0].uuid,
-                    frequency: {
-                      summary: false,
-                      notify_when: 'onThrottleInterval',
-                      throttle: '1m',
-                    },
-                  },
-                ],
+                actions: [],
                 params: {},
                 created_by: 'elastic',
+                api_key_created_by_user: false,
+                revision: 0,
                 scheduled_task_id: match.scheduled_task_id,
                 created_at: match.created_at,
                 updated_at: match.updated_at,
-                throttle: null,
-                notify_when: null,
+                throttle: '1m',
+                notify_when: 'onThrottleInterval',
                 updated_by: 'elastic',
                 api_key_owner: 'elastic',
-                api_key_created_by_user: false,
                 mute_all: false,
                 muted_alert_ids: [],
-                revision: 0,
                 execution_status: match.execution_status,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
-
                 monitoring: match.monitoring,
                 snooze_schedule: match.snooze_schedule,
                 ...(hasActiveSnoozes && { active_snoozes: activeSnoozes }),
@@ -153,40 +118,15 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         });
 
         it('should filter out types that the user is not authorized to `get` retaining pagination', async () => {
-          async function createNoOpAlert(overrides = {}) {
-            const alert = getTestRuleData(overrides);
-            const { body: createdAlert } = await supertest
-              .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
-              .set('kbn-xsrf', 'foo')
-              .send(alert)
-              .expect(200);
-            objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
-            return {
-              id: createdAlert.id,
-              rule_type_id: alert.rule_type_id,
-            };
-          }
-          function createRestrictedNoOpAlert() {
-            return createNoOpAlert({
-              rule_type_id: 'test.restricted-noop',
-              consumer: 'alertsRestrictedFixture',
-            });
-          }
-          function createUnrestrictedNoOpAlert() {
-            return createNoOpAlert({
-              rule_type_id: 'test.unrestricted-noop',
-              consumer: 'alertsFixture',
-            });
-          }
           const allAlerts = [];
-          allAlerts.push(await createNoOpAlert());
-          allAlerts.push(await createNoOpAlert());
-          allAlerts.push(await createRestrictedNoOpAlert());
-          allAlerts.push(await createUnrestrictedNoOpAlert());
-          allAlerts.push(await createUnrestrictedNoOpAlert());
-          allAlerts.push(await createRestrictedNoOpAlert());
-          allAlerts.push(await createNoOpAlert());
-          allAlerts.push(await createNoOpAlert());
+          allAlerts.push(await createNoOpAlert(space));
+          allAlerts.push(await createNoOpAlert(space));
+          allAlerts.push(await createRestrictedNoOpAlert(space));
+          allAlerts.push(await createUnrestrictedNoOpAlert(space));
+          allAlerts.push(await createUnrestrictedNoOpAlert(space));
+          allAlerts.push(await createRestrictedNoOpAlert(space));
+          allAlerts.push(await createNoOpAlert(space));
+          allAlerts.push(await createNoOpAlert(space));
 
           const perPage = 4;
 
@@ -233,25 +173,24 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               expect(response.body.per_page).to.be.equal(perPage);
               expect(response.body.total).to.be.equal(8);
 
-              {
-                const [firstPage, secondPage] = chunk(
-                  allAlerts.map((alert) => alert.id),
-                  perPage
-                );
-                expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
+              const [firstPage, secondPage] = chunk(
+                allAlerts.map((alert) => alert.id),
+                perPage
+              );
+              expect(response.body.data.map((alert: any) => alert.id)).to.eql(firstPage);
 
-                const secondResponse = await supertestWithoutAuth
-                  .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
-                  .set('kbn-xsrf', 'foo')
-                  .auth(user.username, user.password)
-                  .send({
-                    per_page: perPage,
-                    sort_field: 'createdAt',
-                    page: 2,
-                  });
+              const secondResponse = await supertestWithoutAuth
+                .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+                .set('kbn-xsrf', 'foo')
+                .auth(user.username, user.password)
+                .send({
+                  per_page: perPage,
+                  sort_field: 'createdAt',
+                  page: '2',
+                });
 
-                expect(secondResponse.body.data.map((alert: any) => alert.id)).to.eql(secondPage);
-              }
+              expect(secondResponse.statusCode).to.eql(200);
+              expect(secondResponse.body.data.map((alert: any) => alert.id)).to.eql(secondPage);
 
               break;
             default:
@@ -294,7 +233,7 @@ export default function createFindTests({ getService }: FtrProviderContext) {
             .set('kbn-xsrf', 'foo')
             .auth(user.username, user.password)
             .send({
-              filter: 'alert.attributes.actions:{ actionTypeId: test.noop }',
+              filter: 'alert.attributes.actions:{ actionTypeId: "test.noop" }',
             });
 
           switch (scenario.id) {
@@ -334,13 +273,14 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                     group: 'default',
                     connector_type_id: 'test.noop',
                     params: {},
-                    uuid: createdAlert.actions[0].uuid,
+                    uuid: match.actions[0].uuid,
                   },
                 ],
                 params: {},
                 created_by: 'elastic',
-                throttle: '1m',
                 api_key_created_by_user: null,
+                revision: 0,
+                throttle: '1m',
                 updated_by: 'elastic',
                 api_key_owner: null,
                 mute_all: false,
@@ -349,7 +289,6 @@ export default function createFindTests({ getService }: FtrProviderContext) {
                 created_at: match.created_at,
                 updated_at: match.updated_at,
                 execution_status: match.execution_status,
-                revision: 0,
                 ...(match.next_run ? { next_run: match.next_run } : {}),
                 ...(match.last_run ? { last_run: match.last_run } : {}),
                 monitoring: match.monitoring,
@@ -577,73 +516,153 @@ export default function createFindTests({ getService }: FtrProviderContext) {
               throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
           }
         });
+
+        it('should filter by rule type IDs correctly', async () => {
+          await createNoOpAlert(space);
+          await createRestrictedNoOpAlert(space);
+          await createUnrestrictedNoOpAlert(space);
+
+          const perPage = 10;
+          const ruleTypeIds = ['test.restricted-noop', 'test.noop'];
+
+          const response = await supertestWithoutAuth
+            .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+            .set('kbn-xsrf', 'foo')
+            .auth(user.username, user.password)
+            .send({
+              per_page: perPage,
+              sort_field: 'createdAt',
+              rule_type_ids: ruleTypeIds,
+            });
+
+          switch (scenario.id) {
+            case 'no_kibana_privileges at space1':
+            case 'space_1_all at space2':
+              expect(response.statusCode).to.eql(403);
+              expect(response.body).to.eql({
+                error: 'Forbidden',
+                message: `Unauthorized to find rules for any rule types`,
+                statusCode: 403,
+              });
+              break;
+            case 'space_1_all at space1':
+            case 'space_1_all_alerts_none_actions at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.total).to.be.equal(1);
+
+              expect(
+                response.body.data.every(
+                  (rule: { rule_type_id: string }) => rule.rule_type_id === 'test.noop'
+                )
+              ).to.be.eql(true);
+              break;
+            case 'global_read at space1':
+            case 'superuser at space1':
+            case 'space_1_all_with_restricted_fixture at space1':
+              expect(response.statusCode).to.eql(200);
+              expect(response.body.total).to.be.equal(2);
+
+              expect(
+                response.body.data.every((rule: { rule_type_id: string }) =>
+                  ruleTypeIds.includes(rule.rule_type_id)
+                )
+              ).to.be.eql(true);
+              break;
+            default:
+              throw new Error(`Scenario untested: ${JSON.stringify(scenario)}`);
+          }
+        });
       });
     }
 
-    describe('Actions', () => {
-      const { user, space } = SuperuserAtSpace1;
+    describe('filtering', () => {
+      it('should return the correct rules when trying to exploit RBAC through the ruleTypeIds parameter', async () => {
+        const { user, space } = Space1AllAtSpace1;
 
-      it('should return the actions correctly', async () => {
-        const { body: createdAction } = await supertest
-          .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'MY action',
-            connector_type_id: 'test.noop',
-            config: {},
-            secrets: {},
-          })
-          .expect(200);
-
-        const { body: createdRule1 } = await supertest
-          .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        const { body: createdAlert1 } = await supertest
+          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
           .set('kbn-xsrf', 'foo')
           .send(
             getTestRuleData({
-              enabled: true,
-              actions: [
-                {
-                  id: createdAction.id,
-                  group: 'default',
-                  params: {},
-                },
-                {
-                  id: 'system-connector-test.system-action',
-                  params: {},
-                },
-              ],
+              rule_type_id: 'test.restricted-noop',
+              consumer: 'alertsRestrictedFixture',
             })
           )
+          .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
           .expect(200);
 
-        objectRemover.add(space.id, createdRule1.id, 'rule', 'alerting');
+        const { body: createdAlert2 } = await supertest
+          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.noop',
+              consumer: 'alertsFixture',
+            })
+          )
+          .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+          .expect(200);
+
+        objectRemover.add(SuperuserAtSpace1.space.id, createdAlert1.id, 'rule', 'alerting');
+        objectRemover.add(SuperuserAtSpace1.space.id, createdAlert2.id, 'rule', 'alerting');
 
         const response = await supertestWithoutAuth
-          .get(`${getUrlPrefix(space.id)}/api/alerting/rules/_find`)
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
           .set('kbn-xsrf', 'foo')
-          .auth(user.username, user.password);
+          .auth(user.username, user.password)
+          .send({
+            rule_type_ids: ['test.noop', 'test.restricted-noop'],
+          });
 
-        const action = response.body.data[0].actions[0];
-        const systemAction = response.body.data[0].actions[1];
-        const { uuid, ...restAction } = action;
-        const { uuid: systemActionUuid, ...restSystemAction } = systemAction;
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].rule_type_id).to.eql('test.noop');
+      });
 
-        expect([restAction, restSystemAction]).to.eql([
-          {
-            id: createdAction.id,
-            connector_type_id: 'test.noop',
-            group: 'default',
-            params: {},
-          },
-          {
-            id: 'system-connector-test.system-action',
-            connector_type_id: 'test.system-action',
-            params: {},
-          },
-          ,
-        ]);
+      it('should return the correct rules when trying to exploit RBAC through the consumers parameter', async () => {
+        const { user, space } = Space1AllAtSpace1;
+
+        const { body: createdAlert1 } = await supertest
+          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.restricted-noop',
+              consumer: 'alertsRestrictedFixture',
+            })
+          )
+          .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+          .expect(200);
+
+        const { body: createdAlert2 } = await supertest
+          .post(`${getUrlPrefix(SuperuserAtSpace1.space.id)}/api/alerting/rule`)
+          .set('kbn-xsrf', 'foo')
+          .send(
+            getTestRuleData({
+              rule_type_id: 'test.noop',
+              consumer: 'alertsFixture',
+            })
+          )
+          .auth(SuperuserAtSpace1.user.username, SuperuserAtSpace1.user.password)
+          .expect(200);
+
+        objectRemover.add(SuperuserAtSpace1.space.id, createdAlert1.id, 'rule', 'alerting');
+        objectRemover.add(SuperuserAtSpace1.space.id, createdAlert2.id, 'rule', 'alerting');
+
+        const response = await supertestWithoutAuth
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/_find`)
+          .set('kbn-xsrf', 'foo')
+          .auth(user.username, user.password)
+          .send({
+            consumers: ['alertsFixture', 'alertsRestrictedFixture'],
+          });
+
+        expect(response.status).to.eql(200);
+        expect(response.body.total).to.equal(1);
+        expect(response.body.data[0].consumer).to.eql('alertsFixture');
       });
     });
+
     describe('stack alerts', () => {
       const ruleTypes = [
         [
@@ -758,5 +777,35 @@ export default function createFindTests({ getService }: FtrProviderContext) {
         });
       }
     });
+
+    async function createNoOpAlert(space: Space, overrides = {}) {
+      const alert = getTestRuleData(overrides);
+      const { body: createdAlert } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
+        .set('kbn-xsrf', 'foo')
+        .send(alert)
+        .expect(200);
+
+      objectRemover.add(space.id, createdAlert.id, 'rule', 'alerting');
+
+      return {
+        id: createdAlert.id,
+        rule_type_id: alert.rule_type_id,
+      };
+    }
+
+    function createRestrictedNoOpAlert(space: Space) {
+      return createNoOpAlert(space, {
+        rule_type_id: 'test.restricted-noop',
+        consumer: 'alertsRestrictedFixture',
+      });
+    }
+
+    function createUnrestrictedNoOpAlert(space: Space) {
+      return createNoOpAlert(space, {
+        rule_type_id: 'test.unrestricted-noop',
+        consumer: 'alertsFixture',
+      });
+    }
   });
 }

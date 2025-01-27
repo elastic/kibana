@@ -17,7 +17,11 @@
   },
   "action_task_params": {
     "dynamic": false,
-    "properties": {}
+    "properties": {
+      "apiKeyId": {
+        "type": "keyword"
+      }
+    }
   },
   "ad_hoc_run_params": {
     "dynamic": false,
@@ -584,6 +588,17 @@
             }
           }
         }
+      },
+      "observables": {
+        "properties": {
+          "typeKey": {
+            "type": "keyword"
+          },
+          "value": {
+            "type": "keyword"
+          }
+        },
+        "type": "nested"
       },
       "owner": {
         "type": "keyword"
@@ -1593,6 +1608,7 @@
     }
   },
   "fleet-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1607,6 +1623,10 @@
             "type": "keyword"
           }
         }
+      },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
@@ -1786,6 +1806,9 @@
           }
         }
       },
+      "supports_agentless": {
+        "type": "boolean"
+      },
       "updated_at": {
         "type": "date"
       },
@@ -1959,6 +1982,7 @@
     "properties": {}
   },
   "ingest-agent-policies": {
+    "dynamic": false,
     "properties": {
       "advanced_settings": {
         "index": false,
@@ -1973,6 +1997,10 @@
             "type": "keyword"
           }
         }
+      },
+      "agentless": {
+        "dynamic": false,
+        "properties": {}
       },
       "data_output_id": {
         "type": "keyword"
@@ -2374,6 +2402,9 @@
           }
         }
       },
+      "supports_agentless": {
+        "type": "boolean"
+      },
       "updated_at": {
         "type": "date"
       },
@@ -2513,6 +2544,20 @@
       "events": {
         "format": "epoch_millis||strict_date_optional_time",
         "type": "date_range"
+      },
+      "expirationDate": {
+        "type": "date"
+      },
+      "title": {
+        "fields": {
+          "keyword": {
+            "type": "keyword"
+          }
+        },
+        "type": "text"
+      },
+      "updatedAt": {
+        "type": "date"
       }
     }
   },
@@ -3620,6 +3665,9 @@
         "type": "keyword"
       },
       "partition": {
+        "type": "integer"
+      },
+      "priority": {
         "type": "integer"
       },
       "retryAt": {
