@@ -12,8 +12,7 @@ import { login, ROLE } from '../../../../tasks/login';
 
 const { insightsComponentDoesntExist } = workflowInsightsSelectors;
 
-// Unskip when defendInsights assistant feature is enabled by default
-describe.skip(
+describe(
   'Endpoint details',
   {
     tags: [

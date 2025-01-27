@@ -8,8 +8,8 @@ import type {
   AllConnectorsResponse,
   ConnectorResponse,
 } from '@kbn/actions-plugin/common/routes/connector/response';
-import { request } from './common';
 import { DEFEND_INSIGHTS } from '@kbn/elastic-assistant-common';
+import { request } from './common';
 import { ActionType } from '../../../../common/endpoint/types/workflow_insights';
 import {
   WORKFLOW_INSIGHTS_ROUTE,
@@ -206,6 +206,8 @@ export const stubWorkflowInsightsApiResponse = (endpointId: string) => {
         },
       ]);
     });
+  });
+};
 
 export const triggerRunningDefendInsights = () => {
   return request({
