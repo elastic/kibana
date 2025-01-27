@@ -5,10 +5,13 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION } from '../../../common/constants';
+import {
+  SLO_RESOURCES_VERSION,
+  SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
+} from '../../../common/constants';
 
-export const getSLOSettingsTemplate = (name: string) => ({
-  name,
+export const SUMMARY_SETTINGS_TEMPLATE = {
+  name: SUMMARY_COMPONENT_TEMPLATE_SETTINGS_NAME,
   template: {
     settings: {
       auto_expand_replicas: '0-1',
@@ -16,9 +19,9 @@ export const getSLOSettingsTemplate = (name: string) => ({
     },
   },
   _meta: {
-    description: 'Settings for SLO rollup data',
+    description: 'SLO summary settings template',
     version: SLO_RESOURCES_VERSION,
     managed: true,
     managed_by: 'observability',
   },
-});
+};
