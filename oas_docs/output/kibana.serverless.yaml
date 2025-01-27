@@ -9777,6 +9777,14 @@ paths:
             schema:
               type: object
               properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  description: The number of documents per second to process.
+                  type: integer
                 enrichPolicyExecutionInterval:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_Interval'
                 entityTypes:
@@ -9789,11 +9797,21 @@ paths:
                   type: integer
                 filter:
                   type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
                 indexPattern:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
                 lookbackPeriod:
                   default: 24h
-                  description: The lookback period for the entity store
+                  description: The amount of time the transform looks back to calculate the aggregations.
+                  pattern: '[smdh]$'
+                  type: string
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
                   pattern: '[smdh]$'
                   type: string
         description: Schema for the entity store initialization
@@ -9903,6 +9921,14 @@ paths:
             schema:
               type: object
               properties:
+                delay:
+                  default: 1m
+                  description: The delay before the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
+                docsPerSecond:
+                  description: The number of documents per second to process.
+                  type: integer
                 enrichPolicyExecutionInterval:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_Interval'
                 fieldHistoryLength:
@@ -9911,8 +9937,23 @@ paths:
                   type: integer
                 filter:
                   type: string
+                frequency:
+                  default: 1m
+                  description: The frequency at which the transform will run.
+                  pattern: '[smdh]$'
+                  type: string
                 indexPattern:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: The amount of time the transform looks back to calculate the aggregations.
+                  pattern: '[smdh]$'
+                  type: string
+                timeout:
+                  default: 180s
+                  description: The timeout for initializing the aggregating transform.
+                  pattern: '[smdh]$'
+                  type: string
         description: Schema for the engine initialization
         required: true
       responses:
@@ -50420,11 +50461,21 @@ components:
     Security_Entity_Analytics_API_EngineDescriptor:
       type: object
       properties:
+        delay:
+          default: 1m
+          pattern: '[smdh]$'
+          type: string
+        docsPerSecond:
+          type: integer
         error:
           type: object
         fieldHistoryLength:
           type: integer
         filter:
+          type: string
+        frequency:
+          default: 1m
+          pattern: '[smdh]$'
           type: string
         indexPattern:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
@@ -50434,6 +50485,10 @@ components:
           type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
+        timeout:
+          default: 180s
+          pattern: '[smdh]$'
+          type: string
         type:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
       required:
