@@ -496,13 +496,14 @@ export class LensVisService {
         interval,
         breakdownColumn,
       });
+      const dateFieldLabel = `${dataView.timeFieldName} every ${interval}`;
       const context = {
         dataViewSpec: dataView?.toSpec(),
         fieldName: '',
         textBasedColumns: [
           {
             id: 'timestamp',
-            name: `${dataView.timeFieldName} every ${interval}`,
+            name: dateFieldLabel,
             meta: {
               type: 'date',
             },
@@ -526,9 +527,13 @@ export class LensVisService {
 
       // here the attributes contain the main query and not the histogram one
       const updatedAttributesWithQuery = preferredVisAttributes
-        ? injectESQLQueryIntoLensLayers(preferredVisAttributes, {
-            esql: esqlQuery,
-          })
+        ? injectESQLQueryIntoLensLayers(
+            preferredVisAttributes,
+            {
+              esql: esqlQuery,
+            },
+            dateFieldLabel
+          )
         : undefined;
 
       const suggestions =
