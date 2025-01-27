@@ -49,9 +49,10 @@ import {
   deriveLensSuggestionFromLensAttributes,
   type QueryParams,
   injectESQLQueryIntoLensLayers,
+  TIMESTAMP_COLUMN,
 } from '../utils/external_vis_context';
 import { computeInterval } from '../utils/compute_interval';
-import { enrichLensAttributesWithTablesData, TIMESTAMP_COLUMN } from '../utils/lens_vis_from_table';
+import { enrichLensAttributesWithTablesData } from '../utils/lens_vis_from_table';
 
 const UNIFIED_HISTOGRAM_LAYER_ID = 'unifiedHistogram';
 
