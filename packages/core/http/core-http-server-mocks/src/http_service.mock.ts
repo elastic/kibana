@@ -127,6 +127,7 @@ const createInternalPrebootContractMock = (args: CreateMockArgs = {}) => {
     basePath,
     staticAssets: createInternalStaticAssetsMock(basePath, args.cdnUrl),
     csp: CspConfig.DEFAULT,
+    prototypeHardening: false,
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     getServerInfo: jest.fn(),
