@@ -6,18 +6,14 @@
  */
 
 import { InferenceTaskType } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
-import { ElasticsearchClient } from '@kbn/core/server';
 import type { Config, Secrets } from '@kbn/inference-endpoint-ui-common';
-import type { Logger } from '@kbn/logging';
+import { ElasticsearchClient } from '@kbn/core/server';
 import { unflattenObject } from '../utils/unflatten_object';
 
 export const addInferenceEndpoint = async (
   esClient: ElasticsearchClient,
-  type: string,
-  id: string,
   config: Config,
-  secrets: Secrets,
-  logger: Logger
+  secrets: Secrets
 ) => {
   try {
     /* task settings property is required in the API call 
@@ -39,9 +35,6 @@ export const addInferenceEndpoint = async (
       },
     });
   } catch (e) {
-    logger.warn(
-      `Failed to create inference endpoint for task type "${config?.taskType}" and inference id ${config?.inferenceId}. Error: ${e.message}`
-    );
     throw e;
   }
 };

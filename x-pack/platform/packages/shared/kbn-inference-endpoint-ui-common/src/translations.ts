@@ -163,3 +163,17 @@ export const ENDPOINT_CREATION_FAILED = i18n.translate(
     defaultMessage: 'Endpoint creation failed',
   }
 );
+
+export const ENDPOINT_UPDATE_SUCCESS = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointUpdateSuccess',
+  {
+    defaultMessage: 'Inference endpoint updated successfully',
+  }
+);
+
+export const ENDPOINT_UPDATE_FAILED = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.endpointUpdateFailure',
+  {
+    defaultMessage: 'Endpoint update failed',
+  }
+);

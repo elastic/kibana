@@ -25,7 +25,7 @@ import { Form, useForm } from '@kbn/es-ui-shared-plugin/static/forms/hook_form_l
 import * as LABELS from '../translations';
 import type { InferenceEndpoint } from '../types/types';
 import { InferenceServiceFormFields } from './inference_service_form_fields';
-import { useAddInferenceEndpoint } from '../hooks/use_add_endpoint';
+import { useInferenceEndpointMutation } from '../hooks/use_inference_endpoint_mutation';
 
 interface InferenceFlyoutWrapperProps {
   onFlyoutClose: () => void;
@@ -33,6 +33,7 @@ interface InferenceFlyoutWrapperProps {
   toasts: IToasts;
   isEdit?: boolean;
   onSubmitSuccess?: (inferenceId: string) => void;
+  inferenceEndpoint?: InferenceEndpoint;
 }
 
 export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
@@ -41,6 +42,7 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
   toasts,
   isEdit,
   onSubmitSuccess,
+  inferenceEndpoint,
 }) => {
   const inferenceCreationFlyoutId = useGeneratedHtmlId({
     prefix: 'InferenceFlyoutId',
@@ -52,21 +54,29 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
     },
     [onFlyoutClose, onSubmitSuccess]
   );
-  const { mutate: addEndpoint, isLoading } = useAddInferenceEndpoint(
-    http,
-    toasts,
-    onSuccessCallback
-  );
+  const { mutate, isLoading } = useInferenceEndpointMutation(http, toasts, onSuccessCallback);
 
-  const { form } = useForm();
+  const { form } = useForm({
+    defaultValue: {
+      config: {
+        inferenceId: inferenceEndpoint?.config.inferenceId ?? '',
+        taskType: inferenceEndpoint?.config.taskType ?? '',
+        provider: inferenceEndpoint?.config.provider ?? '',
+        providerConfig: inferenceEndpoint?.config.providerConfig,
+      },
+      secrets: {
+        providerSecrets: {},
+      },
+    },
+  });
   const handleSubmit = useCallback(async () => {
     const { isValid, data } = await form.submit();
-
-    if (isValid) {
-      const inferenceEndpoint = data as InferenceEndpoint;
-      addEndpoint(inferenceEndpoint);
+    if (!isValid) {
+      return;
     }
-  }, [addEndpoint, form]);
+
+    mutate(data, !!isEdit);
+  }, [form, isEdit, mutate]);
 
   return (
     <EuiFlyout
@@ -91,7 +101,11 @@ export const InferenceFlyoutWrapper: React.FC<InferenceFlyoutWrapperProps> = ({
                 color="success"
                 size="m"
                 isLoading={form.isSubmitting || isLoading}
-                disabled={(!form.isValid && form.isSubmitted) || isLoading}
+                disabled={
+                  (!form.isValid && form.isSubmitted) ||
+                  isLoading ||
+                  inferenceEndpoint?.config.inferenceId.startsWith('.') // Disable edit option for preconfigured endpoints
+                }
                 data-test-subj="inference-endpoint-submit-button"
                 onClick={handleSubmit}
               >

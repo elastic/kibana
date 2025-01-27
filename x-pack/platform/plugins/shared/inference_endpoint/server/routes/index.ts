@@ -15,7 +15,7 @@ import {
 
 import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
-import { unflattenObject } from '../utils/unflatten_object';
+import { addInferenceEndpoint } from '../lib/add_inference_endpoint';
 
 export const getInferenceServicesRoute = (
   router: IRouter<RequestHandlerContext>,
@@ -90,23 +90,70 @@ export const getInferenceServicesRoute = (
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
 
           const { config, secrets } = request.body;
-          const taskSettings = {};
-          const serviceSettings = {
-            ...unflattenObject(config?.providerConfig ?? {}),
-            ...unflattenObject(secrets?.providerSecrets ?? {}),
-          };
-
-          const result = await esClient.inference.put({
-            inference_id: config?.inferenceId ?? '',
-            task_type: config?.taskType as InferenceTaskType,
-            inference_config: {
-              service: config?.provider,
-              service_settings: serviceSettings,
-              task_settings: taskSettings,
-            },
-          });
+          const result = await addInferenceEndpoint(esClient, config, secrets);
 
           return response.ok({
+            body: result,
+            headers: {
+              'content-type': 'application/json',
+            },
+          });
+        } catch (err) {
+          logger.error(err);
+          return response.customError({
+            body: err.message,
+            statusCode: err.statusCode,
+          });
+        }
+      }
+    );
+
+  router.versioned
+    .put({
+      access: 'internal',
+      path: '/internal/_inference/_update',
+    })
+    .addVersion(
+      {
+        version: INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
+        validate: {
+          request: {
+            body: schema.object({
+              config: schema.object({
+                inferenceId: schema.string(),
+                provider: schema.string(),
+                taskType: schema.string(),
+                providerConfig: schema.any(),
+              }),
+              secrets: schema.object({
+                providerSecrets: schema.any(),
+              }),
+            }),
+          },
+        },
+      },
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<InferenceInferenceEndpointInfo>> => {
+        try {
+          const esClient = (await context.core).elasticsearch.client.asCurrentUser;
+
+          const { config, secrets } = request.body;
+
+          await esClient.inference.delete({
+            inference_id: config.inferenceId,
+            task_type: config.taskType as InferenceTaskType,
+            force: true,
+          });
+
+          const result = await addInferenceEndpoint(esClient, config, secrets);
+
+          return response.ok({
+            headers: {
+              'content-type': 'application/json',
+            },
             body: result,
           });
         } catch (err) {

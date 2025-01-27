@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-import { loggingSystemMock } from '@kbn/core/server/mocks';
-
 import { addInferenceEndpoint } from './add_inference_endpoint';
 
 describe('addInferenceEndpoint', () => {
@@ -16,8 +14,6 @@ describe('addInferenceEndpoint', () => {
     },
   };
 
-  const type = 'text_embedding';
-  const id = 'es-endpoint-1';
   const config: any = {
     provider: 'elasticsearch',
     taskType: 'text_embedding',
@@ -29,18 +25,17 @@ describe('addInferenceEndpoint', () => {
     },
   };
   const secrets: any = { providerSecrets: {} };
-  const mockLogger = loggingSystemMock.createLogger();
 
   beforeEach(() => {
     jest.clearAllMocks();
   });
 
   it('should call the ES client with correct PUT request', async () => {
-    await addInferenceEndpoint(mockClient, type, id, config, secrets, mockLogger);
+    await addInferenceEndpoint(mockClient, config, secrets);
 
     expect(mockClient.inference.put).toHaveBeenCalledWith({
-      inference_id: id,
-      task_type: type,
+      inference_id: config.inferenceId,
+      task_type: config.taskType,
       inference_config: {
         service: 'elasticsearch',
         service_settings: {

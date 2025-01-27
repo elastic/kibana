@@ -25,6 +25,7 @@ import { TaskType } from './render_table_columns/render_task_type/task_type';
 import { DeleteAction } from './render_table_columns/render_actions/actions/delete/delete_action';
 import { useKibana } from '../../hooks/use_kibana';
 import { isEndpointPreconfigured } from '../../utils/preconfigured_endpoint_helper';
+import { EditInferenceFlyout } from '../edit_inference_endpoints/edit_inference_flyout';
 
 interface TabularPageProps {
   inferenceEndpoints: InferenceAPIConfigResponse[];
@@ -36,6 +37,7 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   } = useKibana();
   const toasts = notifications?.toasts;
   const [showDeleteAction, setShowDeleteAction] = useState(false);
+  const [showInferenceFlyout, setShowInferenceFlyout] = useState(false);
   const [selectedInferenceEndpoint, setSelectedInferenceEndpoint] = useState<
     InferenceEndpointUI | undefined
   >(undefined);
@@ -55,13 +57,23 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
   );
 
   const onCancelDeleteModal = useCallback(() => {
-    setShowDeleteAction(false);
     setSelectedInferenceEndpoint(undefined);
+    setShowDeleteAction(false);
   }, []);
 
   const displayDeleteActionitem = useCallback((selectedEndpoint: InferenceEndpointUI) => {
-    setShowDeleteAction(true);
     setSelectedInferenceEndpoint(selectedEndpoint);
+    setShowDeleteAction(true);
+  }, []);
+
+  const displayInferenceFlyout = useCallback((selectedEndpoint: InferenceEndpointUI) => {
+    setShowInferenceFlyout(true);
+    setSelectedInferenceEndpoint(selectedEndpoint);
+  }, []);
+
+  const onCloseInferenceFlyout = useCallback(() => {
+    setShowInferenceFlyout(false);
+    setSelectedInferenceEndpoint(undefined);
   }, []);
 
   const onFilterChangedCallback = useCallback(
@@ -123,6 +135,14 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     },
     {
       actions: [
+        {
+          name: i18n.ENDPOINT_VIEW_ACTION_LABEL,
+          description: i18n.ENDPOINT_VIEW_ACTION_LABEL,
+          icon: 'eye',
+          type: 'icon',
+          onClick: (item: InferenceEndpointUI) => displayInferenceFlyout(item),
+          'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
+        },
         {
           name: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
           description: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
@@ -202,6 +222,12 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
           selectedEndpoint={selectedInferenceEndpoint}
           displayModal={showDeleteAction}
           onCancel={onCancelDeleteModal}
+        />
+      ) : null}
+      {showInferenceFlyout && selectedInferenceEndpoint ? (
+        <EditInferenceFlyout
+          onFlyoutClose={onCloseInferenceFlyout}
+          inferenceEndpointUI={selectedInferenceEndpoint}
         />
       ) : null}
     </>
