@@ -25907,6 +25907,24 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        certificate:
+                          nullable: true
+                          type: string
+                        certificate_authorities:
+                          nullable: true
+                          type: string
+                        certificate_key:
+                          nullable: true
+                          type: string
+                        es_certificate:
+                          nullable: true
+                          type: string
+                        es_certificate_authorities:
+                          nullable: true
+                          type: string
+                        es_certificate_key:
+                          nullable: true
+                          type: string
                         host_urls:
                           items:
                             type: string
@@ -25980,6 +25998,24 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                certificate:
+                  nullable: true
+                  type: string
+                certificate_authorities:
+                  nullable: true
+                  type: string
+                certificate_key:
+                  nullable: true
+                  type: string
+                es_certificate:
+                  nullable: true
+                  type: string
+                es_certificate_authorities:
+                  nullable: true
+                  type: string
+                es_certificate_key:
+                  nullable: true
+                  type: string
                 host_urls:
                   items:
                     type: string
@@ -26015,6 +26051,24 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      certificate:
+                        nullable: true
+                        type: string
+                      certificate_authorities:
+                        nullable: true
+                        type: string
+                      certificate_key:
+                        nullable: true
+                        type: string
+                      es_certificate:
+                        nullable: true
+                        type: string
+                      es_certificate_authorities:
+                        nullable: true
+                        type: string
+                      es_certificate_key:
+                        nullable: true
+                        type: string
                       host_urls:
                         items:
                           type: string
@@ -26129,6 +26183,24 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      certificate:
+                        nullable: true
+                        type: string
+                      certificate_authorities:
+                        nullable: true
+                        type: string
+                      certificate_key:
+                        nullable: true
+                        type: string
+                      es_certificate:
+                        nullable: true
+                        type: string
+                      es_certificate_authorities:
+                        nullable: true
+                        type: string
+                      es_certificate_key:
+                        nullable: true
+                        type: string
                       host_urls:
                         items:
                           type: string
@@ -26197,14 +26269,36 @@ paths:
               additionalProperties: false
               type: object
               properties:
+                certificate:
+                  nullable: true
+                  type: string
+                certificate_authorities:
+                  nullable: true
+                  type: string
+                certificate_key:
+                  nullable: true
+                  type: string
+                es_certificate:
+                  nullable: true
+                  type: string
+                es_certificate_authorities:
+                  nullable: true
+                  type: string
+                es_certificate_key:
+                  nullable: true
+                  type: string
                 host_urls:
                   items:
                     type: string
                   minItems: 1
                   type: array
                 is_default:
+                  default: false
                   type: boolean
                 is_internal:
+                  type: boolean
+                is_preconfigured:
+                  default: false
                   type: boolean
                 name:
                   type: string
@@ -26212,7 +26306,8 @@ paths:
                   nullable: true
                   type: string
               required:
-                - proxy_id
+                - name
+                - host_urls
       responses:
         '200':
           content:
@@ -26225,6 +26320,24 @@ paths:
                     additionalProperties: false
                     type: object
                     properties:
+                      certificate:
+                        nullable: true
+                        type: string
+                      certificate_authorities:
+                        nullable: true
+                        type: string
+                      certificate_key:
+                        nullable: true
+                        type: string
+                      es_certificate:
+                        nullable: true
+                        type: string
+                      es_certificate_authorities:
+                        nullable: true
+                        type: string
+                      es_certificate_key:
+                        nullable: true
+                        type: string
                       host_urls:
                         items:
                           type: string
