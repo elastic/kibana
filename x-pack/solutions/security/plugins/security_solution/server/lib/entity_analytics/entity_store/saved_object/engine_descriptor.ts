@@ -37,7 +37,8 @@ export class EngineDescriptorClient {
       filter,
       fieldHistoryLength,
       indexPattern,
-    }: { filter: string; fieldHistoryLength: number; indexPattern: string }
+      lookbackPeriod,
+    }: { filter: string; fieldHistoryLength: number; indexPattern: string; lookbackPeriod: string }
   ) {
     const engineDescriptor = await this.find(entityType);
 
@@ -54,6 +55,7 @@ export class EngineDescriptorClient {
         filter,
         fieldHistoryLength,
         indexPattern,
+        lookbackPeriod,
       };
       await this.deps.soClient.update<EngineDescriptor>(
         entityEngineDescriptorTypeName,
@@ -73,6 +75,7 @@ export class EngineDescriptorClient {
         indexPattern,
         filter,
         fieldHistoryLength,
+        lookbackPeriod,
       },
       { id: this.getSavedObjectId(entityType) }
     );

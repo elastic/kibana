@@ -5686,29 +5686,6 @@ paths:
       summary: Delete all case comments and alerts
       tags:
         - cases
-    get:
-      deprecated: true
-      description: |
-        Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; instead, use the get case comment API, which requires a comment identifier in the path. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases with the comments you're seeking.
-      operationId: getAllCaseCommentsDefaultSpace
-      parameters:
-        - $ref: '#/components/parameters/Cases_case_id'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Cases_case_response_properties'
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
-          description: Authorization information is missing or invalid.
-      summary: Get all case comments
-      tags:
-        - cases
     patch:
       description: |
         You must have `all` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're updating. NOTE: You cannot change the comment type or the owner of a comment.
@@ -11892,6 +11869,8 @@ paths:
             schema:
               type: object
               properties:
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_Interval'
                 entityTypes:
                   items:
                     $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
@@ -11904,6 +11883,11 @@ paths:
                   type: string
                 indexPattern:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: The lookback period for the entity store
+                  pattern: '[smdh]$'
+                  type: string
         description: Schema for the entity store initialization
         required: true
       responses:
@@ -12007,6 +11991,8 @@ paths:
             schema:
               type: object
               properties:
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_Interval'
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.
@@ -57225,6 +57211,10 @@ components:
           type: string
         indexPattern:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        lookbackPeriod:
+          default: 24h
+          pattern: '[smdh]$'
+          type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
         type:
@@ -57418,6 +57408,11 @@ components:
       required:
         - dsl
         - response
+    Security_Entity_Analytics_API_Interval:
+      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+      example: 1h
+      pattern: ^[1-9]\d*[smh]$
+      type: string
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:

@@ -1634,6 +1634,8 @@
       "@kbn/security-plugin-types-server/*": ["x-pack/platform/packages/shared/security/plugin_types_server/*"],
       "@kbn/security-role-management-model": ["x-pack/platform/packages/private/security/role_management_model"],
       "@kbn/security-role-management-model/*": ["x-pack/platform/packages/private/security/role_management_model/*"],
+      "@kbn/security-solution-connectors": ["x-pack/solutions/security/packages/connectors"],
+      "@kbn/security-solution-connectors/*": ["x-pack/solutions/security/packages/connectors/*"],
       "@kbn/security-solution-distribution-bar": ["x-pack/solutions/security/packages/distribution_bar"],
       "@kbn/security-solution-distribution-bar/*": ["x-pack/solutions/security/packages/distribution_bar/*"],
       "@kbn/security-solution-ess": ["x-pack/solutions/security/plugins/security_solution_ess"],
