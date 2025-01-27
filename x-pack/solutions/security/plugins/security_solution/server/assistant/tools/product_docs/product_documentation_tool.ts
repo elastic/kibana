@@ -62,8 +62,7 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           max: 3,
           connectorId,
           request,
-          // o11y specific parameter, hardcode to native as we do not utilize the other value (simulated)
-          functionCalling: 'native',
+          functionCalling: 'auto',
         });
 
         return {
