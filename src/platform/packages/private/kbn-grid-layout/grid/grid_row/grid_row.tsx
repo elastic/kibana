@@ -213,6 +213,7 @@ export const GridRow = forwardRef<HTMLDivElement, GridRowProps>(
             css={css`
               height: 100%;
               display: grid;
+              position: relative;
               justify-items: stretch;
               transition: background-color 300ms linear;
               ${initialStyles};

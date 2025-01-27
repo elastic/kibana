@@ -21,3 +21,6 @@ export function parseStdout(stdout: Array<string | Buffer>): string {
   // Escape special HTML characters
   return stripANSI(stdoutContent);
 }
+
+export const excapeHtmlCharacters = (htmlText: string): string =>
+  htmlText.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');

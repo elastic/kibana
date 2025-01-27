@@ -61,7 +61,6 @@ export const useAgentless = () => {
 export function useSetupTechnology({
   setNewAgentPolicy,
   newAgentPolicy,
-  updateAgentPolicies,
   updatePackagePolicy,
   setSelectedPolicyTab,
   packageInfo,
@@ -71,7 +70,6 @@ export function useSetupTechnology({
 }: {
   setNewAgentPolicy: (policy: NewAgentPolicy) => void;
   newAgentPolicy: NewAgentPolicy;
-  updateAgentPolicies: (policies: AgentPolicy[]) => void;
   updatePackagePolicy: (policy: Partial<NewPackagePolicy>) => void;
   setSelectedPolicyTab: (tab: SelectedPolicyTab) => void;
   packageInfo?: PackageInfo;
@@ -137,7 +135,6 @@ export function useSetupTechnology({
 
     setCurrentAgentPolicy(nextNewAgentlessPolicy);
     setNewAgentPolicy(nextNewAgentlessPolicy as NewAgentPolicy);
-    updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
     updatePackagePolicy({
       supports_agentless: true,
     });
@@ -154,7 +151,6 @@ export function useSetupTechnology({
     };
     setCurrentAgentPolicy(nextNewAgentlessPolicy);
     setNewAgentPolicy(nextNewAgentlessPolicy);
-    updateAgentPolicies([nextNewAgentlessPolicy] as AgentPolicy[]);
     updatePackagePolicy({
       supports_agentless: false,
     });
