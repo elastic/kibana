@@ -505,41 +505,36 @@ export class StreamsClient {
    * - the user does not have access to the stream
    */
   async getStream(name: string): Promise<StreamDefinition> {
-    const definition = this.dependencies.storageClient
-      .get({ id: name })
-      .then((response) => {
-        const source = response._source;
-        assertsSchema(streamDefinitionSchema, source);
-        return source;
-      })
-      .then((streamDefinition) => {
-        if (isWiredStreamDefinition(streamDefinition)) {
-          checkAccess({
-            id: name,
-            scopedClusterClient: this.dependencies.scopedClusterClient,
-          }).then((privileges) => {
-            if (!privileges.read) {
-              throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
-            }
-          });
+    try {
+      const response = await this.dependencies.storageClient.get({ id: name });
+
+      const streamDefinition = response._source;
+      assertsSchema(streamDefinitionSchema, streamDefinition);
+
+      if (isWiredStreamDefinition(streamDefinition)) {
+        const privileges = await checkAccess({
+          id: name,
+          scopedClusterClient: this.dependencies.scopedClusterClient,
+        });
+        if (!privileges.read) {
+          throw new DefinitionNotFoundError(`Stream definition for ${name} not found`);
         }
-        return streamDefinition;
-      })
-      .catch(async (error) => {
+      }
+      return streamDefinition;
+    } catch (error) {
+      try {
         if (isElasticsearch404(error)) {
           const dataStream = await this.getDataStream(name);
           return await this.getDataStreamAsIngestStream(dataStream);
         }
         throw error;
-      })
-      .catch(async (error) => {
-        if (isElasticsearch404(error)) {
+      } catch (e) {
+        if (isElasticsearch404(e)) {
           throw new DefinitionNotFoundError(`Cannot find stream ${name}`);
         }
-        throw error;
-      });
-
-    return definition;
+        throw e;
+      }
+    }
   }
 
   async getDataStream(name: string): Promise<IndicesDataStream> {
