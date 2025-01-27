@@ -12,6 +12,5 @@
     "@kbn/i18n",
     "@kbn/alerting-comparators",
     "@kbn/es-query",
-    "@kbn/i18n"
   ]
 }
