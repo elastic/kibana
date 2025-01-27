@@ -43,6 +43,6 @@
     "@kbn/core-notifications-browser",
     "@kbn/core-capabilities-browser-mocks",
     "@kbn/sort-predicates",
-    "@kbn/visualization-utils",
+    "@kbn/data-grid-in-table-search",
   ]
 }
