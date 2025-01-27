@@ -18,7 +18,7 @@ import { CreateIndexFormState } from '../../types';
 import { generateRandomIndexName } from '../../utils/indices';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
-import { CreateIndexPanel } from '../shared/create_index_panel';
+import { CreateIndexPanel } from '../shared/create_index_panel/create_index_panel';
 
 import { CreateIndexCodeView } from './create_index_code_view';
 import { CreateIndexUIView } from './create_index_ui_view';
