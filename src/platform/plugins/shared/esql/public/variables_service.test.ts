@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-import { ESQLVariableType } from '@kbn/esql-variables-types';
+import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import { EsqlVariablesService } from './variables_service';
 
 describe('EsqlVariablesService', () => {

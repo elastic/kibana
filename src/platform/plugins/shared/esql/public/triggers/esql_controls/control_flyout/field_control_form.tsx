@@ -19,7 +19,7 @@ import {
 import { css } from '@emotion/react';
 import { monaco } from '@kbn/monaco';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-variables-types';
+import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { getESQLQueryColumnsRaw } from '@kbn/esql-utils';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {

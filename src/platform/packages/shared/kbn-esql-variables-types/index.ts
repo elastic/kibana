@@ -6,7 +6,7 @@
  * your election, the "Elastic License 2.0", the "GNU Affero General Public
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
-
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 
 /**
@@ -34,15 +34,3 @@ export const apiPublishesESQLVariables = (
     unknownApi && (unknownApi as PublishesESQLVariables)?.esqlVariables$ !== undefined
   );
 };
-
-export interface ESQLControlVariable {
-  key: string;
-  value: string | number;
-  type: ESQLVariableType;
-}
-
-export enum ESQLVariableType {
-  TIME_LITERAL = 'time_literal',
-  FIELDS = 'fields',
-  VALUES = 'values',
-}

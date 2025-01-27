@@ -9,7 +9,7 @@
 import deepEqual from 'react-fast-compare';
 import { BehaviorSubject, combineLatest } from 'rxjs';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
-import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-variables-types';
+import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-validation-autocomplete';
 import type { ESQLControlState } from '@kbn/esql/public';
 
 export function initializeESQLControlSelections(initialState: ESQLControlState) {

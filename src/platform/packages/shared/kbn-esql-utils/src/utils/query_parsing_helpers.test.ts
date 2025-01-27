@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
-import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-variables-types';
+import { ESQLVariableType, type ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import {
   getIndexPatternFromESQLQuery,
   getLimitFromESQLQuery,
