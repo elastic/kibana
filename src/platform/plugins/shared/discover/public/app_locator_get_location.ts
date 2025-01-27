@@ -7,15 +7,14 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export const PLUGIN_ID = 'discover';
-export const APP_ICON = 'discoverApp';
+import { setStateToKbnUrl } from '@kbn/kibana-utils-plugin/public';
+import { type DiscoverAppLocatorParams, appLocatorGetLocationCommon } from '../common';
 
-export { DISCOVER_APP_LOCATOR } from './app_locator';
-export type {
-  DiscoverAppLocator,
-  DiscoverAppLocatorParams,
-  MainHistoryLocationState,
-} from './app_locator';
-export { appLocatorGetLocationCommon } from './app_locator_get_location';
-
-export type { DiscoverESQLLocator, DiscoverESQLLocatorParams } from './esql_locator';
+export const appLocatorGetLocation = (
+  {
+    useHash,
+  }: {
+    useHash: boolean;
+  },
+  params: DiscoverAppLocatorParams
+) => appLocatorGetLocationCommon({ useHash, setStateToKbnUrl }, params);
