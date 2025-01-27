@@ -114,19 +114,4 @@ describe('SolutionsViewBadge', () => {
     );
     expect(container).toBeEmptyDOMElement();
   });
-
-  // test('should not render manage searches button without permissions', async () => {
-  //   jest.doMock('../../../../hooks/use_discover_services', () => ({
-  //     useDiscoverServices: jest.fn().mockImplementation(() => ({
-  //       addBasePath: (path: string) => path,
-  //       capabilities: { savedObjectsManagement: { edit: false, delete: false } },
-  //       savedObjectsFinder: { Finder: jest.fn() },
-  //       core: {},
-  //     })),
-  //   }));
-  //   const { SolutionsViewBadge } = await import('./solutions_view_badge');
-
-  //   const component = shallow(<SolutionsViewBadge badgeText="Toggle popover" />);
-  //   expect(component.find('[data-test-subj="manageSearches"]').exists()).toBe(false);
-  // });
 });
