@@ -6,23 +6,29 @@
  */
 
 import type { ReactNode } from 'react';
-import React, { useCallback, useState, useMemo } from 'react';
+import React, { useCallback, useState, useMemo, memo } from 'react';
 import type { EuiTabbedContentTab } from '@elastic/eui';
 import { invariant } from '../../../../../common/utils/invariant';
 import type { RuleSignatureId } from '../../../../../common/api/detection_engine';
 import type { RuleResponse } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { RuleDetailsFlyout } from '../../../rule_management/components/rule_details/rule_details_flyout';
-import { useRulePreviewContext } from './upgrade_prebuilt_rules_table/rule_preview_context';
-interface UseRulePreviewFlyoutParams {
-  rules: RuleResponse[];
+import {
+  RulePreviewContextProvider,
+  useRulePreviewContext,
+} from './upgrade_prebuilt_rules_table/rule_preview_context';
+interface UseRulePreviewFlyoutBaseParams {
   ruleActionsFactory: (
     rule: RuleResponse,
     closeRulePreview: () => void,
-    isAnyFieldCurrentlyEdited: () => boolean
+    isRuleEdited: () => boolean
   ) => ReactNode;
   extraTabsFactory?: (rule: RuleResponse) => EuiTabbedContentTab[];
   subHeaderFactory?: (rule: RuleResponse) => ReactNode;
   flyoutProps: RulePreviewFlyoutProps;
+}
+
+interface UseRulePreviewFlyoutParams extends UseRulePreviewFlyoutBaseParams {
+  rules: RuleResponse[];
 }
 
 interface RulePreviewFlyoutProps {
@@ -47,41 +53,20 @@ export function useRulePreviewFlyout({
   flyoutProps,
 }: UseRulePreviewFlyoutParams): UseRulePreviewFlyoutResult {
   const [rule, setRuleForPreview] = useState<RuleResponse | undefined>();
-  const {
-    actions: { isAnyFieldCurrentlyEdited, clearEditedFields },
-  } = useRulePreviewContext();
-
-  const closeRulePreview = useCallback(() => {
-    setRuleForPreview(undefined);
-    clearEditedFields();
-  }, [clearEditedFields]);
-
-  const ruleActions = useMemo(
-    () => rule && ruleActionsFactory(rule, closeRulePreview, isAnyFieldCurrentlyEdited),
-    [rule, ruleActionsFactory, closeRulePreview, isAnyFieldCurrentlyEdited]
-  );
-  const extraTabs = useMemo(
-    () => (rule && extraTabsFactory ? extraTabsFactory(rule) : []),
-    [rule, extraTabsFactory]
-  );
-
-  const subHeader = useMemo(
-    () => (rule ? subHeaderFactory?.(rule) : null),
-    [subHeaderFactory, rule]
-  );
+  const closeRulePreview = useCallback(() => setRuleForPreview(undefined), []);
 
   return {
-    rulePreviewFlyout: rule && (
-      <RuleDetailsFlyout
-        rule={rule}
-        size="l"
-        id={flyoutProps.id}
-        dataTestSubj={flyoutProps.dataTestSubj}
-        closeFlyout={closeRulePreview}
-        ruleActions={ruleActions}
-        extraTabs={extraTabs}
-        subHeader={subHeader}
-      />
+    rulePreviewFlyout: (
+      <RulePreviewContextProvider key={rule?.rule_id}>
+        <RulePreviewFlyoutInternal
+          rule={rule}
+          closeRulePreview={closeRulePreview}
+          extraTabsFactory={extraTabsFactory}
+          ruleActionsFactory={ruleActionsFactory}
+          subHeaderFactory={subHeaderFactory}
+          flyoutProps={flyoutProps}
+        />
+      </RulePreviewContextProvider>
     ),
     openRulePreview: useCallback(
       (ruleId: RuleSignatureId) => {
@@ -95,3 +80,48 @@ export function useRulePreviewFlyout({
     closeRulePreview,
   };
 }
+
+const RulePreviewFlyoutInternal = memo(function RulePreviewFlyoutInternal({
+  rule,
+  closeRulePreview,
+  extraTabsFactory,
+  ruleActionsFactory,
+  subHeaderFactory,
+  flyoutProps,
+}: UseRulePreviewFlyoutBaseParams & {
+  rule: RuleResponse | undefined;
+  closeRulePreview: () => void;
+}) {
+  const { isRuleEdited } = useRulePreviewContext();
+
+  const ruleActions = useMemo(
+    () => rule && ruleActionsFactory(rule, closeRulePreview, isRuleEdited),
+    [rule, ruleActionsFactory, closeRulePreview, isRuleEdited]
+  );
+  const extraTabs = useMemo(
+    () => (rule && extraTabsFactory ? extraTabsFactory(rule) : []),
+    [rule, extraTabsFactory]
+  );
+
+  const subHeader = useMemo(
+    () => (rule ? subHeaderFactory?.(rule) : null),
+    [subHeaderFactory, rule]
+  );
+
+  if (!rule) {
+    return null;
+  }
+
+  return (
+    <RuleDetailsFlyout
+      rule={rule}
+      size="l"
+      id={flyoutProps.id}
+      dataTestSubj={flyoutProps.dataTestSubj}
+      closeFlyout={closeRulePreview}
+      ruleActions={ruleActions}
+      extraTabs={extraTabs}
+      subHeader={subHeader}
+    />
+  );
+});

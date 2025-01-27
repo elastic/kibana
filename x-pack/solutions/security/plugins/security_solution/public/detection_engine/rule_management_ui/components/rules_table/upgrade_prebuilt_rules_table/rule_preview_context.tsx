@@ -8,25 +8,16 @@
 import { invariant } from '@formatjs/intl-utils';
 import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
 
-export interface RulePreviewContextActionsType {
+export interface RulePreviewContextType {
   /**
    * Sets a field as currently being edited in the rule upgrade flyout
    */
-  setFieldAsCurrentlyEdited: (fieldName: string, editing: boolean) => void;
-
-  /**
-   * Returns whether a field is currently being edited in the rule upgrade flyout
-   */
-  clearEditedFields: () => void;
+  setRuleIsEdited: (fieldName: string, editing: boolean) => void;
 
   /**
    * Returns whether any field is currently being edited in the rule upgrade flyout
    */
-  isAnyFieldCurrentlyEdited: () => boolean;
-}
-
-interface RulePreviewContextType {
-  actions: RulePreviewContextActionsType;
+  isRuleEdited: () => boolean;
 }
 
 const RulePreviewContext = createContext<RulePreviewContextType | null>(null);
@@ -38,38 +29,28 @@ interface RulePreviewContextProviderProps {
 export function RulePreviewContextProvider({ children }: RulePreviewContextProviderProps) {
   const [editedFields, setEditedFields] = useState<Record<string, boolean>>({});
 
-  const setFieldAsCurrentlyEdited = useCallback(
-    (fieldName: string, isEditing: boolean) => {
-      setEditedFields((prev) => {
-        const updatedMap = { ...prev };
-        if (isEditing) {
-          updatedMap[fieldName] = true;
-        } else {
-          delete updatedMap[fieldName];
-        }
-        return updatedMap;
-      });
-    },
-    [setEditedFields]
-  );
-
-  const clearEditedFields = useCallback(() => {
-    setEditedFields({});
+  const setRuleIsEdited = useCallback((fieldName: string, isEditing: boolean) => {
+    setEditedFields((prev) => {
+      const updatedMap = { ...prev };
+      if (isEditing) {
+        updatedMap[fieldName] = true;
+      } else {
+        delete updatedMap[fieldName];
+      }
+      return updatedMap;
+    });
   }, []);
 
-  const isAnyFieldCurrentlyEdited = useCallback(() => {
+  const isRuleEdited = useCallback(() => {
     return Object.keys(editedFields).length > 0;
   }, [editedFields]);
 
   const contextValue: RulePreviewContextType = useMemo(
     () => ({
-      actions: {
-        setFieldAsCurrentlyEdited,
-        clearEditedFields,
-        isAnyFieldCurrentlyEdited,
-      },
+      setRuleIsEdited,
+      isRuleEdited,
     }),
-    [setFieldAsCurrentlyEdited, clearEditedFields, isAnyFieldCurrentlyEdited]
+    [setRuleIsEdited, isRuleEdited]
   );
 
   return <RulePreviewContext.Provider value={contextValue}>{children}</RulePreviewContext.Provider>;

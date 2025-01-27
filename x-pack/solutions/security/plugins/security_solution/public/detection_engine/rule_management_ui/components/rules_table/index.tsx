@@ -14,7 +14,6 @@ import { RulesTables } from './rules_tables';
 import { AllRulesTabs, RulesTableToolbar } from './rules_table_toolbar';
 import { UpgradePrebuiltRulesTable } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table';
 import { UpgradePrebuiltRulesTableContextProvider } from './upgrade_prebuilt_rules_table/upgrade_prebuilt_rules_table_context';
-import { RulePreviewContextProvider } from './upgrade_prebuilt_rules_table/rule_preview_context';
 
 /**
  * Table Component for displaying all Rules for a given cluster. Provides the ability to filter
@@ -39,13 +38,11 @@ export const AllRules = React.memo(() => {
     );
   } else {
     return (
-      <RulePreviewContextProvider>
-        <UpgradePrebuiltRulesTableContextProvider>
-          <RulesTableToolbar />
-          <EuiSpacer />
-          <UpgradePrebuiltRulesTable />
-        </UpgradePrebuiltRulesTableContextProvider>
-      </RulePreviewContextProvider>
+      <UpgradePrebuiltRulesTableContextProvider>
+        <RulesTableToolbar />
+        <EuiSpacer />
+        <UpgradePrebuiltRulesTable />
+      </UpgradePrebuiltRulesTableContextProvider>
     );
   }
 });

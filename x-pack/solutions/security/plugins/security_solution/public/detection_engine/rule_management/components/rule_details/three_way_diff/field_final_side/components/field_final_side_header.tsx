@@ -24,9 +24,7 @@ export function FieldFinalSideHeader(): JSX.Element {
   const { fieldName, hasConflict, rightSideMode, finalDiffableRule, setRuleFieldResolvedValue } =
     useFieldUpgradeContext();
   const { form } = useFieldEditFormContext();
-  const {
-    actions: { setFieldAsCurrentlyEdited },
-  } = useRulePreviewContext();
+  const { setRuleIsEdited } = useRulePreviewContext();
 
   const handleAccept = useCallback(
     () =>
@@ -62,7 +60,7 @@ export function FieldFinalSideHeader(): JSX.Element {
               disabled={!form?.isValid}
               onClick={() => {
                 handleSave();
-                setFieldAsCurrentlyEdited(fieldName, false);
+                setRuleIsEdited(fieldName, false);
               }}
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}

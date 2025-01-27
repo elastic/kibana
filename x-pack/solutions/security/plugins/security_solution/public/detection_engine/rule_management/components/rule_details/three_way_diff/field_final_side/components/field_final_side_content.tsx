@@ -8,7 +8,6 @@
 import React from 'react';
 import { EuiButtonEmpty, EuiFlexGroup } from '@elastic/eui';
 import { KibanaSectionErrorBoundary } from '@kbn/shared-ux-error-boundary';
-import { useRulePreviewContext } from '../../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
 import { FieldFinalReadOnly } from '../../final_readonly';
 import { FieldFinalEdit } from '../../final_edit';
 import { assertUnreachable } from '../../../../../../../../common/utility_types';
@@ -19,23 +18,14 @@ import {
 import * as i18n from './translations';
 
 export function FieldFinalSideContent(): JSX.Element {
-  const { fieldName, rightSideMode, setEditMode, setReadOnlyMode } = useFieldUpgradeContext();
-  const {
-    actions: { setFieldAsCurrentlyEdited },
-  } = useRulePreviewContext();
+  const { rightSideMode, setEditMode, setReadOnlyMode } = useFieldUpgradeContext();
 
   switch (rightSideMode) {
     case FieldFinalSideMode.Readonly:
       return (
         <>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiButtonEmpty
-              iconType="pencil"
-              onClick={() => {
-                setEditMode();
-                setFieldAsCurrentlyEdited(fieldName, true);
-              }}
-            >
+            <EuiButtonEmpty iconType="pencil" onClick={setEditMode}>
               {i18n.EDIT}
             </EuiButtonEmpty>
           </EuiFlexGroup>
@@ -51,13 +41,7 @@ export function FieldFinalSideContent(): JSX.Element {
       return (
         <>
           <EuiFlexGroup justifyContent="flexEnd">
-            <EuiButtonEmpty
-              iconType="cross"
-              onClick={() => {
-                setReadOnlyMode();
-                setFieldAsCurrentlyEdited(fieldName, false);
-              }}
-            >
+            <EuiButtonEmpty iconType="cross" onClick={setReadOnlyMode}>
               {i18n.CANCEL}
             </EuiButtonEmpty>
           </EuiFlexGroup>

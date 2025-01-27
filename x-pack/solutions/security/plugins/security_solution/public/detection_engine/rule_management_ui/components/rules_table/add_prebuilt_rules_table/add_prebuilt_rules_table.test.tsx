@@ -15,7 +15,6 @@ import { usePrebuiltRulesInstallReview } from '../../../../rule_management/logic
 import { useFetchPrebuiltRulesStatusQuery } from '../../../../rule_management/api/hooks/prebuilt_rules/use_fetch_prebuilt_rules_status_query';
 import { useIsUpgradingSecurityPackages } from '../../../../rule_management/logic/use_upgrade_security_packages';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
-import { RulePreviewContextProvider } from '../upgrade_prebuilt_rules_table/rule_preview_context';
 
 // Mock components not needed in this test suite
 jest.mock('../../../../rule_management/components/rule_details/rule_details_flyout', () => ({
@@ -112,12 +111,10 @@ describe('AddPrebuiltRulesTable', () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <RulePreviewContextProvider>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesHeaderButtons />
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </RulePreviewContextProvider>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesHeaderButtons />
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
       </QueryClientProvider>
     );
 
@@ -139,12 +136,10 @@ describe('AddPrebuiltRulesTable', () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <RulePreviewContextProvider>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesHeaderButtons />
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </RulePreviewContextProvider>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesHeaderButtons />
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
       </QueryClientProvider>
     );
 
@@ -164,12 +159,10 @@ describe('AddPrebuiltRulesTable', () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <RulePreviewContextProvider>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesHeaderButtons />
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </RulePreviewContextProvider>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesHeaderButtons />
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
       </QueryClientProvider>
     );
 
@@ -213,11 +206,9 @@ describe('AddPrebuiltRulesTable', () => {
 
       const { findByText } = render(
         <QueryClientProvider client={new QueryClient()}>
-          <RulePreviewContextProvider>
-            <AddPrebuiltRulesTableContextProvider>
-              <AddPrebuiltRulesTable />
-            </AddPrebuiltRulesTableContextProvider>
-          </RulePreviewContextProvider>
+          <AddPrebuiltRulesTableContextProvider>
+            <AddPrebuiltRulesTable />
+          </AddPrebuiltRulesTableContextProvider>
         </QueryClientProvider>
       );
 
@@ -264,11 +255,9 @@ describe('AddPrebuiltRulesTable', () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <RulePreviewContextProvider>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </RulePreviewContextProvider>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
       </QueryClientProvider>
     );
 
@@ -316,11 +305,9 @@ describe('AddPrebuiltRulesTable', () => {
 
     render(
       <QueryClientProvider client={new QueryClient()}>
-        <RulePreviewContextProvider>
-          <AddPrebuiltRulesTableContextProvider>
-            <AddPrebuiltRulesTable />
-          </AddPrebuiltRulesTableContextProvider>
-        </RulePreviewContextProvider>
+        <AddPrebuiltRulesTableContextProvider>
+          <AddPrebuiltRulesTable />
+        </AddPrebuiltRulesTableContextProvider>
       </QueryClientProvider>
     );
 
