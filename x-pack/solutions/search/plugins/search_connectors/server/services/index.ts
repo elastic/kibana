@@ -264,10 +264,13 @@ export const getConnectorsToDeploy = (
     if (connector.is_deleted) continue;
 
     // If no package policies reference this connector by id then it should be deployed
-    if (packagePolicies.every((packagePolicy) => 
-      connector.id !== packagePolicy.connector_settings.id &&
-      packagePolicy.package_policy_id !== connector.id
-   )) {
+    if (
+      packagePolicies.every(
+        (packagePolicy) =>
+          connector.id !== packagePolicy.connector_settings.id &&
+          packagePolicy.package_policy_id !== connector.id
+      )
+    ) {
       results.push(connector);
     }
   }
