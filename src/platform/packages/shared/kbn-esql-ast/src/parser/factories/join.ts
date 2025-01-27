@@ -8,19 +8,26 @@
  */
 
 import { JoinCommandContext, JoinTargetContext } from '../../antlr/esql_parser';
-import { ESQLAstItem, ESQLBinaryExpression, ESQLCommand, ESQLIdentifier } from '../../types';
+import {
+  ESQLAstItem,
+  ESQLBinaryExpression,
+  ESQLCommand,
+  ESQLIdentifier,
+  ESQLSource,
+} from '../../types';
 import {
   createBinaryExpression,
   createCommand,
   createIdentifier,
   createOption,
+  createSource,
 } from '../factories';
 import { visitValueExpression } from '../walkers';
 
 const createNodeFromJoinTarget = (
   ctx: JoinTargetContext
-): ESQLIdentifier | ESQLBinaryExpression => {
-  const index = createIdentifier(ctx._index);
+): ESQLSource | ESQLIdentifier | ESQLBinaryExpression => {
+  const index = createSource(ctx._index);
   const aliasCtx = ctx._alias;
 
   if (!aliasCtx) {

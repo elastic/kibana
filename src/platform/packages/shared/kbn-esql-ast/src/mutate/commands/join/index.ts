@@ -16,6 +16,7 @@ import type {
   ESQLAstQueryExpression,
   ESQLCommand,
   ESQLIdentifier,
+  ESQLSource,
 } from '../../../types';
 import * as generic from '../../generic';
 
@@ -43,6 +44,11 @@ export const byIndex = (ast: ESQLAstQueryExpression, index: number): ESQLCommand
   return [...list(ast)][index];
 };
 
+const getSource = (node: WalkerAstNode): ESQLSource =>
+  Walker.match(node, {
+    type: 'source',
+  }) as ESQLSource;
+
 const getIdentifier = (node: WalkerAstNode): ESQLIdentifier =>
   Walker.match(node, {
     type: 'identifier',
@@ -60,15 +66,15 @@ export const summarize = (query: ESQLAstQueryExpression): JoinCommandSummary[] =
 
   for (const command of list(query)) {
     const firstArg = command.args[0];
-    let index: ESQLIdentifier | undefined;
+    let index: ESQLSource | undefined;
     let alias: ESQLIdentifier | undefined;
     const conditions: ESQLAstExpression[] = [];
 
     if (isAsExpression(firstArg)) {
-      index = getIdentifier(firstArg.args[0]);
+      index = getSource(firstArg.args[0]);
       alias = getIdentifier(firstArg.args[1]);
     } else {
-      index = getIdentifier(firstArg);
+      index = getSource(firstArg);
     }
 
     const on = generic.commands.options.find(command, ({ name }) => name === 'on');
@@ -96,6 +102,6 @@ export interface JoinCommandSummary {
 }
 
 export interface JoinCommandTarget {
-  index: ESQLIdentifier;
+  index: ESQLSource;
   alias?: ESQLIdentifier;
 }

@@ -23,6 +23,7 @@ import {
   walk,
   isBinaryExpression,
   isIdentifier,
+  isSource,
 } from '@kbn/esql-ast';
 import type {
   ESQLAstField,
@@ -1129,22 +1130,22 @@ const validateJoinCommand = (
   }
 
   const target = args[0] as ESQLProperNode;
-  let index: ESQLIdentifier;
+  let index: ESQLSource;
   let alias: ESQLIdentifier | undefined;
 
   if (isBinaryExpression(target)) {
     if (target.name === 'as') {
       alias = target.args[1] as ESQLIdentifier;
-      index = target.args[0] as ESQLIdentifier;
+      index = target.args[0] as ESQLSource;
 
-      if (!isIdentifier(index) || !isIdentifier(alias)) {
+      if (!isSource(index) || !isIdentifier(alias)) {
         return [errors.unexpected(target.location)];
       }
     } else {
       return [errors.unexpected(target.location)];
     }
-  } else if (isIdentifier(target)) {
-    index = target as ESQLIdentifier;
+  } else if (isSource(target)) {
+    index = target as ESQLSource;
   } else {
     return [errors.unexpected(target.location)];
   }
