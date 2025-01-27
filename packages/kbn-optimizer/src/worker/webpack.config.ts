@@ -53,8 +53,7 @@ export function getWebpackConfig(
     target: 'web',
 
     output: {
-      // TODO: remove this commented line if xxhash64 is faster
-      // hashFunction: 'sha1',
+      hashFunction: 'xxhash64',
       path: bundle.outputDir,
       filename: `${bundle.id}.${bundle.type}.js`,
       chunkFilename: `${bundle.id}.chunk.[id].js`,
@@ -299,10 +298,6 @@ export function getWebpackConfig(
     resolve: {
       extensions: ['.js', '.ts', '.tsx', '.json'],
       mainFields: ['browser', 'module', 'main'],
-      // conditionNames: ['browser', 'module', 'import', 'require', 'default'],
-      //
-      // mainFields: ['browser', 'main', 'module'],
-      // // conditionNames: ['require', 'node', 'module', 'import', 'default'],
       alias: {
         core_app_image_assets: Path.resolve(
           worker.repoRoot,
@@ -329,47 +324,25 @@ export function getWebpackConfig(
   const nonDistributableConfig: webpack.Configuration = {
     mode: 'development',
 
-    // TODO: potential performance impact flags
     cache: {
       type: 'memory',
       cacheUnaffected: true,
     },
 
-    output: {
-      // xxhash64 or sha1: according to docs xxhash should be faster but for now sha1 looks faster
-      hashFunction: 'xxhash64',
-      // Setting this to false looks like it will boost performance by a little
-      // pathinfo: false,
-    },
-
     experiments: {
       cacheUnaffected: true,
-      // TODO: enable this after converting all plugins to v5
       backCompat: false,
     },
 
     optimization: {
-      // Need to test which composition makes for the best performance
       sideEffects: false,
-      // providedExports: false,
-      // usedExports: false,
       removeAvailableModules: false,
-      removeEmptyChunks: false,
-      // mergeDuplicateChunks: false,
     },
-
-    // resolve: {
-    //  // Not sure if this is bringing any performance to the table
-    //  cacheWithContext: false,
-    // },
 
     module: {
       // This was default on webpack v4
       unsafeCache: true,
     },
-    // NOTE: I'm not sure about this, but it does seem like it is speeding up
-    // parallelism: 5000,
-    //
   };
 
   const distributableConfig: webpack.Configuration = {
@@ -400,11 +373,6 @@ export function getWebpackConfig(
           },
         }),
       ],
-      // TODO: try to understand why usedExports is treeShaking code it shouldn't be
-      // usedExports: false,
-      // sideEffects: false,
-      // mangleExports: false,
-      //
     },
   };
 
