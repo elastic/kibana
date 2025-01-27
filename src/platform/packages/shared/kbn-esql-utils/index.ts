@@ -25,6 +25,7 @@ export {
   getTimeFieldFromESQLQuery,
   getStartEndParams,
   hasStartEndParams,
+  getNamedParams,
   prettifyQuery,
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
@@ -35,6 +36,7 @@ export {
   TextBasedLanguages,
   sanitazeESQLInput,
   queryCannotBeSampled,
+  mapVariableToColumn,
 } from './src';
 
 export { ENABLE_ESQL, FEEDBACK_LINK } from './constants';

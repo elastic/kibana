@@ -7,6 +7,7 @@
 
 import React from 'react';
 import { i18n } from '@kbn/i18n';
+import { DEFAULT_EMS_ROADMAP_ID } from '@kbn/maps-ems-plugin/common';
 import { AbstractSource, SourceEditorArgs } from '../source';
 import { ITMSSource } from '../tms_source';
 import { getEmsTmsServices } from '../../../util';
@@ -46,9 +47,10 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
       isAutoSelect:
         typeof descriptor.isAutoSelect !== 'undefined' ? descriptor.isAutoSelect : false,
       lightModeDefault:
-        typeof descriptor.lightModeDefault !== 'undefined'
-          ? descriptor.lightModeDefault
-          : getEmsTileLayerId().desaturated,
+        descriptor.lightModeDefault === undefined ||
+        descriptor.lightModeDefault !== DEFAULT_EMS_ROADMAP_ID
+          ? getEmsTileLayerId().desaturated
+          : DEFAULT_EMS_ROADMAP_ID,
     };
   }
 
