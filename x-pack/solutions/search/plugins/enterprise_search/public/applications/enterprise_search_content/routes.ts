@@ -17,8 +17,6 @@ export const CRAWLERS_ELASTIC_MANAGED_PATH = `${CRAWLERS_PATH}/elastic_managed`;
 export const SETTINGS_PATH = `${ROOT_PATH}settings`;
 
 export const NEW_INDEX_SELECT_CONNECTOR_PATH = `${CONNECTORS_PATH}/select_connector`;
-// TODO: what do we do with this path?
-export const NEW_CONNECTOR_PATH = `${CONNECTORS_PATH}/new_connector`;
 export const NEW_CONNECTOR_FLOW_PATH = `${CONNECTORS_PATH}/new_connector_flow`;
 export const NEW_INDEX_SELECT_CONNECTOR_NATIVE_PATH = `${CONNECTORS_PATH}/select_connector?filter=native`;
 export const NEW_INDEX_SELECT_CONNECTOR_CLIENTS_PATH = `${CONNECTORS_PATH}/select_connector?filter=connector_clients`;
