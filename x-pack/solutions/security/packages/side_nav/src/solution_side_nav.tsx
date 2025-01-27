@@ -270,12 +270,12 @@ const SolutionSideNavItem: React.FC<SolutionSideNavItemProps> = React.memo(
       return (
         <EuiFlexGroup alignItems="center" gutterSize="none">
           <EuiFlexItem>{label}</EuiFlexItem>
-          <EuiFlexItem grow={0}>
+          <EuiFlexItem grow={0} id={`solutionSideNavCustomIconItem-${id}`}>
             <EuiIcon type={iconType} color="text" />
           </EuiFlexItem>
         </EuiFlexGroup>
       );
-    }, [label, iconType]);
+    }, [iconType, label, id]);
 
     return (
       <>
