@@ -12,12 +12,13 @@ import { RedirectTo } from '../redirect_to';
 import { StreamDetailRouting } from '../stream_detail_routing';
 import { StreamDetailEnrichment } from '../stream_detail_enrichment';
 import { StreamDetailSchemaEditor } from '../stream_detail_schema_editor';
+import { StreamDetailLifecycle } from '../stream_detail_lifecycle';
 import { Wrapper } from './wrapper';
 
 type ManagementSubTabs = 'route' | 'enrich' | 'schemaEditor';
 
 function isValidManagementSubTab(value: string): value is ManagementSubTabs {
-  return ['route', 'enrich', 'schemaEditor'].includes(value);
+  return ['route', 'enrich', 'schemaEditor', 'lifecycle'].includes(value);
 }
 
 export function WiredStreamDetailManagement({
@@ -60,6 +61,14 @@ export function WiredStreamDetailManagement({
       ),
       label: i18n.translate('xpack.streams.streamDetailView.schemaEditorTab', {
         defaultMessage: 'Schema editor',
+      }),
+    },
+    lifecycle: {
+      content: (
+        <StreamDetailLifecycle definition={definition} refreshDefinition={refreshDefinition} />
+      ),
+      label: i18n.translate('xpack.streams.streamDetailView.lifecycleTab', {
+        defaultMessage: 'Data retention',
       }),
     },
   };
