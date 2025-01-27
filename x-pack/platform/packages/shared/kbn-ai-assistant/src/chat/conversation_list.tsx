@@ -23,7 +23,7 @@ import { i18n } from '@kbn/i18n';
 import React, { MouseEvent } from 'react';
 import type { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConfirmModal, useConversationsByDate } from '../hooks';
-import { EMPTY_CONVERSATION_TITLE, DATE_CATEGORY_LABELS } from '../i18n';
+import { DATE_CATEGORY_LABELS } from '../i18n';
 import { NewChatButton } from '../buttons/new_chat_button';
 
 const panelClassName = css`
@@ -83,13 +83,6 @@ export function ConversationList({
     }),
   });
 
-  const newConversation = {
-    id: '',
-    label: EMPTY_CONVERSATION_TITLE,
-    lastUpdated: '',
-    href: newConversationHref,
-  };
-
   // Categorize conversations by date
   const conversationsCategorizedByDate = useConversationsByDate(
     conversations.value?.conversations,
@@ -143,20 +136,6 @@ export function ConversationList({
                 </EuiFlexItem>
               ) : null}
 
-              {/* Render blank conversation */}
-              {!selectedConversationId ? (
-                <EuiListGroup flush={false} gutterSize="none">
-                  <EuiListGroupItem
-                    data-test-subj="observabilityAiAssistantConversationsLink"
-                    key={newConversation.id}
-                    label={newConversation.label}
-                    href={newConversation.href}
-                    size="s"
-                    onClick={(event) => onClickConversation(event, newConversation.id)}
-                  />
-                </EuiListGroup>
-              ) : null}
-
               {/* Render conversations categorized by date */}
               {Object.entries(conversationsCategorizedByDate).map(([category, conversationList]) =>
                 conversationList.length ? (
@@ -205,6 +184,16 @@ export function ConversationList({
                   </EuiFlexItem>
                 ) : null
               )}
+
+              {!isLoading && !conversations.error && !conversations.value?.conversations?.length ? (
+                <EuiPanel hasBorder={false} hasShadow={false} paddingSize="s">
+                  <EuiText color="subdued" size="s">
+                    {i18n.translate('xpack.aiAssistant.conversationList.noConversations', {
+                      defaultMessage: 'No conversations',
+                    })}
+                  </EuiText>
+                </EuiPanel>
+              ) : null}
             </EuiFlexGroup>
           </EuiFlexItem>
 
