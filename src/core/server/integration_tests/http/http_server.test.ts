@@ -16,6 +16,11 @@ import { Router } from '@kbn/core-http-router-server-internal';
 import { HttpServer, HttpConfig } from '@kbn/core-http-server-internal';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { Logger } from '@kbn/logging';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 describe('Http server', () => {
   let server: HttpServer;
@@ -60,7 +65,7 @@ describe('Http server', () => {
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
-        isDev: false,
+        env,
         versionedRouterOptions: {
           defaultHandlerResolutionStrategy: 'oldest',
         },

@@ -89,7 +89,12 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
+import type {
+  ESQLCallbacks,
+  ESQLSourceResult,
+  ESQLControlVariable,
+  ESQLVariableType,
+} from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getQueryForFields,
@@ -176,6 +181,8 @@ export async function suggest(
     queryForFields.replace(EDITOR_MARKER, ''),
     resourceRetriever
   );
+  const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
+  const getVariablesByType = resourceRetriever?.getVariablesByType;
   const getSources = getSourcesHelper(resourceRetriever);
   const { getPolicies, getPolicyMetadata } = getPolicyRetriever(resourceRetriever);
 
@@ -209,7 +216,10 @@ export async function suggest(
     return suggestions.filter((def) => !isSourceCommand(def));
   }
 
-  if (astContext.type === 'expression') {
+  if (
+    astContext.type === 'expression' ||
+    (astContext.type === 'option' && astContext.command?.name === 'join')
+  ) {
     return getSuggestionsWithinCommandExpression(
       innerText,
       ast,
@@ -220,7 +230,8 @@ export async function suggest(
       getPolicies,
       getPolicyMetadata,
       resourceRetriever?.getPreferences,
-      fullAst
+      fullAst,
+      resourceRetriever
     );
   }
   if (astContext.type === 'setting') {
@@ -254,9 +265,10 @@ export async function suggest(
       astContext,
       getFieldsByType,
       getFieldsMap,
-      getPolicyMetadata,
       fullText,
-      offset
+      offset,
+      getVariablesByType,
+      supportsControls
     );
   }
   if (astContext.type === 'list') {
@@ -277,14 +289,20 @@ export function getFieldsByTypeRetriever(
   resourceRetriever?: ESQLCallbacks
 ): { getFieldsByType: GetColumnsByTypeFn; getFieldsMap: GetFieldsMapFn } {
   const helpers = getFieldsByTypeHelper(queryString, resourceRetriever);
+  const getVariablesByType = resourceRetriever?.getVariablesByType;
+  const supportsControls = resourceRetriever?.canSuggestVariables?.() ?? false;
   return {
     getFieldsByType: async (
       expectedType: string | string[] = 'any',
       ignored: string[] = [],
       options
     ) => {
+      const updatedOptions = {
+        ...options,
+        supportsControls,
+      };
       const fields = await helpers.getFieldsByType(expectedType, ignored);
-      return buildFieldsDefinitionsWithMetadata(fields, options);
+      return buildFieldsDefinitionsWithMetadata(fields, updatedOptions, getVariablesByType);
     },
     getFieldsMap: helpers.getFieldsMap,
   };
@@ -399,7 +417,8 @@ async function getSuggestionsWithinCommandExpression(
   getPolicies: GetPoliciesFn,
   getPolicyMetadata: GetPolicyMetadataFn,
   getPreferences?: () => Promise<{ histogramBarTarget: number } | undefined>,
-  fullAst?: ESQLAst
+  fullAst?: ESQLAst,
+  callbacks?: ESQLCallbacks
 ) {
   const commandDef = getCommandDefinition(command.name);
 
@@ -419,7 +438,9 @@ async function getSuggestionsWithinCommandExpression(
       (expression: ESQLAstItem | undefined) =>
         getExpressionType(expression, references.fields, references.variables),
       getPreferences,
-      fullAst
+      fullAst,
+      commandDef,
+      callbacks
     );
   } else {
     // The deprecated path.
@@ -1034,9 +1055,10 @@ async function getFunctionArgsSuggestions(
   },
   getFieldsByType: GetColumnsByTypeFn,
   getFieldsMap: GetFieldsMapFn,
-  getPolicyMetadata: GetPolicyMetadataFn,
   fullText: string,
-  offset: number
+  offset: number,
+  getVariablesByType?: (type: ESQLVariableType) => ESQLControlVariable[] | undefined,
+  supportsControls?: boolean
 ): Promise<SuggestionRawDefinition[]> {
   const fnDefinition = getFunctionDefinition(node.name);
   // early exit on no hit
@@ -1158,7 +1180,12 @@ async function getFunctionArgsSuggestions(
         command.name,
         getTypesFromParamDefs(constantOnlyParamDefs) as string[],
         undefined,
-        { addComma: shouldAddComma, advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs }
+        {
+          addComma: shouldAddComma,
+          advanceCursorAndOpenSuggestions: hasMoreMandatoryArgs,
+          supportsControls,
+        },
+        getVariablesByType
       )
     );
 

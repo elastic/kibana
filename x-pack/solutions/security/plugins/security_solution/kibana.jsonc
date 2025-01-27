@@ -32,7 +32,6 @@
       "features",
       "fieldFormats",
       "inspector",
-      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -60,7 +59,8 @@
       "entityManager",
       "inference",
       "discoverShared",
-      "productDocBase"
+      "productDocBase",
+      "telemetry"
     ],
     "optionalPlugins": [
       "encryptedSavedObjects",
@@ -72,7 +72,6 @@
       "lists",
       "home",
       "management",
-      "telemetry",
       "dataViewFieldEditor",
       "osquery",
       "savedObjectsTaggingOss",
@@ -88,7 +87,8 @@
       "usageCollection",
       "lists",
       "ml",
-      "unifiedSearch"
+      "unifiedSearch",
+      "esql"
     ],
     "extraPublicDirs": [
       "common"

@@ -8,10 +8,10 @@
  */
 
 import fastIsEqual from 'fast-deep-equal';
-import { StateComparators, initializeTitles } from '@kbn/presentation-publishing';
+import { StateComparators, initializeTitleManager } from '@kbn/presentation-publishing';
 import { BehaviorSubject } from 'rxjs';
 import { DashboardSettings, DashboardState } from './types';
-import { DEFAULT_DASHBOARD_INPUT } from '../dashboard_constants';
+import { DEFAULT_DASHBOARD_INPUT } from './default_dashboard_input';
 
 export function initializeSettingsManager(initialState?: DashboardState) {
   const syncColors$ = new BehaviorSubject<boolean>(
@@ -36,7 +36,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
   function setTags(tags: string[]) {
     if (!fastIsEqual(tags, tags$.value)) tags$.next(tags);
   }
-  const titleManager = initializeTitles(initialState ?? {});
+  const titleManager = initializeTitleManager(initialState ?? {});
   const timeRestore$ = new BehaviorSubject<boolean | undefined>(
     initialState?.timeRestore ?? DEFAULT_DASHBOARD_INPUT.timeRestore
   );
@@ -52,7 +52,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
 
   function getSettings() {
     return {
-      ...titleManager.serializeTitles(),
+      ...titleManager.serialize(),
       syncColors: syncColors$.value,
       syncCursor: syncCursor$.value,
       syncTooltips: syncTooltips$.value,
@@ -69,14 +69,14 @@ export function initializeSettingsManager(initialState?: DashboardState) {
     setTags(settings.tags);
     setTimeRestore(settings.timeRestore);
     setUseMargins(settings.useMargins);
-    titleManager.titlesApi.setHidePanelTitle(settings.hidePanelTitles);
-    titleManager.titlesApi.setPanelDescription(settings.description);
-    titleManager.titlesApi.setPanelTitle(settings.title);
+    titleManager.api.setHideTitle(settings.hidePanelTitles);
+    titleManager.api.setDescription(settings.description);
+    titleManager.api.setTitle(settings.title);
   }
 
   return {
     api: {
-      ...titleManager.titlesApi,
+      ...titleManager.api,
       getSettings,
       settings: {
         syncColors$,
@@ -89,7 +89,7 @@ export function initializeSettingsManager(initialState?: DashboardState) {
       timeRestore$,
     },
     comparators: {
-      ...titleManager.titleComparators,
+      ...titleManager.comparators,
       syncColors: [syncColors$, setSyncColors],
       syncCursor: [syncCursor$, setSyncCursor],
       syncTooltips: [syncTooltips$, setSyncTooltips],

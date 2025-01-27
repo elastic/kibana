@@ -14,9 +14,9 @@ import {
   EuiPanel,
   EuiToolTip,
   EuiSkeletonTitle,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { isEmpty } from 'lodash';
 import { DataStreamApis } from '../use_data_stream_apis';
 import { Conversation } from '../../..';
@@ -26,6 +26,7 @@ import { FlyoutNavigation } from '../assistant_overlay/flyout_navigation';
 import { AssistantSettingsModal } from '../settings/assistant_settings_modal';
 import * as i18n from './translations';
 import { AIConnector } from '../../connectorland/connector_selector';
+import { getAnonymizationTooltip } from './get_anonymization_tooltip';
 import { SettingsContextMenu } from '../settings/settings_context_menu/settings_context_menu';
 
 interface OwnProps {
@@ -79,6 +80,8 @@ export const AssistantHeader: React.FC<Props> = ({
   isAssistantEnabled,
   refetchPrompts,
 }) => {
+  const { euiTheme } = useEuiTheme();
+
   const showAnonymizedValuesChecked = useMemo(
     () =>
       selectedConversation?.replacements != null &&
@@ -101,6 +104,12 @@ export const AssistantHeader: React.FC<Props> = ({
     },
     [onConversationSelected]
   );
+
+  const conversationHasReplacements = !isEmpty(selectedConversation?.replacements);
+  const anonymizationTooltip = getAnonymizationTooltip({
+    conversationHasReplacements,
+    showAnonymizedValuesChecked,
+  });
 
   return (
     <>
@@ -134,6 +143,7 @@ export const AssistantHeader: React.FC<Props> = ({
           {onCloseFlyout && (
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
+                aria-label={i18n.CLOSE}
                 data-test-subj="euiFlyoutCloseButton"
                 iconType="cross"
                 color="text"
@@ -148,8 +158,8 @@ export const AssistantHeader: React.FC<Props> = ({
         hasShadow={false}
         paddingSize="m"
         css={css`
-          padding-top: ${euiThemeVars.euiSizeS};
-          padding-bottom: ${euiThemeVars.euiSizeS};
+          padding-top: ${euiTheme.size.s};
+          padding-bottom: ${euiTheme.size.s};
         `}
       >
         <EuiFlexGroup alignItems={'center'} justifyContent={'spaceBetween'} gutterSize="s">
@@ -182,9 +192,8 @@ export const AssistantHeader: React.FC<Props> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiToolTip
-                  content={
-                    showAnonymizedValuesChecked ? i18n.SHOW_REAL_VALUES : i18n.SHOW_ANONYMIZED
-                  }
+                  content={anonymizationTooltip}
+                  data-test-subj="showAnonymizedValuesTooltip"
                 >
                   <EuiButtonIcon
                     css={css`
@@ -193,12 +202,10 @@ export const AssistantHeader: React.FC<Props> = ({
                     display="base"
                     data-test-subj="showAnonymizedValues"
                     isSelected={showAnonymizedValuesChecked}
-                    aria-label={
-                      showAnonymizedValuesChecked ? i18n.SHOW_ANONYMIZED : i18n.SHOW_REAL_VALUES
-                    }
+                    aria-label={anonymizationTooltip}
                     iconType={showAnonymizedValuesChecked ? 'eye' : 'eyeClosed'}
                     onClick={onToggleShowAnonymizedValues}
-                    isDisabled={isEmpty(selectedConversation?.replacements)}
+                    disabled={!conversationHasReplacements}
                   />
                 </EuiToolTip>
               </EuiFlexItem>

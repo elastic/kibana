@@ -32,7 +32,12 @@ import {
   ActionType,
 } from '../../../../common/endpoint/types/workflow_insights';
 import { createMockEndpointAppContext } from '../../mocks';
-import { createDatastream, createPipeline, generateInsightId } from './helpers';
+import {
+  checkIfRemediationExists,
+  createDatastream,
+  createPipeline,
+  generateInsightId,
+} from './helpers';
 import { securityWorkflowInsightsService } from '.';
 import { DATA_STREAM_NAME } from './constants';
 import { buildWorkflowInsights } from './builders';
@@ -43,6 +48,7 @@ jest.mock('./helpers', () => {
     ...original,
     createDatastream: jest.fn(),
     createPipeline: jest.fn(),
+    checkIfRemediationExists: jest.fn(),
   };
 });
 
@@ -223,17 +229,19 @@ describe('SecurityWorkflowInsightsService', () => {
 
   describe('createFromDefendInsights', () => {
     it('should create workflow insights from defend insights', async () => {
+      const insight = {
+        group: 'AVGAntivirus',
+        events: [
+          {
+            id: 'lqw5opMB9Ke6SNgnxRSZ',
+            endpointId: 'f6e2f338-6fb7-4c85-9c23-d20e9f96a051',
+            value: '/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity',
+          },
+        ],
+      };
       const defendInsights: DefendInsight[] = [
-        {
-          group: 'AVGAntivirus',
-          events: [
-            {
-              id: 'lqw5opMB9Ke6SNgnxRSZ',
-              endpointId: 'f6e2f338-6fb7-4c85-9c23-d20e9f96a051',
-              value: '/Applications/AVGAntivirus.app/Contents/Backend/services/com.avg.activity',
-            },
-          ],
-        },
+        insight,
+        insight, // intentional dupe to confirm de-duping
       ];
 
       const request = {} as KibanaRequest<unknown, unknown, DefendInsightsPostRequestBody>;
@@ -266,6 +274,7 @@ describe('SecurityWorkflowInsightsService', () => {
         defendInsights,
         request,
         endpointMetadataService: expect.any(Object),
+        esClient,
       });
       expect(result).toEqual(workflowInsights.map(() => esClientIndexResp));
     });
@@ -283,9 +292,27 @@ describe('SecurityWorkflowInsightsService', () => {
       expect(esClient.index).toHaveBeenCalledTimes(1);
       expect(esClient.index).toHaveBeenCalledWith({
         index: DATA_STREAM_NAME,
-        body: { ...insight, id: generateInsightId(insight) },
+        id: generateInsightId(insight),
+        body: insight,
         refresh: 'wait_for',
+        op_type: 'create',
       });
+    });
+
+    it('should not index the doc if remediation exists', async () => {
+      await securityWorkflowInsightsService.start({ esClient });
+      const insight = getDefaultInsight();
+
+      const remediationExistsMock = checkIfRemediationExists as jest.Mock;
+      remediationExistsMock.mockResolvedValueOnce(true);
+
+      await securityWorkflowInsightsService.create(insight);
+
+      expect(remediationExistsMock).toHaveBeenCalledTimes(1);
+
+      // two since it calls fetch as well
+      expect(isInitializedSpy).toHaveBeenCalledTimes(1);
+      expect(esClient.index).toHaveBeenCalledTimes(0);
     });
 
     it('should call update instead if insight already exists', async () => {

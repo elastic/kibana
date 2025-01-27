@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { chunk, groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
+import { groupBy, isEqual, keyBy, omit, pick, uniq } from 'lodash';
 import { v5 as uuidv5 } from 'uuid';
 import { dump } from 'js-yaml';
 import pMap from 'p-map';
@@ -26,14 +26,12 @@ import type { BulkResponseItem } from '@elastic/elasticsearch/lib/api/types';
 
 import { DEFAULT_SPACE_ID } from '@kbn/spaces-plugin/common/constants';
 
-import { asyncForEach } from '@kbn/std';
-
 import type { SavedObjectError } from '@kbn/core-saved-objects-common';
 
 import { withSpan } from '@kbn/apm-utils';
 
 import {
-  getAllowedOutputTypeForPolicy,
+  getAllowedOutputTypesForAgentPolicy,
   packageToPackagePolicy,
   policyHasAPMIntegration,
   policyHasEndpointSecurity,
@@ -118,7 +116,11 @@ import { incrementPackagePolicyCopyName } from './package_policies';
 import { outputService } from './output';
 import { agentPolicyUpdateEventHandler } from './agent_policy_update';
 import { escapeSearchQueryPhrase, normalizeKuery as _normalizeKuery } from './saved_object';
-import { getFullAgentPolicy, validateOutputForPolicy } from './agent_policies';
+import {
+  getFullAgentPolicy,
+  validateOutputForPolicy,
+  validateRequiredVersions,
+} from './agent_policies';
 import { auditLoggingService } from './audit_logging';
 import { licenseService } from './license';
 import { createSoFindIterable } from './utils/create_so_find_iterable';
@@ -219,7 +221,7 @@ class AgentPolicyService {
         soClient,
         agentPolicy,
         existingAgentPolicy,
-        getAllowedOutputTypeForPolicy(existingAgentPolicy)
+        getAllowedOutputTypesForAgentPolicy({ ...existingAgentPolicy, ...agentPolicy })
       );
     }
     await soClient.update<AgentPolicySOAttributes>(savedObjectType, id, {
@@ -410,7 +412,13 @@ class AgentPolicyService {
       spaceId: soClient.getCurrentNamespace(),
       namespace: agentPolicy.namespace,
     });
-    await validateOutputForPolicy(soClient, agentPolicy);
+    await validateOutputForPolicy(
+      soClient,
+      agentPolicy,
+      {},
+      getAllowedOutputTypesForAgentPolicy(agentPolicy)
+    );
+    validateRequiredVersions(agentPolicy.name, agentPolicy.required_versions);
 
     const newSo = await soClient.create<AgentPolicySOAttributes>(
       savedObjectType,
@@ -711,6 +719,7 @@ class AgentPolicyService {
         namespace: agentPolicy.namespace,
       });
     }
+    validateRequiredVersions(agentPolicy.name ?? id, agentPolicy.required_versions);
 
     const existingAgentPolicy = await this.get(soClient, id, true);
 
@@ -817,6 +826,7 @@ class AgentPolicyService {
           'fleet_server_host_id',
           'supports_agentless',
           'global_data_tags',
+          'agentless',
           'monitoring_pprof_enabled',
           'monitoring_http',
           'monitoring_diagnostics',
@@ -956,7 +966,7 @@ class AgentPolicyService {
             soClient,
             getAgentPolicy(agentPolicy),
             existingAgentPolicy,
-            getAllowedOutputTypeForPolicy(existingAgentPolicy)
+            getAllowedOutputTypesForAgentPolicy(existingAgentPolicy)
           );
         },
         {
@@ -1073,24 +1083,13 @@ class AgentPolicyService {
       }
     );
 
-    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
-      await scheduleDeployAgentPoliciesTask(
-        appContextService.getTaskManagerStart()!,
-        savedObjectsResults.map((policy) => ({
-          id: policy.id,
-          spaceId: policy.namespaces?.[0],
-        }))
-      );
-    } else {
-      await pMap(
-        savedObjectsResults,
-        (policy) =>
-          this.triggerAgentPolicyUpdatedEvent(esClient, 'updated', policy.id, {
-            spaceId: policy.namespaces?.[0],
-          }),
-        { concurrency: MAX_CONCURRENT_AGENT_POLICIES_OPERATIONS }
-      );
-    }
+    await scheduleDeployAgentPoliciesTask(
+      appContextService.getTaskManagerStart()!,
+      savedObjectsResults.map((policy) => ({
+        id: policy.id,
+        spaceId: policy.namespaces?.[0],
+      }))
+    );
 
     return res;
   }
@@ -1750,24 +1749,13 @@ class AgentPolicyService {
 
     const updatedPoliciesSuccess = updatedAgentPolicies.filter((policy) => !policy.error);
 
-    const config = appContextService.getConfig();
-    const batchSize = config?.setup?.agentPolicySchemaUpgradeBatchSize ?? 100;
-    const policyIds = updatedPoliciesSuccess.map((policy) => policy.id);
-
-    if (appContextService.getExperimentalFeatures().asyncDeployPolicies) {
-      await scheduleDeployAgentPoliciesTask(
-        appContextService.getTaskManagerStart()!,
-        updatedPoliciesSuccess.map((policy) => ({
-          id: policy.id,
-          spaceId: policy.namespaces?.[0],
-        }))
-      );
-    } else {
-      await asyncForEach(
-        chunk(policyIds, batchSize),
-        async (policyIdsBatch) => await this.deployPolicies(soClient, policyIdsBatch)
-      );
-    }
+    await scheduleDeployAgentPoliciesTask(
+      appContextService.getTaskManagerStart()!,
+      updatedPoliciesSuccess.map((policy) => ({
+        id: policy.id,
+        spaceId: policy.namespaces?.[0],
+      }))
+    );
 
     return { updatedPolicies: updatedPoliciesSuccess, failedPolicies };
   }

@@ -7,8 +7,21 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { mergeTests } from 'playwright/test';
-import { uiSettingsFixture } from './ui_settings';
-import { coreWorkerFixtures } from './core';
+export { coreWorkerFixtures } from './core_fixtures';
+export type {
+  ToolingLog,
+  ScoutTestConfig,
+  KibanaUrl,
+  EsClient,
+  KbnClient,
+  SamlSessionManager,
+} from './core_fixtures';
 
-export const scoutWorkerFixtures = mergeTests(coreWorkerFixtures, uiSettingsFixture);
+export { esArchiverFixture } from './es_archiver';
+export type { EsArchiverFixture } from './es_archiver';
+
+export { uiSettingsFixture } from './ui_settings';
+export type { UiSettingsFixture } from './ui_settings';
+
+export { scoutSpaceParallelFixture } from './scout_space';
+export type { ScoutSpaceParallelFixture } from './scout_space';
