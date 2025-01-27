@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { syntheticsGetLatestTestRunRoute } from './pings/get_latest_test_run';
 import { deleteSyntheticsParamsBulkRoute } from './settings/params/delete_params_bulk';
 import { deleteSyntheticsMonitorBulkRoute } from './monitor_cruds/bulk_cruds/delete_monitor_bulk';
 import {
@@ -117,4 +118,5 @@ export const syntheticsAppPublicRestApiRoutes: SyntheticsRestApiRouteFactory[] =
   deleteSyntheticsMonitorRoute,
   deleteSyntheticsMonitorBulkRoute,
   deleteSyntheticsParamsBulkRoute,
+  syntheticsGetLatestTestRunRoute,
 ];
