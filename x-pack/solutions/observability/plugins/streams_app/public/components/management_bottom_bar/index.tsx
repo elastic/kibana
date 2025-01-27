@@ -25,7 +25,12 @@ export function ManagementBottomBar({
   onCancel,
   onConfirm,
 }: ManagementBottomBarProps) {
-  const handleCancel = useDiscardConfirm(onCancel);
+  const handleCancel = useDiscardConfirm(onCancel, {
+    title: discardUnsavedChangesTitle,
+    message: discardUnsavedChangesMessage,
+    confirmButtonText: discardUnsavedChangesLabel,
+    cancelButtonText: keepEditingLabel,
+  });
 
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} gutterSize="s">
@@ -58,4 +63,27 @@ export function ManagementBottomBar({
 const defaultConfirmButtonText = i18n.translate(
   'xpack.streams.streamDetailView.managementTab.bottomBar.confirm',
   { defaultMessage: 'Save changes' }
+);
+
+const discardUnsavedChangesLabel = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.discardUnsavedChangesLabel',
+  { defaultMessage: 'Discard unsaved changes' }
+);
+
+const keepEditingLabel = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.deleteProcessorCancelLabel',
+  { defaultMessage: 'Keep editing' }
+);
+
+const discardUnsavedChangesTitle = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.discardUnsavedChangesTitle',
+  { defaultMessage: 'Unsaved changes' }
+);
+
+const discardUnsavedChangesMessage = i18n.translate(
+  'xpack.streams.streamDetailView.managementTab.enrichment.discardUnsavedChangesMessage',
+  {
+    defaultMessage:
+      'You are about to leave this view without saving. All changes will be lost. Do you really want to leave without saving?',
+  }
 );
