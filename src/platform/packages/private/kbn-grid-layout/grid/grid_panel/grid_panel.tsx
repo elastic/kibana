@@ -13,7 +13,7 @@ import { combineLatest, skip } from 'rxjs';
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
 
-import { GridLayoutStateManager, PanelInteractionEvent, UserInteractionEvent } from '../types';
+import { GridLayoutStateManager } from '../types';
 import { DragHandle, DragHandleApi } from './drag_handle';
 import { ResizeHandle } from './resize_handle';
 
@@ -24,50 +24,18 @@ export interface GridPanelProps {
     panelId: string,
     setDragHandles?: (refs: Array<HTMLElement | null>) => void
   ) => React.ReactNode;
-  interactionStart: (type: PanelInteractionEvent['type'] | 'drop', e: UserInteractionEvent) => void;
   gridLayoutStateManager: GridLayoutStateManager;
 }
 
 export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
-  (
-    { panelId, rowIndex, renderPanelContents, interactionStart, gridLayoutStateManager },
-    panelRef
-  ) => {
+  ({ panelId, rowIndex, renderPanelContents, gridLayoutStateManager }, panelRef) => {
     const [dragHandleApi, setDragHandleApi] = useState<DragHandleApi | null>(null);
     const { euiTheme } = useEuiTheme();
 
-    useEffect(() => {
-      const onDropEventHandler = (dropEvent: MouseEvent) => interactionStart('drop', dropEvent);
-      /**
-       * Subscription to add a singular "drop" event handler whenever an interaction starts -
-       * this is handled in a subscription so that it is not lost when the component gets remounted
-       * (which happens when a panel gets dragged from one grid row to another)
-       */
-      const dropEventSubscription = gridLayoutStateManager.interactionEvent$.subscribe((event) => {
-        if (!event || event.id !== panelId) return;
-
-        /**
-         * By adding the "drop" event listener to the document rather than the drag/resize event handler,
-         * we prevent the element from getting "stuck" in an interaction; however, we only attach this event
-         * listener **when the drag/resize event starts**, and it only executes once (i.e. it removes itself
-         * once it executes, so we don't have to manually remove it outside of the unmount condition)
-         */
-        document.addEventListener('mouseup', onDropEventHandler, {
-          once: true,
-          passive: true,
-        });
-      });
-
-      return () => {
-        dropEventSubscription.unsubscribe();
-        document.removeEventListener('mouseup', onDropEventHandler); // removes the event listener on row change
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
     /** Set initial styles based on state at mount to prevent styles from "blipping" */
     const initialStyles = useMemo(() => {
-      const initialPanel = gridLayoutStateManager.gridLayout$.getValue()[rowIndex].panels[panelId];
+      const initialPanel = (gridLayoutStateManager.proposedGridLayout$.getValue() ??
+        gridLayoutStateManager.gridLayout$.getValue())[rowIndex].panels[panelId];
       return css`
         position: relative;
         height: calc(
@@ -90,11 +58,12 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         const activePanelStyleSubscription = combineLatest([
           gridLayoutStateManager.activePanel$,
           gridLayoutStateManager.gridLayout$,
+          gridLayoutStateManager.proposedGridLayout$,
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([activePanel, gridLayout]) => {
+          .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            const panel = gridLayout[rowIndex].panels[panelId];
+            const panel = (proposedGridLayout ?? gridLayout)[rowIndex].panels[panelId];
             if (!ref || !panel) return;
 
             const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
@@ -196,10 +165,15 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         <DragHandle
           ref={setDragHandleApi}
           gridLayoutStateManager={gridLayoutStateManager}
-          interactionStart={interactionStart}
+          panelId={panelId}
+          rowIndex={rowIndex}
         />
         {panelContents}
-        <ResizeHandle interactionStart={interactionStart} />
+        <ResizeHandle
+          gridLayoutStateManager={gridLayoutStateManager}
+          panelId={panelId}
+          rowIndex={rowIndex}
+        />
       </div>
     );
   }
