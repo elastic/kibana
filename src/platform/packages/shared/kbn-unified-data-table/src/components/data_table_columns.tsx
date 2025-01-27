@@ -288,8 +288,6 @@ function buildEuiGridColumn({
 export const deserializeHeaderRowHeight = (headerRowHeightLines: number) => {
   if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.auto) {
     return undefined;
-  } else if (headerRowHeightLines === ROWS_HEIGHT_OPTIONS.single) {
-    return 1;
   }
 
   return headerRowHeightLines;

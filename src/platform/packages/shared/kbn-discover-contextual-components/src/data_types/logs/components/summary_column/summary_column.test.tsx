@@ -50,7 +50,7 @@ const getSummaryProps = (
   setCellProps: () => {},
   closePopover: () => {},
   density: DataGridDensity.COMPACT,
-  rowHeight: ROWS_HEIGHT_OPTIONS.single,
+  rowHeight: 1,
   onFilter: jest.fn(),
   shouldShowFieldHandler: () => true,
   core: corePluginMock.createStart(),

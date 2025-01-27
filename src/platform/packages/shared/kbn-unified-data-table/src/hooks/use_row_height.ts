@@ -137,6 +137,5 @@ export const useRowHeight = ({
     lineCountInput,
     onChangeRowHeight: onUpdateRowHeight ? onChangeRowHeight : undefined,
     onChangeRowHeightLines: onUpdateRowHeight ? onChangeRowHeightLines : undefined,
-    setLineCountInput,
   };
 };

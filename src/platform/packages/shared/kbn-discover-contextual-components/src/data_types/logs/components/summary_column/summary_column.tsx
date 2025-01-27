@@ -19,7 +19,6 @@ import {
   getLogDocumentOverview,
   getMessageFieldWithFallbacks,
 } from '@kbn/discover-utils';
-import { ROWS_HEIGHT_OPTIONS } from '@kbn/unified-data-table';
 import { Resource } from './resource';
 import { Content } from './content';
 import { createResourceFields, formatJsonDocumentForContent } from './utils';
@@ -65,8 +64,8 @@ const SummaryCell = ({
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
 
-  const rowHeight = maybeNullishRowHeight ?? ROWS_HEIGHT_OPTIONS.single;
-  const isSingleLine = rowHeight === ROWS_HEIGHT_OPTIONS.single || rowHeight === 1;
+  const rowHeight = maybeNullishRowHeight ?? 1;
+  const isSingleLine = rowHeight === 1;
 
   const resourceFields = createResourceFields(row, core, share);
   const shouldRenderResource = resourceFields.length > 0;
