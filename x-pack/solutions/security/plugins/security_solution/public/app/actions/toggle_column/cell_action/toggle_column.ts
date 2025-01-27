@@ -11,6 +11,7 @@ import {
   defaultColumnHeaderType,
   tableDefaults,
   dataTableSelectors,
+  TableId,
 } from '@kbn/securitysolution-data-table';
 import { fieldHasCellActions } from '../../utils';
 import type { SecurityAppStore } from '../../../../common/store';
@@ -64,6 +65,11 @@ export const createToggleColumnCellActionFactory = createCellActionFactory(
 
       const scopedActions = getScopedActions(scopeId);
       if (!scopedActions) {
+        return;
+      }
+
+      if (metadata.alertsTableRef?.current && scopeId === TableId.alertsOnAlertsPage) {
+        metadata.alertsTableRef.current.toggleColumn(field.name);
         return;
       }
 

@@ -5,15 +5,11 @@
  * 2.0.
  */
 
-import React, { useRef, useEffect, useState, useCallback, useMemo, type FC } from 'react';
+import React, { useEffect, useState, useCallback, useMemo, type FC } from 'react';
 import type { EuiDataGridRowHeightsOptions, EuiDataGridStyle } from '@elastic/eui';
 import { EuiFlexGroup } from '@elastic/eui';
 import type { Filter } from '@kbn/es-query';
-import type {
-  AlertsTableImperativeApi,
-  AlertsTableProps,
-  RenderContext,
-} from '@kbn/response-ops-alerts-table/types';
+import type { AlertsTableProps, RenderContext } from '@kbn/response-ops-alerts-table/types';
 import { ALERT_BUILDING_BLOCK_TYPE, AlertConsumers } from '@kbn/rule-data-utils';
 import { SECURITY_SOLUTION_RULE_TYPE_IDS } from '@kbn/securitysolution-rules';
 import styled from 'styled-components';
@@ -29,6 +25,7 @@ import type { SetOptional } from 'type-fest';
 import { noop } from 'lodash';
 import type { Alert } from '@kbn/alerting-types';
 import { AlertsTable } from '@kbn/response-ops-alerts-table';
+import { useAlertsContext } from './alerts_context';
 import { getBulkActionsByTableType } from '../../hooks/trigger_actions_alert_table/use_bulk_actions';
 import { useIsExperimentalFeatureEnabled } from '../../../common/hooks/use_experimental_features';
 import type {
@@ -169,10 +166,9 @@ export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'serv
   const [visualizationInFlyoutEnabled] = useUiSetting$<boolean>(
     ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING
   );
+  const { alertsTableRef } = useAlertsContext();
 
   const { from, to, setQuery } = useGlobalTime();
-
-  const alertTableRefreshHandlerRef = useRef<(() => void) | null>(null);
 
   const dispatch = useDispatch();
 
@@ -293,7 +289,6 @@ export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'serv
     (context) => {
       onLoad(context.alerts);
       setTableContext(context);
-      alertTableRefreshHandlerRef.current = context.refresh;
       dispatch(
         updateIsLoading({
           id: tableType,
@@ -372,7 +367,6 @@ export const AlertsTableComponent: FC<Omit<DetectionEngineAlertTableProps, 'serv
     [leadingControlColumn, sourcererScope, tableType, userProfiles]
   );
 
-  const alertsTableRef = useRef<AlertsTableImperativeApi>(null);
   const fieldsBrowserOptions = useAlertsTableFieldsBrowserOptions(
     SourcererScopeName.detections,
     alertsTableRef.current?.toggleColumn
