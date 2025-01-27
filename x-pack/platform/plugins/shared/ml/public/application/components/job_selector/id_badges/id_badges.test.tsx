@@ -10,6 +10,15 @@ import { render } from '@testing-library/react';
 import type { IdBadgesProps } from './id_badges';
 import { IdBadges } from './id_badges';
 
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: () => ({
+    services: {
+      share: { url: { locators: jest.fn() } },
+      application: { navigateToUrl: jest.fn() },
+    },
+  }),
+}));
+
 const props: IdBadgesProps = {
   page: 'jobs',
   limit: 2,

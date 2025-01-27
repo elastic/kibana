@@ -10,6 +10,17 @@ import { render } from '@testing-library/react';
 import type { NewSelectionIdBadgesProps } from './new_selection_id_badges';
 import { NewSelectionIdBadges } from './new_selection_id_badges';
 
+jest.mock('../../../contexts/kibana', () => ({
+  useMlKibana: () => ({
+    services: {
+      share: {},
+      application: {
+        navigateToUrl: jest.fn(),
+      },
+    },
+  }),
+}));
+
 const props: NewSelectionIdBadgesProps = {
   limit: 2,
   groups: [

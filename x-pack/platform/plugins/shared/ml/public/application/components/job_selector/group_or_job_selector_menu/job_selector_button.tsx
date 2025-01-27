@@ -18,7 +18,7 @@ import { getOptionsForJobSelectorMenuItems } from './get_options_for_job_selecto
 interface Props {
   jobId: string;
   page: MlPages;
-  onRemoveJobId: (jobId: string) => void;
+  onRemoveJobId: (jobOrGroupId: string[]) => void;
   removeJobIdDisabled: boolean;
 }
 

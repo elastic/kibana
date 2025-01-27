@@ -11,6 +11,7 @@ import { EuiContextMenu, EuiNotificationBadge, EuiPopover } from '@elastic/eui';
 import React, { useMemo, useState } from 'react';
 import { EuiButton } from '@elastic/eui';
 import { useUrlState } from '@kbn/ml-url-state';
+import { i18n } from '@kbn/i18n';
 import type { MlPages } from '../../../../locator';
 import { useJobInfoFlyouts } from '../../../jobs/components/job_details_flyout/job_details_flyout_context';
 import { getOptionsForJobSelectorMenuItems } from './get_options_for_job_selector_menu';
@@ -22,12 +23,14 @@ export const GroupSelectorMenu = ({
   page,
   onRemoveJobId,
   removeJobIdDisabled,
+  removeGroupDisabled,
 }: {
   groupId: string;
   jobIds: string[];
   page: MlPages;
-  onRemoveJobId: (jobId: string) => void;
+  onRemoveJobId: (jobOrGroupId: string[]) => void;
   removeJobIdDisabled: boolean;
+  removeGroupDisabled: boolean;
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { setActiveFlyout, setActiveJobId } = useJobInfoFlyouts();
@@ -59,10 +62,27 @@ export const GroupSelectorMenu = ({
     const items: EuiContextMenuPanelDescriptor[] = [
       {
         id: 0,
-        items: jobIds.map((jobId, idx) => ({
-          panel: jobId,
-          name: jobId,
-        })),
+        items: [
+          ...jobIds.map((jobId, idx) => ({
+            panel: jobId,
+            name: jobId,
+          })),
+          {
+            isSeparator: true,
+          },
+          {
+            name: i18n.translate('xpack.ml.groupSelectorMenu.removeGroupLabel', {
+              defaultMessage: 'Remove group from {page}',
+              values: { page },
+            }),
+            icon: 'minusInCircle',
+            disabled: removeGroupDisabled,
+            onClick: () => {
+              onRemoveJobId([groupId, ...jobIds]);
+              closePopover();
+            },
+          },
+        ],
       },
     ];
 
@@ -100,6 +120,7 @@ export const GroupSelectorMenu = ({
     page,
     onRemoveJobId,
     removeJobIdDisabled,
+    removeGroupDisabled,
   ]);
   return (
     <EuiPopover

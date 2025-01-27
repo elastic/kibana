@@ -147,8 +147,8 @@ export function JobSelector({
     return singleSelection ? ML_PAGES.SINGLE_METRIC_VIEWER : ML_PAGES.ANOMALY_EXPLORER;
   }, [singleSelection]);
 
-  const removeJobId = (jobId: string) => {
-    const newSelection = selectedIds.filter((id) => id !== jobId);
+  const removeJobId = (jobOrGroupId: string[]) => {
+    const newSelection = selectedIds.filter((id) => !jobOrGroupId.includes(id));
     applySelection({ newSelection, jobIds: newSelection, time: undefined });
   };
   function renderJobSelectionBar() {

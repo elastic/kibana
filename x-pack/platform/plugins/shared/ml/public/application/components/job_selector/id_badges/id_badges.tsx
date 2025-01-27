@@ -20,7 +20,7 @@ export interface IdBadgesProps {
   onLinkClick: () => void;
   showAllBarBadges: boolean;
   page: MlPages;
-  onRemoveJobId: (jobId: string) => void;
+  onRemoveJobId: (jobOrGroupId: string[]) => void;
 }
 
 export function IdBadges({
@@ -45,6 +45,7 @@ export function IdBadges({
           page={page}
           onRemoveJobId={onRemoveJobId}
           removeJobIdDisabled={selectedJobIds.length < 2}
+          removeGroupDisabled={selectedGroups.length < 2}
         />
       </EuiFlexItem>
     );

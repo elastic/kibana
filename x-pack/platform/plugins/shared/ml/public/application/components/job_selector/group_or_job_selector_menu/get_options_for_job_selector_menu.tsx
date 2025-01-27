@@ -34,7 +34,7 @@ export const getOptionsForJobSelectorMenuItems = ({
 }: {
   jobId: string;
   page: MlPages;
-  onRemoveJobId: (jobId: string) => void;
+  onRemoveJobId: (jobOrGroupId: string[]) => void;
   removeJobIdDisabled: boolean;
   showRemoveJobId: boolean;
   closePopover: () => void;
@@ -120,7 +120,7 @@ export const getOptionsForJobSelectorMenuItems = ({
             icon: 'minusInCircle',
             onClick: () => {
               if (onRemoveJobId) {
-                onRemoveJobId(jobId);
+                onRemoveJobId([jobId]);
                 setActiveJobId(jobId);
                 setActiveFlyout(null);
               }
