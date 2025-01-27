@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect, tags, test } from '@kbn/scout';
+import { expect, tags, test, ANNOTATIONS } from '@kbn/scout';
 import {
   VISIBLE_CHROME,
   HIDDEN_CHROME,
@@ -13,36 +13,43 @@ import {
   EXIT_FULL_SCREEN,
 } from '../fixtures/constants';
 
-test.describe('Maps', { tag: tags.DEPLOYMENT_AGNOSTIC }, () => {
-  test.beforeEach(async ({ browserAuth, pageObjects }) => {
-    await browserAuth.loginAsViewer();
-    await pageObjects.maps.goto();
-    await pageObjects.maps.waitForRender();
-  });
+test.describe(
+  'Maps',
+  {
+    tag: tags.DEPLOYMENT_AGNOSTIC,
+    annotation: { type: ANNOTATIONS.WARNING, description: 'Contains deprecated goto().' },
+  },
+  () => {
+    test.beforeEach(async ({ browserAuth, pageObjects }) => {
+      await browserAuth.loginAsViewer();
+      await pageObjects.maps.goto();
+      await pageObjects.renderable.waitForRender();
+    });
 
-  test('Full screen mode', async ({ page }) => {
-    const fullScreenBtn = page.getByTestId(FULL_SCREEN_MODE);
-    const exitFullScreenBtn = page.getByTestId(EXIT_FULL_SCREEN);
-    const visibleChrome = page.getByTestId(VISIBLE_CHROME);
-    const hiddenChrome = page.getByTestId(HIDDEN_CHROME);
-    const baseMapBtn = page.getByRole('button', { name: 'Basemap' });
+    test('Full screen mode', async ({ page }) => {
+      const fullScreenBtn = page.getByTestId(FULL_SCREEN_MODE);
+      const exitFullScreenBtn = page.getByTestId(EXIT_FULL_SCREEN);
+      const visibleChrome = page.getByTestId(VISIBLE_CHROME);
+      const hiddenChrome = page.getByTestId(HIDDEN_CHROME);
+      const baseMapBtn = page.getByRole('button', { name: 'Basemap' });
 
-    await expect(fullScreenBtn).toBeVisible();
-    await expect(exitFullScreenBtn).not.toBeVisible();
-    await expect(visibleChrome).toBeVisible();
-    await expect(hiddenChrome).not.toBeVisible();
-    await expect(baseMapBtn).toBeVisible();
+      await expect(fullScreenBtn).toBeVisible();
+      await expect(exitFullScreenBtn).not.toBeVisible();
+      await expect(visibleChrome).toBeVisible();
+      await expect(hiddenChrome).not.toBeVisible();
+      await expect(baseMapBtn).toBeVisible();
 
-    await fullScreenBtn.click();
+      await fullScreenBtn.click();
 
-    await expect(fullScreenBtn).not.toBeVisible();
-    await expect(exitFullScreenBtn).toBeVisible();
-    await expect(visibleChrome).not.toBeVisible();
-    await expect(hiddenChrome).toBeVisible();
-    await expect(baseMapBtn).toBeVisible();
+      await expect(fullScreenBtn).not.toBeVisible();
+      await expect(exitFullScreenBtn).toBeVisible();
+      await expect(visibleChrome).not.toBeVisible();
+      await expect(hiddenChrome).toBeVisible();
+      await expect(baseMapBtn).toBeVisible();
 
-    await exitFullScreenBtn.click();
+      await exitFullScreenBtn.click();
 
-    await expect(fullScreenBtn).toBeVisible();
-  });
-});
+      await expect(fullScreenBtn).toBeVisible();
+    });
+  }
+);

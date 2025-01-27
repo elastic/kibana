@@ -7,15 +7,8 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage } from '..';
+const WARNING = 'WARNING';
 
-export class MapsPage {
-  constructor(private readonly page: ScoutPage) {}
-
-  /**
-   * @deprecated see: https://github.com/elastic/kibana/pull/204607#discussion_r1930723011
-   */
-  async goto() {
-    await this.page.gotoApp('maps');
-  }
-}
+export const ANNOTATIONS = {
+  WARNING,
+};
