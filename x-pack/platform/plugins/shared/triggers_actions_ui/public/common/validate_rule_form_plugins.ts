@@ -8,6 +8,7 @@
 import { RuleFormProps } from '@kbn/response-ops-rule-form';
 
 const requiredPluginNames = [
+  // dataViews is intentionally omitted from this list because it is not required for all rule types
   'http',
   'i18n',
   'theme',
@@ -17,7 +18,6 @@ const requiredPluginNames = [
   'charts',
   'settings',
   'data',
-  'dataViews',
   'unifiedSearch',
   'docLinks',
 ];
