@@ -79,6 +79,7 @@ export const getKnowledgeBaseIndicesRoute = (router: ElasticAssistantPluginRoute
 
             for (const key in obj) {
               if (Object.prototype.hasOwnProperty.call(obj, key)) {
+                // @ts-expect-error
                 const value = obj[key];
                 const newPath = currentPath.concat(key);
 
