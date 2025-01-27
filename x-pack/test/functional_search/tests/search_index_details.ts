@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchNavigation',
   ]);
   const es = getService('es');
-  const security = getService('security');
   const browser = getService('browser');
   const retry = getService('retry');
   const spaces = getService('spaces');
