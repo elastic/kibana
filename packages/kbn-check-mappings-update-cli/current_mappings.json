@@ -1079,6 +1079,12 @@
   "entity-engine-status": {
     "dynamic": false,
     "properties": {
+      "delay": {
+        "type": "keyword"
+      },
+      "docsPerSecond": {
+        "type": "float"
+      },
       "fieldHistoryLength": {
         "index": false,
         "type": "integer"
@@ -1086,10 +1092,19 @@
       "filter": {
         "type": "keyword"
       },
+      "frequency": {
+        "type": "keyword"
+      },
       "indexPattern": {
         "type": "keyword"
       },
+      "lookbackPeriod": {
+        "type": "keyword"
+      },
       "status": {
+        "type": "keyword"
+      },
+      "timeout": {
         "type": "keyword"
       },
       "type": {
