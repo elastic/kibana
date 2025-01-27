@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { act, fireEvent, waitFor } from '@testing-library/react';
+import { act, fireEvent, waitFor, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import React from 'react';
 import { HOST_ISOLATION_EXCEPTIONS_PATH } from '../../../../../../common/constants';
@@ -22,7 +22,7 @@ import { getEndpointAuthzInitialStateMock } from '../../../../../../common/endpo
 jest.mock('../../../../../common/components/user_privileges');
 const useUserPrivilegesMock = _useUserPrivileges as jest.Mock;
 
-const prepareTest = () => {
+const prepareTest = async () => {
   // Workaround for timeout via https://github.com/testing-library/user-event/issues/833#issuecomment-1171452841
   const user = userEvent.setup({ advanceTimers: jest.advanceTimersByTime, pointerEventsCheck: 0 });
   const mockedContext = createAppRootMockRenderer();
@@ -31,7 +31,7 @@ const prepareTest = () => {
 
   const apiMocks = exceptionsListAllHttpMocks(mockedContext.coreStart.http);
 
-  act(() => {
+  await act(async () => {
     history.push(HOST_ISOLATION_EXCEPTIONS_PATH);
   });
 
@@ -59,19 +59,17 @@ describe('When on the host isolation exceptions page', () => {
 
   it('should search using expected exception item fields', async () => {
     const expectedFilterString = parseQueryFilterToKQL('fooFooFoo', SEARCHABLE_FIELDS);
-    const { renderResult, apiMocks, user } = prepareTest();
-    const { findAllByTestId } = renderResult;
+    const { apiMocks, user } = await prepareTest();
 
     await waitFor(async () => {
-      expect(await findAllByTestId(`${pageTestId}-card`)).toHaveLength(10);
+      expect(await screen.findAllByTestId(`${pageTestId}-card`)).toHaveLength(10);
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();
 
-    await user.type(renderResult.getByTestId('searchField'), 'fooFooFoo');
-    act(() => {
-      fireEvent.click(renderResult.getByTestId('searchButton'));
-    });
+    await user.type(screen.getByTestId('searchField'), 'fooFooFoo');
+
+    fireEvent.click(screen.getByTestId('searchButton'));
 
     await waitFor(() => {
       expect(apiMocks.responseProvider.exceptionsFind).toHaveBeenCalled();
@@ -95,23 +93,22 @@ describe('When on the host isolation exceptions page', () => {
       });
 
       it('should allow the Create action', async () => {
-        const { renderResult } = prepareTest();
-        const { queryByTestId } = renderResult;
-
-        await waitFor(() => expect(queryByTestId(`${pageTestId}-pageAddButton`)).toBeTruthy());
+        await prepareTest();
+        await waitFor(() =>
+          expect(screen.queryByTestId(`${pageTestId}-pageAddButton`)).toBeTruthy()
+        );
       });
 
       it('should allow the Edit and Delete actions', async () => {
-        const { renderResult, user } = prepareTest();
-        const { getByTestId } = renderResult;
+        const { renderResult, user } = await prepareTest();
 
         await getFirstCard(user, renderResult, {
           showActions: true,
           testId: 'hostIsolationExceptionsListPage',
         });
 
-        expect(getByTestId(`${pageTestId}-card-cardEditAction`)).toBeTruthy();
-        expect(getByTestId(`${pageTestId}-card-cardDeleteAction`)).toBeTruthy();
+        expect(screen.getByTestId(`${pageTestId}-card-cardEditAction`)).toBeTruthy();
+        expect(screen.getByTestId(`${pageTestId}-card-cardDeleteAction`)).toBeTruthy();
       });
     });
 
@@ -126,21 +123,19 @@ describe('When on the host isolation exceptions page', () => {
       });
 
       it('should disable the Create action', async () => {
-        const { renderResult } = prepareTest();
-        const { queryByTestId } = renderResult;
+        await prepareTest();
 
-        await waitFor(() => expect(queryByTestId(`${pageTestId}-container`)).toBeTruthy());
+        await waitFor(() => expect(screen.queryByTestId(`${pageTestId}-container`)).toBeTruthy());
 
-        expect(queryByTestId(`${pageTestId}-pageAddButton`)).toBeNull();
+        expect(screen.queryByTestId(`${pageTestId}-pageAddButton`)).toBeNull();
       });
 
       it('should disable the Edit and Delete actions', async () => {
-        const { renderResult } = prepareTest();
-        const { queryByTestId } = renderResult;
+        await prepareTest();
 
-        await waitFor(() => expect(queryByTestId(`${pageTestId}-container`)).toBeTruthy());
+        await waitFor(() => expect(screen.queryByTestId(`${pageTestId}-container`)).toBeTruthy());
 
-        expect(queryByTestId(`${pageTestId}-card-header-actions-button`)).toBeNull();
+        expect(screen.queryByTestId(`${pageTestId}-card-header-actions-button`)).toBeNull();
       });
     });
 
@@ -159,39 +154,37 @@ describe('When on the host isolation exceptions page', () => {
       });
 
       it('should hide the Create and Edit actions when host isolation exceptions write authz is not allowed, but HIE entries exist', async () => {
-        const { renderResult, user } = prepareTest();
-        const { findAllByTestId, queryByTestId, getByTestId } = await renderResult;
+        const { renderResult, user } = await prepareTest();
 
         await waitFor(async () => {
-          await expect(findAllByTestId(`${pageTestId}-card`)).resolves.toHaveLength(10);
+          await expect(screen.findAllByTestId(`${pageTestId}-card`)).resolves.toHaveLength(10);
         });
         await getFirstCard(user, renderResult, {
           showActions: true,
           testId: 'hostIsolationExceptionsListPage',
         });
 
-        expect(queryByTestId(`${pageTestId}-pageAddButton`)).toBeNull();
-        expect(getByTestId(`${pageTestId}-card-cardDeleteAction`)).toBeTruthy();
-        expect(queryByTestId(`${pageTestId}-card-cardEditAction`)).toBeNull();
+        expect(screen.queryByTestId(`${pageTestId}-pageAddButton`)).toBeNull();
+        expect(screen.getByTestId(`${pageTestId}-card-cardDeleteAction`)).toBeTruthy();
+        expect(screen.queryByTestId(`${pageTestId}-card-cardEditAction`)).toBeNull();
       });
 
       it('should allow Delete action', async () => {
-        const { apiMocks, renderResult, user } = prepareTest();
-        const { findAllByTestId, getByTestId } = await renderResult;
+        const { apiMocks, renderResult, user } = await prepareTest();
 
         await waitFor(async () => {
-          await expect(findAllByTestId(`${pageTestId}-card`)).resolves.toHaveLength(10);
+          await expect(screen.findAllByTestId(`${pageTestId}-card`)).resolves.toHaveLength(10);
         });
         await getFirstCard(user, renderResult, {
           showActions: true,
           testId: 'hostIsolationExceptionsListPage',
         });
 
-        const deleteButton = getByTestId(`${pageTestId}-card-cardDeleteAction`);
+        const deleteButton = screen.getByTestId(`${pageTestId}-card-cardDeleteAction`);
         expect(deleteButton).toBeTruthy();
 
         await user.click(deleteButton);
-        const confirmDeleteButton = getByTestId(`${pageTestId}-deleteModal-submitButton`);
+        const confirmDeleteButton = screen.getByTestId(`${pageTestId}-deleteModal-submitButton`);
         await user.click(confirmDeleteButton);
         await waitFor(() => {
           expect(apiMocks.responseProvider.exceptionDelete).toHaveReturnedWith(
