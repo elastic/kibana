@@ -6,7 +6,7 @@
  */
 
 import type { RootSchema } from '@kbn/core/public';
-import type { RiskSeverity } from '../../../../../../common/search_strategy';
+import type { EntityType, RiskSeverity } from '../../../../../../common/search_strategy';
 
 export enum EntityEventTypes {
   EntityDetailsClicked = 'Entity Details Clicked',
@@ -33,7 +33,7 @@ export enum ML_JOB_TELEMETRY_STATUS {
   installationError = 'installationError',
 }
 interface EntityParam {
-  entity: 'host' | 'user';
+  entity: EntityType;
 }
 
 type ReportEntityDetailsClickedParams = EntityParam;

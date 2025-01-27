@@ -17,7 +17,7 @@
 import { z } from '@kbn/zod';
 
 export type EntityType = z.infer<typeof EntityType>;
-export const EntityType = z.enum(['user', 'host', 'service']);
+export const EntityType = z.enum(['user', 'host', 'service', 'universal']);
 export type EntityTypeEnum = typeof EntityType.enum;
 export const EntityTypeEnum = EntityType.enum;
 
@@ -36,6 +36,11 @@ export const EngineDescriptor = z.object({
   status: EngineStatus,
   filter: z.string().optional(),
   fieldHistoryLength: z.number().int(),
+  lookbackPeriod: z
+    .string()
+    .regex(/[smdh]$/)
+    .optional()
+    .default('24h'),
   error: z.object({}).optional(),
 });
 
@@ -80,3 +85,9 @@ export const InspectQuery = z.object({
   response: z.array(z.string()),
   dsl: z.array(z.string()),
 });
+
+/**
+ * Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+ */
+export type Interval = z.infer<typeof Interval>;
+export const Interval = z.string().regex(/^[1-9]\d*[smh]$/);

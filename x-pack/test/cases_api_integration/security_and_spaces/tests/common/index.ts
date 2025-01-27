@@ -18,7 +18,6 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./comments/delete_comments'));
     loadTestFile(require.resolve('./comments/find_comments'));
     loadTestFile(require.resolve('./comments/get_comment'));
-    loadTestFile(require.resolve('./comments/get_all_comments'));
     loadTestFile(require.resolve('./comments/patch_comment'));
     loadTestFile(require.resolve('./comments/post_comment'));
     loadTestFile(require.resolve('./files/post_file'));
@@ -58,6 +57,7 @@ export default ({ loadTestFile }: FtrProviderContext): void => {
     loadTestFile(require.resolve('./internal/bulk_delete_file_attachments'));
     loadTestFile(require.resolve('./internal/search_cases'));
     loadTestFile(require.resolve('./internal/replace_custom_field'));
+    loadTestFile(require.resolve('./internal/find_user_actions.ts'));
 
     /**
      * Attachments framework

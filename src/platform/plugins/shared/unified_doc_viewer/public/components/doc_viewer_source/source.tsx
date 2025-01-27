@@ -27,10 +27,8 @@ interface SourceViewerProps {
   index: string | undefined;
   dataView: DataView;
   textBasedHits?: DataTableRecord[];
-  hasLineNumbers: boolean;
   width?: number;
   decreaseAvailableHeightBy?: number;
-  requestState?: ElasticRequestState;
   onRefresh: () => void;
 }
 
@@ -41,9 +39,8 @@ export const DocViewerSource = ({
   id,
   index,
   dataView,
-  width,
-  hasLineNumbers,
   textBasedHits,
+  width,
   decreaseAvailableHeightBy,
   onRefresh,
 }: SourceViewerProps) => {
@@ -132,7 +129,8 @@ export const DocViewerSource = ({
       jsonValue={jsonValue}
       width={width}
       height={editorHeight}
-      hasLineNumbers={hasLineNumbers}
+      hasLineNumbers
+      enableFindAction
       onEditorDidMount={(editorNode: monaco.editor.IStandaloneCodeEditor) => setEditor(editorNode)}
     />
   );

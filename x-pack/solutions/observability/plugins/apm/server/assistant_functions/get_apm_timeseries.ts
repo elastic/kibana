@@ -4,11 +4,12 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { FromSchema } from 'json-schema-to-ts';
+import type { FromSchema } from 'json-schema-to-ts';
 import { omit } from 'lodash';
 import { FunctionVisibility } from '@kbn/observability-ai-assistant-plugin/common';
-import { FunctionRegistrationParameters } from '.';
-import { ApmTimeseries, getApmTimeseries } from '../routes/assistant_functions/get_apm_timeseries';
+import type { FunctionRegistrationParameters } from '.';
+import type { ApmTimeseries } from '../routes/assistant_functions/get_apm_timeseries';
+import { getApmTimeseries } from '../routes/assistant_functions/get_apm_timeseries';
 import { NON_EMPTY_STRING } from '../utils/non_empty_string_ref';
 
 const parameters = {

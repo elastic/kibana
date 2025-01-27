@@ -17,7 +17,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import React from 'react';
-import { openInDiscoverText, openInLogsExplorerText } from '../../../common/translations';
+import { openInDiscoverText } from '../../../common/translations';
 import {
   useDatasetDetailsRedirectLinkTelemetry,
   useDatasetDetailsTelemetry,
@@ -89,13 +89,9 @@ export function Header() {
             data-test-subj="datasetQualityDetailsHeaderButton"
             size="s"
             {...redirectLinkProps.linkProps}
-            iconType={
-              redirectLinkProps.isLogsExplorerAvailable ? 'logoObservability' : 'discoverApp'
-            }
+            iconType="discoverApp"
           >
-            {redirectLinkProps.isLogsExplorerAvailable
-              ? openInLogsExplorerText
-              : openInDiscoverText}
+            {openInDiscoverText}
           </EuiButton>
         </EuiFlexGroup>
       </EuiFlexItem>

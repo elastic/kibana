@@ -5,12 +5,12 @@
  * 2.0.
  */
 
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import { uniqueId } from 'lodash';
 import React, { useState } from 'react';
 import { useHistory, useLocation } from 'react-router-dom';
-import { QuerySuggestion } from '@kbn/unified-search-plugin/public';
+import type { QuerySuggestion } from '@kbn/unified-search-plugin/public';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import type { DataView } from '@kbn/data-views-plugin/public';
 import { useApmPluginContext } from '../../../context/apm_plugin/use_apm_plugin_context';

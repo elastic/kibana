@@ -19,8 +19,8 @@ import {
 import { SERVICE_MAP_TIMEOUT_ERROR } from '../../../common/service_map';
 import { environmentQuery } from '../../../common/utils/environment_query';
 
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
-import { APMConfig } from '../..';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../..';
 
 export async function getTraceSampleIds({
   serviceName,

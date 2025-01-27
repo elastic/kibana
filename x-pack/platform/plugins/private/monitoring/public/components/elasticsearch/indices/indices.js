@@ -7,12 +7,7 @@
 
 import React from 'react';
 import { capitalize } from 'lodash';
-import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/formatting';
-import { formatMetric } from '../../../lib/format_number';
-import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
-import { ElasticsearchStatusIcon } from '../status_icon';
-import { ClusterStatus } from '../cluster_status';
-import { EuiMonitoringTable } from '../../table';
+import { css } from '@emotion/react';
 import {
   EuiLink,
   EuiPage,
@@ -22,10 +17,22 @@ import {
   EuiSpacer,
   EuiScreenReaderOnly,
 } from '@elastic/eui';
+
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import { AlertsStatus } from '../../../alerts/status';
-import './indices.scss';
+import { ClusterStatus } from '../cluster_status';
+import { ElasticsearchStatusIcon } from '../status_icon';
+import { EuiMonitoringTable } from '../../table';
+import { LARGE_FLOAT, LARGE_BYTES, LARGE_ABBREVIATED } from '../../../../common/formatting';
+import { formatMetric } from '../../../lib/format_number';
+import { getSafeForExternalLink } from '../../../lib/get_safe_for_external_link';
+
+const statusStyle = css`
+  display: flex;
+  align-items: center;
+`;
 
 const getColumns = (alerts) => {
   return [
@@ -70,7 +77,7 @@ const getColumns = (alerts) => {
       field: 'status',
       sortable: true,
       render: (value) => (
-        <div className="monElasticsearchIndicesTable__status" title={`Index status: ${value}`}>
+        <div css={statusStyle} title={`Index status: ${value}`}>
           <ElasticsearchStatusIcon status={value} />
           &nbsp;
           {capitalize(value)}
@@ -183,7 +190,7 @@ export const ElasticsearchIndices = ({
           />
           <EuiSpacer size="m" />
           <EuiMonitoringTable
-            className="elasticsearchIndicesTable"
+            data-test-subj="elasticsearchIndicesTable"
             rows={indices}
             columns={getColumns(alerts)}
             sorting={sorting}

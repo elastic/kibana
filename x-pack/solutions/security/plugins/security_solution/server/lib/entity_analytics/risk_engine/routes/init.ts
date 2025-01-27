@@ -73,7 +73,6 @@ export const riskEngineInitRoute = (
               risk_engine_enabled: initResult.riskEngineEnabled,
               risk_engine_resources_installed: initResult.riskEngineResourcesInstalled,
               risk_engine_configuration_created: initResult.riskEngineConfigurationCreated,
-              legacy_risk_engine_disabled: initResult.legacyRiskEngineDisabled,
               errors: initResult.errors,
             };
 

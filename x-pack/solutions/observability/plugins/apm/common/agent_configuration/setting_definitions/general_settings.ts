@@ -10,7 +10,7 @@ import { captureBodyRt } from '../runtime_types/capture_body_rt';
 import { logLevelRt } from '../runtime_types/log_level_rt';
 import { logEcsReformattingRt } from '../runtime_types/log_ecs_reformatting_rt';
 import { traceContinuationStrategyRt } from '../runtime_types/trace_continuation_strategy_rt';
-import { RawSettingDefinition } from './types';
+import type { RawSettingDefinition } from './types';
 
 export const generalSettings: RawSettingDefinition[] = [
   // API Request Size

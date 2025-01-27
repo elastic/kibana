@@ -7,7 +7,8 @@
 
 import React from 'react';
 import { EuiLink, EuiText } from '@elastic/eui';
-import type { RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import { SiemMigrationStatus } from '../../../../../common/siem_migrations/constants';
+import { type RuleMigration } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import * as i18n from './translations';
 import type { TableColumn } from './constants';
 
@@ -17,7 +18,7 @@ interface NameProps {
 }
 
 const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
-  if (!rule.elastic_rule) {
+  if (rule.status === SiemMigrationStatus.FAILED) {
     return (
       <EuiText color="danger" size="s">
         {rule.original_rule.title}
@@ -31,7 +32,7 @@ const Name = ({ rule, openMigrationRuleDetails }: NameProps) => {
       }}
       data-test-subj="ruleName"
     >
-      {rule.elastic_rule.title}
+      {rule.elastic_rule?.title ?? rule.original_rule.title}
     </EuiLink>
   );
 };

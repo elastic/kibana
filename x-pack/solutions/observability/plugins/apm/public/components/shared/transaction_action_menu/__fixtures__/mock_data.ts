@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Location } from 'history';
+import type { Location } from 'history';
 
 const bareTransaction = {
   '@metadata': 'whatever',

@@ -5,14 +5,14 @@
  * 2.0.
  */
 
-import { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
-import {
+import type { AnalyticsServiceSetup } from '@kbn/core-analytics-browser';
+import type {
   ITelemetryClient,
   SearchQuerySubmittedParams,
-  TelemetryEventTypes,
   EntityInventoryAddDataParams,
   EmptyStateClickParams,
 } from './types';
+import { TelemetryEventTypes } from './types';
 
 export class TelemetryClient implements ITelemetryClient {
   constructor(private analytics: AnalyticsServiceSetup) {}

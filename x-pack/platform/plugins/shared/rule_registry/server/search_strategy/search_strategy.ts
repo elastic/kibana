@@ -64,7 +64,7 @@ export const ruleRegistrySearchStrategyProvider = (
 
       const registeredRuleTypes = alerting.listTypes();
 
-      const [validRuleTypeIds, invalidRuleTypeIds] = partition(request.ruleTypeIds, (ruleTypeId) =>
+      const [validRuleTypeIds, _] = partition(request.ruleTypeIds, (ruleTypeId) =>
         registeredRuleTypes.has(ruleTypeId)
       );
 
@@ -74,12 +74,6 @@ export const ruleRegistrySearchStrategyProvider = (
           400
         );
       }
-
-      invalidRuleTypeIds.forEach((ruleTypeId) => {
-        logger.warn(
-          `Found invalid rule type '${ruleTypeId}' while using ${RULE_SEARCH_STRATEGY_NAME} search strategy. No alert data from this rule type will be searched.`
-        );
-      });
 
       const securityAuditLogger = security?.audit.asScoped(deps.request);
       const getActiveSpace = async () => spaces?.spacesService.getActiveSpace(deps.request);

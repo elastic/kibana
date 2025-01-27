@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
-import { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
-import { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
-import { Environment } from '../../../common/environment_rt';
+import type { DATAFEED_STATE, JOB_STATE } from '@kbn/ml-plugin/common';
+import type { MlAnomalyDetectors } from '@kbn/ml-plugin/server';
+import type { ApmMlJob } from '../../../common/anomaly_detection/apm_ml_job';
+import type { Environment } from '../../../common/environment_rt';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { APM_ML_JOB_GROUP } from './constants';
 

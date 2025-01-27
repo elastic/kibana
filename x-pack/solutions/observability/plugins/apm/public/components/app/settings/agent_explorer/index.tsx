@@ -18,7 +18,7 @@ import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
-import {
+import type {
   ElasticApmAgentLatestVersion,
   OtelAgentLatestVersion,
 } from '../../../../../common/agent_explorer';

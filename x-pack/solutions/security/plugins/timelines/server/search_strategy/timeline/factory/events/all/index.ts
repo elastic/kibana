@@ -22,7 +22,7 @@ import { formatTimelineData } from '../../helpers/format_timeline_data';
 
 export const timelineEventsAll: TimelineFactory<TimelineEventsQueries.all> = {
   buildDsl: ({ authFilter, ...options }) => {
-    if (options.pagination && options.pagination.querySize >= DEFAULT_MAX_TABLE_QUERY_SIZE) {
+    if (options.pagination && options.pagination.querySize > DEFAULT_MAX_TABLE_QUERY_SIZE) {
       throw new Error(`No query size above ${DEFAULT_MAX_TABLE_QUERY_SIZE}`);
     }
     const { fieldRequested, ...queryOptions } = cloneDeep(options);

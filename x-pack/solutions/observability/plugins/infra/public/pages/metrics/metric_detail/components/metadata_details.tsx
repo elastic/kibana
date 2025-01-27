@@ -10,7 +10,7 @@ import { get } from 'lodash';
 import { EuiButtonIcon, EuiFlexGrid, EuiFlexItem, EuiTitle, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import styled from '@emotion/styled';
-import { InfraMetadata } from '../../../../../common/http_api';
+import type { InfraMetadata } from '../../../../../common/http_api';
 import { MetadataContext } from '../containers/metadata_context';
 
 interface FieldDef {

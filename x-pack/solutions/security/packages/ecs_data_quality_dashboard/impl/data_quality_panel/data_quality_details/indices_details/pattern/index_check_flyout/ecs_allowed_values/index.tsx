@@ -9,7 +9,7 @@ import { EuiCode, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import React from 'react';
 
 import { EMPTY_PLACEHOLDER } from '../../../../../constants';
-import { CodeSuccess } from '../../../../../styles';
+import { codeSuccessCss } from '../../../../../styles';
 import type { AllowedValue } from '../../../../../types';
 
 interface Props {
@@ -23,7 +23,7 @@ const EcsAllowedValuesComponent: React.FC<Props> = ({ allowedValues }) =>
     <EuiFlexGroup data-test-subj="ecsAllowedValues" direction="row" wrap={true} gutterSize="xs">
       {allowedValues.map((x, i) => (
         <EuiFlexItem grow={false} key={`${x.name}_${i}`}>
-          <CodeSuccess>{x.name}</CodeSuccess>
+          <EuiCode css={codeSuccessCss}>{x.name}</EuiCode>
         </EuiFlexItem>
       ))}
     </EuiFlexGroup>

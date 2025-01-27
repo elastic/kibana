@@ -22,7 +22,7 @@ export interface ContainerKpiChartsProps {
   dateRange: TimeRange;
   query?: Query;
   filters?: Filter[];
-  searchSessionId?: string;
+  lastReloadRequestTime?: number;
   options?: {
     getSubtitle?: (formulaValue: string) => string;
   };
@@ -34,7 +34,7 @@ export const ContainerKpiCharts = ({
   dataView,
   filters,
   query,
-  searchSessionId,
+  lastReloadRequestTime,
   loading = false,
 }: ContainerKpiChartsProps) => {
   const isDockerContainer = useIntegrationCheck({ dependsOn: INTEGRATIONS.docker });
@@ -53,7 +53,7 @@ export const ContainerKpiCharts = ({
           dataView={dataView}
           filters={filters}
           query={query}
-          searchSessionId={searchSessionId}
+          lastReloadRequestTime={lastReloadRequestTime}
           loading={loading}
         />
       )}
@@ -63,7 +63,7 @@ export const ContainerKpiCharts = ({
           dataView={dataView}
           filters={filters}
           query={query}
-          searchSessionId={searchSessionId}
+          lastReloadRequestTime={lastReloadRequestTime}
           loading={loading}
         />
       )}
@@ -76,7 +76,7 @@ const DockerKpiCharts = ({
   dataView,
   filters,
   query,
-  searchSessionId,
+  lastReloadRequestTime,
   loading = false,
 }: ContainerKpiChartsProps) => {
   const charts = useDockerContainerKpiCharts({
@@ -92,7 +92,7 @@ const DockerKpiCharts = ({
             dateRange={dateRange}
             filters={filters}
             query={query}
-            searchSessionId={searchSessionId}
+            lastReloadRequestTime={lastReloadRequestTime}
             loading={loading}
           />
         </EuiFlexItem>
@@ -107,7 +107,7 @@ const KubernetesKpiCharts = ({
   filters,
   options,
   query,
-  searchSessionId,
+  lastReloadRequestTime,
   loading = false,
 }: ContainerKpiChartsProps) => {
   const charts = useK8sContainerKpiCharts({
@@ -123,7 +123,7 @@ const KubernetesKpiCharts = ({
             dateRange={dateRange}
             filters={filters}
             query={query}
-            searchSessionId={searchSessionId}
+            lastReloadRequestTime={lastReloadRequestTime}
             loading={loading}
           />
         </EuiFlexItem>

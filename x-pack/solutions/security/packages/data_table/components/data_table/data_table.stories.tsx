@@ -11,7 +11,7 @@ import { DeprecatedCellValueElementProps } from '@kbn/timelines-plugin/common';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import React from 'react';
 import { DragDropContext, DropResult, ResponderProvided } from '@hello-pangea/dnd';
-// eslint-disable-next-line @kbn/eslint/module_migration
+
 import { ThemeProvider } from 'styled-components';
 import { Provider as ReduxStoreProvider } from 'react-redux';
 import { euiDarkVars } from '@kbn/ui-theme';

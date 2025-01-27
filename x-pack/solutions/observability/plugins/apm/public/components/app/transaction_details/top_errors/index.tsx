@@ -11,7 +11,7 @@ import React from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import { isTimeComparison } from '../../../shared/time_comparison/get_comparison_options';
 import { FETCH_STATUS, useFetcher } from '../../../../hooks/use_fetcher';
-import { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
 import { getColumns } from '../../../shared/errors_table/get_columns';
 import { useAnyOfApmParams } from '../../../../hooks/use_apm_params';
 import { useTimeRange } from '../../../../hooks/use_time_range';

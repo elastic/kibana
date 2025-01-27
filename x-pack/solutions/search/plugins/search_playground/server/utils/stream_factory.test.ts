@@ -16,7 +16,7 @@ describe('streamFactory', () => {
       debug: jest.fn(),
     } as unknown as Logger;
 
-    const { DELIMITER, responseWithHeaders } = streamFactory(logger);
+    const { DELIMITER, responseWithHeaders, end } = streamFactory(logger);
 
     expect(DELIMITER).toBe('\n');
     expect(responseWithHeaders.headers).toEqual({
@@ -27,6 +27,7 @@ describe('streamFactory', () => {
       'Transfer-Encoding': 'chunked',
     });
     expect(responseWithHeaders.body).toBeInstanceOf(PassThrough);
+    end();
   });
 
   it('should push data to the stream correctly', () => {
@@ -35,7 +36,7 @@ describe('streamFactory', () => {
       debug: jest.fn(),
     } as unknown as Logger;
 
-    const { push, responseWithHeaders } = streamFactory(logger);
+    const { push, responseWithHeaders, end } = streamFactory(logger);
 
     const data = 'test data';
     push(data);
@@ -47,6 +48,7 @@ describe('streamFactory', () => {
 
     responseWithHeaders.body.end(() => {
       expect(output).toContain(data);
+      end();
     });
   });
 
@@ -56,7 +58,7 @@ describe('streamFactory', () => {
       debug: jest.fn(),
     } as unknown as Logger;
 
-    const { push, responseWithHeaders } = streamFactory(logger);
+    const { push, responseWithHeaders, end } = streamFactory(logger);
 
     const data = 'short';
     push(data);
@@ -68,6 +70,7 @@ describe('streamFactory', () => {
 
     responseWithHeaders.body.end(() => {
       expect(output).toContain(data);
+      end();
     });
   });
 
@@ -77,7 +80,7 @@ describe('streamFactory', () => {
       debug: jest.fn(),
     } as unknown as Logger;
 
-    const { push, responseWithHeaders } = streamFactory(logger);
+    const { push, responseWithHeaders, end } = streamFactory(logger);
 
     // Mock the write method to simulate backpressure
     const originalWrite = responseWithHeaders.body.write.bind(responseWithHeaders.body);
@@ -103,6 +106,7 @@ describe('streamFactory', () => {
 
     responseWithHeaders.body.on('end', () => {
       expect(output).toContain(data);
+      end();
       done();
     });
 

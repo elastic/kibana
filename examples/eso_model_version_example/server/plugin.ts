@@ -61,7 +61,10 @@ export interface EsoModelVersionExamplePluginsStart {
   encryptedSavedObjects: EncryptedSavedObjectsPluginStart;
 }
 
-export class EsoModelVersionExample implements Plugin<void, void> {
+export class EsoModelVersionExample
+  implements
+    Plugin<void, void, EsoModelVersionExamplePluginSetup, EsoModelVersionExamplePluginsStart>
+{
   public setup(
     core: CoreSetup<EsoModelVersionExamplePluginsStart>,
     plugins: EsoModelVersionExamplePluginSetup

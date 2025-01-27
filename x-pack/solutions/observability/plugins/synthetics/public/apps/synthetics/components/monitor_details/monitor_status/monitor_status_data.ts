@@ -83,7 +83,7 @@ export function getSkippedVizColor(euiTheme: EuiThemeComputed) {
 }
 
 export function getErrorVizColor(euiTheme: EuiThemeComputed) {
-  return euiTheme.colors.dangerText;
+  return euiTheme.colors.textDanger;
 }
 
 export function getXAxisLabelFormatter(interval: number) {

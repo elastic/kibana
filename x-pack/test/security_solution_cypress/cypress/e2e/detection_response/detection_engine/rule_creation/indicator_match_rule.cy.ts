@@ -93,6 +93,7 @@ import {
   getIndicatorOrButton,
   selectIndicatorMatchType,
   waitForAlertsToPopulate,
+  getThreatMatchQueryInvalidationText,
 } from '../../../../tasks/create_new_rule';
 import {
   SCHEDULE_INTERVAL_AMOUNT_INPUT,
@@ -195,7 +196,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@skipInServerlessMK
         });
       });
 
-      describe('custom indicator query input', () => {
+      describe('indicator query input', () => {
         beforeEach(() => {
           visit(CREATE_RULE_URL);
           selectIndicatorMatchType();
@@ -207,7 +208,7 @@ describe('indicator match', { tags: ['@ess', '@serverless', '@skipInServerlessMK
 
         it('Shows invalidation text if text is removed', () => {
           getCustomIndicatorQueryInput().type('{selectall}{del}');
-          getCustomQueryInvalidationText().should('exist');
+          getThreatMatchQueryInvalidationText().should('exist');
         });
       });
 

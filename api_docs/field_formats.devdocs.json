@@ -825,13 +825,7 @@
           ],
           "signature": [
             "(uiSettings: ",
-            {
-              "pluginId": "@kbn/core-ui-settings-server",
-              "scope": "server",
-              "docId": "kibKbnCoreUiSettingsServerPluginApi",
-              "section": "def-server.IUiSettingsClient",
-              "text": "IUiSettingsClient"
-            },
+            "IUiSettingsClient",
             ") => Promise<",
             {
               "pluginId": "fieldFormats",
@@ -856,13 +850,7 @@
                 "- {@link IUiSettingsClient }"
               ],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-ui-settings-server",
-                  "scope": "server",
-                  "docId": "kibKbnCoreUiSettingsServerPluginApi",
-                  "section": "def-server.IUiSettingsClient",
-                  "text": "IUiSettingsClient"
-                }
+                "IUiSettingsClient"
               ],
               "path": "src/platform/plugins/shared/field_formats/server/types.ts",
               "deprecated": false,

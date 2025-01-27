@@ -5,6 +5,6 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import type { MetricsUIAggregation } from '../../../types';
 
 export const load: MetricsUIAggregation = { load: { avg: { field: 'system.load.5' } } };

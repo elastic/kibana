@@ -7,7 +7,7 @@
 
 import { useEffect } from 'react';
 import { useLocation } from 'react-router-dom';
-import { getLogsLocatorsFromUrlService } from '@kbn/logs-shared-plugin/common';
+import { getLogsLocatorFromUrlService, getTimeRange } from '@kbn/logs-shared-plugin/common';
 import { getFilterFromLocation, getTimeFromLocation } from './query_params';
 import { useKibanaContextForPlugin } from '../../hooks/use_kibana';
 
@@ -17,7 +17,7 @@ export const RedirectToLogs = () => {
   const {
     services: { share },
   } = useKibanaContextForPlugin();
-  const { logsLocator } = getLogsLocatorsFromUrlService(share.url);
+  const logsLocator = getLogsLocatorFromUrlService(share.url)!;
 
   const filter = getFilterFromLocation(location);
   const time = getTimeFromLocation(location);
@@ -25,8 +25,8 @@ export const RedirectToLogs = () => {
   useEffect(() => {
     logsLocator.navigate(
       {
-        time,
-        filter,
+        query: { language: 'kuery', query: filter },
+        timeRange: getTimeRange(time),
       },
       { replace: true }
     );

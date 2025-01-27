@@ -258,9 +258,20 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           new URL(resp.hits.hits[0]._source?.viewInAppUrl || '').search
         );
 
-        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('LOGS_EXPLORER_LOCATOR');
+        expect(resp.hits.hits[0]._source?.viewInAppUrl).contain('DISCOVER_APP_LOCATOR');
         expect(omit(parsedViewInAppUrl.params, 'timeRange.from')).eql({
-          dataset: DATA_VIEW_TITLE,
+          dataViewId: 'kbn-data-forge-fake_hosts.fake_hosts-*',
+          dataViewSpec: {
+            allowHidden: false,
+            allowNoIndex: false,
+            fieldFormats: {},
+            id: DATA_VIEW_ID,
+            name: 'ad-hoc-data-view-name',
+            runtimeFieldMap: {},
+            sourceFilters: [],
+            timeFieldName: '@timestamp',
+            title: 'kbn-data-forge-fake_hosts.fake_hosts-*',
+          },
           timeRange: { to: 'now' },
           query: { query: '', language: 'kuery' },
           filters: [],

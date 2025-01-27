@@ -6,11 +6,8 @@
  */
 
 import type { MetricsExplorerOptions } from '../../../../../common/metrics_explorer_views/types';
-import {
-  createMetricByFieldLookup,
-  MetricsQueryOptions,
-  metricsToApiOptions,
-} from './metrics_to_api_options';
+import type { MetricsQueryOptions } from './metrics_to_api_options';
+import { createMetricByFieldLookup, metricsToApiOptions } from './metrics_to_api_options';
 
 describe('metricsToApiOptions', () => {
   type TestNodeTypeMetricsField = 'test.node.type.field1' | 'test.node.type.field2';

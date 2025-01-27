@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { StorageGroupedIndexNames } from '../../../../common/storage_explorer';
+import type { StorageGroupedIndexNames } from '../../../../common/storage_explorer';
 
 export function getGroupedIndexLabel(label: StorageGroupedIndexNames) {
   switch (label) {

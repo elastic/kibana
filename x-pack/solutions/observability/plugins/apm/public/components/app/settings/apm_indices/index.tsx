@@ -25,9 +25,10 @@ import React, { useEffect, useState } from 'react';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useApmPluginContext } from '../../../../context/apm_plugin/use_apm_plugin_context';
 import { useFetcher } from '../../../../hooks/use_fetcher';
-import { ApmPluginStartDeps } from '../../../../plugin';
+import type { ApmPluginStartDeps } from '../../../../plugin';
 import { clearCache } from '../../../../services/rest/call_api';
-import { APIReturnType, callApmApi } from '../../../../services/rest/create_call_apm_api';
+import type { APIReturnType } from '../../../../services/rest/create_call_apm_api';
+import { callApmApi } from '../../../../services/rest/create_call_apm_api';
 
 const APM_INDEX_LABELS = [
   {

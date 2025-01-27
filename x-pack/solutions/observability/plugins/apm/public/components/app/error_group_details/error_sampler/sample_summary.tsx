@@ -8,7 +8,7 @@ import { EuiText, EuiSpacer, EuiCodeBlock, useEuiFontSize } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
 import styled from '@emotion/styled';
-import { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
+import type { APMError } from '../../../../../typings/es_schemas/ui/apm_error';
 import { NOT_AVAILABLE_LABEL } from '../../../../../common/i18n';
 
 const Label = styled.div`

@@ -6,17 +6,22 @@
  */
 
 import React from 'react';
-import { EuiBadge, EuiText, EuiToolTip } from '@elastic/eui';
-import styled from 'styled-components';
+import { EuiBadge, EuiText, EuiToolTip, useEuiTheme } from '@elastic/eui';
+import { css } from '@emotion/react';
 
-const StyledText = styled(EuiText)`
-  white-space: nowrap;
-`;
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
 
-const StyledDescription = styled.span`
-  margin-right: ${({ theme }) => theme.eui.euiSizeS};
-  vertical-align: baseline;
-`;
+  return {
+    text: css({
+      whiteSpace: 'nowrap',
+    }),
+    description: css({
+      marginRight: euiTheme.size.s,
+      verticalAlign: 'baseline',
+    }),
+  };
+};
 
 export interface Props {
   badgeText: string;
@@ -33,14 +38,15 @@ const StatComponent: React.FC<Props> = ({
   children,
   badgeProps,
 }) => {
+  const styles = useStyles();
   return (
     <EuiToolTip content={tooltipText}>
-      <StyledText data-test-subj="stat" size={'xs'}>
-        {children && <StyledDescription>{children}</StyledDescription>}
+      <EuiText css={styles.text} data-test-subj="stat" size={'xs'}>
+        {children && <span css={styles.description}>{children}</span>}
         <EuiBadge color={badgeColor} {...badgeProps}>
           {badgeText}
         </EuiBadge>
-      </StyledText>
+      </EuiText>
     </EuiToolTip>
   );
 };

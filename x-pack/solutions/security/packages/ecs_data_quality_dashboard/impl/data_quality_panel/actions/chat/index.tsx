@@ -6,9 +6,11 @@
  */
 
 import React, { FC, useCallback } from 'react';
-import { AssistantAvatar, NewChat } from '@kbn/elastic-assistant';
-import styled from 'styled-components';
+import { NewChat } from '@kbn/elastic-assistant';
+import { css } from '@emotion/react';
+import { useEuiTheme } from '@elastic/eui';
 
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import {
   DATA_QUALITY_DASHBOARD_CONVERSATION_ID,
   DATA_QUALITY_PROMPT_CONTEXT_PILL,
@@ -18,10 +20,16 @@ import {
 import { useDataQualityContext } from '../../data_quality_context';
 import { ASK_ASSISTANT } from './translations';
 
-const StyledLinkText = styled.span`
-  display: flex;
-  gap: ${({ theme }) => theme.eui.euiSizeXS};
-`;
+const useStyles = () => {
+  const { euiTheme } = useEuiTheme();
+
+  return {
+    linkText: css({
+      display: 'flex',
+      gap: euiTheme.size.xs,
+    }),
+  };
+};
 
 interface Props {
   markdownComment: string;
@@ -29,8 +37,10 @@ interface Props {
 }
 
 const ChatActionComponent: FC<Props> = ({ indexName, markdownComment }) => {
+  const styles = useStyles();
   const { isAssistantEnabled } = useDataQualityContext();
   const getPromptContext = useCallback(async () => markdownComment, [markdownComment]);
+
   return (
     <NewChat
       asLink={true}
@@ -43,10 +53,10 @@ const ChatActionComponent: FC<Props> = ({ indexName, markdownComment }) => {
       isAssistantEnabled={isAssistantEnabled}
       iconType={null}
     >
-      <StyledLinkText>
-        <AssistantAvatar size="xs" />
+      <span css={styles.linkText}>
+        <AssistantIcon />
         {ASK_ASSISTANT}
-      </StyledLinkText>
+      </span>
     </NewChat>
   );
 };

@@ -5,9 +5,9 @@
  * 2.0.
  */
 import { uniq, values, sumBy } from 'lodash';
-import { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
-import { ApmPluginRequestHandlerContext } from '../typings';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { IndicesStatsIndicesStats } from '@elastic/elasticsearch/lib/api/types';
+import type { ApmPluginRequestHandlerContext } from '../typings';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export async function getTotalIndicesStats({
   context,

@@ -7,7 +7,7 @@
 
 import { sortBy } from 'lodash';
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
+import type { AgentName } from '../../../typings/es_schemas/ui/fields/agent';
 import { withApmSpan } from '../../utils/with_apm_span';
 import { asMutableArray } from '../../../common/utils/as_mutable_array';
 import { environmentQuery } from '../../../common/utils/environment_query';
@@ -25,8 +25,8 @@ import {
   TRANSACTION_TYPE,
   TRANSACTION_NAME,
 } from '../../../common/es_fields/apm';
-import { RandomSampler } from '../../lib/helpers/get_random_sampler';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { RandomSampler } from '../../lib/helpers/get_random_sampler';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 
 export type BucketKey = Record<typeof TRANSACTION_NAME | typeof SERVICE_NAME, string>;
 

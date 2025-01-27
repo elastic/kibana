@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { MetricsUIAggregation } from '../../../types';
+import type { MetricsUIAggregation } from '../../../types';
 export const txV2: MetricsUIAggregation = {
   tx_sum: {
     sum: {

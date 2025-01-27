@@ -6,66 +6,51 @@
  */
 import { EuiEmptyPrompt, EuiPanel, EuiToolTip } from '@elastic/eui';
 import React from 'react';
-import type { RiskScoreEntity } from '../../../../common/search_strategy';
-import { useCheckSignalIndex } from '../../../detections/containers/detection_engine/alerts/use_check_signal_index';
-import type { inputsModel } from '../../../common/store';
-import { RiskScoreHeaderTitle } from '../risk_score_onboarding/risk_score_header_title';
+import { FormattedMessage } from '@kbn/i18n-react';
+import type { EntityType } from '../../../../common/search_strategy';
 import { HeaderSection } from '../../../common/components/header_section';
-import { EntityAnalyticsLearnMoreLink } from '../risk_score_onboarding/entity_analytics_doc_link';
-import { RiskScoreEnableButton } from '../risk_score_onboarding/risk_score_enable_button';
 import * as i18n from './translations';
+import { EntityAnalyticsLearnMoreLink } from '../entity_analytics_learn_more_link';
+import { RiskScoreHeaderTitle } from '../risk_score_header_title';
+import { SecuritySolutionLinkButton } from '../../../common/components/links';
+import { SecurityPageName } from '../../../../common/constants';
 
 const EnableRiskScoreComponent = ({
-  isDeprecated,
   isDisabled,
   entityType,
-  refetch,
-  timerange,
 }: {
-  isDeprecated: boolean;
   isDisabled: boolean;
-  entityType: RiskScoreEntity;
-  refetch: inputsModel.Refetch;
-  timerange: {
-    from: string;
-    to: string;
-  };
+  entityType: EntityType;
 }) => {
-  const { signalIndexExists } = useCheckSignalIndex();
-  if (!isDeprecated && !isDisabled) {
+  if (!isDisabled) {
     return null;
   }
-
-  const text = isDeprecated
-    ? {
-        cta: i18n.UPGRADE_RISK_SCORE(entityType),
-        body: i18n.UPGRADE_RISK_SCORE_DESCRIPTION,
-      }
-    : {
-        cta: i18n.ENABLE_RISK_SCORE(entityType),
-        body: i18n.ENABLE_RISK_SCORE_DESCRIPTION(entityType),
-      };
 
   return (
     <EuiPanel hasBorder>
       <HeaderSection title={<RiskScoreHeaderTitle riskScoreEntity={entityType} />} titleSize="s" />
       <EuiEmptyPrompt
-        title={<h2>{text.cta}</h2>}
+        title={<h2>{i18n.ENABLE_RISK_SCORE(entityType)}</h2>}
         body={
           <>
-            {text.body}
+            {i18n.ENABLE_RISK_SCORE_DESCRIPTION(entityType)}
             {` `}
             <EntityAnalyticsLearnMoreLink />
           </>
         }
         actions={
-          <EuiToolTip content={!signalIndexExists ? i18n.ENABLE_RISK_SCORE_POPOVER : null}>
-            <RiskScoreEnableButton
-              disabled={!signalIndexExists}
-              refetch={refetch}
-              riskScoreEntity={entityType}
-              timerange={timerange}
-            />
+          <EuiToolTip content={i18n.ENABLE_RISK_SCORE_POPOVER}>
+            <SecuritySolutionLinkButton
+              color="primary"
+              fill
+              deepLinkId={SecurityPageName.entityAnalyticsManagement}
+              data-test-subj={`enable_risk_score`}
+            >
+              <FormattedMessage
+                id="xpack.securitySolution.riskScore.enableButtonTitle"
+                defaultMessage="Enable"
+              />
+            </SecuritySolutionLinkButton>
           </EuiToolTip>
         }
       />

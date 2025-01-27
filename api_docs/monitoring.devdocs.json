@@ -64,13 +64,7 @@
             "description": [],
             "signature": [
               "(esClient: ",
-              {
-                "pluginId": "@kbn/core-elasticsearch-server",
-                "scope": "server",
-                "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                "section": "def-server.ElasticsearchClient",
-                "text": "ElasticsearchClient"
-              },
+              "ElasticsearchClient",
               ") => void"
             ],
             "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
@@ -85,13 +79,7 @@
                 "label": "esClient",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-elasticsearch-server",
-                    "scope": "server",
-                    "docId": "kibKbnCoreElasticsearchServerPluginApi",
-                    "section": "def-server.ElasticsearchClient",
-                    "text": "ElasticsearchClient"
-                  }
+                  "ElasticsearchClient"
                 ],
                 "path": "x-pack/platform/plugins/private/monitoring/server/types.ts",
                 "deprecated": false,

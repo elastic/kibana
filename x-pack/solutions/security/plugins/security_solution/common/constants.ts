@@ -23,7 +23,10 @@ export const ASSET_INVENTORY_FEATURE_ID = 'securitySolutionAssetInventory' as co
 export const ASSISTANT_FEATURE_ID = 'securitySolutionAssistant' as const;
 export const ATTACK_DISCOVERY_FEATURE_ID = 'securitySolutionAttackDiscovery' as const;
 export const CASES_FEATURE_ID = 'securitySolutionCasesV2' as const;
+export const TIMELINE_FEATURE_ID = 'securitySolutionTimeline' as const;
+export const NOTES_FEATURE_ID = 'securitySolutionNotes' as const;
 export const SERVER_APP_ID = 'siem' as const;
+export const SECURITY_FEATURE_ID = 'siemV2' as const;
 export const APP_NAME = 'Security' as const;
 export const APP_ICON = 'securityAnalyticsApp' as const;
 export const APP_ICON_SOLUTION = 'logoSecurity' as const;
@@ -67,7 +70,6 @@ export const ENDPOINT_METRICS_INDEX = '.ds-metrics-endpoint.metrics-*' as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_ON = true as const;
 export const DEFAULT_RULE_REFRESH_INTERVAL_VALUE = 60000 as const; // ms
 export const DEFAULT_RULE_NOTIFICATION_QUERY_SIZE = 100 as const;
-export const SECURITY_FEATURE_ID = 'Security' as const;
 export const SECURITY_TAG_NAME = 'Security Solution' as const;
 export const SECURITY_TAG_DESCRIPTION = 'Security Solution auto-generated tag' as const;
 export const DEFAULT_SPACE_ID = 'default' as const;
@@ -246,6 +248,7 @@ export const DETECTION_ENGINE_RULES_BULK_CREATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_create` as const;
 export const DETECTION_ENGINE_RULES_BULK_UPDATE =
   `${DETECTION_ENGINE_RULES_URL}/_bulk_update` as const;
+export const DETECTION_ENGINE_RULES_IMPORT_URL = `${DETECTION_ENGINE_RULES_URL}/_import` as const;
 
 export * from './entity_analytics/constants';
 
@@ -282,7 +285,6 @@ export const TIMELINE_COPY_URL = `${TIMELINE_URL}/_copy` as const;
 export const NOTE_URL = '/api/note' as const;
 export const PINNED_EVENT_URL = '/api/pinned_event' as const;
 export const SOURCERER_API_URL = '/internal/security_solution/sourcerer' as const;
-export const RISK_SCORE_INDEX_STATUS_API_URL = '/internal/risk_score/index_status' as const;
 
 /**
  * Default signals index key for kibana.dev.yml
@@ -355,10 +357,6 @@ export const showAllOthersBucket: string[] = [
   'user.name',
 ];
 
-export const RISKY_HOSTS_INDEX_PREFIX = 'ml_host_risk_score_' as const;
-
-export const RISKY_USERS_INDEX_PREFIX = 'ml_user_risk_score_' as const;
-
 export const TRANSFORM_STATES = {
   ABORTING: 'aborting',
   FAILED: 'failed',
@@ -426,6 +424,7 @@ export const RULES_TABLE_MAX_PAGE_SIZE = 100;
 export const NEW_FEATURES_TOUR_STORAGE_KEYS = {
   RULE_MANAGEMENT_PAGE: 'securitySolution.rulesManagementPage.newFeaturesTour.v8.13',
   TIMELINES: 'securitySolution.security.timelineFlyoutHeader.saveTimelineTour',
+  SIEM_MAIN_LANDING_PAGE: 'securitySolution.siemMigrations.setupGuide.v8.18',
 };
 
 export const RULE_DETAILS_EXECUTION_LOG_TABLE_SHOW_METRIC_COLUMNS_STORAGE_KEY =

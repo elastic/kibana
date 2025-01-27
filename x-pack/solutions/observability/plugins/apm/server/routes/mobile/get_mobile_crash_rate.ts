@@ -6,9 +6,9 @@
  */
 
 import { kqlQuery, rangeQuery, termQuery } from '@kbn/observability-plugin/server';
-import { Coordinate } from '../../../typings/timeseries';
-import { Maybe } from '../../../typings/common';
-import { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
+import type { Coordinate } from '../../../typings/timeseries';
+import type { Maybe } from '../../../typings/common';
+import type { APMEventClient } from '../../lib/helpers/create_es_client/create_apm_event_client';
 import { getBucketSize } from '../../../common/utils/get_bucket_size';
 import { ERROR_TYPE, ERROR_ID, SERVICE_NAME } from '../../../common/es_fields/apm';
 import { environmentQuery } from '../../../common/utils/environment_query';

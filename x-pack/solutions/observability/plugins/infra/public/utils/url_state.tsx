@@ -6,10 +6,11 @@
  */
 
 import { parse } from 'query-string';
-import { History, Location } from 'history';
+import type { History, Location } from 'history';
 import React from 'react';
 import { Route } from '@kbn/shared-ux-router';
-import { decode, RisonValue } from '@kbn/rison';
+import type { RisonValue } from '@kbn/rison';
+import { decode } from '@kbn/rison';
 import { throttle } from 'lodash';
 import { replaceStateKeyInQueryString } from '../../common/url_state_storage_service';
 

@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SubFeature } from '@kbn/actions-plugin/common';
 import { RuleType } from '../../types';
 import { InitialRule } from '../sections/rule_form/rule_reducer';
 
@@ -18,8 +19,9 @@ type Capabilities = Record<string, any>;
 
 export const hasShowActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.show;
 export const hasSaveActionsCapability = (capabilities: Capabilities) => capabilities?.actions?.save;
-export const hasExecuteActionsCapability = (capabilities: Capabilities, actionTypeId?: string) =>
-  actionTypeId === '.sentinelone' ? capabilities?.actions?.save : capabilities?.actions?.execute;
+export const hasExecuteActionsCapability = (capabilities: Capabilities, subFeature?: SubFeature) =>
+  subFeature ? capabilities?.actions[`${subFeature}Execute`] : capabilities?.actions?.execute;
+
 export const hasDeleteActionsCapability = (capabilities: Capabilities) =>
   capabilities?.actions?.delete;
 

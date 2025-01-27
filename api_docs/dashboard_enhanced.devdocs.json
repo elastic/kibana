@@ -573,13 +573,7 @@
                 "text": "DashboardStart"
               },
               "; }, unknown, ",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ">"
             ],
             "path": "x-pack/platform/plugins/shared/dashboard_enhanced/public/services/drilldowns/abstract_dashboard_drilldown/abstract_dashboard_drilldown.tsx",
@@ -1010,13 +1004,7 @@
             "text": "SerializedEvent"
           },
           "; references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[]; }"
         ],
         "path": "x-pack/platform/plugins/shared/dashboard_enhanced/common/drilldowns/dashboard_drilldown/dashboard_drilldown_persistable_state.ts",
@@ -1068,13 +1056,7 @@
             "text": "SerializedEvent"
           },
           ", references: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectReference",
-            "text": "SavedObjectReference"
-          },
+          "SavedObjectReference",
           "[]) => ",
           {
             "pluginId": "uiActionsEnhanced",

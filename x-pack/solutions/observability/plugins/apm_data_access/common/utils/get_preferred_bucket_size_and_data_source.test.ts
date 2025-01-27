@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ApmDataSourceWithSummary } from '../data_source';
+import type { ApmDataSourceWithSummary } from '../data_source';
 import { ApmDocumentType } from '../document_type';
 import { RollupInterval } from '../rollup';
 import {

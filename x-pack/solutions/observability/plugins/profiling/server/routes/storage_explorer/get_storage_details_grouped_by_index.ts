@@ -4,12 +4,10 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import { ElasticsearchClient } from '@kbn/core/server';
+import type { ElasticsearchClient } from '@kbn/core/server';
 import { groupBy, sumBy } from 'lodash';
-import {
-  IndexLifecyclePhaseSelectOption,
-  StorageGroupedIndexNames,
-} from '../../../common/storage_explorer';
+import type { StorageGroupedIndexNames } from '../../../common/storage_explorer';
+import { IndexLifecyclePhaseSelectOption } from '../../../common/storage_explorer';
 import {
   getIndicesLifecycleStatus,
   getIndicesStats,

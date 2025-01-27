@@ -14,10 +14,10 @@ import {
   SERVICE_NODE_NAME,
 } from '../../../../common/es_fields/apm';
 import { environmentQuery } from '../../../../common/utils/environment_query';
-import { Coordinate } from '../../../../typings/timeseries';
+import type { Coordinate } from '../../../../typings/timeseries';
 import { getMetricsDateHistogramParams } from '../../../lib/helpers/metrics';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
-import { APMConfig } from '../../..';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../..';
 
 export async function getActiveInstancesTimeseries({
   environment,

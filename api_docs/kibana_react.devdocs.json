@@ -19,7 +19,7 @@
           },
           " extends React.Component<Props, {}, any>"
         ],
-        "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -30,7 +30,7 @@
             "tags": [],
             "label": "defaultProps",
             "description": [],
-            "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -44,7 +44,7 @@
                 "signature": [
                   "true"
                 ],
-                "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -58,7 +58,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -72,7 +72,7 @@
                 "signature": [
                   "false"
                 ],
-                "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -88,7 +88,7 @@
             "signature": [
               "(nextProps: Props, prevState: State) => { value: [string | number, string | number] | undefined; prevValue: [string | number, string | number] | undefined; isValid: boolean; errorMessage: string; } | null"
             ],
-            "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -102,7 +102,7 @@
                 "signature": [
                   "Props"
                 ],
-                "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -117,7 +117,7 @@
                 "signature": [
                   "State"
                 ],
-                "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -132,7 +132,7 @@
             "tags": [],
             "label": "state",
             "description": [],
-            "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": []
@@ -147,7 +147,7 @@
             "signature": [
               "(value: [string | number, string | number]) => void"
             ],
-            "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -161,7 +161,7 @@
                 "signature": [
                   "[string | number, string | number]"
                 ],
-                "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+                "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -179,7 +179,7 @@
             "signature": [
               "() => React.JSX.Element"
             ],
-            "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -199,13 +199,7 @@
         "description": [],
         "signature": [
           "<Services extends Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">>(services: Services) => ",
           {
             "pluginId": "kibanaReact",
@@ -216,7 +210,7 @@
           },
           "<Services>"
         ],
-        "path": "src/plugins/kibana_react/public/context/context.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -230,7 +224,7 @@
             "signature": [
               "Services"
             ],
-            "path": "src/plugins/kibana_react/public/context/context.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -248,13 +242,7 @@
         "description": [],
         "signature": [
           "(services: Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">) => ",
           {
             "pluginId": "kibanaReact",
@@ -264,7 +252,7 @@
             "text": "KibanaReactNotifications"
           }
         ],
-        "path": "src/plugins/kibana_react/public/notifications/create_notifications.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/notifications/create_notifications.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -277,16 +265,10 @@
             "description": [],
             "signature": [
               "Partial<",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ">"
             ],
-            "path": "src/plugins/kibana_react/public/notifications/create_notifications.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/notifications/create_notifications.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -304,13 +286,7 @@
         "description": [],
         "signature": [
           "(services: Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">) => ",
           {
             "pluginId": "kibanaReact",
@@ -320,7 +296,7 @@
             "text": "KibanaReactOverlays"
           }
         ],
-        "path": "src/plugins/kibana_react/public/overlays/create_react_overlays.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/overlays/create_react_overlays.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -333,16 +309,10 @@
             "description": [],
             "signature": [
               "Partial<",
-              {
-                "pluginId": "@kbn/core-lifecycle-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-                "section": "def-public.CoreStart",
-                "text": "CoreStart"
-              },
+              "CoreStart",
               ">"
             ],
-            "path": "src/plugins/kibana_react/public/overlays/create_react_overlays.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/overlays/create_react_overlays.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -371,7 +341,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -391,7 +361,7 @@
                 "text": "ElasticAgentCardProps"
               }
             ],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -410,7 +380,7 @@
         "signature": [
           "React.FunctionComponent<React.PropsWithChildren<{ services?: {} | undefined; }>>"
         ],
-        "path": "src/plugins/kibana_react/public/context/context.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -460,7 +430,7 @@
           "KibanaPageTemplateSolutionNavAvatarProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -474,7 +444,7 @@
             "signature": [
               "KibanaPageTemplateSolutionNavAvatarProps"
             ],
-            "path": "src/plugins/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/page_template/solution_nav/solution_nav_avatar.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -503,7 +473,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/theme.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
@@ -524,7 +494,7 @@
                 "text": "KibanaThemeProviderProps"
               }
             ],
-            "path": "src/plugins/kibana_react/public/theme.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -545,7 +515,7 @@
           "MarkdownProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -559,7 +529,7 @@
             "signature": [
               "MarkdownProps"
             ],
-            "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/markdown/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -580,7 +550,7 @@
           "MarkdownSimpleProps",
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/markdown/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -594,7 +564,7 @@
             "signature": [
               "MarkdownSimpleProps"
             ],
-            "path": "src/plugins/kibana_react/public/markdown/index.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/markdown/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -621,7 +591,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -641,7 +611,7 @@
                 "text": "NoDataPageActions"
               }
             ],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/no_data_card.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -668,7 +638,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -688,7 +658,7 @@
                 "text": "NoDataPageProps"
               }
             ],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -707,7 +677,7 @@
         "signature": [
           "({ addDataHref, application, devToolsHref, hidden, managementHref, showDevToolsLink, showManagementLink, }: Props) => (React.JSX.Element | null)[]"
         ],
-        "path": "src/plugins/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -721,7 +691,7 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_actions/overview_page_actions.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -740,7 +710,7 @@
         "signature": [
           "({ addBasePath, path, onSetDefaultRoute, onChangeDefaultRoute, }: Props) => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -754,7 +724,7 @@
             "signature": [
               "Props"
             ],
-            "path": "src/plugins/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/overview_page/overview_page_footer/overview_page_footer.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -777,7 +747,7 @@
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => { href: string; onClick: (event: React.MouseEvent<Element, MouseEvent>) => void; }"
         ],
-        "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -794,7 +764,7 @@
               "History",
               "<unknown>"
             ],
-            "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -809,7 +779,7 @@
             "signature": [
               "string | LocationObject"
             ],
-            "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -824,7 +794,7 @@
             "signature": [
               "Function | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -847,7 +817,7 @@
           "History",
           "<unknown>, to: string | LocationObject, onClickCallback?: Function | undefined) => (event: React.MouseEvent<Element, MouseEvent>) => void"
         ],
-        "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -864,7 +834,7 @@
               "History",
               "<unknown>"
             ],
-            "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -879,7 +849,7 @@
             "signature": [
               "string | LocationObject"
             ],
-            "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -894,7 +864,7 @@
             "signature": [
               "Function | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/react_router_navigate/react_router_navigate.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -922,16 +892,10 @@
             "text": "ToMountPointOptions"
           },
           ") => ",
-          {
-            "pluginId": "@kbn/core-mount-utils-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-            "section": "def-public.MountPoint",
-            "text": "MountPoint"
-          },
+          "MountPoint",
           "<HTMLElement>"
         ],
-        "path": "src/plugins/kibana_react/public/util/index.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -963,7 +927,7 @@
             "signature": [
               "React.ReactNode"
             ],
-            "path": "src/plugins/kibana_react/public/util/index.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -984,7 +948,7 @@
                 "text": "ToMountPointOptions"
               }
             ],
-            "path": "src/plugins/kibana_react/public/util/index.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1011,7 +975,7 @@
           },
           ") => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1031,7 +995,7 @@
                 "text": "UrlTemplateEditorProps"
               }
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1050,7 +1014,7 @@
         "signature": [
           "(defaultValue?: boolean | undefined) => boolean"
         ],
-        "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/dark_mode/use_dark_mode.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1064,7 +1028,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/dark_mode/use_dark_mode.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/dark_mode/use_dark_mode.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1084,24 +1048,12 @@
         ],
         "signature": [
           "(executionContext: ",
-          {
-            "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-public.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          },
+          "ExecutionContextSetup",
           " | undefined, context: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
+          "KibanaExecutionContext",
           ") => void"
         ],
-        "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/use_execution_context/use_execution_context.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1113,16 +1065,10 @@
             "label": "executionContext",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-                "section": "def-public.ExecutionContextSetup",
-                "text": "ExecutionContextSetup"
-              },
+              "ExecutionContextSetup",
               " | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1135,15 +1081,9 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              }
+              "KibanaExecutionContext"
             ],
-            "path": "src/plugins/kibana_react/public/use_execution_context/use_execution_context.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/use_execution_context/use_execution_context.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1164,7 +1104,7 @@
         "signature": [
           "<T>(key: string, defaultValue?: T | undefined) => T"
         ],
-        "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1178,7 +1118,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1193,7 +1133,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1214,7 +1154,7 @@
         "signature": [
           "<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"
         ],
-        "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1228,7 +1168,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1243,7 +1183,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1269,16 +1209,10 @@
             "text": "KibanaReactContextValue"
           },
           "<Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           "> & Extra>"
         ],
-        "path": "src/plugins/kibana_react/public/context/context.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -1297,7 +1231,7 @@
         "signature": [
           "<T>(key: string, defaultValue?: T | undefined) => T"
         ],
-        "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1311,7 +1245,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1326,7 +1260,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1347,7 +1281,7 @@
         "signature": [
           "<T>(key: string, defaultValue?: T | undefined) => [T, Setter<T>]"
         ],
-        "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1361,7 +1295,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1376,7 +1310,7 @@
             "signature": [
               "T | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/ui_settings/use_ui_setting.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/ui_settings/use_ui_setting.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1403,7 +1337,7 @@
           },
           "<{}>; }>(type: React.ComponentType<Props>) => React.FC<Omit<Props, \"kibana\">>"
         ],
-        "path": "src/plugins/kibana_react/public/context/context.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1417,7 +1351,7 @@
             "signature": [
               "React.ComponentType<Props>"
             ],
-            "path": "src/plugins/kibana_react/public/context/context.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1447,16 +1381,10 @@
             "text": "KibanaTheme"
           },
           ">, userProfile?: ",
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-public.UserProfileService",
-            "text": "UserProfileService"
-          },
+          "UserProfileService",
           " | undefined) => React.JSX.Element"
         ],
-        "path": "src/plugins/kibana_react/public/theme.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
@@ -1488,7 +1416,7 @@
             "signature": [
               "React.ReactNode"
             ],
-            "path": "src/plugins/kibana_react/public/theme.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1512,7 +1440,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/kibana_react/public/theme.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1525,16 +1453,10 @@
             "label": "userProfile",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               " | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/theme.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -1562,7 +1484,7 @@
           },
           "<T>"
         ],
-        "path": "src/plugins/kibana_react/public/context/types.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1583,7 +1505,7 @@
               },
               "<T>"
             ],
-            "path": "src/plugins/kibana_react/public/context/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1597,7 +1519,7 @@
             "signature": [
               "React.FunctionComponent<React.PropsWithChildren<{ services?: T | undefined; }>>"
             ],
-            "path": "src/plugins/kibana_react/public/context/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1650,7 +1572,7 @@
               },
               "<T>>>"
             ],
-            "path": "src/plugins/kibana_react/public/context/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1691,7 +1613,7 @@
           },
           "<Services>"
         ],
-        "path": "src/plugins/kibana_react/public/context/types.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1705,7 +1627,7 @@
             "signature": [
               "Services"
             ],
-            "path": "src/plugins/kibana_react/public/context/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1725,7 +1647,7 @@
                 "text": "KibanaReactOverlays"
               }
             ],
-            "path": "src/plugins/kibana_react/public/context/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1745,7 +1667,7 @@
                 "text": "KibanaReactNotifications"
               }
             ],
-            "path": "src/plugins/kibana_react/public/context/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1759,7 +1681,7 @@
         "tags": [],
         "label": "KibanaReactNotifications",
         "description": [],
-        "path": "src/plugins/kibana_react/public/notifications/types.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1805,7 +1727,7 @@
               },
               ") => void; }"
             ],
-            "path": "src/plugins/kibana_react/public/notifications/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1819,7 +1741,7 @@
         "tags": [],
         "label": "KibanaReactOverlays",
         "description": [],
-        "path": "src/plugins/kibana_react/public/overlays/types.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1832,23 +1754,11 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              {
-                "pluginId": "@kbn/core-overlays-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-public.OverlayFlyoutOpenOptions",
-                "text": "OverlayFlyoutOpenOptions"
-              },
+              "OverlayFlyoutOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
-            "path": "src/plugins/kibana_react/public/overlays/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1862,7 +1772,7 @@
                 "signature": [
                   "React.ReactNode"
                 ],
-                "path": "src/plugins/kibana_react/public/overlays/types.ts",
+                "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1875,16 +1785,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-public.OverlayFlyoutOpenOptions",
-                    "text": "OverlayFlyoutOpenOptions"
-                  },
+                  "OverlayFlyoutOpenOptions",
                   " | undefined"
                 ],
-                "path": "src/plugins/kibana_react/public/overlays/types.ts",
+                "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1901,23 +1805,11 @@
             "description": [],
             "signature": [
               "(node: React.ReactNode, options?: ",
-              {
-                "pluginId": "@kbn/core-overlays-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-public.OverlayModalOpenOptions",
-                "text": "OverlayModalOpenOptions"
-              },
+              "OverlayModalOpenOptions",
               " | undefined) => ",
-              {
-                "pluginId": "@kbn/core-mount-utils-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreMountUtilsBrowserPluginApi",
-                "section": "def-public.OverlayRef",
-                "text": "OverlayRef"
-              }
+              "OverlayRef"
             ],
-            "path": "src/plugins/kibana_react/public/overlays/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1931,7 +1823,7 @@
                 "signature": [
                   "React.ReactNode"
                 ],
-                "path": "src/plugins/kibana_react/public/overlays/types.ts",
+                "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1944,16 +1836,10 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-overlays-browser",
-                    "scope": "public",
-                    "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                    "section": "def-public.OverlayModalOpenOptions",
-                    "text": "OverlayModalOpenOptions"
-                  },
+                  "OverlayModalOpenOptions",
                   " | undefined"
                 ],
-                "path": "src/plugins/kibana_react/public/overlays/types.ts",
+                "path": "src/platform/plugins/shared/kibana_react/public/overlays/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1982,7 +1868,7 @@
           " extends ",
           "CommonProps"
         ],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1995,7 +1881,7 @@
             "description": [
               "\nSingle name for the current solution, used to auto-generate the title, logo, description, and button label"
             ],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2011,7 +1897,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2024,7 +1910,7 @@
             "description": [
               "\nRequired to set the docs link for the whole solution"
             ],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2040,7 +1926,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2064,7 +1950,7 @@
               },
               "; }"
             ],
-            "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2078,7 +1964,7 @@
         "tags": [],
         "label": "ToastInput",
         "description": [],
-        "path": "src/plugins/kibana_react/public/notifications/types.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2092,7 +1978,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/notifications/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2106,7 +1992,7 @@
             "signature": [
               "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/notifications/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2120,7 +2006,7 @@
             "signature": [
               "\"warning\" | \"success\" | \"primary\" | \"danger\" | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/notifications/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2135,7 +2021,7 @@
               "IconType",
               " | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/notifications/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2149,7 +2035,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/notifications/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2163,7 +2049,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/notifications/types.ts",
+            "path": "src/platform/plugins/shared/kibana_react/public/notifications/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2179,7 +2065,7 @@
         ],
         "label": "ToMountPointOptions",
         "description": [],
-        "path": "src/plugins/kibana_react/public/util/index.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
@@ -2195,7 +2081,7 @@
               "AnalyticsServiceStart",
               " | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/util/index.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2209,16 +2095,10 @@
             "signature": [
               "Observable",
               "<",
-              {
-                "pluginId": "@kbn/core-theme-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreThemeBrowserPluginApi",
-                "section": "def-public.CoreTheme",
-                "text": "CoreTheme"
-              },
+              "CoreTheme",
               "> | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/util/index.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2230,16 +2110,10 @@
             "label": "userProfile",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-user-profile-browser",
-                "scope": "public",
-                "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-                "section": "def-public.UserProfileService",
-                "text": "UserProfileService"
-              },
+              "UserProfileService",
               " | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/util/index.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/util/index.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2253,7 +2127,7 @@
         "tags": [],
         "label": "UrlTemplateEditorProps",
         "description": [],
-        "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2264,7 +2138,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2278,7 +2152,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2292,7 +2166,7 @@
             "signature": [
               "{ minLines?: number | undefined; maxLines?: number | undefined; } | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2313,7 +2187,7 @@
               },
               "[] | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2329,7 +2203,7 @@
               "editor",
               ".IModelContentChangedEvent) => void) | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2345,7 +2219,7 @@
               "editor",
               ".IStandaloneCodeEditor) => void) | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2360,7 +2234,7 @@
                   "editor",
                   ".IStandaloneCodeEditor"
                 ],
-                "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+                "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2378,7 +2252,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2400,7 +2274,7 @@
               },
               "> | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2414,7 +2288,7 @@
         "tags": [],
         "label": "UrlTemplateEditorVariable",
         "description": [],
-        "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2425,7 +2299,7 @@
             "tags": [],
             "label": "label",
             "description": [],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2439,7 +2313,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2453,7 +2327,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2468,7 +2342,7 @@
               "languages",
               ".CompletionItemKind | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2482,7 +2356,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/kibana_react/public/url_template_editor/url_template_editor.tsx",
+            "path": "src/platform/plugins/shared/kibana_react/public/url_template_editor/url_template_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2509,7 +2383,7 @@
           },
           " & { solution: string; }"
         ],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_card/elastic_agent_card.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2527,152 +2401,44 @@
           " | undefined; application?: ",
           "ApplicationStart",
           " | undefined; chrome?: ",
-          {
-            "pluginId": "@kbn/core-chrome-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreChromeBrowserPluginApi",
-            "section": "def-public.ChromeStart",
-            "text": "ChromeStart"
-          },
+          "ChromeStart",
           " | undefined; customBranding?: ",
-          {
-            "pluginId": "@kbn/core-custom-branding-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreCustomBrandingBrowserPluginApi",
-            "section": "def-public.CustomBrandingStart",
-            "text": "CustomBrandingStart"
-          },
+          "CustomBrandingStart",
           " | undefined; docLinks?: ",
-          {
-            "pluginId": "@kbn/core-doc-links-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreDocLinksBrowserPluginApi",
-            "section": "def-public.DocLinksStart",
-            "text": "DocLinksStart"
-          },
+          "DocLinksStart",
           " | undefined; executionContext?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreExecutionContextBrowserPluginApi",
-            "section": "def-public.ExecutionContextSetup",
-            "text": "ExecutionContextSetup"
-          },
+          "ExecutionContextSetup",
           " | undefined; featureFlags?: ",
-          {
-            "pluginId": "@kbn/core-feature-flags-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreFeatureFlagsBrowserPluginApi",
-            "section": "def-public.FeatureFlagsStart",
-            "text": "FeatureFlagsStart"
-          },
+          "FeatureFlagsStart",
           " | undefined; http?: ",
-          {
-            "pluginId": "@kbn/core-http-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreHttpBrowserPluginApi",
-            "section": "def-public.HttpSetup",
-            "text": "HttpSetup"
-          },
+          "HttpSetup",
           " | undefined; savedObjects?: ",
-          {
-            "pluginId": "@kbn/core-saved-objects-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreSavedObjectsBrowserPluginApi",
-            "section": "def-public.SavedObjectsStart",
-            "text": "SavedObjectsStart"
-          },
+          "SavedObjectsStart",
           " | undefined; i18n?: ",
-          {
-            "pluginId": "@kbn/core-i18n-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreI18nBrowserPluginApi",
-            "section": "def-public.I18nStart",
-            "text": "I18nStart"
-          },
+          "I18nStart",
           " | undefined; notifications?: ",
-          {
-            "pluginId": "@kbn/core-notifications-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreNotificationsBrowserPluginApi",
-            "section": "def-public.NotificationsStart",
-            "text": "NotificationsStart"
-          },
+          "NotificationsStart",
           " | undefined; overlays?: ",
-          {
-            "pluginId": "@kbn/core-overlays-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-            "section": "def-public.OverlayStart",
-            "text": "OverlayStart"
-          },
+          "OverlayStart",
           " | undefined; uiSettings?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.IUiSettingsClient",
-            "text": "IUiSettingsClient"
-          },
+          "IUiSettingsClient",
           " | undefined; settings?: ",
-          {
-            "pluginId": "@kbn/core-ui-settings-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUiSettingsBrowserPluginApi",
-            "section": "def-public.SettingsStart",
-            "text": "SettingsStart"
-          },
+          "SettingsStart",
           " | undefined; fatalErrors?: ",
-          {
-            "pluginId": "@kbn/core-fatal-errors-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreFatalErrorsBrowserPluginApi",
-            "section": "def-public.FatalErrorsSetup",
-            "text": "FatalErrorsSetup"
-          },
+          "FatalErrorsSetup",
           " | undefined; deprecations?: ",
-          {
-            "pluginId": "@kbn/core-deprecations-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreDeprecationsBrowserPluginApi",
-            "section": "def-public.DeprecationsServiceStart",
-            "text": "DeprecationsServiceStart"
-          },
+          "DeprecationsServiceStart",
           " | undefined; theme?: ",
-          {
-            "pluginId": "@kbn/core-theme-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreThemeBrowserPluginApi",
-            "section": "def-public.ThemeServiceSetup",
-            "text": "ThemeServiceSetup"
-          },
+          "ThemeServiceSetup",
           " | undefined; plugins?: ",
-          {
-            "pluginId": "@kbn/core-plugins-contracts-browser",
-            "scope": "public",
-            "docId": "kibKbnCorePluginsContractsBrowserPluginApi",
-            "section": "def-public.PluginsServiceStart",
-            "text": "PluginsServiceStart"
-          },
+          "PluginsServiceStart",
           " | undefined; security?: ",
-          {
-            "pluginId": "@kbn/core-security-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreSecurityBrowserPluginApi",
-            "section": "def-public.SecurityServiceStart",
-            "text": "SecurityServiceStart"
-          },
+          "SecurityServiceStart",
           " | undefined; userProfile?: ",
-          {
-            "pluginId": "@kbn/core-user-profile-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreUserProfileBrowserPluginApi",
-            "section": "def-public.UserProfileService",
-            "text": "UserProfileService"
-          },
+          "UserProfileService",
           " | undefined; }"
         ],
-        "path": "src/plugins/kibana_react/public/context/types.ts",
+        "path": "src/platform/plugins/shared/kibana_react/public/context/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2704,7 +2470,7 @@
             "text": "ThemeServiceStart"
           }
         ],
-        "path": "src/plugins/kibana_react/public/theme.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/theme.tsx",
         "deprecated": true,
         "trackAdoption": false,
         "references": [],
@@ -2717,7 +2483,7 @@
         "tags": [],
         "label": "NO_DATA_RECOMMENDED",
         "description": [],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2734,7 +2500,7 @@
           "EuiCardProps",
           "> & { recommended?: boolean | undefined; button?: React.ReactNode; onClick?: React.MouseEventHandler<HTMLElement> | undefined; category?: string | undefined; }"
         ],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2757,7 +2523,7 @@
           },
           "; }"
         ],
-        "path": "src/plugins/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/page_template/no_data_page/no_data_page.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2772,7 +2538,7 @@
         "signature": [
           "[string | number, string | number]"
         ],
-        "path": "src/plugins/kibana_react/public/validated_range/validated_dual_range.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/validated_range/validated_dual_range.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2796,16 +2562,10 @@
             "text": "KibanaReactContextValue"
           },
           "<Partial<",
-          {
-            "pluginId": "@kbn/core-lifecycle-browser",
-            "scope": "public",
-            "docId": "kibKbnCoreLifecycleBrowserPluginApi",
-            "section": "def-public.CoreStart",
-            "text": "CoreStart"
-          },
+          "CoreStart",
           ">>>"
         ],
-        "path": "src/plugins/kibana_react/public/context/context.tsx",
+        "path": "src/platform/plugins/shared/kibana_react/public/context/context.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2871,7 +2631,7 @@
           },
           ">"
         ],
-        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -2937,7 +2697,7 @@
           },
           ">"
         ],
-        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2963,7 +2723,7 @@
           },
           ">"
         ],
-        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -2985,7 +2745,7 @@
           "[]) => ",
           "Keyframes"
         ],
-        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3049,7 +2809,7 @@
           },
           ">, \"theme\"> & { darkMode?: boolean | undefined; }) => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3073,7 +2833,7 @@
               },
               ">, \"theme\"> & { darkMode?: boolean | undefined; }"
             ],
-            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3108,13 +2868,13 @@
           "Args",
           ">) => React.JSX.Element"
         ],
-        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
             "plugin": "@kbn/react-kibana-context-styled",
-            "path": "packages/react/kibana_context/styled/index.ts"
+            "path": "src/platform/packages/shared/react/kibana_context/styled/index.ts"
           }
         ],
         "children": [
@@ -3133,7 +2893,7 @@
               "Args",
               ">"
             ],
-            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3153,7 +2913,7 @@
               "Args",
               ">"
             ],
-            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -3190,7 +2950,7 @@
           },
           ">>"
         ],
-        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -3223,7 +2983,7 @@
         "description": [
           "\nA `deprecated` structure representing a Kibana theme containing variables from the current EUI theme."
         ],
-        "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+        "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3239,7 +2999,7 @@
             "signature": [
               "{ euiZDataGrid: number; euiZHeaderBelowDataGrid: number; euiZDataGridCellPopover: number; euiDataGridCellPaddingS: string; euiDataGridCellPaddingM: string; euiDataGridCellPaddingL: string; euiTableHoverColor: string; euiTableSelectedColor: string; euiTableHoverSelectedColor: string; euiTableActionsBorderColor: string; euiTableHoverClickableColor: string; euiTableFocusClickableColor: string; euiContrastRatioText: number; euiContrastRatioGraphic: number; euiContrastRatioDisabled: number; euiAnimSlightBounce: string; euiAnimSlightResistance: string; euiAnimSpeedExtraFast: string; euiAnimSpeedFast: string; euiAnimSpeedNormal: string; euiAnimSpeedSlow: string; euiAnimSpeedExtraSlow: string; euiBorderWidthThin: string; euiBorderWidthThick: string; euiBorderColor: string; euiBorderRadius: string; euiBorderRadiusSmall: string; euiBorderThick: string; euiBorderThin: string; euiBorderEditable: string; euiButtonHeight: string; euiButtonHeightSmall: string; euiButtonHeightXSmall: string; euiButtonColorDisabled: string; euiButtonColorDisabledText: string; euiButtonColorGhostDisabled: string; euiButtonTypes: { primary: string; accent: string; success: string; warning: string; danger: string; ghost: string; text: string; }; euiPaletteColorBlind: { euiColorVis0: { graphic: string; behindText: string; }; euiColorVis1: { graphic: string; behindText: string; }; euiColorVis2: { graphic: string; behindText: string; }; euiColorVis3: { graphic: string; behindText: string; }; euiColorVis4: { graphic: string; behindText: string; }; euiColorVis5: { graphic: string; behindText: string; }; euiColorVis6: { graphic: string; behindText: string; }; euiColorVis7: { graphic: string; behindText: string; }; euiColorVis8: { graphic: string; behindText: string; }; euiColorVis9: { graphic: string; behindText: string; }; }; euiPaletteColorBlindKeys: string; euiColorVis0: string; euiColorVis1: string; euiColorVis2: string; euiColorVis3: string; euiColorVis4: string; euiColorVis5: string; euiColorVis6: string; euiColorVis7: string; euiColorVis8: string; euiColorVis9: string; euiColorVis0_behindText: string; euiColorVis1_behindText: string; euiColorVis2_behindText: string; euiColorVis3_behindText: string; euiColorVis4_behindText: string; euiColorVis5_behindText: string; euiColorVis6_behindText: string; euiColorVis7_behindText: string; euiColorVis8_behindText: string; euiColorVis9_behindText: string; euiFontWeightLight: number; euiFontWeightRegular: number; euiFontWeightMedium: number; euiFontWeightSemiBold: number; euiFontWeightBold: number; euiCodeFontWeightRegular: number; euiCodeFontWeightBold: number; euiFormMaxWidth: string; euiFormControlHeight: string; euiFormControlCompressedHeight: string; euiFormControlPadding: string; euiFormControlCompressedPadding: string; euiFormControlBorderRadius: string; euiFormControlCompressedBorderRadius: string; euiRadioSize: string; euiCheckBoxSize: string; euiCheckboxBorderRadius: string; euiSwitchHeight: string; euiSwitchWidth: string; euiSwitchThumbSize: string; euiSwitchIconHeight: string; euiSwitchHeightCompressed: string; euiSwitchWidthCompressed: string; euiSwitchThumbSizeCompressed: string; euiSwitchHeightMini: string; euiSwitchWidthMini: string; euiSwitchThumbSizeMini: string; euiFormBackgroundColor: string; euiFormBackgroundDisabledColor: string; euiFormBackgroundReadOnlyColor: string; euiFormBorderOpaqueColor: string; euiFormBorderColor: string; euiFormBorderDisabledColor: string; euiFormCustomControlDisabledIconColor: string; euiFormCustomControlBorderColor: string; euiFormControlDisabledColor: string; euiFormControlBoxShadow: string; euiFormControlPlaceholderText: string; euiFormInputGroupLabelBackground: string; euiFormInputGroupBorder: string; euiSwitchOffColor: string; euiFormControlIconSizes: { small: string; medium: string; large: string; xLarge: string; xxLarge: string; }; euiFormControlLayoutGroupInputHeight: string; euiFormControlLayoutGroupInputCompressedHeight: string; euiFormControlLayoutGroupInputCompressedBorderRadius: string; euiHeaderBackgroundColor: string; euiHeaderDarkBackgroundColor: string; euiHeaderBorderColor: string; euiHeaderBreadcrumbColor: string; euiHeaderHeight: string; euiHeaderChildSize: string; euiHeaderHeightCompensation: string; euiPageDefaultMaxWidth: string; euiPageSidebarMinWidth: string; euiPanelPaddingModifiers: { paddingSmall: string; paddingMedium: string; paddingLarge: string; }; euiPanelBorderRadiusModifiers: { borderRadiusNone: number; borderRadiusMedium: string; }; euiPanelBackgroundColorModifiers: { transparent: string; plain: string; subdued: string; accent: string; primary: string; success: string; warning: string; danger: string; }; euiBreakpoints: { xs: number; s: string; m: string; l: string; xl: string; }; euiBreakpointKeys: string; euiShadowColor: string; euiSize: string; euiSizeXS: string; euiSizeS: string; euiSizeM: string; euiSizeL: string; euiSizeXL: string; euiSizeXXL: string; euiScrollBar: string; euiScrollBarCorner: string; euiScrollBarCornerThin: string; euiFocusRingColor: string; euiFocusRingAnimStartColor: string; euiFocusRingAnimStartSize: string; euiFocusRingAnimStartSizeLarge: string; euiFocusRingSizeLarge: string; euiFocusRingSize: string; euiFocusTransparency: number; euiFocusTransparencyPercent: string; euiFocusBackgroundColor: string; euiFontFamily: string; euiCodeFontFamily: string; euiFontFeatureSettings: string; euiTextScale: string; euiFontSize: string; euiFontSizeXS: string; euiFontSizeS: string; euiFontSizeM: string; euiFontSizeL: string; euiFontSizeXL: string; euiFontSizeXXL: string; euiLineHeight: number; euiBodyLineHeight: number; euiTitles: { xxxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xxs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; xs: { 'font-size': string; 'line-height': string; 'font-weight': number; }; s: { 'font-size': string; 'line-height': string; 'font-weight': number; }; m: { 'font-size': string; 'line-height': string; 'font-weight': number; }; l: { 'font-size': string; 'line-height': string; 'font-weight': number; }; }; euiZLevel0: number; euiZLevel1: number; euiZLevel2: number; euiZLevel3: number; euiZLevel4: number; euiZLevel5: number; euiZLevel6: number; euiZLevel7: number; euiZLevel8: number; euiZLevel9: number; euiZToastList: number; euiZModal: number; euiZMask: number; euiZNavigation: number; euiZContentMenu: number; euiZHeader: number; euiZFlyout: number; euiZMaskBelowHeader: number; euiZContent: number; euiColorGhost: string; euiColorInk: string; euiColorPrimary: string; euiColorAccent: string; euiColorSuccess: string; euiColorWarning: string; euiColorDanger: string; euiColorEmptyShade: string; euiColorLightestShade: string; euiColorLightShade: string; euiColorMediumShade: string; euiColorDarkShade: string; euiColorDarkestShade: string; euiColorFullShade: string; euiPageBackgroundColor: string; euiColorHighlight: string; euiTextColor: string; euiTitleColor: string; euiTextSubduedColor: string; euiColorDisabled: string; euiColorPrimaryText: string; euiColorSuccessText: string; euiColorAccentText: string; euiColorWarningText: string; euiColorDangerText: string; euiColorDisabledText: string; euiLinkColor: string; euiColorChartLines: string; euiColorChartBand: string; }"
             ],
-            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3252,7 +3012,7 @@
             "description": [
               "True if the theme is in \"dark\" mode, false otherwise."
             ],
-            "path": "packages/react/kibana_context/styled/styled_provider.tsx",
+            "path": "src/platform/packages/shared/react/kibana_context/styled/styled_provider.tsx",
             "deprecated": false,
             "trackAdoption": false
           }

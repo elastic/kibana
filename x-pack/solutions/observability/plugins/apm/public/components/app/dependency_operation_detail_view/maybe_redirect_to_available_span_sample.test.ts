@@ -6,8 +6,8 @@
  */
 import { range } from 'lodash';
 import { maybeRedirectToAvailableSpanSample } from './maybe_redirect_to_available_span_sample';
-import { replace as urlHelpersReplace } from '../../shared/links/url_helpers';
-import { History } from 'history';
+import type { replace as urlHelpersReplace } from '../../shared/links/url_helpers';
+import type { History } from 'history';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 
 describe('maybeRedirectToAvailableSpanSample', () => {

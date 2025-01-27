@@ -6,9 +6,10 @@
  */
 
 import React, { useCallback } from 'react';
-import { EuiSelectable, EuiSelectableOption } from '@elastic/eui';
+import type { EuiSelectableOption } from '@elastic/eui';
+import { EuiSelectable } from '@elastic/eui';
 import { ANOMALY_DETECTOR_SELECTOR_OPTIONS } from '../../../../../common/rules/apm_rule_types';
-import { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
+import type { AnomalyDetectorType } from '../../../../../common/anomaly_detection/apm_ml_detectors';
 
 interface Props {
   values: AnomalyDetectorType[];

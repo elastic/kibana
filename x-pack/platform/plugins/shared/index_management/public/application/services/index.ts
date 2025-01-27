@@ -15,7 +15,6 @@ export {
   flushIndices,
   forcemergeIndices,
   clearCacheIndices,
-  unfreezeIndices,
   loadIndexSettings,
   updateIndexSettings,
   loadIndexStats,
@@ -29,6 +28,7 @@ export {
   useLoadIndexSettings,
   createIndex,
   useLoadInferenceEndpoints,
+  createInferenceEndpoint,
 } from './api';
 
 export { sortTable } from './sort_table';

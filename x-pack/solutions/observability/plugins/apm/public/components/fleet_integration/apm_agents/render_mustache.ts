@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DocLinksStart } from '@kbn/core/public';
+import type { DocLinksStart } from '@kbn/core/public';
 import Mustache from 'mustache';
 
 const TEMPLATE_TAGS = ['{', '}'];

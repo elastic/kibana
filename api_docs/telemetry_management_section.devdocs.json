@@ -23,7 +23,7 @@
           },
           ">>"
         ],
-        "path": "src/plugins/telemetry_management_section/public/components/lazy_opt_in_example_flyout.tsx",
+        "path": "src/platform/plugins/shared/telemetry_management_section/public/components/lazy_opt_in_example_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -56,7 +56,7 @@
         "description": [
           "\nOptInExampleFlyout props"
         ],
-        "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+        "path": "src/platform/plugins/shared/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -72,7 +72,7 @@
             "signature": [
               "() => Promise<unknown[]>"
             ],
-            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+            "path": "src/platform/plugins/shared/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -90,7 +90,7 @@
             "signature": [
               "() => void"
             ],
-            "path": "src/plugins/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
+            "path": "src/platform/plugins/shared/telemetry_management_section/public/components/opt_in_example_flyout.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -130,7 +130,7 @@
         "signature": [
           "string[]"
         ],
-        "path": "src/plugins/telemetry_management_section/common/constants.ts",
+        "path": "src/platform/plugins/shared/telemetry_management_section/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

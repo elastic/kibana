@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import type { TickFormatter, XYBrushEvent } from '@elastic/charts';
 import {
   AnnotationDomainType,
   AreaSeries,
@@ -16,8 +17,6 @@ import {
   Position,
   ScaleType,
   Settings,
-  TickFormatter,
-  XYBrushEvent,
   Tooltip,
   LegendValue,
 } from '@elastic/charts';
@@ -27,15 +26,16 @@ import moment from 'moment';
 import React from 'react';
 import { useHistory } from 'react-router-dom';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
-import { Annotation } from '../../../../../common/annotations';
+import { getVizColorForIndex } from '../../../../../common/viz_colors';
+import type { Annotation } from '../../../../../common/annotations';
 import {
   asAbsoluteDateTime,
   asPercent,
   getDurationFormatter,
 } from '../../../../../common/utils/formatters';
-import { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
+import type { Coordinate, TimeSeries } from '../../../../../typings/timeseries';
 import { useChartPointerEventContext } from '../../../../context/chart_pointer_event/use_chart_pointer_event_context';
-import { FETCH_STATUS } from '../../../../hooks/use_fetcher';
+import type { FETCH_STATUS } from '../../../../hooks/use_fetcher';
 import { unit } from '../../../../utils/style';
 import { ChartContainer } from '../chart_container';
 import { isTimeseriesEmpty, onBrushEnd } from '../helper/helper';
@@ -143,7 +143,7 @@ export function BreakdownChart({
         )}
 
         {timeseries?.length ? (
-          timeseries.map((serie) => {
+          timeseries.map((serie, index) => {
             return (
               <AreaSeries
                 timeZone={timeZone}
@@ -157,7 +157,7 @@ export function BreakdownChart({
                 data={serie.data}
                 stackAccessors={['x']}
                 stackMode={yAxisType === 'percentage' ? 'percentage' : undefined}
-                color={serie.areaColor}
+                color={getVizColorForIndex(index, euiTheme)}
                 curve={CurveType.CURVE_MONOTONE_X}
               />
             );

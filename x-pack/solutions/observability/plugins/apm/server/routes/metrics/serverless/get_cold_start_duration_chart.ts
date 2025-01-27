@@ -10,10 +10,10 @@ import { euiLightVars as theme } from '@kbn/ui-theme';
 import { termQuery } from '@kbn/observability-plugin/server';
 import { FAAS_COLDSTART_DURATION, FAAS_ID, METRICSET_NAME } from '../../../../common/es_fields/apm';
 import { fetchAndTransformMetrics } from '../fetch_and_transform_metrics';
-import { ChartBase } from '../types';
+import type { ChartBase } from '../types';
 import { isFiniteNumber } from '../../../../common/utils/is_finite_number';
-import { APMConfig } from '../../..';
-import { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
+import type { APMConfig } from '../../..';
+import type { APMEventClient } from '../../../lib/helpers/create_es_client/create_apm_event_client';
 
 const chartBase: ChartBase = {
   title: i18n.translate('xpack.apm.agentMetrics.serverless.coldStartDuration', {

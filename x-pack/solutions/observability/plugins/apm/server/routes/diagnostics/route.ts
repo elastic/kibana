@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   FieldCapsResponse,
   IndicesDataStream,
   IndicesGetIndexTemplateIndexTemplateItem,
@@ -17,7 +17,7 @@ import type { APMIndices } from '@kbn/apm-data-access-plugin/server';
 import * as t from 'io-ts';
 import { isoToEpochRt } from '@kbn/io-ts-utils';
 import { createApmServerRoute } from '../apm_routes/create_apm_server_route';
-import { ApmEvent } from './bundle/get_apm_events';
+import type { ApmEvent } from './bundle/get_apm_events';
 import { getDiagnosticsBundle } from './get_diagnostics_bundle';
 import { getFleetPackageInfo } from './get_fleet_package_info';
 

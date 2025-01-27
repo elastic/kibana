@@ -6,16 +6,18 @@
  */
 
 import React from 'react';
-import { MetricsExplorerChartContextMenu, Props } from './chart_context_menu';
-import { ReactWrapper, mount } from 'enzyme';
+import type { Props } from './chart_context_menu';
+import { MetricsExplorerChartContextMenu } from './chart_context_menu';
+import type { ReactWrapper } from 'enzyme';
+import { mount } from 'enzyme';
 import { options, timeRange, chartOptions } from '../../../../utils/fixtures/metrics_explorer';
-import { Capabilities } from '@kbn/core/public';
+import type { Capabilities } from '@kbn/core/public';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { coreMock } from '@kbn/core/public/mocks';
 import { MetricsDataViewProvider, SourceProvider } from '../../../../containers/metrics_source';
 import { TIMESTAMP_FIELD } from '../../../../../common/constants';
-import { DataView } from '@kbn/data-views-plugin/common';
-import { ResolvedDataView } from '../../../../utils/data_view';
+import type { DataView } from '@kbn/data-views-plugin/common';
+import type { ResolvedDataView } from '../../../../utils/data_view';
 
 const coreStartMock = coreMock.createStart();
 

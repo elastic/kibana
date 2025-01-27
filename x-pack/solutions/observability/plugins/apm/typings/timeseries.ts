@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import {
+import type {
   AccessorFn,
   AreaSeriesStyle,
   Fit,
@@ -15,7 +15,7 @@ import {
   SeriesColorAccessorFn,
   SeriesColorsArray,
 } from '@elastic/charts';
-import { Maybe } from './common';
+import type { Maybe } from './common';
 
 export interface Coordinate {
   x: number;
@@ -50,7 +50,7 @@ export interface APMChartSpec<
   data: TCoordinate[];
   legendValue?: string;
   type: string;
-  color: string | SeriesColorsArray | SeriesColorAccessorFn;
+  color?: string | SeriesColorsArray | SeriesColorAccessorFn;
   areaColor?: string;
   fit?: Exclude<Fit, 'explicit'> | FitConfig;
   stackAccessors?: Accessor;

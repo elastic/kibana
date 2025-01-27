@@ -32,6 +32,7 @@ describe('geminiAdapter', () => {
       tools: params.tools,
       toolConfig: params.toolConfig,
       systemInstruction: params.systemInstruction,
+      temperature: params.temperature,
     };
   }
 
@@ -239,6 +240,86 @@ describe('geminiAdapter', () => {
       ]);
     });
 
+    it('correctly formats content parts', () => {
+      geminiAdapter.chatComplete({
+        executor: executorMock,
+        logger,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'text',
+                text: 'question',
+              },
+            ],
+          },
+          {
+            role: MessageRole.Assistant,
+            content: 'answer',
+          },
+          {
+            role: MessageRole.User,
+            content: [
+              {
+                type: 'image',
+                source: {
+                  data: 'aaaaaa',
+                  mimeType: 'image/png',
+                },
+              },
+              {
+                type: 'image',
+                source: {
+                  data: 'bbbbbb',
+                  mimeType: 'image/png',
+                },
+              },
+            ],
+          },
+        ],
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+
+      const { messages } = getCallParams();
+      expect(messages).toEqual([
+        {
+          parts: [
+            {
+              text: 'question',
+            },
+          ],
+          role: 'user',
+        },
+        {
+          parts: [
+            {
+              text: 'answer',
+            },
+          ],
+          role: 'assistant',
+        },
+        {
+          parts: [
+            {
+              inlineData: {
+                data: 'aaaaaa',
+                mimeType: 'image/png',
+              },
+            },
+            {
+              inlineData: {
+                data: 'bbbbbb',
+                mimeType: 'image/png',
+              },
+            },
+          ],
+          role: 'user',
+        },
+      ]);
+    });
+
     it('groups messages from the same user', () => {
       geminiAdapter.chatComplete({
         logger,
@@ -420,6 +501,65 @@ describe('geminiAdapter', () => {
           signal: abortController.signal,
         }),
       });
+    });
+
+    it('propagates the temperature parameter', () => {
+      geminiAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        temperature: 0.6,
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          temperature: 0.6,
+        }),
+      });
+    });
+
+    it('propagates the modelName parameter', () => {
+      geminiAdapter.chatComplete({
+        logger,
+        executor: executorMock,
+        messages: [{ role: MessageRole.User, content: 'question' }],
+        modelName: 'gemini-1.5',
+      });
+
+      expect(executorMock.invoke).toHaveBeenCalledTimes(1);
+      expect(executorMock.invoke).toHaveBeenCalledWith({
+        subAction: 'invokeStream',
+        subActionParams: expect.objectContaining({
+          model: 'gemini-1.5',
+        }),
+      });
+    });
+
+    it('throws an error if the connector response is in error', async () => {
+      executorMock.invoke.mockImplementation(async () => {
+        return {
+          actionId: 'actionId',
+          status: 'error',
+          serviceMessage: 'something went wrong',
+          data: undefined,
+        };
+      });
+
+      await expect(
+        lastValueFrom(
+          geminiAdapter
+            .chatComplete({
+              logger,
+              executor: executorMock,
+              messages: [{ role: MessageRole.User, content: 'Hello' }],
+            })
+            .pipe(toArray())
+        )
+      ).rejects.toThrowErrorMatchingInlineSnapshot(
+        `"Error calling connector: something went wrong"`
+      );
     });
   });
 });

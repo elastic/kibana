@@ -15,7 +15,7 @@ import { useUnifiedSearchContext } from '../../hooks/use_unified_search';
 import { ControlsContent } from './controls_content';
 import { useMetricsDataViewContext } from '../../../../../containers/metrics_source';
 import { LimitOptions } from './limit_options';
-import { HostLimitOptions } from '../../types';
+import type { HostLimitOptions } from '../../types';
 
 export const UnifiedSearchBar = () => {
   const {
@@ -60,6 +60,7 @@ export const UnifiedSearchBar = () => {
             showQueryMenu
             useDefaultBehaviors
             isAutoRefreshDisabled
+            isRefreshPaused
           />
         </EuiFlexItem>
         <EuiFlexItem>

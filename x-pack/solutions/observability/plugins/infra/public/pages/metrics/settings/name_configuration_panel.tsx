@@ -15,7 +15,7 @@ import {
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import React from 'react';
-import { InputFieldProps } from './input_fields';
+import type { InputFieldProps } from './input_fields';
 
 interface NameConfigurationPanelProps {
   isLoading: boolean;

@@ -8,14 +8,13 @@
 import React, { useCallback, useMemo } from 'react';
 import moment from 'moment';
 import { i18n } from '@kbn/i18n';
+import type { BrushEndListener, TooltipProps } from '@elastic/charts';
 import {
   Axis,
   Chart,
   niceTimeFormatter,
   Position,
   Settings,
-  BrushEndListener,
-  TooltipProps,
   Tooltip,
   LegendValue,
 } from '@elastic/charts';
@@ -32,7 +31,7 @@ import {
 } from './helpers';
 import { ErrorMessage } from './error_message';
 import { useKibanaUiSetting } from '../../../../hooks/use_kibana_ui_setting';
-import { VisSectionProps } from '../types';
+import type { VisSectionProps } from '../types';
 
 export const ChartSectionVis = ({
   id,

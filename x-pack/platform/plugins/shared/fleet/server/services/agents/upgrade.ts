@@ -118,7 +118,7 @@ export async function sendUpgradeAgentsActions(
           spaceId: currentSpaceId,
         },
         { pitId: await openPointInTime(esClient) }
-      ).runActionAsyncWithRetry();
+      ).runActionAsyncTask();
     }
   }
 

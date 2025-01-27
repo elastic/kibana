@@ -33,4 +33,7 @@ export const workflowInsightsSelectors = {
     cy.getByTestSubj('workflowInsightsEmptyResultsCallout').should('not.exist'),
   clickTrustedAppFormSubmissionButton: () =>
     cy.getByTestSubj('trustedAppsListPage-flyout-submitButton').click(),
+  insightsComponentDoesntExist: () =>
+    cy.getByTestSubj('endpointDetailsInsightsWrapper').should('not.exist'),
+  addConnectorButtonExists: () => cy.getByTestSubj('addNewConnectorButton').should('exist'),
 };

@@ -2,7 +2,186 @@
   "id": "sessionView",
   "client": {
     "classes": [],
-    "functions": [],
+    "functions": [
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-public.DetailPanelAlertTab",
+        "type": "Function",
+        "tags": [],
+        "label": "DetailPanelAlertTab",
+        "description": [
+          "\nHost Panel of  session view detail panel."
+        ],
+        "signature": [
+          "({ alerts, isFetchingAlerts, hasNextPageAlerts, fetchNextPageAlerts, onJumpToEvent, onShowAlertDetails, investigatedAlertId, }: DetailPanelAlertTabDeps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/plugins/session_view/public/components/detail_panel_alert_tab/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-public.DetailPanelAlertTab.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  alerts,\n  isFetchingAlerts,\n  hasNextPageAlerts,\n  fetchNextPageAlerts,\n  onJumpToEvent,\n  onShowAlertDetails,\n  investigatedAlertId,\n}",
+            "description": [],
+            "signature": [
+              "DetailPanelAlertTabDeps"
+            ],
+            "path": "x-pack/solutions/security/plugins/session_view/public/components/detail_panel_alert_tab/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-public.DetailPanelMetadataTab",
+        "type": "Function",
+        "tags": [],
+        "label": "DetailPanelMetadataTab",
+        "description": [
+          "\nHost Panel of  session view detail panel."
+        ],
+        "signature": [
+          "({ processHost, processContainer, processOrchestrator, processCloud, }: DetailPanelMetadataTabDeps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/plugins/session_view/public/components/detail_panel_metadata_tab/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-public.DetailPanelMetadataTab.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  processHost,\n  processContainer,\n  processOrchestrator,\n  processCloud,\n}",
+            "description": [],
+            "signature": [
+              "DetailPanelMetadataTabDeps"
+            ],
+            "path": "x-pack/solutions/security/plugins/session_view/public/components/detail_panel_metadata_tab/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-public.DetailPanelProcessTab",
+        "type": "Function",
+        "tags": [],
+        "label": "DetailPanelProcessTab",
+        "description": [
+          "\nDetail panel in the session view."
+        ],
+        "signature": [
+          "({ selectedProcess, index }: DetailPanelProcessTabDeps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/security/plugins/session_view/public/components/detail_panel_process_tab/index.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-public.DetailPanelProcessTab.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{ selectedProcess, index }",
+            "description": [],
+            "signature": [
+              "DetailPanelProcessTabDeps"
+            ],
+            "path": "x-pack/solutions/security/plugins/session_view/public/components/detail_panel_process_tab/index.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "sessionView",
+        "id": "def-public.useFetchSessionViewAlerts",
+        "type": "Function",
+        "tags": [],
+        "label": "useFetchSessionViewAlerts",
+        "description": [],
+        "signature": [
+          "(sessionEntityId: string, sessionStartTime: string, investigatedAlertId?: string | undefined) => ",
+          "UseInfiniteQueryResult",
+          "<{ events: ",
+          {
+            "pluginId": "sessionView",
+            "scope": "common",
+            "docId": "kibSessionViewPluginApi",
+            "section": "def-common.ProcessEvent",
+            "text": "ProcessEvent"
+          },
+          "[]; cursor: any; total: number | undefined; }, unknown>"
+        ],
+        "path": "x-pack/solutions/security/plugins/session_view/public/components/session_view/hooks.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-public.useFetchSessionViewAlerts.$1",
+            "type": "string",
+            "tags": [],
+            "label": "sessionEntityId",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/session_view/public/components/session_view/hooks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-public.useFetchSessionViewAlerts.$2",
+            "type": "string",
+            "tags": [],
+            "label": "sessionStartTime",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/session_view/public/components/session_view/hooks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "sessionView",
+            "id": "def-public.useFetchSessionViewAlerts.$3",
+            "type": "string",
+            "tags": [],
+            "label": "investigatedAlertId",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/session_view/public/components/session_view/hooks.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
     "interfaces": [
       {
         "parentPluginId": "sessionView",

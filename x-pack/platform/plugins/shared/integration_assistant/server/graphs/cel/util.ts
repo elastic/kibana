@@ -30,3 +30,20 @@ export function getStateVarsAndDefaultValues(stateDetails: CelInputStateDetails[
   }
   return defaultStateVarSettings;
 }
+
+/**
+ * Gets an object containing state variables configuration information.
+ */
+export function getStateVarsConfigDetails(stateDetails: CelInputStateDetails[]): object {
+  const defaultStateVarConfigSettings: Record<string, unknown> = {};
+  for (const stateVar of stateDetails) {
+    if (stateVar.configurable) {
+      defaultStateVarConfigSettings[stateVar.name] = {
+        description: stateVar.description,
+        type: stateVar.type,
+        default: stateVar.default,
+      };
+    }
+  }
+  return defaultStateVarConfigSettings;
+}

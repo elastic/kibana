@@ -48,7 +48,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
               idAria: 'detectionEngineStepScheduleRuleInterval',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleInterval',
-              minimumValue: 1,
+              minValue: 1,
             }}
           />
           <UseField
@@ -58,7 +58,7 @@ const StepScheduleRuleComponent: FC<StepScheduleRuleProps> = ({
               idAria: 'detectionEngineStepScheduleRuleFrom',
               isDisabled: isLoading,
               dataTestSubj: 'detectionEngineStepScheduleRuleFrom',
-              minimumValue: 1,
+              minValue: 0,
             }}
           />
         </StyledForm>

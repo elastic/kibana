@@ -14,11 +14,13 @@ import {
   TopNType,
 } from '@kbn/profiling-utils';
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
-import { IDLE_SOCKET_TIMEOUT, RouteRegisterParameters } from '.';
+import type { RouteRegisterParameters } from '.';
+import { IDLE_SOCKET_TIMEOUT } from '.';
 import { getRoutePaths, INDEX_EVENTS } from '../../common';
 import { computeBucketWidthFromTimeRangeAndBucketCount } from '../../common/histogram';
-import { createTopNSamples, getTopNAggregationRequest, TopNResponse } from '../../common/topn';
-import { ProfilingESClient } from '../utils/create_profiling_es_client';
+import type { TopNResponse } from '../../common/topn';
+import { createTopNSamples, getTopNAggregationRequest } from '../../common/topn';
+import type { ProfilingESClient } from '../utils/create_profiling_es_client';
 import { handleRouteHandlerError } from '../utils/handle_route_error_handler';
 import { withProfilingSpan } from '../utils/with_profiling_span';
 import { getClient } from './compat';

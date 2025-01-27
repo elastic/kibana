@@ -7,14 +7,14 @@
 
 import DateMath from '@kbn/datemath';
 import { useMemo } from 'react';
-import { MetricExpressionCustomMetric } from '../../../../common/alerting/metrics';
-import { MetricExpression, TimeRange } from '../types';
-import {
+import type { MetricExpressionCustomMetric } from '../../../../common/alerting/metrics';
+import type { MetricExpression, TimeRange } from '../types';
+import type {
   MetricsExplorerOptions,
   MetricsExplorerTimestamp,
 } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_options';
 import { useMetricsExplorerData } from '../../../pages/metrics/metrics_explorer/hooks/use_metrics_explorer_data';
-import { MetricExplorerCustomMetricAggregations } from '../../../../common/http_api/metrics_explorer';
+import type { MetricExplorerCustomMetricAggregations } from '../../../../common/http_api/metrics_explorer';
 
 const DEFAULT_TIME_RANGE = {};
 

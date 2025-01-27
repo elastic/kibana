@@ -21,6 +21,7 @@ import {
   getTemplateExists,
   migrateToDataStream,
   putMappings,
+  removeAliases,
   removePolicyFromIndex,
   setIndexTemplate,
   setPolicy,
@@ -328,6 +329,7 @@ export class ListClient {
       listName,
       listMappings.properties as Record<string, MappingProperty>
     );
+    await removeAliases(esClient, listName);
     await migrateToDataStream(esClient, listName);
     await removePolicyFromIndex(esClient, listName);
     if (await this.getListPolicyExists()) {
@@ -354,6 +356,7 @@ export class ListClient {
       listItemName,
       listItemMappings.properties as Record<string, MappingProperty>
     );
+    await removeAliases(esClient, listItemName);
     await migrateToDataStream(esClient, listItemName);
     await removePolicyFromIndex(esClient, listItemName);
     if (await this.getListItemPolicyExists()) {

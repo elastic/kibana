@@ -40,7 +40,8 @@ export class CreateSLO {
     private summaryTransformManager: TransformManager,
     private logger: Logger,
     private spaceId: string,
-    private basePath: IBasePath
+    private basePath: IBasePath,
+    private username: string
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
@@ -100,14 +101,14 @@ export class CreateSLO {
       ]);
     } catch (err) {
       this.logger.error(
-        `Cannot install the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back.`
+        `Cannot create the SLO [id: ${slo.id}, revision: ${slo.revision}]. Rolling back. ${err}`
       );
 
       await asyncForEach(rollbackOperations.reverse(), async (operation) => {
         try {
           await operation();
         } catch (rollbackErr) {
-          this.logger.error('Rollback operation failed', rollbackErr);
+          this.logger.error(`Rollback operation failed. ${rollbackErr}`);
         }
       });
 
@@ -217,6 +218,8 @@ export class CreateSLO {
       tags: params.tags ?? [],
       createdAt: now,
       updatedAt: now,
+      createdBy: this.username,
+      updatedBy: this.username,
       groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
       version: SLO_MODEL_VERSION,
     };

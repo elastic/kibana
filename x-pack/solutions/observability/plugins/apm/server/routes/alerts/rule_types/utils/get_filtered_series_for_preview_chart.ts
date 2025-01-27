@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { Coordinate } from '../../../../../typings/timeseries';
+import type { Coordinate } from '../../../../../typings/timeseries';
 
 export type BarSeriesDataMap = Record<string, Coordinate[]>;
 type BarSeriesData = Array<{ name: string; data: Coordinate[] }>;

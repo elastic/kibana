@@ -6,7 +6,8 @@
  */
 
 import React, { useEffect, useRef } from 'react';
-import { Subject, Subscription } from 'rxjs';
+import type { Subscription } from 'rxjs';
+import { Subject } from 'rxjs';
 
 const refreshServiceGroupsSubject = new Subject<void>();
 

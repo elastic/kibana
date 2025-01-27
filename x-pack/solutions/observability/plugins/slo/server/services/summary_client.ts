@@ -25,7 +25,7 @@ import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/servi
 import { toDateRange } from '../domain/services/date_range';
 import { BurnRatesClient } from './burn_rates_client';
 import { getFlattenedGroupings } from './utils';
-import { computeTotalSlicesFromDateRange } from './utils/compute_total_slices_from_date_range';
+import { getSlicesFromDateRange } from './utils/get_slices_from_date_range';
 
 interface Params {
   slo: SLODefinition;
@@ -190,7 +190,7 @@ function computeSliValue(
   const total = bucket?.total?.value ?? 0;
 
   if (timeslicesBudgetingMethodSchema.is(slo.budgetingMethod)) {
-    const totalSlices = computeTotalSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
+    const totalSlices = getSlicesFromDateRange(dateRange, slo.objective.timesliceWindow!);
 
     return computeSLI(good, total, totalSlices);
   }

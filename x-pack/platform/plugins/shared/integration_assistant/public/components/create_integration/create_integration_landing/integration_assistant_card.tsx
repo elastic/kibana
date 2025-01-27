@@ -15,7 +15,7 @@ import {
   EuiTitle,
   EuiBetaBadge,
 } from '@elastic/eui';
-import { AssistantAvatar } from '@kbn/elastic-assistant';
+import { AssistantIcon } from '@kbn/ai-assistant-icon';
 import { useAuthorization } from '../../../common/hooks/use_authorization';
 import { MissingPrivilegesTooltip } from '../../../common/components/authorization';
 import { useNavigate, Page } from '../../../common/hooks/use_navigate';
@@ -28,7 +28,7 @@ export const IntegrationAssistantCard = React.memo(() => {
     <EuiPanel hasBorder={true} paddingSize="l">
       <EuiFlexGroup direction="row" gutterSize="l" alignItems="center" justifyContent="center">
         <EuiFlexItem grow={false}>
-          <AssistantAvatar />
+          <AssistantIcon />
         </EuiFlexItem>
         <EuiFlexItem>
           <EuiFlexGroup
