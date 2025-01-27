@@ -822,13 +822,6 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({
           ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.single,
-        }).fitRowToContent
-      ).toEqual([false]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
           rowHeight: RowHeightMode.custom,
         }).fitRowToContent
       ).toEqual([false]);
@@ -845,13 +838,6 @@ describe('Datatable Visualization', () => {
       expect(getDatatableExpressionArgs({ ...defaultExpressionTableState }).rowHeightLines).toEqual(
         [1]
       );
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          rowHeight: RowHeightMode.single,
-        }).rowHeightLines
-      ).toEqual([1]);
 
       expect(
         getDatatableExpressionArgs({
@@ -880,13 +866,6 @@ describe('Datatable Visualization', () => {
       expect(
         getDatatableExpressionArgs({ ...defaultExpressionTableState }).headerRowHeight
       ).toEqual([RowHeightMode.custom]);
-
-      expect(
-        getDatatableExpressionArgs({
-          ...defaultExpressionTableState,
-          headerRowHeight: RowHeightMode.single,
-        }).headerRowHeightLines
-      ).toEqual([1]);
 
       expect(
         getDatatableExpressionArgs({
