@@ -164,7 +164,7 @@ describe('calculateRiskScores()', () => {
       expect(response).toHaveProperty('scores');
       expect(response.scores.host).toHaveLength(2);
       expect(response.scores.user).toHaveLength(2);
-      expect(response.scores.service).toHaveLength(0);
+      expect(response.scores.service).toHaveLength(2);
     });
 
     it('calculates risk score for service when the experimental flag is enabled', async () => {

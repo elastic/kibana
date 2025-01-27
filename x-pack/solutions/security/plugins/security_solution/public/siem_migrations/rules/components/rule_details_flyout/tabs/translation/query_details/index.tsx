@@ -5,4 +5,5 @@
  * 2.0.
  */
 
-export * from './v1';
+export * from './original_rule_query';
+export * from './translated_rule_query';
