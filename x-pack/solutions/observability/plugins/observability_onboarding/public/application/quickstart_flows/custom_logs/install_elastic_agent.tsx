@@ -10,6 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { default as React, useCallback, useEffect, useState } from 'react';
 import { type LogsLocatorParams, LOGS_LOCATOR_ID } from '@kbn/logs-shared-plugin/common';
+import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -26,14 +27,14 @@ import { StepModal } from '../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { WindowsInstallStep } from '../shared/windows_install_step';
 import { TroubleshootingLink } from '../shared/troubleshooting_link';
-import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 
 const defaultDatasetName = '';
 
 export function InstallElasticAgent() {
   const {
-    services: { share },
+    services: { share, analytics },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+  const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
 
   const logsLocator = share.url.locators.get<LogsLocatorParams>(LOGS_LOCATOR_ID);
 
@@ -181,8 +182,6 @@ export function InstallElasticAgent() {
     }
   }, [progressSucceded, refetchProgress]);
 
-  useFlowProgressTelemetry(progressData?.progress, 'custom_logs');
-
   const getCheckLogsStep = useCallback(() => {
     const progress = progressData?.progress;
     if (progress) {
@@ -209,6 +208,19 @@ export function InstallElasticAgent() {
   const isInstallCompleted = progressData?.progress?.['ea-status']?.status === 'complete';
   const autoDownloadConfigStatus = (progressData?.progress?.['ea-config']?.status ??
     'incomplete') as EuiStepStatus;
+  const isIngestCompleted = progressData?.progress?.['logs-ingest']?.status === 'complete';
+
+  useEffect(() => {
+    if (isIngestCompleted && !dataReceivedTelemetrySent) {
+      setDataReceivedTelemetrySent(true);
+      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+        flow_type: 'logFiles',
+        flow_id: onboardingId,
+        step: 'logs-ingest',
+        step_status: 'complete',
+      });
+    }
+  }, [analytics, dataReceivedTelemetrySent, isIngestCompleted, onboardingId]);
 
   return (
     <StepModal

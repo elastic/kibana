@@ -127,7 +127,7 @@ export function getDashboardApi({
       ...settingsManager.internalApi.getState(),
       ...unifiedSearchState,
       panels,
-      viewMode: viewModeManager.api.viewMode.value,
+      viewMode: viewModeManager.api.viewMode$.value,
     };
 
     const controlGroupApi = controlGroupApi$.value;
@@ -163,7 +163,7 @@ export function getDashboardApi({
     controlGroupApi$,
     executionContext: {
       type: 'dashboard',
-      description: settingsManager.api.panelTitle.value,
+      description: settingsManager.api.title$.value,
     },
     fullScreenMode$,
     getAppContext: () => {
@@ -185,7 +185,7 @@ export function getDashboardApi({
       const saveResult = await openSaveModal({
         isManaged,
         lastSavedId: savedObjectId$.value,
-        viewMode: viewModeManager.api.viewMode.value,
+        viewMode: viewModeManager.api.viewMode$.value,
         ...getState(),
       });
 
@@ -225,7 +225,7 @@ export function getDashboardApi({
 
       return;
     },
-    savedObjectId: savedObjectId$,
+    savedObjectId$,
     setFullScreenMode: (fullScreenMode: boolean) => fullScreenMode$.next(fullScreenMode),
     setSavedObjectId: (id: string | undefined) => savedObjectId$.next(id),
     type: DASHBOARD_API_TYPE as 'dashboard',

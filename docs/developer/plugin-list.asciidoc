@@ -641,6 +641,10 @@ Index Management by running this series of requests in Console:
 external LLM APIs. Its goals are:
 
 
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/inference_endpoint/README.md[inferenceEndpoint]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
@@ -664,10 +668,6 @@ the infrastructure monitoring use-case within Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate_app/README.md[investigateApp]
 |undefined
-
-
-|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
-|This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/lens/readme.md[lens]

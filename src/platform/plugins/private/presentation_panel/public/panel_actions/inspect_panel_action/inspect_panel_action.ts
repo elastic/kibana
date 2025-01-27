@@ -12,8 +12,8 @@ import { apiHasInspectorAdapters, HasInspectorAdapters } from '@kbn/inspector-pl
 import { tracksOverlays } from '@kbn/presentation-containers';
 import {
   EmbeddableApiContext,
-  getPanelTitle,
-  PublishesPanelTitle,
+  getTitle,
+  PublishesTitle,
   HasParentApi,
   apiHasUniqueId,
 } from '@kbn/presentation-publishing';
@@ -21,8 +21,7 @@ import { Action, IncompatibleActionError } from '@kbn/ui-actions-plugin/public';
 import { ACTION_INSPECT_PANEL } from './constants';
 import { inspector } from '../../kibana_services';
 
-export type InspectPanelActionApi = HasInspectorAdapters &
-  Partial<PublishesPanelTitle & HasParentApi>;
+export type InspectPanelActionApi = HasInspectorAdapters & Partial<PublishesTitle & HasParentApi>;
 const isApiCompatible = (api: unknown | null): api is InspectPanelActionApi => {
   return Boolean(api) && apiHasInspectorAdapters(api);
 };
@@ -58,7 +57,7 @@ export class InspectPanelAction implements Action<EmbeddableApiContext> {
     }
 
     const panelTitle =
-      getPanelTitle(embeddable) ||
+      getTitle(embeddable) ||
       i18n.translate('presentationPanel.action.inspectPanel.untitledEmbeddableFilename', {
         defaultMessage: '[No Title]',
       });
