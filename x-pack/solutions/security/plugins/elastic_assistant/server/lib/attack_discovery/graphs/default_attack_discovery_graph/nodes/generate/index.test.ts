@@ -111,7 +111,8 @@ describe('getGenerateNode', () => {
   });
 
   it('invokes the chain with the expected alerts from state and formatting instructions', async () => {
-    const mockInvoke = getChainWithFormatInstructions(mockLlm, prompts).chain.invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlm, prompts }).chain
+      .invoke as jest.Mock;
 
     const generateNode = getGenerateNode({
       llm: mockLlm,
@@ -139,7 +140,7 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
       'You asked for some JSON, here it is:\n```json\n{"key": "value"}\n```\nI hope that works for you.';
 
     const mockLlmWithResponse = new FakeLLM({ response }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse, prompts).chain
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithResponse, prompts }).chain
       .invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(response);
@@ -170,8 +171,8 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithHallucination = new FakeLLM({
       response: hallucinatedResponse,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithHallucination, prompts).chain
-      .invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithHallucination, prompts })
+      .chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(hallucinatedResponse);
 
@@ -205,8 +206,10 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithRepeatedGenerations = new FakeLLM({
       response: repeatedResponse,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithRepeatedGenerations, prompts).chain
-      .invoke as jest.Mock;
+    const mockInvoke = getChainWithFormatInstructions({
+      llm: mockLlmWithRepeatedGenerations,
+      prompts,
+    }).chain.invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(repeatedResponse);
 
@@ -239,7 +242,7 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithResponse = new FakeLLM({
       response,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse, prompts).chain
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithResponse, prompts }).chain
       .invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(response);
@@ -279,7 +282,7 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithResponse = new FakeLLM({
       response: secondResponse,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse, prompts).chain
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithResponse, prompts }).chain
       .invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(secondResponse);
@@ -319,7 +322,7 @@ ${getAnonymizedAlertsFromState(initialGraphState).join('\n\n')}
     const mockLlmWithResponse = new FakeLLM({
       response: secondResponse,
     }) as unknown as ActionsClientLlm;
-    const mockInvoke = getChainWithFormatInstructions(mockLlmWithResponse, prompts).chain
+    const mockInvoke = getChainWithFormatInstructions({ llm: mockLlmWithResponse, prompts }).chain
       .invoke as jest.Mock;
 
     mockInvoke.mockResolvedValue(secondResponse);

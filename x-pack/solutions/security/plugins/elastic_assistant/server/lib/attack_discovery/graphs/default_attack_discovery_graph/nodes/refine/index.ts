@@ -60,7 +60,10 @@ export const getRefineNode = ({
         unrefinedResults,
       });
 
-      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions(llm, prompts);
+      const { chain, formatInstructions, llmType } = getChainWithFormatInstructions({
+        llm,
+        prompts,
+      });
 
       logger?.debug(
         () => `refine node is invoking the chain (${llmType}), attempt ${generationAttempts}`

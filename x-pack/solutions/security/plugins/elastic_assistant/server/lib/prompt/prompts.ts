@@ -117,12 +117,12 @@ const MITRE_ATTACK_TACTICS = [
   COMMAND_AND_CONTROL,
   EXFILTRATION,
 ] as const;
-export const AD_GENERATION_DETAILS_MARKDOWN = `A detailed insight with markdown, where each markdown bullet contains a description of what happened that reads like a story of the attack as it played out and always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
-export const AD_GENERATION_ENTITY_SUMMARY_MARKDOWN = `A short (no more than a sentence) summary of the insight featuring only the host.name and user.name fields (when they are applicable), using the same ${SYNTAX} syntax`;
-export const AD_GENERATION_MITRE_ATTACK_TACTICS = `An array of MITRE ATT&CK tactic for the insight, using one of the following values: ${MITRE_ATTACK_TACTICS.join(
+export const ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN = `A detailed insight with markdown, where each markdown bullet contains a description of what happened that reads like a story of the attack as it played out and always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
+export const ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN = `A short (no more than a sentence) summary of the insight featuring only the host.name and user.name fields (when they are applicable), using the same ${SYNTAX} syntax`;
+export const ATTACK_DISCOVERY_GENERATION_MITRE_ATTACK_TACTICS = `An array of MITRE ATT&CK tactic for the insight, using one of the following values: ${MITRE_ATTACK_TACTICS.join(
   ','
 )}`;
-export const AD_GENERATION_SUMMARY_MARKDOWN = `A markdown summary of insight, using the same ${SYNTAX} syntax`;
-export const AD_GENERATION_TITLE =
+export const ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN = `A markdown summary of insight, using the same ${SYNTAX} syntax`;
+export const ATTACK_DISCOVERY_GENERATION_TITLE =
   'A short, no more than 7 words, title for the insight, NOT formatted with special syntax or markdown. This must be as brief as possible.';
-export const AD_GENERATION_INSIGHTS = `Insights with markdown that always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;
+export const ATTACK_DISCOVERY_GENERATION_INSIGHTS = `Insights with markdown that always uses special ${SYNTAX} syntax for field names and values from the source data. ${GOOD_SYNTAX_EXAMPLES} ${BAD_SYNTAX_EXAMPLES}`;

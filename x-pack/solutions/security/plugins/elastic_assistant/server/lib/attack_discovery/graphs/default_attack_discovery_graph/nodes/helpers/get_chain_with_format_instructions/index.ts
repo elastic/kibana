@@ -18,10 +18,13 @@ interface GetChainWithFormatInstructions {
   llmType: string;
 }
 
-export const getChainWithFormatInstructions = (
-  llm: ActionsClientLlm,
-  prompts: GenerationPrompts
-): GetChainWithFormatInstructions => {
+export const getChainWithFormatInstructions = ({
+  llm,
+  prompts,
+}: {
+  llm: ActionsClientLlm;
+  prompts: GenerationPrompts;
+}): GetChainWithFormatInstructions => {
   const outputParser = getOutputParser(prompts);
   const formatInstructions = outputParser.getFormatInstructions();
 

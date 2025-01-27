@@ -49,7 +49,7 @@ Here is the JSON Schema instance your output must adhere to. Include the enclosi
 \`\`\`
 `;
 
-    const chainWithFormatInstructions = getChainWithFormatInstructions(mockLlm, prompts);
+    const chainWithFormatInstructions = getChainWithFormatInstructions({ llm: mockLlm, prompts });
     expect(chainWithFormatInstructions).toEqual({
       chain: expect.any(Object),
       formatInstructions: expectedFormatInstructions,
