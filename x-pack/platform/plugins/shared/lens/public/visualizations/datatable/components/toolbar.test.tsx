@@ -91,7 +91,7 @@ describe('datatable toolbar', () => {
 
     expect(getRowHeightValue()).toHaveTextContent(/custom/i);
     expect(getHeaderHeightValue()).toHaveTextContent(/custom/i);
-    expect(getHeaderHeightCustomValue()).toHaveValue(1);
+    expect(getHeaderHeightCustomValue()).toHaveValue(3);
     expect(getPaginationSwitch()).not.toBeChecked();
   });
 
@@ -147,7 +147,7 @@ describe('datatable toolbar', () => {
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
       rowHeight: 'custom',
-      rowHeightLines: 1,
+      rowHeightLines: 3,
     });
   });
 
