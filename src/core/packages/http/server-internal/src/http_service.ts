@@ -185,6 +185,7 @@ export class HttpService
 
     this.internalSetup = {
       ...serverContract,
+      rateLimiter: config.rateLimiter,
       registerOnPostValidation: (cb) => {
         Router.on('onPostValidate', cb);
       },
