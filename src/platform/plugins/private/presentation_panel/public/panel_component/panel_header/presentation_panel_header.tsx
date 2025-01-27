@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
+import { EuiIconTip, EuiScreenReaderOnly } from '@elastic/eui';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -108,21 +108,19 @@ export const PresentationPanelHeader = <
           />
         </h2>
         {panelDescription && (
-          <EuiToolTip
+          <EuiIconTip
             title={!hideTitle ? panelTitle || undefined : undefined}
             content={panelDescription}
             delay="regular"
             position="top"
             anchorClassName="embPanel__titleTooltipAnchor"
             anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
-          >
-            <EuiIcon
-              type="iInCircle"
-              color="subdued"
-              data-test-subj="embeddablePanelTitleDescriptionIcon"
-              tabIndex={0}
-            />
-          </EuiToolTip>
+            type="iInCircle"
+            color="subdued"
+            iconProps={{
+              'data-test-subj': 'embeddablePanelTitleDescriptionIcon',
+            }}
+          />
         )}
         {showBadges && badgeElements}
         {showNotifications && notificationElements}
