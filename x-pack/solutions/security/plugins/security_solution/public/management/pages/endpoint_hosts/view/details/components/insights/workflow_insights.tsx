@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiHorizontalRule,
   EuiAccordion,
   EuiSpacer,
   EuiText,
@@ -135,7 +134,6 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
           scanCompleted={scanCompleted && userTriggeredScan}
           endpointId={endpointId}
         />
-        <EuiHorizontalRule />
       </EuiAccordion>
       <EuiSpacer size="l" />
     </>
