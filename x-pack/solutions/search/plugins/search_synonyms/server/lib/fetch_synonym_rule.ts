@@ -12,9 +12,8 @@ export const fetchSynonymRule = async (
   synonymsSetId: string,
   ruleId: string
 ) => {
-  const result = await client.synonyms.getSynonymRule({
+  return client.synonyms.getSynonymRule({
     set_id: synonymsSetId,
     rule_id: ruleId,
   });
-  return result;
 };

@@ -33,14 +33,6 @@ export class SearchSynonymsPlugin
       id: PLUGIN_ID,
       appRoute: PLUGIN_ROUTE_ROOT,
       title: PLUGIN_TITLE,
-      deepLinks: [
-        {
-          id: 'synonyms',
-          path: '/',
-          title: PLUGIN_TITLE,
-          visibleIn: ['globalSearch'],
-        },
-      ],
       async mount({ element, history }: AppMountParameters) {
         const { renderApp } = await import('./application');
         const [coreStart, depsStart] = await core.getStartServices();

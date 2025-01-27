@@ -5,8 +5,6 @@
  * 2.0.
  */
 
-// create a function with name fetchSynonymsSet which accepts three arguments, client, synonymsSetId, and pagination and returns a promise with _meta, id and data properties where data is a list of SynonymsSynonymRule objects
-
 import { ElasticsearchClient } from '@kbn/core/server';
 import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
 import { Page, Paginate, pageToPagination } from '../../common/pagination';

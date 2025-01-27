@@ -62,6 +62,9 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         size: request.query.size,
       });
       return response.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
         body: result,
       });
     })
@@ -100,6 +103,9 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const synonymsSetId = request.params.synonymsSetId;
       const result = await deleteSynonymsSet(asCurrentUser, synonymsSetId);
       return response.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
         body: result,
       });
     })
@@ -155,6 +161,9 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
         size: request.query.size,
       });
       return response.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
         body: result,
       });
     })
@@ -203,6 +212,9 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const ruleId = request.params.ruleId;
       const result = await fetchSynonymRule(asCurrentUser, synonymsSetId, ruleId);
       return response.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
         body: result,
       });
     })
@@ -251,6 +263,9 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const ruleId = request.params.ruleId;
       const result = await deleteSynonymRule(asCurrentUser, synonymsSetId, ruleId);
       return response.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
         body: result,
       });
     })

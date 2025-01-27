@@ -12,5 +12,5 @@ export const deleteSynonymRule = async (
   synonymsSetId: string,
   ruleId: string
 ) => {
-  return await client.synonyms.deleteSynonymRule({ set_id: synonymsSetId, rule_id: ruleId });
+  return client.synonyms.deleteSynonymRule({ set_id: synonymsSetId, rule_id: ruleId });
 };

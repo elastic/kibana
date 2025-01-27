@@ -13,7 +13,7 @@ import { SearchSynonymsOverview } from './components/overview/overview';
 export const SearchSynonymsRouter = () => {
   return (
     <Routes>
-      <Route exact path="/:synonymsSetId">
+      <Route exact path="/sets/:synonymsSetId">
         <SynonymsSetDetail />
       </Route>
       <Route exact path="/">
