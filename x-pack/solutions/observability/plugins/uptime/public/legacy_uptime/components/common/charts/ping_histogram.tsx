@@ -125,18 +125,7 @@ export const PingHistogramComponent: React.FC<PingHistogramComponentProps> = ({
     });
 
     content = (
-      <ChartWrapper
-        height={height}
-        loading={loading}
-        aria-label={i18n.translate('xpack.uptime.snapshotHistogram.description', {
-          defaultMessage:
-            'Bar Chart showing uptime status over time from {startTime} to {endTime}.',
-          values: {
-            startTime: moment(new Date(absoluteStartDate).valueOf()).fromNow(),
-            endTime: moment(new Date(absoluteEndDate).valueOf()).fromNow(),
-          },
-        })}
-      >
+      <ChartWrapper height={height} loading={loading}>
         <Chart>
           <Settings
             xDomain={{

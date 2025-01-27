@@ -54,7 +54,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('overview page with expanded monitor detail', async () => {
       await uptimeService.overview.expandMonitorDetail(A11Y_TEST_MONITOR_ID);
-      await uptimeService.overview.openIntegrationsPopoverForMonitor(A11Y_TEST_MONITOR_ID);
+      await uptimeService.overview.openIntegrationsPopoverForMonitor(
+        A11Y_TEST_MONITOR_ID,
+        'uptime'
+      );
       await a11y.testAppSnapshot();
     });
 
