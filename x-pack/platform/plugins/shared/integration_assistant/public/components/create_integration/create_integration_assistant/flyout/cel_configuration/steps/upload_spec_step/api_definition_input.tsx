@@ -6,7 +6,7 @@
  */
 
 import React, { useCallback, useState } from 'react';
-import { EuiFilePicker, EuiFlexItem, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
+import { EuiFilePicker, EuiFormRow, EuiSpacer, EuiText } from '@elastic/eui';
 import Oas from 'oas';
 import yaml from 'js-yaml';
 import type { IntegrationSettings } from '../../../../types';
@@ -17,7 +17,7 @@ interface PrepareOasErrorResult {
   error: string;
 }
 interface PrepareOasSuccessResult {
-  oas: Oas | undefined;
+  oas: Oas;
 }
 type PrepareOasResult = PrepareOasSuccessResult | PrepareOasErrorResult;
 
@@ -31,7 +31,7 @@ type PrepareOasResult = PrepareOasSuccessResult | PrepareOasErrorResult;
  * @returns The parsed OAS object or an error message.
  */
 const prepareOas = (fileContent: string): PrepareOasResult => {
-  let parsedApiSpec: Oas | undefined;
+  let parsedApiSpec: Oas;
 
   try {
     parsedApiSpec = new Oas(fileContent);
@@ -49,25 +49,32 @@ const prepareOas = (fileContent: string): PrepareOasResult => {
 
 interface ApiDefinitionInputProps {
   integrationSettings: IntegrationSettings | undefined;
+  showValidation: boolean;
   isGenerating: boolean;
+  onModifySpecFile: (hasValidFile: boolean) => void;
 }
 
 export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
-  ({ integrationSettings, isGenerating }) => {
+  ({ integrationSettings, showValidation, isGenerating, onModifySpecFile }) => {
     const { setIntegrationSettings } = useActions();
+    const [uploadedFile, setUploadedFile] = useState<FileList | undefined>(undefined);
     const [isParsing, setIsParsing] = useState(false);
     const [apiFileError, setApiFileError] = useState<string>();
 
     const onChangeApiDefinition = useCallback(
       (files: FileList | null) => {
-        if (!files) {
+        if (!files || files.length === 0) {
+          setUploadedFile(undefined);
+          onModifySpecFile(false);
           return;
         }
 
+        setUploadedFile(files);
         setApiFileError(undefined);
         setIntegrationSettings({
           ...integrationSettings,
           apiSpec: undefined,
+          apiSpecFileName: undefined,
         });
 
         const apiDefinitionFile = files[0];
@@ -86,6 +93,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
 
           if (fileContent == null) {
             setApiFileError(i18n.API_DEFINITION_ERROR.CAN_NOT_READ);
+            onModifySpecFile(false);
             return;
           }
 
@@ -93,6 +101,7 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
             // V8-based browsers can't handle large files and return an empty string
             // instead of an error; see https://stackoverflow.com/a/61316641
             setApiFileError(i18n.API_DEFINITION_ERROR.TOO_LARGE_TO_PARSE);
+            onModifySpecFile(false);
             return;
           }
 
@@ -100,14 +109,24 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
 
           if ('error' in prepareResult) {
             setApiFileError(prepareResult.error);
+            onModifySpecFile(false);
             return;
           }
 
           const { oas } = prepareResult;
 
+          const oasPaths = oas.getPaths();
+
+          // Verify we have valid GET paths in the uploaded spec file
+          if (Object.values(oasPaths).filter((path) => path?.get).length === 0) {
+            setApiFileError(i18n.API_DEFINITION_ERROR.NO_PATHS_IDENTIFIED);
+            onModifySpecFile(false);
+          }
+
           setIntegrationSettings({
             ...integrationSettings,
             apiSpec: oas,
+            apiSpecFileName: apiDefinitionFile.name,
           });
         };
 
@@ -124,49 +143,46 @@ export const ApiDefinitionInput = React.memo<ApiDefinitionInputProps>(
         reader.onabort = handleReaderError;
 
         reader.readAsText(apiDefinitionFile);
+        onModifySpecFile(true);
       },
-      [integrationSettings, setIntegrationSettings, setIsParsing]
+      [setIntegrationSettings, integrationSettings, onModifySpecFile]
     );
 
     return (
-      <EuiFlexItem>
-        <EuiText size="s">
-          <p>{i18n.OPEN_API_UPLOAD_INSTRUCTIONS}</p>
-        </EuiText>
-        <EuiSpacer size="m" />
-        <EuiFormRow
-          fullWidth
-          helpText={
-            <EuiText color="danger" size="xs">
-              {apiFileError}
-            </EuiText>
-          }
-          isInvalid={apiFileError != null}
-        >
-          <>
-            <EuiFilePicker
-              id="apiDefinitionFilePicker"
-              fullWidth
-              initialPromptText={
-                <>
-                  <EuiText size="s" textAlign="center">
-                    {i18n.API_DEFINITION_DESCRIPTION}
-                  </EuiText>
-                  <EuiText size="xs" color="subdued" textAlign="center">
-                    {i18n.API_DEFINITION_DESCRIPTION_2}
-                  </EuiText>
-                </>
-              }
-              onChange={onChangeApiDefinition}
-              display="large"
-              aria-label="Upload API definition file"
-              isLoading={isParsing}
-              data-test-subj="apiDefinitionFilePicker"
-              data-loading={isParsing}
-            />
-          </>
-        </EuiFormRow>
-      </EuiFlexItem>
+      <EuiFormRow
+        fullWidth
+        isDisabled={isGenerating}
+        label={i18n.API_DEFINITION_TITLE}
+        isInvalid={apiFileError != null || (showValidation && uploadedFile === undefined)}
+        error={apiFileError ? apiFileError : i18n.SPEC_FILE_REQUIRED}
+      >
+        <>
+          <EuiText size="s">
+            <p>{i18n.OPEN_API_UPLOAD_INSTRUCTIONS}</p>
+          </EuiText>
+          <EuiSpacer size="m" />
+          <EuiFilePicker
+            id="apiDefinitionFilePicker"
+            fullWidth
+            initialPromptText={
+              <>
+                <EuiText size="s" textAlign="center">
+                  {i18n.API_DEFINITION_DESCRIPTION}
+                </EuiText>
+                <EuiText size="xs" color="subdued" textAlign="center">
+                  {i18n.API_DEFINITION_DESCRIPTION_2}
+                </EuiText>
+              </>
+            }
+            onChange={onChangeApiDefinition}
+            display="large"
+            aria-label="Upload API definition file"
+            isLoading={isParsing || isGenerating}
+            isInvalid={apiFileError != null || (showValidation && uploadedFile === undefined)}
+            data-test-subj="apiDefinitionFilePicker"
+          />
+        </>
+      </EuiFormRow>
     );
   }
 );

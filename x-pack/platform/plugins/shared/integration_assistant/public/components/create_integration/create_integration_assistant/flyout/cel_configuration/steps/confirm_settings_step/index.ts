@@ -5,5 +5,4 @@
  * 2.0.
  */
 
-export { CelInputStep } from './cel_input_step';
-export * from './is_step_ready';
+export { ConfirmSettingsStep } from './confirm_settings_step';

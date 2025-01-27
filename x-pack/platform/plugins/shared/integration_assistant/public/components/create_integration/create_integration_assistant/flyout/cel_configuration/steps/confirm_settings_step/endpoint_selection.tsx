@@ -24,7 +24,7 @@ import type { IntegrationSettings } from '../../../../types';
 const loadPaths = (integrationSettings: IntegrationSettings | undefined): string[] => {
   const pathObjs = integrationSettings?.apiSpec?.getPaths();
   if (!pathObjs) {
-    throw new Error('Unable to parse path options from OpenAPI spec');
+    return [];
   }
   return Object.keys(pathObjs).filter((path) => pathObjs[path].get);
 };
@@ -35,6 +35,8 @@ interface EndpointSelectionProps {
   selectedPath: string | undefined;
   selectedOtherPath: string | undefined;
   useOtherEndpoint: boolean;
+  isGenerating: boolean;
+  showValidation: boolean;
   onChangeSuggestedPath(id: string): void;
   onChangeOtherPath(path: EuiComboBoxOptionOption[]): void;
 }
@@ -46,6 +48,8 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
     selectedPath,
     selectedOtherPath,
     useOtherEndpoint,
+    isGenerating,
+    showValidation,
     onChangeSuggestedPath,
     onChangeOtherPath,
   }) => {
@@ -77,34 +81,44 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmPath">
-        <EuiTitle size="s">
-          <h2>{i18n.CONFIRM_ENDPOINT}</h2>
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="confirmPath">
+        <EuiTitle size="xs">
+          <h4>{i18n.CONFIRM_ENDPOINT}</h4>
         </EuiTitle>
         {hasSuggestedPaths && (
           <EuiFlexItem>
             <EuiText size="s">{i18n.CONFIRM_ENDPOINT_DESCRIPTION}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiFlexItem>
               <EuiRadioGroup
                 options={options}
                 idSelected={selectedPath}
+                disabled={isGenerating}
                 onChange={onChangeSuggestedPath}
+                data-test-subj="suggestedPathsRadioGroup"
               />
             </EuiFlexItem>
           </EuiFlexItem>
         )}
         {(!hasSuggestedPaths || (useOtherEndpoint && !isShowingAllPaths)) && (
           <EuiFlexGroup direction="column">
-            <EuiFormRow fullWidth>
+            <EuiFormRow
+              fullWidth
+              isDisabled={isGenerating}
+              isInvalid={showValidation && useOtherEndpoint && selectedOtherPath === undefined}
+              error={i18n.PATH_REQUIRED}
+            >
               <EuiComboBox
                 singleSelection={{ asPlainText: true }}
                 fullWidth
                 options={otherPathOptions}
+                isDisabled={isGenerating}
+                isInvalid={showValidation && useOtherEndpoint && selectedOtherPath === undefined}
                 selectedOptions={
                   selectedOtherPath === undefined ? undefined : [{ label: selectedOtherPath }]
                 }
                 onChange={onChangeOtherPath}
+                data-test-subj="allPathOptionsComboBox"
               />
             </EuiFormRow>
           </EuiFlexGroup>
