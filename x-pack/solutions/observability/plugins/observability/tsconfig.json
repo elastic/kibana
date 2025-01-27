@@ -113,7 +113,8 @@
     "@kbn/logging-mocks",
     "@kbn/response-ops-rule-form",
     "@kbn/streams-plugin",
-    "@kbn/data-service"
+    "@kbn/data-service",
+    "@kbn/ebt-tools"
   ],
   "exclude": ["target/**/*"]
 }
