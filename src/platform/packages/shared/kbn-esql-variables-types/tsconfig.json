@@ -15,5 +15,6 @@
   ],
   "kbn_references": [
     "@kbn/presentation-publishing",
+    "@kbn/esql-validation-autocomplete",
   ]
 }

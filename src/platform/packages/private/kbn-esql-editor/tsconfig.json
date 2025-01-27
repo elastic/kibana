@@ -27,7 +27,6 @@
     "@kbn/code-editor",
     "@kbn/fields-metadata-plugin",
     "@kbn/esql-validation-autocomplete",
-    "@kbn/esql-variables-types",
     "@kbn/esql-utils",
     "@kbn/content-management-favorites-public",
     "@kbn/usage-collection-plugin",
