@@ -10,8 +10,11 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import {
-  IngestStreamLifecycle,
   ReadStreamDefinition,
+  UnwiredIngestStreamEffectiveLifecycle,
+  isDslLifecycle,
+  isErrorLifecycle,
+  isIlmLifecycle,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
@@ -118,7 +121,7 @@ export function EntityDetailViewWithoutParams({
                       </EuiBadge>
                     </>
                   ) : null}
-                  {definition && <LifecycleBadge lifecycle={definition.lifecycle} />}
+                  {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
                 </EuiFlexGroup>
               }
             />
@@ -141,35 +144,49 @@ export function EntityDetailViewWithoutParams({
   );
 }
 
-function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamLifecycle }) {
+function LifecycleBadge({ lifecycle }: { lifecycle: UnwiredIngestStreamEffectiveLifecycle }) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
-  if (lifecycle.type === 'ilm') {
+
+  if (isIlmLifecycle(lifecycle)) {
     return (
       <EuiBadge color="hollow">
         <EuiLink
           color="text"
-          href={ilmLocator?.getRedirectUrl({ page: 'policy_edit', policyName: lifecycle.policy })}
+          href={ilmLocator?.getRedirectUrl({
+            page: 'policy_edit',
+            policyName: lifecycle.ilm.policy,
+          })}
         >
           {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
             defaultMessage: 'ILM Policy: {name}',
-            values: { name: lifecycle.policy },
+            values: { name: lifecycle.ilm.policy },
           })}
         </EuiLink>
       </EuiBadge>
     );
   }
 
-  if (lifecycle.type === 'error') {
+  if (isErrorLifecycle(lifecycle)) {
     return (
       <EuiBadge color="hollow">
         {i18n.translate('xpack.streams.entityDetailViewWithoutParams.errorBadgeLabel', {
           defaultMessage: 'Error: {message}',
-          values: { message: lifecycle.message },
+          values: { message: lifecycle.error.message },
+        })}
+      </EuiBadge>
+    );
+  }
+  if (isDslLifecycle(lifecycle)) {
+    return (
+      <EuiBadge color="hollow">
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel', {
+          defaultMessage: 'Retention: {retention}',
+          values: { retention: lifecycle.dsl.data_retention || '∞' },
         })}
       </EuiBadge>
     );
@@ -177,9 +194,8 @@ function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamLifecycle }) {
 
   return (
     <EuiBadge color="hollow">
-      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dlmBadgeLabel', {
-        defaultMessage: 'Retention: {retention}',
-        values: { retention: lifecycle.data_retention || '∞' },
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
+        defaultMessage: 'Retention: Disabled',
       })}
     </EuiBadge>
   );

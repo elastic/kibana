@@ -19,6 +19,7 @@ import {
   getDataStreamLifecycle,
   getUnmanagedElasticsearchAssets,
 } from '../../../lib/streams/stream_crud';
+import { findInheritedLifecycle } from '../../../lib/streams/helpers/lifecycle';
 
 export async function readStream({
   name,
@@ -47,8 +48,6 @@ export async function readStream({
     }),
   ]);
 
-  const lifecycle = getDataStreamLifecycle(dataStream);
-
   if (isUnwiredStreamDefinition(streamDefinition)) {
     return {
       stream: omit(streamDefinition, 'name'),
@@ -59,7 +58,7 @@ export async function readStream({
           })
         : [],
       data_stream_exists: !!dataStream,
-      lifecycle,
+      effective_lifecycle: getDataStreamLifecycle(dataStream),
       dashboards,
       inherited_fields: {},
     };
@@ -68,7 +67,7 @@ export async function readStream({
   const body: WiredStreamGetResponse = {
     stream: omit(streamDefinition, 'name'),
     dashboards,
-    lifecycle,
+    effective_lifecycle: findInheritedLifecycle(streamDefinition, ancestors),
     inherited_fields: ancestors.reduce((acc, def) => {
       Object.entries(def.ingest.wired.fields).forEach(([key, fieldDef]) => {
         acc[key] = { ...fieldDef, from: def.name };

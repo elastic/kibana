@@ -52,7 +52,7 @@ export function StreamDetailView() {
               dashboards: response.dashboards,
               inherited_fields: response.inherited_fields,
               elasticsearch_assets: [],
-              lifecycle: response.lifecycle,
+              effective_lifecycle: response.effective_lifecycle,
               name: key,
               stream: {
                 name: key,
@@ -65,7 +65,7 @@ export function StreamDetailView() {
             dashboards: response.dashboards,
             elasticsearch_assets: response.elasticsearch_assets,
             inherited_fields: {},
-            lifecycle: response.lifecycle,
+            effective_lifecycle: response.effective_lifecycle,
             name: key,
             data_stream_exists: response.data_stream_exists,
             stream: {
