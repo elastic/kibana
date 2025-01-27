@@ -30,7 +30,7 @@ const detailedServiceMap = url.format({
 });
 
 // Failing: See https://github.com/elastic/kibana/issues/207005
-describe.skip('service map', () => {
+describe('service map', () => {
   before(() => {
     synthtrace.index(
       opbeans({
@@ -69,7 +69,7 @@ describe.skip('service map', () => {
       );
     });
 
-    it.skip('shows nodes in detailed service map', () => {
+    it('shows nodes in detailed service map', () => {
       cy.visitKibana(detailedServiceMap);
       cy.wait('@serviceMap');
       cy.contains('h1', 'opbeans-java');
@@ -91,6 +91,8 @@ describe.skip('service map', () => {
         cy.visitKibana(serviceMapHref);
         // we need to dismiss the service-group call out first
         cy.getByTestSubj('apmUnifiedSearchBar').type('_id : foo{enter}');
+        cy.wait('@serviceMap');
+
         cy.contains('No services available');
         // search bar is still visible
         cy.getByTestSubj('apmUnifiedSearchBar');
