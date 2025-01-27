@@ -174,7 +174,7 @@ export interface AppendAssistantMessageToConversationParams {
   messageContent: string;
   replacements: Replacements;
   conversationId: string;
-  contentReferences?: ContentReferences;
+  contentReferences?: ContentReferences | false;
   isError?: boolean;
   traceData?: Message['traceData'];
 }
@@ -196,7 +196,7 @@ export const appendAssistantMessageToConversation = async ({
     ...(contentReferences ? { contentReferences } : {}),
   };
 
-  const isMetadataPopulated = contentReferences !== undefined;
+  const isMetadataPopulated = Boolean(contentReferences) !== false;
 
   await conversationsDataClient.appendConversationMessages({
     existingConversation: conversation,
@@ -231,7 +231,7 @@ export interface LangChainExecuteParams {
   telemetry: AnalyticsServiceSetup;
   actionTypeId: string;
   connectorId: string;
-  contentReferencesStore: ContentReferencesStore;
+  contentReferencesStore: ContentReferencesStore | false;
   llmTasks?: LlmTasksPluginStart;
   inference: InferenceServerStart;
   isOssModel?: boolean;

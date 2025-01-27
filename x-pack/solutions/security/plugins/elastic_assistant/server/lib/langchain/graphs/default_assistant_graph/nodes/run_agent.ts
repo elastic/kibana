@@ -13,6 +13,7 @@ import { formatLatestUserMessage } from '../prompts';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
 import { AIAssistantKnowledgeBaseDataClient } from '../../../../../ai_assistant_data_clients/knowledge_base';
+import { INCLUDE_CITATIONS } from './translations';
 
 export interface RunAgentParams extends NodeParamsBase {
   state: AgentState;
@@ -55,6 +56,7 @@ export async function runAgent({
             ? JSON.stringify(knowledgeHistory.map((e) => e.text))
             : NO_KNOWLEDGE_HISTORY
         }`,
+        include_citations_prompt_placeholder: state.contentReferencesEnabled ? INCLUDE_CITATIONS : '',
         // prepend any user prompt (gemini)
         input: formatLatestUserMessage(state.input, state.llmType),
         chat_history: sanitizeChatHistory(state.messages), // TODO: Message de-dupe with ...state spread

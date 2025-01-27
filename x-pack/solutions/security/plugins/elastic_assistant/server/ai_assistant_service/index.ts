@@ -25,7 +25,10 @@ import {
   errorResult,
   successResult,
 } from './create_resource_installation_helper';
-import { conversationsFieldMap } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
+import {
+  conversationsFieldMap,
+  conversationsFieldMapV2,
+} from '../ai_assistant_data_clients/conversations/field_maps_configuration';
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
 import { AIAssistantDataClient } from '../ai_assistant_data_clients';
@@ -95,6 +98,8 @@ export class AIAssistantService {
   private isKBSetupInProgress: boolean = false;
   private hasInitializedV2KnowledgeBase: boolean = false;
   private productDocManager?: ProductDocBaseStartContract['management'];
+  // Temporary 'feature flag' to determine if we should initialize the new message metadata mappings, toggled when citations should be enabled.
+  private contentReferencesEnabled: boolean = false;
 
   constructor(private readonly options: AIAssistantServiceOpts) {
     this.initialized = false;
@@ -102,7 +107,7 @@ export class AIAssistantService {
     this.conversationsDataStream = this.createDataStream({
       resource: 'conversations',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: conversationsFieldMap,
+      fieldMap: this.contentReferencesEnabled ? conversationsFieldMapV2 : conversationsFieldMap,
     });
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',

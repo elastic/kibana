@@ -29,7 +29,7 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { kbDataClient } = params as AssistantToolParams;
+    const { kbDataClient, contentReferencesStore } = params as AssistantToolParams;
     if (kbDataClient == null) return null;
 
     return new DynamicStructuredTool({
@@ -48,13 +48,17 @@ export const SECURITY_LABS_KNOWLEDGE_BASE_TOOL: AssistantTool = {
           query: input.question,
         });
 
-        const reference = params.contentReferencesStore.add((p) =>
-          knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
-        );
+        const reference =
+          contentReferencesStore &&
+          contentReferencesStore.add((p) =>
+            knowledgeBaseReference(p.id, 'Elastic Security Labs content', 'securityLabsId')
+          );
 
         // TODO: Token pruning
         const result = JSON.stringify(docs).substring(0, 20000);
-        return `${result}\n${contentReferenceString(reference)}`;
+
+        const citation = reference ? `\n${contentReferenceString(reference)}` : '';
+        return `${result}${citation}`;
       },
       tags: ['security-labs', 'knowledge-base'],
       // TODO: Remove after ZodAny is fixed https://github.com/langchain-ai/langchainjs/blob/main/langchain-core/src/tools.ts

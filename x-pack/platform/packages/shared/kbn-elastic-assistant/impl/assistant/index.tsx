@@ -95,6 +95,7 @@ const AssistantComponent: React.FC<Props> = ({
     showAnonymizedValues,
     setContentReferencesVisible,
     setShowAnonymizedValues,
+    assistantFeatures: { contentReferencesEnabled },
   } = useAssistantContext();
 
   const [selectedPromptContexts, setSelectedPromptContexts] = useState<
@@ -233,9 +234,16 @@ const AssistantComponent: React.FC<Props> = ({
       }
     };
 
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
+    if (contentReferencesEnabled) {
+      window.addEventListener('keydown', handleKeyDown);
+    }
+    return () => {
+      if (contentReferencesEnabled) {
+        window.removeEventListener('keydown', handleKeyDown);
+      }
+    };
   }, [
+    contentReferencesEnabled,
     setContentReferencesVisible,
     contentReferencesVisible,
     setShowAnonymizedValues,
@@ -398,6 +406,7 @@ const AssistantComponent: React.FC<Props> = ({
             currentUserAvatar,
             systemPromptContent: currentSystemPrompt?.content,
             contentReferencesVisible,
+            contentReferencesEnabled,
           })}
           // Avoid comments going off the flyout
           css={css`
@@ -428,6 +437,7 @@ const AssistantComponent: React.FC<Props> = ({
       contentReferencesVisible,
       euiTheme.size.l,
       selectedPromptContextsCount,
+      contentReferencesEnabled,
     ]
   );
 

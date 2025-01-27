@@ -84,4 +84,5 @@ export type GetAssistantMessages = (commentArgs: {
   setIsStreaming: (isStreaming: boolean) => void;
   systemPromptContent?: string;
   contentReferencesVisible?: boolean;
+  contentReferencesEnabled?: boolean;
 }) => EuiCommentProps[];

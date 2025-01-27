@@ -25,6 +25,7 @@ import { buildResponse } from '../lib/build_response';
 import { ElasticAssistantRequestHandlerContext, GetElser } from '../types';
 import {
   appendAssistantMessageToConversation,
+  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
   getSystemPromptFromUserConversation,
   langChainExecute,
@@ -111,7 +112,11 @@ export const postActionsConnectorExecuteRoute = (
           const conversationsDataClient =
             await assistantContext.getAIAssistantConversationsDataClient();
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
-          const contentReferencesStore = contentReferencesStoreFactory();
+
+          const contentReferencesEnabled =
+            assistantContext.getRegisteredFeatures(DEFAULT_PLUGIN_NAME).contentReferencesEnabled;
+          const contentReferencesStore =
+            contentReferencesEnabled && contentReferencesStoreFactory();
 
           onLlmResponse = async (
             content: string,
@@ -119,7 +124,8 @@ export const postActionsConnectorExecuteRoute = (
             isError = false
           ): Promise<void> => {
             if (conversationsDataClient && conversationId) {
-              const contentReferences = pruneContentReferences(content, contentReferencesStore);
+              const contentReferences =
+                contentReferencesStore && pruneContentReferences(content, contentReferencesStore);
 
               await appendAssistantMessageToConversation({
                 conversationId,

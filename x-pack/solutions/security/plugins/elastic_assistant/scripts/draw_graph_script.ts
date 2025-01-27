@@ -54,6 +54,7 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     createLlmInstance,
     tools: [],
     replacements: {},
+    contentReferencesEnabled: false,
   });
   return graph.getGraph();
 }

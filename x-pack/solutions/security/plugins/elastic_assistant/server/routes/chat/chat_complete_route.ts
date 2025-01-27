@@ -27,6 +27,7 @@ import { buildResponse } from '../../lib/build_response';
 import {
   appendAssistantMessageToConversation,
   createConversationWithUserInput,
+  DEFAULT_PLUGIN_NAME,
   getIsKnowledgeBaseInstalled,
   langChainExecute,
   performChecks,
@@ -177,7 +178,12 @@ export const chatCompleteRoute = (
             }));
           }
 
-          const contentReferencesStore = contentReferencesStoreFactory();
+          const contentReferencesEnabled =
+            ctx.elasticAssistant.getRegisteredFeatures(
+              DEFAULT_PLUGIN_NAME
+            ).contentReferencesEnabled;
+          const contentReferencesStore =
+            contentReferencesEnabled && contentReferencesStoreFactory();
 
           const onLlmResponse = async (
             content: string,
@@ -185,7 +191,8 @@ export const chatCompleteRoute = (
             isError = false
           ): Promise<void> => {
             if (newConversation?.id && conversationsDataClient) {
-              const contentReferences = pruneContentReferences(content, contentReferencesStore);
+              const contentReferences =
+                contentReferencesStore && pruneContentReferences(content, contentReferencesStore);
 
               await appendAssistantMessageToConversation({
                 conversationId: newConversation?.id,

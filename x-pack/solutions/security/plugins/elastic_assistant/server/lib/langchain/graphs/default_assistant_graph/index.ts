@@ -182,6 +182,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     replacements,
     // some chat models (bedrock) require a signal to be passed on agent invoke rather than the signal passed to the chat model
     ...(llmType === 'bedrock' ? { signal: abortSignal } : {}),
+    contentReferencesEnabled: Boolean(contentReferencesStore),
   });
   const inputs: GraphInputs = {
     responseLanguage,
@@ -214,13 +215,14 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     traceOptions,
   });
 
-  const contentReferences = pruneContentReferences(graphResponse.output, contentReferencesStore);
+  const contentReferences =
+    contentReferencesStore && pruneContentReferences(graphResponse.output, contentReferencesStore);
 
   const metadata: MessageMetadata = {
     ...(contentReferences ? { contentReferences } : {}),
   };
 
-  const isMetadataPopulated = contentReferences !== undefined;
+  const isMetadataPopulated = Boolean(contentReferences) !== false;
 
   return {
     body: {

@@ -32,7 +32,8 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { connectorId, llmTasks, request } = params as AssistantToolParams;
+    const { connectorId, llmTasks, request, contentReferencesStore } =
+      params as AssistantToolParams;
 
     // This check is here in order to satisfy TypeScript
     if (llmTasks == null || connectorId == null) return null;
@@ -71,13 +72,19 @@ export const PRODUCT_DOCUMENTATION_TOOL: AssistantTool = {
           functionCalling: 'auto',
         });
 
-        const enrichedDocuments = response.documents.map(
-          enrichDocument(params.contentReferencesStore)
-        );
+        if (contentReferencesStore) {
+          const enrichedDocuments = response.documents.map(enrichDocument(contentReferencesStore));
+
+          return {
+            content: {
+              documents: enrichedDocuments,
+            },
+          };
+        }
 
         return {
           content: {
-            documents: enrichedDocuments,
+            documents: response.documents,
           },
         };
       },

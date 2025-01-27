@@ -18,7 +18,7 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Node } from 'unist';
 import type { ContentReferences } from '@kbn/elastic-assistant-common';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
@@ -30,6 +30,7 @@ interface Props {
   content: string;
   contentReferences?: ContentReferences;
   contentReferencesVisible: boolean;
+  contentReferencesEnabled: boolean;
   index: number;
   loading: boolean;
   ['data-test-subj']?: string;
@@ -107,12 +108,14 @@ interface GetPluginDependencies {
   contentReferences?: ContentReferences;
   loading: boolean;
   contentReferencesVisible: boolean;
+  contentReferencesEnabled: boolean;
 }
 
 const getPluginDependencies = ({
   contentReferences,
   contentReferencesVisible,
   loading,
+  contentReferencesEnabled,
 }: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
@@ -122,11 +125,15 @@ const getPluginDependencies = ({
 
   processingPlugins[1][1].components = {
     ...components,
-    contentReference: contentReferenceComponentFactory({
-      contentReferences,
-      contentReferencesVisible,
-      loading,
-    }),
+    ...(contentReferencesEnabled
+      ? {
+          contentReference: contentReferenceComponentFactory({
+            contentReferences,
+            contentReferencesVisible,
+            loading,
+          }),
+        }
+      : {}),
     cursor: Cursor,
     customCodeBlock: (props) => {
       return (
@@ -162,7 +169,7 @@ const getPluginDependencies = ({
       loadingCursorPlugin,
       customCodeBlockLanguagePlugin,
       ...parsingPlugins,
-      ContentReferenceParser,
+      ...(contentReferencesEnabled ? [ContentReferenceParser] : []),
     ],
     processingPluginList: processingPlugins,
   };
@@ -173,6 +180,7 @@ export function MessageText({
   content,
   contentReferences,
   contentReferencesVisible,
+  contentReferencesEnabled,
   index,
   'data-test-subj': dataTestSubj,
 }: Props) {
@@ -180,11 +188,16 @@ export function MessageText({
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies({
-    contentReferences,
-    contentReferencesVisible,
-    loading,
-  });
+  const { parsingPluginList, processingPluginList } = useMemo(
+    () =>
+      getPluginDependencies({
+        contentReferences,
+        contentReferencesVisible,
+        contentReferencesEnabled,
+        loading,
+      }),
+    [contentReferences, contentReferencesVisible, contentReferencesEnabled, loading]
+  );
 
   return (
     <EuiText css={containerCss} data-test-subj={dataTestSubj}>

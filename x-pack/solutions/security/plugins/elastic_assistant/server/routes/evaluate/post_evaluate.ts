@@ -270,7 +270,12 @@ export const postEvaluateRoute = (
                   },
                 };
 
-              const contentReferencesStore = contentReferencesStoreFactory();
+              const contentReferencesEnabled =
+                assistantContext.getRegisteredFeatures(
+                  DEFAULT_PLUGIN_NAME
+                ).contentReferencesEnabled;
+              const contentReferencesStore =
+                contentReferencesEnabled && contentReferencesStoreFactory();
 
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
@@ -332,6 +337,7 @@ export const postEvaluateRoute = (
                   logger,
                   tools,
                   replacements: {},
+                  contentReferencesEnabled: Boolean(contentReferencesStore),
                 }),
               };
             })

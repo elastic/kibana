@@ -232,7 +232,7 @@ export interface AssistantToolParams {
   inference?: InferenceServerStart;
   isEnabledKnowledgeBase: boolean;
   connectorId?: string;
-  contentReferencesStore: ContentReferencesStore;
+  contentReferencesStore: ContentReferencesStore | false;
   esClient: ElasticsearchClient;
   kbDataClient?: AIAssistantKnowledgeBaseDataClient;
   langChainTimeout?: number;

@@ -647,7 +647,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     contentReferencesStore,
     esClient,
   }: {
-    contentReferencesStore: ContentReferencesStore;
+    contentReferencesStore: ContentReferencesStore | false;
     esClient: ElasticsearchClient;
   }): Promise<StructuredTool[]> => {
     const user = this.options.currentUser;

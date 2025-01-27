@@ -58,6 +58,7 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
       onNewReplacements,
       replacements,
       size,
+      contentReferencesStore,
     } = params as OpenAndAcknowledgedAlertsToolParams;
     return new DynamicStructuredTool({
       name: 'OpenAndAcknowledgedAlertsTool',
@@ -91,13 +92,14 @@ export const OPEN_AND_ACKNOWLEDGED_ALERTS_TOOL: AssistantTool = {
               rawData: getRawDataOrDefault(x.fields),
             });
             const hitId = x._id;
-            const alertReferenceString =
+            const citation =
               hitId &&
+              contentReferencesStore &&
               `\nCitation,${contentReferenceBlock(
-                params.contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
+                contentReferencesStore.add((p) => securityAlertReference(p.id, hitId))
               )}`;
 
-            return `${transformed}${alertReferenceString ?? ''}`;
+            return `${transformed}${citation ?? ''}`;
           })
         );
       },

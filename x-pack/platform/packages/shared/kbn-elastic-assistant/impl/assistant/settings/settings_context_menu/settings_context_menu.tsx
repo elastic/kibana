@@ -46,6 +46,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       contentReferencesVisible,
       showAnonymizedValues,
       setShowAnonymizedValues,
+      assistantFeatures: { contentReferencesEnabled },
     } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -146,8 +147,15 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiContextMenuItem>,
-        <EuiPanel color="transparent" paddingSize="s" key={'chat-options-panel'}>
-          <EuiTitle size="xxxs" key={'chat-options-title'}>
+        <EuiPanel color="transparent" paddingSize="none" key={'chat-options-panel'}>
+          <EuiTitle
+            size="xxxs"
+            key={'chat-options-title'}
+            css={css`
+              padding-left: ${euiTheme.size.m};
+              padding-bottom: ${euiTheme.size.xs};
+            `}
+          >
             <h3>{i18n.CHAT_OPTIONS}</h3>
           </EuiTitle>
           <EuiHorizontalRule margin="none" />
@@ -169,24 +177,26 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
               />
             </EuiContextMenuItem>
           </EuiToolTip>
-          <EuiToolTip
-            position="left"
-            key={'show-citations-tooltip'}
-            content={i18n.SHOW_CITATIONS_SHORTCUT}
-          >
-            <EuiContextMenuItem
-              aria-label={'show-citations'}
-              key={'show-citations'}
-              data-test-subj={'show-citations'}
+          {contentReferencesEnabled && (
+            <EuiToolTip
+              position="left"
+              key={'show-citations-tooltip'}
+              content={i18n.SHOW_CITATIONS_SHORTCUT}
             >
-              <EuiSwitch
-                label={i18n.SHOW_CITATIONS}
-                checked={contentReferencesVisible}
-                onChange={(e) => setContentReferencesVisible(e.target.checked)}
-                compressed
-              />
-            </EuiContextMenuItem>
-          </EuiToolTip>
+              <EuiContextMenuItem
+                aria-label={'show-citations'}
+                key={'show-citations'}
+                data-test-subj={'show-citations'}
+              >
+                <EuiSwitch
+                  label={i18n.SHOW_CITATIONS}
+                  checked={contentReferencesVisible}
+                  onChange={(e) => setContentReferencesVisible(e.target.checked)}
+                  compressed
+                />
+              </EuiContextMenuItem>
+            </EuiToolTip>
+          )}
           <EuiHorizontalRule margin="none" />
           <EuiContextMenuItem
             aria-label={'clear-chat'}
@@ -214,6 +224,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         handleShowAlertsModal,
         knowledgeBase.latestAlerts,
         showDestroyModal,
+        contentReferencesEnabled,
+        euiTheme.size.m,
+        euiTheme.size.xs,
       ]
     );
 

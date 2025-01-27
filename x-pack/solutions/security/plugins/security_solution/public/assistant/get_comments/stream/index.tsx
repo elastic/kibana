@@ -20,6 +20,7 @@ interface Props {
   content?: string;
   contentReferences?: ContentReferences;
   contentReferencesVisible?: boolean;
+  contentReferencesEnabled?: boolean;
   isError?: boolean;
   isFetching?: boolean;
   isControlsEnabled?: boolean;
@@ -35,7 +36,8 @@ export const StreamComment = ({
   abortStream,
   content,
   contentReferences,
-  contentReferencesVisible,
+  contentReferencesVisible = true,
+  contentReferencesEnabled = false,
   index,
   isControlsEnabled = false,
   isError = false,
@@ -112,9 +114,10 @@ export const StreamComment = ({
           data-test-subj={isError ? 'errorComment' : undefined}
           content={message}
           contentReferences={contentReferences}
+          contentReferencesEnabled={contentReferencesEnabled}
           index={index}
           loading={isAnythingLoading}
-          contentReferencesVisible={contentReferencesVisible ?? true}
+          contentReferencesVisible={contentReferencesVisible}
         />
       }
       error={error ? new Error(error) : undefined}

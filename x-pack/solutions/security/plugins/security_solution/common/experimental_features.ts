@@ -120,6 +120,11 @@ export const allowedExperimentalValues = Object.freeze({
   attackDiscoveryAlertFiltering: false,
 
   /**
+   * Enables content references (citations) in the AI Assistant
+   */
+  contentReferencesEnabled: true,
+
+  /**
    * Enables the Managed User section inside the new user details flyout.
    */
   newUserDetailsFlyoutManagedUser: false,

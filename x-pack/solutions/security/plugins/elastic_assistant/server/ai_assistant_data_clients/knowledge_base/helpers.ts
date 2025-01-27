@@ -148,7 +148,7 @@ export const getStructuredToolForIndexEntry = ({
 }: {
   indexEntry: IndexEntry;
   esClient: ElasticsearchClient;
-  contentReferencesStore: ContentReferencesStore;
+  contentReferencesStore: ContentReferencesStore | false;
   logger: Logger;
 }): DynamicStructuredTool => {
   const inputSchema = indexEntry.inputSchema?.reduce((prev, input) => {
@@ -221,9 +221,9 @@ export const getStructuredToolForIndexEntry = ({
             hit._id ? `METADATA _id\n | WHERE _id == "${hit._id}"` : ''
           }`;
 
-          const reference = contentReferencesStore.add((p) =>
-            esqlQueryReference(p.id, esqlQuery, hit._index)
-          );
+          const reference =
+            contentReferencesStore &&
+            contentReferencesStore.add((p) => esqlQueryReference(p.id, esqlQuery, hit._index));
 
           if (indexEntry.outputFields && indexEntry.outputFields.length > 0) {
             return indexEntry.outputFields.reduce(
@@ -231,13 +231,13 @@ export const getStructuredToolForIndexEntry = ({
                 // @ts-expect-error
                 return { ...prev, [field]: hit._source[field] };
               },
-              { citation: contentReferenceBlock(reference) }
+              reference ? { citation: contentReferenceBlock(reference) } : {}
             );
           }
 
           return {
             text: hit.highlight?.[indexEntry.field].join('\n --- \n'),
-            citation: contentReferenceBlock(reference),
+            ...(reference ? { citation: contentReferenceBlock(reference) } : {}),
           };
         });
 

@@ -34,7 +34,8 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
   getTool(params: AssistantToolParams) {
     if (!this.isSupported(params)) return null;
 
-    const { kbDataClient, logger } = params as KnowledgeBaseRetrievalToolParams;
+    const { kbDataClient, logger, contentReferencesStore } =
+      params as KnowledgeBaseRetrievalToolParams;
     if (kbDataClient == null) return null;
 
     return new DynamicStructuredTool({
@@ -48,13 +49,15 @@ export const KNOWLEDGE_BASE_RETRIEVAL_TOOL: AssistantTool = {
           () => `KnowledgeBaseRetrievalToolParams:input\n ${JSON.stringify(input, null, 2)}`
         );
 
-        const docs = (
-          await kbDataClient.getKnowledgeBaseDocumentEntries({
-            query: input.query,
-            kbResource: 'user',
-            required: false,
-          })
-        ).map(enrichDocument(params.contentReferencesStore));
+        const docs = await kbDataClient.getKnowledgeBaseDocumentEntries({
+          query: input.query,
+          kbResource: 'user',
+          required: false,
+        });
+
+        if (contentReferencesStore) {
+          return JSON.stringify(docs.map(enrichDocument(contentReferencesStore)));
+        }
 
         return JSON.stringify(docs);
       },
