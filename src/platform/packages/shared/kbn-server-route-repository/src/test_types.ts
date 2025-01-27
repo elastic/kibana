@@ -316,6 +316,11 @@ const repository = {
         });
       }
 
+      // Test returning an error response
+      if (start === 'something-3') {
+        return kibanaResponseFactory.notFound({ body: { message: 'Not found' } });
+      }
+
       return { success: false as const, message: 'No change!' };
     },
   }),
