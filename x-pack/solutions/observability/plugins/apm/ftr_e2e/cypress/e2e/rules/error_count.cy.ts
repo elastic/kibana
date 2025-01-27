@@ -60,6 +60,7 @@ describe('Rules', () => {
     const ruleName = 'Error count threshold';
     const comboBoxInputSelector = '[data-popover-open] [data-test-subj=comboBoxSearchInput]';
     const confirmModalButtonSelector = '.euiModal button[data-test-subj=confirmModalConfirmButton]';
+    const saveButtonSelector = 'button[data-test-subj=ruleFlyoutFooterSaveButton]';
 
     describe('when created from APM', () => {
       describe('when created from Service Inventory', () => {
@@ -79,10 +80,10 @@ describe('Rules', () => {
 
           // Navigate to Rule Details step
           cy.getByTestSubj('ruleFormStep-details').click();
-          cy.contains('Create rule').should('not.be.disabled');
+          cy.get(saveButtonSelector).should('not.be.disabled');
 
           // Save, with no actions
-          cy.contains('Create rule').click();
+          cy.get(saveButtonSelector).click();
           cy.get(confirmModalButtonSelector).click();
 
           cy.contains(`Created rule "${ruleName}`);

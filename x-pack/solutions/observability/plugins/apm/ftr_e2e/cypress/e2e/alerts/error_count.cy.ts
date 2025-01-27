@@ -59,7 +59,8 @@ describe('Alerts', () => {
 
   describe('when rendered from Service view in APM app', () => {
     const ruleName = 'Error count threshold';
-    const confirmModalButtonSelector = '[data-test-subj=confirmModalConfirmButton]';
+    const confirmModalButtonSelector = '.euiModal button[data-test-subj=confirmModalConfirmButton]';
+    const saveButtonSelector = 'button[data-test-subj=ruleFlyoutFooterSaveButton]';
 
     it('alerts table is rendered correctly', () => {
       cy.loginAsEditorUser();
@@ -82,10 +83,10 @@ describe('Alerts', () => {
 
       // Navigate to Rule Details step
       cy.getByTestSubj('ruleFormStep-details').click();
-      cy.contains('Create rule').should('not.be.disabled');
+      cy.get(saveButtonSelector).should('not.be.disabled');
 
       // Save, with no actions
-      cy.contains('Create rule').click();
+      cy.get(saveButtonSelector).click();
       cy.get(confirmModalButtonSelector).click();
 
       cy.contains(`Created rule "${ruleName}`);
