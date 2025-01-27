@@ -40,7 +40,7 @@ export function getConnectorType(
         errors: {
           connector: new Array<string>(),
           message: new Array<string>(),
-          prompts: new Array<string>(),
+          prompts: new Array<string[]>(),
         },
       };
 
@@ -48,17 +48,18 @@ export function getConnectorType(
         validationResult.errors.connector.push(CONNECTOR_REQUIRED);
       }
 
-      if (!actionParams.message) {
+      if (!actionParams.message && !actionParams.prompts) {
         validationResult.errors.message.push(MESSAGE_REQUIRED);
       }
 
       if (actionParams.prompts) {
-        actionParams.prompts.forEach((prompt) => {
+        actionParams.prompts.forEach((prompt, index) => {
+          validationResult.errors.prompts[index] = [];
           if (!prompt.message) {
-            validationResult.errors.prompts.push(MESSAGE_REQUIRED);
+            validationResult.errors.prompts[index].push(MESSAGE_REQUIRED);
           }
-          if (!prompt.statuses) {
-            validationResult.errors.prompts.push(STATUS_REQUIRED);
+          if (!prompt.statuses.length) {
+            validationResult.errors.prompts[index].push(STATUS_REQUIRED);
           }
         });
       }

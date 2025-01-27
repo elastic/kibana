@@ -23,8 +23,10 @@ import {
   ObservabilityAIAssistantService,
   useGenAIConnectorsWithoutContext,
 } from '@kbn/observability-ai-assistant-plugin/public';
+import { RuleFormParamsErrors } from '@kbn/alerts-ui-shared';
 import { ObsAIAssistantActionParams } from './types';
 import { ALERT_STATUSES } from '../../common/constants';
+import { MESSAGE_REQUIRED, STATUS_REQUIRED } from './translations';
 
 const ObsAIAssistantParamsFields: React.FunctionComponent<
   ActionParamsProps<ObsAIAssistantActionParams> & { service: ObservabilityAIAssistantService }
@@ -82,6 +84,11 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
     }
   };
 
+  const isValidField = (statusError: string, promptIndex: number) => {
+    const errorsList = ((errors.prompts as RuleFormParamsErrors)?.[promptIndex] as string[]) || [];
+    return errorsList.includes(statusError);
+  };
+
   return (
     <>
       <EuiFormRow
@@ -135,6 +142,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
                 );
               }}
               isClearable={true}
+              isInvalid={isValidField(STATUS_REQUIRED, promptIndex)}
             />
           </EuiFormRow>
           <EuiSpacer size="m" />
@@ -155,8 +163,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
                 onChange={(event) => {
                   handleOnChange('message', event.target.value, promptIndex);
                 }}
-                // @ts-expect-error upgrade typescript v5.1.6
-                isInvalid={errors.message?.length > 0}
+                isInvalid={isValidField(MESSAGE_REQUIRED, promptIndex)}
               />
             </EuiFlexItem>
           </EuiFormRow>
