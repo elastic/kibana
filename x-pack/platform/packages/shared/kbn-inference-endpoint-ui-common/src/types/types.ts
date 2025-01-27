@@ -53,3 +53,8 @@ export interface Secrets {
 }
 
 export const INFERENCE_ENDPOINT_INTERNAL_API_VERSION = '1';
+
+export interface InferenceEndpoint {
+  config: Config;
+  secrets: Secrets;
+}
