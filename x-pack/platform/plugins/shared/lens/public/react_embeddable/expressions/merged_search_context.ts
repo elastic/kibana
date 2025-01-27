@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import type { ESQLControlVariable } from '@kbn/esql-variables-types';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import {
   type AggregateQuery,

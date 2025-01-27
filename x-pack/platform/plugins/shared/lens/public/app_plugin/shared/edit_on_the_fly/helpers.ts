@@ -12,7 +12,7 @@ import {
   mapVariableToColumn,
 } from '@kbn/esql-utils';
 import { type AggregateQuery, buildEsQuery } from '@kbn/es-query';
-import type { ESQLControlVariable } from '@kbn/esql-variables-types';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { ESQLRow } from '@kbn/es-types';
 import { getLensAttributesFromSuggestion } from '@kbn/visualization-utils';
 import type { DataViewSpec } from '@kbn/data-views-plugin/public';

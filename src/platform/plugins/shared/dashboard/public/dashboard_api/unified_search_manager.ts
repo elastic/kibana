@@ -24,7 +24,7 @@ import {
   compareFilters,
   isFilterPinned,
 } from '@kbn/es-query';
-import { ESQLControlVariable } from '@kbn/esql-variables-types';
+import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
 import fastIsEqual from 'fast-deep-equal';
 import { cloneDeep } from 'lodash';

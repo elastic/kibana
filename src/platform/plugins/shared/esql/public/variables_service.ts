@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { ESQLControlVariable } from '@kbn/esql-variables-types';
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 
 export class EsqlVariablesService {
   esqlVariables: ESQLControlVariable[] = [];
