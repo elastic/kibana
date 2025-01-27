@@ -93,7 +93,6 @@ pageLoadAssetSize:
   kibanaReact: 74422
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
-  kubernetesSecurity: 77234
   lens: 57135
   licenseManagement: 41817
   licensing: 29004
@@ -195,5 +194,5 @@ pageLoadAssetSize:
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 46868
-  visualizations: 90000
+  visualizations: 41000
   watcher: 43598
