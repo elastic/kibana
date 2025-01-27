@@ -11,7 +11,7 @@ import { MAX_DEGRADED_FIELDS } from '../../../../common/constants';
 import { INDEX, TIMESTAMP, _IGNORED } from '../../../../common/es_fields';
 import { createDatasetQualityESClient } from '../../../utils';
 import { existsQuery, rangeQuery } from '../../../utils/queries';
-import { getFieldIntervalInSeconds } from './get_interval';
+import { getFieldIntervalInSeconds } from '../../../utils/get_interval';
 
 export async function getDegradedFields({
   esClient,
