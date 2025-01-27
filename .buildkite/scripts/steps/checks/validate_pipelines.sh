@@ -3,7 +3,7 @@ set -euo pipefail
 source .buildkite/scripts/common/util.sh
 
 echo --- Check if all pipelines are in locations.yml
-cmd="node .buildkite/pipeline-resource-definitions/scripts/fix-location-collection.ts"
+cmd="ts-node .buildkite/pipeline-resource-definitions/scripts/fix-location-collection.ts"
 
 eval "$cmd"
 check_for_changed_files "$cmd" true
