@@ -21,7 +21,6 @@ interface RequestData {
 }
 
 type Callback<T> = (error?: any, result?: T) => void;
-// type ModuleFactory = (data: RequestData, callback: Callback<BundleRemoteModule>) => void;
 
 export class BundleRemotesPlugin {
   private allowedBundleIds = new Set<string>();
@@ -40,34 +39,6 @@ export class BundleRemotesPlugin {
       // hook into the creation of NormalModule instances in webpack, if the import
       // statement leading to the creation of the module is pointing to a bundleRef
       // entry then create a BundleRefModule instead of a NormalModule.
-      // compilationParams.normalModuleFactory.hooks.factorize.tap(
-      //   'BundleRefsPlugin/normalModuleFactory/factorize',
-      //   (data: RequestData) => {
-      //     const { request } = data.dependencies[0];
-      //
-      //     const cached = moduleCache.get(request);
-      //     if (cached === null) {
-      //       return;
-      //     }
-      //     if (cached !== undefined) {
-      //       return cached;
-      //     }
-      //
-      //     this.resolve(request, (error, result) => {
-      //       if (error || result === undefined) {
-      //         throw error;
-      //       }
-      //
-      //       moduleCache.set(request, result);
-      //
-      //       if (result === null) {
-      //         return;
-      //       }
-      //
-      //       return result;
-      //     });
-      //   }
-      // );
       compilationParams.normalModuleFactory.hooks.factorize.tapAsync(
         'BundleRefsPlugin/normalModuleFactory/factorize',
         (data: RequestData, callback: Callback<BundleRemoteModule>) => {
@@ -135,7 +106,9 @@ export class BundleRemotesPlugin {
   }
 
   public resolve(request: string, cb: (error?: Error, bundle?: null | BundleRemoteModule) => void) {
-    if (request.endsWith('.json')) {
+    // NOTE: previously on webpack v4 ?raw files did not reach this phase and were excluded
+    // which is not the case anymore in webpack v5 so we need to do exclude them from being resolved
+    if (request.endsWith('.json') || request.endsWith('?raw')) {
       return cb(undefined, null);
     }
 
