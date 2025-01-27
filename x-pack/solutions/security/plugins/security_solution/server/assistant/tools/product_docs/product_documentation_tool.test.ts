@@ -86,7 +86,7 @@ describe('ProductDocumentationTool', () => {
         max: 3,
         connectorId: 'fake-connector',
         request,
-        functionCalling: 'native',
+        functionCalling: 'auto',
       });
     });
   });
