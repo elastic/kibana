@@ -101,7 +101,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
       // services can be customized, but must extend DeploymentAgnosticCommonServices
       services: options.services || services,
       junit: options.junit,
-      suiteTags: options.suiteTags,
+      suiteTags: {
+        include: options.suiteTags?.include,
+        exclude: [...(options.suiteTags?.exclude || []), 'skipStateful'],
+      },
 
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),

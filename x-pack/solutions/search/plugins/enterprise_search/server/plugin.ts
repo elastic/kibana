@@ -50,10 +50,8 @@ import {
 } from '../common/constants';
 
 import {
-  appSearchGuideId,
   websiteSearchGuideId,
   databaseSearchGuideId,
-  appSearchGuideConfig,
   websiteSearchGuideConfig,
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
@@ -359,7 +357,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     /**
      * Register a config for the search guide
      */
-    guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
     if (config.hasWebCrawler) {
       guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
