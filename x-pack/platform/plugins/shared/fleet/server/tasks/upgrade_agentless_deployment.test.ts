@@ -89,7 +89,6 @@ describe('Upgrade Agentless Deployments', () => {
   let mockTask: UpgradeAgentlessDeploymentsTask;
   let mockCore: ReturnType<typeof coreSetupMock>;
   let mockTaskManagerSetup: ReturnType<typeof tmSetupMock>;
-  let mockCoreSetup: ReturnType<typeof coreMock.createSetup>;
 
   const getMockAgentPolicyFetchAllAgentPolicies = (items: AgentPolicy[]) =>
     jest.fn().mockResolvedValue(
@@ -103,7 +102,7 @@ describe('Upgrade Agentless Deployments', () => {
     appContextService.start(mockContract);
     mockCore = coreSetupMock();
     mockTaskManagerSetup = tmSetupMock();
-    mockCoreSetup = coreMock.createSetup();
+
     mockTask = new UpgradeAgentlessDeploymentsTask({
       core: mockCore,
       taskManager: mockTaskManagerSetup,
