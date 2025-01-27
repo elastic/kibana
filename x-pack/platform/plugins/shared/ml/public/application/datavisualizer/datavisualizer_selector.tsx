@@ -15,11 +15,13 @@ import {
   EuiFlexGrid,
   EuiFlexItem,
   EuiIcon,
+  EuiImage,
   EuiLink,
+  EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
   EuiBetaBadge,
-  EuiTextAlign,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -30,6 +32,7 @@ import { useMlKibana, useNavigateToPath } from '../contexts/kibana';
 import { HelpMenu } from '../components/help_menu';
 import { MlPageHeader } from '../components/page_header';
 import { ML_PAGES } from '../../locator';
+import esqlImage from './images/esql-overview-ml.svg';
 
 function startTrialDescription() {
   return (
@@ -105,60 +108,78 @@ export const DatavisualizerSelector: FC = () => {
         <EuiFlexGroup direction="column">
           {isEsqlEnabled ? (
             <EuiFlexItem>
-              <EuiCard
-                hasBorder
-                icon={<EuiIcon size="xxl" type="dataVisualizer" />}
-                title={
-                  <EuiTextAlign textAlign="center">
-                    <>
-                      <FormattedMessage
-                        id="xpack.ml.datavisualizer.selector.selectESQLTitle"
-                        defaultMessage="Visualize data using ES|QL"
-                      />{' '}
-                      <EuiBetaBadge
-                        label=""
-                        iconType="beaker"
-                        size="m"
-                        color="hollow"
-                        tooltipContent={
+              <EuiPanel>
+                <EuiFlexGroup alignItems="center">
+                  <EuiFlexItem>
+                    <EuiImage size="fullWidth" src={esqlImage} alt={'ES|QL input image'} />
+                  </EuiFlexItem>
+                  <EuiFlexItem>
+                    <EuiFlexGroup direction="column">
+                      <EuiFlexItem>
+                        <EuiFlexGroup gutterSize="xs">
+                          <EuiFlexItem grow={false}>
+                            <EuiTitle size="m">
+                              <h3>
+                                <FormattedMessage
+                                  id="xpack.ml.datavisualizer.selector.selectESQLTitle"
+                                  defaultMessage="ES|QL"
+                                />
+                              </h3>
+                            </EuiTitle>
+                          </EuiFlexItem>
+                          <EuiFlexItem grow={false}>
+                            <EuiBetaBadge
+                              label=""
+                              iconType="beaker"
+                              size="m"
+                              color="hollow"
+                              tooltipContent={
+                                <FormattedMessage
+                                  id="xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg"
+                                  defaultMessage="ES|QL data visualizer is in technical preview."
+                                />
+                              }
+                              tooltipPosition={'right'}
+                            />
+                          </EuiFlexItem>
+                        </EuiFlexGroup>
+                      </EuiFlexItem>
+                      <EuiFlexItem>
+                        <EuiText>
                           <FormattedMessage
-                            id="xpack.ml.datavisualizer.selector.esqlTechnicalPreviewBadge.titleMsg"
-                            defaultMessage="ES|QL data visualizer is in technical preview."
+                            id="xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg"
+                            defaultMessage="The Elasticsearch Query Language (ES|QL) provides a powerful way to filter, transform, and analyze data stored in Elastic Search."
                           />
-                        }
-                        tooltipPosition={'right'}
-                      />
-                    </>
-                  </EuiTextAlign>
-                }
-                description={
-                  <FormattedMessage
-                    id="xpack.ml.datavisualizer.selector.technicalPreviewBadge.contentMsg"
-                    defaultMessage="Use ES|QL queries to visualize information about any data set."
-                  />
-                }
-                footer={
-                  <EuiButton
-                    target="_self"
-                    onClick={() => navigateToPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
-                    data-test-subj="mlDataVisualizerSelectESQLButton"
-                  >
-                    <FormattedMessage
-                      id="xpack.ml.datavisualizer.selector.useESQLButtonLabel"
-                      defaultMessage="Use ES|QL"
-                    />
-                  </EuiButton>
-                }
-                data-test-subj="mlDataVisualizerCardESQLData"
-              />
+                        </EuiText>
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <div>
+                          <EuiButton
+                            fill
+                            target="_self"
+                            onClick={() => navigateToPath(ML_PAGES.DATA_VISUALIZER_ESQL)}
+                            data-test-subj="mlDataVisualizerSelectESQLButton"
+                          >
+                            <FormattedMessage
+                              id="xpack.ml.datavisualizer.selector.useESQLButtonLabel"
+                              defaultMessage="Try it now!"
+                            />
+                          </EuiButton>
+                        </div>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
+                  </EuiFlexItem>
+                </EuiFlexGroup>
+              </EuiPanel>
             </EuiFlexItem>
           ) : null}
           <EuiFlexItem>
             <EuiFlexGroup>
               <EuiFlexItem>
                 <EuiCard
+                  layout="horizontal"
                   hasBorder
-                  icon={<EuiIcon size="xxl" type="addDataApp" />}
+                  icon={<EuiIcon size="xxl" type="documents" />}
                   title={
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.importDataTitle"
@@ -166,62 +187,77 @@ export const DatavisualizerSelector: FC = () => {
                     />
                   }
                   description={
-                    <FormattedMessage
-                      id="xpack.ml.datavisualizer.selector.importDataDescription"
-                      defaultMessage="Import data from a log file. You can upload files up to {maxFileSize}."
-                      values={{ maxFileSize }}
-                    />
-                  }
-                  footer={
-                    <EuiButton
-                      target="_self"
-                      onClick={() => navigateToPath('/filedatavisualizer')}
-                      data-test-subj="mlDataVisualizerUploadFileButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
-                        defaultMessage="Select file"
-                      />
-                    </EuiButton>
+                    <EuiFlexGroup direction="column" alignItems="flexStart">
+                      <EuiFlexItem grow={false}>
+                        <FormattedMessage
+                          id="xpack.ml.datavisualizer.selector.importDataDescription"
+                          defaultMessage="Upload your file, analyze its data, and optionally import the data into an index. You can upload files up to {maxFileSize}."
+                          values={{ maxFileSize }}
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          target="_self"
+                          onClick={() => navigateToPath('/filedatavisualizer')}
+                          data-test-subj="mlDataVisualizerUploadFileButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.ml.datavisualizer.selector.uploadFileButtonLabel"
+                            defaultMessage="Select file"
+                          />
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   }
                   data-test-subj="mlDataVisualizerCardImportData"
                 />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiCard
+                  layout="horizontal"
                   hasBorder
-                  icon={<EuiIcon size="xxl" type="dataVisualizer" />}
+                  icon={<EuiIcon size="xxl" type="document" />}
                   title={
                     <FormattedMessage
                       id="xpack.ml.datavisualizer.selector.selectDataViewTitle"
                       defaultMessage="Visualize data from a data view"
                     />
                   }
-                  description={''}
-                  footer={
-                    <EuiButton
-                      target="_self"
-                      onClick={() => navigateToPath('/datavisualizer_index_select')}
-                      data-test-subj="mlDataVisualizerSelectIndexButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
-                        defaultMessage="Select data view"
-                      />
-                    </EuiButton>
+                  description={
+                    <EuiFlexGroup direction="column" alignItems="flexStart">
+                      <EuiFlexItem grow={false}>
+                        <FormattedMessage
+                          id="xpack.ml.datavisualizer.selector.importDataDescription"
+                          defaultMessage="Remove sensitive information from documents before indexing."
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          target="_self"
+                          onClick={() => navigateToPath('/datavisualizer_index_select')}
+                          data-test-subj="mlDataVisualizerSelectIndexButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
+                            defaultMessage="Select data view"
+                          />
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   }
                   data-test-subj="mlDataVisualizerCardIndexData"
                 />
               </EuiFlexItem>
               <EuiFlexItem>
                 <EuiCard
+                  layout="horizontal"
                   hasBorder
                   icon={<EuiIcon size="xxl" type="visTagCloud" />}
                   title={
                     <>
                       <FormattedMessage
                         id="xpack.ml.datavisualizer.selector.selectDataDriftTitle"
-                        defaultMessage="Visualize data using data drift"
+                        defaultMessage="Data drift"
                       />{' '}
                       <EuiBetaBadge
                         label=""
@@ -239,22 +275,26 @@ export const DatavisualizerSelector: FC = () => {
                     </>
                   }
                   description={
-                    <FormattedMessage
-                      id="xpack.ml.datavisualizer.selector.dataDriftDescription"
-                      defaultMessage="Visualize changes in the model input data."
-                    />
-                  }
-                  footer={
-                    <EuiButton
-                      target="_self"
-                      onClick={() => navigateToPath('/data_drift_index_select')}
-                      data-test-subj="mlDataVisualizerSelectDataDriftButton"
-                    >
-                      <FormattedMessage
-                        id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
-                        defaultMessage="Select data view"
-                      />
-                    </EuiButton>
+                    <EuiFlexGroup direction="column" alignItems="flexStart">
+                      <EuiFlexItem grow={false}>
+                        <FormattedMessage
+                          id="xpack.ml.datavisualizer.selector.dataDriftDescription"
+                          defaultMessage="Visualize changes in the model input data. Detecting data drift enables you to identify potential performance issues."
+                        />
+                      </EuiFlexItem>
+                      <EuiFlexItem grow={false}>
+                        <EuiButton
+                          target="_self"
+                          onClick={() => navigateToPath('/data_drift_index_select')}
+                          data-test-subj="mlDataVisualizerSelectDataDriftButton"
+                        >
+                          <FormattedMessage
+                            id="xpack.ml.datavisualizer.selector.selectDataViewButtonLabel"
+                            defaultMessage="Compare data distribution"
+                          />
+                        </EuiButton>
+                      </EuiFlexItem>
+                    </EuiFlexGroup>
                   }
                   data-test-subj="mlDataVisualizerCardDataDriftData"
                 />

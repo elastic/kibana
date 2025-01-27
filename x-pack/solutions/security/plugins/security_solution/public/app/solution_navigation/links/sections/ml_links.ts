@@ -49,13 +49,7 @@ export const mlAppLink: LinkItem = {
 export const mlNavCategories: SolutionLinkCategory[] = [
   {
     type: LinkCategoryType.separator,
-    linkIds: [
-      ExternalPageName.mlOverview,
-      ExternalPageName.mlDataVisualizer,
-      // TODO: remove once pages are merged into overview
-      ExternalPageName.mlNotifications,
-      ExternalPageName.mlMemoryUsage,
-    ],
+    linkIds: [ExternalPageName.mlOverview, ExternalPageName.mlDataVisualizer],
   },
   {
     type: LinkCategoryType.title,

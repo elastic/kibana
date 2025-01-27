@@ -8,10 +8,9 @@
 import { i18n } from '@kbn/i18n';
 import type { EuiSideNavItemType } from '@elastic/eui';
 import type { ReactNode } from 'react';
-import React, { useCallback, useMemo } from 'react';
+import { useCallback, useMemo } from 'react';
 import { CHANGE_POINT_DETECTION_ENABLED } from '@kbn/aiops-change-point-detection/constants';
 import { useUrlState } from '@kbn/ml-url-state';
-import { NotificationsIndicator } from './notifications_indicator';
 import type { MlLocatorParams } from '../../../../common/types/locator';
 import { useMlLocator, useNavigateToPath } from '../../contexts/kibana';
 import { isFullLicense } from '../../license';
@@ -92,28 +91,6 @@ export function useSideNavItems(activeRoute: MlRoute | undefined) {
             disabled: false,
             pathId: ML_PAGES.DATA_VISUALIZER,
             testSubj: 'mlMainTab dataVisualizer',
-          },
-          {
-            id: 'notifications',
-            pathId: ML_PAGES.NOTIFICATIONS,
-            name: disableLinks ? (
-              i18n.translate('xpack.ml.navMenu.notificationsTabLinkText', {
-                defaultMessage: 'Notifications',
-              })
-            ) : (
-              <NotificationsIndicator />
-            ),
-            disabled: disableLinks,
-            testSubj: 'mlMainTab notifications',
-          },
-          {
-            id: 'memory_usage',
-            pathId: ML_PAGES.MEMORY_USAGE,
-            name: i18n.translate('xpack.ml.navMenu.memoryUsageText', {
-              defaultMessage: 'Memory Usage',
-            }),
-            disabled: disableLinks || !canViewMlNodes,
-            testSubj: 'mlMainTab nodesOverview',
           },
         ],
       },

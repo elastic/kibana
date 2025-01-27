@@ -213,20 +213,6 @@ function createNavTree({ streamsAvailable }: { streamsAvailable?: boolean }) {
                   {
                     link: 'ml:dataVisualizer',
                   },
-                  // TODO: remove once merged into overview
-                  {
-                    link: 'ml:notifications',
-                  },
-                  // TODO: remove once merged into overview
-                  {
-                    link: 'ml:memoryUsage',
-                    title: i18n.translate(
-                      'xpack.observability.obltNav.machineLearning.memoryUsage',
-                      {
-                        defaultMessage: 'Memory usage',
-                      }
-                    ),
-                  },
                 ],
               },
               {

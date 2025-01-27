@@ -167,20 +167,6 @@ export const createNavigationTree = ({
                   {
                     link: 'ml:dataVisualizer',
                   },
-                  // TODO: remove once merged into overview
-                  {
-                    link: 'ml:notifications',
-                  },
-                  // TODO: remove once merged into overview
-                  {
-                    link: 'ml:memoryUsage',
-                    title: i18n.translate(
-                      'xpack.serverlessObservability.nav.machineLearning.memoryUsage',
-                      {
-                        defaultMessage: 'Memory usage',
-                      }
-                    ),
-                  },
                 ],
               },
               {

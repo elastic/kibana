@@ -6,13 +6,14 @@
  */
 
 import type { FC } from 'react';
-import React, { useMemo, useState } from 'react';
+import React, { useMemo, useEffect, useState } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiSpacer, EuiTab, EuiTabs, EuiNotificationBadge } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import type { TimefilterContract } from '@kbn/data-plugin/public';
 import { mlTimefilterRefresh$ } from '@kbn/ml-date-picker';
 import { useStorage } from '@kbn/ml-local-storage';
+import { FIELD_FORMAT_IDS } from '@kbn/field-formats-plugin/common';
 import { OverviewStatsBar } from '../components/collapsible_panel/collapsible_panel';
 import type { MlStorageKey, TMlStorageMapped } from '../../../common/types/storage';
 import { ML_OVERVIEW_PANELS, ML_OVERVIEW_PANELS_EXTENDED } from '../../../common/types/storage';
@@ -26,12 +27,17 @@ import { SavedObjectsWarning } from '../components/saved_objects_warning';
 import { UpgradeWarning } from '../components/upgrade';
 import { HelpMenu } from '../components/help_menu';
 import { useMlKibana } from '../contexts/kibana';
+import { useMlNotifications } from '../contexts/ml/ml_notifications_context';
 import { NodesList } from '../memory_usage/nodes_overview';
 import { MlPageHeader } from '../components/page_header';
 import { PageTitle } from '../components/page_title';
 import { getMlNodesCount } from '../ml_nodes_check/check_ml_nodes';
 import { MemoryPage } from '../memory_usage/memory_tree_map/memory_page';
 import { NotificationsList } from '../notifications/components/notifications_list';
+import { useMemoryUsage } from '../memory_usage/use_memory_usage';
+import { useFieldFormatter } from '../contexts/kibana';
+import type { MlSavedObjectType } from '../../../common/types/saved_objects';
+import { type StatEntry } from '../components/collapsible_panel/collapsible_panel';
 
 export const overviewPanelDefaultState = Object.freeze({
   nodes: true,
@@ -41,6 +47,20 @@ export const overviewPanelDefaultState = Object.freeze({
 const overviewPanelExtendedDefaultState = Object.freeze({
   memoryUsage: true,
 });
+const MEMORY_STATS_LABELS = {
+  'anomaly-detector': i18n.translate('xpack.ml.overview.memoryUsagePanel.anomalyDetectionLabel', {
+    defaultMessage: 'Anomaly detection',
+  }),
+  'data-frame-analytics': i18n.translate(
+    'xpack.ml.overview.memoryUsagePanel.dataFrameAnalyticsLabel',
+    {
+      defaultMessage: 'Data frame analytics',
+    }
+  ),
+  'trained-model': i18n.translate('xpack.ml.overview.memoryUsagePanel.trainedModelsLabel', {
+    defaultMessage: 'Trained models',
+  }),
+};
 
 enum TAB_IDS {
   OVERVIEW = 'overview',
@@ -56,10 +76,20 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
     services: { docLinks },
   } = useMlKibana();
   const helpLink = docLinks.links.ml.guide;
+  const {
+    data: memoryUsageData,
+    error: memoryUsageError,
+    loading: memoryUsageLoading,
+  } = useMemoryUsage();
+  const bytesFormatter = useFieldFormatter(FIELD_FORMAT_IDS.BYTES);
+  const { notificationsCounts } = useMlNotifications();
+  const errorsAndWarningCount =
+    (notificationsCounts?.error ?? 0) + (notificationsCounts?.warning ?? 0);
 
   const [selectedTabId, setSelectedTabId] = useState<TabIdType>(TAB_IDS.OVERVIEW);
   const [adLazyJobCount, setAdLazyJobCount] = useState(0);
   const [dfaLazyJobCount, setDfaLazyJobCount] = useState(0);
+  const [memoryUsageStats, setMemoryUsageStats] = useState<StatEntry[]>([]);
 
   const [panelsState, setPanelsState] = useStorage<
     MlStorageKey,
@@ -70,6 +100,37 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
     MlStorageKey,
     TMlStorageMapped<typeof ML_OVERVIEW_PANELS_EXTENDED>
   >(ML_OVERVIEW_PANELS_EXTENDED, overviewPanelExtendedDefaultState);
+
+  useEffect(
+    function setUpMemoryUsageStats() {
+      if (memoryUsageLoading || memoryUsageError) return;
+
+      const sumSizeByType = memoryUsageData.reduce((acc, current) => {
+        const { type, size } = current;
+        if (acc[type] === undefined) {
+          acc[type] = size;
+        } else {
+          acc[type] = (acc[type] as number) + size;
+        }
+        return acc;
+      }, {} as Record<MlSavedObjectType, number>);
+
+      const formattedSizes: StatEntry[] = [];
+
+      Object.keys(sumSizeByType).forEach((type) => {
+        const size = sumSizeByType[type as MlSavedObjectType];
+        formattedSizes.push({
+          label: MEMORY_STATS_LABELS[type as MlSavedObjectType],
+          value: bytesFormatter(size),
+          'data-test-subj': `mlMemoryUsageStatsCount ${type}`,
+        });
+      });
+
+      setMemoryUsageStats(formattedSizes);
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    [memoryUsageLoading, memoryUsageError]
+  );
 
   const tabs = useMemo(
     () => [
@@ -93,6 +154,12 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
                       defaultMessage="Memory Usage"
                     />
                   }
+                  headerItems={[
+                    <OverviewStatsBar
+                      inputStats={memoryUsageStats}
+                      dataTestSub={'mlOverviewMemoryUsageStatsBar'}
+                    />,
+                  ]}
                   ariaLabel={i18n.translate('xpack.ml.overview.memoryUsagePanel.ariaLabel', {
                     defaultMessage: 'Memory usage panel',
                   })}
@@ -156,16 +223,28 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
             defaultMessage="Notifications"
           />
         ),
+        append: (
+          <EuiNotificationBadge
+            aria-label={i18n.translate('xpack.ml.overview.notificationsIndicator.unreadErrors', {
+              defaultMessage: 'Unread errors or warnings indicator.',
+            })}
+            data-test-subj={'mlNotificationErrorsIndicator'}
+          >
+            {errorsAndWarningCount}
+          </EuiNotificationBadge>
+        ),
         content: <NotificationsList />,
       },
     ],
     [
       canViewMlNodes,
       disableCreateAnomalyDetectionJob,
-      setPanelsState,
-      setPanelsExtendedState,
+      errorsAndWarningCount,
+      memoryUsageStats,
       panelsState,
       panelsExtendedState,
+      setPanelsState,
+      setPanelsExtendedState,
     ]
   );
 
@@ -176,6 +255,7 @@ export const OverviewPage: FC<{ timefilter: TimefilterContract }> = ({ timefilte
         onClick={() => setSelectedTabId(tab.id)}
         isSelected={tab.id === selectedTabId}
         data-test-subj={`mlManagmentOverviewPageTabs ${tab.id}`}
+        append={tab.append}
       >
         {tab.name}
       </EuiTab>
