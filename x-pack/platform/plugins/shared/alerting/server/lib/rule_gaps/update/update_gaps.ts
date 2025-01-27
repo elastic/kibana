@@ -148,9 +148,14 @@ const updateGapBatch = async (
         );
         return false;
       }
-      const retryDelaySec: number = Math.min(Math.pow(2, retryCount), 30);
-      await delay(retryDelaySec * 1000 * Math.random());
+      logger.info(
+        `Retrying update of ${bulkResponse.items.length} gaps due to conflicts. Retry ${
+          retryCount + 1
+        } of ${MAX_RETRIES}`
+      );
 
+      const retryDelaySec: number = Math.min(Math.pow(3, retryCount + 1), 30);
+      await delay(retryDelaySec * 1000 * Math.random());
       const failedUpdatesIds =
         bulkResponse?.items
           .filter((item) => item.update?.status === CONFLICT_STATUS_CODE)

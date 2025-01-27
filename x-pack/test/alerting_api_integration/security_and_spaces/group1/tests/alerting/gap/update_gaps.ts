@@ -292,6 +292,9 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
     it('should fill gap with multiple backfills', async () => {
       const { space } = SuperuserAtSpace1;
 
+      const fiveDaysGapStart = moment(gapStart);
+      const fiveDaysGapEnd = moment(gapStart).add(5, 'days').toISOString();
+
       // Create a rule
       const ruleResponse = await supertest
         .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -307,25 +310,32 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           ruleId,
-          start: gapStart,
-          end: gapEnd,
+          start: fiveDaysGapStart,
+          end: fiveDaysGapEnd,
           spaceId: space.id,
         });
 
       // Schedule two backfills that together cover the entire gap
-      const firstHalfEnd = moment(gapStart).add(12, 'hours').toISOString();
-      const secondHalfStart = firstHalfEnd;
+
+      const startBackfillTime = moment(gapStart);
+      const backfills = [];
+
+      for (let i = 0; i < 5; i++) {
+        backfills.push({
+          rule_id: ruleId,
+          start: startBackfillTime.toISOString(),
+          end: moment(startBackfillTime).add(24, 'hours').toISOString(),
+        });
+        startBackfillTime.add(24, 'hours');
+      }
 
       const scheduleResponse = await supertest
         .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/backfill/_schedule`)
         .set('kbn-xsrf', 'foo')
-        .send([
-          { rule_id: ruleId, start: gapStart, end: firstHalfEnd },
-          { rule_id: ruleId, start: secondHalfStart, end: gapEnd },
-        ]);
+        .send(backfills);
 
       expect(scheduleResponse.statusCode).to.eql(200);
-      expect(scheduleResponse.body).to.have.length(2);
+      expect(scheduleResponse.body).to.have.length(5);
 
       // Wait for both backfills to complete
       await Promise.all(
@@ -340,19 +350,19 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .send({
           rule_id: ruleId,
-          start: gapStart,
-          end: gapEnd,
+          start: fiveDaysGapStart.toISOString(),
+          end: fiveDaysGapEnd,
         });
 
       expect(finalGapResponse.statusCode).to.eql(200);
       expect(finalGapResponse.body.total).to.eql(1);
       const finalGap = finalGapResponse.body.data[0];
       expect(finalGap.status).to.eql('filled');
-      expect(finalGap.filled_duration_ms).to.eql(86400000);
+      expect(finalGap.filled_duration_ms).to.eql(432000000);
       expect(finalGap.unfilled_duration_ms).to.eql(0);
       expect(finalGap.filled_intervals).to.have.length(1);
-      expect(finalGap.filled_intervals[0].gte).to.eql(gapStart);
-      expect(finalGap.filled_intervals[0].lte).to.eql(gapEnd);
+      expect(finalGap.filled_intervals[0].gte).to.eql(fiveDaysGapStart.toISOString());
+      expect(finalGap.filled_intervals[0].lte).to.eql(fiveDaysGapEnd);
       expect(finalGap.unfilled_intervals).to.have.length(0);
       expect(finalGap.in_progress_intervals).to.have.length(0);
     });
