@@ -91,6 +91,7 @@ import {
   createKeywordBuilderPipeline,
   deleteKeywordBuilderPipeline,
 } from '../../asset_inventory/ingest_pipelines';
+import { DEFAULT_INTERVAL } from './task/constants';
 
 // Workaround. TransformState type is wrong. The health type should be: TransformHealth from '@kbn/transform-plugin/common/types/transform_stats'
 export interface TransformHealth extends estypes.TransformGetTransformStatsTransformStatsHealth {
@@ -128,6 +129,18 @@ interface SearchEntitiesParams {
   sortField: string;
   sortOrder: SortOrder;
 }
+
+export const DEFAULT_INIT_ENTITY_STORE: InitEntityStoreRequestBody = {
+  indexPattern: '',
+  lookbackPeriod: '24h',
+  filter: '',
+  fieldHistoryLength: 10,
+  enrichPolicyExecutionInterval: DEFAULT_INTERVAL,
+};
+
+const DEFAULT_ENTITY_ENGINE: InitEntityEngineRequestBody & { lookbackPeriod?: string } = {
+  ...DEFAULT_INIT_ENTITY_STORE,
+};
 
 export class EntityStoreDataClient {
   private engineClient: EngineDescriptorClient;
@@ -203,17 +216,24 @@ export class EntityStoreDataClient {
   }
 
   public async enable(
-    {
-      indexPattern = '',
-      filter = '',
-      fieldHistoryLength = 10,
-      entityTypes,
-    }: InitEntityStoreRequestBody,
+    requestBodyOverrides: Partial<InitEntityStoreRequestBody> = {},
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityStoreResponse> {
     if (!this.options.taskManager) {
       throw new Error('Task Manager is not available');
     }
+
+    const {
+      indexPattern,
+      lookbackPeriod,
+      filter,
+      fieldHistoryLength,
+      entityTypes,
+      enrichPolicyExecutionInterval,
+    } = {
+      ...DEFAULT_INIT_ENTITY_STORE,
+      ...requestBodyOverrides,
+    };
 
     // Immediately defer the initialization to the next tick. This way we don't block on the init preflight checks
     const run = <T>(fn: () => Promise<T>) =>
@@ -229,7 +249,17 @@ export class EntityStoreDataClient {
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
-        this.init(entity, { indexPattern, filter, fieldHistoryLength }, { pipelineDebugMode })
+        this.init(
+          entity,
+          {
+            indexPattern,
+            lookbackPeriod,
+            filter,
+            fieldHistoryLength,
+            enrichPolicyExecutionInterval,
+          },
+          { pipelineDebugMode }
+        )
       )
     );
 
@@ -287,9 +317,21 @@ export class EntityStoreDataClient {
 
   public async init(
     entityType: EntityType,
-    { indexPattern = '', filter = '', fieldHistoryLength = 10 }: InitEntityEngineRequestBody,
+    InitEntityEngineRequestBodyOverrides: Partial<typeof DEFAULT_ENTITY_ENGINE> = {},
     { pipelineDebugMode = false }: { pipelineDebugMode?: boolean } = {}
   ): Promise<InitEntityEngineResponse> {
+    const mergedRequest = {
+      ...DEFAULT_ENTITY_ENGINE,
+      ...InitEntityEngineRequestBodyOverrides,
+    } as Required<typeof DEFAULT_ENTITY_ENGINE>;
+
+    const {
+      indexPattern,
+      filter,
+      fieldHistoryLength,
+      lookbackPeriod,
+      enrichPolicyExecutionInterval,
+    } = mergedRequest;
     const { experimentalFeatures } = this.options;
 
     if (entityType === EntityType.universal && !experimentalFeatures.assetInventoryStoreEnabled) {
@@ -337,6 +379,7 @@ export class EntityStoreDataClient {
     const descriptor = await this.engineClient.init(entityType, {
       filter,
       fieldHistoryLength,
+      lookbackPeriod,
       indexPattern,
     });
     this.log('debug', entityType, `Initialized engine saved object`);
@@ -344,6 +387,8 @@ export class EntityStoreDataClient {
     this.asyncSetup(
       entityType,
       fieldHistoryLength,
+      lookbackPeriod,
+      enrichPolicyExecutionInterval,
       this.options.taskManager,
       indexPattern,
       filter,
@@ -359,6 +404,8 @@ export class EntityStoreDataClient {
   private async asyncSetup(
     entityType: EntityType,
     fieldHistoryLength: number,
+    lookbackPeriod: string,
+    enrichPolicyExecutionInterval: string,
     taskManager: TaskManagerStartContract,
     indexPattern: string,
     filter: string,
@@ -373,7 +420,7 @@ export class EntityStoreDataClient {
       const description = createEngineDescription({
         entityType,
         namespace,
-        requestParams: { indexPattern, fieldHistoryLength },
+        requestParams: { indexPattern, fieldHistoryLength, lookbackPeriod },
         defaultIndexPatterns,
         config,
       });
@@ -447,6 +494,7 @@ export class EntityStoreDataClient {
         namespace,
         logger,
         taskManager,
+        interval: enrichPolicyExecutionInterval,
       });
 
       this.log(`debug`, entityType, `Started entity store field retention enrich task`);
