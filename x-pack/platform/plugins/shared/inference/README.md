@@ -11,11 +11,22 @@ external LLM APIs. Its goals are:
 
 The inference APIs are meant to be usable directly, and self-sufficient to power any RAG workflow. 
 
-However, if you'd still rather use langchain, we're also supporting it via various
-utilities exposed from the `@kbn/inference-langchain` package.
+However, we're also exposing a way to use langchain while benefiting from the inference APIs, 
+via the `getChatModel` API exposed from the inference plugin's start contract.
 
-The most notable one would be the `InferenceChatModel` class, which allows to use the inference APIs
-as source for langchain.
+```ts
+const chatModel = await inferenceStart.getChatModel({
+  request,
+  connectorId: myInferenceConnectorId,
+  chatModelOptions: {
+    temperature: 0.2,
+  },
+});
+
+// just use it as another langchain chatModel
+```
+
+Other langchain utilities are exposed from the `@kbn/inference-langchain` package.
 
 ## Architecture and examples
 
