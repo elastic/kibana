@@ -51,11 +51,11 @@ export const mockSourceLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: 'euiColorVis4' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisNeutral0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -109,11 +109,11 @@ export const mockDestinationLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#D36086' },
+        options: { color: 'euiColorVis2' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisNeutral0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -165,11 +165,11 @@ export const mockClientLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#6092C0' },
+        options: { color: 'euiColorVis4' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisNeutral0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -228,11 +228,11 @@ export const mockServerLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#D36086' },
+        options: { color: 'euiColorVis2' },
       },
       lineColor: {
         type: 'STATIC',
-        options: { color: '#FFFFFF' },
+        options: { color: 'euiColorVisNeutral0' },
       },
       lineWidth: { type: 'STATIC', options: { size: 2 } },
       iconSize: { type: 'STATIC', options: { size: 8 } },
@@ -283,7 +283,7 @@ export const mockLineLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#1EA593' },
+        options: { color: '#6092C0' },
       },
       lineColor: {
         type: 'STATIC',
@@ -348,7 +348,7 @@ export const mockClientServerLineLayer = {
     properties: {
       fillColor: {
         type: 'STATIC',
-        options: { color: '#1EA593' },
+        options: { color: '#6092C0' },
       },
       lineColor: {
         type: 'STATIC',
@@ -535,7 +535,9 @@ export const mockCommaFilebeatExclusionGlobIndexPattern: IndexPatternSavedObject
 export const mockEuiTheme: EuiThemeComputed<{}> = {
   colors: {
     vis: {
-      euiColorVisNeutral0: '#FFFFFF',
+      euiColorVisNeutral0: 'euiColorVisNeutral0',
+      euiColorVis4: 'euiColorVis4',
+      euiColorVis2: 'euiColorVis2',
     },
   },
 } as unknown as EuiThemeComputed<{}>;
