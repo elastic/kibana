@@ -181,5 +181,5 @@ export const conversationsFieldMapV2: FieldMap = {
     type: 'flattened',
     array: false,
     required: false,
-  },  
+  },
 } as const;

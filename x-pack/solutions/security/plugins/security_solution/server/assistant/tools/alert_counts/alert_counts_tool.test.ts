@@ -191,7 +191,7 @@ describe('AlertCountsTool', () => {
         replacements,
         request,
         ...rest,
-        contentReferencesStore: false
+        contentReferencesStore: false,
       }) as DynamicTool;
 
       const result = await tool.func('');

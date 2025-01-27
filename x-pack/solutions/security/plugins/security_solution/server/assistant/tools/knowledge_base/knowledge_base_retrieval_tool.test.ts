@@ -66,7 +66,10 @@ describe('KnowledgeBaseRetievalTool', () => {
     });
 
     it('does not include citations if contentReferenceStore is false', async () => {
-      const tool = KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool({...defaultArgs, contentReferencesStore: false}) as DynamicStructuredTool;
+      const tool = KNOWLEDGE_BASE_RETRIEVAL_TOOL.getTool({
+        ...defaultArgs,
+        contentReferencesStore: false,
+      }) as DynamicStructuredTool;
 
       getKnowledgeBaseDocumentEntries.mockResolvedValue([
         new Document({
@@ -82,6 +85,5 @@ describe('KnowledgeBaseRetievalTool', () => {
 
       expect(result).not.toContain('citation');
     });
-
   });
 });

@@ -142,7 +142,10 @@ describe('ProductDocumentationTool', () => {
     });
 
     it('does include citations if contentReferencesStore is false', async () => {
-      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool({...defaultArgs, contentReferencesStore: false}) as DynamicStructuredTool;
+      const tool = PRODUCT_DOCUMENTATION_TOOL.getTool({
+        ...defaultArgs,
+        contentReferencesStore: false,
+      }) as DynamicStructuredTool;
 
       (retrieveDocumentation as jest.Mock).mockResolvedValue({
         documents: [
