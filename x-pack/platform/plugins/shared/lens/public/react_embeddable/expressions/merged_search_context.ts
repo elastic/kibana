@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
+import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import type { DataPublicPluginStart, FilterManager } from '@kbn/data-plugin/public';
 import {
   type AggregateQuery,
@@ -24,6 +24,7 @@ export interface MergedSearchContext {
   query: Array<Query | AggregateQuery>;
   filters: Filter[];
   disableWarningToasts: boolean;
+  esqlVariables?: ESQLControlVariable[];
 }
 
 export function getMergedSearchContext(
@@ -32,10 +33,12 @@ export function getMergedSearchContext(
     filters,
     query,
     timeRange,
+    esqlVariables,
   }: {
     filters?: Filter[];
     query?: Query | AggregateQuery;
     timeRange?: TimeRange;
+    esqlVariables?: ESQLControlVariable[];
   },
   customTimeRange$: PublishingSubject<TimeRange | undefined>,
   parentApi: unknown,
@@ -60,6 +63,7 @@ export function getMergedSearchContext(
 
   const timeRangeToRender = customTimeRange ?? timesliceTimeRange ?? timeRange;
   const context = {
+    esqlVariables,
     now: data.nowProvider.get().getTime(),
     timeRange: timeRangeToRender,
     query: [attributes.state.query].filter(nonNullable),
