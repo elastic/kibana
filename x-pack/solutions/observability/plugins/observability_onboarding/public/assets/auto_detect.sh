@@ -13,8 +13,6 @@ if ! command -v curl >/dev/null 2>&1; then
   fail "curl is required to run this script"
 fi
 
-update_step_progress "logs-detect" "initialize"
-
 # Check if the `lsof` command exists in PATH, if not use `/usr/sbin/lsof` if possible
 LSOF_PATH=""
 if command -v lsof >/dev/null 2>&1; then
@@ -92,6 +90,34 @@ ensure_argument "$kibana_api_endpoint" "--kibana-url"
 ensure_argument "$onboarding_flow_id" "--id"
 ensure_argument "$elastic_agent_version" "--ea-version"
 
+update_step_progress() {
+  local STEPNAME="$1"
+  local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
+  local MESSAGE=${3:-}
+  local PAYLOAD=${4:-}
+  local data=""
+
+  MESSAGE=$(echo "$MESSAGE" | sed 's/"/\\"/g')
+
+  if [ -z "$PAYLOAD" ]; then
+    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
+  else
+    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
+  fi
+  curl --request POST \
+    --url "${kibana_api_endpoint}/internal/observability_onboarding/flow/${onboarding_flow_id}/step/${STEPNAME}" \
+    --header "Authorization: ApiKey ${install_api_key_encoded}" \
+    --header "Content-Type: application/json" \
+    --header "kbn-xsrf: true" \
+    --header "x-elastic-internal-origin: Kibana" \
+    --data "$data" \
+    --output /dev/null \
+    --no-progress-meter \
+    --fail
+}
+
+update_step_progress "logs-detect" "initialize"
+
 known_integrations_list_string=""
 selected_known_integrations_array=()
 detected_patterns=()
@@ -124,34 +150,11 @@ elif [ "${OS}" == "Darwin" ]; then
   fi
   elastic_agent_config_path=/Library/Elastic/Agent/elastic-agent.yml
 else
-  update_step_progress "logs-detect" "danger" "Unable to run auto-detect script on \"${os} (${arch})\""
+  update_step_progress "logs-detect" "danger" "Unable to run auto-detect script on ${os} (${arch})"
   fail "This script is only supported on Linux and macOS"
 fi
 
 elastic_agent_artifact_name="elastic-agent-${elastic_agent_version}-${os}-${arch}"
-
-update_step_progress() {
-  local STEPNAME="$1"
-  local STATUS="$2" # "incomplete" | "complete" | "disabled" | "loading" | "warning" | "danger" | "current"
-  local MESSAGE=${3:-}
-  local PAYLOAD=${4:-}
-  local data=""
-  if [ -z "$PAYLOAD" ]; then
-    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\"}"
-  else
-    data="{\"status\":\"${STATUS}\", \"message\":\"${MESSAGE}\", \"payload\":${PAYLOAD}}"
-  fi
-  curl --request POST \
-    --url "${kibana_api_endpoint}/internal/observability_onboarding/flow/${onboarding_flow_id}/step/${STEPNAME}" \
-    --header "Authorization: ApiKey ${install_api_key_encoded}" \
-    --header "Content-Type: application/json" \
-    --header "kbn-xsrf: true" \
-    --header "x-elastic-internal-origin: Kibana" \
-    --data "$data" \
-    --output /dev/null \
-    --no-progress-meter \
-    --fail
-}
 
 download_elastic_agent() {
   local download_url="https://artifacts.elastic.co/downloads/beats/elastic-agent/${elastic_agent_artifact_name}.tar.gz"
