@@ -115,6 +115,7 @@ export interface DatatableColumn {
   name: string;
   meta: DatatableColumnMeta;
   isNull?: boolean;
+  variable?: string;
 }
 
 /**
