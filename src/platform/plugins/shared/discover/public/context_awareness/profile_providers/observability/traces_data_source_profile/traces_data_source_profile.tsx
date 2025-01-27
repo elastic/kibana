@@ -168,9 +168,33 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                               )}
                             </EuiFlexItem>
                           </EuiFlexGroup>
-                          <EuiSpacer size="l" />
                         </>
                       )}
+                      {!isRootSpan && (
+                        <>
+                          <EuiSpacer size="l" />
+                          <EuiFlexGroup>
+                            <EuiFlexItem>
+                              <EuiText color="subdued" size="xs">
+                                Transaction
+                              </EuiText>
+                              <TransactionLink
+                                traceId={traceId as string}
+                                transactionName={transactionName as string}
+                                serviceName={serviceName as string}
+                                indexPattern={context.indexPattern}
+                              />
+                            </EuiFlexItem>
+                            <EuiFlexItem>
+                              <EuiText color="subdued" size="xs">
+                                Traces
+                              </EuiText>
+                              <TracesExplorerWaterfallLink spanId={spanId as string} />
+                            </EuiFlexItem>
+                          </EuiFlexGroup>
+                        </>
+                      )}
+                      <EuiSpacer size="l" />
                       <EuiFlexGroup>
                         <EuiFlexItem>
                           <EuiText color="subdued" size="xs">
@@ -181,17 +205,12 @@ export const createTracesDataSourceProfileProvider = (): DataSourceProfileProvid
                             agentName={agentName as string}
                           />
                         </EuiFlexItem>
-                        {!isRootSpan && (
+                        {isRootSpan && (
                           <EuiFlexItem>
                             <EuiText color="subdued" size="xs">
-                              Transaction
+                              Traces
                             </EuiText>
-                            <TransactionLink
-                              traceId={traceId as string}
-                              transactionName={transactionName as string}
-                              serviceName={serviceName as string}
-                              indexPattern={context.indexPattern}
-                            />
+                            <TracesExplorerWaterfallLink spanId={spanId as string} />
                           </EuiFlexItem>
                         )}
                       </EuiFlexGroup>

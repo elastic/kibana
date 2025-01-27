@@ -44,7 +44,7 @@ export const TracesExplorerWaterfallLink: React.FC<TracesExplorerWaterfallLinkPr
         line-break: anywhere;
       `}
     >
-      Explore trace
+      Explore timeline
     </EuiLink>
   );
 };
