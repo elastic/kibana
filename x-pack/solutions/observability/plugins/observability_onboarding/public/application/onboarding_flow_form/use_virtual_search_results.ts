@@ -30,7 +30,6 @@ export function useVirtualSearchResults(): CustomCard[] {
     title: i18n.translate('xpack.observability_onboarding.packageList.uploadFileTitle', {
       defaultMessage: 'AWS Firehose',
     }),
-    release: 'preview',
     description: i18n.translate(
       'xpack.observability_onboarding.packageList.uploadFileDescription',
       {

@@ -85,9 +85,6 @@ async function recallFromSemanticTextConnectors({
   const params = {
     index: connectorIndices,
     size: 20,
-    _source: {
-      excludes: semanticTextFields.map((field) => `${field}.inference`),
-    },
     query: {
       bool: {
         should: semanticTextFields.flatMap((field) => {

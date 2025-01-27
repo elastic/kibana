@@ -24,13 +24,17 @@ import {
   repeatWhen,
 } from 'rxjs';
 
+import { i18n } from '@kbn/i18n';
 import { ViewMode } from '@kbn/presentation-publishing';
-import { getEditTitleAriaLabel, placeholderTitle } from '../presentation_panel_strings';
 import {
   CustomizePanelActionApi,
   isApiCompatibleWithCustomizePanelAction,
 } from '../../panel_actions/customize_panel_action';
 import { openCustomizePanelFlyout } from '../../panel_actions/customize_panel_action/open_customize_panel';
+
+export const placeholderTitle = i18n.translate('presentationPanel.placeholderTitle', {
+  defaultMessage: '[No Title]',
+});
 
 const createDocumentMouseMoveListener = once(() => fromEvent<MouseEvent>(document, 'mousemove'));
 const createDocumentMouseUpListener = once(() => fromEvent<MouseEvent>(document, 'mouseup'));
@@ -107,7 +111,10 @@ export const PresentationPanelTitle = ({
         color="text"
         ref={setPanelTitleElmRef}
         className={titleClassNames}
-        aria-label={getEditTitleAriaLabel(panelTitle)}
+        aria-label={i18n.translate('presentationPanel.header.titleAriaLabel', {
+          defaultMessage: 'Click to edit title: {title}',
+          values: { title: panelTitle ?? placeholderTitle },
+        })}
         data-test-subj={'embeddablePanelTitleLink'}
       >
         {panelTitle || placeholderTitle}

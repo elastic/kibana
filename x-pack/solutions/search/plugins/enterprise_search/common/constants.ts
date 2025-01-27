@@ -16,6 +16,8 @@ import {
   SEARCH_VECTOR_SEARCH,
   SEARCH_SEMANTIC_SEARCH,
   SEARCH_AI_SEARCH,
+  SEARCH_INDICES,
+  SEARCH_INDICES_START,
 } from '@kbn/deeplinks-search';
 import { i18n } from '@kbn/i18n';
 
@@ -29,6 +31,8 @@ export const SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.search
 export const ENTERPRISE_SEARCH_PRODUCT_NAME = i18n.translate('xpack.enterpriseSearch.productName', {
   defaultMessage: 'Enterprise Search',
 });
+
+export { SEARCH_INDICES_START, SEARCH_INDICES };
 
 export const ENTERPRISE_SEARCH_OVERVIEW_PLUGIN = {
   ID: ENTERPRISE_SEARCH_APP_ID,

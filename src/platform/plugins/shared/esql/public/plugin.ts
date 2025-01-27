@@ -20,10 +20,21 @@ import {
   updateESQLQueryTrigger,
   UpdateESQLQueryAction,
   UPDATE_ESQL_QUERY_TRIGGER,
+  esqlControlTrigger,
+  CreateESQLControlAction,
+  ESQL_CONTROL_TRIGGER,
 } from './triggers';
 import { setKibanaServices } from './kibana_services';
+import { JoinIndicesAutocompleteResult } from '../common';
+import { cacheNonParametrizedAsyncFunction } from './util/cache';
+import { EsqlVariablesService } from './variables_service';
 
-interface EsqlPluginStart {
+interface EsqlPluginSetupDependencies {
+  indexManagement: IndexManagementPluginSetup;
+  uiActions: UiActionsSetup;
+}
+
+interface EsqlPluginStartDependencies {
   dataViews: DataViewsPublicPluginStart;
   expressions: ExpressionsStart;
   uiActions: UiActionsStart;
@@ -32,38 +43,75 @@ interface EsqlPluginStart {
   usageCollection?: UsageCollectionStart;
 }
 
-interface EsqlPluginSetup {
-  indexManagement: IndexManagementPluginSetup;
-  uiActions: UiActionsSetup;
+export interface EsqlPluginStart {
+  getJoinIndicesAutocomplete: () => Promise<JoinIndicesAutocompleteResult>;
+  variablesService: EsqlVariablesService;
 }
 
-export class EsqlPlugin implements Plugin<{}, void> {
+export class EsqlPlugin implements Plugin<{}, EsqlPluginStart> {
   private indexManagement?: IndexManagementPluginSetup;
 
-  public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetup) {
+  public setup(_: CoreSetup, { indexManagement, uiActions }: EsqlPluginSetupDependencies) {
     this.indexManagement = indexManagement;
 
     uiActions.registerTrigger(updateESQLQueryTrigger);
+    uiActions.registerTrigger(esqlControlTrigger);
 
     return {};
   }
 
   public start(
     core: CoreStart,
-    { dataViews, expressions, data, uiActions, fieldsMetadata, usageCollection }: EsqlPluginStart
-  ): void {
+    {
+      dataViews,
+      expressions,
+      data,
+      uiActions,
+      fieldsMetadata,
+      usageCollection,
+    }: EsqlPluginStartDependencies
+  ): EsqlPluginStart {
     const storage = new Storage(localStorage);
+
+    // Register triggers
     const appendESQLAction = new UpdateESQLQueryAction(data);
+
     uiActions.addTriggerAction(UPDATE_ESQL_QUERY_TRIGGER, appendESQLAction);
+    const createESQLControlAction = new CreateESQLControlAction(core, data.search.search);
+    uiActions.addTriggerAction(ESQL_CONTROL_TRIGGER, createESQLControlAction);
+
+    const variablesService = new EsqlVariablesService();
+
+    const getJoinIndicesAutocomplete = cacheNonParametrizedAsyncFunction(
+      async () => {
+        const result = await core.http.get<JoinIndicesAutocompleteResult>(
+          '/internal/esql/autocomplete/join/indices'
+        );
+
+        return result;
+      },
+      1000 * 60 * 5, // Keep the value in cache for 5 minutes
+      1000 * 15 // Refresh the cache in the background only if 15 seconds passed since the last call
+    );
+
+    const start = {
+      getJoinIndicesAutocomplete,
+      variablesService,
+    };
+
     setKibanaServices(
+      start,
       core,
       dataViews,
       expressions,
       storage,
+      uiActions,
       this.indexManagement,
       fieldsMetadata,
       usageCollection
     );
+
+    return start;
   }
 
   public stop() {}

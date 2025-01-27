@@ -47,7 +47,6 @@
     "@kbn/kibana-react-plugin",
     "@kbn/management-plugin",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/ui-theme",
     "@kbn/core-doc-links-server-mocks",
     "@kbn/doc-links",
     "@kbn/core-saved-objects-utils-server",

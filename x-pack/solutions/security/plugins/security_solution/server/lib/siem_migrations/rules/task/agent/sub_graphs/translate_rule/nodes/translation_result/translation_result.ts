@@ -5,7 +5,11 @@
  * 2.0.
  */
 
-import { RuleTranslationResult } from '../../../../../../../../../../common/siem_migrations/constants';
+import {
+  DEFAULT_TRANSLATION_RISK_SCORE,
+  DEFAULT_TRANSLATION_SEVERITY,
+  RuleTranslationResult,
+} from '../../../../../../../../../../common/siem_migrations/constants';
 import type { GraphNode } from '../../types';
 
 export const translationResultNode: GraphNode = async (state) => {
@@ -13,7 +17,8 @@ export const translationResultNode: GraphNode = async (state) => {
   const elasticRule = {
     title: state.original_rule.title,
     description: state.original_rule.description || state.original_rule.title,
-    severity: 'low',
+    severity: DEFAULT_TRANSLATION_SEVERITY,
+    risk_score: DEFAULT_TRANSLATION_RISK_SCORE,
     ...state.elastic_rule,
   };
 

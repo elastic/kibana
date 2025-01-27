@@ -15,11 +15,13 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import { isNativeFunctionCallingSupported } from '../../utils/function_calling_support';
 import {
   toolsToOpenAI,
   toolChoiceToOpenAI,
   messagesToOpenAI,
   processOpenAIStream,
+  emitTokenCountEstimateIfMissing,
 } from '../openai';
 
 export const inferenceAdapter: InferenceConnectorAdapter = {
@@ -29,15 +31,19 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     messages,
     toolChoice,
     tools,
-    functionCalling,
+    functionCalling = 'auto',
     temperature = 0,
+    modelName,
     logger,
     abortSignal,
   }) => {
-    const simulatedFunctionCalling = functionCalling === 'simulated';
+    const useSimulatedFunctionCalling =
+      functionCalling === 'auto'
+        ? !isNativeFunctionCallingSupported(executor.getConnector())
+        : functionCalling === 'simulated';
 
     let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
-    if (simulatedFunctionCalling) {
+    if (useSimulatedFunctionCalling) {
       const wrapped = wrapWithSimulatedFunctionCalling({
         system,
         messages,
@@ -46,11 +52,13 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       });
       request = {
         temperature,
+        model: modelName,
         messages: messagesToOpenAI({ system: wrapped.system, messages: wrapped.messages }),
       };
     } else {
       request = {
         temperature,
+        model: modelName,
         messages: messagesToOpenAI({ system, messages }),
         tool_choice: toolChoiceToOpenAI(toolChoice),
         tools: toolsToOpenAI(tools),
@@ -69,7 +77,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       switchMap((response) => {
         if (response.status === 'error') {
           return throwError(() =>
-            createInferenceInternalError('Error calling the inference API', {
+            createInferenceInternalError(`Error calling connector: ${response.serviceMessage}`, {
               rootError: response.serviceMessage,
             })
           );
@@ -82,7 +90,8 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
         );
       }),
       processOpenAIStream(),
-      simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      emitTokenCountEstimateIfMissing({ request }),
+      useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
 };
