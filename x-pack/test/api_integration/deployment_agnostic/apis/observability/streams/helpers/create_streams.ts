@@ -6,7 +6,7 @@
  */
 
 import { StreamUpsertRequest } from '@kbn/streams-schema';
-import expect from '@kbn/expect/expect';
+import expect from '@kbn/expect';
 import { StreamsSupertestRepositoryClient } from './repository_client';
 
 type StreamPutItem = Omit<StreamUpsertRequest, 'dashboards'> & { name: string };
