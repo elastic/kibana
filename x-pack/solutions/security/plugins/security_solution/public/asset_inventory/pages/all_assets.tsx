@@ -168,7 +168,7 @@ const AllAssets = ({
     onChangeItemsPerPage,
     setUrlQuery,
     onSort,
-    onResetFilters,
+    // onResetFilters,
     filters,
     sort,
   } = assetInventoryDataTable;

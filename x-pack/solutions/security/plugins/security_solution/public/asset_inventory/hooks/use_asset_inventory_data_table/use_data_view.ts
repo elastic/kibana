@@ -6,11 +6,12 @@
  */
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
+import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
 export const useDataView = (indexPattern: string) => {
   const {
     data: { dataViews },
-  } = useKibana().services;
+  } = useKibana<{ data: DataPublicPluginStart }>().services;
 
   return useQuery(['useDataView', indexPattern], async () => {
     const [dataView] = await dataViews.find(indexPattern);
