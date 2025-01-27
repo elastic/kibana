@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import { PublishingSubject } from '@kbn/presentation-publishing';
 
 /**
@@ -35,3 +34,15 @@ export const apiPublishesESQLVariables = (
     unknownApi && (unknownApi as PublishesESQLVariables)?.esqlVariables$ !== undefined
   );
 };
+
+export enum ESQLVariableType {
+  TIME_LITERAL = 'time_literal',
+  FIELDS = 'fields',
+  VALUES = 'values',
+}
+
+export interface ESQLControlVariable {
+  key: string;
+  value: string | number;
+  type: ESQLVariableType;
+}

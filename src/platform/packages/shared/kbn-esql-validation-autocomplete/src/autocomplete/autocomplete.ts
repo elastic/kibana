@@ -17,6 +17,7 @@ import type {
   ESQLFunction,
   ESQLSingleAstItem,
 } from '@kbn/esql-ast';
+import { ESQLControlVariable, ESQLVariableType } from '@kbn/esql-variables-types';
 import { ESQL_NUMBER_TYPES, isNumericType } from '../shared/esql_types';
 import type { EditorContext, ItemKind, SuggestionRawDefinition, GetColumnsByTypeFn } from './types';
 import {
@@ -89,12 +90,7 @@ import {
   getPolicyHelper,
   getSourcesHelper,
 } from '../shared/resources_helpers';
-import type {
-  ESQLCallbacks,
-  ESQLSourceResult,
-  ESQLControlVariable,
-  ESQLVariableType,
-} from '../shared/types';
+import type { ESQLCallbacks, ESQLSourceResult } from '../shared/types';
 import {
   getFunctionsToIgnoreForStats,
   getQueryForFields,

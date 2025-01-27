@@ -10,7 +10,6 @@
     "server/**/*",
   ],
   "kbn_references": [
-    "@kbn/esql-editor",
     "@kbn/kibana-react-plugin",
     "@kbn/core",
     "@kbn/expressions-plugin",
@@ -27,6 +26,7 @@
     "@kbn/content-management-plugin",
     "@kbn/kibana-utils-plugin",
     "@kbn/esql-validation-autocomplete",
+    "@kbn/esql-variables-types",
     "@kbn/monaco",
     "@kbn/esql-ast",
     "@kbn/search-types",

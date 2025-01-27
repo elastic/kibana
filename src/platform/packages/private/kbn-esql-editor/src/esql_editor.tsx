@@ -31,9 +31,9 @@ import memoize from 'lodash/memoize';
 import React, { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { css } from '@emotion/react';
-import { ESQLRealField, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import { ESQLRealField } from '@kbn/esql-validation-autocomplete';
 import { FieldType } from '@kbn/esql-validation-autocomplete/src/definitions/types';
-import { ESQLVariableType } from '@kbn/esql-validation-autocomplete';
+import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-variables-types';
 import { EditorFooter } from './editor_footer';
 import { fetchFieldsFromESQL } from './fetch_fields_from_esql';
 import {

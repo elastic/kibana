@@ -9,7 +9,7 @@ import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
 import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
 import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
 import { type KibanaExecutionContext } from '@kbn/core/public';
-import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-variables-types';
 import {
   BehaviorSubject,
   type Subscription,
