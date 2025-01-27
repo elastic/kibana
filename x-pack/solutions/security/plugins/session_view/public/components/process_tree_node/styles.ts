@@ -25,7 +25,7 @@ export const useStyles = ({
   isSelected,
   isSessionLeader,
 }: StylesDeps) => {
-  const { euiTheme, euiVars } = useEuiTheme();
+  const { euiTheme } = useEuiTheme();
 
   const cached = useMemo(() => {
     const { colors, border, size, font } = euiTheme;
@@ -50,7 +50,7 @@ export const useStyles = ({
     };
 
     const icon: CSSObject = {
-      color: euiVars.euiColorDarkShade,
+      color: euiTheme.colors.darkShade,
     };
 
     /**
@@ -142,7 +142,7 @@ export const useStyles = ({
       processNode.top = '-' + size.base;
       processNode.zIndex = 1;
       processNode.borderTop = `${size.base} solid transparent`;
-      processNode.backgroundColor = euiVars.euiColorLightestShade;
+      processNode.backgroundColor = euiTheme.colors.lightestShade;
       processNode.borderBottom = border.editable;
     }
 
@@ -156,7 +156,7 @@ export const useStyles = ({
       paddingLeft: size.s,
       position: 'relative',
       verticalAlign: 'middle',
-      color: euiVars.euiTextSubduedColor,
+      color: euiTheme.colors.textSubdued,
       wordBreak: 'break-all',
       padding: `${size.xs} 0px`,
       button: {
@@ -203,7 +203,7 @@ export const useStyles = ({
       sessionLeader,
       jumpToTop,
     };
-  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, euiVars, isSessionLeader]);
+  }, [depth, euiTheme, hasAlerts, hasInvestigatedAlert, isSelected, isSessionLeader]);
 
   return cached;
 };
