@@ -50,7 +50,6 @@ export function convertRulesFilterToKQL({
   tags,
   excludeRuleTypes = [],
   ruleExecutionStatus,
-  ruleIds,
 }: Partial<RulesFilterOptions>): string {
   const kql: string[] = [];
 
@@ -86,10 +85,6 @@ export function convertRulesFilterToKQL({
     kql.push(`${LAST_RUN_OUTCOME_FIELD}: "failed"`);
   }
 
-  if (ruleIds?.length) {
-    kql.push(convertRuleIdsToKQL(ruleIds));
-  }
-
   return kql.join(' AND ');
 }
 
@@ -117,8 +112,4 @@ export function convertRuleTagsToKQL(tags: string[]): string {
 
 export function convertRuleTypesToKQL(ruleTypes: Type[]): string {
   return `${PARAMS_TYPE_FIELD}: (${ruleTypes.map(prepareKQLStringParam).join(' OR ')})`;
-}
-
-export function convertRuleIdsToKQL(ruleIds: string[]): string {
-  return `(${ruleIds.map((ruleId) => `alert.id: ("alert:${ruleId}")`).join(' OR ')})`;
 }

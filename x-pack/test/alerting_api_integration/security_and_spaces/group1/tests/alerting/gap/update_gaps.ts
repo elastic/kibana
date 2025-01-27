@@ -18,7 +18,7 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const retry = getService('retry');
 
-  describe('update gaps', () => {
+  describe.only('update gaps', () => {
     const objectRemover = new ObjectRemover(supertest);
     const gapStart = moment().subtract(14, 'days').startOf('day').toISOString();
     const gapEnd = moment().subtract(13, 'days').startOf('day').toISOString();

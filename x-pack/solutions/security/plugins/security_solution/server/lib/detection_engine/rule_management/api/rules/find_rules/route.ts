@@ -53,6 +53,15 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
           const ctx = await context.resolve(['core', 'securitySolution', 'alerting']);
           const rulesClient = await ctx.alerting.getRulesClient();
 
+          let ruleIds: string[] = [];
+          if (query.gaps_range_start && query.gaps_range_end) {
+            const ruleIdsWithGaps = await rulesClient.getRuleIdsWithGaps({
+              start: query.gaps_range_start,
+              end: query.gaps_range_end,
+            });
+            ruleIds = ruleIdsWithGaps.ruleIds ?? [];
+          }
+
           const rules = await findRules({
             rulesClient,
             perPage: query.per_page,
@@ -61,6 +70,7 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
             sortOrder: query.sort_order,
             filter: query.filter,
             fields: query.fields,
+            ruleIds: ruleIds ?? [],
           });
 
           const transformed = transformFindAlerts(rules);

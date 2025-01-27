@@ -63,6 +63,10 @@ export interface FetchRulesProps {
   pagination?: Pick<PaginationOptions, 'page' | 'perPage'>;
   filterOptions?: FilterOptions;
   sortingOptions?: SortingOptions;
+  gapsRange?: {
+    start: string;
+    end: string;
+  };
   signal?: AbortSignal;
 }
 
@@ -100,7 +104,7 @@ export interface FilterOptions {
   enabled?: boolean; // undefined is to display all the rules
   ruleExecutionStatus?: RuleExecutionStatus; // undefined means "all"
   ruleSource?: RuleCustomizationEnum[]; // undefined is to display all the rules
-  ruleIds?: string[];
+  showRulesWithGaps?: boolean;
   gapSearchRange?: GapRangeValue;
 }
 

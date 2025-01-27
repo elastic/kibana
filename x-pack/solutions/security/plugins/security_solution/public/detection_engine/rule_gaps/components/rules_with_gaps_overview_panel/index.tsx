@@ -43,7 +43,7 @@ export const RulesWithGapsOverviewPanel = () => {
       onSuccess: (result) => {
         if (showRulesWithGaps) {
           setFilterOptions({
-            ruleIds: result.rule_ids,
+            showRulesWithGaps: true,
           });
         }
       },
@@ -79,15 +79,10 @@ export const RulesWithGapsOverviewPanel = () => {
   const handleShowRulesWithGapsFilterButtonClick = (value: boolean) => {
     setShowRulesWithGaps(value);
     if (!data) return;
-    if (value) {
-      setFilterOptions({
-        ruleIds: data.rule_ids,
-      });
-    } else {
-      setFilterOptions({
-        ruleIds: [],
-      });
-    }
+
+    setFilterOptions({
+      showRulesWithGaps: value,
+    });
   };
 
   return (
