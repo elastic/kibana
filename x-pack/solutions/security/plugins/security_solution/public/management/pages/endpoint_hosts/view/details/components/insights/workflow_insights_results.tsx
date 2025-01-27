@@ -42,6 +42,12 @@ const CustomEuiCallOut = styled(EuiCallOut)`
   }
 `;
 
+const ScrollableContainer = styled(EuiPanel)`
+  max-height: 500px;
+  overflow-y: auto;
+  padding: 0;
+`;
+
 export const WorkflowInsightsResults = ({
   results,
   scanCompleted,
@@ -127,7 +133,7 @@ export const WorkflowInsightsResults = ({
                     <EuiText size={'s'} color={'subdued'}>
                       {insight.message}
                     </EuiText>
-                    <EuiText size={'xs'} color={'subdued'}>
+                    <EuiText size={'xs'} color={'subdued'} css={'word-break: break-word'}>
                       {item.entries[0].type === 'match' &&
                         item.entries[0].field === 'process.executable.caseless' &&
                         item.entries[0].value}
@@ -173,7 +179,7 @@ export const WorkflowInsightsResults = ({
           <EuiSpacer size={'s'} />
         </>
       ) : null}
-      {insights}
+      <ScrollableContainer hasBorder>{insights}</ScrollableContainer>
     </>
   );
 };

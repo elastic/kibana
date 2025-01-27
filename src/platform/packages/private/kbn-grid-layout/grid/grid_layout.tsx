@@ -7,16 +7,16 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import classNames from 'classnames';
 import { cloneDeep } from 'lodash';
 import React, { useEffect, useMemo, useRef, useState } from 'react';
-import { combineLatest, distinctUntilChanged, filter, map, pairwise, skip } from 'rxjs';
+import { combineLatest, distinctUntilChanged, map, pairwise, skip } from 'rxjs';
 
 import { css } from '@emotion/react';
 
 import { GridHeightSmoother } from './grid_height_smoother';
 import { GridRow } from './grid_row';
 import { GridAccessMode, GridLayoutData, GridSettings } from './types';
-import { useGridLayoutEvents } from './use_grid_layout_events';
 import { useGridLayoutState } from './use_grid_layout_state';
 import { isLayoutEqual } from './utils/equality_checks';
 import { resolveGridRow } from './utils/resolve_grid_row';
@@ -31,6 +31,7 @@ export interface GridLayoutProps {
   onLayoutChange: (newLayout: GridLayoutData) => void;
   expandedPanelId?: string;
   accessMode?: GridAccessMode;
+  className?: string; // this makes it so that custom CSS can be passed via Emotion
 }
 
 export const GridLayout = ({
@@ -40,15 +41,16 @@ export const GridLayout = ({
   onLayoutChange,
   expandedPanelId,
   accessMode = 'EDIT',
+  className,
 }: GridLayoutProps) => {
+  const layoutRef = useRef<HTMLDivElement | null>(null);
   const { gridLayoutStateManager, setDimensionsRef } = useGridLayoutState({
     layout,
+    layoutRef,
     gridSettings,
     expandedPanelId,
     accessMode,
   });
-  useGridLayoutEvents({ gridLayoutStateManager });
-  const layoutRef = useRef<HTMLDivElement | null>(null);
 
   const [rowCount, setRowCount] = useState<number>(
     gridLayoutStateManager.gridLayout$.getValue().length
@@ -93,17 +95,8 @@ export const GridLayout = ({
     /**
      * This subscription calls the passed `onLayoutChange` callback when the layout changes
      */
-    const onLayoutChangeSubscription = combineLatest([
-      gridLayoutStateManager.gridLayout$,
-      gridLayoutStateManager.interactionEvent$,
-    ])
-      .pipe(
-        // if an interaction event is happening, then ignore any "draft" layout changes
-        filter(([_, event]) => !Boolean(event)),
-        // once no interaction event, create pairs of "old" and "new" layouts for comparison
-        map(([newLayout]) => newLayout),
-        pairwise()
-      )
+    const onLayoutChangeSubscription = gridLayoutStateManager.gridLayout$
+      .pipe(pairwise())
       .subscribe(([layoutBefore, layoutAfter]) => {
         if (!isLayoutEqual(layoutBefore, layoutAfter)) {
           onLayoutChange(layoutAfter);
@@ -152,12 +145,6 @@ export const GridLayout = ({
           rowIndex={rowIndex}
           renderPanelContents={renderPanelContents}
           gridLayoutStateManager={gridLayoutStateManager}
-          setInteractionEvent={(nextInteractionEvent) => {
-            if (!nextInteractionEvent) {
-              gridLayoutStateManager.activePanel$.next(undefined);
-            }
-            gridLayoutStateManager.interactionEvent$.next(nextInteractionEvent);
-          }}
           ref={(element: HTMLDivElement | null) =>
             (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
           }
@@ -173,8 +160,10 @@ export const GridLayout = ({
           layoutRef.current = divElement;
           setDimensionsRef(divElement);
         }}
-        className="kbnGrid"
+        className={classNames('kbnGrid', className)}
         css={css`
+          padding: calc(var(--kbnGridGutterSize) * 1px);
+
           &:has(.kbnGridPanel--expanded) {
             ${expandedPanelStyles}
           }
