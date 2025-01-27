@@ -244,7 +244,7 @@ export class RenderingService {
     const bootstrapScript = isAnonymousPage ? 'bootstrap-anonymous.js' : 'bootstrap.js';
     const metadata: RenderingMetadata = {
       strictCsp: http.csp.strict,
-      hardenPrototypes: http.csp.strict, // TODO[legrego]: use a dedicated configuration for this
+      hardenPrototypes: http.prototypeHardening,
       uiPublicUrl: `${staticAssetsHrefBase}/ui`,
       bootstrapScriptUrl: `${basePath}/${bootstrapScript}`,
       locale,

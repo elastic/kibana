@@ -134,6 +134,7 @@ const configSchema = schema.object(
         defaultValue: 'http1',
       })
     ),
+    prototypeHardening: schema.boolean({ defaultValue: false }),
     host: schema.string({
       defaultValue: 'localhost',
       hostname: true,

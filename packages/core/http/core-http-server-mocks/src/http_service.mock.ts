@@ -182,6 +182,7 @@ const createInternalSetupContractMock = () => {
     registerStaticDir: jest.fn(),
     basePath,
     csp: CspConfig.DEFAULT,
+    prototypeHardening: false,
     staticAssets: createInternalStaticAssetsMock(basePath),
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
