@@ -6,10 +6,10 @@
  */
 
 import React, { useMemo } from 'react';
-import type { FieldValueQueryBar } from '../../../../../../../detection_engine/rule_creation_ui/components/query_bar_field';
-import { UseField } from '../../../../../../../shared_imports';
+import type { FieldValueQueryBar } from '../../../../../../../../detection_engine/rule_creation_ui/components/query_bar_field';
+import { UseField } from '../../../../../../../../shared_imports';
 import { EsqlEditorField } from './esql_editor_field';
-import type { RuleTranslationSchema } from '../types';
+import type { RuleTranslationSchema } from '../../types';
 
 interface EsqlEditorFieldProps {
   path: string;
