@@ -86,6 +86,8 @@ export interface EditConfigPanelProps {
   // in cases where the embeddable is not filtered by time
   // (e.g. through unified search) set this property to true
   hideTimeFilterInfo?: boolean;
+  /** The dashboard api, important for creating controls from the ES|QL editor */
+  parentApi?: unknown;
 }
 
 export interface LayerConfigurationProps {

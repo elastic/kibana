@@ -5608,6 +5608,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-variables-types@link:src/platform/packages/shared/kbn-esql-variables-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql@link:src/platform/plugins/shared/esql":
   version "0.0.0"
   uid ""
@@ -7121,6 +7125,10 @@
   uid ""
 
 "@kbn/security-role-management-model@link:x-pack/platform/packages/private/security/role_management_model":
+  version "0.0.0"
+  uid ""
+
+"@kbn/security-solution-connectors@link:x-pack/solutions/security/packages/connectors":
   version "0.0.0"
   uid ""
 
