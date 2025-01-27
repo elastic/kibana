@@ -111,7 +111,7 @@ export const JobDetailsFlyout = () => {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={openJobsList} iconType="popout">
+            <EuiButtonEmpty onClick={openJobsList}>
               <FormattedMessage
                 id="xpack.ml.jobDetailsFlyout.openJobsListButton"
                 defaultMessage="Open jobs list"

@@ -18,6 +18,7 @@ import {
   EuiTitle,
 } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { useUrlState } from '@kbn/ml-url-state';
 import { useJobInfoFlyouts } from '../../../../../jobs/components/job_details_flyout';
 import { useGetAnalytics } from '../../../analytics_management/services/analytics_service';
 import type { AnalyticStatsBarStats } from '../../../../../components/stats_bar';
@@ -71,13 +72,17 @@ export const AnalyticsDetailFlyout = () => {
 
   const locator = useMlLocator()!;
   const navigateToPath = useNavigateToPath();
+  const [globalState] = useUrlState('_g');
 
   const redirectToAnalyticsList = useCallback(async () => {
     const path = await locator.getUrl({
       page: ML_PAGES.DATA_FRAME_ANALYTICS_JOBS_MANAGE,
+      pageState: {
+        jobId: globalState?.ml?.jobId,
+      },
     });
-    await navigateToPath(path, true);
-  }, [locator, navigateToPath]);
+    await navigateToPath(path, false);
+  }, [locator, navigateToPath, globalState?.ml?.jobId]);
 
   const flyoutTitleId = `mlAnalyticsDetailsFlyout-${analyticsId}`;
   return isDataFrameAnalyticsDetailsFlyoutOpen ? (
@@ -101,10 +106,10 @@ export const AnalyticsDetailFlyout = () => {
           </EuiFlexItem>
 
           <EuiFlexItem grow={false}>
-            <EuiButtonEmpty onClick={redirectToAnalyticsList} iconType="popout">
+            <EuiButtonEmpty onClick={redirectToAnalyticsList}>
               <FormattedMessage
-                id="xpack.ml.analyticsDetailsFlyout.openAnalyticsListButton"
-                defaultMessage="Open analytics list"
+                id="xpack.ml.jobDetailsFlyout.openJobsListButton"
+                defaultMessage="Open jobs list"
               />
             </EuiButtonEmpty>
           </EuiFlexItem>

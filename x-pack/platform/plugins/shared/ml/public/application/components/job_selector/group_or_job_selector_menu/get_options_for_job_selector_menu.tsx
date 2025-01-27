@@ -97,7 +97,7 @@ export const getOptionsForJobSelectorMenuItems = ({
       name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.jobDetails', {
         defaultMessage: 'Job details',
       }),
-      icon: 'editorTable',
+      icon: 'eye',
       onClick: () => {
         setActiveJobId(jobId);
         setActiveFlyout(FlyoutType.JOB_DETAILS);

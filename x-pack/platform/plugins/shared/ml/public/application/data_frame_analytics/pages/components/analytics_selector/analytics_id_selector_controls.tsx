@@ -48,9 +48,9 @@ const SelectorControl = ({ analyticsId, 'data-test-subj': dataTestSubj }: Select
         items: [
           {
             name: i18n.translate('xpack.ml.overview.dataFrameAnalytics.jobContextMenu.details', {
-              defaultMessage: 'Analytics details',
+              defaultMessage: 'Job details',
             }),
-            icon: 'editorTable',
+            icon: 'eye',
             onClick: () => {
               setActiveJobId(analyticsId);
               setActiveFlyout(FlyoutType.DATA_FRAME_ANALYTICS_DETAILS);
