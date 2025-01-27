@@ -58,6 +58,7 @@ import {
   FLEET_SYNTHETICS_PACKAGE,
   FLEET_SERVER_PACKAGE,
 } from '../../common/constants';
+import type { ValueOf } from '../../common/types';
 import { normalizeHostsForAgents } from '../../common/services';
 import {
   FleetEncryptedSavedObjectEncryptionKeyRequired,
@@ -80,6 +81,7 @@ import {
   extractAndWriteOutputSecrets,
   isOutputSecretStorageEnabled,
 } from './secrets';
+import { findAgentlessPolicies } from './outputs/helpers';
 import { patchUpdateDataWithRequireEncryptedAADFields } from './outputs/so_helpers';
 
 type Nullable<T> = { [P in keyof T]: T[P] | null };
@@ -176,7 +178,7 @@ async function getAgentPoliciesPerOutput(outputId?: string, isDefault?: boolean)
       }, [])
     ),
   ];
-  const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIDs(
+  const agentPoliciesFromPackagePolicies = await agentPolicyService.getByIds(
     internalSoClientWithoutSpaceExtension,
     agentPolicyIdsFromPackagePolicies
   );
@@ -245,7 +247,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
     );
     const agentPolicyIds = _.uniq(packagePolicies.flatMap((p) => p.policy_ids));
     if (agentPolicyIds.length) {
-      agentPolicies = await agentPolicyService.getByIDs(
+      agentPolicies = await agentPolicyService.getByIds(
         internalSoClientWithoutSpaceExtension,
         agentPolicyIds
       );
@@ -272,7 +274,7 @@ async function findPoliciesWithFleetServerOrSynthetics(outputId?: string, isDefa
 
 function validateOutputNotUsedInPolicy(
   agentPolicies: AgentPolicy[],
-  dataOutputType: OutputType['Logstash'] | OutputType['Kafka'],
+  dataOutputType: ValueOf<OutputType>,
   integrationName: string
 ) {
   // Validate no policy with this integration uses that output
@@ -300,26 +302,30 @@ async function validateTypeChanges(
   const mergedIsDefault = data.is_default ?? originalOutput.is_default;
   const { policiesWithFleetServer, policiesWithSynthetics } =
     await findPoliciesWithFleetServerOrSynthetics(id, mergedIsDefault);
+  const agentlessPolicies = await findAgentlessPolicies(id);
 
   if (data.type === outputType.Logstash || originalOutput.type === outputType.Logstash) {
     await validateLogstashOutputNotUsedInAPMPolicy(id, mergedIsDefault);
   }
-  // prevent changing an ES output to logstash or kafka if it's used by fleet server or synthetics policies
+  // prevent changing an ES output to a non-local ES output if it's used by an invalid policy
   if (
     originalOutput.type === outputType.Elasticsearch &&
-    (data?.type === outputType.Logstash || data?.type === outputType.Kafka)
+    data?.type !== outputType.Elasticsearch &&
+    data.type
   ) {
-    // Validate no policy with fleet server use that policy
+    // Validate no policy with fleet server, synthetics, or agentless policies use that output
     validateOutputNotUsedInPolicy(policiesWithFleetServer, data.type, 'Fleet Server');
     validateOutputNotUsedInPolicy(policiesWithSynthetics, data.type, 'Synthetics');
+    validateOutputNotUsedInPolicy(agentlessPolicies, data.type, 'agentless');
   }
+
   await updateAgentPoliciesDataOutputId(
     internalSoClientWithoutSpaceExtension,
     esClient,
     data,
     mergedIsDefault,
     defaultDataOutputId,
-    _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics]),
+    _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics, ...agentlessPolicies]),
     fromPreconfiguration
   );
 }
@@ -333,10 +339,10 @@ async function updateAgentPoliciesDataOutputId(
   agentPolicies: AgentPolicy[],
   fromPreconfiguration: boolean
 ) {
-  // if a logstash output is updated to become default
-  // if fleet server policies don't have data_output_id
-  // update them to use the default output
-  if ((data?.type === outputType.Logstash || data?.type === outputType.Kafka) && isDefault) {
+  // if a non-local ES output is about to be updated to become default
+  // and fleet server, synthetics, or agentless policies don't have
+  // data_output_id set, update them to use the current default output ID
+  if (data?.type !== outputType.Elasticsearch && isDefault) {
     for (const policy of agentPolicies) {
       if (!policy.data_output_id) {
         await agentPolicyService.update(
@@ -547,13 +553,14 @@ class OutputService {
     }
     const { policiesWithFleetServer, policiesWithSynthetics } =
       await findPoliciesWithFleetServerOrSynthetics();
+    const agentlessPolicies = await findAgentlessPolicies();
     await updateAgentPoliciesDataOutputId(
       soClient,
       esClient,
       data,
       data.is_default,
       defaultDataOutputId,
-      _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics]),
+      _.uniq([...policiesWithFleetServer, ...policiesWithSynthetics, ...agentlessPolicies]),
       options?.fromPreconfiguration ?? false
     );
 

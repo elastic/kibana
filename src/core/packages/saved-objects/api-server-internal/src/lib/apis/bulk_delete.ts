@@ -141,7 +141,7 @@ export const performBulkDelete = async <T>(
   const bulkDeleteResponse = bulkDeleteParams.length
     ? await client.bulk({
         refresh,
-        body: bulkDeleteParams,
+        operations: bulkDeleteParams,
         require_alias: true,
       })
     : undefined;

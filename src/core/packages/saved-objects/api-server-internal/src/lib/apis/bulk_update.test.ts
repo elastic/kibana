@@ -17,7 +17,7 @@ import {
 } from '../repository.test.mock';
 
 import type { Payload } from '@hapi/boom';
-import * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 import type {
   SavedObjectsBulkUpdateObject,
@@ -164,13 +164,13 @@ describe('#bulkUpdate', () => {
         overrides?: Record<string, unknown>;
       }
     ) => {
-      const body = [];
+      const operations = [];
       for (const object of objects) {
-        body.push(getBulkIndexEntry(method, object, _index, getId, overrides));
-        body.push(expect.any(Object));
+        operations.push(getBulkIndexEntry(method, object, _index, getId, overrides));
+        operations.push(expect.any(Object));
       }
       expect(client.bulk).toHaveBeenCalledWith(
-        expect.objectContaining({ body }),
+        expect.objectContaining({ operations }),
         expect.anything()
       );
     };
@@ -214,7 +214,7 @@ describe('#bulkUpdate', () => {
           expect.objectContaining({ _id: `${MULTI_NAMESPACE_ISOLATED_TYPE}:${obj2.id}` }),
         ];
         expect(client.mget).toHaveBeenCalledWith(
-          expect.objectContaining({ body: { docs } }),
+          expect.objectContaining({ docs }),
           expect.anything()
         );
       });
@@ -239,7 +239,7 @@ describe('#bulkUpdate', () => {
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: [
+            operations: [
               getBulkIndexEntry('index', _obj1),
               expect.objectContaining({
                 [obj1.type]: {
@@ -267,7 +267,7 @@ describe('#bulkUpdate', () => {
         expect(client.bulk).toHaveBeenCalledTimes(1);
         expect(client.bulk).toHaveBeenCalledWith(
           expect.objectContaining({
-            body: [
+            operations: [
               getBulkIndexEntry('index', _obj1),
               expect.objectContaining({
                 [obj1.type]: {
@@ -288,12 +288,12 @@ describe('#bulkUpdate', () => {
 
       it(`defaults to no references`, async () => {
         await bulkUpdateSuccess(client, repository, registry, [obj1, obj2]);
-        const body = [
+        const operations = [
           ...expectObjArgs({ ...obj1, references: [] }),
           ...expectObjArgs({ ...obj2, references: [] }),
         ];
         expect(client.bulk).toHaveBeenCalledWith(
-          expect.objectContaining({ body }),
+          expect.objectContaining({ operations }),
           expect.anything()
         );
       });
@@ -302,12 +302,12 @@ describe('#bulkUpdate', () => {
         const test = async (references: SavedObjectReference[]) => {
           const objects = [obj1, obj2].map((obj) => ({ ...obj, references }));
           await bulkUpdateSuccess(client, repository, registry, objects);
-          const body = [
+          const operations = [
             ...expectObjArgs({ ...obj1, references }),
             ...expectObjArgs({ ...obj2, references }),
           ];
           expect(client.bulk).toHaveBeenCalledWith(
-            expect.objectContaining({ body }),
+            expect.objectContaining({ operations }),
             expect.anything()
           );
           client.bulk.mockClear();
@@ -322,12 +322,12 @@ describe('#bulkUpdate', () => {
         const test = async (references: unknown) => {
           const objects = [obj1, obj2];
           await bulkUpdateSuccess(client, repository, registry, objects);
-          const body = [
+          const operations = [
             ...expectObjArgs({ ...obj1, references: expect.not.arrayContaining([references]) }),
             ...expectObjArgs({ ...obj2, references: expect.not.arrayContaining([references]) }),
           ];
           expect(client.bulk).toHaveBeenCalledWith(
-            expect.objectContaining({ body }),
+            expect.objectContaining({ operations }),
             expect.anything()
           );
           client.bulk.mockClear();

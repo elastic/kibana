@@ -29,7 +29,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "path": "packages/kbn-transpose-utils/index.ts",
+        "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -43,7 +43,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-transpose-utils/index.ts",
+            "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -62,7 +62,7 @@
         "signature": [
           "(value: string, columnId: string) => string"
         ],
-        "path": "packages/kbn-transpose-utils/index.ts",
+        "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -76,7 +76,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-transpose-utils/index.ts",
+            "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -91,7 +91,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-transpose-utils/index.ts",
+            "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -110,7 +110,7 @@
         "signature": [
           "(id: string) => boolean"
         ],
-        "path": "packages/kbn-transpose-utils/index.ts",
+        "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -124,7 +124,7 @@
             "signature": [
               "string"
             ],
-            "path": "packages/kbn-transpose-utils/index.ts",
+            "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -149,7 +149,7 @@
         "signature": [
           "\"---\""
         ],
-        "path": "packages/kbn-transpose-utils/index.ts",
+        "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -166,7 +166,7 @@
         "signature": [
           "\"›\""
         ],
-        "path": "packages/kbn-transpose-utils/index.ts",
+        "path": "src/platform/packages/private/kbn-transpose-utils/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

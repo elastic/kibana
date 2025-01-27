@@ -19,6 +19,7 @@ export {
   AnalyzeLogsRequestBody,
   AnalyzeLogsResponse,
 } from './api/analyze_logs/analyze_logs_route.gen';
+export { AnalyzeApiRequestBody, AnalyzeApiResponse } from './api/analyze_api/analyze_api_route.gen';
 export { CelInputRequestBody, CelInputResponse } from './api/cel/cel_input_route.gen';
 
 export { partialShuffleArray } from './utils';
@@ -33,7 +34,7 @@ export type {
 } from './api/model/common_attributes.gen';
 export { SamplesFormat, SamplesFormatName } from './api/model/common_attributes.gen';
 export type { ESProcessorItem } from './api/model/processor_attributes.gen';
-export type { CelInput } from './api/model/cel_input_attributes.gen';
+export type { CelInput, CelAuthType } from './api/model/cel_input_attributes.gen';
 
 export {
   CATEGORIZATION_GRAPH_PATH,
@@ -46,4 +47,5 @@ export {
   RELATED_GRAPH_PATH,
   CHECK_PIPELINE_PATH,
   ANALYZE_LOGS_PATH,
+  ANALYZE_API_PATH,
 } from './constants';

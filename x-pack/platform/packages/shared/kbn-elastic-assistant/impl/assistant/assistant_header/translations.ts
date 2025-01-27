@@ -21,6 +21,13 @@ export const ANONYMIZATION = i18n.translate(
   }
 );
 
+export const CLOSE = i18n.translate(
+  'xpack.elasticAssistant.assistant.assistantHeader.closeButtonLabel',
+  {
+    defaultMessage: 'Close',
+  }
+);
+
 export const KNOWLEDGE_BASE = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.knowledgeBase',
   {
@@ -53,6 +60,13 @@ export const SHOW_REAL_VALUES = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.showAnonymizedToggleRealValuesLabel',
   {
     defaultMessage: 'Show real values',
+  }
+);
+
+export const THIS_CONVERSATION_DOES_NOT_INCLUDE_ANONYMIZED_FIELDS = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.thisConversationDoesNotIncludeAnonymizedFieldsTooltip',
+  {
+    defaultMessage: 'This conversation does not include anonymized fields',
   }
 );
 

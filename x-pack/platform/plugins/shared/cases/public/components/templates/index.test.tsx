@@ -111,12 +111,6 @@ describe.skip('Templates', () => {
     });
   });
 
-  it('shows the experimental badge', async () => {
-    appMockRender.render(<Templates {...props} />);
-
-    expect(await screen.findByTestId('case-experimental-badge')).toBeInTheDocument();
-  });
-
   it('shows error when templates reaches the limit', async () => {
     const mockTemplates = [];
 

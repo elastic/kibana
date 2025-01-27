@@ -168,7 +168,7 @@ export const performBulkUpdate = async <T>(
 
   const bulkGetResponse = bulkGetDocs.length
     ? await client.mget<SavedObjectsRawDocSource>(
-        { body: { docs: bulkGetDocs } },
+        { docs: bulkGetDocs },
         { ignore: [404], meta: true }
       )
     : undefined;
@@ -344,7 +344,7 @@ export const performBulkUpdate = async <T>(
   const bulkUpdateResponse = bulkUpdateParams.length
     ? await client.bulk({
         refresh,
-        body: bulkUpdateParams,
+        operations: bulkUpdateParams,
         _source_includes: ['originId'],
         require_alias: true,
       })

@@ -93,14 +93,7 @@ export function loadEmbeddableData(
     updateWarnings,
     resetMessages,
     updateMessages,
-  } = buildUserMessagesHelpers(
-    api,
-    internalApi,
-    services,
-    onBeforeBadgesRender,
-    services.spaces,
-    metaInfo
-  );
+  } = buildUserMessagesHelpers(api, internalApi, services, onBeforeBadgesRender, metaInfo);
 
   const dispatchBlockingErrorIfAny = () => {
     const blockingErrors = getUserMessages(blockingMessageDisplayLocations, {
@@ -136,9 +129,7 @@ export function loadEmbeddableData(
     internalApi.updateDataLoading(true);
 
     // the component is ready to load
-    if (apiHasLensComponentCallbacks(parentApi)) {
-      parentApi.onLoad?.(true);
-    }
+    onLoad?.(true);
 
     const currentState = getState();
 
@@ -169,11 +160,12 @@ export function loadEmbeddableData(
       internalApi.updateVisualizationContext({
         activeData: adapters?.tables?.tables,
       });
+
       // data has loaded
       internalApi.updateDataLoading(false);
       // The third argument here is an observable to let the
       // consumer to be notified on data change
-      onLoad?.(false, adapters, api.dataLoading);
+      onLoad?.(false, adapters, api.dataLoading$);
 
       api.loadViewUnderlyingData();
 
@@ -274,7 +266,7 @@ export function loadEmbeddableData(
       }),
       map(() => 'attributes' as ReloadReason)
     ),
-    api.savedObjectId.pipe(
+    api.savedObjectId$.pipe(
       waitUntilChanged(),
       map(() => 'savedObjectId' as ReloadReason)
     ),
@@ -291,7 +283,7 @@ export function loadEmbeddableData(
   const subscriptions: Subscription[] = [
     mergedSubscriptions.pipe(debounceTime(0)).subscribe(reload),
     // make sure to reload on viewMode change
-    api.viewMode.subscribe(() => {
+    api.viewMode$.subscribe(() => {
       // only reload if drilldowns are set
       if (getState().enhancements?.dynamicActions) {
         reload('viewMode');

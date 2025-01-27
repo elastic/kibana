@@ -7,6 +7,7 @@
 import React, { useState } from 'react';
 
 import { css } from '@emotion/react';
+import { useValues } from 'kea';
 
 import {
   EuiButton,
@@ -23,6 +24,7 @@ import {
 import { i18n } from '@kbn/i18n';
 
 import connectorLogo from '../../../../../../assets/images/connector.svg';
+import { KibanaLogic } from '../../../../../shared/kibana';
 
 const nativePopoverPanels = [
   {
@@ -87,17 +89,17 @@ const connectorClientPopoverPanels = [
 
 export interface ConnectorDescriptionPopoverProps {
   isNative: boolean;
-  isRunningLocally?: boolean;
   showIsOnlySelfManaged: boolean;
 }
 
 export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverProps> = ({
   isNative,
-  isRunningLocally,
   showIsOnlySelfManaged,
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const panels = isNative ? nativePopoverPanels : connectorClientPopoverPanels;
+  const { isAgentlessEnabled } = useValues(KibanaLogic);
+
   return (
     <EuiPopover
       anchorPosition="upCenter"
@@ -123,7 +125,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
         hasBorder={false}
         hasShadow={false}
       >
-        {(showIsOnlySelfManaged || isRunningLocally) && (
+        {((isNative && !isAgentlessEnabled) || showIsOnlySelfManaged) && (
           <>
             <EuiFlexGroup>
               <EuiFlexItem>
@@ -155,7 +157,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
           </>
         )}
 
-        {!isRunningLocally && (
+        {((isNative && isAgentlessEnabled) || !isNative) && (
           <EuiFlexGroup>
             {panels.map((panel) => {
               return (
@@ -186,7 +188,7 @@ export const ConnectorDescriptionPopover: React.FC<ConnectorDescriptionPopoverPr
             })}
           </EuiFlexGroup>
         )}
-        {isRunningLocally && (
+        {isNative && !isAgentlessEnabled && (
           <>
             <EuiSpacer size="m" />
             <EuiFlexGroup direction="column" justifyContent="center">

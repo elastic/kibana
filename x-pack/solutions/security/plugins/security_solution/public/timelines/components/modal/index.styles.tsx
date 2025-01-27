@@ -56,10 +56,6 @@ export const usePaneStyles = () => {
     &:not(.timeline-portal-overlay-mask--full-screen) .timeline-container {
       margin: ${euiTheme.size.m};
       border-radius: ${euiTheme.border.radius.medium};
-
-      .timeline-template-badge {
-        border-radius: ${euiTheme.border.radius.medium} ${euiTheme.border.radius.medium} 0 0; // top corners only
-      }
     }
   `;
 };

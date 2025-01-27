@@ -604,13 +604,6 @@ export async function isSecretStorageEnabled(
 ): Promise<boolean> {
   const logger = appContextService.getLogger();
 
-  // first check if the feature flag is enabled, if not secrets are disabled
-  const { secretsStorage: secretsStorageEnabled } = appContextService.getExperimentalFeatures();
-  if (!secretsStorageEnabled) {
-    logger.debug('Secrets storage is disabled by feature flag');
-    return false;
-  }
-
   // if serverless then secrets will always be supported
   const isFleetServerStandalone =
     appContextService.getConfig()?.internal?.fleetServerStandalone ?? false;
@@ -659,14 +652,6 @@ export async function isOutputSecretStorageEnabled(
   soClient: SavedObjectsClientContract
 ): Promise<boolean> {
   const logger = appContextService.getLogger();
-
-  // first check if the feature flag is enabled, if not output secrets are disabled
-  const { outputSecretsStorage: outputSecretsStorageEnabled } =
-    appContextService.getExperimentalFeatures();
-  if (!outputSecretsStorageEnabled) {
-    logger.debug('Output secrets storage is disabled by feature flag');
-    return false;
-  }
 
   // if serverless then output secrets will always be supported
   const isFleetServerStandalone =

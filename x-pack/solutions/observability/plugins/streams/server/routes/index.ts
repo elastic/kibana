@@ -5,38 +5,24 @@
  * 2.0.
  */
 
-import { dashboardRoutes } from './dashboards/route';
 import { esqlRoutes } from './esql/route';
-import { deleteStreamRoute } from './streams/delete';
-import { streamDetailRoute } from './streams/details';
-import { disableStreamsRoute } from './streams/disable';
-import { editStreamRoute } from './streams/edit';
-import { enableStreamsRoute } from './streams/enable';
-import { forkStreamsRoute } from './streams/fork';
-import { listStreamsRoute } from './streams/list';
-import { readStreamRoute } from './streams/read';
-import { resyncStreamsRoute } from './streams/resync';
-import { sampleStreamRoute } from './streams/sample';
-import { schemaFieldsSimulationRoute } from './streams/schema/fields_simulation';
-import { unmappedFieldsRoute } from './streams/schema/unmapped_fields';
-import { streamsStatusRoutes } from './streams/settings';
+import { dashboardRoutes } from './dashboards/route';
+import { crudRoutes } from './streams/crud/route';
+import { enablementRoutes } from './streams/enablement/route';
+import { managementRoutes } from './streams/management/route';
+import { schemaRoutes } from './streams/schema/route';
+import { processingRoutes } from './streams/processing/route';
+import { ingestRoutes } from './streams/ingest/route';
 
 export const streamsRouteRepository = {
-  ...enableStreamsRoute,
-  ...resyncStreamsRoute,
-  ...forkStreamsRoute,
-  ...readStreamRoute,
-  ...editStreamRoute,
-  ...deleteStreamRoute,
-  ...listStreamsRoute,
-  ...streamsStatusRoutes,
   ...esqlRoutes,
-  ...disableStreamsRoute,
   ...dashboardRoutes,
-  ...sampleStreamRoute,
-  ...streamDetailRoute,
-  ...unmappedFieldsRoute,
-  ...schemaFieldsSimulationRoute,
+  ...crudRoutes,
+  ...enablementRoutes,
+  ...managementRoutes,
+  ...schemaRoutes,
+  ...processingRoutes,
+  ...ingestRoutes,
 };
 
 export type StreamsRouteRepository = typeof streamsRouteRepository;

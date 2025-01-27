@@ -45,13 +45,13 @@ import {
   AI_SEARCH_PLUGIN,
   APPLICATIONS_PLUGIN,
   SEARCH_PRODUCT_NAME,
+  SEARCH_INDICES,
+  SEARCH_INDICES_START,
 } from '../common/constants';
 
 import {
-  appSearchGuideId,
   websiteSearchGuideId,
   databaseSearchGuideId,
-  appSearchGuideConfig,
   websiteSearchGuideConfig,
   databaseSearchGuideConfig,
 } from '../common/guided_onboarding/search_guide_config';
@@ -71,7 +71,6 @@ import {
   IEnterpriseSearchRequestHandler,
 } from './lib/enterprise_search_request_handler';
 
-import { registerAppSearchRoutes } from './routes/app_search';
 import { registerEnterpriseSearchRoutes } from './routes/enterprise_search';
 import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
 import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
@@ -80,7 +79,6 @@ import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
 import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
-import { registerWorkplaceSearchRoutes } from './routes/workplace_search';
 
 import { appSearchTelemetryType } from './saved_objects/app_search/telemetry';
 import { enterpriseSearchTelemetryType } from './saved_objects/enterprise_search/telemetry';
@@ -165,11 +163,17 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
       VECTOR_SEARCH_PLUGIN.ID,
       SEMANTIC_SEARCH_PLUGIN.ID,
       AI_SEARCH_PLUGIN.ID,
+      SEARCH_INDICES,
+      SEARCH_INDICES_START,
     ];
     const isCloud = !!cloud?.cloudId;
 
     if (customIntegrations) {
-      registerEnterpriseSearchIntegrations(config, customIntegrations);
+      registerEnterpriseSearchIntegrations(
+        config,
+        customIntegrations,
+        http.staticAssets.getPluginAssetHref('images/crawler.svg')
+      );
     }
 
     /*
@@ -291,9 +295,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     };
 
     registerConfigDataRoute(dependencies);
-    registerAppSearchRoutes(dependencies);
     registerEnterpriseSearchRoutes(dependencies);
-    registerWorkplaceSearchRoutes(dependencies);
     // Enterprise Search Routes
     if (config.hasConnectors) registerConnectorRoutes(dependencies);
     if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
@@ -355,7 +357,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     /**
      * Register a config for the search guide
      */
-    guidedOnboarding?.registerGuideConfig(appSearchGuideId, appSearchGuideConfig);
     if (config.hasWebCrawler) {
       guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
@@ -369,12 +370,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
 
     if (globalSearch) {
       globalSearch.registerResultProvider(
-        getSearchResultProvider(
-          config,
-          searchConnectors?.getConnectorTypes() || [],
-          isCloud,
-          http.staticAssets.getPluginAssetHref('images/crawler.svg')
-        )
+        getSearchResultProvider(config, searchConnectors?.getConnectorTypes() || [], isCloud)
       );
       globalSearch.registerResultProvider(getIndicesSearchResultProvider(http.staticAssets));
       globalSearch.registerResultProvider(getConnectorsSearchResultProvider(http.staticAssets));
