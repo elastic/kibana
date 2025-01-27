@@ -27,6 +27,6 @@
     "@kbn/i18n",
     "@kbn/datemath",
     "@kbn/es-query",
-    "@kbn/esql-validation-autocomplete"
+    "@kbn/esql-variables-types"
   ]
 }
