@@ -11,7 +11,11 @@ import { LegendValue, Position, ScaleType } from '@elastic/charts';
 import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { AxisExtentConfig, YScaleType } from '@kbn/expression-xy-plugin/common';
 import { TooltipWrapper } from '@kbn/visualization-utils';
-import { LegendSize, XYLegendValue } from '@kbn/visualizations-plugin/common/constants';
+import {
+  LegendSize,
+  type XYLegendValue,
+  type AxesSettingsConfig,
+} from '@kbn/visualizations-plugin/common';
 import type { LegendSettingsPopoverProps } from '../../../shared_components/legend/legend_settings_popover';
 import type { VisualizationToolbarProps, FramePublicAPI } from '../../../types';
 import { State, XYState } from '../types';
@@ -24,7 +28,7 @@ import { TextPopover } from './titles_and_text_popover';
 import { getScaleType } from '../to_expression';
 import { getDefaultVisualValuesForLayer } from '../../../shared_components/datasource_default_values';
 import { getDataLayers } from '../visualization_helpers';
-import type { AxesSettingsConfig, AxesSettingsConfigKeys } from '../../../shared_components';
+import type { AxesSettingsConfigKeys } from '../../../shared_components';
 
 type UnwrapArray<T> = T extends Array<infer P> ? P : T;
 

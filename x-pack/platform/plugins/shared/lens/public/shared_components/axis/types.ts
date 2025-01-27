@@ -5,10 +5,6 @@
  * 2.0.
  */
 
-export interface AxesSettingsConfig {
-  x: boolean;
-  yRight: boolean;
-  yLeft: boolean;
-}
+import type { AxesSettingsConfig } from '@kbn/visualizations-plugin/common';
 
 export type AxesSettingsConfigKeys = keyof AxesSettingsConfig;
