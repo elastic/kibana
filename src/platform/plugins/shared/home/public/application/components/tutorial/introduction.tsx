@@ -8,8 +8,6 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { Content } from './content';
 import {
   EuiImage,
   EuiLink,
@@ -19,9 +17,24 @@ import {
   EuiSpacer,
   EuiBadge,
 } from '@elastic/eui';
-
-import { FormattedMessage, injectI18n } from '@kbn/i18n-react';
+import { IBasePath } from '@kbn/core-http-browser';
+import { FormattedMessage, InjectedIntl, injectI18n } from '@kbn/i18n-react';
+import { Content } from './content';
 import { TutorialsCategory } from '../../../../common/constants';
+
+interface IntroductionUiProps {
+  description: string;
+  title: string;
+  previewUrl?: string;
+  exportedFieldUrl?: string;
+  iconType?: string;
+  isBeta?: boolean;
+  notices?: unknown; // PropTypes.node
+  exportedFieldsUrl?: string;
+  intl: InjectedIntl;
+  basePath: IBasePath;
+  category?: unknown;
+}
 
 function IntroductionUI({
   description,
@@ -29,12 +42,12 @@ function IntroductionUI({
   title,
   exportedFieldsUrl,
   iconType,
-  isBeta,
+  isBeta = false,
   intl,
   notices,
   basePath,
   category,
-}) {
+}: IntroductionUiProps) {
   let rightSideItems;
   if (previewUrl) {
     rightSideItems = [
@@ -128,19 +141,5 @@ function IntroductionUI({
     </>
   );
 }
-
-IntroductionUI.propTypes = {
-  description: PropTypes.string.isRequired,
-  title: PropTypes.string.isRequired,
-  previewUrl: PropTypes.string,
-  exportedFieldsUrl: PropTypes.string,
-  iconType: PropTypes.string,
-  isBeta: PropTypes.bool,
-  notices: PropTypes.node,
-};
-
-IntroductionUI.defaultProps = {
-  isBeta: false,
-};
 
 export const Introduction = injectI18n(IntroductionUI);

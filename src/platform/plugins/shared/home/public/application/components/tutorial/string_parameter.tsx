@@ -8,24 +8,23 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-import { EuiFormRow, EuiFieldNumber } from '@elastic/eui';
 
-export function NumberParameter({ id, label, value, setParameter }) {
-  const handleChange = (evt) => {
-    setParameter(id, parseFloat(evt.target.value));
+import { EuiFormRow, EuiFieldText } from '@elastic/eui';
+
+export interface Props {
+  id: string;
+  label: string;
+  value: string;
+  setParameter: (id: string, value: string) => void;
+}
+export function StringParameter({ id, label, value, setParameter }: Props) {
+  const handleChange = (evt: React.ChangeEvent<HTMLInputElement>) => {
+    setParameter(id, evt.target.value);
   };
 
   return (
     <EuiFormRow label={label}>
-      <EuiFieldNumber value={value} onChange={handleChange} fullWidth />
+      <EuiFieldText value={value} onChange={handleChange} fullWidth />
     </EuiFormRow>
   );
 }
-
-NumberParameter.propTypes = {
-  id: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  value: PropTypes.number.isRequired,
-  setParameter: PropTypes.func.isRequired,
-};

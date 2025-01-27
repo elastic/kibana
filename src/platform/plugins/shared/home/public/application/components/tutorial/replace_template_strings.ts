@@ -10,7 +10,7 @@
 import { Writer } from 'mustache';
 import { getServices } from '../../kibana_services';
 
-const TEMPLATE_TAGS = ['{', '}'];
+const TEMPLATE_TAGS: [string, string] = ['{', '}'];
 
 // Can not use 'Mustache' since its a global object
 const mustacheWriter = new Writer();
@@ -22,9 +22,8 @@ mustacheWriter.escapedValue = function escapedValue(token, context) {
   }
 };
 
-export function replaceTemplateStrings(text, params = {}) {
+export function replaceTemplateStrings(text: string, params = {}) {
   const { tutorialService, kibanaVersion, docLinks } = getServices();
-
   const variables = {
     // '{' and '}' can not be used in template since they are used as template tags.
     // Must use '{curlyOpen}'' and '{curlyClose}'
@@ -48,7 +47,7 @@ export function replaceTemplateStrings(text, params = {}) {
         version: kibanaVersion,
       },
     },
-    params: params,
+    params,
   };
   mustacheWriter.parse(text, TEMPLATE_TAGS);
   return mustacheWriter.render(text, variables);

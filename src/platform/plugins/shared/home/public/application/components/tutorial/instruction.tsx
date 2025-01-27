@@ -8,12 +8,21 @@
  */
 
 import React, { Suspense, useMemo } from 'react';
-import PropTypes from 'prop-types';
+import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
 import { Content } from './content';
 
-import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
-
 import { getServices } from '../../kibana_services';
+
+interface InstructionProps {
+  commands?: string[];
+  paramValues: string;
+  textPost?: string;
+  textPre?: string;
+  replaceTemplateStrings: (text: string, paramValues?: string) => string;
+  customComponentName: string;
+  variantId?: string;
+  isCloudEnabled: boolean;
+}
 
 export function Instruction({
   commands,
@@ -24,7 +33,7 @@ export function Instruction({
   customComponentName,
   variantId,
   isCloudEnabled,
-}) {
+}: InstructionProps) {
   const { tutorialService, http, theme, getBasePath, kibanaVersion } = getServices();
 
   let pre;
@@ -47,7 +56,7 @@ export function Instruction({
     );
   }
   const customComponent = tutorialService.getCustomComponent(customComponentName);
-  //Memoize the custom component so it wont rerender everytime
+  // Memoize the custom component so it wont rerender everytime
   const LazyCustomComponent = useMemo(() => {
     if (customComponent) {
       return React.lazy(() => customComponent());
@@ -95,14 +104,3 @@ export function Instruction({
     </div>
   );
 }
-
-Instruction.propTypes = {
-  commands: PropTypes.array,
-  paramValues: PropTypes.object.isRequired,
-  textPost: PropTypes.string,
-  textPre: PropTypes.string,
-  replaceTemplateStrings: PropTypes.func.isRequired,
-  customComponentName: PropTypes.string,
-  variantId: PropTypes.string,
-  isCloudEnabled: PropTypes.bool.isRequired,
-};

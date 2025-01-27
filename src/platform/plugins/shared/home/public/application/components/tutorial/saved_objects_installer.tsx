@@ -7,12 +7,9 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-/* eslint-disable no-multi-str*/
+import { injectI18n, InjectedIntl } from '@kbn/i18n-react';
 
-import { injectI18n } from '@kbn/i18n-react';
-
-import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
+import React from 'react';
 
 import {
   EuiTitle,
@@ -23,19 +20,59 @@ import {
   EuiSpacer,
   EuiCallOut,
 } from '@elastic/eui';
+import {
+  SavedObjectsBatchResponse,
+  SavedObjectsBulkCreateObject,
+  SavedObjectsBulkCreateOptions,
+} from '@kbn/core-saved-objects-api-browser';
 
-class SavedObjectsInstallerUi extends React.Component {
+interface SavedObjectShape {
+  id: string;
+  type: string;
+  attributes: unknown;
+  version: string;
+}
+
+// interface SavedObjectsInstallerUi {}
+interface SavedObjectInstallerProps {
+  intl: InjectedIntl;
+  bulkCreate: (
+    objects: Array<SavedObjectsBulkCreateObject<unknown>>,
+    options?: SavedObjectsBulkCreateOptions | undefined
+  ) => Promise<SavedObjectsBatchResponse<unknown>>; // is there anything to do with deprecated things?
+  savedObjects: SavedObjectShape[];
+  installMsg: string;
+}
+interface SavedObjectInstallerState {
+  isInstalling: boolean;
+  installStatusMsg: string;
+  isInstalled: boolean;
+  overwrite: boolean;
+  buttonLabel: string; // DEFAULT_BUTTON_LABEL
+}
+class SavedObjectsInstallerUi extends React.Component<
+  SavedObjectInstallerProps,
+  SavedObjectInstallerState
+> {
+  private _isMounted: boolean;
+
+  constructor(props: SavedObjectInstallerProps) {
+    super(props);
+
+    this.state = {
+      isInstalling: false,
+      isInstalled: false,
+      overwrite: false,
+      buttonLabel: this.DEFAULT_BUTTON_LABEL,
+      installStatusMsg: '', // what should I set here?
+    };
+    this._isMounted = false;
+  }
+
   DEFAULT_BUTTON_LABEL = this.props.intl.formatMessage({
     id: 'home.tutorial.savedObject.defaultButtonLabel',
     defaultMessage: 'Load Kibana objects',
   });
-
-  state = {
-    isInstalling: false,
-    isInstalled: false,
-    overwrite: false,
-    buttonLabel: this.DEFAULT_BUTTON_LABEL,
-  };
 
   componentDidMount() {
     this._isMounted = true;
@@ -54,7 +91,6 @@ class SavedObjectsInstallerUi extends React.Component {
     try {
       // Filter out the saved object version field, if present, to avoid inadvertently triggering optimistic concurrency control.
       const objectsToCreate = this.props.savedObjects.map(
-        // eslint-disable-next-line no-unused-vars
         ({ version, ...savedObject }) => savedObject
       );
       resp = await this.props.bulkCreate(objectsToCreate, { overwrite: this.state.overwrite });
@@ -88,7 +124,7 @@ class SavedObjectsInstallerUi extends React.Component {
     });
 
     const overwriteErrors = errors.filter((savedObject) => {
-      return savedObject.error.statusCode === 409;
+      return Boolean(savedObject.error?.statusCode === 409); // do i need this Boolean?
     });
     if (overwriteErrors.length > 0) {
       this.setState({
@@ -126,7 +162,7 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
           {
             errorsLength: errors.length,
             savedObjectsLength: this.props.savedObjects.length,
-            errorMessage: errors[0].error.message,
+            errorMessage: errors[0].error?.message,
           }
         )
       : this.props.intl.formatMessage(
@@ -204,17 +240,5 @@ Click 'Confirm overwrite' to import and overwrite existing objects. Any changes 
     );
   }
 }
-
-const savedObjectShape = PropTypes.shape({
-  id: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
-  attributes: PropTypes.object.isRequired,
-});
-
-SavedObjectsInstallerUi.propTypes = {
-  bulkCreate: PropTypes.func.isRequired,
-  savedObjects: PropTypes.arrayOf(savedObjectShape).isRequired,
-  installMsg: PropTypes.string,
-};
 
 export const SavedObjectsInstaller = injectI18n(SavedObjectsInstallerUi);

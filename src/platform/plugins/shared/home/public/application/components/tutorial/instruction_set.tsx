@@ -8,11 +8,6 @@
  */
 
 import React, { Fragment } from 'react';
-import PropTypes from 'prop-types';
-import { Instruction } from './instruction';
-import { ParameterForm } from './parameter_form';
-import { Content } from './content';
-import { getDisplayText } from '../../../../common/instruction_variant';
 import {
   EuiTabs,
   EuiTab,
@@ -25,49 +20,114 @@ import {
   EuiTitle,
   EuiSplitPanel,
 } from '@elastic/eui';
+import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
+import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
+import { Instruction } from './instruction';
+import { ParameterForm } from './parameter_form';
+import { Content } from './content';
+import { INSTRUCTION_VARIANT, getDisplayText } from '../../../../common/instruction_variant';
 import * as StatusCheckStates from './status_check_states';
 
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
-import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access style variables from EUI context
+interface InstructionShape {
+  title: string;
+  textPre: string;
+  commands: string[];
+  textPost: string;
+  customComponentName: string; // ?
+}
 
-class InstructionSetUi extends React.Component {
-  constructor(props) {
+export interface InstructionVariantShape {
+  id: keyof typeof INSTRUCTION_VARIANT; // ?
+  instructions: InstructionShape[];
+  initialSelected: boolean;
+}
+
+export interface StatusCheckConfigShape {
+  success: string;
+  error: string;
+  title: string;
+  text: string;
+  btnLabel: string;
+  customStatusCheck: string;
+}
+
+export interface InstructionProps {
+  // not sure if i should export props
+  title: string;
+  callOut: {
+    iconType: string;
+    message: string;
+    title: string;
+  }; // ?
+  instructionVariants: InstructionVariantShape[];
+  statusCheckConfig: StatusCheckConfigShape;
+  statusCheckState: keyof typeof StatusCheckStates;
+  onStatusCheck: () => void;
+  offset: number;
+  params: unknown; // type
+  paramValues: object; // ?
+  setParameter: (paramId: string, newValue: string) => void;
+  replaceTemplateStrings: (text: string) => string;
+  isCloudEnabled: boolean;
+  intl: InjectedIntl;
+}
+interface InstructionState {
+  selectedTabId: string;
+  isParamFormVisible: boolean;
+  tabs?: Tab; // ?
+}
+interface Tab {
+  id: string;
+  name: string;
+  initialSelected: boolean;
+}
+class InstructionSetUi extends React.Component<InstructionProps | any> {
+  tabs: Tab[]; // ? why state doesn't complain
+  state: InstructionState;
+
+  constructor(props: InstructionProps) {
     super(props);
 
-    this.tabs = props.instructionVariants.map((variant) => {
-      return {
-        id: variant.id,
-        name: getDisplayText(variant.id),
-        initialSelected: variant.initialSelected,
-      };
-    });
-
-    this.state = {
-      isParamFormVisible: false,
-    };
-
-    if (this.tabs.length > 0) {
-      this.state.selectedTabId =
-        this.tabs.find(({ initialSelected }) => initialSelected)?.id ?? this.tabs[0].id;
-    }
+    this.tabs = this.initializeTabs(props.instructionVariants);
+    this.state = this.initializeState(this.tabs);
+  }
+  initializeTabs(instructionVariants: InstructionVariantShape[]) {
+    return instructionVariants.map((variant) => ({
+      id: variant.id,
+      name: getDisplayText(variant.id),
+      initialSelected: variant.initialSelected,
+    }));
   }
 
+  initializeState(tabs: Tab[]) {
+    const initialState = {
+      isParamFormVisible: false,
+      selectedTabId:
+        tabs.length > 0
+          ? tabs.find(({ initialSelected }) => initialSelected)?.id ?? tabs[0].id
+          : '',
+    };
+
+    return initialState;
+  }
   handleToggleVisibility = () => {
-    this.setState((prevState) => ({ isParamFormVisible: !prevState.isParamFormVisible }));
+    this.setState((prevState: InstructionState) => ({
+      isParamFormVisible: !prevState.isParamFormVisible,
+    }));
   };
 
-  onSelectedTabChanged = (id) => {
+  onSelectedTabChanged = (id: string) => {
     this.setState({
       selectedTabId: id,
     });
   };
 
   renderTabs = () => {
-    return this.tabs.map((tab, index) => (
+    return this.tabs.map((tab) => (
       <EuiTab
-        onClick={() => this.onSelectedTabChanged(tab.id)}
+        onClick={this.onSelectedTabChanged.bind(this, tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
-        key={index}
+        key={tab.id}
       >
         {tab.name}
       </EuiTab>
@@ -76,7 +136,7 @@ class InstructionSetUi extends React.Component {
 
   renderStatusCheckMessage() {
     let message;
-    let color;
+    let color: 'success' | 'warning' | undefined;
     switch (this.props.statusCheckState) {
       case StatusCheckStates.NOT_CHECKED:
       case StatusCheckStates.FETCHING:
@@ -109,7 +169,7 @@ class InstructionSetUi extends React.Component {
     );
   }
 
-  getStepStatus(statusCheckState) {
+  getStepStatus(statusCheckState: InstructionProps['statusCheckState']) {
     switch (statusCheckState) {
       case undefined:
       case StatusCheckStates.NOT_CHECKED:
@@ -141,7 +201,6 @@ class InstructionSetUi extends React.Component {
     const checkStatusStep = (
       <Fragment>
         <Content text={statusCheckConfig.text} />
-
         <EuiSpacer size="s" />
         <EuiButton
           onClick={onStatusCheck}
@@ -154,7 +213,6 @@ class InstructionSetUi extends React.Component {
             />
           )}
         </EuiButton>
-
         {this.renderStatusCheckMessage()}
       </Fragment>
     );
@@ -173,32 +231,36 @@ class InstructionSetUi extends React.Component {
   }
 
   renderInstructions = () => {
-    const instructionVariant = this.props.instructionVariants.find((variant) => {
-      return variant.id === this.state.selectedTabId;
-    });
+    const instructionVariant = this.props.instructionVariants.find(
+      (variant: InstructionVariantShape) => {
+        return variant.id === this.state.selectedTabId;
+      }
+    );
     if (!instructionVariant) {
       return;
     }
 
-    const steps = instructionVariant.instructions.map((instruction, index) => {
-      const step = (
-        <Instruction
-          commands={instruction.commands}
-          paramValues={this.props.paramValues}
-          textPre={instruction.textPre}
-          textPost={instruction.textPost}
-          replaceTemplateStrings={this.props.replaceTemplateStrings}
-          customComponentName={instruction.customComponentName}
-          variantId={instructionVariant.id}
-          isCloudEnabled={this.props.isCloudEnabled}
-        />
-      );
-      return {
-        title: instruction.title,
-        children: step,
-        key: index,
-      };
-    });
+    const steps = instructionVariant.instructions.map(
+      (instruction: InstructionShape, index: string) => {
+        const step = (
+          <Instruction
+            commands={instruction.commands}
+            paramValues={this.props.paramValues}
+            textPre={instruction.textPre}
+            textPost={instruction.textPost}
+            replaceTemplateStrings={this.props.replaceTemplateStrings}
+            customComponentName={instruction.customComponentName}
+            variantId={instructionVariant.id}
+            isCloudEnabled={this.props.isCloudEnabled}
+          />
+        );
+        return {
+          title: instruction.title,
+          children: step,
+          key: index,
+        };
+      }
+    );
 
     if (this.props.statusCheckConfig) {
       steps.push(this.renderStatusCheck());
@@ -290,48 +352,5 @@ class InstructionSetUi extends React.Component {
     );
   }
 }
-
-const instructionShape = PropTypes.shape({
-  title: PropTypes.string,
-  textPre: PropTypes.string,
-  commands: PropTypes.arrayOf(PropTypes.string),
-  textPost: PropTypes.string,
-});
-
-const instructionVariantShape = PropTypes.shape({
-  id: PropTypes.string.isRequired,
-  instructions: PropTypes.arrayOf(instructionShape).isRequired,
-  initialSelected: PropTypes.bool,
-});
-
-const statusCheckConfigShape = PropTypes.shape({
-  success: PropTypes.string,
-  error: PropTypes.string,
-  title: PropTypes.string,
-  text: PropTypes.string,
-  btnLabel: PropTypes.string,
-  customStatusCheck: PropTypes.string,
-});
-
-InstructionSetUi.propTypes = {
-  title: PropTypes.string.isRequired,
-  callOut: PropTypes.object,
-  instructionVariants: PropTypes.arrayOf(instructionVariantShape).isRequired,
-  statusCheckConfig: statusCheckConfigShape,
-  statusCheckState: PropTypes.oneOf([
-    StatusCheckStates.FETCHING,
-    StatusCheckStates.NOT_CHECKED,
-    StatusCheckStates.HAS_DATA,
-    StatusCheckStates.NO_DATA,
-    StatusCheckStates.ERROR,
-  ]),
-  onStatusCheck: PropTypes.func.isRequired,
-  offset: PropTypes.number.isRequired,
-  params: PropTypes.array,
-  paramValues: PropTypes.object.isRequired,
-  setParameter: PropTypes.func,
-  replaceTemplateStrings: PropTypes.func.isRequired,
-  isCloudEnabled: PropTypes.bool.isRequired,
-};
 
 export const InstructionSet = injectI18n(InstructionSetUi);

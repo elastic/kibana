@@ -8,11 +8,29 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 
 import { EuiCard, EuiIcon } from '@elastic/eui';
 
-export function Synopsis({ id, description, iconUrl, iconType, title, url, onClick, isBeta }) {
+interface SynopsisProps {
+  id: string;
+  description: string;
+  iconUrl?: string;
+  iconType?: string;
+  title: string;
+  url?: string;
+  onClick?: () => void;
+  isBeta?: boolean;
+}
+export function Synopsis({
+  id,
+  description,
+  iconUrl,
+  iconType,
+  title,
+  url,
+  onClick,
+  isBeta = false,
+}: SynopsisProps) {
   let optionalImg;
 
   if (iconUrl) {
@@ -23,7 +41,7 @@ export function Synopsis({ id, description, iconUrl, iconType, title, url, onCli
 
   return (
     <EuiCard
-      betaBadgeProps={{ label: isBeta ? 'Beta' : null }}
+      betaBadgeProps={{ label: isBeta ? 'Beta' : null, title }} // not sure about which title to use and what to do with beta anyway
       className="homSynopsis__card"
       data-test-subj={`homeSynopsisLink${id.toLowerCase()}`}
       description={description}
@@ -37,17 +55,3 @@ export function Synopsis({ id, description, iconUrl, iconType, title, url, onCli
     />
   );
 }
-
-Synopsis.propTypes = {
-  description: PropTypes.string.isRequired,
-  iconUrl: PropTypes.string,
-  iconType: PropTypes.string,
-  title: PropTypes.string.isRequired,
-  url: PropTypes.string,
-  onClick: PropTypes.func,
-  isBeta: PropTypes.bool,
-};
-
-Synopsis.defaultProps = {
-  isBeta: false,
-};
