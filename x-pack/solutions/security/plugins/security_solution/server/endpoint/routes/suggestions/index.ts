@@ -7,11 +7,12 @@
 
 import type { Observable } from 'rxjs';
 import { firstValueFrom } from 'rxjs';
-import type { RequestHandler, Logger } from '@kbn/core/server';
+import type { RequestHandler, Logger, DocLinksServiceSetup } from '@kbn/core/server';
 import type { TypeOf } from '@kbn/config-schema';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import type { ConfigSchema } from '@kbn/unified-search-plugin/server/config';
 import { termsEnumSuggestions } from '@kbn/unified-search-plugin/server/autocomplete/terms_enum';
+import { i18n } from '@kbn/i18n';
 import {
   type EndpointSuggestionsBody,
   EndpointSuggestionsSchema,
@@ -36,7 +37,8 @@ export const getLogger = (endpointAppContext: EndpointAppContext): Logger => {
 export function registerEndpointSuggestionsRoutes(
   router: SecuritySolutionPluginRouter,
   config$: Observable<ConfigSchema>,
-  endpointContext: EndpointAppContext
+  endpointContext: EndpointAppContext,
+  docLinks: DocLinksServiceSetup
 ) {
   router.versioned
     .post({
@@ -48,14 +50,27 @@ export function registerEndpointSuggestionsRoutes(
         },
       },
       options: { authRequired: true },
-      // @ts-expect-error TODO(https://github.com/elastic/kibana/issues/196095): Replace {RouteDeprecationInfo}
-      deprecated: true,
     })
     .addVersion(
       {
         version: '2023-10-31',
         validate: {
           request: EndpointSuggestionsSchema,
+        },
+        options: {
+          deprecated: {
+            documentationUrl:
+              docLinks.links.securitySolution.legacyEndpointManagementApiDeprecations,
+            severity: 'critical',
+            message: i18n.translate('xpack.securitySolution.deprecations.endpoint.suggestions', {
+              defaultMessage:
+                'The "{path}" URL is deprecated and will be removed in the next major version.',
+              values: { path: SUGGESTIONS_ROUTE },
+            }),
+            reason: {
+              type: 'remove',
+            },
+          },
         },
       },
       withEndpointAuthz(
