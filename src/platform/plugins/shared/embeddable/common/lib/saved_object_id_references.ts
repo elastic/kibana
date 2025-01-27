@@ -8,9 +8,8 @@
  */
 
 import type { SavedObjectReference } from '@kbn/core/server';
-import { EmbeddableStateWithType } from '../types';
+import { EmbeddableStateWithType, EmbeddableStateWithTypeAndSavedObjectId } from '../types';
 
-type EmbeddableStateWithTypeAndSavedObjectId = EmbeddableStateWithType & { savedObjectId?: string };
 const stateHasSavedObjectId = (
   state: EmbeddableStateWithType
 ): state is EmbeddableStateWithTypeAndSavedObjectId => {

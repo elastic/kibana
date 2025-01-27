@@ -28,6 +28,11 @@ export interface DashboardPanelState<
   TEmbeddableInput extends EmbeddableInput | SavedObjectEmbeddableInput = SavedObjectEmbeddableInput
 > extends PanelState<TEmbeddableInput> {
   readonly gridData: GridData;
+  /**
+   * @deprecated
+   * The panelRefName key was used to link a reference to a panel. This is no longer used
+   * and is kept for BWC reasons. But it will be removed on Dashboard save.
+   */
   panelRefName?: string;
 
   /**

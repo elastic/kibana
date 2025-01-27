@@ -10,7 +10,8 @@
 import { createExtract, createInject } from './dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 import { ParsedDashboardAttributesWithType } from '../../types';
-import { SavedObjectEmbeddableInput } from '@kbn/embeddable-plugin/common';
+import { EmbeddableStateWithTypeAndSavedObjectId } from '@kbn/embeddable-plugin/common';
+import type { SavedObjectReference } from '@kbn/core/server';
 
 const persistableStateService = createEmbeddablePersistableStateServiceMock();
 
@@ -21,8 +22,8 @@ const dashboardWithExtractedPanel: ParsedDashboardAttributesWithType = {
     panel_1: {
       type: 'panel_type',
       gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
-      panelRefName: 'panel_panel_1',
       explicitInput: {
+        enhancements: {},
         id: 'panel_1',
       },
     },
@@ -43,6 +44,7 @@ const unextractedDashboardState: ParsedDashboardAttributesWithType = {
       type: 'panel_type',
       gridData: { w: 0, h: 0, x: 0, y: 0, i: '0' },
       explicitInput: {
+        enhancements: {},
         id: 'panel_1',
         savedObjectId: 'object-id',
       },
@@ -53,6 +55,15 @@ const unextractedDashboardState: ParsedDashboardAttributesWithType = {
 describe('inject/extract by reference panel', () => {
   it('should inject the extracted saved object panel', () => {
     const inject = createInject(persistableStateService);
+
+    persistableStateService.inject.mockImplementationOnce((state, references) => {
+      const ref = references.find((r) => r.name.indexOf(`panel_panel_1`) === 0);
+      if (!ref) {
+        return state;
+      }
+
+      return { ...state, savedObjectId: ref.id };
+    });
     const references = [extractedSavedObjectPanelRef];
 
     const injected = inject(
@@ -65,6 +76,23 @@ describe('inject/extract by reference panel', () => {
 
   it('should extract the saved object panel', () => {
     const extract = createExtract(persistableStateService);
+
+    persistableStateService.extract.mockImplementationOnce(
+      (state: EmbeddableStateWithTypeAndSavedObjectId) => {
+        const references: SavedObjectReference[] = [];
+        references.push({
+          name: `panel_${state.id}`,
+          type: state.type,
+          id: state.savedObjectId!,
+        });
+        delete state.savedObjectId;
+        return {
+          state,
+          references,
+        };
+      }
+    );
+
     const { state: extractedState, references: extractedReferences } =
       extract(unextractedDashboardState);
 
@@ -83,7 +111,10 @@ const dashboardWithExtractedByValuePanel: ParsedDashboardAttributesWithType = {
       explicitInput: {
         id: 'panel_1',
         extracted_reference: 'ref',
-      } as Partial<SavedObjectEmbeddableInput> & { id: string; extracted_reference: string },
+      } as Partial<EmbeddableStateWithTypeAndSavedObjectId> & {
+        id: string;
+        extracted_reference: string;
+      },
     },
   },
 };
@@ -104,7 +135,7 @@ const unextractedDashboardByValueState: ParsedDashboardAttributesWithType = {
       explicitInput: {
         id: 'panel_1',
         value: 'id',
-      } as Partial<SavedObjectEmbeddableInput> & { id: string; value: string },
+      } as Partial<EmbeddableStateWithTypeAndSavedObjectId> & { id: string; value: string },
     },
   },
 };

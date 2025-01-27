@@ -49,6 +49,7 @@ export interface SavedDashboardPanel {
   embeddableConfig: { [key: string]: Serializable }; // parsed into the panel's explicitInput
   id?: string; // the saved object id for by reference panels
   type: string; // the embeddable type
+  /** @deprecated panelRefName is no longer used to determine references */
   panelRefName?: string;
   gridData: GridData;
   panelIndex: string;

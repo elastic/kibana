@@ -13,33 +13,12 @@ import {
   InjectExtractDeps,
 } from './dashboard_saved_object_references';
 
-import {
-  createExtract,
-  createInject,
-} from '../../dashboard_container/persistable_state/dashboard_container_references';
 import { createEmbeddablePersistableStateServiceMock } from '@kbn/embeddable-plugin/common/mocks';
 import type { DashboardAttributes, DashboardItem } from '../../../server/content_management';
 import { DashboardAttributesAndReferences } from '../../types';
 
 const embeddablePersistableStateServiceMock = createEmbeddablePersistableStateServiceMock();
-const dashboardInject = createInject(embeddablePersistableStateServiceMock);
-const dashboardExtract = createExtract(embeddablePersistableStateServiceMock);
 
-embeddablePersistableStateServiceMock.extract.mockImplementation((state) => {
-  if (state.type === 'dashboard') {
-    return dashboardExtract(state);
-  }
-
-  return { state, references: [] };
-});
-
-embeddablePersistableStateServiceMock.inject.mockImplementation((state, references) => {
-  if (state.type === 'dashboard') {
-    return dashboardInject(state, references);
-  }
-
-  return state;
-});
 const deps: InjectExtractDeps = {
   embeddablePersistableStateService: embeddablePersistableStateServiceMock,
 };
@@ -116,9 +95,10 @@ describe('extractReferences', () => {
                 "x": 0,
                 "y": 0,
               },
-              "panelConfig": Object {},
+              "panelConfig": Object {
+                "enhancements": Object {},
+              },
               "panelIndex": "panel-1",
-              "panelRefName": "panel_panel-1",
               "title": "Title 1",
               "type": "visualization",
               "version": "7.9.1",
@@ -131,9 +111,10 @@ describe('extractReferences', () => {
                 "x": 1,
                 "y": 1,
               },
-              "panelConfig": Object {},
+              "panelConfig": Object {
+                "enhancements": Object {},
+              },
               "panelIndex": "panel-2",
-              "panelRefName": "panel_panel-2",
               "title": "Title 2",
               "type": "visualization",
               "version": "7.9.1",
@@ -222,7 +203,9 @@ describe('extractReferences', () => {
                 "x": 0,
                 "y": 0,
               },
-              "panelConfig": Object {},
+              "panelConfig": Object {
+                "enhancements": Object {},
+              },
               "panelIndex": "0",
               "title": "Title 1",
               "type": "visualization",
@@ -248,7 +231,6 @@ describe('injectReferences', () => {
       panels: [
         {
           type: 'visualization',
-          panelRefName: 'panel_0',
           panelIndex: '0',
           title: 'Title 1',
           version: '7.9.0',
@@ -257,7 +239,6 @@ describe('injectReferences', () => {
         },
         {
           type: 'visualization',
-          panelRefName: 'panel_1',
           panelIndex: '1',
           title: 'Title 2',
           version: '7.9.0',
@@ -268,12 +249,12 @@ describe('injectReferences', () => {
     };
     const references = [
       {
-        name: 'panel_0',
+        name: '0:panel_0',
         type: 'visualization',
         id: '1',
       },
       {
-        name: 'panel_1',
+        name: '1:panel_1',
         type: 'visualization',
         id: '2',
       },
@@ -304,7 +285,9 @@ describe('injectReferences', () => {
               "y": 0,
             },
             "id": "1",
-            "panelConfig": Object {},
+            "panelConfig": Object {
+              "enhancements": Object {},
+            },
             "panelIndex": "0",
             "title": "Title 1",
             "type": "visualization",
@@ -319,7 +302,9 @@ describe('injectReferences', () => {
               "y": 1,
             },
             "id": "2",
-            "panelConfig": Object {},
+            "panelConfig": Object {
+              "enhancements": Object {},
+            },
             "panelIndex": "1",
             "title": "Title 2",
             "type": "visualization",
@@ -348,89 +333,6 @@ describe('injectReferences', () => {
     `);
   });
 
-  test('skips a panel when panelRefName is missing', () => {
-    const attributes = {
-      ...commonAttributes,
-      id: '1',
-      title: 'test',
-      panels: [
-        {
-          type: 'visualization',
-          panelRefName: 'panel_0',
-          panelIndex: '0',
-          title: 'Title 1',
-          gridData: { x: 0, y: 0, w: 1, h: 1, i: '0' },
-          panelConfig: {},
-        },
-        {
-          type: 'visualization',
-          panelIndex: '1',
-          title: 'Title 2',
-          gridData: { x: 1, y: 1, w: 2, h: 2, i: '1' },
-          panelConfig: {},
-        },
-      ],
-    };
-    const references = [
-      {
-        name: 'panel_0',
-        type: 'visualization',
-        id: '1',
-      },
-    ];
-    const newAttributes = injectReferences({ attributes, references }, deps);
-    expect(newAttributes).toMatchInlineSnapshot(`
-      Object {
-        "description": "",
-        "id": "1",
-        "kibanaSavedObjectMeta": Object {
-          "searchSource": Object {},
-        },
-        "options": Object {
-          "hidePanelTitles": false,
-          "syncColors": true,
-          "syncCursor": true,
-          "syncTooltips": true,
-          "useMargins": true,
-        },
-        "panels": Array [
-          Object {
-            "gridData": Object {
-              "h": 1,
-              "i": "0",
-              "w": 1,
-              "x": 0,
-              "y": 0,
-            },
-            "id": "1",
-            "panelConfig": Object {},
-            "panelIndex": "0",
-            "title": "Title 1",
-            "type": "visualization",
-            "version": undefined,
-          },
-          Object {
-            "gridData": Object {
-              "h": 2,
-              "i": "1",
-              "w": 2,
-              "x": 1,
-              "y": 1,
-            },
-            "panelConfig": Object {},
-            "panelIndex": "1",
-            "title": "Title 2",
-            "type": "visualization",
-            "version": undefined,
-          },
-        ],
-        "timeRestore": false,
-        "title": "test",
-        "version": 1,
-      }
-    `);
-  });
-
   test(`fails when it can't find the reference in the array`, () => {
     const attributes = {
       ...commonAttributes,
@@ -439,7 +341,6 @@ describe('injectReferences', () => {
       panels: [
         {
           panelIndex: '0',
-          panelRefName: 'panel_0',
           title: 'Title 1',
           type: 'visualization',
           gridData: { x: 0, y: 0, w: 1, h: 1, i: '0' },
