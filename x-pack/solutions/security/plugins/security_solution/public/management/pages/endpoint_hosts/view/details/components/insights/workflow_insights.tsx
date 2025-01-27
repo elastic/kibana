@@ -6,7 +6,6 @@
  */
 
 import {
-  EuiHorizontalRule,
   EuiAccordion,
   EuiSpacer,
   EuiText,
@@ -114,6 +113,7 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
                 label={TECHNICAL_PREVIEW}
                 tooltipContent={TECHNICAL_PREVIEW_TOOLTIP}
                 size="s"
+                iconType={'beaker'}
                 data-test-subj={'workflow-insights-tech-preview-badge'}
               />
             </EuiFlexItem>
@@ -134,7 +134,6 @@ export const WorkflowInsights = React.memo(({ endpointId }: WorkflowInsightsProp
           scanCompleted={scanCompleted && userTriggeredScan}
           endpointId={endpointId}
         />
-        <EuiHorizontalRule />
       </EuiAccordion>
       <EuiSpacer size="l" />
     </>
