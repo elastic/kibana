@@ -35,10 +35,14 @@ export const config: PluginConfigDescriptor<AutomaticImportConfigType> = {
   schema: configSchema,
   deprecations: ({ renameFromRoot }) => [
     renameFromRoot('xpack.integration_assistant.enabled', 'xpack.automatic_import.enabled', {
-        level: 'critical',
-      }),
-    renameFromRoot('xpack.integration_assistant.enableExperimental', 'xpack.automatic_import.enableExperimental', {
       level: 'critical',
     }),
-    ],
+    renameFromRoot(
+      'xpack.integration_assistant.enableExperimental',
+      'xpack.automatic_import.enableExperimental',
+      {
+        level: 'critical',
+      }
+    ),
+  ],
 };
