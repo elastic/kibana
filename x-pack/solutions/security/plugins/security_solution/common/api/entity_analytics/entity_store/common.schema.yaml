@@ -113,3 +113,8 @@ components:
       required:
         - dsl
         - response
+    Interval:
+      type: string
+      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+      pattern: '^[1-9]\d*[smh]$' # any number except zero followed by one of the suffixes 's', 'm', 'h'
+      example: '1h'
