@@ -38,6 +38,7 @@ import type {
   SLOServerStart,
 } from './types';
 import { getSloClientWithRequest } from './client';
+import { HealthTask } from './services/tasks/health_task';
 
 const sloRuleTypes = [SLO_BURN_RATE_RULE_TYPE_ID];
 
@@ -49,6 +50,7 @@ export class SLOPlugin
   private readonly config: SLOConfig;
   private readonly isServerless: boolean;
   private sloOrphanCleanupTask?: SloOrphanSummaryCleanupTask;
+  private healthTask?: HealthTask;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.logger = this.initContext.logger.get();
@@ -173,6 +175,13 @@ export class SLOPlugin
       this.config
     );
 
+    this.healthTask = new HealthTask({
+      core,
+      taskManager: plugins.taskManager,
+      logFactory: this.initContext.logger,
+      config: this.config,
+    });
+
     return {};
   }
 
@@ -183,6 +192,10 @@ export class SLOPlugin
     this.sloOrphanCleanupTask
       ?.start(plugins.taskManager, internalSoClient, internalEsClient)
       .catch(() => {});
+
+    this.healthTask?.start({ taskManager: plugins.taskManager }).catch((e) => {
+      this.logger.error(`Error starting HealthTask: ${e}`);
+    });
 
     return {
       getSloClientWithRequest: (request: KibanaRequest) => {
