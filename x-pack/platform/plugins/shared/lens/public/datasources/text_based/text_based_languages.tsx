@@ -234,8 +234,9 @@ export function getTextBasedDatasource({
           c?.meta?.type
         );
         return {
-          columnId: c.id,
-          fieldName: c.id,
+          columnId: c.variable ?? c.id,
+          fieldName: c.variable ? `?${c.variable}` : c.id,
+          variable: c.variable,
           label: c.name,
           customLabel: c.id !== c.name,
           meta: c.meta,
