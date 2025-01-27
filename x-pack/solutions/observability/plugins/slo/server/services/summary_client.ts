@@ -19,7 +19,7 @@ import {
   occurrencesBudgetingMethodSchema,
   timeslicesBudgetingMethodSchema,
 } from '@kbn/slo-schema';
-import { SLO_DESTINATION_INDEX_PATTERN } from '../../common/constants';
+import { SLI_DESTINATION_INDEX_PATTERN } from '../../common/constants';
 import { DateRange, Groupings, Meta, SLODefinition, Summary } from '../domain/models';
 import { computeSLI, computeSummaryStatus, toErrorBudget } from '../domain/services';
 import { toDateRange } from '../domain/services/date_range';
@@ -69,8 +69,8 @@ export class DefaultSummaryClient implements SummaryClient {
       }
     >({
       index: remoteName
-        ? `${remoteName}:${SLO_DESTINATION_INDEX_PATTERN}`
-        : SLO_DESTINATION_INDEX_PATTERN,
+        ? `${remoteName}:${SLI_DESTINATION_INDEX_PATTERN}`
+        : SLI_DESTINATION_INDEX_PATTERN,
       size: 0,
       query: {
         bool: {

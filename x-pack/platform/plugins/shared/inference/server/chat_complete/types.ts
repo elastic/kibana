@@ -30,6 +30,7 @@ export interface InferenceConnectorAdapter {
       system?: string;
       functionCalling?: FunctionCallingMode;
       temperature?: number;
+      modelName?: string;
       abortSignal?: AbortSignal;
       logger: Logger;
     } & ToolOptions

@@ -61,6 +61,7 @@ import type { SecurityAppStore } from './common/store/types';
 import { PluginContract } from './plugin_contract';
 import { PluginServices } from './plugin_services';
 import { getExternalReferenceAttachmentEndpointRegular } from './cases/attachments/external_reference';
+import { hasAccessToSecuritySolution } from './helpers_access';
 
 export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, StartPlugins> {
   private config: SecuritySolutionUiConfigType;
@@ -295,7 +296,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
         cases: new subPluginClasses.Cases(),
         dashboards: new subPluginClasses.Dashboards(),
         explore: new subPluginClasses.Explore(),
-        kubernetes: new subPluginClasses.Kubernetes(),
         onboarding: new subPluginClasses.Onboarding(),
         overview: new subPluginClasses.Overview(),
         timelines: new subPluginClasses.Timelines(),
@@ -330,7 +330,6 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       dashboards: subPlugins.dashboards.start(),
       exceptions: subPlugins.exceptions.start(storage),
       explore: subPlugins.explore.start(storage),
-      kubernetes: subPlugins.kubernetes.start(),
       management: subPlugins.management.start(core, plugins),
       onboarding: subPlugins.onboarding.start(),
       overview: subPlugins.overview.start(),
@@ -438,7 +437,10 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
     const { upsellingService, isSolutionNavigationEnabled$ } = this.contract;
 
     // When the user does not have access to SIEM (main Security feature) nor Security Cases feature, the plugin must be inaccessible.
-    if (!capabilities.siem?.show && !capabilities.securitySolutionCasesV2?.read_cases) {
+    if (
+      !hasAccessToSecuritySolution(capabilities) &&
+      !capabilities.securitySolutionCasesV2?.read_cases
+    ) {
       this.appUpdater$.next(() => ({
         status: AppStatus.inaccessible,
         visibleIn: [],

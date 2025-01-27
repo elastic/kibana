@@ -8,6 +8,7 @@
 import React, { useCallback, useState } from 'react';
 import { StyledNodeExpandButton, RoundEuiButtonIcon, ExpandButtonSize } from './styles';
 import type { EntityNodeViewModel, LabelNodeViewModel } from '..';
+import { NODE_EXPAND_BUTTON_TEST_ID } from '../test_ids';
 
 export interface NodeExpandButtonProps {
   x?: string;
@@ -37,7 +38,7 @@ export const NodeExpandButton = ({ x, y, color, onClick }: NodeExpandButtonProps
         onClick={onClickHandler}
         iconSize="m"
         aria-label="Open or close node actions"
-        data-test-subj="nodeExpandButton"
+        data-test-subj={NODE_EXPAND_BUTTON_TEST_ID}
       />
     </StyledNodeExpandButton>
   );

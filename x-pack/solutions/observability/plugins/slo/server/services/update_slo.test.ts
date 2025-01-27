@@ -20,8 +20,9 @@ import { SecurityHasPrivilegesResponse } from '@elastic/elasticsearch/lib/api/ty
 import {
   getSLOSummaryTransformId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SLI_DESTINATION_INDEX_PATTERN,
+  SLO_RESOURCES_VERSION,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
 } from '../../common/constants';
 import { SLODefinition } from '../domain/models';
 import { fiveMinute, oneMinute } from './fixtures/duration';
@@ -64,11 +65,12 @@ describe('UpdateSLO', () => {
       mockScopedClusterClient,
       mockLogger,
       'some-space',
-      httpServiceMock.createStartContract().basePath
+      httpServiceMock.createStartContract().basePath,
+      'some-user-id'
     );
   });
 
-  describe('when the update payload does not change the original SLO', () => {
+  describe('when the update does not change the original SLO', () => {
     function expectNoCallsToAnyMocks() {
       expect(mockEsClient.security.hasPrivileges).not.toBeCalled();
 
@@ -85,6 +87,10 @@ describe('UpdateSLO', () => {
       expect(mockEsClient.deleteByQuery).not.toBeCalled();
       expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).not.toBeCalled();
     }
+
+    beforeEach(() => {
+      mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
+    });
 
     it('returns early with a fully identical SLO payload', async () => {
       const slo = createSLO();
@@ -194,14 +200,71 @@ describe('UpdateSLO', () => {
     });
   });
 
-  describe('handles breaking changes', () => {
+  describe('without breaking changes update', () => {
     beforeEach(() => {
       mockEsClient.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
     });
 
-    it('consideres a settings change as a breaking change', async () => {
+    describe('when resources are up-to-date', () => {
+      beforeEach(() => {
+        mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
+      });
+      it('updates the summary pipeline with the new non-breaking changes', async () => {
+        const slo = createSLO();
+        mockRepository.findById.mockResolvedValueOnce(slo);
+        await updateSLO.execute(slo.id, { name: 'updated name' });
+
+        expectNonBreakingChangeUpdatedResources();
+      });
+
+      function expectNonBreakingChangeUpdatedResources() {
+        expect(mockScopedClusterClient.asSecondaryAuthUser.ingest.putPipeline).toHaveBeenCalled();
+
+        expect(mockTransformManager.install).not.toHaveBeenCalled();
+        expect(mockTransformManager.start).not.toHaveBeenCalled();
+        expect(mockSummaryTransformManager.install).not.toHaveBeenCalled();
+        expect(mockSummaryTransformManager.start).not.toHaveBeenCalled();
+
+        expect(mockEsClient.index).not.toHaveBeenCalled();
+      }
+    });
+
+    describe('when resources are running on an older version', () => {
+      beforeEach(() => {
+        mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION - 2);
+      });
+
+      it('consideres the non-breaking changes as breaking', async () => {
+        const slo = createSLO();
+        mockRepository.findById.mockResolvedValueOnce(slo);
+        await updateSLO.execute(slo.id, { name: 'updated name' });
+
+        expect(mockRepository.update).toHaveBeenCalledWith(
+          expect.objectContaining({
+            ...slo,
+            name: 'updated name',
+            revision: 2,
+            updatedAt: expect.anything(),
+            updatedBy: 'some-user-id',
+          })
+        );
+        expectInstallationOfUpdatedSLOResources();
+        expectDeletionOfOriginalSLOResources(slo);
+      });
+    });
+  });
+
+  describe('with breaking changes update', () => {
+    beforeEach(() => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+      mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
+    });
+
+    it('considers a settings change as a breaking change', async () => {
       const slo = createSLO();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -214,17 +277,12 @@ describe('UpdateSLO', () => {
 
       expectDeletionOfOriginalSLOResources(slo);
       expect(mockRepository.update).toHaveBeenCalledWith(
-        expect.objectContaining({
-          ...slo,
-          settings: newSettings,
-          revision: 2,
-          updatedAt: expect.anything(),
-        })
+        expect.objectContaining({ settings: newSettings, revision: 2 })
       );
       expectInstallationOfUpdatedSLOResources();
     });
 
-    it('consideres a budgeting method change as a breaking change', async () => {
+    it('considers a budgeting method change as a breaking change', async () => {
       const slo = createSLO({ budgetingMethod: 'occurrences' });
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -241,7 +299,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres a timeWindow change as a breaking change', async () => {
+    it('considers a timeWindow change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -253,7 +311,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres a timeslice target change as a breaking change', async () => {
+    it('considers a timeslice target change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -269,7 +327,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres a timeslice window change as a breaking change', async () => {
+    it('considers a timeslice window change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -285,7 +343,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres an indicator change as a breaking change', async () => {
+    it('considers an indicator change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -297,7 +355,7 @@ describe('UpdateSLO', () => {
       expectDeletionOfOriginalSLOResources(slo);
     });
 
-    it('consideres a groupBy change as a breaking change', async () => {
+    it('considers a groupBy change as a breaking change', async () => {
       const slo = createSLOWithTimeslicesBudgetingMethod();
       mockRepository.findById.mockResolvedValueOnce(slo);
 
@@ -315,6 +373,7 @@ describe('UpdateSLO', () => {
       mockEsClient.security.hasPrivileges.mockResolvedValue({
         has_all_requested: true,
       } as SecurityHasPrivilegesResponse);
+      mockSummaryTransformManager.getVersion.mockResolvedValue(SLO_RESOURCES_VERSION);
     });
 
     it('throws a SecurityException error when the user does not have the required privileges on the source index', async () => {
@@ -388,6 +447,30 @@ describe('UpdateSLO', () => {
     });
   });
 
+  describe('Update also updates updatedBy field', () => {
+    beforeEach(() => {
+      mockEsClient.security.hasPrivileges.mockResolvedValue({
+        has_all_requested: true,
+      } as SecurityHasPrivilegesResponse);
+    });
+
+    it('updates the updatedBy field with the user id', async () => {
+      const originalSlo = createSLO({
+        id: 'original-id',
+        indicator: createAPMTransactionErrorRateIndicator({ environment: 'development' }),
+      });
+      mockRepository.findById.mockResolvedValueOnce(originalSlo);
+
+      const newIndicator = createAPMTransactionErrorRateIndicator({ environment: 'production' });
+
+      await updateSLO.execute(originalSlo.id, { indicator: newIndicator });
+
+      expect(mockRepository.update).toHaveBeenCalledWith(
+        expect.objectContaining({ updatedBy: 'some-user-id' })
+      );
+    });
+  });
+
   function expectInstallationOfUpdatedSLOResources() {
     expect(mockTransformManager.install).toHaveBeenCalled();
     expect(mockTransformManager.start).toHaveBeenCalled();
@@ -415,7 +498,7 @@ describe('UpdateSLO', () => {
     expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
       1,
       expect.objectContaining({
-        index: SLO_DESTINATION_INDEX_PATTERN,
+        index: SLI_DESTINATION_INDEX_PATTERN,
         query: {
           bool: {
             filter: [
@@ -429,7 +512,7 @@ describe('UpdateSLO', () => {
     expect(mockEsClient.deleteByQuery).toHaveBeenNthCalledWith(
       2,
       expect.objectContaining({
-        index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+        index: SUMMARY_DESTINATION_INDEX_PATTERN,
         query: {
           bool: {
             filter: [

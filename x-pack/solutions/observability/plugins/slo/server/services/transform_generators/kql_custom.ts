@@ -10,7 +10,7 @@ import { DataViewsService } from '@kbn/data-views-plugin/common';
 import { kqlCustomIndicatorSchema, timeslicesBudgetingMethodSchema } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow, parseIndex } from '.';
 import {
-  SLO_DESTINATION_INDEX_NAME,
+  SLI_DESTINATION_INDEX_NAME,
   getSLOPipelineId,
   getSLOTransformId,
 } from '../../../common/constants';
@@ -64,7 +64,7 @@ export class KQLCustomTransformGenerator extends TransformGenerator {
   private buildDestination(slo: SLODefinition) {
     return {
       pipeline: getSLOPipelineId(slo.id, slo.revision),
-      index: SLO_DESTINATION_INDEX_NAME,
+      index: SLI_DESTINATION_INDEX_NAME,
     };
   }
 
