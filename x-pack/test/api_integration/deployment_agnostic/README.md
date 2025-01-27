@@ -9,6 +9,12 @@ A deployment-agnostic API integration test is a test suite that fulfills the fol
 
 A deployment-agnostic test should be loaded in stateful and at least 1 serverless FTR config files.
 
+## Tests, that are not deployment-agnostic:
+- tests verifying Kibana behavior under a basic license.
+- tests dependent on ES/Kibana server arguments, that are not set in Elastic Cloud
+- tests requiring a custom plugin to be loaded specifically for testing purposes.
+- tests dependent on varying user privileges between serverless and stateful environments.
+
 ## Tests Design Requirements
 A deployment-agnostic test is contained within a single test file and always utilizes the [DeploymentAgnosticFtrProviderContext](https://github.com/elastic/kibana/blob/main/x-pack/test/api_integration/deployment_agnostic/ftr_provider_context.d.ts) to load compatible FTR services. A compatible FTR service must support:
 
@@ -240,6 +246,36 @@ node scripts/functional_test_runner --config x-pack/test/api_integration/deploym
 ```
 
 ## Tagging and Skipping the Tests
-Since deployment-agnostic tests are designed to run both locally and on MKI/Cloud, we believe no extra tagging is required. If a test is not working on MKI/Cloud or both, there is most likely an issue with the FTR service or the configuration file it uses.
+Since deployment-agnostic tests are designed to run both locally and on MKI/Cloud, we believe no extra tagging is required in general (read below for exceptions). If a test is not working on MKI/Cloud or both, there is most likely an issue with the FTR service or the configuration file it uses.
 
 When a test fails on CI, automation will apply `.skip` to the top-level describe block. This means the test will be skipped in **both serverless and stateful environments**. If a test is unstable in a specific environment only, it is probably a sign that the test is not truly deployment-agnostic.
+
+### Excluding a suite from test environments
+As pointed out above, deployment agnostic tests should be designed to run in stateful and serverless, locally and in cloud (ECH, MKI). However, there are situations where a test suite should only run on a subset of these environments. **This should be an exception.**
+
+Here are the supported suite labels to control execution in test environments:
+* `skipStateful` - this will exclude the suite from **all stateful test runs, local and ECH**
+* `skipCloud` - this will exclude the suite from **stateful cloud / ECH test runs**
+* `skipServerless` - this will exclude the suite from **all serverless test runs, local and MKI**
+* `skipMKI` - this will exclude the suite from **serverless cloud / MKI test runs**
+
+Note that tags can not be applied to an arrow function suite like `describe('test suite', () => {`. Here's an example of how to apply a suite tag:
+```ts
+describe('test suite', function () {
+  // add a comment to explain why this suite is excluded from that test environment
+  this.tags(['skipMKI']);
+  [...]
+});
+```
+
+## Migrating existing tests
+If your tests align with the outlined criteria and requirements, you can migrate them to deployment-agnostic by following these steps:
+
+1. Move your tests to the `x-pack/test/api_integration/deployment_agnostic/apis/<plugin>` directory.
+2. Update each test file to use the `DeploymentAgnosticFtrProviderContext` context and load the required FTR services it provides.
+3. Ensure the `roleScopedSupertest` or `samlAuth` service is used instead for `supertest` for authentication and test API calls.
+4. Remove all usage of the `supertest` service. It is authenticated as system index superuser and often causes test failures on Cloud, where priveleges are more strict.
+5. Avoid modifying `config` files, as this could disrupt test runs in Cloud environments.
+6. Include your tests in both the platform and at least one solution index file.
+7. Execute your tests locally against a local environment.
+8. Verify your tests by running them locally against a real MKI project and an ESS deployment to ensure full compatibility.
