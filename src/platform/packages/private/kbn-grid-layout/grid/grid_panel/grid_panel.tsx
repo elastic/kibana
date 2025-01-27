@@ -57,12 +57,13 @@ export const GridPanel = forwardRef<HTMLDivElement, GridPanelProps>(
         /** Update the styles of the panel via a subscription to prevent re-renders */
         const activePanelStyleSubscription = combineLatest([
           gridLayoutStateManager.activePanel$,
+          gridLayoutStateManager.gridLayout$,
           gridLayoutStateManager.proposedGridLayout$,
         ])
           .pipe(skip(1)) // skip the first emit because the `initialStyles` will take care of it
-          .subscribe(([activePanel, proposedGridLayout]) => {
+          .subscribe(([activePanel, gridLayout, proposedGridLayout]) => {
             const ref = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
-            const panel = proposedGridLayout?.[rowIndex].panels[panelId];
+            const panel = (proposedGridLayout ?? gridLayout)[rowIndex].panels[panelId];
             if (!ref || !panel) return;
 
             const currentInteractionEvent = gridLayoutStateManager.interactionEvent$.getValue();
