@@ -501,6 +501,3 @@ export const getIsKnowledgeBaseInstalled = async (
 
   return isInferenceEndpointExists && securityLabsDocsExist;
 };
-
-export const getModelOrOss = (llmType?: string, isOssModel?: boolean, model?: string) =>
-  llmType === 'openai' && isOssModel ? 'oss' : model;

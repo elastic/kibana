@@ -30,6 +30,7 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 import {
   formatPrompt,
@@ -39,7 +40,7 @@ import { getPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
-import { DEFAULT_PLUGIN_NAME, getModelOrOss, performChecks } from '../helpers';
+import { DEFAULT_PLUGIN_NAME, performChecks } from '../helpers';
 import { fetchLangSmithDataset } from './utils';
 import { transformESSearchToAnonymizationFields } from '../../ai_assistant_data_clients/anonymization_fields/helpers';
 import { EsAnonymizationFieldsSchema } from '../../ai_assistant_data_clients/anonymization_fields/types';
@@ -313,8 +314,6 @@ export const postEvaluateRoute = (
                 actionsClient,
                 connector,
                 connectorId: connector.id,
-                // use oss as model when using openai and oss
-                // else let the resolveProviderAndModel logic determine the model from connector
                 model: getModelOrOss(llmType, isOssModel),
                 promptId: promptDictionary.systemPrompt,
                 provider: llmType,
