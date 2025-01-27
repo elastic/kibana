@@ -10,9 +10,9 @@ import deepEqual from 'fast-deep-equal';
 import { EuiFormRow } from '@elastic/eui';
 import { ESQLLangEditor } from '@kbn/esql/public';
 import type { AggregateQuery } from '@kbn/es-query';
-import { convertToQueryType } from '../../../../../../../common/components/query_bar/convert_to_query_type';
-import type { FieldValueQueryBar } from '../../../../../../../detection_engine/rule_creation_ui/components/query_bar_field';
-import type { FieldHook } from '../../../../../../../shared_imports';
+import { convertToQueryType } from '../../../../../../../../common/components/query_bar/convert_to_query_type';
+import type { FieldValueQueryBar } from '../../../../../../../../detection_engine/rule_creation_ui/components/query_bar_field';
+import type { FieldHook } from '../../../../../../../../shared_imports';
 
 interface EsqlEditorFieldProps {
   field: FieldHook<FieldValueQueryBar>;
