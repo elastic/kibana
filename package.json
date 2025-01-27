@@ -1065,7 +1065,7 @@
     "@turf/length": "^6.0.2",
     "@xstate/react": "^3.2.2",
     "@xstate5/react": "npm:@xstate/react@^4.1.2",
-    "@xyflow/react": "^12.4.0",
+    "@xyflow/react": "^12.4.1",
     "adm-zip": "^0.5.9",
     "ai": "^4.0.18",
     "ajv": "^8.17.1",
