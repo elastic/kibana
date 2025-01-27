@@ -121,7 +121,7 @@ export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
         setDefaultTime,
       };
 
-      log.serviceMessage(`'scoutSpace:${spaceId}' loaded`);
+      log.serviceLoaded(`scoutSpace:${spaceId}`);
       await use({ savedObjects, uiSettings, id: spaceId });
 
       // Cleanup space after tests via API call

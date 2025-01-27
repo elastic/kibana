@@ -35,7 +35,7 @@ export const uiSettingsFixture = coreWorkerFixtures.extend<{}, { uiSettings: UiS
         },
       };
 
-      log.serviceMessage(`'uiSettings' loaded`);
+      log.serviceLoaded('uiSettings');
       await use(kbnClientUiSettings);
     },
     { scope: 'worker' },

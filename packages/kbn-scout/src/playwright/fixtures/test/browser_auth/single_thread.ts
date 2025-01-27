@@ -44,7 +44,7 @@ export const browserAuthFixture = coreWorkerFixtures.extend<{ browserAuth: Brows
       return loginAs(roleName);
     };
 
-    log.serviceMessage(`'browserAuth' loaded`);
+    log.serviceLoaded('browserAuth');
     await use({ loginAsAdmin, loginAsViewer, loginAsPrivilegedUser });
   },
 });

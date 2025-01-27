@@ -25,7 +25,7 @@ export function createScoutConfig(
 
   const config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as ScoutTestConfig;
 
-  log.serviceMessage(`'config' loaded`);
+  log.serviceLoaded('config');
 
   return config;
 }

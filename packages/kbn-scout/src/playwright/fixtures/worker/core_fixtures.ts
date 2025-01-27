@@ -12,9 +12,9 @@ import { KbnClient, SamlSessionManager } from '@kbn/test';
 import { Client } from '@elastic/elasticsearch';
 import {
   createKbnUrl,
-  createEsClient,
-  createKbnClient,
-  createLogger,
+  getEsClient,
+  getKbnClient,
+  getLogger,
   createSamlSessionManager,
   createScoutConfig,
   KibanaUrl,
@@ -52,7 +52,7 @@ export const coreWorkerFixtures = base.extend<
   // all other fixtures within the worker scope.
   log: [
     ({}, use) => {
-      use(createLogger());
+      use(getLogger());
     },
     { scope: 'worker' },
   ],
@@ -90,7 +90,7 @@ export const coreWorkerFixtures = base.extend<
    */
   esClient: [
     ({ config, log }, use) => {
-      use(createEsClient(config, log));
+      use(getEsClient(config, log));
     },
     { scope: 'worker' },
   ],
@@ -100,7 +100,7 @@ export const coreWorkerFixtures = base.extend<
    */
   kbnClient: [
     ({ log, config }, use) => {
-      use(createKbnClient(config, log));
+      use(getKbnClient(config, log));
     },
     { scope: 'worker' },
   ],

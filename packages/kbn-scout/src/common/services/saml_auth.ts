@@ -64,7 +64,7 @@ export const createSamlSessionManager = (
     cloudUsersFilePath: config.cloudUsersFilePath,
   });
 
-  log.serviceMessage(`'samlAuth' loaded`);
+  log.serviceLoaded('samlAuth');
 
   return sessionManager;
 };

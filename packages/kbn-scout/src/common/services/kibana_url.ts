@@ -67,7 +67,7 @@ export class KibanaUrl {
 export function createKbnUrl(scoutConfig: ScoutTestConfig, log: ScoutLogger) {
   const kbnUrl = new KibanaUrl(new URL(scoutConfig.hosts.kibana));
 
-  log.serviceMessage(`'kbnUrl' loaded`);
+  log.serviceLoaded('kbnUrl');
 
   return kbnUrl;
 }
