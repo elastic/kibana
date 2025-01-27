@@ -11,7 +11,7 @@ import type {
   EntityType,
   InitEntityEngineRequestBody,
 } from '../../../../../common/api/entity_analytics';
-import { DEFAULT_LOOKBACK_PERIOD, DEFAULT_TIMESTAMP_FIELD } from '../entity_definitions/constants';
+import { DEFAULT_TIMESTAMP_FIELD } from '../entity_definitions/constants';
 import { generateIndexMappings } from '../elasticsearch_assets';
 import {
   hostEntityEngineDescription,
