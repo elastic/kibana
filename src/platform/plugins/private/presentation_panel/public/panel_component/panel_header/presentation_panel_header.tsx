@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { EuiScreenReaderOnly } from '@elastic/eui';
+import { EuiIcon, EuiScreenReaderOnly, EuiToolTip } from '@elastic/eui';
 import { ViewMode } from '@kbn/presentation-publishing';
 import { i18n } from '@kbn/i18n';
 import classNames from 'classnames';
@@ -93,18 +93,40 @@ export const PresentationPanelHeader = <
       className={headerClasses}
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
     >
-      <h2 ref={memoizedSetDragHandle} data-test-subj="dashboardPanelTitle" className={titleClasses}>
-        {ariaLabelElement}
-        <PresentationPanelTitle
-          api={api}
-          viewMode={viewMode}
-          hideTitle={hideTitle}
-          panelTitle={panelTitle}
-          panelDescription={panelDescription}
-        />
+      <div
+        ref={memoizedSetDragHandle}
+        data-test-subj="dashboardPanelTitle"
+        className={titleClasses}
+      >
+        <h2 className="embPanel__titleInner" data-test-subj="embeddablePanelTitleInner">
+          {ariaLabelElement}
+          <PresentationPanelTitle
+            api={api}
+            viewMode={viewMode}
+            hideTitle={hideTitle}
+            panelTitle={panelTitle}
+          />
+        </h2>
+        {panelDescription && (
+          <EuiToolTip
+            title={!hideTitle ? panelTitle || undefined : undefined}
+            content={panelDescription}
+            delay="regular"
+            position="top"
+            anchorClassName="embPanel__titleTooltipAnchor"
+            anchorProps={{ 'data-test-subj': 'embeddablePanelTooltipAnchor' }}
+          >
+            <EuiIcon
+              type="iInCircle"
+              color="subdued"
+              data-test-subj="embeddablePanelTitleDescriptionIcon"
+              tabIndex={0}
+            />
+          </EuiToolTip>
+        )}
         {showBadges && badgeElements}
-      </h2>
-      {showNotifications && notificationElements}
+        {showNotifications && notificationElements}
+      </div>
     </figcaption>
   );
 };
