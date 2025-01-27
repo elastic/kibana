@@ -27,7 +27,7 @@ export const pageObjectsParallelFixture = scoutPageParallelFixture.extend<
   { scoutSpace: ScoutSpaceParallelFixture }
 >({
   pageObjects: async ({ page, log, scoutSpace }, use) => {
-    const corePageObjects = createCorePageObjects(page);
+    const corePageObjects = createCorePageObjects(page, log);
     log.debug(serviceLoadedMsg(`pageObjects:${scoutSpace.id}`));
     await use(corePageObjects);
   },
