@@ -214,7 +214,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           caseId,
         });
 
-        expect(comments[1].owner).toBe(owner);
+        expect(comments[0].owner).toBe(owner);
       };
 
       before(async () => {
