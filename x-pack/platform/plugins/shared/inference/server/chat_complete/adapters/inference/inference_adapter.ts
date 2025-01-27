@@ -15,6 +15,7 @@ import {
   parseInlineFunctionCalls,
   wrapWithSimulatedFunctionCalling,
 } from '../../simulated_function_calling';
+import { isNativeFunctionCallingSupported } from '../../utils/function_calling_support';
 import {
   toolsToOpenAI,
   toolChoiceToOpenAI,
@@ -30,16 +31,19 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
     messages,
     toolChoice,
     tools,
-    functionCalling,
+    functionCalling = 'auto',
     temperature = 0,
     modelName,
     logger,
     abortSignal,
   }) => {
-    const simulatedFunctionCalling = functionCalling === 'simulated';
+    const useSimulatedFunctionCalling =
+      functionCalling === 'auto'
+        ? !isNativeFunctionCallingSupported(executor.getConnector())
+        : functionCalling === 'simulated';
 
     let request: Omit<OpenAI.ChatCompletionCreateParams, 'model'> & { model?: string };
-    if (simulatedFunctionCalling) {
+    if (useSimulatedFunctionCalling) {
       const wrapped = wrapWithSimulatedFunctionCalling({
         system,
         messages,
@@ -87,7 +91,7 @@ export const inferenceAdapter: InferenceConnectorAdapter = {
       }),
       processOpenAIStream(),
       emitTokenCountEstimateIfMissing({ request }),
-      simulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
+      useSimulatedFunctionCalling ? parseInlineFunctionCalls({ logger }) : identity
     );
   },
 };

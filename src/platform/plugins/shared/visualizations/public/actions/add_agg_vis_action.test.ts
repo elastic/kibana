@@ -9,7 +9,6 @@
 
 import {
   AddAggVisualizationPanelAction,
-  ADD_AGG_VIS_ACTION_ID,
   type AddAggVisualizationPanelActionApi,
 } from './add_agg_vis_action';
 import type { BaseVisType } from '../vis_types/base_vis_type';
@@ -17,7 +16,7 @@ import { VisGroups } from '../vis_types/vis_groups_enum';
 import { TypesService, type TypesStart } from '../vis_types/types_service';
 
 const mockCompatibleEmbeddableAPI: AddAggVisualizationPanelActionApi = {
-  type: ADD_AGG_VIS_ACTION_ID,
+  type: 'anyEmbeddable',
   addNewPanel: jest.fn(),
   getAppContext: jest.fn(),
 };
