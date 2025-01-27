@@ -10,7 +10,9 @@ import type {
   IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient, Logger } from '@kbn/core/server';
+import { SLOConfig } from '../../common/config';
 import {
+  HEALTH_INDEX_NAME,
   SLI_DESTINATION_INDEX_NAME,
   SUMMARY_DESTINATION_INDEX_NAME,
   SUMMARY_TEMP_INDEX_NAME,
@@ -21,6 +23,9 @@ import { SUMMARY_MAPPINGS_TEMPLATE } from '../assets/component_templates/summary
 import { SUMMARY_SETTINGS_TEMPLATE } from '../assets/component_templates/summary_settings_template';
 import { SLI_INDEX_TEMPLATE } from '../assets/index_templates/sli_index_template';
 import { SUMMARY_INDEX_TEMPLATE } from '../assets/index_templates/summary_index_template';
+import { HEALTH_MAPPINGS_TEMPLATE } from '../assets/component_templates/health_mappings_template';
+import { HEALTH_SETTINGS_TEMPLATE } from '../assets/component_templates/health_settings_template';
+import { HEALTH_INDEX_TEMPLATE } from '../assets/index_templates/health_index_template';
 import { retryTransientEsErrors } from '../utils/retry';
 
 export interface ResourceInstaller {
@@ -30,15 +35,21 @@ export interface ResourceInstaller {
 export class DefaultResourceInstaller implements ResourceInstaller {
   private isInstalling: boolean = false;
 
-  constructor(private esClient: ElasticsearchClient, private logger: Logger) {}
+  constructor(
+    private esClient: ElasticsearchClient,
+    private logger: Logger,
+    private config: SLOConfig
+  ) {}
 
-  public async ensureCommonResourcesInstalled() {
+  public async ensureCommonResourcesInstalled(): Promise<void> {
     if (this.isInstalling) {
       return;
     }
     this.isInstalling = true;
 
     let installTimeout;
+
+    const isHealthEnabled = this.config.healthEnabled;
     try {
       installTimeout = setTimeout(() => (this.isInstalling = false), 60000);
 
@@ -56,6 +67,17 @@ export class DefaultResourceInstaller implements ResourceInstaller {
       await this.createIndex(SLI_DESTINATION_INDEX_NAME);
       await this.createIndex(SUMMARY_DESTINATION_INDEX_NAME);
       await this.createIndex(SUMMARY_TEMP_INDEX_NAME);
+
+      if (isHealthEnabled) {
+        await Promise.all([
+          this.createOrUpdateComponentTemplate(HEALTH_MAPPINGS_TEMPLATE),
+          this.createOrUpdateComponentTemplate(HEALTH_SETTINGS_TEMPLATE),
+        ]);
+
+        await this.createOrUpdateIndexTemplate(HEALTH_INDEX_TEMPLATE);
+
+        await this.createIndex(HEALTH_INDEX_NAME);
+      }
     } catch (err) {
       this.logger.error(`Error while installing SLO shared resources: ${err}`);
     } finally {

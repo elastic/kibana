@@ -156,7 +156,11 @@ export class SLOPlugin
       .getStartServices()
       .then(async ([coreStart, pluginStart]) => {
         const esInternalClient = coreStart.elasticsearch.client.asInternalUser;
-        const sloResourceInstaller = new DefaultResourceInstaller(esInternalClient, this.logger);
+        const sloResourceInstaller = new DefaultResourceInstaller(
+          esInternalClient,
+          this.logger,
+          this.config
+        );
         await sloResourceInstaller.ensureCommonResourcesInstalled();
       })
       .catch(() => {
