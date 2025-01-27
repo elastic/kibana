@@ -103,7 +103,7 @@
     ],
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAiAssistant": [
-      "platform/plugins/shared/observability_solution/observability_ai_assistant",
+      "platform/plugins/shared/observability_ai_assistant",
       "solutions/observability/plugins/observability_ai_assistant_app"
     ],
     "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",

@@ -6508,7 +6508,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_ai_assistant":
   version "0.0.0"
   uid ""
 
