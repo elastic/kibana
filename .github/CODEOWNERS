@@ -689,7 +689,7 @@ src/platform/plugins/shared/ui_actions @elastic/appex-sharedux
 src/platform/plugins/shared/ui_actions_enhanced @elastic/appex-sharedux
 src/platform/plugins/shared/unified_doc_viewer @elastic/kibana-data-discovery
 src/platform/plugins/shared/unified_histogram @elastic/kibana-data-discovery
-src/platform/plugins/shared/unified_search @elastic/kibana-visualizations
+src/platform/plugins/shared/unified_search @elastic/kibana-presentation
 src/platform/plugins/shared/usage_collection @elastic/kibana-core
 src/platform/plugins/shared/vis_types/timeseries @elastic/kibana-visualizations
 src/platform/plugins/shared/visualizations @elastic/kibana-visualizations
@@ -1167,7 +1167,6 @@ src/platform/plugins/shared/discover/public/context_awareness/profile_providers/
 /test/functional/fixtures/kbn_archiver/visualize.json @elastic/kibana-visualizations
 /test/functional/fixtures/kbn_archiver/managed_content.json @elastic/kibana-visualizations # Assigned per only use: https://github.com/elastic/kibana/blob/main/x-pack/test/functional/apps/managed_content/managed_content.ts#L38
 /test/api_integration/fixtures/kbn_archiver/event_annotations/event_annotations.json @elastic/kibana-visualizations
-/test/functional/page_objects/unified_search_page.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/200132#discussion_r1847188168
 /test/functional/apps/getting_started/*.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/199767#discussion_r1840485031
 /x-pack/test/upgrade/apps/graph @elastic/kibana-visualizations
 /x-pack/test/functional/page_objects/log_wrapper.ts @elastic/kibana-visualizations # Assigned per https://github.com/elastic/kibana/pull/36437
@@ -1458,6 +1457,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 ### END Observability Plugins
 
 # Presentation
+/test/functional/page_objects/unified_search_page.ts @elastic/kibana-presentation
 /test/functional/fixtures/kbn_archiver/dashboard_error_cases.json @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1859020986
 /x-pack/test/functional/es_archives/getting_started/shakespeare @elastic/kibana-presentation # Assigned per https://github.com/elastic/kibana/pull/201648#discussion_r1860319853
 /x-pack/test/upgrade/screenshots @elastic/kibana-presentation
@@ -1994,7 +1994,6 @@ x-pack/platform/plugins/private/cloud_integrations/cloud_full_story/server/confi
 # search
 /x-pack/test/functional/es_archives/data/search_sessions @elastic/search-kibana
 /x-pack/test/common/services/search_secure.ts @elastic/search-kibana
-/test/functional/page_objects/unified_search_page.ts @elastic/search-kibana
 /test/functional/fixtures/kbn_archiver/ccs @elastic/search-kibana
 /test/functional/fixtures/kbn_archiver/annotation_listing_page_search.json @elastic/search-kibana
 /test/functional/fixtures/es_archiver/search/downsampled @elastic/search-kibana
