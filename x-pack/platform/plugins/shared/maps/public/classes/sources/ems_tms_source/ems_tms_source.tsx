@@ -47,7 +47,7 @@ export class EMSTMSSource extends AbstractSource implements ITMSSource {
       isAutoSelect:
         typeof descriptor.isAutoSelect !== 'undefined' ? descriptor.isAutoSelect : false,
       lightModeDefault:
-        typeof descriptor.lightModeDefault === 'undefined' ||
+        descriptor.lightModeDefault === undefined ||
         descriptor.lightModeDefault !== DEFAULT_EMS_ROADMAP_ID
           ? getEmsTileLayerId().desaturated
           : DEFAULT_EMS_ROADMAP_ID,
