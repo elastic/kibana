@@ -14,7 +14,6 @@ import {
   EuiFlexGroup,
   EuiPanel,
   EuiSpacer,
-  EuiText,
 } from '@elastic/eui';
 import { isEmpty } from 'lodash/fp';
 import type Oas from 'oas';
@@ -296,8 +295,6 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
     return (
       <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmSettingsStep">
         <EuiPanel hasShadow={false} hasBorder={false}>
-          <EuiText size="s">{i18n.CONFIRM_DESCRIPTION}</EuiText>
-          <EuiSpacer size="m" />
           <EndpointSelection
             integrationSettings={integrationSettings}
             pathSuggestions={suggestedPaths}
@@ -321,7 +318,7 @@ export const ConfirmSettingsStep = React.memo<ConfirmSettingsStepProps>(
           <EuiSpacer size="m" />
           {successfulGeneration && isSelectedPathGenerated ? (
             <EuiCallOut
-              title="Success"
+              title={i18n.SUCCESS}
               color="success"
               iconType="check"
               data-test-subj="successCallout"

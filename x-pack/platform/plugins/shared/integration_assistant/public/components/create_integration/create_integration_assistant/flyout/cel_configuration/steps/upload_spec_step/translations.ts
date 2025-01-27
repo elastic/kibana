@@ -11,7 +11,7 @@ export const OPEN_API_UPLOAD_INSTRUCTIONS = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.uploadSpec.uploadInstructions',
   {
     defaultMessage:
-      "Upload an OpenAPI spec file to generate a configuration for the CEL input. This is typically found in vendor's API reference documentation.",
+      "The LLM will analyze the file to identify the structure of your API data. The OpenAPI spec file is typically found in the vendor's API reference documentation.",
   }
 );
 export const API_DEFINITION_TITLE = i18n.translate(
@@ -99,12 +99,12 @@ export const SUCCESS = i18n.translate(
 export const DATASTREAM_TITLE_REQUIRED = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.uploadSpec.dataStreamRequired',
   {
-    defaultMessage: 'Data stream title is required',
+    defaultMessage: 'A data stream title is required',
   }
 );
 export const SPEC_FILE_REQUIRED = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.uploadSpec.specFileRequired',
   {
-    defaultMessage: 'OpenAPI spec file is required',
+    defaultMessage: 'An OpenAPI spec file is required',
   }
 );

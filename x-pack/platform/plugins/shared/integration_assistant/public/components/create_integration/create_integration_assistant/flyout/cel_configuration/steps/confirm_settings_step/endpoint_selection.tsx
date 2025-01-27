@@ -81,14 +81,14 @@ export const EndpointSelection = React.memo<EndpointSelectionProps>(
     );
 
     return (
-      <EuiFlexGroup direction="column" gutterSize="l" data-test-subj="confirmPath">
-        <EuiTitle size="s">
-          <h2>{i18n.CONFIRM_ENDPOINT}</h2>
+      <EuiFlexGroup direction="column" gutterSize="s" data-test-subj="confirmPath">
+        <EuiTitle size="xs">
+          <h4>{i18n.CONFIRM_ENDPOINT}</h4>
         </EuiTitle>
         {hasSuggestedPaths && (
           <EuiFlexItem>
             <EuiText size="s">{i18n.CONFIRM_ENDPOINT_DESCRIPTION}</EuiText>
-            <EuiSpacer size="s" />
+            <EuiSpacer size="m" />
             <EuiFlexItem>
               <EuiRadioGroup
                 options={options}

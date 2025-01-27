@@ -19,12 +19,6 @@ export const ENTER_MANUALLY = i18n.translate(
     defaultMessage: 'Enter manually',
   }
 );
-export const CONFIRM_DESCRIPTION = i18n.translate(
-  'xpack.integrationAssistant.celFlyout.step.confirmSettings.confirmDescription',
-  {
-    defaultMessage: 'The LLM will generate the CEL input configuration for your API endpoint.',
-  }
-);
 export const CONFIRM_ENDPOINT = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.confirmSettings.confirmEndpoint',
   {
@@ -46,7 +40,8 @@ export const CONFIRM_AUTH = i18n.translate(
 export const CONFIRM_AUTH_DESCRIPTION = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.confirmSettings.confirmAuthDescription',
   {
-    defaultMessage: 'Select the authentication method for the selected API endpoint',
+    defaultMessage:
+      'Select the authentication method for the API endpoint. Generation should take less than a minute.',
   }
 );
 export const AUTH_SELECTION_TITLE = i18n.translate(
@@ -77,6 +72,12 @@ export const GENERATING = i18n.translate(
   'xpack.integrationAssistant.celFlyout.step.confirmSettings.generatingButtonLabel',
   {
     defaultMessage: 'Generating',
+  }
+);
+export const SUCCESS = i18n.translate(
+  'xpack.integrationAssistant.celFlyout.step.confirmSettings.success',
+  {
+    defaultMessage: 'Success! Configuration ready.',
   }
 );
 export const CANCEL = i18n.translate(
