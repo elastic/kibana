@@ -336,7 +336,7 @@ export const getLineLayer = (
       properties: {
         fillColor: {
           type: 'STATIC',
-          options: { color: '#1EA593' },
+          options: { color: euiVisColorPalette[1] },
         },
         lineColor: {
           type: 'STATIC',
