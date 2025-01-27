@@ -15,7 +15,7 @@ import type {
   ESQLSingleAstItem,
   ESQLCommandOption,
 } from '@kbn/esql-ast';
-import type { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
+import type { ESQLControlVariable } from '@kbn/esql-variables-types';
 import type { DatatableColumn } from '@kbn/expressions-plugin/common';
 
 const DEFAULT_ESQL_LIMIT = 1000;
@@ -179,4 +179,21 @@ export const mapVariableToColumn = (
     }
   });
   return columns;
+};
+
+export const getValuesFromQueryField = (queryString: string) => {
+  const validQuery = `${queryString} ""`;
+  const { root } = parse(validQuery);
+  const lastCommand = root.commands[root.commands.length - 1];
+  const columns: ESQLColumn[] = [];
+
+  walk(lastCommand, {
+    visitColumn: (node) => columns.push(node),
+  });
+
+  const column = Walker.match(lastCommand, { type: 'column' });
+
+  if (column) {
+    return `${column.name}`;
+  }
 };

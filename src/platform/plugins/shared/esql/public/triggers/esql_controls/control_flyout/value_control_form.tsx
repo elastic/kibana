@@ -21,8 +21,13 @@ import {
 import { css } from '@emotion/react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { ISearchGeneric } from '@kbn/search-types';
-import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
-import { getIndexPatternFromESQLQuery, getESQLResults } from '@kbn/esql-utils';
+import { ESQLVariableType, ESQLControlVariable } from '@kbn/esql-variables-types';
+import {
+  getIndexPatternFromESQLQuery,
+  getESQLResults,
+  appendStatsByToQuery,
+  getValuesFromQueryField,
+} from '@kbn/esql-utils';
 import { ESQLLangEditor } from '../../../create_editor';
 import type { ESQLControlState, ControlWidthOptions } from '../types';
 import {
@@ -35,9 +40,7 @@ import {
 } from './shared_form_components';
 import {
   getRecurrentVariableName,
-  getValuesFromQueryField,
   getFlyoutStyling,
-  appendStatsByToQuery,
   areValuesIntervalsValid,
   validateVariableName,
 } from './helpers';
