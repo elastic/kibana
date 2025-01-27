@@ -2,26 +2,10 @@
   "id": "@kbn/shared-ux-avatar-solution",
   "client": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/shared-ux-avatar-solution",
-        "id": "def-common.KibanaSolutionAvatar",
+        "id": "def-public.KibanaSolutionAvatar",
         "type": "Function",
         "tags": [],
         "label": "KibanaSolutionAvatar",
@@ -32,9 +16,9 @@
           "(props: ",
           {
             "pluginId": "@kbn/shared-ux-avatar-solution",
-            "scope": "common",
+            "scope": "public",
             "docId": "kibKbnSharedUxAvatarSolutionPluginApi",
-            "section": "def-common.KibanaSolutionAvatarProps",
+            "section": "def-public.KibanaSolutionAvatarProps",
             "text": "KibanaSolutionAvatarProps"
           },
           ") => React.JSX.Element"
@@ -45,7 +29,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/shared-ux-avatar-solution",
-            "id": "def-common.KibanaSolutionAvatar.$1",
+            "id": "def-public.KibanaSolutionAvatar.$1",
             "type": "CompoundType",
             "tags": [],
             "label": "props",
@@ -53,9 +37,9 @@
             "signature": [
               {
                 "pluginId": "@kbn/shared-ux-avatar-solution",
-                "scope": "common",
+                "scope": "public",
                 "docId": "kibKbnSharedUxAvatarSolutionPluginApi",
-                "section": "def-common.KibanaSolutionAvatarProps",
+                "section": "def-public.KibanaSolutionAvatarProps",
                 "text": "KibanaSolutionAvatarProps"
               }
             ],
@@ -74,7 +58,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/shared-ux-avatar-solution",
-        "id": "def-common.KibanaSolutionAvatarProps",
+        "id": "def-public.KibanaSolutionAvatarProps",
         "type": "Type",
         "tags": [],
         "label": "KibanaSolutionAvatarProps",
@@ -90,6 +74,22 @@
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }
