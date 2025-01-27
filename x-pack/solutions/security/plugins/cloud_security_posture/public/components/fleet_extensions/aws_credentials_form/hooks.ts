@@ -76,17 +76,19 @@ export const useAwsCredentialsForm = ({
   const fields = getInputVarsFields(input, group.fields);
   const fieldsSnapshot = useRef({});
 
-  // This should ony set the credentials after the initial render
-  if (!getAwsCredentialsType(input) && !lastManualCredentialsType.current) {
-    onChange({
-      updatedPolicy: getPosturePolicy(newPolicy, input.type, {
-        'aws.credentials.type': {
-          value: awsCredentialsType,
-          type: 'text',
-        },
-      }),
-    });
-  }
+  useEffect(() => {
+    // This should ony set the credentials after the initial render
+    if (!getAwsCredentialsType(input) && !lastManualCredentialsType.current) {
+      onChange({
+        updatedPolicy: getPosturePolicy(newPolicy, input.type, {
+          'aws.credentials.type': {
+            value: awsCredentialsType,
+            type: 'text',
+          },
+        }),
+      });
+    }
+  }, [awsCredentialsType, input, newPolicy, onChange]);
 
   useEffect(() => {
     const isInvalid =
