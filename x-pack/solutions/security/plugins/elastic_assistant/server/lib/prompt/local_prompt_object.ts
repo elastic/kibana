@@ -7,12 +7,12 @@
 
 import { Prompt } from './types';
 import {
-  AD_GENERATION_DETAILS_MARKDOWN,
-  AD_GENERATION_ENTITY_SUMMARY_MARKDOWN,
-  AD_GENERATION_INSIGHTS,
-  AD_GENERATION_MITRE_ATTACK_TACTICS,
-  AD_GENERATION_SUMMARY_MARKDOWN,
-  AD_GENERATION_TITLE,
+  ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
+  ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+  ATTACK_DISCOVERY_GENERATION_INSIGHTS,
+  ATTACK_DISCOVERY_GENERATION_MITRE_ATTACK_TACTICS,
+  ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN,
+  ATTACK_DISCOVERY_GENERATION_TITLE,
   ATTACK_DISCOVERY_CONTINUE,
   ATTACK_DISCOVERY_DEFAULT,
   ATTACK_DISCOVERY_REFINE,
@@ -107,37 +107,37 @@ export const localPrompts: Prompt[] = [
   {
     promptId: promptDictionary.attackDiscoveryDetailsMarkdown,
     prompt: {
-      default: AD_GENERATION_DETAILS_MARKDOWN,
+      default: ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryEntitySummaryMarkdown,
     prompt: {
-      default: AD_GENERATION_ENTITY_SUMMARY_MARKDOWN,
+      default: ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryMitreAttackTactics,
     prompt: {
-      default: AD_GENERATION_MITRE_ATTACK_TACTICS,
+      default: ATTACK_DISCOVERY_GENERATION_MITRE_ATTACK_TACTICS,
     },
   },
   {
     promptId: promptDictionary.attackDiscoverySummaryMarkdown,
     prompt: {
-      default: AD_GENERATION_SUMMARY_MARKDOWN,
+      default: ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryGenerationTitle,
     prompt: {
-      default: AD_GENERATION_TITLE,
+      default: ATTACK_DISCOVERY_GENERATION_TITLE,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryGenerationInsights,
     prompt: {
-      default: AD_GENERATION_INSIGHTS,
+      default: ATTACK_DISCOVERY_GENERATION_INSIGHTS,
     },
   },
 ];
