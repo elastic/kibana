@@ -46,13 +46,21 @@ export const PutFleetServerHostRequestSchema = {
     is_internal: schema.maybe(schema.boolean()),
     proxy_id: schema.nullable(schema.string()),
     certificate_authorities: schema.maybe(schema.oneOf([schema.literal(null), schema.string()])),
-    certificate: schema.nullable(schema.oneOf([schema.literal(null), schema.string()])),
-    certificate_key: schema.nullable(schema.oneOf([schema.literal(null), schema.string()])),
-    es_certificate_authorities: schema.nullable(
-      schema.oneOf([schema.literal(null), schema.string()])
+    certificate: schema.maybe(
+      schema.nullable(schema.oneOf([schema.literal(null), schema.string()]))
     ),
-    es_certificate: schema.nullable(schema.oneOf([schema.literal(null), schema.string()])),
-    es_certificate_key: schema.nullable(schema.oneOf([schema.literal(null), schema.string()])),
+    certificate_key: schema.maybe(
+      schema.nullable(schema.oneOf([schema.literal(null), schema.string()]))
+    ),
+    es_certificate_authorities: schema.maybe(
+      schema.nullable(schema.oneOf([schema.literal(null), schema.string()]))
+    ),
+    es_certificate: schema.maybe(
+      schema.nullable(schema.oneOf([schema.literal(null), schema.string()]))
+    ),
+    es_certificate_key: schema.maybe(
+      schema.nullable(schema.oneOf([schema.literal(null), schema.string()]))
+    ),
   }),
 };
 
