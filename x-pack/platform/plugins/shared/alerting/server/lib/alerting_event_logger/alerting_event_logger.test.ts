@@ -22,6 +22,7 @@ import {
   initializeExecuteBackfillRecord,
   SavedObjects,
   updateEventWithRuleData,
+  createGapRecord,
 } from './alerting_event_logger';
 import { UntypedNormalizedRuleType } from '../../rule_type_registry';
 import {
@@ -1457,6 +1458,32 @@ describe('AlertingEventLogger', () => {
       expect(alertingEventLogger.getEvent()!.message).toBe('first failure message');
     });
   });
+
+  describe('reportGap()', () => {
+    test('should throw error if alertingEventLogger has not been initialized', () => {
+      expect(() =>
+        alertingEventLogger.reportGap({
+          gap: { gte: '', lte: '' },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    test('should report gap event', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      const range = {
+        gte: '2022-05-05T15:59:54.480Z',
+        lte: '2022-05-05T16:59:54.480Z',
+      };
+      alertingEventLogger.reportGap({ gap: range });
+
+      const event = createGapRecord(ruleContext, ruleData, [alertSO], {
+        status: 'unfilled',
+        range,
+      });
+
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+    });
+  });
 });
 
 describe('helper functions', () => {
@@ -2063,6 +2090,59 @@ describe('helper functions', () => {
           ],
         },
       });
+    });
+  });
+
+  describe('createGapRecord', () => {
+    test('should populate expected fields in event log record', () => {
+      const record = createGapRecord(ruleContextWithScheduleDelay, ruleDataWithName, [alertSO], {
+        status: 'unfilled',
+        range: {
+          gte: '2022-05-05T15:59:54.480Z',
+          lte: '2022-05-05T16:59:54.480Z',
+        },
+      });
+
+      // these fields should be explicitly set
+      expect(record.event?.action).toEqual('gap');
+      expect(record.event?.kind).toEqual('alert');
+      expect(record.event?.category).toEqual([ruleDataWithName.type?.producer]);
+
+      expect(record.kibana?.alert?.rule?.gap?.status).toEqual('unfilled');
+      expect(record.kibana?.alert?.rule?.gap?.range?.gte).toEqual('2022-05-05T15:59:54.480Z');
+      expect(record.kibana?.alert?.rule?.gap?.range?.lte).toEqual('2022-05-05T16:59:54.480Z');
+
+      expect(record.kibana?.alert?.rule?.rule_type_id).toEqual(ruleDataWithName.type?.id);
+      expect(record.kibana?.alert?.rule?.consumer).toEqual(ruleDataWithName.consumer);
+      expect(record.kibana?.alert?.rule?.execution?.uuid).toEqual(
+        ruleContextWithScheduleDelay.executionId
+      );
+
+      expect(record.kibana?.saved_objects).toEqual([
+        {
+          id: ruleContextWithScheduleDelay.savedObjectId,
+          type: ruleContextWithScheduleDelay.savedObjectType,
+          type_id: ruleDataWithName.type?.id,
+          rel: SAVED_OBJECT_REL_PRIMARY,
+        },
+      ]);
+      expect(record.kibana?.space_ids).toEqual([ruleContextWithScheduleDelay.spaceId]);
+      expect(record?.rule?.id).toEqual(ruleDataWithName.id);
+      expect(record?.rule?.license).toEqual(ruleDataWithName.type?.minimumLicenseRequired);
+      expect(record?.rule?.category).toEqual(ruleDataWithName.type?.id);
+      expect(record?.rule?.ruleset).toEqual(ruleDataWithName.type?.producer);
+      expect(record?.rule?.name).toEqual(ruleDataWithName.name);
+
+      // these fields should not be set by this function
+      expect(record.kibana?.alert?.rule?.gap?.filled_intervals).toEqual(undefined);
+      expect(record['@timestamp']).toBeUndefined();
+      expect(record.event?.provider).toBeUndefined();
+      expect(record.event?.outcome).toBeUndefined();
+      expect(record.kibana?.alert?.rule?.execution?.metrics).toBeUndefined();
+      expect(record.kibana?.server_uuid).toBeUndefined();
+      expect(record.kibana?.task).toBeUndefined();
+      expect(record.kibana?.version).toBeUndefined();
+      expect(record?.ecs).toBeUndefined();
     });
   });
 });
