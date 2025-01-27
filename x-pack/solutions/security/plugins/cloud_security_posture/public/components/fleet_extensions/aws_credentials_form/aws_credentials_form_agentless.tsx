@@ -187,6 +187,18 @@ export const AwsCredentialsFormAgentless = ({
   const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
 
+  // This should ony set the credentials after the initial render
+  if (!getAwsCredentialsType(input)) {
+    updatePolicy({
+      ...getPosturePolicy(newPolicy, input.type, {
+        'aws.credentials.type': {
+          value: awsCredentialsType,
+          type: 'text',
+        },
+      }),
+    });
+  }
+
   const isValidSemantic = semverValid(packageInfo.version);
   const showCloudCredentialsButton = isValidSemantic
     ? semverCompare(packageInfo.version, CLOUD_CREDENTIALS_PACKAGE_VERSION) >= 0
