@@ -17,4 +17,4 @@
 import { z } from '@kbn/zod';
 
 export type GetKnowledgeBaseIndicesResponse = z.infer<typeof GetKnowledgeBaseIndicesResponse>;
-export const GetKnowledgeBaseIndicesResponse = z.record(z.string(), z.array(z.string()));
+export const GetKnowledgeBaseIndicesResponse = z.object({}).catchall(z.array(z.string()));
