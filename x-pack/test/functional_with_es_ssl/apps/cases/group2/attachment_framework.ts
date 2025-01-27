@@ -85,7 +85,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     return caseWithAttachment;
   };
 
-  const validateAttachment = async (type: string, attachmentId?: string) => {
+  const validateAttachment = async (type: string, attachmentId?: string | null) => {
     await testSubjects.existOrFail(`comment-${type}-.test`);
     await testSubjects.existOrFail(`copy-link-${attachmentId}`);
     await testSubjects.existOrFail(`attachment-.test-${attachmentId}-arrowRight`);
@@ -189,8 +189,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         });
 
         const comments = response.filter((userAction) => userAction.type === 'comment');
-        const externalRefAttachmentId = comments[0].comment_id ?? undefined;
-        const persistableStateAttachmentId = comments[1].comment_id ?? undefined;
+        const externalRefAttachmentId = comments[0].comment_id;
+        const persistableStateAttachmentId = comments[1].comment_id;
         await validateAttachment(AttachmentType.externalReference, externalRefAttachmentId);
         await validateAttachment(AttachmentType.persistableState, persistableStateAttachmentId);
 
