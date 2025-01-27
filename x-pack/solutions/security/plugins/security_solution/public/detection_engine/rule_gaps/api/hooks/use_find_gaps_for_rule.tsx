@@ -40,7 +40,10 @@ export const useFindGapsForRule = (
     start: string;
     end: string;
     statuses: GapStatus[];
-    sortField: keyof Gap;
+    sortField:
+      | 'kibana.alert.rule.gap.total_gap_duration_ms'
+      | '@timestamp'
+      | 'kibana.alert.rule.gap.status';
     sortOrder: string;
   },
   options?: UseQueryOptions<FindGapsResponseBody>
