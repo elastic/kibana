@@ -6636,37 +6636,6 @@ paths:
       summary: Get case creators
       tags:
         - cases
-  /api/cases/status:
-    get:
-      deprecated: true
-      description: |
-        Returns the number of cases that are open, closed, and in progress. Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find cases API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
-      operationId: getCaseStatusDefaultSpace
-      parameters:
-        - $ref: '#/components/parameters/Cases_owner_filter'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  count_closed_cases:
-                    type: integer
-                  count_in_progress_cases:
-                    type: integer
-                  count_open_cases:
-                    type: integer
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
-          description: Authorization information is missing or invalid.
-      summary: Get case status summary
-      tags:
-        - cases
   /api/cases/tags:
     get:
       description: |

@@ -5,4 +5,9 @@
  * 2.0.
  */
 
-export { EntSearchLogStream } from './log_stream';
+import { AgentPolicyInfo } from '../../../../../common/types';
+import { createAsyncAction } from '../utils/actions';
+
+export const getAgentPoliciesAction = createAsyncAction<void, AgentPolicyInfo[]>(
+  '[AGENT POLICIES] GET'
+);
