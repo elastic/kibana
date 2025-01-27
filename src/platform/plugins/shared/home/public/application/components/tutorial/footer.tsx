@@ -8,13 +8,14 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
-
 import { EuiFlexGroup, EuiFlexItem, EuiText, EuiButton } from '@elastic/eui';
-
 import { FormattedMessage } from '@kbn/i18n-react';
 
-export function Footer({ url, label }) {
+interface FooterProps {
+  url: string;
+  label: string;
+}
+export function Footer({ url, label }: FooterProps) {
   return (
     <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
       <EuiFlexItem grow={false}>
@@ -36,8 +37,3 @@ export function Footer({ url, label }) {
     </EuiFlexGroup>
   );
 }
-
-Footer.propTypes = {
-  url: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-};

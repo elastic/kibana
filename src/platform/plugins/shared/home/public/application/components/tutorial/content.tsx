@@ -8,13 +8,11 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiMarkdownFormat } from '@elastic/eui';
 
-export function Content({ text }) {
+interface ContentProps {
+  text: string;
+}
+export function Content({ text }: ContentProps) {
   return <EuiMarkdownFormat>{text}</EuiMarkdownFormat>;
 }
-
-Content.propTypes = {
-  text: PropTypes.string.isRequired,
-};

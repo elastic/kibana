@@ -8,12 +8,21 @@
  */
 
 import React from 'react';
-import PropTypes from 'prop-types';
+import { EuiPanel } from '@elastic/eui';
 import { NumberParameter } from './number_parameter';
 import { StringParameter } from './string_parameter';
-import { EuiPanel } from '@elastic/eui';
 
-export class ParameterForm extends React.Component {
+interface Param {
+  id: string;
+  label: string;
+  type: string;
+}
+interface ParameterFormProps {
+  params: Param[];
+  paramValues: { [key: string]: number | string };
+  setParameter: (id: string, value: any) => void;
+}
+export class ParameterForm extends React.Component<ParameterFormProps> {
   renderInputs = () => {
     return this.props.params.map((param) => {
       switch (param.type) {
@@ -23,7 +32,7 @@ export class ParameterForm extends React.Component {
               key={param.id}
               id={param.id}
               label={param.label}
-              value={this.props.paramValues[param.id]}
+              value={this.props.paramValues[param.id] as number}
               setParameter={this.props.setParameter}
             />
           );
@@ -33,7 +42,7 @@ export class ParameterForm extends React.Component {
               key={param.id}
               id={param.id}
               label={param.label}
-              value={this.props.paramValues[param.id]}
+              value={this.props.paramValues[param.id] as string}
               setParameter={this.props.setParameter}
             />
           );
@@ -47,15 +56,3 @@ export class ParameterForm extends React.Component {
     return <EuiPanel>{this.renderInputs()}</EuiPanel>;
   }
 }
-
-const paramsShape = PropTypes.shape({
-  id: PropTypes.string.isRequired,
-  label: PropTypes.string.isRequired,
-  type: PropTypes.string.isRequired,
-});
-
-ParameterForm.propTypes = {
-  params: PropTypes.arrayOf(paramsShape).isRequired,
-  paramValues: PropTypes.object.isRequired,
-  setParameter: PropTypes.func.isRequired,
-};

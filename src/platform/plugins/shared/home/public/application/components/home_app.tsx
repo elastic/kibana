@@ -9,21 +9,31 @@
 
 import React from 'react';
 import { I18nProvider } from '@kbn/i18n-react';
-import PropTypes from 'prop-types';
+import { Redirect, RouteComponentProps } from 'react-router-dom';
+import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 import { Home } from './home';
 import { TutorialDirectory } from './tutorial_directory';
 import { Tutorial } from './tutorial/tutorial';
-import { Redirect } from 'react-router-dom';
-import { HashRouter as Router, Routes, Route } from '@kbn/shared-ux-router';
 
 import { getTutorial } from '../load_tutorials';
 import { replaceTemplateStrings } from './tutorial/replace_template_strings';
 import { getServices } from '../kibana_services';
 import { GettingStarted } from './guided_onboarding';
+import { FeatureCatalogueEntry, FeatureCatalogueSolution } from '../../services';
 
 const REDIRECT_TO_INTEGRATIONS_TAB_IDS = ['all', 'logging', 'metrics', 'security'];
 
-export function HomeApp({ directories, solutions }) {
+interface HomeAppProps {
+  directories: FeatureCatalogueEntry[];
+  solutions: FeatureCatalogueSolution[];
+  match: {
+    params: {
+      id: string;
+      tab: string;
+    };
+  };
+}
+export function HomeApp({ directories, solutions }: HomeAppProps) {
   const {
     application,
     savedObjectsClient,
@@ -36,7 +46,7 @@ export function HomeApp({ directories, solutions }) {
   const environment = environmentService.getEnvironment();
   const isCloudEnabled = environment.cloud;
 
-  const renderTutorialDirectory = (props) => {
+  const renderTutorialDirectory = (props: RouteComponentProps<{ tab: string }>) => {
     // Redirect to integrations app unless a specific tab that is still supported was specified.
     const tabId = props.match.params.tab;
     if (!tabId || REDIRECT_TO_INTEGRATIONS_TAB_IDS.includes(tabId)) {
@@ -53,7 +63,7 @@ export function HomeApp({ directories, solutions }) {
     );
   };
 
-  const renderTutorial = (props) => {
+  const renderTutorial = (props: RouteComponentProps<{ id: string }>) => {
     return (
       <Tutorial
         addBasePath={addBasePath}
@@ -61,7 +71,7 @@ export function HomeApp({ directories, solutions }) {
         getTutorial={getTutorial}
         replaceTemplateStrings={replaceTemplateStrings}
         tutorialId={props.match.params.id}
-        bulkCreate={savedObjectsClient.bulkCreate}
+        bulkCreate={savedObjectsClient.bulkCreate} // bulkCreate is deprecated - what's the alternative?
       />
     );
   };
@@ -94,30 +104,3 @@ export function HomeApp({ directories, solutions }) {
     </I18nProvider>
   );
 }
-
-HomeApp.propTypes = {
-  directories: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      subtitle: PropTypes.string,
-      description: PropTypes.string.isRequired,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      showOnHomePage: PropTypes.bool.isRequired,
-      category: PropTypes.string.isRequired,
-      order: PropTypes.number,
-      solutionId: PropTypes.string,
-    })
-  ),
-  solutions: PropTypes.arrayOf(
-    PropTypes.shape({
-      id: PropTypes.string.isRequired,
-      title: PropTypes.string.isRequired,
-      description: PropTypes.string,
-      icon: PropTypes.string.isRequired,
-      path: PropTypes.string.isRequired,
-      order: PropTypes.number,
-    })
-  ),
-};

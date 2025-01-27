@@ -8,7 +8,6 @@
  */
 
 import React, { Component } from 'react';
-import PropTypes from 'prop-types';
 
 import {
   EuiPanel,
@@ -22,14 +21,26 @@ import {
   EuiSpacer,
   EuiToolTip,
   EuiTitle,
+  PopoverAnchorPosition,
 } from '@elastic/eui';
 
 import { FormattedMessage } from '@kbn/i18n-react';
 
 export const NUM_LONG_LINKS = 5;
 
-export class RecentlyAccessed extends Component {
-  constructor(props) {
+interface RecentlyAccessedShape {
+  label: string;
+  link: string;
+  id: string;
+}
+interface RecentlyAccessedProps {
+  recentlyAccessed: RecentlyAccessedShape[];
+}
+interface RecentlyAccessedState {
+  isPopoverOpen: boolean;
+}
+export class RecentlyAccessed extends Component<RecentlyAccessedProps, RecentlyAccessedState> {
+  constructor(props: RecentlyAccessedProps) {
     super(props);
 
     this.state = {
@@ -81,7 +92,7 @@ export class RecentlyAccessed extends Component {
       </EuiLink>
     );
 
-    let anchorPosition = 'downRight';
+    let anchorPosition: PopoverAnchorPosition = 'downRight'; // not sure if i should import it like this, but otherwise it was typing it as "string" and expected union
     if (window.innerWidth <= 768) {
       anchorPosition = 'downLeft';
     }
@@ -99,7 +110,7 @@ export class RecentlyAccessed extends Component {
     );
   };
 
-  renderLongLink = (recentlyAccessedItem, includeSeparator = false) => {
+  renderLongLink = (recentlyAccessedItem: RecentlyAccessedShape, includeSeparator = false) => {
     let separator;
     if (includeSeparator) {
       separator = (
@@ -184,13 +195,3 @@ export class RecentlyAccessed extends Component {
     );
   }
 }
-
-export const recentlyAccessedShape = PropTypes.shape({
-  label: PropTypes.string.isRequired,
-  link: PropTypes.string.isRequired,
-  id: PropTypes.string.isRequired,
-});
-
-RecentlyAccessed.propTypes = {
-  recentlyAccessed: PropTypes.arrayOf(recentlyAccessedShape).isRequired,
-};

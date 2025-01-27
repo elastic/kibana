@@ -9,16 +9,15 @@
 
 import _ from 'lodash';
 import React from 'react';
-import PropTypes from 'prop-types';
 import { EuiFlexItem, EuiFlexGrid, EuiFlexGroup, EuiLink } from '@elastic/eui';
-import { injectI18n, FormattedMessage } from '@kbn/i18n-react';
+import { injectI18n, FormattedMessage, InjectedIntl } from '@kbn/i18n-react';
 import { SampleDataTab } from '@kbn/home-sample-data-tab';
 
 import { i18n } from '@kbn/i18n';
-import { Synopsis } from './synopsis';
-import { getServices } from '../kibana_services';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { getTutorials } from '../load_tutorials';
+import { Synopsis } from './synopsis';
+import { HomeKibanaServices, getServices } from '../kibana_services';
+import { ITutorial, getTutorials } from '../load_tutorials';
 
 const SAMPLE_DATA_TAB_ID = 'sampleData';
 
@@ -26,8 +25,36 @@ const integrationsTitle = i18n.translate('home.breadcrumbs.integrationsAppTitle'
   defaultMessage: 'Integrations',
 });
 
-class TutorialDirectoryUi extends React.Component {
-  constructor(props) {
+interface TutorialDirectoryUiProps {
+  addBasePath: HomeKibanaServices['addBasePath'];
+  openTab: string;
+  isCloudEnabled: boolean;
+  intl: InjectedIntl;
+}
+interface TutorialCard extends Pick<ITutorial, 'id' | 'name' | 'category' | 'elasticCloud'> {
+  onClick?: () => void;
+  description: string;
+  url: string;
+  icon?: string;
+  isBeta?: boolean; // ?
+}
+interface TutorialDirectoryUiTabs {
+  // should i merge tabs and state interface
+  tabs: unknown;
+}
+interface TutorialDirectoryUiState {
+  selectedTabId: TutorialDirectoryUiProps['openTab'];
+  tutorialCards: TutorialCard[];
+}
+class TutorialDirectoryUi extends React.Component<
+  TutorialDirectoryUiProps,
+  TutorialDirectoryUiState,
+  TutorialDirectoryUiTabs
+> {
+  private _isMounted: boolean;
+  tabs: Array<{ id: string; name: string; content: JSX.Element }>;
+
+  constructor(props: TutorialDirectoryUiProps) {
     super(props);
 
     const extraTabs = getServices().addDataService.getAddDataTabs();
@@ -47,7 +74,7 @@ class TutorialDirectoryUi extends React.Component {
         content: getComponent(),
       })),
     ];
-
+    this._isMounted = false;
     let openTab = SAMPLE_DATA_TAB_ID;
     if (
       props.openTab &&
@@ -72,13 +99,13 @@ class TutorialDirectoryUi extends React.Component {
 
     this.setBreadcrumbs();
 
-    const tutorialConfigs = await getTutorials();
+    const tutorialConfigs: ITutorial[] = await getTutorials();
 
     if (!this._isMounted) {
       return;
     }
 
-    let tutorialCards = tutorialConfigs.map((tutorialConfig) => {
+    let tutorialCards: TutorialCard[] = tutorialConfigs.map((tutorialConfig: ITutorial) => {
       // add base path to SVG based icons
       let icon = tutorialConfig.euiIconType;
       if (icon && icon.includes('/')) {
@@ -88,13 +115,14 @@ class TutorialDirectoryUi extends React.Component {
       return {
         id: tutorialConfig.id,
         category: tutorialConfig.category,
-        icon: icon,
+        icon,
         name: tutorialConfig.name,
         description: tutorialConfig.shortDescription,
         url: this.props.addBasePath(`#/tutorial/${tutorialConfig.id}`),
         elasticCloud: tutorialConfig.elasticCloud,
+        // Paulina : should we do something about comments below now? use or remove isBeta
         // Beta label is skipped on the tutorial overview page for now. Too many beta labels.
-        //isBeta: tutorialConfig.isBeta,
+        // isBeta: tutorialConfig.isBeta,
       };
     });
 
@@ -126,12 +154,12 @@ class TutorialDirectoryUi extends React.Component {
     });
 
     this.setState({
-      // eslint-disable-line react/no-did-mount-set-state
-      tutorialCards: tutorialCards,
+      tutorialCards,
     });
   }
 
-  componentDidUpdate(prevProps, prevState) {
+  componentDidUpdate(_prevProps: unknown, prevState: Readonly<TutorialDirectoryUiState>) {
+    // set prevProps: any because i am not using it anyways
     if (prevState.selectedTabId !== this.state.selectedTabId) {
       this.setBreadcrumbs();
     }
@@ -149,13 +177,14 @@ class TutorialDirectoryUi extends React.Component {
     if (tab?.name) {
       breadcrumbs.push({
         text: tab.name,
+        href: '',
       });
     }
 
     getServices().chrome.setBreadcrumbs(breadcrumbs);
   };
 
-  onSelectedTabChanged = (id) => {
+  onSelectedTabChanged = (id: string) => {
     this.setState({
       selectedTabId: id,
     });
@@ -198,7 +227,6 @@ class TutorialDirectoryUi extends React.Component {
                   iconType={tutorial.icon}
                   description={tutorial.description}
                   title={tutorial.name}
-                  wrapInPanel
                   url={tutorial.url}
                   onClick={tutorial.onClick}
                   isBeta={tutorial.isBeta}
@@ -228,46 +256,41 @@ class TutorialDirectoryUi extends React.Component {
     const tabs = this.getTabs();
 
     return (
-      <KibanaPageTemplate
-        restrictWidth={1200}
-        template="empty"
-        pageHeader={{
-          pageTitle: (
-            <FormattedMessage
-              id="home.tutorial.addDataToKibanaTitle"
-              defaultMessage="More ways to add data"
-            />
-          ),
-          description: (
-            <FormattedMessage
-              id="home.tutorial.addDataToKibanaDescription"
-              defaultMessage="In addition to adding {integrationsLink}, you can try our sample data or upload your own data."
-              values={{
-                integrationsLink: (
-                  <EuiLink href={this.props.addBasePath(`/app/integrations/browse`)}>
-                    <FormattedMessage
-                      id="home.tutorial.addDataToKibanaDescription.integrations"
-                      defaultMessage="integrations"
-                    />
-                  </EuiLink>
-                ),
-              }}
-            />
-          ),
-          tabs,
-          rightSideItems: headerLinks ? [headerLinks] : [],
-        }}
-      >
-        <KibanaPageTemplate.Section>{this.renderTabContent()}</KibanaPageTemplate.Section>
-      </KibanaPageTemplate>
+      <div style={{ border: '10px solid blue' }}>
+        <KibanaPageTemplate
+          restrictWidth={1200}
+          pageHeader={{
+            pageTitle: (
+              <FormattedMessage
+                id="home.tutorial.addDataToKibanaTitle"
+                defaultMessage="More ways to add data"
+              />
+            ),
+            description: (
+              <FormattedMessage
+                id="home.tutorial.addDataToKibanaDescription"
+                defaultMessage="In addition to adding {integrationsLink}, you can try our sample data or upload your own data."
+                values={{
+                  integrationsLink: (
+                    <EuiLink href={this.props.addBasePath(`/app/integrations/browse`)}>
+                      <FormattedMessage
+                        id="home.tutorial.addDataToKibanaDescription.integrations"
+                        defaultMessage="integrations"
+                      />
+                    </EuiLink>
+                  ),
+                }}
+              />
+            ),
+            tabs,
+            rightSideItems: headerLinks ? [headerLinks] : [],
+          }}
+        >
+          <KibanaPageTemplate.Section>{this.renderTabContent()}</KibanaPageTemplate.Section>
+        </KibanaPageTemplate>
+      </div>
     );
   }
 }
-
-TutorialDirectoryUi.propTypes = {
-  addBasePath: PropTypes.func.isRequired,
-  openTab: PropTypes.string,
-  isCloudEnabled: PropTypes.bool.isRequired,
-};
 
 export const TutorialDirectory = injectI18n(TutorialDirectoryUi);
