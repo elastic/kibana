@@ -25518,6 +25518,30 @@
                       "items": {
                         "additionalProperties": false,
                         "properties": {
+                          "certificate": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "certificate_authorities": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "certificate_key": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "es_certificate": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "es_certificate_authorities": {
+                            "nullable": true,
+                            "type": "string"
+                          },
+                          "es_certificate_key": {
+                            "nullable": true,
+                            "type": "string"
+                          },
                           "host_urls": {
                             "items": {
                               "type": "string"
@@ -25629,6 +25653,30 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "certificate": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "certificate_authorities": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "certificate_key": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "es_certificate": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "es_certificate_authorities": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "es_certificate_key": {
+                    "nullable": true,
+                    "type": "string"
+                  },
                   "host_urls": {
                     "items": {
                       "type": "string"
@@ -25677,6 +25725,30 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "certificate": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "certificate_authorities": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "certificate_key": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "es_certificate": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "es_certificate_authorities": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "es_certificate_key": {
+                          "nullable": true,
+                          "type": "string"
+                        },
                         "host_urls": {
                           "items": {
                             "type": "string"
@@ -25851,6 +25923,30 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "certificate": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "certificate_authorities": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "certificate_key": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "es_certificate": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "es_certificate_authorities": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "es_certificate_key": {
+                          "nullable": true,
+                          "type": "string"
+                        },
                         "host_urls": {
                           "items": {
                             "type": "string"
@@ -25956,6 +26052,30 @@
               "schema": {
                 "additionalProperties": false,
                 "properties": {
+                  "certificate": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "certificate_authorities": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "certificate_key": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "es_certificate": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "es_certificate_authorities": {
+                    "nullable": true,
+                    "type": "string"
+                  },
+                  "es_certificate_key": {
+                    "nullable": true,
+                    "type": "string"
+                  },
                   "host_urls": {
                     "items": {
                       "type": "string"
@@ -25964,9 +26084,14 @@
                     "type": "array"
                   },
                   "is_default": {
+                    "default": false,
                     "type": "boolean"
                   },
                   "is_internal": {
+                    "type": "boolean"
+                  },
+                  "is_preconfigured": {
+                    "default": false,
                     "type": "boolean"
                   },
                   "name": {
@@ -25978,7 +26103,8 @@
                   }
                 },
                 "required": [
-                  "proxy_id"
+                  "name",
+                  "host_urls"
                 ],
                 "type": "object"
               }
@@ -25995,6 +26121,30 @@
                     "item": {
                       "additionalProperties": false,
                       "properties": {
+                        "certificate": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "certificate_authorities": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "certificate_key": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "es_certificate": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "es_certificate_authorities": {
+                          "nullable": true,
+                          "type": "string"
+                        },
+                        "es_certificate_key": {
+                          "nullable": true,
+                          "type": "string"
+                        },
                         "host_urls": {
                           "items": {
                             "type": "string"
