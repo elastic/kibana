@@ -1159,6 +1159,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: Total number of alerts created during last rule run.
                                     nullable: true
@@ -2064,6 +2078,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: Total number of alerts created during last rule run.
                                     nullable: true
@@ -2944,6 +2972,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: Total number of alerts created during last rule run.
                                     nullable: true
@@ -3928,6 +3970,20 @@ paths:
                                     description: Duration in seconds of rule run gap.
                                     nullable: true
                                     type: number
+                                  gap_range:
+                                    additionalProperties: false
+                                    nullable: true
+                                    type: object
+                                    properties:
+                                      gte:
+                                        description: End of the gap range.
+                                        type: string
+                                      lte:
+                                        description: Start of the gap range.
+                                        type: string
+                                    required:
+                                      - lte
+                                      - gte
                                   total_alerts_created:
                                     description: Total number of alerts created during last rule run.
                                     nullable: true
@@ -9721,6 +9777,8 @@ paths:
             schema:
               type: object
               properties:
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_Interval'
                 entityTypes:
                   items:
                     $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
@@ -9733,6 +9791,11 @@ paths:
                   type: string
                 indexPattern:
                   $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: The lookback period for the entity store
+                  pattern: '[smdh]$'
+                  type: string
         description: Schema for the entity store initialization
         required: true
       responses:
@@ -9840,6 +9903,8 @@ paths:
             schema:
               type: object
               properties:
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Security_Entity_Analytics_API_Interval'
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.
@@ -47915,6 +47980,19 @@ components:
           description: Duration in seconds of execution gap
           minimum: 0
           type: integer
+        gap_range:
+          description: Range of the execution gap
+          type: object
+          properties:
+            gte:
+              description: Start date of the execution gap
+              type: string
+            lte:
+              description: End date of the execution gap
+              type: string
+          required:
+            - gte
+            - lte
         total_enrichment_duration_ms:
           description: Total time spent enriching documents during current rule execution cycle
           minimum: 0
@@ -51099,6 +51177,10 @@ components:
           type: string
         indexPattern:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_IndexPattern'
+        lookbackPeriod:
+          default: 24h
+          pattern: '[smdh]$'
+          type: string
         status:
           $ref: '#/components/schemas/Security_Entity_Analytics_API_EngineStatus'
         type:
@@ -51292,6 +51374,11 @@ components:
       required:
         - dsl
         - response
+    Security_Entity_Analytics_API_Interval:
+      description: Interval in which enrich policy runs. For example, `"1h"` means the rule runs every hour.
+      example: 1h
+      pattern: ^[1-9]\d*[smh]$
+      type: string
     Security_Entity_Analytics_API_RiskEngineScheduleNowErrorResponse:
       type: object
       properties:
