@@ -133,8 +133,6 @@ export function getInstallCommandForPlatform({
       : '<PATH_TO_FLEET_SERVER_CERT_KEY>';
 
     commandArguments.push(['certificate-authorities', certificateAuthorities]);
-    commandArguments.push(['fleet-server-cert', fleetServerCert]);
-    commandArguments.push(['fleet-server-cert-key', certificateKey]);
 
     if (!sslCATrustedFingerprint) {
       const esCert = fleetServerHost?.es_certificate
@@ -142,6 +140,8 @@ export function getInstallCommandForPlatform({
         : '<PATH_TO_ES_CERT>';
       commandArguments.push(['fleet-server-es-ca', esCert]);
     }
+    commandArguments.push(['fleet-server-cert', fleetServerCert]);
+    commandArguments.push(['fleet-server-cert-key', certificateKey]);
   }
 
   commandArguments.push(['fleet-server-port', '8220']);

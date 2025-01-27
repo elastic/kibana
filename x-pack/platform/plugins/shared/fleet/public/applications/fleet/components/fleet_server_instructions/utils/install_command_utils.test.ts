@@ -8,6 +8,14 @@
 import { getInstallCommandForPlatform } from './install_command_utils';
 
 describe('getInstallCommandForPlatform', () => {
+  const fleetServerHost = {
+    id: 'host-id1',
+    name: 'host',
+    host_urls: ['http://fleetserver:8220'],
+    is_default: false,
+    is_preconfigured: false,
+  };
+
   describe('without policy id', () => {
     it('should return the correct command if the the policyId is not set for linux', () => {
       const res = getInstallCommandForPlatform({
@@ -263,7 +271,7 @@ describe('getInstallCommandForPlatform', () => {
         esOutputHost: 'http://elasticsearch:9200',
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         isProductionDeployment: true,
       });
 
@@ -289,10 +297,9 @@ describe('getInstallCommandForPlatform', () => {
         esOutputHost: 'http://elasticsearch:9200',
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         isProductionDeployment: true,
       });
-
       expect(res).toMatchInlineSnapshot(`
         "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--darwin-aarch64.tar.gz
         tar xzvf elastic-agent--darwin-aarch64.tar.gz
@@ -315,7 +322,7 @@ describe('getInstallCommandForPlatform', () => {
         esOutputHost: 'http://elasticsearch:9200',
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         isProductionDeployment: true,
       });
 
@@ -342,7 +349,7 @@ describe('getInstallCommandForPlatform', () => {
         esOutputHost: 'http://elasticsearch:9200',
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         isProductionDeployment: true,
       });
 
@@ -369,7 +376,7 @@ describe('getInstallCommandForPlatform', () => {
         esOutputHost: 'http://elasticsearch:9200',
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         isProductionDeployment: true,
       });
 
@@ -389,6 +396,72 @@ describe('getInstallCommandForPlatform', () => {
           --fleet-server-port=8220"
       `);
     });
+
+    describe('with full fleet server hosts settings', () => {
+      it('should return the command with correct SSL options', () => {
+        const fullFleetServerHost = {
+          ...fleetServerHost,
+          certificate_authorities: 'cert authorities',
+          certificate: 'path/to/cert',
+          es_certificate: 'path/to/EScert',
+          certificate_key: '0939388u45r78457sdfjkhiughw',
+        };
+        const res = getInstallCommandForPlatform({
+          platform: 'linux',
+          esOutputHost: 'http://elasticsearch:9200',
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost: fullFleetServerHost,
+          isProductionDeployment: true,
+        });
+
+        expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
+        tar xzvf elastic-agent--linux-x86_64.tar.gz
+        cd elastic-agent--linux-x86_64
+        sudo ./elastic-agent install --url=http://fleetserver:8220 \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --certificate-authorities='cert authorities' \\\\
+          --fleet-server-es-ca='path/to/EScert' \\\\
+          --fleet-server-cert='path/to/cert' \\\\
+          --fleet-server-cert-key='0939388u45r78457sdfjkhiughw' \\\\
+          --fleet-server-port=8220"
+      `);
+      });
+      it('should return the command with SSL options and placeholders', () => {
+        const fullFleetServerHost = {
+          ...fleetServerHost,
+          certificate_authorities: 'cert authorities',
+          certificate: 'path/to/cert',
+          certificate_key: '0939388u45r78457sdfjkhiughw',
+        };
+        const res = getInstallCommandForPlatform({
+          platform: 'linux',
+          esOutputHost: 'http://elasticsearch:9200',
+          serviceToken: 'service-token-1',
+          policyId: 'policy-1',
+          fleetServerHost: fullFleetServerHost,
+          isProductionDeployment: true,
+        });
+
+        expect(res).toMatchInlineSnapshot(`
+        "curl -L -O https://artifacts.elastic.co/downloads/beats/elastic-agent/elastic-agent--linux-x86_64.tar.gz
+        tar xzvf elastic-agent--linux-x86_64.tar.gz
+        cd elastic-agent--linux-x86_64
+        sudo ./elastic-agent install --url=http://fleetserver:8220 \\\\
+          --fleet-server-es=http://elasticsearch:9200 \\\\
+          --fleet-server-service-token=service-token-1 \\\\
+          --fleet-server-policy=policy-1 \\\\
+          --certificate-authorities='cert authorities' \\\\
+          --fleet-server-es-ca=<PATH_TO_ES_CERT> \\\\
+          --fleet-server-cert='path/to/cert' \\\\
+          --fleet-server-cert-key='0939388u45r78457sdfjkhiughw' \\\\
+          --fleet-server-port=8220"
+      `);
+      });
+    });
   });
 
   describe('with simple proxy settings', () => {
@@ -404,7 +477,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -445,7 +518,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -486,7 +559,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -528,7 +601,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -570,7 +643,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -618,7 +691,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -669,7 +742,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -720,7 +793,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -772,7 +845,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',
@@ -824,7 +897,7 @@ describe('getInstallCommandForPlatform', () => {
         },
         serviceToken: 'service-token-1',
         policyId: 'policy-1',
-        fleetServerHost: 'http://fleetserver:8220',
+        fleetServerHost,
         downloadSource: {
           id: 'download-src',
           name: 'download-src',

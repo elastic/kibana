@@ -70,7 +70,35 @@ describe('useFleetServerHostsForm', () => {
     await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
   });
 
-  it('should allow the user to correct and submit a invalid form', async () => {
+  it('should submit a valid form with SSL options', async () => {
+    const testRenderer = createFleetTestRendererMock();
+    const onSuccess = jest.fn();
+    testRenderer.startServices.http.post.mockResolvedValue({});
+    const { result } = testRenderer.renderHook(() =>
+      useFleetServerHostsForm(
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: [],
+          is_default: false,
+          is_preconfigured: false,
+          certificate_authorities: 'cert authorities',
+          certificate: 'path/to/cert',
+          es_certificate: 'path/to/EScert',
+          certificate_key: '0939388u45r78457sdfjkhiughw',
+        },
+        onSuccess
+      )
+    );
+
+    act(() => result.current.inputs.hostUrlsInput.props.onChange(['https://test.fr']));
+
+    await act(() => result.current.submit());
+
+    await testRenderer.waitFor(() => expect(onSuccess).toBeCalled());
+  });
+
+  it('should allow the user to correct and submit an invalid form', async () => {
     const testRenderer = createFleetTestRendererMock();
     const onSuccess = jest.fn();
     testRenderer.startServices.http.post.mockResolvedValue({});

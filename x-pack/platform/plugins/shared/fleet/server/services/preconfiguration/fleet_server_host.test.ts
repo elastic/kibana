@@ -15,14 +15,14 @@ import {
   updateFleetServerHost,
 } from '../fleet_server_host';
 
+import type { FleetServerHost } from '../../../common/types';
+
 import {
   createCloudFleetServerHostIfNeeded,
   getCloudFleetServersHosts,
   getPreconfiguredFleetServerHostFromConfig,
   createOrUpdatePreconfiguredFleetServerHosts,
 } from './fleet_server_host';
-
-import type { FleetServerHost } from '../../../common/types';
 
 jest.mock('../fleet_server_host');
 jest.mock('../app_context');
@@ -55,6 +55,28 @@ describe('getPreconfiguredFleetServerHostFromConfig', () => {
           name: 'TEST',
           is_default: true,
           host_urls: ['http://test.fr'],
+        },
+      ],
+    };
+
+    const res = getPreconfiguredFleetServerHostFromConfig(config);
+
+    expect(res).toEqual(config.fleetServerHosts);
+  });
+
+  it('should work with preconfigured fleetServerHosts that have SSL options', () => {
+    const config = {
+      fleetServerHosts: [
+        {
+          id: 'id1',
+          name: 'fleet server 1',
+          host_urls: [],
+          is_default: false,
+          is_preconfigured: false,
+          certificate_authorities: 'cert authorities',
+          certificate: 'path/to/cert',
+          es_certificate: 'path/to/EScert',
+          certificate_key: '0939388u45r78457sdfjkhiughw',
         },
       ],
     };

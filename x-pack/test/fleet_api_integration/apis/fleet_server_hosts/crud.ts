@@ -106,6 +106,29 @@ export default function (providerContext: FtrProviderContext) {
         expect(fleetServerHost.name).to.eql('Default updated');
       });
 
+      it('should allow to update an existing fleet server host with SSL options', async function () {
+        await supertest
+          .put(`/api/fleet/fleet_server_hosts/${defaultFleetServerHostId}`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: 'Default',
+            certificate_authorities: 'cert authorities',
+            certificate: 'path/to/cert',
+            es_certificate: 'path/to/EScert',
+            certificate_key: '0939388u45r78457sdfjkhiughw',
+          })
+          .expect(200);
+
+        const {
+          body: { item: fleetServerHost },
+        } = await supertest
+          .get(`/api/fleet/fleet_server_hosts/${defaultFleetServerHostId}`)
+          .expect(200);
+
+        expect(fleetServerHost.certificate).to.eql('path/to/cert');
+        expect(fleetServerHost.certificate_authorities).to.eql('cert authorities');
+      });
+
       it('should return a 404 when updating a non existing fleet server host', async function () {
         await supertest
           .put(`/api/fleet/fleet_server_hosts/idonotexists`)
@@ -129,6 +152,33 @@ export default function (providerContext: FtrProviderContext) {
             host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
             is_default: true,
             id,
+          })
+          .expect(200);
+
+        const {
+          body: { item: fleetServerHost },
+        } = await supertest.get(`/api/fleet/fleet_server_hosts/${id}`).expect(200);
+
+        expect(fleetServerHost.is_default).to.be(true);
+      });
+
+      it('should allow to create a default fleet server host with SSL options', async function () {
+        const id = `test-${Date.now()}`;
+
+        await supertest
+          .post(`/api/fleet/fleet_server_hosts`)
+          .set('kbn-xsrf', 'xxxx')
+          .send({
+            name: `Default ${Date.now()}`,
+            host_urls: ['https://test.fr:8080', 'https://test.fr:8081'],
+            is_default: true,
+            id,
+            certificate_authorities: 'cert authorities',
+            certificate: 'path/to/cert',
+            certificate_key: '0939388u45r78457sdfjkhiughw',
+            es_certificate: 'path/to/EScert',
+            es_certificate_key: '89345y8934ydiufghuewh',
+            es_certificate_authorities: 'ES cert authorities',
           })
           .expect(200);
 
