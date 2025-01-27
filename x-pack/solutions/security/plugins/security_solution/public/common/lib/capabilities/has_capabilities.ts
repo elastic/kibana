@@ -42,13 +42,3 @@ export const hasCapabilities = (
     });
   }
 };
-
-/**
- * A class to check if capabilities are granted using the `RequiredCapabilities` format.
- */
-export class CapabilitiesChecker {
-  constructor(private readonly capabilities: Capabilities) {}
-  public has(requiredCapabilities: RequiredCapabilities): boolean {
-    return hasCapabilities(this.capabilities, requiredCapabilities);
-  }
-}

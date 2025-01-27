@@ -37,7 +37,6 @@ import {
   type SeparatorLinkCategory,
 } from '@kbn/security-solution-navigation';
 import type { SolutionSideNavItem } from './types';
-import { BetaBadge } from './beta_badge';
 import { TELEMETRY_EVENT } from './telemetry/const';
 import { useTelemetryContext } from './telemetry/telemetry_context';
 import {
@@ -388,12 +387,11 @@ const SolutionSideNavPanelItem: React.FC<SolutionSideNavPanelItemProps> = React.
  * Renders the navigation item label
  **/
 const ItemLabel: React.FC<{ item: SolutionSideNavItem }> = React.memo(function ItemLabel({
-  item: { label, openInNewTab, isBeta, betaOptions },
+  item: { label, openInNewTab },
 }) {
   return (
     <>
       {label} {openInNewTab && <EuiIcon type="popout" size="s" />}
-      {isBeta && <BetaBadge text={betaOptions?.text} />}
     </>
   );
 });

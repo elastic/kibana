@@ -7,7 +7,7 @@
 
 import { loadAllActions as loadConnectors } from '@kbn/triggers-actions-ui-plugin/public/common/constants';
 import type { AIConnector } from '@kbn/elastic-assistant/impl/connectorland/connector_selector';
-import { CapabilitiesChecker } from '../../../../../../common/lib/capabilities';
+import { CapabilitiesChecker } from '../../../../../../common/lib/capabilities/capabilities_checker';
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import { AIActionTypeIds } from '../../common/connectors/constants';
 import type { AIConnectorCardMetadata } from './types';

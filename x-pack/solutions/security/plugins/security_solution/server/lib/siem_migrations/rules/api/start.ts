@@ -54,6 +54,12 @@ export const registerSiemRuleMigrationsStartRoute = (
           try {
             const ctx = await context.resolve(['core', 'actions', 'alerting', 'securitySolution']);
 
+            // Check if the connector exists and user has permissions to read it
+            const connector = await ctx.actions.getActionsClient().get({ id: connectorId });
+            if (!connector) {
+              return res.badRequest({ body: `Connector with id ${connectorId} not found` });
+            }
+
             const ruleMigrationsClient = ctx.securitySolution.getSiemRuleMigrationsClient();
 
             if (retry) {

@@ -39,6 +39,11 @@ import {
   upsertMigrationResources,
   getIntegrations,
 } from '../api';
+import {
+  getMissingCapabilities,
+  type MissingCapability,
+  type CapabilitiesLevel,
+} from './capabilities';
 import type { RuleMigrationStats } from '../types';
 import { getSuccessToast } from './success_notification';
 import { RuleMigrationsStorage } from './storage';
@@ -76,8 +81,20 @@ export class SiemRulesMigrationsService {
     return this.latestStats$.asObservable();
   }
 
+  public getMissingCapabilities(level?: CapabilitiesLevel): MissingCapability[] {
+    return getMissingCapabilities(this.core.application.capabilities, level);
+  }
+
+  public hasMissingCapabilities(level?: CapabilitiesLevel): boolean {
+    return this.getMissingCapabilities(level).length > 0;
+  }
+
   public isAvailable() {
-    return ExperimentalFeaturesService.get().siemMigrationsEnabled && licenseService.isEnterprise();
+    return (
+      ExperimentalFeaturesService.get().siemMigrationsEnabled &&
+      licenseService.isEnterprise() &&
+      !this.hasMissingCapabilities('minimum')
+    );
   }
 
   public startPolling() {
@@ -174,8 +191,9 @@ export class SiemRulesMigrationsService {
     }
 
     return getRuleMigrationsStatsAll(params).catch((e) => {
-      // Retry only on network errors (no e.status) and 503 (Service Unavailable), otherwise throw
-      if (e.response.status || (e.status && e.status !== 503)) {
+      // Retry only on network errors (no status) and 503 (Service Unavailable), otherwise throw
+      const status = e.response?.status || e.status;
+      if (status && status !== 503) {
         throw e;
       }
       const nextSleepSecs = sleepSecs ? sleepSecs * 2 : 1; // Exponential backoff

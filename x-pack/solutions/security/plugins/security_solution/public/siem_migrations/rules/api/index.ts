@@ -25,6 +25,7 @@ import {
   SIEM_RULE_MIGRATION_RESOURCES_PATH,
   SIEM_RULE_MIGRATIONS_PREBUILT_RULES_PATH,
   SIEM_RULE_MIGRATIONS_INTEGRATIONS_PATH,
+  SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
 } from '../../../../common/siem_migrations/constants';
 import type {
   CreateRuleMigrationRequestBody,
@@ -42,6 +43,7 @@ import type {
   UpdateRuleMigrationResponse,
   StartRuleMigrationResponse,
   GetRuleMigrationIntegrationsResponse,
+  GetRuleMigrationPrivilegesResponse,
 } from '../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 
 export interface GetRuleMigrationStatsParams {
@@ -210,6 +212,20 @@ export const getRuleMigrations = async ({
       },
       signal,
     }
+  );
+};
+
+export interface GetRuleMigrationMissingPrivilegesParams {
+  /** Optional AbortSignal for cancelling request */
+  signal?: AbortSignal;
+}
+/** Retrieves all the migration rule documents of a specific migration. */
+export const getRuleMigrationMissingPrivileges = async ({
+  signal,
+}: GetRuleMigrationMissingPrivilegesParams): Promise<GetRuleMigrationPrivilegesResponse> => {
+  return KibanaServices.get().http.get<GetRuleMigrationPrivilegesResponse>(
+    SIEM_RULE_MIGRATION_MISSING_PRIVILEGES_PATH,
+    { version: '1', signal }
   );
 };
 

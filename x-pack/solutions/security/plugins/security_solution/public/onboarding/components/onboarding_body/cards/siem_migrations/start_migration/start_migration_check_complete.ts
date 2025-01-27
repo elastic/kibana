@@ -5,32 +5,17 @@
  * 2.0.
  */
 
-import {
-  SECURITY_FEATURE_ID_V2,
-  SIEM_MIGRATIONS_FEATURE_ID,
-} from '@kbn/security-solution-features/constants';
-import { CapabilitiesChecker } from '../../../../../../common/lib/capabilities';
 import { SiemMigrationTaskStatus } from '../../../../../../../common/siem_migrations/constants';
 
 import type { OnboardingCardCheckComplete } from '../../../../../types';
 import type { StartMigrationCardMetadata } from './types';
-import { CAPABILITIES_REQUIRED } from './translations';
 
 export const checkStartMigrationCardComplete: OnboardingCardCheckComplete<
   StartMigrationCardMetadata
-> = async ({ siemMigrations, application }) => {
-  const capabilities = new CapabilitiesChecker(application.capabilities);
-
-  const missingCapabilities: string[] = [];
-  if (!capabilities.has(`${SECURITY_FEATURE_ID_V2}.crud`)) {
-    missingCapabilities.push(CAPABILITIES_REQUIRED.securityAll);
-  }
-  if (!capabilities.has(`${SIEM_MIGRATIONS_FEATURE_ID}.all`)) {
-    missingCapabilities.push(CAPABILITIES_REQUIRED.siemMigrationsAll);
-  }
-  if (!capabilities.has('actions.execute')) {
-    missingCapabilities.push(CAPABILITIES_REQUIRED.connectorsRead);
-  }
+> = async ({ siemMigrations }) => {
+  const missingCapabilities = siemMigrations.rules
+    .getMissingCapabilities('all')
+    .map(({ description }) => description);
 
   let isComplete = false;
 
