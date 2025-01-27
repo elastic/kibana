@@ -1,19 +1,22 @@
 ## How to run tests
-First start the servers with
+
+You can drop the following in your terminal.
 
 ```bash
-// ESS
-node scripts/scout.js start-server --stateful
+run_tests() {
+  local suit_name=$1
+  local config_path=$2
+  local run_mode=$3
 
-// Serverless
-node scripts/scout.js start-server --serverless=[es|oblt|security]
+  echo "--- $suit_name ($run_mode) UI Tests"
+  if ! node scripts/scout run-tests "$run_mode" --config "$config_path"; then
+    echo "$suit_name: failed"
+  else
+    echo "$suit_name: passed"
+  fi
+}
+
+for run_mode in "--stateful" "--serverless=es" "--serverless=oblt" "--serverless=security"; do
+  run_tests "Maps" "x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts" "$run_mode"
+done
 ```
-
-Then you can run the tests multiple times in another terminal with:
-
-```bash
-// ESS
-npx playwright test --config x-pack/platform/plugins/shared/maps/ui_tests/playwright.config.ts
-```
-
-Test results are available in `x-pack/plugins/maps/ui_tests/output`
