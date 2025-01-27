@@ -5,16 +5,16 @@
  * 2.0.
  */
 
+import type { ActionsClient } from '@kbn/actions-plugin/server';
+import type { Logger } from '@kbn/core/server';
 import type { ActionsClientSimpleChatModel } from '@kbn/langchain/server';
 import {
   ActionsClientBedrockChatModel,
   ActionsClientChatOpenAI,
   ActionsClientChatVertexAI,
 } from '@kbn/langchain/server';
-import type { Logger } from '@kbn/core/server';
-import type { ActionsClient } from '@kbn/actions-plugin/server';
-import type { ActionsClientChatOpenAIParams } from '@kbn/langchain/server/language_models/chat_openai';
 import type { CustomChatModelInput as ActionsClientBedrockChatModelParams } from '@kbn/langchain/server/language_models/bedrock_chat';
+import type { ActionsClientChatOpenAIParams } from '@kbn/langchain/server/language_models/chat_openai';
 import type { CustomChatModelInput as ActionsClientChatVertexAIParams } from '@kbn/langchain/server/language_models/gemini_chat';
 import type { CustomChatModelInput as ActionsClientSimpleChatModelParams } from '@kbn/langchain/server/language_models/simple_chat_model';
 
@@ -39,6 +39,7 @@ const llmTypeDictionary: Record<string, string> = {
   [`.gen-ai`]: `openai`,
   [`.bedrock`]: `bedrock`,
   [`.gemini`]: `gemini`,
+  [`.inference`]: `inference`,
 };
 
 export class ActionsClientChat {
@@ -83,6 +84,7 @@ export class ActionsClientChat {
       case 'gemini':
         return ActionsClientChatVertexAI;
       case 'openai':
+      case 'inference':
       default:
         return ActionsClientChatOpenAI;
     }
