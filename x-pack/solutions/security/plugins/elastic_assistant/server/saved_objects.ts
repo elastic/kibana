@@ -9,5 +9,10 @@ import type { CoreSetup } from '@kbn/core/server';
 import { promptType } from './lib/prompt/saved_object_mappings';
 
 export const initSavedObjects = (savedObjects: CoreSetup['savedObjects']) => {
-  savedObjects.registerType(promptType);
+  try {
+    savedObjects.registerType(promptType);
+  } catch (e) {
+    // implementation intends to fall back to reasonable defaults when the saved objects are unavailable
+    // do not block the plugin from starting
+  }
 };
