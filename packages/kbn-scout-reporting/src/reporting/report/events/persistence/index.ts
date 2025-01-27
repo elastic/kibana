@@ -179,7 +179,7 @@ export async function uploadScoutReportEvents(eventLogPath: string, log?: Toolin
         rejectUnauthorized: SCOUT_REPORTER_ES_VERIFY_CERTS,
       },
     },
-    log
+    { log }
   );
 
   const reportDataStream = new ScoutReportDataStream(es, logger);

@@ -47,8 +47,7 @@ export const initializeReportDatastream: Command<void> = {
           rejectUnauthorized: flagsReader.boolean('verifyTLSCerts'),
         },
       },
-      log,
-      true
+      { log, cli: true }
     );
 
     // Initialize the report datastream

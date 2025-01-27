@@ -52,8 +52,7 @@ export const uploadEvents: Command<void> = {
           rejectUnauthorized: flagsReader.boolean('verifyTLSCerts'),
         },
       },
-      log,
-      true
+      { log, cli: true }
     );
 
     // Event log upload
