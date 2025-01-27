@@ -48,6 +48,7 @@ export const GroupSelectorMenu = ({
   const popoverId = `mlAnomalyGroupPopover-${groupId}`;
   const button = (
     <EuiButton
+      data-test-subj="mlJobSelectionBadge"
       iconType="folderClosed"
       iconSide="left"
       onClick={onButtonClick}

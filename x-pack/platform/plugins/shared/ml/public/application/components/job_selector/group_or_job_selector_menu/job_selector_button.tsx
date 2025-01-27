@@ -87,6 +87,7 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
 
   const button = (
     <EuiButton
+      data-test-subj="mlJobSelectionBadge"
       iconType="boxesVertical"
       iconSide="right"
       onClick={onButtonClick}
