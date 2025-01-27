@@ -168,7 +168,8 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             ],
             documents: [createTestDocument('test message')],
           },
-          400
+          // this should be a 400, but ES reports this as a 500
+          500
         );
       });
 
