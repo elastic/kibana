@@ -1331,7 +1331,7 @@ paths:
         - Security Detections API
         - Alerts migration API
   /api/detection_engine/signals/migration_status:
-    post:
+    get:
       deprecated: true
       description: >-
         Retrieve indices that contain detection alerts of a particular age,

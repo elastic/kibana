@@ -4,7 +4,7 @@ info:
   version: '2023-10-31'
 paths:
   /api/detection_engine/signals/migration_status:
-    post:
+    get:
       x-labels: [ess]
       operationId: ReadAlertsMigrationStatus
       x-codegen-enabled: true
