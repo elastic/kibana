@@ -32,6 +32,10 @@ components:
           type: string
         fieldHistoryLength:
           type: integer
+        lookbackPeriod: 
+          type: string
+          default: 24h
+          pattern: '[smdh]$'
         error:
           type: object
 
