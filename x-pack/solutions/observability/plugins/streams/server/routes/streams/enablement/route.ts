@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import { badRequest, internal } from '@hapi/boom';
 import { z } from '@kbn/zod';
-import { SecurityException } from '../../../lib/streams/errors';
-import { createServerRoute } from '../../create_server_route';
 import { DisableStreamsResponse, EnableStreamsResponse } from '../../../lib/streams/client';
+import { createServerRoute } from '../../create_server_route';
 
 export const enableStreamsRoute = createServerRoute({
   endpoint: 'POST /api/streams/_enable',
@@ -25,18 +23,11 @@ export const enableStreamsRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<EnableStreamsResponse> => {
-    try {
-      const { streamsClient } = await getScopedClients({
-        request,
-      });
+    const { streamsClient } = await getScopedClients({
+      request,
+    });
 
-      return await streamsClient.enableStreams();
-    } catch (e) {
-      if (e instanceof SecurityException) {
-        throw badRequest(e);
-      }
-      throw internal(e);
-    }
+    return await streamsClient.enableStreams();
   },
 });
 
@@ -52,16 +43,9 @@ export const disableStreamsRoute = createServerRoute({
     },
   },
   handler: async ({ request, getScopedClients }): Promise<DisableStreamsResponse> => {
-    try {
-      const { streamsClient } = await getScopedClients({ request });
+    const { streamsClient } = await getScopedClients({ request });
 
-      return await streamsClient.disableStreams();
-    } catch (e) {
-      if (e instanceof SecurityException) {
-        throw badRequest(e);
-      }
-      throw internal(e);
-    }
+    return await streamsClient.disableStreams();
   },
 });
 

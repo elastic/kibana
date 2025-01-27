@@ -11,6 +11,7 @@ import { StreamDefinitionBase } from '../base';
 import { FieldDefinition, fieldDefinitionSchema } from './fields';
 import { ProcessorDefinition, processorDefinitionSchema } from './processors';
 import { RoutingDefinition, routingDefinitionSchema } from './routing';
+import { IngestStreamLifecycle, ingestStreamLifecycleSchema } from './lifecycle';
 
 interface IngestBase {
   processing: ProcessorDefinition[];
@@ -21,6 +22,7 @@ interface WiredIngest extends IngestBase {
   wired: {
     fields: FieldDefinition;
   };
+  lifecycle: IngestStreamLifecycle;
 }
 
 interface UnwiredIngest extends IngestBase {
@@ -63,6 +65,7 @@ const wiredIngestSchema: z.Schema<WiredIngest> = z.intersection(
     wired: z.object({
       fields: fieldDefinitionSchema,
     }),
+    lifecycle: ingestStreamLifecycleSchema,
   })
 );
 
