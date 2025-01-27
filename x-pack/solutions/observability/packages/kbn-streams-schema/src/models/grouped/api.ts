@@ -7,6 +7,7 @@
 import { z } from '@kbn/zod';
 import {
   StreamGetResponseBase,
+  streamGetResponseSchemaBase,
   StreamUpsertRequestBase,
   streamUpsertRequestSchemaBase,
 } from '../base/api';
@@ -26,6 +27,13 @@ interface GroupedStreamUpsertRequest extends StreamUpsertRequestBase {
   stream: GroupedStreamDefinitionBase;
 }
 
+const groupedStreamGetResponseSchema: z.Schema<GroupedStreamGetResponse> = z.intersection(
+  streamGetResponseSchemaBase,
+  z.object({
+    stream: groupedStreamDefinitionBaseSchema,
+  })
+);
+
 const groupedStreamUpsertRequestSchema: z.Schema<GroupedStreamUpsertRequest> = z.intersection(
   streamUpsertRequestSchemaBase,
   z.object({
@@ -36,5 +44,6 @@ const groupedStreamUpsertRequestSchema: z.Schema<GroupedStreamUpsertRequest> = z
 export {
   type GroupedStreamGetResponse,
   type GroupedStreamUpsertRequest,
+  groupedStreamGetResponseSchema,
   groupedStreamUpsertRequestSchema,
 };

@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { isUnWiredStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -36,7 +36,7 @@ export function StreamDetailView() {
     refresh,
     loading,
   } = useStreamsAppFetch(
-    ({ signal }) => {
+    async ({ signal }) => {
       return streamsRepositoryClient
         .fetch('GET /api/streams/{id}', {
           signal,
@@ -61,17 +61,20 @@ export function StreamDetailView() {
             };
           }
 
-          return {
-            dashboards: response.dashboards,
-            elasticsearch_assets: response.elasticsearch_assets,
-            inherited_fields: {},
-            effective_lifecycle: response.effective_lifecycle,
-            name: key,
-            stream: {
+          if (isUnWiredStreamGetResponse(response)) {
+            return {
+              dashboards: response.dashboards,
+              elasticsearch_assets: response.elasticsearch_assets,
+              inherited_fields: {},
+              effective_lifecycle: response.effective_lifecycle,
               name: key,
-              ...response.stream,
-            },
-          };
+              stream: {
+                name: key,
+                ...response.stream,
+              },
+            };
+          }
+          throw new Error('Stream detail only supports IngestStreams.');
         });
     },
     [streamsRepositoryClient, key]
