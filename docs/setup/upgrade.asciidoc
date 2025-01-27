@@ -77,5 +77,3 @@ include::upgrade/saved-objects-migration.asciidoc[]
 include::upgrade/resolving-migration-failures.asciidoc[]
 
 include::upgrade/rollback-migration.asciidoc[]
-
-include::{kibana-root}/docs/settings/logging-settings.asciidoc[]
