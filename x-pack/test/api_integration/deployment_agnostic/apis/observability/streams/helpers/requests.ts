@@ -74,3 +74,20 @@ export async function putStream(
     .expect(expectStatusCode)
     .then((response) => response.body);
 }
+
+export async function getStream(
+  apiClient: StreamsSupertestRepositoryClient,
+  name: string,
+  expectStatusCode: number = 200
+) {
+  return await apiClient
+    .fetch('GET /api/streams/{id}', {
+      params: {
+        path: {
+          id: name,
+        },
+      },
+    })
+    .expect(expectStatusCode)
+    .then((response) => response.body);
+}
