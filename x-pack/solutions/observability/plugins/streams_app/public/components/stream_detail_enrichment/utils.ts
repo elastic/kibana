@@ -7,19 +7,16 @@
 
 /* eslint-disable @typescript-eslint/naming-convention */
 
-import {
-  ProcessorDefinition,
-  ProcessorType,
-  isDissectProcessorDefinition,
-  isGrokProcessorDefinition,
-} from '@kbn/streams-schema';
+import { ProcessorDefinition, ProcessorType, getProcessorType } from '@kbn/streams-schema';
+import { htmlIdGenerator } from '@elastic/eui';
 import {
   DissectFormState,
-  ProcessorDefinitionWithId,
+  ProcessorDefinitionWithUIAttributes,
   GrokFormState,
   ProcessorFormState,
+  WithUIAttributes,
 } from './types';
-import { EMPTY_EQUALS_CONDITION } from '../../util/condition';
+import { ALWAYS_CONDITION } from '../../util/condition';
 
 const defaultGrokProcessorFormState: GrokFormState = {
   type: 'grok',
@@ -28,7 +25,7 @@ const defaultGrokProcessorFormState: GrokFormState = {
   pattern_definitions: {},
   ignore_failure: true,
   ignore_missing: true,
-  if: EMPTY_EQUALS_CONDITION,
+  if: ALWAYS_CONDITION,
 };
 
 const defaultDissectProcessorFormState: DissectFormState = {
@@ -37,7 +34,7 @@ const defaultDissectProcessorFormState: DissectFormState = {
   pattern: '',
   ignore_failure: true,
   ignore_missing: true,
-  if: EMPTY_EQUALS_CONDITION,
+  if: ALWAYS_CONDITION,
 };
 
 const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState> = {
@@ -47,11 +44,11 @@ const defaultProcessorFormStateByType: Record<ProcessorType, ProcessorFormState>
 
 export const getDefaultFormState = (
   type: ProcessorType,
-  processor?: ProcessorDefinitionWithId
+  processor?: ProcessorDefinitionWithUIAttributes
 ): ProcessorFormState => {
   if (!processor) return defaultProcessorFormStateByType[type];
 
-  if (isGrokProcessorDefinition(processor)) {
+  if (isGrokProcessor(processor)) {
     const { grok } = processor;
 
     return structuredClone({
@@ -61,7 +58,7 @@ export const getDefaultFormState = (
     });
   }
 
-  if (isDissectProcessorDefinition(processor)) {
+  if (isDissectProcessor(processor)) {
     const { dissect } = processor;
 
     return structuredClone({
@@ -105,4 +102,38 @@ export const convertFormStateToProcessor = (formState: ProcessorFormState): Proc
   }
 
   throw new Error('Cannot convert form state to processing: unknown type.');
+};
+
+const createProcessorGuardByType =
+  <TProcessorType extends ProcessorType>(type: TProcessorType) =>
+  (
+    processor: ProcessorDefinitionWithUIAttributes
+  ): processor is WithUIAttributes<
+    Extract<ProcessorDefinition, { [K in TProcessorType]: unknown }>
+  > =>
+    processor.type === type;
+
+export const isGrokProcessor = createProcessorGuardByType('grok');
+export const isDissectProcessor = createProcessorGuardByType('dissect');
+
+const createId = htmlIdGenerator();
+const toUIDefinition = <TProcessorDefinition extends ProcessorDefinition>(
+  processor: TProcessorDefinition,
+  uiAttributes: Partial<Pick<WithUIAttributes<TProcessorDefinition>, 'status'>> = {}
+): ProcessorDefinitionWithUIAttributes => ({
+  id: createId(),
+  status: 'saved',
+  type: getProcessorType(processor),
+  ...uiAttributes,
+  ...processor,
+});
+
+const toAPIDefinition = (processor: ProcessorDefinitionWithUIAttributes): ProcessorDefinition => {
+  const { id, status, type, ...processorConfig } = processor;
+  return processorConfig;
+};
+
+export const processorConverter = {
+  toAPIDefinition,
+  toUIDefinition,
 };

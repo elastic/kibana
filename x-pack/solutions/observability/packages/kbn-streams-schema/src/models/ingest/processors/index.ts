@@ -78,7 +78,7 @@ export type ProcessorConfig = BodyOf<ProcessorDefinition>;
 
 export type ProcessorType = UnionKeysOf<ProcessorDefinition>;
 
-type ProcessorTypeOf<TProcessorDefinition extends ProcessorDefinition> =
+export type ProcessorTypeOf<TProcessorDefinition extends ProcessorDefinition> =
   UnionKeysOf<TProcessorDefinition> & ProcessorType;
 
 export const processorDefinitionSchema: z.ZodType<ProcessorDefinition> = z.union([

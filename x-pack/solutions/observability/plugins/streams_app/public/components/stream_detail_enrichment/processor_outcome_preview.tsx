@@ -44,23 +44,21 @@ import { UseProcessingSimulatorReturnType } from './hooks/use_processing_simulat
 
 interface ProcessorOutcomePreviewProps {
   definition: ReadStreamDefinition;
-  formFields: ProcessorFormState;
+  columns: string[];
   isLoading: UseProcessingSimulatorReturnType['isLoading'];
   simulation: UseProcessingSimulatorReturnType['simulation'];
   samples: UseProcessingSimulatorReturnType['samples'];
   onRefreshSamples: UseProcessingSimulatorReturnType['refreshSamples'];
-  onSimulate: UseProcessingSimulatorReturnType['simulate'];
   simulationError: UseProcessingSimulatorReturnType['error'];
 }
 
 export const ProcessorOutcomePreview = ({
   definition,
-  formFields,
+  columns,
   isLoading,
   simulation,
   samples,
   onRefreshSamples,
-  onSimulate,
   simulationError,
 }: ProcessorOutcomePreviewProps) => {
   const { dependencies } = useKibana();
@@ -91,30 +89,30 @@ export const ProcessorOutcomePreview = ({
     return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
   }, [samples, simulation?.documents, selectedDocsFilter]);
 
-  const detectedFieldsColumns = useMemo(
-    () =>
-      simulation?.detected_fields ? simulation.detected_fields.map((field) => field.name) : [],
-    [simulation?.detected_fields]
-  );
+  // const detectedFieldsColumns = useMemo(
+  //   () =>
+  //     simulation?.detected_fields ? simulation.detected_fields.map((field) => field.name) : [],
+  //   [simulation?.detected_fields]
+  // );
 
   const tableColumns = useMemo(() => {
     switch (selectedDocsFilter) {
       case 'outcome_filter_unmatched':
-        return [formFields.field];
+        return columns;
       case 'outcome_filter_matched':
       case 'outcome_filter_all':
       default:
-        return [formFields.field, ...detectedFieldsColumns];
+        return columns;
     }
-  }, [formFields.field, detectedFieldsColumns, selectedDocsFilter]);
+  }, [columns, selectedDocsFilter]);
 
-  const detectedFieldsEnabled =
-    isWiredReadStream(definition) &&
-    ((simulation && !isEmpty(simulation.detected_fields)) || !isEmpty(formFields.detected_fields));
+  // const detectedFieldsEnabled =
+  //   isWiredReadStream(definition) &&
+  //   ((simulation && !isEmpty(simulation.detected_fields)) || !isEmpty(formFields.detected_fields));
 
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      {/* <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiTitle size="xs">
           <h3>
             {i18n.translate(
@@ -138,8 +136,8 @@ export const ProcessorOutcomePreview = ({
           )}
         </EuiButton>
       </EuiFlexGroup>
-      <EuiSpacer />
-      {detectedFieldsEnabled && <DetectedFields detectedFields={simulation?.detected_fields} />}
+      <EuiSpacer /> */}
+      {/* {detectedFieldsEnabled && <DetectedFields detectedFields={simulation?.detected_fields} />} */}
       <OutcomeControls
         docsFilter={selectedDocsFilter}
         onDocsFilterChange={setSelectedDocsFilter}

@@ -19,7 +19,11 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition, isRootStreamDefinition } from '@kbn/streams-schema';
+import {
+  ReadStreamDefinition,
+  getProcessorConfig,
+  isRootStreamDefinition,
+} from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { useDefinition } from './hooks/use_definition';
@@ -29,6 +33,8 @@ import { DraggableProcessorListItem } from './processors_list';
 import { SortableList } from './sortable_list';
 import { ManagementBottomBar } from '../management_bottom_bar';
 import { AddProcessorPanel } from './processors';
+import { SimulationPlayground } from './simulation_playground';
+import { useProcessingSimulator } from './hooks/use_processing_simulator';
 
 interface StreamDetailEnrichmentContentProps {
   definition: ReadStreamDefinition;
@@ -52,6 +58,14 @@ export function StreamDetailEnrichmentContent({
     hasChanges,
     isSavingChanges,
   } = useDefinition(definition, refreshDefinition);
+
+  const { error, isLoading, refreshSamples, simulation, samples } = useProcessingSimulator({
+    definition,
+    condition: {
+      field: processors[0] ? getProcessorConfig(processors[0]).field : '',
+      operator: 'exists',
+    },
+  });
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
@@ -126,10 +140,15 @@ export function StreamDetailEnrichmentContent({
               <EuiResizableButton indicator="border" accountForScrollbars="both" />
 
               <EuiResizablePanel initialSize={70} minSize="300px" tabIndex={0} paddingSize="none">
-                {i18n.translate(
-                  'xpack.streams.streamDetailEnrichmentContent.dadbksaldResizablePanelLabel',
-                  { defaultMessage: 'dadbksald' }
-                )}
+                <SimulationPlayground
+                  definition={definition}
+                  columns={['message']} // TODO: get columns from definition
+                  simulation={simulation}
+                  samples={samples}
+                  onRefreshSamples={refreshSamples}
+                  simulationError={error}
+                  isLoading={isLoading}
+                />
               </EuiResizablePanel>
             </>
           )}

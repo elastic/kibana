@@ -10,13 +10,16 @@ import {
   FieldDefinitionType,
   GrokProcessorConfig,
   ProcessorDefinition,
+  ProcessorTypeOf,
 } from '@kbn/streams-schema';
 
-export type WithId<T> = T & {
+export type WithUIAttributes<T extends ProcessorDefinition> = T & {
   id: string;
+  type: ProcessorTypeOf<T>;
+  status: 'draft' | 'saved' | 'updated';
 };
 
-export type ProcessorDefinitionWithId = WithId<ProcessorDefinition>;
+export type ProcessorDefinitionWithUIAttributes = WithUIAttributes<ProcessorDefinition>;
 
 export interface DetectedField {
   name: string;

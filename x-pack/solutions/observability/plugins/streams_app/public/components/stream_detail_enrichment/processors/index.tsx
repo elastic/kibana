@@ -18,6 +18,7 @@ import {
   EuiButtonIcon,
   EuiIcon,
   EuiText,
+  EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import {
@@ -35,8 +36,13 @@ import { useBoolean } from '@kbn/react-hooks';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
-import { DetectedField, ProcessorFormState, ProcessorDefinitionWithId } from '../types';
-import { getDefaultFormState, convertFormStateToProcessor } from '../utils';
+import { DetectedField, ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
+import {
+  getDefaultFormState,
+  convertFormStateToProcessor,
+  isGrokProcessor,
+  isDissectProcessor,
+} from '../utils';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 
 export interface ProcessorPanelProps {
@@ -49,9 +55,9 @@ export interface AddProcessorPanelProps extends ProcessorPanelProps {
 }
 
 export interface EditProcessorPanelProps extends ProcessorPanelProps {
-  processor: ProcessorDefinitionWithId;
+  processor: ProcessorDefinitionWithUIAttributes;
   onDeleteProcessor: (id: string) => void;
-  onUpdateProcessor: (id: string, processor: ProcessorDefinitionWithId) => void;
+  onUpdateProcessor: (id: string, processor: ProcessorDefinition) => void;
 }
 
 export function AddProcessorPanel({ onAddProcessor }: AddProcessorPanelProps) {
@@ -160,13 +166,9 @@ export function EditProcessorPanel({
   const { euiTheme } = useEuiTheme();
   const [isOpen, { on: openPanel, off: closePanel }] = useBoolean();
 
-  const processorType = getProcessorType(processor);
   const processorDescription = getProcessorDescription(processor);
 
-  const defaultValues = useMemo(
-    () => getDefaultFormState(processorType, processor),
-    [processor, processorType]
-  );
+  const defaultValues = useMemo(() => getDefaultFormState(processor.type, processor), [processor]);
 
   const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
@@ -178,9 +180,9 @@ export function EditProcessorPanel({
   );
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
-    const processingDefinition = convertFormStateToProcessor(data);
+    const processorDefinition = convertFormStateToProcessor(data);
 
-    onUpdateProcessor(processor.id, { id: processor.id, ...processingDefinition });
+    onUpdateProcessor(processor.id, processorDefinition);
     closePanel();
   };
 
@@ -203,20 +205,24 @@ export function EditProcessorPanel({
   });
 
   const buttonContent = isOpen ? (
-    <strong>{processorType.toUpperCase()}</strong>
+    <strong>{processor.type.toUpperCase()}</strong>
   ) : (
     <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
       <EuiIcon type="grab" />
-      <strong>{processorType.toUpperCase()}</strong>
+      <strong>{processor.type.toUpperCase()}</strong>
       <EuiText component="span" size="s" color="subdued" className="eui-textTruncate">
         {processorDescription}
       </EuiText>
     </EuiFlexGroup>
   );
 
+  const isDraft = processor.status === 'draft';
+  const isUnsaved = isDraft || processor.status === 'updated';
+
   return (
     <EuiPanel
       hasBorder
+      color={isDraft ? 'subdued' : undefined}
       css={css`
         padding: ${euiTheme.size.m};
       `}
@@ -257,16 +263,26 @@ export function EditProcessorPanel({
               </EuiButton>
             </EuiFlexGroup>
           ) : (
-            <EuiButtonIcon
-              onClick={openPanel}
-              iconType="pencil"
-              color="text"
-              size="xs"
-              aria-label={i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.editProcessorAction',
-                { defaultMessage: 'Edit {type} processor', values: { type: processorType } }
+            <EuiFlexGroup alignItems="center" gutterSize="s">
+              {isUnsaved && (
+                <EuiBadge>
+                  {i18n.translate(
+                    'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.unsavedBadge',
+                    { defaultMessage: 'Unsaved' }
+                  )}
+                </EuiBadge>
               )}
-            />
+              <EuiButtonIcon
+                onClick={openPanel}
+                iconType="pencil"
+                color="text"
+                size="xs"
+                aria-label={i18n.translate(
+                  'xpack.streams.streamDetailView.managementTab.enrichment.editProcessorAction',
+                  { defaultMessage: 'Edit {type} processor', values: { type: processor.type } }
+                )}
+              />
+            </EuiFlexGroup>
           )
         }
       >
@@ -308,10 +324,10 @@ const deleteProcessorMessage = i18n.translate(
   { defaultMessage: 'Deleting this processor will permanently impact the field configuration.' }
 );
 
-const getProcessorDescription = (processor: ProcessorDefinitionWithId) => {
-  if (isGrokProcessorDefinition(processor)) {
+const getProcessorDescription = (processor: ProcessorDefinitionWithUIAttributes) => {
+  if (isGrokProcessor(processor)) {
     return processor.grok.patterns.join(' • ');
-  } else if (isDissectProcessorDefinition(processor)) {
+  } else if (isDissectProcessor(processor)) {
     return processor.dissect.pattern;
   }
 

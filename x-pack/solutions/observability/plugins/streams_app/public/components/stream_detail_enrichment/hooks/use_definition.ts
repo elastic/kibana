@@ -16,11 +16,12 @@ import {
   WiredReadStreamDefinition,
   IngestUpsertRequest,
   ProcessorDefinition,
+  getProcessorType,
 } from '@kbn/streams-schema';
-import { htmlIdGenerator } from '@elastic/eui';
 import { isEqual } from 'lodash';
-import { DetectedField, ProcessorDefinitionWithId } from '../types';
+import { DetectedField } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
+import { processorConverter } from '../utils';
 
 export const useDefinition = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
   const { core, dependencies } = useKibana();
@@ -40,7 +41,7 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   );
 
   const nextProcessorDefinitions = useMemo(
-    () => processors.map(convertUiDefinitionIntoApiDefinition),
+    () => processors.map(processorConverter.toAPIDefinition),
     [processors]
   );
 
@@ -50,21 +51,32 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   }, [definition]);
 
   const hasChanges = useMemo(
-    () => !isEqual(existingProcessorDefinitions, nextProcessorDefinitions),
-    [existingProcessorDefinitions, nextProcessorDefinitions]
+    () => processors.some((proc) => proc.status === 'draft' || proc.status === 'updated'),
+    [processors]
   );
 
-  const addProcessor = (newProcessing: ProcessorDefinition, newFields?: DetectedField[]) => {
-    setProcessors((prevProcs) => prevProcs.concat({ ...newProcessing, id: createId() }));
+  const addProcessor = (newProcessor: ProcessorDefinition, newFields?: DetectedField[]) => {
+    setProcessors((prevProcs) =>
+      prevProcs.concat(processorConverter.toUIDefinition(newProcessor, { status: 'draft' }))
+    );
 
     if (isWiredReadStream(definition) && newFields) {
       setFields((currentFields) => mergeFields(definition, currentFields, newFields));
     }
   };
 
-  const updateProcessor = (id: string, processorUpdate: ProcessorDefinitionWithId) => {
+  const updateProcessor = (id: string, processorUpdate: ProcessorDefinition) => {
     setProcessors((prevProcs) =>
-      prevProcs.map((proc) => (proc.id === id ? processorUpdate : proc))
+      prevProcs.map((proc) =>
+        proc.id === id
+          ? {
+              ...processorUpdate,
+              id,
+              type: getProcessorType(processorUpdate),
+              status: 'updated',
+            }
+          : proc
+      )
     );
   };
 
@@ -132,20 +144,8 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   };
 };
 
-const createId = htmlIdGenerator();
-const createProcessorsList = (processors: ProcessorDefinition[]): ProcessorDefinitionWithId[] =>
-  processors.map(createProcessorWithId);
-
-const createProcessorWithId = (processor: ProcessorDefinition): ProcessorDefinitionWithId => ({
-  id: createId(),
-  ...processor,
-});
-
-const convertUiDefinitionIntoApiDefinition = (
-  processor: ProcessorDefinitionWithId
-): ProcessorDefinition => {
-  const { id, ...processorConfig } = processor;
-  return processorConfig;
+const createProcessorsList = (processors: ProcessorDefinition[]) => {
+  return processors.map((processor) => processorConverter.toUIDefinition(processor));
 };
 
 const mergeFields = (
