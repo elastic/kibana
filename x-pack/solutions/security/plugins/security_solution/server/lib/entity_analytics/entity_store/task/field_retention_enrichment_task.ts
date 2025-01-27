@@ -24,7 +24,7 @@ import {
   stateSchemaByVersion,
   type LatestTaskStateSchema as EntityStoreFieldRetentionTaskState,
 } from './state';
-import { INTERVAL, SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
+import { SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
 import type { EntityAnalyticsRoutesDeps } from '../../types';
 
 import { executeFieldRetentionEnrichPolicy } from '../elasticsearch_assets';
@@ -120,10 +120,12 @@ export const startEntityStoreFieldRetentionEnrichTask = async ({
   logger,
   namespace,
   taskManager,
+  interval,
 }: {
   logger: Logger;
   namespace: string;
   taskManager: TaskManagerStartContract;
+  interval: string;
 }) => {
   const taskId = getTaskId(namespace);
   const log = logFactory(logger, taskId);
@@ -136,7 +138,7 @@ export const startEntityStoreFieldRetentionEnrichTask = async ({
       taskType: getTaskName(),
       scope: SCOPE,
       schedule: {
-        interval: INTERVAL,
+        interval,
       },
       state: { ...defaultState, namespace },
       params: { version: VERSION },
@@ -234,7 +236,7 @@ export const runTask = async ({
 
     telemetry.reportEvent(FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT.eventType, {
       duration: taskDurationInSeconds,
-      interval: INTERVAL,
+      interval: taskInstance.schedule?.interval,
     });
 
     // Track entity store usage
