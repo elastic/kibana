@@ -7452,6 +7452,10 @@ paths:
             schema:
               type: object
               properties:
+                entityTypes:
+                  items:
+                    $ref: '#/components/schemas/Security_Entity_Analytics_API_EntityType'
+                  type: array
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.

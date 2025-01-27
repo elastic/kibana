@@ -219,7 +219,12 @@ export class EntityStoreDataClient {
       new Promise<T>((resolve) => setTimeout(() => fn().then(resolve), 0));
 
     const { experimentalFeatures } = this.options;
-    const enginesTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+    const enabledEntityTypes = getEnabledStoreEntityTypes(experimentalFeatures);
+
+    // When entityTypes param is defined it only enables the engines that are provided
+    const enginesTypes = entityTypes
+      ? (entityTypes as EntityType[]).filter((type) => enabledEntityTypes.includes(type))
+      : enabledEntityTypes;
 
     const promises = enginesTypes.map((entity) =>
       run(() =>
