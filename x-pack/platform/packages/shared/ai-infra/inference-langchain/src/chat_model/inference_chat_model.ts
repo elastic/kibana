@@ -30,6 +30,7 @@ import {
   RunnableLambda,
 } from '@langchain/core/runnables';
 import {
+  InferenceConnector,
   ChatCompleteAPI,
   ChatCompleteOptions,
   ChatCompleteCompositeResponse,
@@ -54,7 +55,7 @@ import {
 export interface InferenceChatModelParams
   extends BaseChatModelParams,
     Partial<InferenceChatModelCallOptions> {
-  connectorId: string;
+  connector: InferenceConnector;
   chatComplete: ChatCompleteAPI;
 }
 
@@ -83,7 +84,7 @@ type InvocationParams = Omit<ChatCompleteOptions, 'messages' | 'system' | 'strea
  */
 export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOptions> {
   private readonly chatComplete: ChatCompleteAPI;
-  private readonly connectorId: string;
+  private readonly connector: InferenceConnector;
 
   protected temperature?: number;
   protected functionCallingMode?: FunctionCallingMode;
@@ -94,7 +95,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   constructor(args: InferenceChatModelParams) {
     super(args);
     this.chatComplete = args.chatComplete;
-    this.connectorId = args.connectorId;
+    this.connector = args.connector;
     this.temperature = args.temperature;
     this.functionCallingMode = args.functionCallingMode;
     this.model = args.model;
@@ -118,12 +119,14 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
   }
 
   _llmType() {
+    // TODO
     // ideally retrieve info from the inference API / connector
     // but the method is sync and we can't retrieve this info synchronously, so...
     return 'inference';
   }
 
   _modelType() {
+    // TODO
     // Some agent / langchain stuff have behavior depending on the model type, so we use base_chat_model for now.
     // See: https://github.com/langchain-ai/langchainjs/blob/fb699647a310c620140842776f4a7432c53e02fa/langchain/src/agents/openai/index.ts#L185
     return 'base_chat_model';
@@ -162,7 +165,7 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
 
   invocationParams(options: this['ParsedCallOptions']): InvocationParams {
     return {
-      connectorId: this.connectorId,
+      connectorId: this.connector.connectorId,
       functionCalling: options.functionCallingMode,
       modelName: options.model,
       temperature: options.temperature,
