@@ -12,12 +12,14 @@ import { EuiButtonIcon, EuiToolTip, useEuiTheme } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { css, type SerializedStyles } from '@emotion/react';
 import { useFindMatches } from './matches/use_find_matches';
-import { InTableSearchInput, INPUT_TEST_SUBJ } from './in_table_search_input';
+import { InTableSearchInput } from './in_table_search_input';
 import { UseFindMatchesProps } from './types';
 import {
   ACTIVE_HIGHLIGHT_COLOR,
   CELL_MATCH_INDEX_ATTRIBUTE,
   HIGHLIGHT_CLASS_NAME,
+  BUTTON_TEST_SUBJ,
+  INPUT_TEST_SUBJ,
 } from './constants';
 
 const innerCss = css`
@@ -43,8 +45,6 @@ const innerCss = css`
     border-right: 0;
   }
 `;
-
-const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
 
 export interface InTableSearchControlProps
   extends Omit<UseFindMatchesProps, 'onScrollToActiveMatch'> {

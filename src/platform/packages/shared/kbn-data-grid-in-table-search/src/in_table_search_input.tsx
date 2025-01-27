@@ -18,11 +18,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-utils';
-
-export const INPUT_TEST_SUBJ = 'inTableSearchInput';
-export const COUNTER_TEST_SUBJ = 'inTableSearchMatchesCounter';
-export const BUTTON_PREV_TEST_SUBJ = 'inTableSearchButtonPrev';
-export const BUTTON_NEXT_TEST_SUBJ = 'inTableSearchButtonNext';
+import {
+  COUNTER_TEST_SUBJ,
+  INPUT_TEST_SUBJ,
+  BUTTON_PREV_TEST_SUBJ,
+  BUTTON_NEXT_TEST_SUBJ,
+} from './constants';
 
 export interface InTableSearchInputProps {
   matchesCount: number | null;

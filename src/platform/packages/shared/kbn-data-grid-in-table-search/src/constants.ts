@@ -11,3 +11,9 @@ export const CELL_MATCH_INDEX_ATTRIBUTE = 'data-match-index';
 export const HIGHLIGHT_CLASS_NAME = 'dataGridInTableSearch__match';
 export const HIGHLIGHT_COLOR = '#e5ffc0'; // TODO: Use a named color token
 export const ACTIVE_HIGHLIGHT_COLOR = '#ffc30e'; // TODO: Use a named color token
+
+export const BUTTON_TEST_SUBJ = 'startInTableSearchButton';
+export const INPUT_TEST_SUBJ = 'inTableSearchInput';
+export const COUNTER_TEST_SUBJ = 'inTableSearchMatchesCounter';
+export const BUTTON_PREV_TEST_SUBJ = 'inTableSearchButtonPrev';
+export const BUTTON_NEXT_TEST_SUBJ = 'inTableSearchButtonNext';
