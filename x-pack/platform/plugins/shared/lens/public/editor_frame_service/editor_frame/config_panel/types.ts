@@ -49,7 +49,7 @@ export interface ConfigPanelWrapperProps {
   updateSuggestion?: (attrs: TypedLensSerializedState['attributes']) => void;
   /** Set the attributes state */
   setCurrentAttributes?: (attrs: TypedLensSerializedState['attributes']) => void;
-  parentApi: unknown;
+  parentApi?: unknown;
   panelId?: string;
   closeFlyout?: () => void;
   canEditTextBasedQuery?: boolean;
