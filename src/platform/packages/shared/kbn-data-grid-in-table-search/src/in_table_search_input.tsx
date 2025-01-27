@@ -20,6 +20,9 @@ import { i18n } from '@kbn/i18n';
 import { useDebouncedValue } from '@kbn/visualization-utils';
 
 export const INPUT_TEST_SUBJ = 'inTableSearchInput';
+export const COUNTER_TEST_SUBJ = 'inTableSearchMatchesCounter';
+export const BUTTON_PREV_TEST_SUBJ = 'inTableSearchButtonPrev';
+export const BUTTON_NEXT_TEST_SUBJ = 'inTableSearchButtonNext';
 
 export interface InTableSearchInputProps {
   matchesCount: number | null;
@@ -95,7 +98,11 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
         isLoading={isProcessing}
         append={
           <EuiFlexGroup responsive={false} alignItems="center" gutterSize="none">
-            <EuiFlexItem grow={false} className="dataGridInTableSearch__matchesCounter">
+            <EuiFlexItem
+              grow={false}
+              className="dataGridInTableSearch__matchesCounter"
+              data-test-subj={COUNTER_TEST_SUBJ}
+            >
               <EuiText color="subdued" size="s">
                 {matchesCount && activeMatchPosition
                   ? `${activeMatchPosition}/${matchesCount}`
@@ -107,6 +114,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
               <EuiButtonIcon
                 iconType="arrowUp"
                 color="text"
+                data-test-subj={BUTTON_PREV_TEST_SUBJ}
                 disabled={areArrowsDisabled}
                 aria-label={i18n.translate('dataGridInTableSearch.buttonPreviousMatch', {
                   defaultMessage: 'Previous',
@@ -118,6 +126,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
               <EuiButtonIcon
                 iconType="arrowDown"
                 color="text"
+                data-test-subj={BUTTON_NEXT_TEST_SUBJ}
                 disabled={areArrowsDisabled}
                 aria-label={i18n.translate('dataGridInTableSearch.buttonNextMatch', {
                   defaultMessage: 'Next',

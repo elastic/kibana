@@ -28,9 +28,14 @@ export function RowCellsRenderer({
   const matchesCountPerColumnIdRef = useRef<Record<string, number>>({});
   const rowMatchesCountRef = useRef<number>(0);
   const remainingNumberOfResultsRef = useRef<number>(visibleColumns.length);
+  const isCompletedRef = useRef<boolean>(false);
 
   // all cells in the row were processed
   const onComplete = useCallback(() => {
+    if (isCompletedRef.current) {
+      return;
+    }
+    isCompletedRef.current = true; // report only once
     onRowProcessed({
       rowIndex,
       rowMatchesCount: rowMatchesCountRef.current,
@@ -76,7 +81,7 @@ export function RowCellsRenderer({
 
   return (
     <>
-      {visibleColumns.map((columnId) => {
+      {visibleColumns.map((columnId, colIndex) => {
         return (
           <ErrorBoundary
             key={`${rowIndex}-${columnId}`}
@@ -90,8 +95,8 @@ export function RowCellsRenderer({
               isExpandable={false}
               isExpanded={false}
               isDetails={false}
-              colIndex={0}
-              setCellProps={() => {}}
+              colIndex={colIndex}
+              setCellProps={setCellProps}
               inTableSearchTerm={inTableSearchTerm}
               onHighlightsCountFound={(count) => {
                 // you can comment out the next line to observe that the row timeout is working as expected.
@@ -134,4 +139,8 @@ class ErrorBoundary extends React.Component<
 
     return this.props.children;
   }
+}
+
+function setCellProps() {
+  // nothing to do here
 }
