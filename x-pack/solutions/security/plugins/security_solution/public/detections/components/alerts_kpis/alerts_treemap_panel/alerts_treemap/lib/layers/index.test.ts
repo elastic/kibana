@@ -9,9 +9,13 @@ import { getRiskScorePalette, RISK_SCORE_STEPS } from '../chart_palette';
 import { maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
 import { getGroupFromPath, getLayersOneDimension, getLayersMultiDimensional } from '.';
 import type { Key, ArrayNode } from '@elastic/charts';
+import { useEuiTheme } from '@elastic/eui';
+import { renderHook } from '@testing-library/react';
 
 describe('layers', () => {
-  const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS);
+  const { result } = renderHook(() => useEuiTheme());
+  const euiTheme = result.current.euiTheme;
+  const colorPalette = getRiskScorePalette(RISK_SCORE_STEPS, euiTheme);
 
   describe('getGroupFromPath', () => {
     it('returns the expected group from the path', () => {
@@ -69,7 +73,7 @@ describe('layers', () => {
       const dataName = 'mimikatz process started';
       expect(
         getLayersOneDimension({ colorPalette, maxRiskSubAggregations })[0].shape.fillColor(dataName)
-      ).toEqual('#E7664C');
+      ).toEqual('#BD271E');
     });
 
     it('return the default fill color when dataName is not found in the maxRiskSubAggregations', () => {
@@ -165,7 +169,7 @@ describe('layers', () => {
             { index: 0, value: 'Host-k8iyfzraq9' },
           ],
         })
-      ).toEqual('#E7664C');
+      ).toEqual('#BD271E');
     });
 
     it('returns the default fillColor for layer 1 when the group from path is not found', () => {

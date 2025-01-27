@@ -13,6 +13,8 @@ import { getFlattenedLegendItems } from './get_flattened_legend_items';
 import { bucketsWithStackByField1, maxRiskSubAggregations } from '../flatten/mocks/mock_buckets';
 import { flattenedBuckets } from '../flatten/mocks/mock_flattened_buckets';
 import { TableId } from '@kbn/securitysolution-data-table';
+import { renderHook } from '@testing-library/react';
+import { useEuiTheme } from '@elastic/eui';
 
 describe('getFlattenedLegendItems', () => {
   it('returns the expected legend items', () => {
@@ -52,25 +54,25 @@ describe('getFlattenedLegendItems', () => {
         value: 'EQL process sequence',
       },
       {
-        color: '#DA8B45',
+        color: '#FF7E62',
         count: 10,
         field: 'host.name',
         value: 'Host-k8iyfzraq9',
       },
       {
-        color: '#DA8B45',
+        color: '#FF7E62',
         count: 7,
         field: 'host.name',
         value: 'Host-ao1a4wu7vn',
       },
       {
-        color: '#DA8B45',
+        color: '#FF7E62',
         count: 5,
         field: 'host.name',
         value: 'Host-3fbljiq8rj',
       },
       {
-        color: '#DA8B45',
+        color: '#FF7E62',
         count: 3,
         field: 'host.name',
         value: 'Host-r4y6xi92ob',
@@ -81,25 +83,25 @@ describe('getFlattenedLegendItems', () => {
         value: 'Endpoint Security',
       },
       {
-        color: '#D6BF57',
+        color: '#F1D86F',
         count: 11,
         field: 'host.name',
         value: 'Host-ao1a4wu7vn',
       },
       {
-        color: '#D6BF57',
+        color: '#F1D86F',
         count: 6,
         field: 'host.name',
         value: 'Host-3fbljiq8rj',
       },
       {
-        color: '#D6BF57',
+        color: '#F1D86F',
         count: 1,
         field: 'host.name',
         value: 'Host-k8iyfzraq9',
       },
       {
-        color: '#D6BF57',
+        color: '#F1D86F',
         count: 1,
         field: 'host.name',
         value: 'Host-r4y6xi92ob',
@@ -110,19 +112,19 @@ describe('getFlattenedLegendItems', () => {
         value: 'mimikatz process started',
       },
       {
-        color: '#E7664C',
+        color: '#BD271E',
         count: 3,
         field: 'host.name',
         value: 'Host-k8iyfzraq9',
       },
       {
-        color: '#E7664C',
+        color: '#BD271E',
         count: 1,
         field: 'host.name',
         value: 'Host-3fbljiq8rj',
       },
       {
-        color: '#E7664C',
+        color: '#BD271E',
         count: 1,
         field: 'host.name',
         value: 'Host-r4y6xi92ob',
@@ -133,16 +135,17 @@ describe('getFlattenedLegendItems', () => {
         value: 'Threshold rule',
       },
       {
-        color: '#E7664C',
+        color: '#BD271E',
         count: 1,
         field: 'host.name',
         value: 'Host-r4y6xi92ob',
       },
     ].map((legend) => ({ ...legend, scopeId: TableId.alertsOnAlertsPage }));
-
+    const { result: euiThemeResult } = renderHook(() => useEuiTheme());
+    const euiTheme = euiThemeResult.current.euiTheme;
     const legendItems = getFlattenedLegendItems({
       buckets: bucketsWithStackByField1,
-      colorPalette: getRiskScorePalette(RISK_SCORE_STEPS),
+      colorPalette: getRiskScorePalette(RISK_SCORE_STEPS, euiTheme),
       flattenedBuckets,
       maxRiskSubAggregations,
       stackByField0: 'kibana.alert.rule.name',

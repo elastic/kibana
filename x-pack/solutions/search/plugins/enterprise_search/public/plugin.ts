@@ -66,7 +66,6 @@ import type { DynamicSideNavItems } from './navigation_tree';
 
 export interface ClientData extends InitialAppData {
   errorConnectingMessage?: string;
-  publicUrl?: string;
 }
 
 export type EnterpriseSearchPublicSetup = ReturnType<EnterpriseSearchPlugin['setup']>;
@@ -150,7 +149,7 @@ export class EnterpriseSearchPlugin implements Plugin {
     this.esConfig = { elasticsearch_host: ELASTICSEARCH_URL_PLACEHOLDER };
   }
 
-  private data: ClientData = {} as ClientData;
+  private data: ClientData = {};
   private esConfig: ESConfig;
 
   private async getInitialData(http: HttpSetup) {
@@ -268,6 +267,7 @@ export class EnterpriseSearchPlugin implements Plugin {
       },
       order: 1,
       title: ENTERPRISE_SEARCH_CONTENT_PLUGIN.NAV_TITLE,
+      visibleIn: [],
     });
 
     core.application.register({
