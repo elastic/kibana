@@ -23,6 +23,7 @@ import type { BaseMessage, AIMessageChunk } from '@langchain/core/messages';
 import type { CallbackManagerForLLMRun } from '@langchain/core/callbacks/manager';
 import { isZodSchema } from '@langchain/core/utils/types';
 import { ChatGenerationChunk, ChatResult, ChatGeneration } from '@langchain/core/outputs';
+import { OutputParserException } from '@langchain/core/output_parsers';
 import {
   Runnable,
   RunnablePassthrough,
@@ -38,6 +39,7 @@ import {
   ToolOptions,
   isChatCompletionChunkEvent,
   isChatCompletionTokenCountEvent,
+  isToolValidationError,
 } from '@kbn/inference-common';
 import type { ToolChoice } from './types';
 import { toAsyncIterator, wrapInferenceError } from './utils';
@@ -199,12 +201,26 @@ export class InferenceChatModel extends BaseChatModel<InferenceChatModelCallOpti
     runManager?: CallbackManagerForLLMRun
   ): Promise<ChatResult> {
     const { system, messages } = messagesToInference(baseMessages);
-    const response = await this.completionWithRetry({
-      ...this.invocationParams(options),
-      system,
-      messages,
-      stream: false,
-    });
+
+    let response: Awaited<ChatCompleteCompositeResponse<ToolOptions, false>>;
+    try {
+      response = await this.completionWithRetry({
+        ...this.invocationParams(options),
+        system,
+        messages,
+        stream: false,
+      });
+    } catch (e) {
+      // convert tool validation to output parser exception
+      // for structured output calls
+      if (isToolValidationError(e) && e.meta.toolCalls) {
+        throw new OutputParserException(
+          `Failed to parse. Error: ${e.message}`,
+          JSON.stringify(e.meta.toolCalls)
+        );
+      }
+      throw e;
+    }
 
     // TODO: ideally intercept and convert invalid tool call to OutputParserException
     //       as this is used by the structured output parser.
