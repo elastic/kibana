@@ -23,10 +23,6 @@ const LazyPolicyReplaceDefineStepExtension = lazy(
   () => import('./components/fleet_extensions/package_policy_replace_define_step_extension')
 );
 
-const LazyCustomAssets = lazy(
-  () => import('./components/fleet_extensions/custom_assets_extension')
-);
-
 const RouterLazy = lazy(() => import('./application/router'));
 const Router = (props: CloudDefendRouterProps) => (
   <Suspense fallback={<LoadingState />}>
@@ -60,12 +56,6 @@ export class CloudDefendPlugin
       package: INTEGRATION_PACKAGE_NAME,
       view: 'package-policy-replace-define-step',
       Component: LazyPolicyReplaceDefineStepExtension,
-    });
-
-    plugins.fleet.registerExtension({
-      package: INTEGRATION_PACKAGE_NAME,
-      view: 'package-detail-assets',
-      Component: LazyCustomAssets,
     });
 
     const CloudDefendRouter = (props: CloudDefendRouterProps) => (
