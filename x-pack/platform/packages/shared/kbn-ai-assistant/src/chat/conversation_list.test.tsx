@@ -8,7 +8,7 @@
 import React from 'react';
 import { i18n } from '@kbn/i18n';
 import { render, screen, fireEvent } from '@testing-library/react';
-import { EMPTY_CONVERSATION_TITLE, DATE_CATEGORY_LABELS } from '../i18n';
+import { DATE_CATEGORY_LABELS } from '../i18n';
 import { ConversationList } from './conversation_list';
 import { UseConversationListResult } from '../hooks/use_conversation_list';
 import { useConversationsByDate } from '../hooks/use_conversations_by_date';
@@ -97,16 +97,41 @@ const defaultProps = {
 
 describe('ConversationList', () => {
   beforeEach(() => {
+    jest.clearAllMocks();
     (useConversationsByDate as jest.Mock).mockReturnValue(mockCategorizedConversations);
   });
 
   it('renders the component without errors', () => {
     render(<ConversationList {...defaultProps} />);
-    const newConversationLinks = screen.getAllByText(EMPTY_CONVERSATION_TITLE);
-    const firstNewConversationLink = newConversationLinks.find((el) =>
-      el.closest('a[data-test-subj="observabilityAiAssistantConversationsLink"]')
-    );
-    expect(firstNewConversationLink).toBeInTheDocument();
+
+    const todayCategoryLabel = screen.getByText(/today/i, {
+      selector: 'div.euiText',
+    });
+    expect(todayCategoryLabel).toBeInTheDocument();
+
+    const yesterdayCategoryLabel = screen.getByText(/yesterday/i, {
+      selector: 'div.euiText',
+    });
+    expect(yesterdayCategoryLabel).toBeInTheDocument();
+
+    expect(screen.queryByRole('progressbar')).not.toBeInTheDocument();
+    expect(
+      screen.queryByText(
+        i18n.translate('xpack.aiAssistant.conversationList.errorMessage', {
+          defaultMessage: 'Failed to load',
+        })
+      )
+    ).not.toBeInTheDocument();
+
+    expect(
+      screen.queryByText(
+        i18n.translate('xpack.aiAssistant.conversationList.noConversations', {
+          defaultMessage: 'No conversations',
+        })
+      )
+    ).not.toBeInTheDocument();
+
+    expect(screen.getByTestId('observabilityAiAssistantNewChatButton')).toBeInTheDocument();
   });
 
   it('displays loading state', () => {
@@ -160,5 +185,20 @@ describe('ConversationList', () => {
     const newChatButton = screen.getByTestId('observabilityAiAssistantNewChatButton');
     fireEvent.click(newChatButton);
     expect(defaultProps.onConversationSelect).toHaveBeenCalledWith(undefined);
+  });
+
+  it('renders "no conversations" message when there are no conversations', () => {
+    const emptyProps = {
+      ...defaultProps,
+      conversations: { ...mockConversations, value: { conversations: [] } },
+    };
+    render(<ConversationList {...emptyProps} />);
+    expect(
+      screen.getByText(
+        i18n.translate('xpack.aiAssistant.conversationList.noConversations', {
+          defaultMessage: 'No conversations',
+        })
+      )
+    ).toBeInTheDocument();
   });
 });
