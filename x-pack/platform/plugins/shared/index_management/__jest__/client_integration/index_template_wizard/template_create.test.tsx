@@ -8,7 +8,7 @@
 import React from 'react';
 import { act } from 'react-dom/test-utils';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, LOOKUP_INDEX_MODE } from '../../../common/constants';
 import { setupEnvironment } from '../helpers';
 
 import {
@@ -298,7 +298,11 @@ describe('<TemplateCreate />', () => {
       beforeEach(async () => {
         const { actions } = testBed;
         // Logistics
-        await actions.completeStepOne({ name: TEMPLATE_NAME, indexPatterns: ['index1'] });
+        await actions.completeStepOne({
+          name: TEMPLATE_NAME,
+          indexPatterns: ['index1'],
+          indexMode: LOOKUP_INDEX_MODE,
+        });
         // Component templates
         await actions.completeStepTwo();
       });
@@ -325,6 +329,17 @@ describe('<TemplateCreate />', () => {
         await actions.completeStepThree('{ invalidJsonString ');
 
         expect(form.getErrorsMessages()).toContain('Invalid JSON format.');
+      });
+
+      it('should not allow setting number_of_shards to a value different from 1 for Lookup index mode', async () => {
+        // The Lookup index mode was already selected in the first (Logistics) step
+        const { form, actions } = testBed;
+
+        await actions.completeStepThree('{ "index.number_of_shards": 2 }');
+
+        expect(form.getErrorsMessages()).toContain(
+          'For a Lookup index mode, the number of shards can only be set to 1 or unset.'
+        );
       });
     });
 

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { i18n } from '@kbn/i18n';
 import {
   EuiFlexGroup,
@@ -22,7 +22,8 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { CodeEditor } from '@kbn/code-editor';
 
-import { Forms } from '../../../../../shared_imports';
+import { LOOKUP_INDEX_MODE } from '../../../../../../common/constants';
+import { Forms, isJSON } from '../../../../../shared_imports';
 import { useJsonStep } from './use_json_step';
 import { documentationService } from '../../../mappings_editor/shared_imports';
 import { indexModeLabels } from '../../../../lib/index_mode_labels';
@@ -35,13 +36,45 @@ interface Props {
   indexMode?: IndexMode;
 }
 
+const NUMBER_OF_SHARDS_LOOKUP_MODE = 1;
+
 export const StepSettings: React.FunctionComponent<Props> = React.memo(
   ({ defaultValue = {}, onChange, esDocsBase, indexMode }) => {
     const { navigateToStep } = Forms.useFormWizardContext();
+    const customValidate = useCallback(
+      (json: string) => {
+        if (isJSON(json)) {
+          const settings = JSON.parse(json);
+          const numberOfShardsValue =
+            settings['index.number_of_shards'] ?? settings?.index?.number_of_shards;
+          if (
+            numberOfShardsValue &&
+            indexMode === LOOKUP_INDEX_MODE &&
+            (isNaN(Number(numberOfShardsValue)) ||
+              Number(numberOfShardsValue) !== NUMBER_OF_SHARDS_LOOKUP_MODE)
+          ) {
+            return i18n.translate(
+              'xpack.idxMgmt.formWizard.stepSettings.validations.lookupIndexModeNumberOfShardsError',
+              {
+                defaultMessage:
+                  'For a Lookup index mode, the number of shards can only be set to 1 or unset.',
+              }
+            );
+          } else {
+            return null;
+          }
+        }
+        return null;
+      },
+      [indexMode]
+    );
     const { jsonContent, setJsonContent, error } = useJsonStep({
       defaultValue,
       onChange,
+      customValidate,
     });
+
+    console.log(error);
 
     return (
       <div data-test-subj="stepSettings">
