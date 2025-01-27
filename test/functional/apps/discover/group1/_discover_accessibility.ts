@@ -27,9 +27,14 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   };
 
   const hasFocus = async (testSubject: string) => {
-    const targetElement = await testSubjects.find(testSubject);
     const activeElement = await find.activeElement();
-    return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
+    const activeElementTestID = await activeElement._webElement.getAttribute('data-test-subj');
+    if (activeElementTestID !== testSubject) {
+      log.debug(`hasFocus: Active element test subj ${activeElementTestID} is not ${testSubject}`);
+    } else {
+      log.debug(`hasFocus: Active element test subj is ${activeElementTestID}`);
+    }
+    return activeElementTestID === testSubject;
   };
 
   describe('discover accessibility', () => {
