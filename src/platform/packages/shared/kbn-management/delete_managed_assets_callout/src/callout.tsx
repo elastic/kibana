@@ -14,13 +14,11 @@ import { EuiCallOut } from '@elastic/eui';
 
 export interface DeleteManagedAssetsCalloutProps extends EuiCallOutProps {
   assetName: string;
-  overrideTitle?: string;
   overrideBody?: string;
 }
 
 export const DeleteManagedAssetsCallout = ({
   assetName,
-  overrideTitle,
   overrideBody,
   ...overrideCalloutProps
 }: DeleteManagedAssetsCalloutProps) => {
