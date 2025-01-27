@@ -2094,7 +2094,7 @@ export default function eventLogTests({ getService }: FtrProviderContext) {
 
           // Call the update API
           const updateResponse = await supertest
-            .post(`${getUrlPrefix(space.id)}/_test/event_log/update_document`)
+            .post(`${getUrlPrefix(space.id)}/_test/event_log/update_documents`)
             .set('kbn-xsrf', 'foo')
             .send({
               _id: eventToUpdate?._id,
