@@ -20,7 +20,12 @@ import { i18n } from '@kbn/i18n';
 import React, { useMemo } from 'react';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/css';
-import { StreamDefinition, isDescendantOf, isWiredStream } from '@kbn/streams-schema';
+import {
+  StreamDefinition,
+  isDescendantOf,
+  isUnwiredStreamDefinition,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { NestedView } from '../nested_view';
 import { useKibana } from '../../hooks/use_kibana';
@@ -35,7 +40,7 @@ export interface StreamTree {
 
 function asTrees(definitions: StreamDefinition[]) {
   const trees: StreamTree[] = [];
-  const wiredDefinitions = definitions.filter((definition) => isWiredStream(definition));
+  const wiredDefinitions = definitions.filter((definition) => isWiredStreamDefinition(definition));
   wiredDefinitions.sort((a, b) => a.name.split('.').length - b.name.split('.').length);
 
   wiredDefinitions.forEach((definition) => {
@@ -80,12 +85,12 @@ export function StreamsList({
 
   const filteredItems = useMemo(() => {
     return items
-      .filter((item) => showClassic || isWiredStream(item))
+      .filter((item) => showClassic || isWiredStreamDefinition(item))
       .filter((item) => !query || item.name.toLowerCase().includes(query.toLowerCase()));
   }, [query, items, showClassic]);
 
   const classicStreams = useMemo(() => {
-    return filteredItems.filter((item) => !isWiredStream(item));
+    return filteredItems.filter((item) => isUnwiredStreamDefinition(item));
   }, [filteredItems]);
 
   const treeView = useMemo(() => {

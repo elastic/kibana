@@ -19,7 +19,7 @@ import {
   EuiSpacer,
 } from '@elastic/eui';
 import { EmbeddablePackageState, PanelNotFoundError } from '@kbn/embeddable-plugin/public';
-import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
+import { apiHasSnapshottableState } from '@kbn/presentation-publishing';
 import { LazyDashboardPicker, withSuspense } from '@kbn/presentation-util-plugin/public';
 import { omit } from 'lodash';
 import React, { useCallback, useMemo, useState } from 'react';
@@ -48,7 +48,7 @@ export function CopyToDashboardModal({ api, closeModal }: CopyToDashboardModalPr
     null
   );
 
-  const dashboardId = api.parentApi.savedObjectId.value;
+  const dashboardId = api.parentApi.savedObjectId$.value;
 
   const onSubmit = useCallback(() => {
     const dashboard = api.parentApi;

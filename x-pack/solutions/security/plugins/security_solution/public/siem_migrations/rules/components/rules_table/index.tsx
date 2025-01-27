@@ -212,13 +212,13 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
       startMigration(migrationId, SiemMigrationRetryFilter.FAILED);
     }, [migrationId, startMigration]);
 
-    const isLoading =
-      isStatsLoading || isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
+    const isRulesLoading =
+      isPrebuiltRulesLoading || isDataLoading || isTableLoading || isRetryLoading;
 
     const ruleActionsFactory = useCallback(
       (ruleMigration: RuleMigration, closeRulePreview: () => void) => {
         const canMigrationRuleBeInstalled =
-          !isLoading &&
+          !isRulesLoading &&
           !ruleMigration.elastic_rule?.id &&
           ruleMigration.translation_result === RuleTranslationResult.FULL;
         return (
@@ -253,12 +253,12 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           </EuiFlexGroup>
         );
       },
-      [installSingleRule, isLoading]
+      [installSingleRule, isRulesLoading]
     );
 
     const getMigrationRuleData = useCallback(
       (ruleId: string) => {
-        if (!isLoading && ruleMigrations.length) {
+        if (!isRulesLoading && ruleMigrations.length) {
           const ruleMigration = ruleMigrations.find((item) => item.id === ruleId);
           let matchedPrebuiltRule: RuleResponse | undefined;
           let relatedIntegrations: RelatedIntegration[] = [];
@@ -278,14 +278,14 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
           return { ruleMigration, matchedPrebuiltRule, relatedIntegrations, isIntegrationsLoading };
         }
       },
-      [integrations, isIntegrationsLoading, isLoading, prebuiltRules, ruleMigrations]
+      [integrations, isIntegrationsLoading, isRulesLoading, prebuiltRules, ruleMigrations]
     );
 
     const {
       migrationRuleDetailsFlyout: rulePreviewFlyout,
       openMigrationRuleDetails: openRulePreview,
     } = useMigrationRuleDetailsFlyout({
-      isLoading,
+      isLoading: isRulesLoading,
       getMigrationRuleData,
       ruleActionsFactory,
     });
@@ -300,7 +300,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
     return (
       <>
         <EuiSkeletonLoading
-          isLoading={isDataLoading}
+          isLoading={isStatsLoading}
           loadingContent={
             <>
               <EuiSkeletonTitle />
@@ -324,7 +324,7 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
                   </EuiFlexItem>
                   <EuiFlexItem grow={false}>
                     <BulkActions
-                      isTableLoading={isLoading}
+                      isTableLoading={isRulesLoading}
                       numberOfFailedRules={translationStats.rules.failed}
                       numberOfTranslatedRules={translationStats.rules.success.installable}
                       numberOfSelectedRules={selectedRuleMigrations.length}
