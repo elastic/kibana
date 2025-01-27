@@ -107,7 +107,7 @@ export default function (providerContext: FtrProviderContext) {
             logger.debug('Post install modal not found');
           }
           expect(modal !== undefined).to.be(true);
-        }, 10000);
+        });
 
         await cisIntegration.navigateToIntegrationCspList();
         expect((await cisIntegration.getFieldValueInEditPage(ROLE_ARN_TEST_ID)) === roleArn).to.be(

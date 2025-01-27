@@ -65,4 +65,8 @@ export const testSubjectIds = {
   GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID:
     'cloudSecurityGraphGraphInvestigationInvestigateInTimeline',
   ALERT_TABLE_ROW_CSS_SELECTOR: '[data-test-subj="alertsTable"] .euiDataGridRow',
+  SETUP_TECHNOLOGY_SELECTOR: 'setup-technology-selector',
+  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ: 'setup-technology-selector-accordion',
+  SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_OPTION: 'setup-technology-agentless-option',
+  DIRECT_ACCESS_KEYS: 'direct_access_keys',
 };
