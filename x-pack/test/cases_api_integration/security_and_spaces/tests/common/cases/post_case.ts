@@ -19,7 +19,7 @@ import {
   deleteAllCaseItems,
   createCase,
   removeServerGeneratedPropertiesFromCase,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   createConfiguration,
   getConfigurationRequest,
@@ -140,14 +140,13 @@ export default ({ getService }: FtrProviderContext): void => {
 
       it('should create a user action when creating a case', async () => {
         const postedCase = await createCase(supertest, getPostCaseRequest());
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const creationUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[0]);
 
         expect(creationUserAction).to.eql({
           action: 'create',
           type: 'create_case',
           created_by: defaultUser,
-          case_id: postedCase.id,
           comment_id: null,
           owner: 'securitySolutionFixture',
           payload: {
