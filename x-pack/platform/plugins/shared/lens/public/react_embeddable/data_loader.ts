@@ -195,7 +195,7 @@ export function loadEmbeddableData(
     );
 
     // Go concurrently: build the expression and fetch the dataViews
-    const [{ params, abortController, ...rest }, dataViews] = await Promise.all([
+    const [{ params, abortController, ...rest }, dataViewIds] = await Promise.all([
       getExpressionRendererParams(currentState, {
         searchContext,
         api,
@@ -235,9 +235,12 @@ export function loadEmbeddableData(
     });
 
     // Publish the used dataViews on the Lens API
-    internalApi.updateDataViews(dataViews);
+    internalApi.updateDataViews(dataViewIds);
 
-    if (params?.expression != null && !dispatchBlockingErrorIfAny()) {
+    // This will catch also failed loaded dataViews
+    const hasBlockingErrors = dispatchBlockingErrorIfAny();
+
+    if (params?.expression != null && !hasBlockingErrors) {
       internalApi.updateExpressionParams(params);
     }
 
