@@ -20,10 +20,15 @@ import type {
  */
 
 export const modelVersions: SavedObjectsModelVersionMap = {
-  /** First model version picksup from the last legacy migration in 8.9.0 */
+  /**
+   * First model version picks up from the last legacy migration in 8.9.0.
+   */
   1: {
     changes: [],
   },
+  // 2: {
+  //   changes: [ /* Put future migration here */ ],
+  // },
 };
 
 /**
