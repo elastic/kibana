@@ -21,7 +21,7 @@ export default function ({ getService, getPageObjects }) {
         'x-pack/test/functional/es_archives/monitoring/singlecluster_three_nodes_shard_relocation',
         {
           from: 'Oct 5, 2017 @ 20:31:48.354',
-          to: 'Oct 5, 2017 @ 20:35:12.176',
+          to: 'Oct 5, 2017 @ 20:35:30.176',
         }
       );
 
@@ -39,14 +39,18 @@ export default function ({ getService, getPageObjects }) {
     it('should have an Elasticsearch Cluster Summary Status with correct info', async () => {
       expect(await esClusterSummaryStatus.getContent()).to.eql({
         nodesCount: 'Nodes\n3',
-        indicesCount: 'Indices\n20',
-        memory: 'JVM Heap\n575.3 MB / 2.0 GB',
-        totalShards: 'Total shards\n80',
+        indicesCount: 'Indices\n21',
+        memory: 'JVM Heap\n629.3 MB / 2.0 GB',
+        totalShards: 'Total shards\n82',
         unassignedShards: 'Unassigned shards\n5',
-        documentCount: 'Documents\n25,927',
-        dataSize: 'Data\n101.6 MB',
+        documentCount: 'Documents\n26,062',
+        dataSize: 'Data\n101.9 MB',
         health: 'Health: yellow',
       });
+    });
+
+    it('should show the link to view more cluster logs', async () => {
+      expect(await esClusterSummaryStatus.viewLogsLinkIsShowing()).to.be(true);
     });
   });
 }
