@@ -702,7 +702,7 @@ export function defineRoutes(
 
   router.post(
     {
-      path: '/_test/event_log/update_document',
+      path: '/_test/event_log/update_documents',
       validate: {
         body: schema.object({
           _id: schema.string(),
@@ -718,15 +718,18 @@ export function defineRoutes(
       req: KibanaRequest<any, any, any, any>,
       res: KibanaResponseFactory
     ) => {
-      const result = await eventLogger.updateEvent(
+      const result = await eventLogger.updateEvents([
         {
-          _id: req.body._id,
-          _index: req.body._index,
-          _seq_no: req.body._seq_no,
-          _primary_term: req.body._primary_term,
+          internalFields: {
+            _id: req.body._id,
+            _index: req.body._index,
+            _seq_no: req.body._seq_no,
+            _primary_term: req.body._primary_term,
+          },
+          event: req.body.fieldsToUpdate,
         },
-        req.body.fieldsToUpdate
-      );
+      ]);
+
       return res.ok({ body: { ok: true, result } });
     }
   );
