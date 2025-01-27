@@ -15,19 +15,14 @@ export default ({ getPageObjects }: FtrProviderContext) => {
   describe('Findings Page onboarding', function () {
     this.tags(['cloud_security_posture_findings_onboarding']);
     let findings: typeof PageObjects.findings;
-    let notInstalledVulnerabilities: typeof findings.notInstalledVulnerabilities;
     let notInstalledCSP: typeof findings.notInstalledCSP;
     let thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt: typeof findings.thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt;
-    let thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt: typeof findings.thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt;
 
     beforeEach(async () => {
       findings = PageObjects.findings;
-      notInstalledVulnerabilities = findings.notInstalledVulnerabilities;
       notInstalledCSP = findings.notInstalledCSP;
       thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt =
         findings.thirdPartyIntegrationsNoMisconfigurationsFindingsPrompt;
-      thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt =
-        findings.thirdPartyIntegrationsNoVulnerabilitiesFindingsPrompt;
 
       await findings.waitForPluginInitialized();
     });
