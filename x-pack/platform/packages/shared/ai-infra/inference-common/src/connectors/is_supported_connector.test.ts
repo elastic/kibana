@@ -5,8 +5,12 @@
  * 2.0.
  */
 
-import { InferenceConnectorType, RawConnector, COMPLETION_TASK_TYPE } from './connectors';
-import { isSupportedConnectorType, isSupportedConnector } from './is_supported_connector';
+import { InferenceConnectorType, RawConnector } from './connectors';
+import {
+  isSupportedConnectorType,
+  isSupportedConnector,
+  COMPLETION_TASK_TYPE,
+} from './is_supported_connector';
 
 const createRawConnector = (parts: Partial<RawConnector>): RawConnector => {
   return {
