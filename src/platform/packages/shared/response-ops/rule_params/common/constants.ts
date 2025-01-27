@@ -7,5 +7,32 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './search_configuration_schema';
-export { dataViewSpecSchema } from './data_view_spec_schema';
+/**
+ * Max length for the custom field description
+ */
+export const MAX_DATA_VIEW_FIELD_DESCRIPTION_LENGTH = 300;
+
+/**
+ * All runtime field types.
+ * @public
+ */
+export const RUNTIME_FIELD_TYPES = [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point',
+  'composite',
+] as const;
+
+export const RUNTIME_FIELD_TYPES2 = [
+  'keyword',
+  'long',
+  'double',
+  'date',
+  'ip',
+  'boolean',
+  'geo_point',
+] as const;
