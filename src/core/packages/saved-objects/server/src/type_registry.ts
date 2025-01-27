@@ -8,7 +8,6 @@
  */
 
 import type { SavedObjectsType } from './saved_objects_type';
-
 /**
  * Registry holding information about all the registered {@link SavedObjectsType | saved object types}.
  */
