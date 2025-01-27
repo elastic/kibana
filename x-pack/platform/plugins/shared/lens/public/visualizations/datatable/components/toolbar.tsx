@@ -26,6 +26,8 @@ type LineCounts = {
   [key in keyof typeof ROW_HEIGHT_LINES_KEYS]: number;
 };
 
+const LEGACY_SINGLE_ROW_HEIGHT_MODE = 'single';
+
 export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisualizationState>) {
   const { state, setState } = props;
 
@@ -111,7 +113,12 @@ export function DataTableToolbar(props: VisualizationToolbarProps<DatatableVisua
           lineCountInput={lineCounts[ROW_HEIGHT_LINES_KEYS.headerRowHeightLines]}
         />
         <RowHeightSettings
-          rowHeight={state.rowHeight ?? DEFAULT_ROW_HEIGHT}
+          rowHeight={
+            // @ts-ignore - saved state can contain legacy row height mode
+            state.rowHeight === LEGACY_SINGLE_ROW_HEIGHT_MODE
+              ? RowHeightMode.custom
+              : state.rowHeight ?? DEFAULT_ROW_HEIGHT
+          }
           label={i18n.translate('xpack.lens.table.visualOptionsFitRowToContentLabel', {
             defaultMessage: 'Body cell lines',
           })}
