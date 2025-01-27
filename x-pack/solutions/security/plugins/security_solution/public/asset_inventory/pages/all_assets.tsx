@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useCallback } from 'react';
 import _ from 'lodash';
 import { type Filter } from '@kbn/es-query';
 import { i18n } from '@kbn/i18n';
@@ -36,6 +36,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
+import { InventoryFlyoutSelector } from '../components/inventory_flyout_selector';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
 
@@ -141,6 +142,14 @@ export interface AllAssetsProps {
   'data-test-subj'?: string;
 }
 
+const getEntity = (row: DataTableRecord) => {
+  return {
+    id: row.flattened['asset.name'],
+    timestamp: row.flattened['@timestamp'],
+    type: 'user',
+  };
+};
+
 const AllAssets = ({
   rows,
   isLoading,
@@ -158,6 +167,17 @@ const AllAssets = ({
     defaultQuery: getDefaultQuery,
     nonPersistedFilters,
   });
+
+  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
+
+  const renderDocumentView = useCallback((hit: DataTableRecord) => {
+    return (
+      <InventoryFlyoutSelector
+        entity={getEntity(hit)}
+        onFlyoutClose={() => setExpandedDoc(undefined)}
+      />
+    );
+  }, []);
 
   const {
     // columnsLocalStorageKey,
@@ -203,11 +223,6 @@ const AllAssets = ({
   }, [persistedSettings]);
 
   const { dataView, dataViewIsLoading, dataViewIsRefetching } = useDataViewContext();
-
-  const [expandedDoc, setExpandedDoc] = useState<DataTableRecord | undefined>(undefined);
-
-  const renderDocumentView = (hit: DataTableRecord) =>
-    flyoutComponent(hit, () => setExpandedDoc(undefined));
 
   const {
     uiActions,
@@ -397,7 +412,6 @@ const AllAssets = ({
                 className={styles.gridStyle}
                 ariaLabelledBy={title}
                 columns={currentColumns}
-                expandedDoc={expandedDoc}
                 dataView={dataView}
                 loadingState={loadingState}
                 onFilter={onAddFilter as DocViewFilterFn}
@@ -406,6 +420,7 @@ const AllAssets = ({
                 onSort={onSort}
                 rows={rows}
                 sampleSizeState={MAX_ASSETS_TO_LOAD}
+                expandedDoc={expandedDoc}
                 setExpandedDoc={setExpandedDoc}
                 renderDocumentView={renderDocumentView}
                 sort={sort}

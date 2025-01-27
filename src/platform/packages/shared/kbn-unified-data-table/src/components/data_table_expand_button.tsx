@@ -65,6 +65,7 @@ export const ExpandButton = (props: EuiDataGridCellValueElementProps) => {
           toolTipRef.current?.hideToolTip();
           setPressed(Boolean(nextHit));
           setExpanded?.(nextHit);
+          z;
         }}
         color={isCurrentRowExpanded ? 'primary' : 'text'}
         iconType={isCurrentRowExpanded ? 'minimize' : 'expand'}
