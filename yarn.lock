@@ -4708,7 +4708,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-server-mocks@link:packages/core/i18n/core-i18n-server-mocks":
+"@kbn/core-i18n-server-mocks@link:src/core/packages/i18n/server-mocks":
   version "0.0.0"
   uid ""
 
