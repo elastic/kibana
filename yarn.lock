@@ -4696,7 +4696,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-i18n-browser-mocks@link:packages/core/i18n/core-i18n-browser-mocks":
+"@kbn/core-i18n-browser-mocks@link:src/core/packages/i18n/browser-mocks":
   version "0.0.0"
   uid ""
 

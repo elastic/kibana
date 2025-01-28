@@ -1392,7 +1392,7 @@
     "@kbn/core-http-resources-server-mocks": "link:src/core/packages/http/resources-server-mocks",
     "@kbn/core-http-router-server-mocks": "link:src/core/packages/http/router-server-mocks",
     "@kbn/core-http-server-mocks": "link:src/core/packages/http/server-mocks",
-    "@kbn/core-i18n-browser-mocks": "link:packages/core/i18n/core-i18n-browser-mocks",
+    "@kbn/core-i18n-browser-mocks": "link:src/core/packages/i18n/browser-mocks",
     "@kbn/core-i18n-server-mocks": "link:packages/core/i18n/core-i18n-server-mocks",
     "@kbn/core-injected-metadata-browser-mocks": "link:packages/core/injected-metadata/core-injected-metadata-browser-mocks",
     "@kbn/core-integrations-browser-mocks": "link:packages/core/integrations/core-integrations-browser-mocks",
