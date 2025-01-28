@@ -119,4 +119,65 @@ describe('getDefaultGraphState', () => {
 
     expect(state.unrefinedResults?.default?.()).toBeNull();
   });
+
+  it('returns the expected default end', () => {
+    const state = getDefaultGraphState();
+
+    expect(state.end?.default?.()).toBeUndefined();
+  });
+
+  it('returns the expected end when it is provided', () => {
+    const end = '2025-01-02T00:00:00.000Z';
+
+    const state = getDefaultGraphState({ end });
+
+    expect(state.end?.default?.()).toEqual(end);
+  });
+
+  it('returns the expected default filter to be undefined', () => {
+    const state = getDefaultGraphState();
+
+    expect(state.filter?.default?.()).toBeUndefined();
+  });
+
+  it('returns the expected filter when it is provided', () => {
+    const filter = {
+      bool: {
+        must: [],
+        filter: [
+          {
+            match_phrase: {
+              'user.name': 'root',
+            },
+          },
+        ],
+        should: [],
+        must_not: [
+          {
+            match_phrase: {
+              'host.name': 'foo',
+            },
+          },
+        ],
+      },
+    };
+
+    const state = getDefaultGraphState({ filter });
+
+    expect(state.filter?.default?.()).toEqual(filter);
+  });
+
+  it('returns the expected default start to be undefined', () => {
+    const state = getDefaultGraphState();
+
+    expect(state.start?.default?.()).toBeUndefined();
+  });
+
+  it('returns the expected start when it is provided', () => {
+    const start = '2025-01-01T00:00:00.000Z';
+
+    const state = getDefaultGraphState({ start });
+
+    expect(state.start?.default?.()).toEqual(start);
+  });
 });
