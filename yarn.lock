@@ -5000,7 +5000,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-base-server-mocks@link:packages/core/saved-objects/core-saved-objects-base-server-mocks":
+"@kbn/core-saved-objects-base-server-mocks@link:src/core/packages/saved-objects/base-server-mocks":
   version "0.0.0"
   uid ""
 
