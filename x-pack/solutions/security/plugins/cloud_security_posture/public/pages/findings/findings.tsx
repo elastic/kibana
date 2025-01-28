@@ -56,7 +56,7 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
   );
 };
 
-export const Findings = () => {
+export const Findings = ({ useExpandableFlyoutApi }: { useExpandableFlyoutApi: any }) => {
   const history = useHistory();
   const location = useLocation();
 
@@ -90,6 +90,14 @@ export const Findings = () => {
       pathname === findingsNavigation.vulnerabilities_by_resource.path
     );
   };
+
+  const { openFlyout } = useExpandableFlyoutApi();
+
+  openFlyout({
+    right: {
+      id: 'TestKey',
+    },
+  });
 
   return (
     <>

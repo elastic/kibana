@@ -158,6 +158,10 @@ const expandableFlyoutDocumentsPanels: ExpandableFlyoutProps['registeredPanels']
       <NetworkPanel {...(props as NetworkExpandableFlyoutProps).params} isPreviewMode />
     ),
   },
+  {
+    key: 'TestKey',
+    component: (props) => <div>{'OMEGA HELLO WORLD, THIS IS JUST TESTING'}</div>,
+  },
 ];
 
 export const SECURITY_SOLUTION_ON_CLOSE_EVENT = `expandable-flyout-on-close-${Flyouts.securitySolution}`;

@@ -12,7 +12,7 @@ import { Routes, Route } from '@kbn/shared-ux-router';
 import { benchmarksNavigation, cloudPosturePages } from '../common/navigation/constants';
 import type { CspSecuritySolutionContext } from '..';
 import { SecuritySolutionContext } from './security_solution_context';
-import * as pages from '../pages';
+import * as Pages from '../pages';
 import { CspRoute } from './csp_route';
 
 const queryClient = new QueryClient({
@@ -22,23 +22,27 @@ const queryClient = new QueryClient({
 /** Props for the cloud security posture router component */
 export interface CspRouterProps {
   securitySolutionContext?: CspSecuritySolutionContext;
+  useExpandableFlyoutApi: any;
 }
 
-export const CspRouter = ({ securitySolutionContext }: CspRouterProps) => {
+export const CspRouter = ({ securitySolutionContext, useExpandableFlyoutApi }: CspRouterProps) => {
   const routerElement = (
     <QueryClientProvider client={queryClient}>
       <Routes>
-        <CspRoute {...cloudPosturePages.findings} component={pages.Findings} />
-        <CspRoute {...cloudPosturePages.dashboard} component={pages.ComplianceDashboard} />
+        <CspRoute {...cloudPosturePages.findings}>
+          <Pages.Findings useExpandableFlyoutApi={useExpandableFlyoutApi} />
+        </CspRoute>
+
+        <CspRoute {...cloudPosturePages.dashboard} component={Pages.ComplianceDashboard} />
         <CspRoute
           {...cloudPosturePages.vulnerability_dashboard}
-          component={pages.VulnerabilityDashboard}
+          component={Pages.VulnerabilityDashboard}
         />
 
         <CspRoute {...cloudPosturePages.benchmarks}>
           <Routes>
-            <CspRoute {...benchmarksNavigation.rules} component={pages.Rules} />
-            <CspRoute {...cloudPosturePages.benchmarks} component={pages.Benchmarks} />
+            <CspRoute {...benchmarksNavigation.rules} component={Pages.Rules} />
+            <CspRoute {...cloudPosturePages.benchmarks} component={Pages.Benchmarks} />
           </Routes>
         </CspRoute>
 
