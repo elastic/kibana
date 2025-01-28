@@ -30,7 +30,7 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { DashboardApi } from '../../../../dashboard_api/types';
 import { MenuItem, MenuItemGroup } from '../types';
 import { getMenuItemGroups } from '../get_menu_item_groups';
-import { Group } from './group';
+import { Groups } from './groups';
 
 export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi }) {
   const { euiTheme } = useEuiTheme();
@@ -82,47 +82,6 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
         .filter((group) => !group.isDisabled)
     );
   }, [groups, searchTerm]);
-
-  function renderGroups() {
-    if (error) {
-      return (
-        <EuiEmptyPrompt
-          iconType="warning"
-          iconColor="danger"
-          body={
-            <EuiText size="s" textAlign="center">
-              <FormattedMessage
-                id="dashboard.solutionToolbar.addPanelFlyout.loadingErrorDescription"
-                defaultMessage="An error occurred loading the available dashboard panels for selection"
-              />
-            </EuiText>
-          }
-          data-test-subj="dashboardPanelSelectionErrorIndicator"
-        />
-      );
-    }
-
-    return filteredGroups.length === 0 ? (
-      <EuiText size="s" textAlign="center" data-test-subj="dashboardPanelSelectionNoPanelMessage">
-        <FormattedMessage
-          id="dashboard.solutionToolbar.addPanelFlyout.noResultsDescription"
-          defaultMessage="No panel types found"
-        />
-      </EuiText>
-    ) : (
-      <EuiFlexGroup direction="column" gutterSize="m" data-test-subj="dashboardPanelSelectionList">
-        {filteredGroups.map((group) => (
-          <EuiFlexItem
-            key={group.id}
-            data-test-subj={group['data-test-subj']}
-            data-group-sort-order={group.order}
-          >
-            <Group group={group} />
-          </EuiFlexItem>
-        ))}
-      </EuiFlexGroup>
-    );
-  }
 
   return (
     <>
@@ -177,7 +136,23 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
                   : {}),
               }}
             >
-              {renderGroups()}
+              {error ? (
+                <EuiEmptyPrompt
+                  iconType="warning"
+                  iconColor="danger"
+                  body={
+                    <EuiText size="s" textAlign="center">
+                      <FormattedMessage
+                        id="dashboard.solutionToolbar.addPanelFlyout.loadingErrorDescription"
+                        defaultMessage="An error occurred loading the available dashboard panels for selection"
+                      />
+                    </EuiText>
+                  }
+                  data-test-subj="dashboardPanelSelectionErrorIndicator"
+                />
+              ) : (
+                <Groups groups={filteredGroups} />
+              )}
             </EuiFlexItem>
           </EuiFlexGroup>
         </EuiSkeletonText>
