@@ -5,23 +5,21 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import { SetupTechnology } from '@kbn/fleet-plugin/public';
 import { FormattedMessage } from '@kbn/i18n-react';
+
 import {
-  EuiAccordion,
-  EuiFormRow,
-  EuiLink,
   EuiSpacer,
-  EuiSuperSelect,
-  EuiText,
   useGeneratedHtmlId,
+  EuiFlexItem,
+  EuiFlexGroup,
+  EuiRadioGroup,
+  EuiTitle,
+  EuiRadioGroupOption,
 } from '@elastic/eui';
-import {
-  SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ,
-  SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ,
-} from '../../test_subjects';
+import { SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ } from '../../test_subjects';
 
 export const SetupTechnologySelector = ({
   disabled,
@@ -32,110 +30,96 @@ export const SetupTechnologySelector = ({
   setupTechnology: SetupTechnology;
   onSetupTechnologyChange: (value: SetupTechnology) => void;
 }) => {
-  const options = [
+  const radioGroupItemId1 = useGeneratedHtmlId({
+    prefix: 'radioGroupItem',
+    suffix: 'agentless',
+  });
+  const radioGroupItemId2 = useGeneratedHtmlId({
+    prefix: 'radioGroupItem',
+    suffix: 'agentbased',
+  });
+  const radioOptions: EuiRadioGroupOption[] = [
     {
-      value: SetupTechnology.AGENT_BASED,
-      'data-test-subj': 'setup-technology-agent-based-option',
-      inputDisplay: (
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.setupTechnology.agentbasedInputDisplay"
-          defaultMessage="Agent-based"
-        />
-      ),
-      dropdownDisplay: (
-        <>
-          <strong>
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentbasedDrowpownDisplay"
-              defaultMessage="Agent-based"
-            />
-          </strong>
-          <EuiText size="s" color="subdued">
+      id: radioGroupItemId1,
+      label: (
+        <EuiFlexGroup gutterSize="xs" direction="column" aria-label={'Deployment Modes Selection'}>
+          <EuiFlexItem grow={false}>
+            <p>
+              <strong>
+                <FormattedMessage
+                  id="xpack.csp.fleetIntegration.setupTechnology.agentlessRadioLabel"
+                  defaultMessage="Agentless"
+                />
+              </strong>
+            </p>
+          </EuiFlexItem>
+          <EuiFlexItem>
             <p>
               <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.agentbasedDrowpownDescription"
-                defaultMessage="Set up the integration with an agent"
+                id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioDescription"
+                defaultMessage="Setup integration without an agent"
               />
             </p>
-          </EuiText>
-        </>
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     },
     {
-      value: SetupTechnology.AGENTLESS,
-      inputDisplay: (
-        <FormattedMessage
-          id="xpack.csp.fleetIntegration.setupTechnology.agentlessInputDisplay"
-          defaultMessage="Agentless"
-        />
-      ),
-      'data-test-subj': 'setup-technology-agentless-option',
-      dropdownDisplay: (
-        <>
-          <strong>
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDisplay"
-              defaultMessage="Agentless"
-            />
-          </strong>
-          <EuiText size="s" color="subdued">
+      id: radioGroupItemId2,
+      label: (
+        <EuiFlexGroup gutterSize="xs" direction="column" aria-label={'Agent-based'}>
+          <EuiFlexItem grow={false}>
             <p>
-              <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.agentlessDrowpownDescription"
-                defaultMessage="Set up the integration without an agent"
-              />
+              <strong>
+                <FormattedMessage
+                  id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioLabel"
+                  defaultMessage="Agent-based"
+                />
+              </strong>
             </p>
-          </EuiText>
-        </>
+          </EuiFlexItem>
+          <EuiFlexItem>
+            <FormattedMessage
+              id="xpack.csp.fleetIntegration.setupTechnology.agentBasedRadioDescription"
+              defaultMessage="Deploy Elastic Agent into your Cloud Account"
+            />
+          </EuiFlexItem>
+        </EuiFlexGroup>
       ),
     },
   ];
 
+  const [radioIdSelected, setRadioIdSelected] = useState(
+    SetupTechnology.AGENTLESS === setupTechnology ? radioGroupItemId1 : radioGroupItemId2
+  );
+
+  const onChange = (optionId: string) => {
+    setRadioIdSelected(optionId);
+    onSetupTechnologyChange(
+      optionId === radioGroupItemId1 ? SetupTechnology.AGENTLESS : SetupTechnology.AGENT_BASED
+    );
+  };
+
   return (
     <>
       <EuiSpacer size="l" />
-      <EuiAccordion
-        isDisabled={disabled}
-        initialIsOpen={disabled}
-        id={useGeneratedHtmlId({ prefix: 'setup-type' })}
-        buttonContent={
-          <EuiLink disabled={disabled}>
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.advancedOptionsLabel"
-              defaultMessage="Advanced options"
-            />
-          </EuiLink>
-        }
-        data-test-subj={SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ}
-      >
-        <EuiSpacer size="l" />
-        <EuiFormRow
-          fullWidth
-          label={
-            <FormattedMessage
-              id="xpack.csp.fleetIntegration.setupTechnology.setupTechnologyLabel"
-              defaultMessage="Setup technology"
-            />
-          }
-        >
-          <EuiSuperSelect
-            disabled={disabled}
-            options={options}
-            valueOfSelected={setupTechnology}
-            placeholder={
-              <FormattedMessage
-                id="xpack.csp.fleetIntegration.setupTechnology.setupTechnologyPlaceholder"
-                defaultMessage="Select the setup technology"
-              />
-            }
-            onChange={onSetupTechnologyChange}
-            itemLayoutAlign="top"
-            hasDividers
-            fullWidth
-            data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
+      <EuiTitle size="xs">
+        <h2>
+          <FormattedMessage
+            id="xpack.csp.setupTechnologySelector.deploymentOptionsTitle"
+            defaultMessage="Deployment Options"
           />
-        </EuiFormRow>
-      </EuiAccordion>
+        </h2>
+      </EuiTitle>
+      <EuiSpacer size="l" />
+      <EuiRadioGroup
+        disabled={disabled}
+        data-test-subj={SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ}
+        options={radioOptions}
+        idSelected={radioIdSelected}
+        onChange={(id) => onChange(id)}
+        name="radio group"
+      />
     </>
   );
 };
