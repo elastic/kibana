@@ -18,7 +18,7 @@ import {
   type SupportedDataType,
 } from '../../../definitions/types';
 import { getPosition, joinIndicesToSuggestions } from './util';
-import { TRIGGER_SUGGESTION_COMMAND } from '../../factories';
+import { TRIGGER_SUGGESTION_COMMAND, buildFieldsDefinitionsWithMetadata } from '../../factories';
 import type { GetColumnsByTypeFn, SuggestionRawDefinition } from '../../types';
 import { commaCompleteItem, pipeCompleteItem } from '../../complete_items';
 
@@ -113,10 +113,22 @@ export const suggest: CommandBaseDefinition<'join'>['suggest'] = async (
     }
 
     case 'after_on': {
+      console.log('after_on');
+      const res = await callbacks?.getColumnsFor({ query: 'FROM lookup_index' });
+      console.log('res', res);
+      const supportsControls = callbacks?.canSuggestVariables?.() ?? false;
+      const getVariablesByType = callbacks?.getVariablesByType;
+      const defs = buildFieldsDefinitionsWithMetadata(
+        res!,
+        { supportsControls },
+        getVariablesByType
+      );
+      console.log('defs', defs);
       const fields = await getColumnsByType(['any'], [], {
         advanceCursor: true,
         openSuggestions: true,
       });
+      console.log('fields', fields);
 
       return fields;
     }
