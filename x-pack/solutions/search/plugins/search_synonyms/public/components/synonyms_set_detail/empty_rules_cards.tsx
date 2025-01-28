@@ -51,7 +51,11 @@ export const SynonymsSetEmptyRulesCards: React.FC<SynonymsSetEmptyRulesCardsProp
           footer={
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiButton color="primary" onClick={() => onCreateRule('equivalent')}>
+                <EuiButton
+                  data-test-subj="searchSynonymsSynonymsSetEmptyRulesCardsAddEquivalentRuleButton"
+                  color="primary"
+                  onClick={() => onCreateRule('equivalent')}
+                >
                   {i18n.translate(
                     'xpack.searchSynonyms.synonymsSetEmptyRulesCards.equivalent.addRuleButton',
                     {
@@ -124,7 +128,11 @@ export const SynonymsSetEmptyRulesCards: React.FC<SynonymsSetEmptyRulesCardsProp
           footer={
             <EuiFlexGroup direction="column">
               <EuiFlexItem grow={false}>
-                <EuiButton color="primary" onClick={() => onCreateRule('explicit')}>
+                <EuiButton
+                  data-test-subj="searchSynonymsSynonymsSetEmptyRulesCardsAddExplicitRuleButton"
+                  color="primary"
+                  onClick={() => onCreateRule('explicit')}
+                >
                   {i18n.translate(
                     'xpack.searchSynonyms.synonymsSetEmptyRulesCards.explicit.addRuleButton',
                     {

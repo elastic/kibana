@@ -23,6 +23,7 @@ import {
 import { FormattedMessage } from '@kbn/i18n-react';
 import { i18n } from '@kbn/i18n';
 import { formatSynonymsSetName } from '../../utils/synonyms_utils';
+import { usePutSynonymsSet } from '../../hooks/use_put_synonyms_set';
 
 interface CreateSynonymsSetModalProps {
   onClose: () => void;
@@ -33,6 +34,9 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
 
   const [name, setName] = useState('');
   const [rawName, setRawName] = useState('');
+  const { mutate: createSynonymsSet } = usePutSynonymsSet(() => {
+    onClose();
+  });
   return (
     <EuiModal onClose={onClose}>
       <EuiModalHeader>
@@ -60,6 +64,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
             }
           >
             <EuiFieldText
+              data-test-subj="searchSynonymsCreateSynonymsSetModalFieldText"
               value={rawName}
               onChange={(e) => {
                 setRawName(e.target.value);
@@ -71,13 +76,24 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
       </EuiModalBody>
 
       <EuiModalFooter>
-        <EuiButtonEmpty onClick={onClose}>
+        <EuiButtonEmpty
+          data-test-subj="searchSynonymsCreateSynonymsSetModalCancelButton"
+          onClick={onClose}
+        >
           <FormattedMessage
             id="xpack.searchSynonyms.createSynonymsSetModal.cancelButton"
             defaultMessage="Cancel"
           />
         </EuiButtonEmpty>
-        <EuiButton form={formId} fill disabled={!name}>
+        <EuiButton
+          data-test-subj="searchSynonymsCreateSynonymsSetModalCreateButton"
+          form={formId}
+          fill
+          disabled={!name}
+          onClick={() => {
+            createSynonymsSet({ synonymsSetId: name });
+          }}
+        >
           <FormattedMessage
             id="xpack.searchSynonyms.createSynonymsSetModal.createButton"
             defaultMessage="Create"

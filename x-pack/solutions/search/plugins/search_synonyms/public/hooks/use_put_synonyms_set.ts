@@ -9,6 +9,7 @@ import { useMutation, useQueryClient } from '@tanstack/react-query';
 import { SynonymsPutSynonymResponse } from '@elastic/elasticsearch/lib/api/types';
 import { i18n } from '@kbn/i18n';
 import { KibanaServerError } from '@kbn/kibana-utils-plugin/common';
+import { PLUGIN_ROUTE_ROOT } from '../../common/api_routes';
 import { useKibana } from './use_kibana';
 
 interface MutationArgs {
@@ -18,7 +19,7 @@ interface MutationArgs {
 export const usePutSynonymsSet = (onSuccess?: () => void, onError?: (error: string) => void) => {
   const queryClient = useQueryClient();
   const {
-    services: { http, notifications },
+    services: { http, notifications, application },
   } = useKibana();
 
   return useMutation(
@@ -40,6 +41,7 @@ export const usePutSynonymsSet = (onSuccess?: () => void, onError?: (error: stri
         if (onSuccess) {
           onSuccess();
         }
+        application.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/sets/${synonymsSetId}`);
       },
       onError: (error: { body: KibanaServerError }) => {
         if (onError) {

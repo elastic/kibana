@@ -81,6 +81,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
+                data-test-subj="searchSynonymsColumnsButton"
                 iconType="expand"
                 aria-label={i18n.translate(
                   'xpack.searchSynonyms.synonymsSetTable.expandSynonyms.aria.label',
@@ -179,11 +180,41 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
           }}
         />
       )}
+
+      {isRuleFlyoutOpen && generatedId ? (
+        <SynonymsRuleFlyout
+          synonymsSetId={synonymsSetId}
+          onClose={() => {
+            setIsRuleFlyoutOpen(false);
+            setSynonymsRuleToEdit(null);
+            setGeneratedId(null);
+            setRuleTypeToCreate(null);
+          }}
+          flyoutMode={'create'}
+          synonymsRule={{ id: generatedId, synonyms: '' }}
+          renderExplicit={ruleTypeToCreate === 'explicit'}
+        />
+      ) : (
+        synonymsRule && (
+          <SynonymsRuleFlyout
+            synonymsSetId={synonymsSetId}
+            onClose={() => {
+              setIsRuleFlyoutOpen(false);
+              setSynonymsRuleToEdit(null);
+              setGeneratedId(null);
+              setRuleTypeToCreate(null);
+            }}
+            flyoutMode={'edit'}
+            synonymsRule={synonymsRule}
+          />
+        )
+      )}
       {data.data.length !== 0 && (
         <>
           <EuiPopover
             button={
               <EuiButton
+                data-test-subj="searchSynonymsSynonymsSetRuleTableAddRuleButton"
                 iconType="plusInCircle"
                 onClick={() => {
                   setAddNewRulePopoverOpen(true);
@@ -210,34 +241,6 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
             />
           </EuiPopover>
 
-          {isRuleFlyoutOpen && generatedId ? (
-            <SynonymsRuleFlyout
-              synonymsSetId={synonymsSetId}
-              onClose={() => {
-                setIsRuleFlyoutOpen(false);
-                setSynonymsRuleToEdit(null);
-                setGeneratedId(null);
-                setRuleTypeToCreate(null);
-              }}
-              flyoutMode={'create'}
-              synonymsRule={{ id: generatedId, synonyms: '' }}
-              renderExplicit={ruleTypeToCreate === 'explicit'}
-            />
-          ) : (
-            synonymsRule && (
-              <SynonymsRuleFlyout
-                synonymsSetId={synonymsSetId}
-                onClose={() => {
-                  setIsRuleFlyoutOpen(false);
-                  setSynonymsRuleToEdit(null);
-                  setGeneratedId(null);
-                  setRuleTypeToCreate(null);
-                }}
-                flyoutMode={'edit'}
-                synonymsRule={synonymsRule}
-              />
-            )
-          )}
           <EuiBasicTable
             data-test-subj="synonyms-set-table"
             items={data.data}

@@ -50,7 +50,7 @@ export const SearchSynonymsOverview = () => {
         rightSideItems={[
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiLink>
+              <EuiLink data-test-subj="searchSynonymsSearchSynonymsOverviewApiDocumentationLink">
                 <FormattedMessage
                   id="xpack.searchSynonyms.synonymsSetDetail.documentationLink"
                   defaultMessage="API Documentation"
@@ -59,6 +59,7 @@ export const SearchSynonymsOverview = () => {
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="searchSynonymsSearchSynonymsOverviewCreateButton"
                 fill
                 iconType="plusInCircle"
                 onClick={() => {

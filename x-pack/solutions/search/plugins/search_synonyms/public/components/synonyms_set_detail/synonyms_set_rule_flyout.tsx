@@ -90,7 +90,10 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
               defaultMessage: 'Rule ID',
             })}
           >
-            <EuiFieldText value={synonymsRule.id} />
+            <EuiFieldText
+              data-test-subj="searchSynonymsSynonymsRuleFlyoutFieldText"
+              value={synonymsRule.id}
+            />
           </EuiFormRow>
         )}
       </EuiFlyoutHeader>
@@ -159,20 +162,25 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
             <EuiFlexGroup>
               <EuiFlexItem grow={false}>
                 <EuiButtonEmpty
+                  data-test-subj="searchSynonymsSynonymsRuleFlyoutResetChangesButton"
                   iconType={'refresh'}
                   disabled={!hasChanges}
                   onClick={() => {
                     setSelectedFromTerms(
-                      from
-                        .trim()
-                        .split(',')
-                        .map((s) => ({ label: s }))
+                      from.length === 0
+                        ? []
+                        : from
+                            .trim()
+                            .split(',')
+                            .map((s) => ({ label: s }))
                     );
                     setSelectedToTerms(
-                      to
-                        .trim()
-                        .split(',')
-                        .map((s) => ({ label: s }))
+                      to.length === 0
+                        ? []
+                        : to
+                            .trim()
+                            .split(',')
+                            .map((s) => ({ label: s }))
                     );
                   }}
                 >
@@ -183,6 +191,7 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
               </EuiFlexItem>
               <EuiFlexItem grow={false}>
                 <EuiButton
+                  data-test-subj="searchSynonymsSynonymsRuleFlyoutSaveButton"
                   fill
                   onClick={() => {
                     if (!synonymsRule.id) {
