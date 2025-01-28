@@ -2,10 +2,10 @@
 apiVersion: backstage.io/v1alpha1
 kind: Resource
 metadata:
-  name: bk-kibana-console-definitions-sync-8_x
-  description: Opens a PR if anything changes in the console definitions in elasticsearch-definitions for 8.x branch
+  name: bk-kibana-console-definitions-sync
+  description: Opens a PR if anything changes in the console definitions in elasticsearch-definitions
   links:
-    - url: 'https://buildkite.com/elastic/kibana-console-definitions-sync-8_x'
+    - url: 'https://buildkite.com/elastic/kibana-console-definitions-sync'
       title: Pipeline link
 spec:
   type: buildkite-pipeline
@@ -15,15 +15,15 @@ spec:
     apiVersion: buildkite.elastic.dev/v1
     kind: Pipeline
     metadata:
-      name: kibana / Console definitions sync 8.x
-      description: Opens a PR if anything changes in the console definitions in elasticsearch-definitions for 8.x branch
+      name: kibana / Console definitions sync
+      description: Opens a PR if anything changes in the console definitions in elasticsearch-definitions
     spec:
       env:
         SLACK_NOTIFICATIONS_CHANNEL: '#kibana-management'
         ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
       allow_rebuilds: false
-      branch_configuration: 8.x
-      default_branch: 8.x
+      branch_configuration: main 8.x
+      default_branch: main
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/console_definitions_sync.yml
       provider_settings:
@@ -49,6 +49,6 @@ spec:
         Weekly build:
           cronline: 0 0 * * 1 America/New_York
           message: Weekly build
-          branch: 8.x
+          branch: main
       tags:
         - kibana
