@@ -8,7 +8,8 @@
 import type {
   ClusterPutComponentTemplateRequest,
   IndicesGetIndexTemplateIndexTemplateItem,
-} from '@elastic/elasticsearch/lib/api/types';
+  IndicesPutIndexTemplateRequest,
+} from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
 import { retryTransientEsErrors } from './retry_transient_es_errors';
@@ -52,7 +53,7 @@ const putIndexTemplateTotalFieldsLimitUsingComponentTemplate = async (
                   'index.mapping.total_fields.limit': totalFieldsLimit,
                 },
               },
-            },
+            } as IndicesPutIndexTemplateRequest['body'],
           }),
         { logger }
       );

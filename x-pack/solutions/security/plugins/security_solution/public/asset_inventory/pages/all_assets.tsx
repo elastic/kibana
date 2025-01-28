@@ -43,6 +43,7 @@ import { AssetCriticalityBadge } from '../../entity_analytics/components/asset_c
 import { EmptyState } from '../components/empty_state';
 import { AdditionalControls } from '../components/additional_controls';
 import { AssetInventorySearchBar } from '../components/search_bar';
+import { RiskBadge } from '../components/risk_badge';
 
 import { useDataViewContext } from '../hooks/data_view_context';
 import { useStyles } from '../hooks/use_styles';
@@ -92,7 +93,7 @@ const columnHeaders: Record<string, string> = {
 const customCellRenderer = (rows: DataTableRecord[]) => ({
   'asset.risk': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const risk = rows[rowIndex].flattened['asset.risk'] as number;
-    return risk;
+    return <RiskBadge risk={risk} />;
   },
   'asset.criticality': ({ rowIndex }: EuiDataGridCellValueElementProps) => {
     const criticality = rows[rowIndex].flattened[
@@ -373,7 +374,7 @@ const AllAssets = ({
         loading={loadingState === DataLoadingState.loading}
       />
       <EuiPageTemplate.Section>
-        <EuiTitle size="l">
+        <EuiTitle size="l" data-test-subj="all-assets-title">
           <h1>
             <FormattedMessage
               id="xpack.securitySolution.assetInventory.allAssets"
