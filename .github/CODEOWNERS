@@ -41,7 +41,6 @@ examples/unified_doc_viewer @elastic/kibana-core
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
-packages/core/ui-settings/core-ui-settings-browser-mocks @elastic/appex-sharedux
 packages/core/ui-settings/core-ui-settings-server-mocks @elastic/appex-sharedux
 packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
 packages/kbn-ambient-common-types @elastic/kibana-operations
@@ -331,6 +330,7 @@ src/core/packages/theme/browser-internal @elastic/kibana-core
 src/core/packages/theme/browser-mocks @elastic/kibana-core
 src/core/packages/ui-settings/browser @elastic/appex-sharedux
 src/core/packages/ui-settings/browser-internal @elastic/appex-sharedux
+src/core/packages/ui-settings/browser-mocks @elastic/appex-sharedux
 src/core/packages/ui-settings/common @elastic/appex-sharedux
 src/core/packages/ui-settings/server @elastic/appex-sharedux
 src/core/packages/ui-settings/server-internal @elastic/appex-sharedux
