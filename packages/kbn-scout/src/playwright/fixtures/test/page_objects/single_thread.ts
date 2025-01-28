@@ -23,7 +23,7 @@ export const pageObjectsFixture = scoutPageFixture.extend<{
   pageObjects: PageObjects;
 }>({
   pageObjects: async ({ page, log }, use) => {
-    const corePageObjects = createCorePageObjects(page, log);
+    const corePageObjects = createCorePageObjects(page);
     log.debug(serviceLoadedMsg(`pageObjects`));
     await use(corePageObjects);
   },

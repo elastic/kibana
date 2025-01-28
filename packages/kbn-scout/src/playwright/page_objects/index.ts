@@ -32,7 +32,7 @@ export interface PageObjects {
  * @param page - `ScoutPage` instance used for initializing page objects.
  * @returns An object containing lazy-loaded core page objects.
  */
-export function createCorePageObjects(page: ScoutPage, log: ToolingLog): PageObjects {
+export function createCorePageObjects(page: ScoutPage): PageObjects {
   return {
     datePicker: createLazyPageObject(DatePicker, page),
     dashboard: createLazyPageObject(DashboardApp, page),
