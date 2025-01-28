@@ -369,6 +369,7 @@ function useTableData({
     },
     // only fetches detailed statistics when `currentPageItems` is updated.
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mainStatistics.requestId, currentPageItems, offset, comparisonEnabled],
     { preservePreviousData: false }
   );
