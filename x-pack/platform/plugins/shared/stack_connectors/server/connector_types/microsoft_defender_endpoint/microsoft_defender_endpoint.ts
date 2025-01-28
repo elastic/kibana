@@ -42,7 +42,6 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
   MicrosoftDefenderEndpointSecrets
 > {
   private readonly oAuthToken: OAuthTokenManager;
-  private instanceId: string;
 
   private readonly urls: {
     machines: string;
@@ -53,8 +52,6 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     params: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>
   ) {
     super(params);
-    this.instanceId = Math.random().toString(36).substr(2);
-
     this.oAuthToken = new OAuthTokenManager({
       ...params,
       apiRequest: async (...args) => this.request(...args),
@@ -110,9 +107,7 @@ export class MicrosoftDefenderEndpointConnector extends SubActionConnector<
     req: Omit<SubActionRequestParams<R>, 'responseSchema'>,
     connectorUsageCollector: ConnectorUsageCollector
   ): Promise<R> {
-    this.logger.debug(
-      () => `[InstanceId: ${this.instanceId}] Request:\n${JSON.stringify(req, null, 2)}`
-    );
+    this.logger.debug(() => `Request:\n${JSON.stringify(req, null, 2)}`);
 
     const requestOptions: SubActionRequestParams<R> = {
       ...req,
