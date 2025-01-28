@@ -5,14 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
-import PropTypes from 'prop-types';
+import React, { ReactNode } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
 import { remoteClustersUrl } from '../../../services/documentation';
 
-import { EuiPageHeader, EuiButtonEmpty, EuiSpacer } from '@elastic/eui';
+interface Props {
+  title: ReactNode;
+  description?: ReactNode;
+}
 
-export const RemoteClusterPageTitle = ({ title, description }) => (
+export const RemoteClusterPageTitle: React.FC<Props> = ({ title, description }) => (
   <>
     <EuiPageHeader
       bottomBorder
@@ -38,8 +41,3 @@ export const RemoteClusterPageTitle = ({ title, description }) => (
     <EuiSpacer size="l" />
   </>
 );
-
-RemoteClusterPageTitle.propTypes = {
-  title: PropTypes.node.isRequired,
-  description: PropTypes.node,
-};
