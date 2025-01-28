@@ -16,7 +16,7 @@ import {
   convertFeaturesToIndicesArray,
   getESSystemIndicesMigrationStatus,
 } from '../es_system_indices_migration';
-import { getCorrectiveAction } from './get_corrective_actions';
+import { type EsMetadata, getCorrectiveAction } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
@@ -35,9 +35,7 @@ const createBaseMigrationDeprecation = (
     message,
     url,
     level,
-    // @ts-expect-error @elastic/elasticsearch _meta not available yet in MigrationDeprecationInfoResponse
     _meta: metadata,
-    // @ts-expect-error @elastic/elasticsearch resolve_during_rolling_upgrade not available yet in MigrationDeprecationInfoResponse
     resolve_during_rolling_upgrade: resolveDuringUpgrade,
   } = migrationDeprecation;
 
@@ -137,7 +135,7 @@ export const getEnrichedDeprecations = async (
     .map((deprecation) => {
       const correctiveAction = getCorrectiveAction(
         deprecation.message,
-        deprecation.metadata,
+        deprecation.metadata as EsMetadata,
         deprecation.index!
       );
 

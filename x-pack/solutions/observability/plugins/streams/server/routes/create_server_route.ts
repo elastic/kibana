@@ -6,6 +6,39 @@
  */
 
 import { createServerRouteFactory } from '@kbn/server-route-repository';
+import { CreateServerRouteFactory } from '@kbn/server-route-repository-utils/src/typings';
+import { badRequest, forbidden, internal, notFound } from '@hapi/boom';
+import { errors } from '@elastic/elasticsearch';
 import { StreamsRouteHandlerResources } from './types';
+import { StatusError } from '../lib/streams/errors/status_error';
 
-export const createServerRoute = createServerRouteFactory<StreamsRouteHandlerResources>();
+const createPlainStreamsServerRoute = createServerRouteFactory<StreamsRouteHandlerResources>();
+
+export const createServerRoute: CreateServerRouteFactory<
+  StreamsRouteHandlerResources,
+  undefined
+> = ({ handler, ...config }) => {
+  return createPlainStreamsServerRoute({
+    ...config,
+    handler: (options) => {
+      return handler(options).catch((error) => {
+        if (error instanceof StatusError || error instanceof errors.ResponseError) {
+          switch (error.statusCode) {
+            case 400:
+              throw badRequest(error);
+
+            case 403:
+              throw forbidden(error);
+
+            case 404:
+              throw notFound(error);
+
+            case 500:
+              throw internal(error);
+          }
+        }
+        throw error;
+      });
+    },
+  });
+};
