@@ -19,7 +19,6 @@ import { MlPageHeader } from '../../components/page_header';
 import { HeaderMenuPortal } from '../../components/header_menu_portal';
 import { JobsActionMenu } from '../components/jobs_action_menu';
 import { useEnabledFeatures } from '../../contexts/ml';
-import { SpaceManagementContextWrapper } from '../../components/space_management_context_wrapper';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE;
@@ -59,16 +58,14 @@ export const JobsPage: FC<JobsPageProps> = ({ isMlEnabledInSpace, lastRefresh })
       <HeaderMenuPortal>
         <JobsActionMenu />
       </HeaderMenuPortal>
-      <SpaceManagementContextWrapper>
-        <JobsListView
-          euiTheme={euiTheme}
-          isMlEnabledInSpace={isMlEnabledInSpace}
-          lastRefresh={lastRefresh}
-          jobsViewState={pageState}
-          onJobsViewStateUpdate={setPageState}
-          showNodeInfo={showNodeInfo}
-        />
-      </SpaceManagementContextWrapper>
+      <JobsListView
+        euiTheme={euiTheme}
+        isMlEnabledInSpace={isMlEnabledInSpace}
+        lastRefresh={lastRefresh}
+        jobsViewState={pageState}
+        onJobsViewStateUpdate={setPageState}
+        showNodeInfo={showNodeInfo}
+      />
       <HelpMenu docLink={helpLink} />
     </>
   );

@@ -74,6 +74,7 @@ import { MLSavedObjectsSpacesList } from '../components/ml_saved_objects_spaces_
 import { useCanManageSpacesAndSavedObjects } from '../hooks/use_spaces';
 import { useSavedObjectsApiService } from '../services/ml_api_service/saved_objects';
 import { TRAINED_MODEL_SAVED_OBJECT_TYPE } from '../../../common/types/saved_objects';
+import { SpaceManagementContextWrapper } from '../components/space_management_context_wrapper';
 
 interface PageUrlState {
   pageKey: typeof ML_PAGES.TRAINED_MODELS_MANAGE;
@@ -736,155 +737,160 @@ export const ModelsList: FC<Props> = ({
 
   return (
     <>
-      <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
-      <EuiFlexGroup justifyContent="spaceBetween">
-        {modelsStats ? (
-          <EuiFlexItem>
-            <EuiFlexGroup alignItems="center">
-              <EuiFlexItem grow={false}>
-                <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
-                <EuiSwitch
-                  label={
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.showAllLabel"
-                      defaultMessage="Show all"
-                    />
-                  }
-                  checked={!!pageState.showAll}
-                  onChange={(e) => updatePageState({ showAll: e.target.checked })}
-                  data-test-subj="mlModelsShowAllSwitch"
-                />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiFlexItem>
-        ) : null}
-        <EuiFlexItem grow={false}>
-          <EuiButton
-            fill
-            iconType={'plusInCircle'}
-            color={'primary'}
-            onClick={setIsAddModelFlyoutVisible.bind(null, true)}
-            data-test-subj="mlModelsAddTrainedModelButton"
-          >
-            <FormattedMessage
-              id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
-              defaultMessage="Add trained model"
-            />
-          </EuiButton>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-      <EuiSpacer size="m" />
-      <div data-test-subj="mlModelsTableContainer">
-        <EuiInMemoryTable<TrainedModelUIItem>
-          tableLayout={'auto'}
-          responsiveBreakpoint={'xl'}
-          allowNeutralSort={false}
-          columns={columns}
-          itemIdToExpandedRowMap={itemIdToExpandedRowMap}
-          items={tableItems}
-          itemId={ModelsTableToConfigMapping.id}
-          loading={isLoading}
-          search={search}
-          selection={selection}
-          rowProps={(item) => ({
-            'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
-          })}
-          pagination={pagination}
-          onTableChange={onTableChange}
-          sorting={sorting}
-          data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
-          childrenBetween={
-            isElserCalloutVisible ? (
-              <>
-                <EuiCallOut
-                  size="s"
-                  title={
-                    <FormattedMessage
-                      id="xpack.ml.trainedModels.modelsList.newElserModelTitle"
-                      defaultMessage="New ELSER model now available"
-                    />
-                  }
-                  onDismiss={setIsElserCalloutDismissed.bind(null, true)}
-                >
-                  <FormattedMessage
-                    id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
-                    defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it."
-                    values={{
-                      docLink: (
-                        <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
-                          <FormattedMessage
-                            id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
-                            defaultMessage="View documentation"
-                          />
-                        </EuiLink>
-                      ),
-                    }}
+      <SpaceManagementContextWrapper>
+        <SavedObjectsWarning onCloseFlyout={fetchModelsData} forceRefresh={isLoading} />
+        <EuiFlexGroup justifyContent="spaceBetween">
+          {modelsStats ? (
+            <EuiFlexItem>
+              <EuiFlexGroup alignItems="center">
+                <EuiFlexItem grow={false}>
+                  <StatsBar stats={modelsStats} dataTestSub={'mlInferenceModelsStatsBar'} />
+                </EuiFlexItem>
+                <EuiFlexItem grow={false}>
+                  <EuiSwitch
+                    label={
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.showAllLabel"
+                        defaultMessage="Show all"
+                      />
+                    }
+                    checked={!!pageState.showAll}
+                    onChange={(e) => updatePageState({ showAll: e.target.checked })}
+                    data-test-subj="mlModelsShowAllSwitch"
                   />
-                </EuiCallOut>
-                <EuiSpacer size="m" />
-              </>
-            ) : null
-          }
-        />
-      </div>
-      {modelsToDelete.length > 0 && (
-        <DeleteModelsModal
-          onClose={(refreshList) => {
-            modelsToDelete.forEach((model) => {
-              if (isBaseNLPModelItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
-                abortedDownload.current.add(model.model_id);
-              }
-            });
-
-            setItemIdToExpandedRowMap((prev) => {
-              const newMap = { ...prev };
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiFlexItem>
+          ) : null}
+          <EuiFlexItem grow={false}>
+            <EuiButton
+              fill
+              iconType={'plusInCircle'}
+              color={'primary'}
+              onClick={setIsAddModelFlyoutVisible.bind(null, true)}
+              data-test-subj="mlModelsAddTrainedModelButton"
+            >
+              <FormattedMessage
+                id="xpack.ml.trainedModels.modelsList.addModelButtonLabel"
+                defaultMessage="Add trained model"
+              />
+            </EuiButton>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+        <EuiSpacer size="m" />
+        <div data-test-subj="mlModelsTableContainer">
+          <EuiInMemoryTable<TrainedModelUIItem>
+            tableLayout={'auto'}
+            responsiveBreakpoint={'xl'}
+            allowNeutralSort={false}
+            columns={columns}
+            itemIdToExpandedRowMap={itemIdToExpandedRowMap}
+            items={tableItems}
+            itemId={ModelsTableToConfigMapping.id}
+            loading={isLoading}
+            search={search}
+            selection={selection}
+            rowProps={(item) => ({
+              'data-test-subj': `mlModelsTableRow row-${item.model_id}`,
+            })}
+            pagination={pagination}
+            onTableChange={onTableChange}
+            sorting={sorting}
+            data-test-subj={isLoading ? 'mlModelsTable loading' : 'mlModelsTable loaded'}
+            childrenBetween={
+              isElserCalloutVisible ? (
+                <>
+                  <EuiCallOut
+                    size="s"
+                    title={
+                      <FormattedMessage
+                        id="xpack.ml.trainedModels.modelsList.newElserModelTitle"
+                        defaultMessage="New ELSER model now available"
+                      />
+                    }
+                    onDismiss={setIsElserCalloutDismissed.bind(null, true)}
+                  >
+                    <FormattedMessage
+                      id="xpack.ml.trainedModels.modelsList.newElserModelDescription"
+                      defaultMessage="A new version of ELSER that shows faster performance and improved relevance is now available. {docLink} for information on how to start using it."
+                      values={{
+                        docLink: (
+                          <EuiLink href={nlpElserDocUrl} external target={'_blank'}>
+                            <FormattedMessage
+                              id="xpack.ml.trainedModels.modelsList.startDeployment.viewElserDocLink"
+                              defaultMessage="View documentation"
+                            />
+                          </EuiLink>
+                        ),
+                      }}
+                    />
+                  </EuiCallOut>
+                  <EuiSpacer size="m" />
+                </>
+              ) : null
+            }
+          />
+        </div>
+        {modelsToDelete.length > 0 && (
+          <DeleteModelsModal
+            onClose={(refreshList) => {
               modelsToDelete.forEach((model) => {
-                delete newMap[model.model_id];
+                if (isBaseNLPModelItem(model) && model.state === MODEL_STATE.DOWNLOADING) {
+                  abortedDownload.current.add(model.model_id);
+                }
               });
-              return newMap;
-            });
 
-            setModelsToDelete([]);
+              setItemIdToExpandedRowMap((prev) => {
+                const newMap = { ...prev };
+                modelsToDelete.forEach((model) => {
+                  delete newMap[model.model_id];
+                });
+                return newMap;
+              });
 
-            if (refreshList) {
-              fetchModelsData();
-            }
-          }}
-          models={modelsToDelete}
-        />
-      )}
-      {modelToTest === null ? null : (
-        <TestModelAndPipelineCreationFlyout
-          model={modelToTest}
-          onClose={(refreshList?: boolean) => {
-            setModelToTest(null);
-            if (refreshList) {
-              fetchModelsData();
-            }
-          }}
-        />
-      )}
-      {dfaModelToTest === null ? null : (
-        <TestDfaModelsFlyout model={dfaModelToTest} onClose={setDfaModelToTest.bind(null, null)} />
-      )}
-      {modelToDeploy !== undefined ? (
-        <AddInferencePipelineFlyout
-          onClose={setModelToDeploy.bind(null, undefined)}
-          model={modelToDeploy}
-        />
-      ) : null}
-      {isAddModelFlyoutVisible ? (
-        <AddModelFlyout
-          modelDownloads={items.filter(isModelDownloadItem)}
-          onClose={setIsAddModelFlyoutVisible.bind(null, false)}
-          onSubmit={(modelId) => {
-            onModelDownloadRequest(modelId);
-            setIsAddModelFlyoutVisible(false);
-          }}
-        />
-      ) : null}
+              setModelsToDelete([]);
+
+              if (refreshList) {
+                fetchModelsData();
+              }
+            }}
+            models={modelsToDelete}
+          />
+        )}
+        {modelToTest === null ? null : (
+          <TestModelAndPipelineCreationFlyout
+            model={modelToTest}
+            onClose={(refreshList?: boolean) => {
+              setModelToTest(null);
+              if (refreshList) {
+                fetchModelsData();
+              }
+            }}
+          />
+        )}
+        {dfaModelToTest === null ? null : (
+          <TestDfaModelsFlyout
+            model={dfaModelToTest}
+            onClose={setDfaModelToTest.bind(null, null)}
+          />
+        )}
+        {modelToDeploy !== undefined ? (
+          <AddInferencePipelineFlyout
+            onClose={setModelToDeploy.bind(null, undefined)}
+            model={modelToDeploy}
+          />
+        ) : null}
+        {isAddModelFlyoutVisible ? (
+          <AddModelFlyout
+            modelDownloads={items.filter(isModelDownloadItem)}
+            onClose={setIsAddModelFlyoutVisible.bind(null, false)}
+            onSubmit={(modelId) => {
+              onModelDownloadRequest(modelId);
+              setIsAddModelFlyoutVisible(false);
+            }}
+          />
+        ) : null}
+      </SpaceManagementContextWrapper>
     </>
   );
 };

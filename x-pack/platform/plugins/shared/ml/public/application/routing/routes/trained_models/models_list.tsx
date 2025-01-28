@@ -19,7 +19,6 @@ import { useRouteResolver } from '../../use_resolver';
 import { basicResolvers, initSavedObjects } from '../../resolvers';
 import { getBreadcrumbWithUrlForApp } from '../../breadcrumbs';
 import { MlPageHeader } from '../../../components/page_header';
-import { SpaceManagementContextWrapper } from '../../../components/space_management_context_wrapper';
 
 const ModelsList = dynamic(async () => ({
   default: (await import('../../../model_management/models_list')).ModelsList,
@@ -66,9 +65,7 @@ const PageWrapper: FC = () => {
         </EuiFlexGroup>
       </MlPageHeader>
 
-      <SpaceManagementContextWrapper>
-        <ModelsList />
-      </SpaceManagementContextWrapper>
+      <ModelsList />
     </PageLoader>
   );
 };

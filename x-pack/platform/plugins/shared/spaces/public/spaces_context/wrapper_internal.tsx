@@ -62,11 +62,13 @@ export const SpacesContextWrapperInternal = (
   useEffect(() => {
     let unmounted = false;
     getStartServices().then(([coreStart]) => {
+      if (unmounted) {
+        return;
+      }
+
       const { application, docLinks, notifications } = coreStart;
       const services = { application, docLinks, notifications };
-      if (!unmounted) {
-        setContext(createSpacesReactContext(services, spacesManager, spacesDataPromise));
-      }
+      setContext(createSpacesReactContext(services, spacesManager, spacesDataPromise));
     });
     return () => {
       unmounted = true;

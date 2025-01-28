@@ -40,6 +40,7 @@ import { AnomalyDetectionEmptyState } from '../anomaly_detection_empty_state';
 import { removeNodeInfo } from '../../../../../../common/util/job_utils';
 import { jobCloningService } from '../../../../services/job_cloning_service';
 import { ANOMALY_DETECTOR_SAVED_OBJECT_TYPE } from '../../../../../../common/types/saved_objects';
+import { SpaceManagementContextWrapper } from '../../../../components/space_management_context_wrapper';
 
 let blockingJobsRefreshTimeout = null;
 
@@ -433,135 +434,137 @@ export class JobsListViewUI extends Component {
     const noJobsFound = !loading && jobIds.length === 0;
 
     return (
-      <div data-test-subj="ml-jobs-list">
-        <NodeAvailableWarning />
+      <SpaceManagementContextWrapper>
+        <div data-test-subj="ml-jobs-list">
+          <NodeAvailableWarning />
 
-        <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
+          <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
 
-        <SavedObjectsWarning
-          onCloseFlyout={this.onRefreshClick}
-          forceRefresh={loading || isRefreshing}
-        />
+          <SavedObjectsWarning
+            onCloseFlyout={this.onRefreshClick}
+            forceRefresh={loading || isRefreshing}
+          />
 
-        <UpgradeWarning />
+          <UpgradeWarning />
 
-        <>
-          {noJobsFound ? <AnomalyDetectionEmptyState /> : null}
+          <>
+            {noJobsFound ? <AnomalyDetectionEmptyState /> : null}
 
-          {jobIds.length > 0 ? (
-            <>
-              <EuiFlexGroup justifyContent="spaceBetween">
-                <EuiFlexItem grow={false}>
-                  <JobStatsBar
-                    jobsSummaryList={jobsSummaryList}
-                    showNodeInfo={this.props.showNodeInfo}
-                  />
-                </EuiFlexItem>
-                <EuiFlexItem grow={false}>
-                  <NewJobButton />
-                </EuiFlexItem>
-              </EuiFlexGroup>
-
-              <EuiSpacer size="s" />
-
-              <div>
-                <EuiFlexGroup
-                  css={{
-                    alignItems: 'center',
-                    minHeight: '60px',
-                  }}
-                  gutterSize="none"
-                >
+            {jobIds.length > 0 ? (
+              <>
+                <EuiFlexGroup justifyContent="spaceBetween">
                   <EuiFlexItem grow={false}>
-                    <MultiJobActions
-                      selectedJobs={this.state.selectedJobs}
-                      allJobIds={jobIds}
-                      showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
-                      showStartDatafeedModal={this.showStartDatafeedModal}
-                      showDeleteJobModal={this.showDeleteJobModal}
-                      showResetJobModal={this.showResetJobModal}
-                      showCreateAlertFlyout={this.showCreateAlertFlyout}
-                      showStopDatafeedsConfirmModal={this.showStopDatafeedsConfirmModal}
-                      refreshJobs={() => this.refreshJobSummaryList()}
+                    <JobStatsBar
+                      jobsSummaryList={jobsSummaryList}
+                      showNodeInfo={this.props.showNodeInfo}
                     />
                   </EuiFlexItem>
-                  <EuiFlexItem>
-                    <JobFilterBar
-                      setFilters={this.setFilters}
-                      queryText={this.props.jobsViewState.queryText}
-                    />
+                  <EuiFlexItem grow={false}>
+                    <NewJobButton />
                   </EuiFlexItem>
                 </EuiFlexGroup>
-                <JobsList
-                  jobsSummaryList={this.state.filteredJobsSummaryList}
-                  fullJobsList={this.state.fullJobsList}
-                  itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
-                  toggleRow={this.toggleRow}
-                  selectJobChange={this.selectJobChange}
-                  showEditJobFlyout={this.showEditJobFlyout}
-                  showDatafeedChartFlyout={this.showDatafeedChartFlyout}
-                  showDeleteJobModal={this.showDeleteJobModal}
-                  showResetJobModal={this.showResetJobModal}
-                  showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
-                  showStartDatafeedModal={this.showStartDatafeedModal}
-                  showStopDatafeedsConfirmModal={this.showStopDatafeedsConfirmModal}
-                  refreshJobs={() => this.refreshJobSummaryList()}
-                  jobsViewState={this.props.jobsViewState}
-                  onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
-                  selectedJobsCount={this.state.selectedJobs.length}
-                  showCreateAlertFlyout={this.showCreateAlertFlyout}
-                  loading={loading}
-                />
-              </div>
-            </>
-          ) : null}
 
-          <EditJobFlyout
-            euiTheme={this.props.euiTheme}
-            setShowFunction={this.setShowEditJobFlyoutFunction}
-            unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
-            refreshJobs={() => this.refreshJobSummaryList()}
-            allJobIds={jobIds}
-          />
-          <JobListDatafeedChartFlyout
-            setShowFunction={this.setShowDatafeedChartFlyoutFunction}
-            unsetShowFunction={this.unsetShowDatafeedChartFlyoutFunction}
-            refreshJobs={() => this.refreshJobSummaryList()}
-          />
-          <StopDatafeedsConfirmModal
-            setShowFunction={this.setShowStopDatafeedsConfirmModalFunction}
-            unsetShowFunction={this.unsetShowStopDatafeedsConfirmModalFunction}
-            refreshJobs={() => this.refreshJobSummaryList()}
-            allJobIds={jobIds}
-          />
-          <CloseJobsConfirmModal
-            setShowFunction={this.setShowCloseJobsConfirmModalFunction}
-            unsetShowFunction={this.unsetShowCloseJobsConfirmModalFunction}
-            refreshJobs={() => this.refreshJobSummaryList()}
-          />
-          <DeleteJobModal
-            setShowFunction={this.setShowDeleteJobModalFunction}
-            unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-            refreshJobs={() => this.refreshJobSummaryList()}
-          />
-          <ResetJobModal
-            setShowFunction={this.setShowResetJobModalFunction}
-            unsetShowFunction={this.unsetShowResetJobModalFunction}
-            refreshJobs={() => this.refreshJobSummaryList()}
-          />
-          <StartDatafeedModal
-            setShowFunction={this.setShowStartDatafeedModalFunction}
-            unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-            getShowCreateAlertFlyoutFunction={this.getShowCreateAlertFlyoutFunction}
-            refreshJobs={() => this.refreshJobSummaryList()}
-          />
-          <JobListMlAnomalyAlertFlyout
-            setShowFunction={this.setShowCreateAlertFlyoutFunction}
-            unsetShowFunction={this.unsetShowCreateAlertFlyoutFunction}
-            onSave={this.onRefreshClick}
-          />
-        </>
-      </div>
+                <EuiSpacer size="s" />
+
+                <div>
+                  <EuiFlexGroup
+                    css={{
+                      alignItems: 'center',
+                      minHeight: '60px',
+                    }}
+                    gutterSize="none"
+                  >
+                    <EuiFlexItem grow={false}>
+                      <MultiJobActions
+                        selectedJobs={this.state.selectedJobs}
+                        allJobIds={jobIds}
+                        showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
+                        showStartDatafeedModal={this.showStartDatafeedModal}
+                        showDeleteJobModal={this.showDeleteJobModal}
+                        showResetJobModal={this.showResetJobModal}
+                        showCreateAlertFlyout={this.showCreateAlertFlyout}
+                        showStopDatafeedsConfirmModal={this.showStopDatafeedsConfirmModal}
+                        refreshJobs={() => this.refreshJobSummaryList()}
+                      />
+                    </EuiFlexItem>
+                    <EuiFlexItem>
+                      <JobFilterBar
+                        setFilters={this.setFilters}
+                        queryText={this.props.jobsViewState.queryText}
+                      />
+                    </EuiFlexItem>
+                  </EuiFlexGroup>
+                  <JobsList
+                    jobsSummaryList={this.state.filteredJobsSummaryList}
+                    fullJobsList={this.state.fullJobsList}
+                    itemIdToExpandedRowMap={this.state.itemIdToExpandedRowMap}
+                    toggleRow={this.toggleRow}
+                    selectJobChange={this.selectJobChange}
+                    showEditJobFlyout={this.showEditJobFlyout}
+                    showDatafeedChartFlyout={this.showDatafeedChartFlyout}
+                    showDeleteJobModal={this.showDeleteJobModal}
+                    showResetJobModal={this.showResetJobModal}
+                    showCloseJobsConfirmModal={this.showCloseJobsConfirmModal}
+                    showStartDatafeedModal={this.showStartDatafeedModal}
+                    showStopDatafeedsConfirmModal={this.showStopDatafeedsConfirmModal}
+                    refreshJobs={() => this.refreshJobSummaryList()}
+                    jobsViewState={this.props.jobsViewState}
+                    onJobsViewStateUpdate={this.props.onJobsViewStateUpdate}
+                    selectedJobsCount={this.state.selectedJobs.length}
+                    showCreateAlertFlyout={this.showCreateAlertFlyout}
+                    loading={loading}
+                  />
+                </div>
+              </>
+            ) : null}
+
+            <EditJobFlyout
+              euiTheme={this.props.euiTheme}
+              setShowFunction={this.setShowEditJobFlyoutFunction}
+              unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
+              refreshJobs={() => this.refreshJobSummaryList()}
+              allJobIds={jobIds}
+            />
+            <JobListDatafeedChartFlyout
+              setShowFunction={this.setShowDatafeedChartFlyoutFunction}
+              unsetShowFunction={this.unsetShowDatafeedChartFlyoutFunction}
+              refreshJobs={() => this.refreshJobSummaryList()}
+            />
+            <StopDatafeedsConfirmModal
+              setShowFunction={this.setShowStopDatafeedsConfirmModalFunction}
+              unsetShowFunction={this.unsetShowStopDatafeedsConfirmModalFunction}
+              refreshJobs={() => this.refreshJobSummaryList()}
+              allJobIds={jobIds}
+            />
+            <CloseJobsConfirmModal
+              setShowFunction={this.setShowCloseJobsConfirmModalFunction}
+              unsetShowFunction={this.unsetShowCloseJobsConfirmModalFunction}
+              refreshJobs={() => this.refreshJobSummaryList()}
+            />
+            <DeleteJobModal
+              setShowFunction={this.setShowDeleteJobModalFunction}
+              unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+              refreshJobs={() => this.refreshJobSummaryList()}
+            />
+            <ResetJobModal
+              setShowFunction={this.setShowResetJobModalFunction}
+              unsetShowFunction={this.unsetShowResetJobModalFunction}
+              refreshJobs={() => this.refreshJobSummaryList()}
+            />
+            <StartDatafeedModal
+              setShowFunction={this.setShowStartDatafeedModalFunction}
+              unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+              getShowCreateAlertFlyoutFunction={this.getShowCreateAlertFlyoutFunction}
+              refreshJobs={() => this.refreshJobSummaryList()}
+            />
+            <JobListMlAnomalyAlertFlyout
+              setShowFunction={this.setShowCreateAlertFlyoutFunction}
+              unsetShowFunction={this.unsetShowCreateAlertFlyoutFunction}
+              onSave={this.onRefreshClick}
+            />
+          </>
+        </div>
+      </SpaceManagementContextWrapper>
     );
   }
 
