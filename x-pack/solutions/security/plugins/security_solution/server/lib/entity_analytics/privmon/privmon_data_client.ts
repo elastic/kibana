@@ -8,6 +8,7 @@ import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
 import type { SearchRequest, SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import objectHash from 'object-hash';
+import type { DataViewsService } from '@kbn/data-plugin/common';
 import type {
   InitPrivmonResult,
   PrivilegedUserDoc,
@@ -32,12 +33,20 @@ import {
   mergePrivilegedUsersByUser,
   privilegedUsersToUserQuery,
 } from './utils';
-import { PRIVILEGED_USER_MAPPING } from './mappings';
+import {
+  PRIVILEGED_USER_MAPPING,
+  LOGIN_MAPPING,
+  createAndStartPrivmonMlJobs,
+  createPrivmonDataViews,
+  createPrivmonDetectionRules,
+} from './assets';
+import type { IDetectionRulesClient } from '../../detection_engine/rule_management/logic/detection_rules_client/detection_rules_client_interface';
 
 interface PrivMonClientOpts {
   logger: Logger;
   esClient: ElasticsearchClient;
   namespace: string;
+  dataViewsService: DataViewsService;
 }
 
 export interface PrivmonSearchOptions {
@@ -69,10 +78,12 @@ export class PrivmonDataClient {
 
   public async init({
     taskManager,
+    detectionRulesClient,
     config,
   }: {
     taskManager: TaskManagerStartContract;
     config: EntityAnalyticsConfig['privmon'];
+    detectionRulesClient: IDetectionRulesClient;
   }): Promise<InitPrivmonResult> {
     const { esClient, logger, namespace } = this.options;
 
@@ -89,7 +100,7 @@ export class PrivmonDataClient {
         data_stream: {},
         composed_of: ['ecs@mappings'],
         template: {
-          mappings: {},
+          mappings: LOGIN_MAPPING,
           settings: {
             index: {
               default_pipeline: pipelineId,
@@ -175,6 +186,20 @@ export class PrivmonDataClient {
     );
 
     logger.debug(`[PrivmonDataClient] Created index template ${PRIVMON_USERS_INDEX_TEMPLATE_NAME}`);
+
+    await createPrivmonDataViews(this.options.dataViewsService, namespace, logger);
+
+    await createAndStartPrivmonMlJobs({
+      esClient,
+      logger,
+      namespace,
+    });
+
+    await createPrivmonDetectionRules({
+      detectionRulesClient,
+      logger,
+      namespace,
+    });
 
     await startPrivmonTask({
       logger,

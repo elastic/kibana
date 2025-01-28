@@ -5,4 +5,7 @@
  * 2.0.
  */
 
-export * from './privileged_user_mapping';
+export * from './dataviews';
+export * from './detection_rules';
+export * from './ml_jobs';
+export * from './mappings';

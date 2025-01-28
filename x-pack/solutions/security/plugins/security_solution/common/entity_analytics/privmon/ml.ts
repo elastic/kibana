@@ -5,8 +5,5 @@
  * 2.0.
  */
 
-export * from './indices';
-export * from './constants';
-export * from './types';
-export * from './utils';
-export * from './ml';
+export const getUnusualLoginUserIpsJobName = (namespace: string) =>
+  `security-privmon-user-ip-logins-${namespace}`;

@@ -66,9 +66,13 @@ export const registerPrivmonTask = ({
   }
 
   const getPrivmonService: GetPrivmonService = (namespace) =>
-    getStartServices().then(([coreStart, { fleet }]) => {
+    getStartServices().then(async ([coreStart, startPlugins]) => {
       const esClient = coreStart.elasticsearch.client.asInternalUser;
       const soClient = buildScopedInternalSavedObjectsClientUnsafe({ coreStart, namespace });
+      const dataViewsService = await startPlugins.dataViews.dataViewsServiceFactory(
+        soClient,
+        esClient
+      );
 
       const assetCriticalityDataClient = new AssetCriticalityDataClient({
         esClient,
@@ -86,6 +90,7 @@ export const registerPrivmonTask = ({
         logger,
         esClient,
         namespace,
+        dataViewsService,
       });
 
       return privmonServiceFactory({

@@ -15,3 +15,6 @@ export const getPrivmonPrivilegesIndex = (namespace: string) =>
 
 export const getPrivmonUsersIndex = (namespace: string) =>
   `${PRIVMON_INDEX_PREFIX}.users-${namespace}`;
+
+export const getLoginAnomaliesIndex = (namespace: string) =>
+  `${PRIVMON_INDEX_PREFIX}.login-anomalies-${namespace}`;

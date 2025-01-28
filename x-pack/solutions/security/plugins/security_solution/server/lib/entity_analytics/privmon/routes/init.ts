@@ -36,8 +36,7 @@ export const privmonInitRoute = (
         const siemResponse = buildSiemResponse(response);
         const [_, { taskManager }] = await getStartServices();
         const privmonDataClient = securitySolution.getPrivmonDataClient();
-
-        console.log('BADGER');
+        const detectionRulesClient = securitySolution.getDetectionRulesClient();
         try {
           if (!taskManager) {
             return siemResponse.error({
@@ -48,6 +47,7 @@ export const privmonInitRoute = (
 
           const initResult = await privmonDataClient.init({
             taskManager,
+            detectionRulesClient,
             config,
           });
 

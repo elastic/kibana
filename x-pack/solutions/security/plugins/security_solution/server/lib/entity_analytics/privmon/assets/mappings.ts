@@ -50,3 +50,28 @@ export const PRIVILEGED_USER_MAPPING: MappingTypeMapping = {
     },
   },
 };
+
+export const LOGIN_MAPPING: MappingTypeMapping = {
+  properties: {
+    '@timestamp': {
+      type: 'date',
+    },
+    source: {
+      properties: {
+        ip: {
+          type: 'ip',
+        },
+      },
+    },
+    user: {
+      properties: {
+        id: {
+          type: 'keyword',
+        },
+        name: {
+          type: 'keyword',
+        },
+      },
+    },
+  },
+};
