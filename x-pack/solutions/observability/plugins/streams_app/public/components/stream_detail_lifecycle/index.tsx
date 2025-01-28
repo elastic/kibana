@@ -6,17 +6,24 @@
  */
 import {
   EuiButton,
+  EuiContextMenu,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
+  EuiModal,
+  EuiModalBody,
+  EuiModalFooter,
+  EuiModalHeader,
+  EuiModalHeaderTitle,
   EuiPanel,
+  EuiPopover,
+  EuiSpacer,
   EuiText,
   useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React, { useCallback, useEffect } from 'react';
+import React, { ReactNode, useState } from 'react';
 import {
-  IngestStreamLifecycle,
   ReadStreamDefinition,
   WiredReadStreamDefinition,
   isDslLifecycle,
@@ -25,6 +32,13 @@ import {
   isRoot,
 } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
+
+enum LifecycleEditAction {
+  None,
+  Dsl,
+  Ilm,
+  Inherit,
+}
 
 function useLifecycleState({ definition }: { definition?: ReadStreamDefinition }) {
   return {};
@@ -40,6 +54,8 @@ export function StreamDetailLifecycle({
   const theme = useEuiTheme().euiTheme;
   const lifecycleAppState = useLifecycleState({ definition });
 
+  const [openEditModal, setOpenEditModal] = useState(LifecycleEditAction.None);
+
   const {
     dependencies: {
       start: {
@@ -53,49 +69,75 @@ export function StreamDetailLifecycle({
   }
 
   return (
-    <EuiFlexItem
-      className={css`
-        overflow: auto;
-      `}
-      grow={false}
-    >
-      <EuiFlexGroup
-        direction="column"
-        gutterSize="s"
+    <>
+      {openEditModal != LifecycleEditAction.None && (
+        <EuiModal onClose={() => setOpenEditModal(LifecycleEditAction.None)}>
+          <EuiModalHeader>
+            <EuiModalHeaderTitle>Modal title</EuiModalHeaderTitle>
+          </EuiModalHeader>
+
+          <EuiModalBody>
+            This modal has the following setup:
+            <EuiSpacer />
+          </EuiModalBody>
+
+          <EuiModalFooter>
+            <EuiButton onClick={() => setOpenEditModal(LifecycleEditAction.None)} fill>
+              Close
+            </EuiButton>
+          </EuiModalFooter>
+        </EuiModal>
+      )}
+
+      <EuiFlexItem
         className={css`
           overflow: auto;
         `}
+        grow={false}
       >
-        <EuiFlexItem>
-          <EuiPanel
-            hasShadow={false}
-            hasBorder
-            className={css`
-              display: flex;
-              max-width: 100%;
-              overflow: auto;
-              flex-grow: 1;
-            `}
-            paddingSize="s"
-          >
-            <EuiFlexGroup
-              gutterSize="m"
+        <EuiFlexGroup
+          direction="column"
+          gutterSize="s"
+          className={css`
+            overflow: auto;
+          `}
+        >
+          <EuiFlexItem>
+            <EuiPanel
+              hasShadow={false}
+              hasBorder
               className={css`
+                display: flex;
+                max-width: 100%;
                 overflow: auto;
+                flex-grow: 1;
               `}
+              paddingSize="s"
             >
-              <EuiFlexItem grow={1}>
-                <RetentionSummary definition={definition} />
-              </EuiFlexItem>
+              <EuiFlexGroup
+                gutterSize="m"
+                className={css`
+                  overflow: auto;
+                `}
+              >
+                <EuiFlexItem grow={1}>
+                  <RetentionSummary definition={definition} />
+                </EuiFlexItem>
 
-              <EuiFlexItem grow={4}>
-                <RetentionMetadata definition={definition} />
-              </EuiFlexItem>
-            </EuiFlexGroup>
-          </EuiPanel>
-        </EuiFlexItem>
-      </EuiFlexGroup>
-    </EuiFlexItem>
+                <EuiFlexItem grow={4}>
+                  <RetentionMetadata
+                    definition={definition}
+                    openEditModal={(action) => {
+                      setOpenEditModal(action);
+                    }}
+                  />
+                </EuiFlexItem>
+              </EuiFlexGroup>
+            </EuiPanel>
+          </EuiFlexItem>
+        </EuiFlexGroup>
+      </EuiFlexItem>
+    </>
   );
 }
 
@@ -162,40 +204,79 @@ function RetentionSummary({ definition }: { definition: WiredReadStreamDefinitio
   );
 }
 
-function RetentionMetadata({ definition }: { definition: WiredReadStreamDefinition }) {
+function RetentionMetadata({
+  definition,
+  openEditModal,
+}: {
+  definition: WiredReadStreamDefinition;
+  openEditModal: (action: LifecycleEditAction) => void;
+}) {
+  const [isMenuOpen, setMenuOpen] = useState(false);
+
   const Row = ({
     metadata,
     value,
-    action,
-    onClick,
+    button,
   }: {
     metadata: string;
     value: string;
     action?: string;
-    onClick?: () => void;
+    button?: ReactNode;
   }) => {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xl">
-        <EuiFlexItem grow={2}>
+        <EuiFlexItem grow={3}>
           <EuiText>
             <b>{metadata}</b>
           </EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem grow={4}>
           <EuiText>{value}</EuiText>
         </EuiFlexItem>
-        <EuiFlexItem grow={1}>
-          {action && onClick ? (
-            <EuiButton size="s" onClick={onClick}>
-              {action}
-            </EuiButton>
-          ) : undefined}
-        </EuiFlexItem>
+        <EuiFlexItem grow={1}>{button}</EuiFlexItem>
       </EuiFlexGroup>
     );
   };
 
   const lifecycle = definition.effective_lifecycle;
+
+  const contextualMenu = (
+    <EuiPopover
+      button={
+        <EuiButton size="s" fullWidth onClick={() => setMenuOpen(!isMenuOpen)}>
+          Edit data retention
+        </EuiButton>
+      }
+      isOpen={isMenuOpen}
+      closePopover={() => setMenuOpen(false)}
+      panelPaddingSize="none"
+      anchorPosition="downLeft"
+    >
+      <EuiContextMenu
+        initialPanelId={0}
+        panels={[
+          {
+            id: 0,
+            title: 'Manage data retention',
+            items: [
+              {
+                name: 'Set specific retention days',
+                onClick: () => openEditModal(LifecycleEditAction.Dsl),
+              },
+              {
+                name: 'Use a lifecycle policy',
+                onClick: () => openEditModal(LifecycleEditAction.Ilm),
+              },
+              {
+                name: 'Reset to default',
+                onClick: () => openEditModal(LifecycleEditAction.Inherit),
+              },
+            ],
+          },
+        ]}
+      />
+    </EuiPopover>
+  );
 
   return (
     <EuiPanel hasBorder={false} hasShadow={false}>
@@ -208,8 +289,7 @@ function RetentionMetadata({ definition }: { definition: WiredReadStreamDefiniti
             ? 'Policy-based'
             : 'Disabled'
         }
-        action="Edit data retention"
-        onClick={() => console.log('hello')}
+        button={contextualMenu}
       />
       <EuiHorizontalRule margin="m" />
       <Row metadata="Source" value={lifecycle.from} />
