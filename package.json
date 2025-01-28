@@ -1389,7 +1389,7 @@
     "@kbn/core-fatal-errors-browser-mocks": "link:src/core/packages/fatal-errors/browser-mocks",
     "@kbn/core-http-browser-mocks": "link:src/core/packages/http/browser-mocks",
     "@kbn/core-http-context-server-mocks": "link:src/core/packages/http/context-server-mocks",
-    "@kbn/core-http-resources-server-mocks": "link:packages/core/http/core-http-resources-server-mocks",
+    "@kbn/core-http-resources-server-mocks": "link:src/core/packages/http/resources-server-mocks",
     "@kbn/core-http-router-server-mocks": "link:packages/core/http/core-http-router-server-mocks",
     "@kbn/core-http-server-mocks": "link:packages/core/http/core-http-server-mocks",
     "@kbn/core-i18n-browser-mocks": "link:packages/core/i18n/core-i18n-browser-mocks",
