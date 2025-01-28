@@ -5040,7 +5040,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-server-mocks@link:packages/core/saved-objects/core-saved-objects-server-mocks":
+"@kbn/core-saved-objects-server-mocks@link:src/core/packages/saved-objects/server-mocks":
   version "0.0.0"
   uid ""
 
