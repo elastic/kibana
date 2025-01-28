@@ -9,7 +9,7 @@
 
 import React from 'react';
 
-import { act, fireEvent, render } from '@testing-library/react';
+import { fireEvent, render, waitFor } from '@testing-library/react';
 
 import { take } from 'lodash';
 import { getOptionsListMocks } from '../../mocks/api_mocks';
@@ -19,8 +19,6 @@ import type { OptionsListComponentApi } from '../types';
 import { OptionsListPopoverSuggestions } from './options_list_popover_suggestions';
 
 describe('Options list popover', () => {
-  const waitOneTick = () => act(() => new Promise((resolve) => setTimeout(resolve, 0)));
-
   const allOptions = [
     { value: 'moo', docCount: 1 },
     { value: 'tweet', docCount: 2 },
@@ -72,9 +70,10 @@ describe('Options list popover', () => {
 
     // we are displaying all the available options - so don't display "load more" text
     mocks.api.availableOptions$.next(allOptions);
-    await waitOneTick();
-    optionComponents = await suggestionsComponent.findAllByRole('option');
-    expect(optionComponents.length).toBe(9);
+    await waitFor(async () => {
+      optionComponents = await suggestionsComponent.findAllByRole('option');
+      expect(optionComponents.length).toBe(9);
+    });
     expect(
       suggestionsComponent.queryByTestId('optionsList-control-selection-honk')
     ).toBeInTheDocument();
@@ -95,7 +94,11 @@ describe('Options list popover', () => {
     // reset request size + update cardinality
     mocks.stateManager.requestSize.next(MIN_OPTIONS_LIST_REQUEST_SIZE);
     mocks.api.totalCardinality$.next(MAX_OPTIONS_LIST_REQUEST_SIZE + 100);
-    await waitOneTick();
+    await waitFor(async () => {
+      // wait for request size to be reset in UI
+      const optionComponents = await suggestionsComponent.findAllByRole('option');
+      expect(optionComponents.length).toBe(6);
+    });
 
     // ensure we don't fetch more than MAX_OPTIONS_LIST_REQUEST_SIZE
     fireEvent.scroll(suggestionsComponent.getByTestId('optionsList--scrollListener'));
