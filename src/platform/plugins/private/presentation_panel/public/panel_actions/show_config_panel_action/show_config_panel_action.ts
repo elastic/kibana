@@ -68,7 +68,7 @@ export class ShowConfigPanelAction
   }
 
   public getIconType() {
-    return 'gear';
+    return 'wrench';
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
