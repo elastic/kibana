@@ -241,6 +241,35 @@ export function validateName(value: string) {
   }
 }
 
+export function validateKibanaURL(val: string, syncEnabled: boolean) {
+  try {
+    if (syncEnabled && !val) {
+      return [
+        i18n.translate('xpack.fleet.settings.outputForm.urlRequiredError', {
+          defaultMessage: 'URL is required',
+        }),
+      ];
+    } else if (!val) {
+      return;
+    } else {
+      const urlParsed = new URL(val);
+      if (!['http:', 'https:'].includes(urlParsed.protocol)) {
+        return [
+          i18n.translate('xpack.fleet.settings.outputForm.invalidProtocolError', {
+            defaultMessage: 'Invalid protocol',
+          }),
+        ];
+      }
+    }
+  } catch (error) {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.invalidURLError', {
+        defaultMessage: 'Invalid URL',
+      }),
+    ];
+  }
+}
+
 export function validateKafkaUsername(value: string) {
   if (!value || value === '') {
     return [
@@ -285,6 +314,18 @@ export function validateServiceToken(value: string) {
 }
 
 export const validateServiceTokenSecret = toSecretValidator(validateServiceToken);
+
+export function validateKibanaAPIKey(value: string) {
+  if (!value || value === '') {
+    return [
+      i18n.translate('xpack.fleet.settings.outputForm.kibanaAPIKeyRequiredErrorMessage', {
+        defaultMessage: 'Kibana API Key is required',
+      }),
+    ];
+  }
+}
+
+export const validateKibanaAPIKeySecret = toSecretValidator(validateKibanaAPIKey);
 
 export function validateSSLCertificate(value: string) {
   if (!value || value === '') {

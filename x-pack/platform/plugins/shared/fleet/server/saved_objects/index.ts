@@ -510,12 +510,24 @@ export const getSavedObjectTypes = (
                   id: { type: 'keyword' },
                 },
               },
+              kibana_api_key: {
+                dynamic: false,
+                properties: {
+                  id: { type: 'keyword' },
+                },
+              },
             },
           },
           preset: {
             type: 'keyword',
             index: false,
           },
+          sync_integrations: { type: 'boolean' },
+          kibana_url: {
+            type: 'keyword',
+            index: false,
+          },
+          kibana_api_key: { type: 'keyword', index: false },
         },
       },
       modelVersions: {
@@ -609,6 +621,31 @@ export const getSavedObjectTypes = (
             {
               type: 'data_backfill',
               backfillFn: backfillOutputPolicyToV7,
+            },
+          ],
+        },
+        '8': {
+          changes: [
+            {
+              type: 'mappings_addition',
+              addedMappings: {
+                sync_integrations: { type: 'boolean' },
+                kibana_url: {
+                  type: 'keyword',
+                  index: false,
+                },
+                kibana_api_key: { type: 'keyword', index: false },
+                secrets: {
+                  properties: {
+                    kibana_api_key: {
+                      dynamic: false,
+                      properties: {
+                        id: { type: 'keyword' },
+                      },
+                    },
+                  },
+                },
+              },
             },
           ],
         },

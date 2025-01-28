@@ -49,7 +49,12 @@ function ensureNoDuplicateSecrets(output: Partial<Output>) {
     output.service_token &&
     output.secrets?.service_token
   ) {
-    throw Boom.badRequest('Cannot specify both service_token and secrets.service_token');
+    if (output.service_token && output.secrets?.service_token) {
+      throw Boom.badRequest('Cannot specify both service_token and secrets.service_token');
+    }
+    if (output.kibana_api_key && output.secrets?.kibana_api_key) {
+      throw Boom.badRequest('Cannot specify both kibana_api_key and secrets.kibana_api_key');
+    }
   }
 }
 

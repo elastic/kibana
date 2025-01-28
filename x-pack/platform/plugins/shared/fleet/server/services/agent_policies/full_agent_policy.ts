@@ -518,6 +518,7 @@ export function transformOutputToFullPolicyOutput(
 
   if (output.type === outputType.RemoteElasticsearch) {
     newOutput.service_token = output.service_token;
+    newOutput.kibana_api_key = output.kibana_api_key;
   }
 
   if (outputTypeSupportPresets(output.type)) {
