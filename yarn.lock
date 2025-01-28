@@ -4940,7 +4940,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-preboot-server-mocks@link:packages/core/preboot/core-preboot-server-mocks":
+"@kbn/core-preboot-server-mocks@link:src/core/packages/preboot/server-mocks":
   version "0.0.0"
   uid ""
 
