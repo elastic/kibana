@@ -122,7 +122,6 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
   };
   // need to tell the helper that the colorStops are required to display
   const displayStops = applyPaletteParams(props.paletteService, activePalette, currentMinMax);
-  const categories = getColorCategories(currentData?.rows ?? [], accessor, false, [null]);
 
   if (activePalette.name !== CUSTOM_PALETTE && activePalette.params?.stops) {
     activePalette.params.stops = applyPaletteParams(
@@ -260,7 +259,7 @@ export function TableDimensionEditor(props: TableDimensionEditorProps) {
                 }}
                 paletteService={props.paletteService}
                 panelRef={props.panelRef}
-                categories={categories}
+                categories={getColorCategories(currentData?.rows ?? [], accessor, false, [null])}
                 formatter={formatter}
                 allowCustomMatch={allowCustomMatch}
               />

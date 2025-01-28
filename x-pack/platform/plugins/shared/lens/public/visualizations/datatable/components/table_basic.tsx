@@ -31,7 +31,7 @@ import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public'
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
-import { getColorCategories } from '@kbn/chart-expressions-common';
+import { getColorCategoriesFn } from '@kbn/chart-expressions-common';
 import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
 import { CoreTheme } from '@kbn/core/public';
 import { getKbnPalettes } from '@kbn/palettes';
@@ -400,6 +400,7 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         return cellColorFnMap.get(originalId)!;
       }
 
+      const getColorCategories = getColorCategoriesFn(!colorMapping);
       const colInfo = getDatatableColumn(firstLocalTable, originalId);
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
