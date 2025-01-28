@@ -31,7 +31,9 @@ export const useCreateAdhocDataView = (
           const validatedPatterns = ensurePatternFormat(combinedPatterns);
           const patternsString = validatedPatterns.join(',');
           const adHocDataView = await dataViews.createAndSave({
-            id: patternsString,
+            id: `adhoc_sourcerer_${Date.now()}`,
+            // NOTE: setting name here - it will not render duplicate warning this way.
+            name: `adhoc_sourcerer_${Date.now()}`,
             title: patternsString,
           });
           if (adHocDataView.fields.getByName('@timestamp')?.type === 'date') {
