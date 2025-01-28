@@ -3039,8 +3039,11 @@
           }
         }
       },
+      "promptGroupId": {
+        "type": "keyword"
+      },
       "promptId": {
-        "type": "text"
+        "type": "keyword"
       },
       "provider": {
         "type": "keyword"
