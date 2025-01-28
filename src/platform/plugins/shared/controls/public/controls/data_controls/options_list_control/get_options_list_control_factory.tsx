@@ -93,13 +93,17 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       const totalCardinality$ = new BehaviorSubject<number>(0);
 
       const dataControl = initializeDataControl<
-        Pick<OptionsListControlState, 'searchTechnique' | 'singleSelect'>
+        Pick<OptionsListControlState, 'searchTechnique' | 'singleSelect' | 'runPastTimeout'>
       >(
         uuid,
         OPTIONS_LIST_CONTROL,
         'optionsListDataView',
         initialState,
-        { searchTechnique: searchTechnique$, singleSelect: singleSelect$ },
+        {
+          searchTechnique: searchTechnique$,
+          singleSelect: singleSelect$,
+          runPastTimeout: runPastTimeout$,
+        },
         controlGroupApi
       );
 
