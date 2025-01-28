@@ -200,13 +200,7 @@ export const reindexServiceFactory = (
         method: 'POST',
         path: `_create_from/${indexName}/${newIndexName}`,
         body: {
-          // Settings overrides copied from ES datastream reindex logic
-          // https://github.com/elastic/elasticsearch/blob/9c0709f386fee4154e930cb61a02868adebe8572/x-pack/plugin/migrate/src/main/java/org/elasticsearch/xpack/migrate/action/ReindexDataStreamIndexTransportAction.java#L195-L210
           settings_override: {
-            // Remove read-only settings if they exist
-            'index.blocks.read_only': null,
-            'index.blocks.read_only_allow_delete': null,
-            'index.blocks.write': null,
             // Reindexing optimizations
             'index.number_of_replicas': 0,
             'index.refresh_interval': -1,
