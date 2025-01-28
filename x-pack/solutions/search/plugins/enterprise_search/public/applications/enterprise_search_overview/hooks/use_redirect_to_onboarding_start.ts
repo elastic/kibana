@@ -7,26 +7,37 @@
 
 import { useEffect } from 'react';
 
+import { useActions, useValues } from 'kea';
 import { useObservable } from 'react-use/lib';
 
 import { SEARCH_INDICES_START } from '@kbn/deeplinks-search';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 
+import { Status } from '../../../../common/types/api';
 import { KibanaDeps } from '../../../../common/types/kibana_deps';
+
+import { FetchIndicesStatusAPILogic } from '../api/fetch_indices_status';
 
 export const useRedirectToOnboardingStart = () => {
   const {
     services: { application, searchIndices, navigation },
   } = useKibana<KibanaDeps>();
-
-  const { data: indicesStatus, isFetching } = searchIndices?.fetchIndicesStatus() || {};
+  const { makeRequest } = useActions(FetchIndicesStatusAPILogic);
+  const { data: indicesStatus, status } = useValues(FetchIndicesStatusAPILogic);
+  const isLoading = status === Status.LOADING;
   const isSolutionNav = useObservable(navigation.isSolutionNavEnabled$, false);
 
   useEffect(() => {
-    if (!isFetching && isSolutionNav && indicesStatus?.indexNames.length === 0) {
+    if (searchIndices?.enabled && isSolutionNav) {
+      makeRequest({});
+    }
+  }, [isSolutionNav, searchIndices]);
+
+  useEffect(() => {
+    if (!isLoading && isSolutionNav && indicesStatus?.indexNames.length === 0) {
       application?.navigateToApp(SEARCH_INDICES_START);
     }
-  }, [isFetching, application, indicesStatus, isSolutionNav]);
+  }, [isLoading, application, indicesStatus, isSolutionNav]);
 
-  return { isChecking: isFetching };
+  return { isChecking: isLoading };
 };

@@ -19,22 +19,18 @@ import type {
   IndexManagementPluginSetup,
   IndexManagementPluginStart,
 } from '@kbn/index-management-shared-types';
-import type { UseQueryResult } from '@tanstack/react-query';
 import type { AppDeepLinkId } from '@kbn/core-chrome-browser';
 import type { ServerlessPluginSetup, ServerlessPluginStart } from '@kbn/serverless/public';
-import type { IndicesStatusResponse } from '../common';
 import type { AvailableLanguages } from './code_examples';
 
 export interface SearchIndicesPluginSetup {
   enabled: boolean;
-  fetchIndicesStatus: (pollingInterval?: number) => UseQueryResult<IndicesStatusResponse>;
   startAppId: string;
   startRoute: string;
 }
 
 export interface SearchIndicesPluginStart {
   enabled: boolean;
-  fetchIndicesStatus: (pollingInterval?: number) => UseQueryResult<IndicesStatusResponse>;
   startAppId: AppDeepLinkId;
   startRoute: string;
 }
