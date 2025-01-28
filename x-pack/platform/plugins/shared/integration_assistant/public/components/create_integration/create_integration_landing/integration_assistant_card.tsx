@@ -36,7 +36,6 @@ export const IntegrationAssistantCard = React.memo(() => {
                     <h3>{i18n.ASSISTANT_TITLE}</h3>
                   </EuiTitle>
                 </EuiFlexItem>
-                <EuiFlexItem grow={false} />
               </EuiFlexGroup>
             </EuiFlexItem>
             <EuiFlexItem>
