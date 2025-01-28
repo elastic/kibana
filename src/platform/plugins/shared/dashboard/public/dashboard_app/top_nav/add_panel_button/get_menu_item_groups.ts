@@ -11,7 +11,6 @@ import { VisGroups } from '@kbn/visualizations-plugin/public';
 import { ADD_PANEL_TRIGGER } from '@kbn/ui-actions-plugin/public';
 import {
   ADD_PANEL_ANNOTATION_GROUP,
-  ADD_PANEL_LEGACY_GROUP,
   ADD_PANEL_OTHER_GROUP,
   ADD_PANEL_VISUALIZATION_GROUP,
 } from '@kbn/embeddable-plugin/public';
@@ -27,7 +26,7 @@ const VIS_GROUP_TO_ADD_PANEL_GROUP: Record<VisGroups, undefined | PresentableGro
   [VisGroups.AGGBASED]: undefined,
   [VisGroups.PROMOTED]: ADD_PANEL_VISUALIZATION_GROUP,
   [VisGroups.TOOLS]: ADD_PANEL_ANNOTATION_GROUP,
-  [VisGroups.LEGACY]: ADD_PANEL_LEGACY_GROUP,
+  [VisGroups.LEGACY]: undefined,
 };
 
 export async function getMenuItemGroups(
