@@ -41,7 +41,7 @@ import type {
 } from '@kbn/core-http-server';
 import { performance } from 'perf_hooks';
 import { isBoom } from '@hapi/boom';
-import { identity, isObject } from 'lodash';
+import { identity, isNil, isObject, omitBy } from 'lodash';
 import { IHttpEluMonitorConfig } from '@kbn/core-http-server/src/elu_monitor';
 import { Env } from '@kbn/config';
 import { CoreContext } from '@kbn/core-base-server-internal';
@@ -769,6 +769,7 @@ export class HttpServer {
       access: route.options.access ?? 'internal',
       deprecated,
       security: route.security,
+      ...omitBy({ excludeFromRateLimiter: route.options.excludeFromRateLimiter }, isNil),
     };
     // Log HTTP API target consumer.
     optionsLogger.debug(

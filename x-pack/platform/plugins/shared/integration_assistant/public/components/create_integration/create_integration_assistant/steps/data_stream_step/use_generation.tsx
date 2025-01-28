@@ -8,7 +8,6 @@
 import { isEmpty } from 'lodash/fp';
 import { useCallback, useEffect, useState } from 'react';
 import type { HttpSetup } from '@kbn/core-http-browser';
-import { getLangSmithOptions } from '../../../../../common/lib/lang_smith';
 import type { Docs, ESProcessorItem, Pipeline, SamplesFormat } from '../../../../../../common';
 import {
   type AnalyzeLogsRequestBody,
@@ -18,12 +17,13 @@ import {
 } from '../../../../../../common';
 import { isGenerationErrorBody } from '../../../../../../common/api/generation_error';
 import {
+  getLangSmithOptions,
   runCategorizationGraph,
   runEcsGraph,
   runRelatedGraph,
   runAnalyzeLogsGraph,
-} from '../../../../../common/lib/api';
-import { useKibana } from '../../../../../common/hooks/use_kibana';
+  useKibana,
+} from '../../../../../common';
 import type { State } from '../../state';
 import * as i18n from './translations';
 import { useTelemetry } from '../../../telemetry';
