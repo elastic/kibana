@@ -30,6 +30,11 @@ export const getAnomalies = async (
   params: AnomaliesSearchParams,
   mlAnomalySearch: MlAnomalySearch
 ): Promise<AnomalyResults> => {
+  const queryRequest = buildAnomalyQuery(params);
+  return mlAnomalySearch(queryRequest, params.jobIds);
+};
+
+export const buildAnomalyQuery = (params: AnomaliesSearchParams): estypes.SearchRequest => {
   const boolCriteria = buildCriteria(params);
   return mlAnomalySearch(
     {
@@ -61,8 +66,7 @@ export const getAnomalies = async (
       ],
       sort: [{ record_score: { order: 'desc' as const } }],
     },
-    params.jobIds
-  );
+  };
 };
 
 const buildCriteria = (params: AnomaliesSearchParams): object[] => {

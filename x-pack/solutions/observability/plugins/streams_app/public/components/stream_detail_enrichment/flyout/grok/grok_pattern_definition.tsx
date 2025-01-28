@@ -10,9 +10,12 @@ import { useController } from 'react-hook-form';
 import { EuiFormRow } from '@elastic/eui';
 import { CodeEditor } from '@kbn/code-editor';
 import { i18n } from '@kbn/i18n';
+import { ProcessorFormState } from '../../types';
 
 export const GrokPatternDefinition = () => {
-  const { field, fieldState } = useController({ name: 'pattern_definitions' });
+  const { field, fieldState } = useController<ProcessorFormState, 'pattern_definitions'>({
+    name: 'pattern_definitions',
+  });
 
   return (
     <EuiFormRow
