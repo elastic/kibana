@@ -4956,7 +4956,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-browser-mocks@link:packages/core/rendering/core-rendering-browser-mocks":
+"@kbn/core-rendering-browser-mocks@link:src/core/packages/rendering/browser-mocks":
   version "0.0.0"
   uid ""
 
