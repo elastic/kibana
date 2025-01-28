@@ -4552,7 +4552,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-browser-mocks@link:packages/core/execution-context/core-execution-context-browser-mocks":
+"@kbn/core-execution-context-browser-mocks@link:src/core/packages/execution-context/browser-mocks":
   version "0.0.0"
   uid ""
 

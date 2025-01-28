@@ -1384,7 +1384,7 @@
     "@kbn/core-elasticsearch-client-server-mocks": "link:src/core/packages/elasticsearch/client-server-mocks",
     "@kbn/core-elasticsearch-server-mocks": "link:src/core/packages/elasticsearch/server-mocks",
     "@kbn/core-environment-server-mocks": "link:src/core/packages/environment/server-mocks",
-    "@kbn/core-execution-context-browser-mocks": "link:packages/core/execution-context/core-execution-context-browser-mocks",
+    "@kbn/core-execution-context-browser-mocks": "link:src/core/packages/execution-context/browser-mocks",
     "@kbn/core-execution-context-server-mocks": "link:packages/core/execution-context/core-execution-context-server-mocks",
     "@kbn/core-fatal-errors-browser-mocks": "link:packages/core/fatal-errors/core-fatal-errors-browser-mocks",
     "@kbn/core-http-browser-mocks": "link:packages/core/http/core-http-browser-mocks",
