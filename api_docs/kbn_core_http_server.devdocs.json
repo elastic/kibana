@@ -4065,6 +4065,14 @@
                 "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
               },
               {
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
+              },
+              {
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
+              },
+              {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/api_key_routes.ts"
               },
@@ -8017,6 +8025,14 @@
                 "path": "x-pack/solutions/search/plugins/search_inference_endpoints/server/routes.ts"
               },
               {
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
+              },
+              {
+                "plugin": "searchSynonyms",
+                "path": "x-pack/solutions/search/plugins/search_synonyms/server/routes.ts"
+              },
+              {
                 "plugin": "serverlessSearch",
                 "path": "x-pack/solutions/search/plugins/serverless_search/server/routes/connectors_routes.ts"
               },
@@ -9502,6 +9518,20 @@
             "signature": [
               "InternalRouteSecurity",
               " | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/router/request.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.KibanaRouteOptions.excludeFromRateLimiter",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "excludeFromRateLimiter",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
             ],
             "path": "src/core/packages/http/server/src/router/request.ts",
             "deprecated": false,
@@ -11261,6 +11291,24 @@
           },
           {
             "parentPluginId": "@kbn/core-http-server",
+            "id": "def-server.RouteConfigOptions.excludeFromRateLimiter",
+            "type": "CompoundType",
+            "tags": [
+              "default"
+            ],
+            "label": "excludeFromRateLimiter",
+            "description": [
+              "\nWhether the rate limiter should never throttle this route.\n"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/core/packages/http/server/src/router/route.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/core-http-server",
             "id": "def-server.RouteConfigOptions.discontinued",
             "type": "string",
             "tags": [],
@@ -12899,6 +12947,10 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
+              },
+              {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
               },
@@ -13645,18 +13697,6 @@
               {
                 "plugin": "ecsDataQualityDashboard",
                 "path": "x-pack/solutions/security/plugins/ecs_data_quality_dashboard/server/routes/results/get_index_results.ts"
-              },
-              {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/solutions/security/plugins/kubernetes_security/server/routes/aggregate.ts"
-              },
-              {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/solutions/security/plugins/kubernetes_security/server/routes/count.ts"
-              },
-              {
-                "plugin": "kubernetesSecurity",
-                "path": "x-pack/solutions/security/plugins/kubernetes_security/server/routes/multi_terms_aggregate.ts"
               },
               {
                 "plugin": "sessionView",

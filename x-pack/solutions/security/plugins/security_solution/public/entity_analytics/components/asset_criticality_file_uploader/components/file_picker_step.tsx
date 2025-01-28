@@ -13,15 +13,17 @@ import {
   EuiSpacer,
   EuiText,
   EuiTitle,
+  useEuiFontSize,
   useEuiTheme,
 } from '@elastic/eui';
+
 import { css } from '@emotion/css';
 import React from 'react';
 import { FormattedMessage, useI18n } from '@kbn/i18n-react';
 
-import { euiThemeVars } from '@kbn/ui-theme';
 import { useAssetCriticalityEntityTypes } from '../../../hooks/use_enabled_entity_types';
 import { EntityTypeToIdentifierField } from '../../../../../common/entity_analytics/types';
+
 import {
   CRITICALITY_CSV_MAX_SIZE_BYTES,
   ValidCriticalityLevels,
@@ -37,19 +39,20 @@ interface AssetCriticalityFilePickerStepProps {
 
 const sampleCSVContent = `user,user-001,low_impact\nuser,user-002,medium_impact\nhost,host-001,extreme_impact`;
 
-const listStyle = css`
-  list-style-type: disc;
-  margin-bottom: ${euiThemeVars.euiSizeL};
-  margin-left: ${euiThemeVars.euiSizeL};
-  line-height: ${euiThemeVars.euiLineHeight};
-`;
-
 export const AssetCriticalityFilePickerStep: React.FC<AssetCriticalityFilePickerStepProps> =
   React.memo(({ onFileChange, errorMessage, isLoading }) => {
     const i18n = useI18n();
 
     const formatBytes = useFormatBytes();
     const { euiTheme } = useEuiTheme();
+
+    const listStyle = css`
+      list-style-type: disc;
+      margin-bottom: ${euiTheme.size.l};
+      margin-left: ${euiTheme.size.l};
+      line-height: ${useEuiFontSize('s').lineHeight};
+    `;
+
     const entityTypes = useAssetCriticalityEntityTypes();
     const i18nOrList = (items: string[]) =>
       i18n

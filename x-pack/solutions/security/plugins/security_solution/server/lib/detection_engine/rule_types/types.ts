@@ -390,6 +390,7 @@ export interface SearchAfterAndBulkCreateParams {
   primaryTimestamp: string;
   secondaryTimestamp?: string;
   additionalFilters?: estypes.QueryDslQueryContainer[];
+  isLoggedRequestsEnabled?: boolean;
 }
 
 export interface SearchAfterAndBulkCreateReturnType {
@@ -405,10 +406,17 @@ export interface SearchAfterAndBulkCreateReturnType {
   userError?: boolean;
   warningMessages: string[];
   suppressedAlertsCount?: number;
+  loggedRequests?: RulePreviewLoggedRequest[];
+}
+
+export interface LoggedRequestsConfig {
+  type: string;
+  description: string;
+  skipRequestQuery?: boolean;
 }
 
 // the new fields can be added later if needed
 export interface OverrideBodyQuery {
   _source?: estypes.SearchSourceConfig;
-  fields?: estypes.Fields;
+  fields?: Array<estypes.QueryDslFieldAndFormat | estypes.Field>;
 }

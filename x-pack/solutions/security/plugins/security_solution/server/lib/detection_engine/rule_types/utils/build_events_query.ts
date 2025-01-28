@@ -114,7 +114,7 @@ export const buildEventsSearchQuery = ({
   trackTotalHits,
   additionalFilters,
   overrideBody,
-}: BuildEventsSearchQuery) => {
+}: BuildEventsSearchQuery): estypes.SearchRequest => {
   const timestamps = secondaryTimestamp
     ? [primaryTimestamp, secondaryTimestamp]
     : [primaryTimestamp];
@@ -152,12 +152,12 @@ export const buildEventsSearchQuery = ({
     });
   }
 
-  const searchQuery = {
+  const searchQuery: estypes.SearchRequest = {
     allow_no_indices: true,
     index,
-    size,
     ignore_unavailable: true,
     track_total_hits: trackTotalHits,
+    size,
     query: {
       bool: {
         filter: filterWithTime,

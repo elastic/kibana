@@ -105,6 +105,8 @@ import {
   MAX_CONCURRENT_PACKAGE_ASSETS,
 } from '../constants';
 
+import { inputNotAllowedInAgentless } from '../../common/services/agentless_policy_helper';
+
 import { createSoFindIterable } from './utils/create_so_find_iterable';
 
 import type { FleetAuthzRouteConfig } from './security';
@@ -295,6 +297,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
         await validateAgentPolicyOutputForIntegration(
           soClient,
           agentPolicy,
+          packagePolicy,
           enrichedPackagePolicy.package?.name
         );
       }
@@ -939,6 +942,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
     const logger = appContextService.getLogger();
 
     this.keepPolicyIdInSync(packagePolicyUpdate);
+    await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
 
     let enrichedPackagePolicy: UpdatePackagePolicy;
     let secretReferences: PolicySecretReference[] | undefined;
@@ -946,7 +950,6 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
 
     try {
       logger.debug(`Starting update of package policy ${id}`);
-      await preflightCheckPackagePolicy(soClient, packagePolicyUpdate);
       enrichedPackagePolicy = await packagePolicyService.runExternalCallbacks(
         'packagePolicyUpdate',
         packagePolicyUpdate,
@@ -1912,17 +1915,23 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
               i.type === input.type &&
               (!input.policy_template || input.policy_template === i.policy_template)
           );
+          // disable some inputs in case of agentless integration
+          const enabled = inputNotAllowedInAgentless(input.type, newPolicy?.supports_agentless)
+            ? false
+            : input.enabled;
+
           return {
             ...defaultInput,
-            enabled: input.enabled,
+            enabled,
             type: input.type,
             // to propagate "enabled: false" to streams
             streams: defaultInput?.streams?.map((stream) => ({
               ...stream,
-              enabled: input.enabled,
+              enabled,
             })),
           } as NewPackagePolicyInput;
         });
+
         newPackagePolicy = {
           ...newPP,
           name: newPolicy.name,
@@ -2212,6 +2221,7 @@ class PackagePolicyClientImpl implements PackagePolicyClient {
                 await validateAgentPolicyOutputForIntegration(
                   soClient,
                   agentPolicy,
+                  packagePolicy,
                   packagePolicy.package.name,
                   false
                 );
