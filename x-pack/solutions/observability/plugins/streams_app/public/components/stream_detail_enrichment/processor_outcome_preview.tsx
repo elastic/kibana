@@ -9,14 +9,12 @@ import React, { useEffect, useMemo, useState } from 'react';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import {
   EuiPanel,
-  EuiTitle,
   EuiSpacer,
   EuiFlexGroup,
   EuiFilterButton,
   EuiFilterGroup,
   EuiEmptyPrompt,
   EuiLoadingLogo,
-  EuiButton,
   EuiFormRow,
   EuiSuperSelectOption,
   EuiSuperSelect,
@@ -24,13 +22,8 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { isEmpty } from 'lodash';
 import { FieldIcon } from '@kbn/react-field';
-import {
-  FIELD_DEFINITION_TYPES,
-  ReadStreamDefinition,
-  isWiredReadStream,
-} from '@kbn/streams-schema';
+import { FIELD_DEFINITION_TYPES, ReadStreamDefinition } from '@kbn/streams-schema';
 import { UseControllerProps, useController, useFieldArray } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { flattenObject } from '@kbn/object-utils';
@@ -38,13 +31,12 @@ import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
-import { convertFormStateToProcessor } from './utils';
 import { DetectedField, ProcessorFormState } from './types';
-import { UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
+import { TableColumn, UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
 
 interface ProcessorOutcomePreviewProps {
   definition: ReadStreamDefinition;
-  columns: string[];
+  columns: TableColumn[];
   isLoading: UseProcessingSimulatorReturnType['isLoading'];
   simulation: UseProcessingSimulatorReturnType['simulation'];
   samples: UseProcessingSimulatorReturnType['samples'];
@@ -89,56 +81,21 @@ export const ProcessorOutcomePreview = ({
     return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
   }, [samples, simulation?.documents, selectedDocsFilter]);
 
-  // const detectedFieldsColumns = useMemo(
-  //   () =>
-  //     simulation?.detected_fields ? simulation.detected_fields.map((field) => field.name) : [],
-  //   [simulation?.detected_fields]
-  // );
-
   const tableColumns = useMemo(() => {
     switch (selectedDocsFilter) {
       case 'outcome_filter_unmatched':
-        return columns;
+        return columns
+          .filter((column) => column.origin === 'processor')
+          .map((column) => column.name);
       case 'outcome_filter_matched':
       case 'outcome_filter_all':
       default:
-        return columns;
+        return columns.map((column) => column.name);
     }
   }, [columns, selectedDocsFilter]);
 
-  // const detectedFieldsEnabled =
-  //   isWiredReadStream(definition) &&
-  //   ((simulation && !isEmpty(simulation.detected_fields)) || !isEmpty(formFields.detected_fields));
-
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
-      {/* <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
-        <EuiTitle size="xs">
-          <h3>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomeTitle',
-              { defaultMessage: 'Outcome' }
-            )}
-          </h3>
-        </EuiTitle>
-        <EuiButton
-          data-test-subj="streamsAppProcessorOutcomePreviewRunSimulationButton"
-          iconType="play"
-          color="accentSecondary"
-          size="s"
-          onClick={() => {
-            onSimulate(convertFormStateToProcessor(formFields), formFields.detected_fields);
-          }}
-          isLoading={isLoading}
-        >
-          {i18n.translate(
-            'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.runSimulation',
-            { defaultMessage: 'Run simulation' }
-          )}
-        </EuiButton>
-      </EuiFlexGroup>
-      <EuiSpacer /> */}
-      {/* {detectedFieldsEnabled && <DetectedFields detectedFields={simulation?.detected_fields} />} */}
       <OutcomeControls
         docsFilter={selectedDocsFilter}
         onDocsFilterChange={setSelectedDocsFilter}
@@ -265,74 +222,6 @@ const OutcomeControls = ({
     </EuiFlexGroup>
   );
 };
-
-const DetectedFields = ({ detectedFields }: { detectedFields?: DetectedField[] }) => {
-  const { euiTheme } = useEuiTheme();
-  const { fields, replace } = useFieldArray<{ detected_fields: DetectedField[] }>({
-    name: 'detected_fields',
-  });
-
-  useEffect(() => {
-    if (detectedFields) replace(detectedFields);
-  }, [detectedFields, replace]);
-
-  return (
-    <EuiFormRow
-      label={i18n.translate(
-        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.detectedFieldsLabel',
-        { defaultMessage: 'Detected fields' }
-      )}
-      css={css`
-        margin-bottom: ${euiTheme.size.l};
-      `}
-      fullWidth
-    >
-      <EuiFlexGroup gutterSize="s" wrap>
-        {fields.map((field, id) => (
-          <DetectedFieldSelector key={field.name} name={`detected_fields.${id}`} />
-        ))}
-      </EuiFlexGroup>
-    </EuiFormRow>
-  );
-};
-
-const DetectedFieldSelector = (
-  props: UseControllerProps<ProcessorFormState, `detected_fields.${number}`>
-) => {
-  const { field } = useController(props);
-
-  const options = useMemo(() => getDetectedFieldSelectOptions(field.value), [field.value]);
-
-  return (
-    <EuiSuperSelect
-      options={options}
-      valueOfSelected={field.value.type}
-      onChange={(type) => field.onChange({ ...field.value, type })}
-      css={css`
-        min-inline-size: 180px;
-      `}
-    />
-  );
-};
-
-const getDetectedFieldSelectOptions = (
-  fieldValue: DetectedField
-): Array<EuiSuperSelectOption<string>> =>
-  [...FIELD_DEFINITION_TYPES, 'unmapped'].map((type) => ({
-    value: type,
-    inputDisplay: (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <FieldIcon type={fieldValue.type} size="s" />
-        {fieldValue.name}
-      </EuiFlexGroup>
-    ),
-    dropdownDisplay: (
-      <EuiFlexGroup alignItems="center" gutterSize="s">
-        <FieldIcon type={type} size="s" />
-        {type}
-      </EuiFlexGroup>
-    ),
-  }));
 
 interface OutcomePreviewTableProps {
   documents?: Array<Record<PropertyKey, unknown>>;

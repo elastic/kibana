@@ -10,7 +10,7 @@ import { i18n } from '@kbn/i18n';
 import { EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
-import { UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
+import { TableColumn, UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
 
 const tabs = [
   {
@@ -32,7 +32,7 @@ const tabs = [
 
 interface SimulationPlaygroundProps {
   definition: ReadStreamDefinition;
-  columns: string[];
+  columns: TableColumn[];
   isLoading: UseProcessingSimulatorReturnType['isLoading'];
   simulation: UseProcessingSimulatorReturnType['simulation'];
   samples: UseProcessingSimulatorReturnType['samples'];
@@ -83,7 +83,7 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
       {renderedTabsSet.current.has('detectedFields') && (
         <div hidden={selectedTabId !== 'detectedFields'}>
           {i18n.translate('xpack.streams.simulationPlayground.div.detectedFieldsLabel', {
-            defaultMessage: 'Detected fields',
+            defaultMessage: 'WIP',
           })}
         </div>
       )}

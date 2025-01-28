@@ -6,7 +6,7 @@
  */
 
 import { useMemo } from 'react';
-import { isEmpty } from 'lodash';
+import { isEmpty, uniq } from 'lodash';
 import {
   ReadStreamDefinition,
   FieldDefinition,
@@ -25,6 +25,10 @@ import { processorConverter } from '../utils';
 type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
 // type SimulationRequestBody =
 //   StreamsAPIClientRequestParamsOf<'POST /api/streams/{id}/processing/_simulate'>['params']['body'];
+export interface TableColumn {
+  name: string;
+  origin: 'processor' | 'detected';
+}
 
 export interface UseProcessingSimulatorReturnType {
   error?: IHttpFetchError<ResponseErrorBody>;
@@ -32,7 +36,7 @@ export interface UseProcessingSimulatorReturnType {
   refreshSamples: () => void;
   samples: Array<Record<PropertyKey, unknown>>;
   simulation?: Simulation | null;
-  tableColumns: string[];
+  tableColumns: TableColumn[];
 }
 
 export const useProcessingSimulator = ({
@@ -54,7 +58,6 @@ export const useProcessingSimulator = ({
     absoluteTimeRange: { start, end },
   } = useDateRange({ data });
 
-  console.log('processors', processors);
   const draftProcessors = useMemo(
     () => processors.filter((processor) => processor.status === 'draft'),
     [processors]
@@ -166,7 +169,15 @@ const getTableColumns = (
   processors: ProcessorDefinitionWithUIAttributes[],
   fields: DetectedField[]
 ) => {
-  const uniqueSourceFields = getUniqueSourceFields(processors);
+  const uniqueProcessorsFields = uniq(getUniqueSourceFields(processors)).map((name) => ({
+    name,
+    origin: 'processor',
+  }));
 
-  return [...new Set([...uniqueSourceFields, ...fields.map((field) => field.name)])];
+  const uniqueDetectedFields = uniq(fields.map((field) => field.name)).map((name) => ({
+    name,
+    origin: 'detected',
+  }));
+
+  return [...uniqueProcessorsFields, ...uniqueDetectedFields] as TableColumn[];
 };
