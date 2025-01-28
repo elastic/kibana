@@ -7,6 +7,7 @@ To upgrade from 7.16.0 or earlier to {version},
 Before you upgrade, you must resolve all critical issues identified by the *Upgrade Assistant*.
 
 In addition, we recommend to carefully review the <<breaking-changes-summary,list of breaking changes and deprecations>> and to take any necessary actions to mitigate their impact on the upgrade.
+You can enable the <<enable-http-debug-logs, deprecated APIs debug logs config>> to get information about calls to deprecated APIs.
 
 Rolling upgrades are unsupported in {kib}. To upgrade,
 you must shut down all {kib} instances, install the new software, and restart {kib}.
