@@ -61,10 +61,9 @@ export const performGet = async <T>(
       type,
       id,
       existingNamespaces: body?._source?.namespaces ?? [],
-      name: SavedObjectsUtils.getName(
-        { attributes: body?._source?.[type] },
-        registry.getNameAttribute(type)
-      ),
+      name: SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+        attributes: body?._source?.[type],
+      }),
     },
     objectNotFound,
   });

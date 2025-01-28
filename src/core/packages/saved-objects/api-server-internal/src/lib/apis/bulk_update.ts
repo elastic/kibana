@@ -187,10 +187,9 @@ export const performBulkUpdate = async <T>(
   const authObjects: Array<WithAuditName<AuthorizeUpdateObject>> = validObjects.map((element) => {
     const { type, id, objectNamespace, esRequestIndex: index, documentToSave } = element.value;
     const preflightResult = bulkGetResponse!.body.docs[index];
-    const name = SavedObjectsUtils.getName(
-      { attributes: documentToSave[type] as SavedObject<T> },
-      registry.getNameAttribute(type)
-    );
+    const name = SavedObjectsUtils.getName(registry.getNameAttribute(type), {
+      attributes: documentToSave[type] as SavedObject<T>,
+    });
 
     if (registry.isMultiNamespace(type)) {
       return {

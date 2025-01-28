@@ -203,7 +203,7 @@ export const performBulkGet = async <T>(
       existingNamespaces: doc?._source?.namespaces ?? [],
       error: docNotFound,
       name: !docNotFound
-        ? SavedObjectsUtils.getName(savedObject, registry.getNameAttribute(type))
+        ? SavedObjectsUtils.getName(registry.getNameAttribute(type), savedObject)
         : undefined,
     });
 

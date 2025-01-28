@@ -64,7 +64,7 @@ export const performDelete = async <T>(
 
       const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
 
-      name = SavedObjectsUtils.getName(saveObject, nameAttribute);
+      name = SavedObjectsUtils.getName(nameAttribute, saveObject);
     }
 
     // we don't need to pass existing namespaces in because we're only concerned with authorizing

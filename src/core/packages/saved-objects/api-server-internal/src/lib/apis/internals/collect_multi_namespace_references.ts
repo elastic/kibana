@@ -92,7 +92,7 @@ export async function collectMultiNamespaceReferences(
     const originId = object?.originId;
     const spaces = object?.namespaces ?? [];
 
-    const name = SavedObjectsUtils.getName(object, registry.getNameAttribute(object?.type!));
+    const name = SavedObjectsUtils.getName(registry.getNameAttribute(object?.type!), object);
 
     return {
       type,

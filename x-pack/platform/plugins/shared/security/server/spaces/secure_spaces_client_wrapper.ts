@@ -288,7 +288,7 @@ export class SecureSpacesClientWrapper implements ISpacesClient {
         for await (const response of finder.find()) {
           const auditObjects = response.saved_objects.map((obj) => ({
             ...obj,
-            name: SavedObjectsUtils.getName(obj, registry.getNameAttribute(obj.type)),
+            name: SavedObjectsUtils.getName(registry.getNameAttribute(obj.type), obj),
           }));
           this.securityExtension?.auditObjectsForSpaceDeletion(id, auditObjects);
         }

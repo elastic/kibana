@@ -107,9 +107,9 @@ export const performBulkDelete = async <T>(
 
         const name = preflightResult
           ? SavedObjectsUtils.getName(
+              registry.getNameAttribute(type),
               // @ts-expect-error MultiGetHit._source is optional
-              { attributes: preflightResult?._source?.[type] },
-              registry.getNameAttribute(type)
+              { attributes: preflightResult?._source?.[type] }
             )
           : undefined;
 

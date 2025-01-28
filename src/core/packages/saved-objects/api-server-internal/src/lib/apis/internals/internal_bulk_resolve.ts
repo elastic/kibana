@@ -227,8 +227,8 @@ export async function internalBulkResolve<T>(
 
       if (result && securityExtension) {
         (result.saved_object as WithAuditName<SavedObject>).name = SavedObjectsUtils.getName(
-          result.saved_object,
-          registry.getNameAttribute(type)
+          registry.getNameAttribute(type),
+          result.saved_object
         );
       }
     } catch (error) {

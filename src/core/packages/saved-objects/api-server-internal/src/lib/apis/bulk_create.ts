@@ -156,7 +156,7 @@ export const performBulkCreate = async <T>(
       id: object.id,
       initialNamespaces: object.initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source.namespaces ?? [],
-      name: SavedObjectsUtils.getName(object, registry.getNameAttribute(object.type)),
+      name: SavedObjectsUtils.getName(registry.getNameAttribute(object.type), object),
     };
   });
 

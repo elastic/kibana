@@ -92,8 +92,8 @@ export interface ISavedObjectTypeRegistry {
   isImportableAndExportable(type: string): boolean;
 
   /**
-   * Returns the `nameAttribute` property for given type, or `undefined` if
+   * Returns the `nameAttribute` property for given type, or `unknown` if
    * the property/type is not registered.
    */
-  getNameAttribute(type: string): string | undefined;
+  getNameAttribute(type: string): string;
 }

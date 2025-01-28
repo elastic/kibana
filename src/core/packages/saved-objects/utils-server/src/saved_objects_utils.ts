@@ -115,34 +115,34 @@ export class SavedObjectsUtils {
   }
 
   public static getName(
-    savedObject?: Pick<SavedObject<unknown>, 'attributes'> | null,
-    nameAttribute?: string
+    nameAttribute: string,
+    savedObject?: Pick<SavedObject<unknown>, 'attributes'> | null
   ): string | undefined {
     if (!savedObject) {
       return undefined;
     }
 
-    const attributes = savedObject?.attributes as Record<string, unknown> & {
+    const attributes = savedObject?.attributes as {
       name?: string;
       title?: string;
+      // needed to allow index signature below
+      [key: string]: string | undefined;
     };
 
-    const fallbackTitle = attributes?.name ?? attributes?.title ?? '';
+    const fallbackTitle = attributes?.name || attributes?.title;
 
-    if (nameAttribute) {
-      return (
-        (attributes?.[nameAttribute as keyof (typeof savedObject)['attributes']] as string) ??
-        fallbackTitle
-      );
+    if (nameAttribute !== 'unknown') {
+      return attributes?.[nameAttribute] || fallbackTitle;
     }
 
     return fallbackTitle;
   }
 
-  public static getIncludedNameFields(type: string, nameAttribute?: string) {
-    const sourceIncludes = nameAttribute
-      ? [`${type}.${nameAttribute}`]
-      : [`${type}.name`, `${type}.title`];
+  public static getIncludedNameFields(type: string, nameAttribute: string) {
+    const sourceIncludes =
+      nameAttribute !== 'unknown'
+        ? [`${type}.${nameAttribute}`]
+        : [`${type}.name`, `${type}.title`];
 
     return sourceIncludes;
   }

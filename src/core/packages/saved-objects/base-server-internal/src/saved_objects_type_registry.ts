@@ -100,7 +100,7 @@ export class SavedObjectTypeRegistry implements ISavedObjectTypeRegistry {
   }
 
   public getNameAttribute(type: string) {
-    return this.types.get(type)?.nameAttribute;
+    return this.types.get(type)?.nameAttribute || 'unknown';
   }
 }
 

@@ -50,7 +50,7 @@ export const performRemoveReferencesTo = async <T>(
 
       const saveObject = { attributes: savedObjectResponse.body._source?.[type] };
 
-      name = SavedObjectsUtils.getName(saveObject, nameAttribute);
+      name = SavedObjectsUtils.getName(nameAttribute, saveObject);
     }
 
     await securityExtension.authorizeRemoveReferences({ namespace, object: { type, id, name } });
