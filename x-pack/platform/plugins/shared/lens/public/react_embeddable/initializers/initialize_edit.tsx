@@ -201,17 +201,37 @@ export function initializeEditApi(
   };
 
   const canShowConfig = () => {
-    return (
-      isReadOnly(viewMode$) &&
-      Boolean(capabilities.visualize.show) &&
-      !capabilities.dashboard?.showWriteControls
-    );
+    return isReadOnly(viewMode$) && Boolean(capabilities.visualize.show);
   };
 
   // this will force the embeddable to toggle the inline editing feature
   const canEditInline = apiPublishesInlineEditingCapabilities(parentApi)
     ? parentApi.canEditInline
     : true;
+
+  const openConfigurationPanel = async (
+    { showOnly }: { showOnly: boolean } = { showOnly: false }
+  ) => {
+    // save the initial state in case it needs to revert later on
+    const firstState = getState();
+
+    const rootEmbeddable = parentApi;
+    const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
+    const ConfigPanel = await openInlineEditor({
+      // restore the first state found when the panel opened
+      onCancel: () => updateState({ ...firstState }),
+      // the getState() here contains the wrong filters references
+      // but the input attributes are correct as openInlineEditor() handler is using
+      // the getStateWithInjectedFilters() function
+      onApply: showOnly
+        ? noop
+        : (attributes: LensRuntimeState['attributes']) =>
+            updateState({ ...getState(), attributes }),
+    });
+    if (ConfigPanel) {
+      mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
+    }
+  };
 
   return {
     comparators: { disabledActionIds: disabledActionIdsComparator },
@@ -248,23 +268,7 @@ export function initializeEditApi(
           return navigateFn();
         }
 
-        // save the initial state in case it needs to revert later on
-        const firstState = getState();
-
-        const rootEmbeddable = parentApi;
-        const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-        const ConfigPanel = await openInlineEditor({
-          // the getState() here contains the wrong filters references
-          // but the input attributes are correct as openInlineEditor() handler is using
-          // the getStateWithInjectedFilters() function
-          onApply: (attributes: LensRuntimeState['attributes']) =>
-            updateState({ ...getState(), attributes }),
-          // restore the first state found when the panel opened
-          onCancel: () => updateState({ ...firstState }),
-        });
-        if (ConfigPanel) {
-          mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
-        }
+        openConfigurationPanel({ showOnly: false });
       },
       /**
        * Check everything here: user/app permissions and the current inline editing state
@@ -284,18 +288,7 @@ export function initializeEditApi(
         if (!parentApi || !apiHasAppContext(parentApi)) {
           return;
         }
-        // save the initial state in case it needs to revert later on
-        const firstState = getState();
-
-        const rootEmbeddable = parentApi;
-        const overlayTracker = tracksOverlays(rootEmbeddable) ? rootEmbeddable : undefined;
-        const ConfigPanel = await openInlineEditor({
-          // restore the first state found when the panel opened
-          onCancel: () => updateState({ ...firstState }),
-        });
-        if (ConfigPanel) {
-          mountInlineEditPanel(ConfigPanel, startDependencies.coreStart, overlayTracker, uuid);
-        }
+        openConfigurationPanel({ showOnly: true });
       },
       getEditHref: async () => {
         if (!parentApi || !apiHasAppContext(parentApi)) {
