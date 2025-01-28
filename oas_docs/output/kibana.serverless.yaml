@@ -43693,8 +43693,8 @@ components:
           type: integer
         request:
           $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-      required:
-        - request
+        request_type:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
     Security_Detections_API_RulePreviewLogs:
       type: object
       properties:
