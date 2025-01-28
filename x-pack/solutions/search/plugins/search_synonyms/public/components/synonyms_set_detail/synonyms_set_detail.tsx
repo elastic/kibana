@@ -8,8 +8,6 @@
 import { useParams } from 'react-router-dom';
 import React, { useMemo } from 'react';
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
-import { EuiButton, EuiButtonIcon, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
-import { FormattedMessage } from '@kbn/i18n-react';
 import { useKibana } from '../../hooks/use_kibana';
 import { SynonymsSetRuleTable } from './synonyms_set_rule_table';
 
@@ -17,7 +15,6 @@ export const SynonymsSetDetail = () => {
   const { synonymsSetId = '' } = useParams<{
     synonymsSetId?: string;
   }>();
-
   const {
     services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
@@ -36,26 +33,7 @@ export const SynonymsSetDetail = () => {
       solutionNav={searchNavigation?.useClassicNavigation(history)}
       color="primary"
     >
-      <KibanaPageTemplate.Header
-        pageTitle={synonymsSetId}
-        restrictWidth
-        color="primary"
-        rightSideItems={[
-          <EuiFlexGroup alignItems="center">
-            <EuiFlexItem grow={false}>
-              <EuiButton color="text" iconType="endpoint">
-                <FormattedMessage
-                  id="xpack.searchSynonyms.synonymsSetDetail.connectToApiButton"
-                  defaultMessage="Connect to API"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButtonIcon iconType="boxesHorizontal" size="m" color="text" />
-            </EuiFlexItem>
-          </EuiFlexGroup>,
-        ]}
-      />
+      <KibanaPageTemplate.Header pageTitle={synonymsSetId} restrictWidth color="primary" />
       <KibanaPageTemplate.Section restrictWidth>
         {synonymsSetId && <SynonymsSetRuleTable synonymsSetId={synonymsSetId} />}
       </KibanaPageTemplate.Section>

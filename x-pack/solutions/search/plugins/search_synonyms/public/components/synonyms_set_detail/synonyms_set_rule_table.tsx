@@ -9,10 +9,13 @@ import React from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
+  EuiButton,
   EuiButtonIcon,
   EuiCode,
   EuiFlexGroup,
   EuiFlexItem,
+  EuiPopover,
+  EuiPopoverTitle,
   EuiText,
 } from '@elastic/eui';
 import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
@@ -21,13 +24,38 @@ import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination
 import { useFetchSynonymsSet } from '../../hooks/use_fetch_synonyms_set';
 import { getExplicitSynonym, isExplicitSynonym } from '../../utils/synonyms_utils';
 import { DeleteSynonymRuleModal } from './delete_synonym_rule_modal';
+import { SynonymsSetEmptyRuleTable } from './empty_rules_table';
+import { SynonymsSetEmptyRulesCards } from './empty_rules_cards';
+import { SynonymsRuleFlyout } from './synonyms_set_rule_flyout';
+import { useFetchSynonymRule } from '../../hooks/use_fetch_synonym_rule';
+import { useFetchGeneratedRuleId } from '../../hooks/use_fetch_generated_rule_id';
 
 export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: string }) => {
   const [pageIndex, setPageIndex] = React.useState(0);
   const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_VALUE.size);
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
   const [synonymRuleToDelete, setSynonymRuleToDelete] = React.useState<string | null>(null);
-  const { data, isLoading } = useFetchSynonymsSet(synonymsSetId, { from, size: pageSize });
+  const { data, isLoading, isInitialLoading } = useFetchSynonymsSet(synonymsSetId, {
+    from,
+    size: pageSize,
+  });
+  const [addNewRulePopoverOpen, setAddNewRulePopoverOpen] = React.useState(false);
+
+  const [isRuleFlyoutOpen, setIsRuleFlyoutOpen] = React.useState(false);
+  const [synonymsRuleToEdit, setSynonymsRuleToEdit] = React.useState<string | null>(null);
+  const [generatedId, setGeneratedId] = React.useState<string | null>(null);
+  const { data: synonymsRule } = useFetchSynonymRule(synonymsSetId, synonymsRuleToEdit || '');
+  const [ruleTypeToCreate, setRuleTypeToCreate] = React.useState<'equivalent' | 'explicit' | null>(
+    null
+  );
+
+  const { mutate: generateRuleId } = useFetchGeneratedRuleId((ruleId) => {
+    if (synonymsSetId && ruleTypeToCreate) {
+      setGeneratedId(ruleId);
+      setIsRuleFlyoutOpen(true);
+      setAddNewRulePopoverOpen(false);
+    }
+  });
 
   if (!data) return null;
 
@@ -45,7 +73,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
       name: i18n.translate('xpack.searchSynonyms.synonymsSetTable.synonymsColumn', {
         defaultMessage: 'Synonyms',
       }),
-      render: (synonyms: string) => {
+      render: (synonyms: string, synonymRule: SynonymsSynonymRule) => {
         const isExplicit = isExplicitSynonym(synonyms);
         const [explicitFrom = '', explicitTo = ''] = isExplicit ? getExplicitSynonym(synonyms) : [];
 
@@ -60,6 +88,12 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
                     defaultMessage: 'Expand synonyms rule',
                   }
                 )}
+                onClick={() => {
+                  if (synonymRule.id) {
+                    setSynonymsRuleToEdit(synonymRule.id);
+                    setIsRuleFlyoutOpen(true);
+                  }
+                }}
               />
             </EuiFlexItem>
             {isExplicit ? (
@@ -117,7 +151,12 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
           ),
           icon: 'pencil',
           type: 'icon',
-          onClick: () => {},
+          onClick: (synonymRule: SynonymsSynonymRule) => {
+            if (synonymRule.id) {
+              setSynonymsRuleToEdit(synonymRule.id);
+              setIsRuleFlyoutOpen(true);
+            }
+          },
         },
       ],
     },
@@ -132,17 +171,86 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
           closeDeleteModal={() => setSynonymRuleToDelete(null)}
         />
       )}
-      <EuiBasicTable
-        data-test-subj="synonyms-set-table"
-        items={data.data}
-        columns={columns}
-        loading={isLoading}
-        pagination={pagination}
-        onChange={({ page }) => {
-          setPageIndex(page.index);
-          setPageSize(page.size);
-        }}
-      />
+      {data.data.length === 0 && !isInitialLoading && (
+        <SynonymsSetEmptyRuleTable
+          onCreateRule={(type: 'equivalent' | 'explicit') => {
+            setRuleTypeToCreate(type);
+            generateRuleId({ synonymsSetId });
+          }}
+        />
+      )}
+      {data.data.length !== 0 && (
+        <>
+          <EuiPopover
+            button={
+              <EuiButton
+                iconType="plusInCircle"
+                onClick={() => {
+                  setAddNewRulePopoverOpen(true);
+                }}
+              >
+                {i18n.translate('xpack.searchSynonyms.synonymsSetTable.addRuleButton', {
+                  defaultMessage: 'Add rule',
+                })}
+              </EuiButton>
+            }
+            isOpen={addNewRulePopoverOpen}
+            closePopover={() => setAddNewRulePopoverOpen(false)}
+          >
+            <EuiPopoverTitle>
+              {i18n.translate('xpack.searchSynonyms.synonymsSetTable.addRule.title', {
+                defaultMessage: 'Select a rule type',
+              })}
+            </EuiPopoverTitle>
+            <SynonymsSetEmptyRulesCards
+              onCreateRule={(type: 'equivalent' | 'explicit') => {
+                setRuleTypeToCreate(type);
+                generateRuleId({ synonymsSetId });
+              }}
+            />
+          </EuiPopover>
+
+          {isRuleFlyoutOpen && generatedId ? (
+            <SynonymsRuleFlyout
+              synonymsSetId={synonymsSetId}
+              onClose={() => {
+                setIsRuleFlyoutOpen(false);
+                setSynonymsRuleToEdit(null);
+                setGeneratedId(null);
+                setRuleTypeToCreate(null);
+              }}
+              flyoutMode={'create'}
+              synonymsRule={{ id: generatedId, synonyms: '' }}
+              renderExplicit={ruleTypeToCreate === 'explicit'}
+            />
+          ) : (
+            synonymsRule && (
+              <SynonymsRuleFlyout
+                synonymsSetId={synonymsSetId}
+                onClose={() => {
+                  setIsRuleFlyoutOpen(false);
+                  setSynonymsRuleToEdit(null);
+                  setGeneratedId(null);
+                  setRuleTypeToCreate(null);
+                }}
+                flyoutMode={'edit'}
+                synonymsRule={synonymsRule}
+              />
+            )
+          )}
+          <EuiBasicTable
+            data-test-subj="synonyms-set-table"
+            items={data.data}
+            columns={columns}
+            loading={isLoading}
+            pagination={pagination}
+            onChange={({ page }) => {
+              setPageIndex(page.index);
+              setPageSize(page.size);
+            }}
+          />
+        </>
+      )}
     </>
   );
 };

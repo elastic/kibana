@@ -12,3 +12,10 @@ export const isExplicitSynonym = (synonym: string) => {
 export const getExplicitSynonym = (synonym: string) => {
   return [synonym.split('=>')[0].trim(), synonym.split('=>')[1].trim()];
 };
+
+export const formatSynonymsSetName = (rawName: string) =>
+  rawName
+    .trim()
+    .replace(/[^a-zA-Z0-9]+/g, '-') // Replace all special/non-alphanumerical characters with dashes
+    .replace(/^[-]+|[-]+$/g, '') // Strip all leading and trailing dashes
+    .toLowerCase();

@@ -21,12 +21,14 @@ import { useKibana } from '../../hooks/use_kibana';
 import { SynonymSets } from '../synonym_sets/synonym_sets';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
 import { EmptyPrompt } from '../empty_prompt/empty_prompt';
+import { CreateSynonymsSetModal } from '../synonym_sets/create_new_set_modal';
 
 export const SearchSynonymsOverview = () => {
   const {
     services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
   const { data: synonymsData, isInitialLoading } = useFetchSynonymsSets();
+  const [isCreateModalVisible, setIsCreateModalVisible] = React.useState(false);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),
@@ -56,7 +58,13 @@ export const SearchSynonymsOverview = () => {
               </EuiLink>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton fill iconType="plusInCircle">
+              <EuiButton
+                fill
+                iconType="plusInCircle"
+                onClick={() => {
+                  setIsCreateModalVisible(true);
+                }}
+              >
                 <FormattedMessage
                   id="xpack.searchSynonyms.synonymsSetDetail.createButton"
                   defaultMessage="Create"
@@ -74,6 +82,13 @@ export const SearchSynonymsOverview = () => {
         </EuiText>
       </KibanaPageTemplate.Header>
       <KibanaPageTemplate.Section restrictWidth>
+        {isCreateModalVisible && (
+          <CreateSynonymsSetModal
+            onClose={() => {
+              setIsCreateModalVisible(false);
+            }}
+          />
+        )}
         {isInitialLoading && <EuiLoadingSpinner />}
 
         {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount > 0 && (
