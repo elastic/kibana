@@ -15,8 +15,12 @@ import type { IntegrationAssistantRouteHandlerContext } from '../plugin';
 import { registerAnalyzeLogsRoutes } from './analyze_logs_routes';
 import { registerCelInputRoutes } from './cel_routes';
 import { registerApiAnalysisRoutes } from './analyze_api_route';
+import { ValidateCelTask } from '../graphs/cel/validation/validate_task';
 
-export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
+export function registerRoutes(
+  router: IRouter<IntegrationAssistantRouteHandlerContext>,
+  validateCelTask: ValidateCelTask
+) {
   registerAnalyzeLogsRoutes(router);
   registerEcsRoutes(router);
   registerIntegrationBuilderRoutes(router);
@@ -25,5 +29,5 @@ export function registerRoutes(router: IRouter<IntegrationAssistantRouteHandlerC
   registerPipelineRoutes(router);
 
   registerApiAnalysisRoutes(router);
-  registerCelInputRoutes(router);
+  registerCelInputRoutes(router, validateCelTask);
 }

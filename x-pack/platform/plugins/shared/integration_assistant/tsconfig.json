@@ -1,7 +1,9 @@
 {
   "extends": "../../../../../tsconfig.base.json",
   "compilerOptions": {
-    "outDir": "target/types"
+    "outDir": "target/types",
+    "module": "esnext",
+    "moduleResolution": "node",
   },
   "include": [
     "index.ts",
@@ -10,7 +12,8 @@
     "common/**/*.ts",
     "scripts/**/*.ts",
     "__jest__/**/*",
-    "../../../../typings/**/*"
+    "../../../../typings/**/*",
+    "server/graphs/cel/validation/wasm/wasm_exec.js"
   ],
   "exclude": [
     "target/**/*"
@@ -44,6 +47,8 @@
     "@kbn/utils",
     "@kbn/zod",
     "@kbn/tooling-log",
-    "@kbn/ai-assistant-icon"
+    "@kbn/ai-assistant-icon",
+    "@kbn/task-manager-plugin",
+    "@kbn/logging"
   ]
 }

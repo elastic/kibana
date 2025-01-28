@@ -21,6 +21,7 @@ import type {
   IntegrationAssistantPluginStartDependencies,
   IntegrationAssistantPluginSetupDependencies,
 } from './types';
+import { ValidateCelTask } from './graphs/cel/validation/validate_task';
 
 export type IntegrationAssistantRouteHandlerContext = CustomRequestHandlerContext<{
   integrationAssistant: {
@@ -45,6 +46,7 @@ export class IntegrationAssistantPlugin
   private readonly logger: Logger;
   private isAvailable: boolean;
   private hasLicense: boolean;
+  private validateCelTask: ValidateCelTask | undefined;
 
   constructor(initializerContext: PluginInitializerContext) {
     this.logger = initializerContext.logger.get();
@@ -53,7 +55,8 @@ export class IntegrationAssistantPlugin
   }
 
   public setup(
-    core: CoreSetup<IntegrationAssistantPluginStartDependencies, IntegrationAssistantPluginStart>
+    core: CoreSetup<IntegrationAssistantPluginStartDependencies, IntegrationAssistantPluginStart>,
+    dependencies: IntegrationAssistantPluginSetupDependencies
   ): IntegrationAssistantPluginSetup {
     core.http.registerRouteHandlerContext<
       IntegrationAssistantRouteHandlerContext,
@@ -65,9 +68,14 @@ export class IntegrationAssistantPlugin
     }));
     const router = core.http.createRouter<IntegrationAssistantRouteHandlerContext>();
 
+    this.validateCelTask = new ValidateCelTask({
+      logger: this.logger,
+      taskManager: dependencies.taskManager,
+    });
+
     this.logger.debug('integrationAssistant api: Setup');
 
-    registerRoutes(router);
+    registerRoutes(router, this.validateCelTask);
 
     return {
       setIsAvailable: (isAvailable: boolean) => {
@@ -79,7 +87,7 @@ export class IntegrationAssistantPlugin
   }
 
   public start(
-    _: CoreStart,
+    coreStart: CoreStart,
     dependencies: IntegrationAssistantPluginStartDependencies
   ): IntegrationAssistantPluginStart {
     this.logger.debug('integrationAssistant api: Started');
@@ -88,6 +96,10 @@ export class IntegrationAssistantPlugin
     licensing.license$.subscribe((license) => {
       this.hasLicense = license.hasAtLeast(MINIMUM_LICENSE_TYPE);
     });
+
+    const esClient = coreStart.elasticsearch.client.asInternalUser;
+    // Load the TaskManagerStartContract to the ValidateCelTask
+    this.validateCelTask?.startTaskManager(dependencies.taskManager, esClient);
 
     return {};
   }

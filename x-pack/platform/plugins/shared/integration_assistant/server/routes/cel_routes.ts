@@ -22,8 +22,12 @@ import { getLLMClass, getLLMType } from '../util/llm';
 import { buildRouteValidationWithZod } from '../util/route_validation';
 import { withAvailability } from './with_availability';
 import { isErrorThatHandlesItsOwnResponse } from '../lib/errors';
+import { ValidateCelTask } from '../graphs/cel/validation/validate_task';
 
-export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRouteHandlerContext>) {
+export function registerCelInputRoutes(
+  router: IRouter<IntegrationAssistantRouteHandlerContext>,
+  validateCelTask: ValidateCelTask
+) {
   router.versioned
     .post({
       path: CEL_INPUT_GRAPH_PATH,
@@ -81,6 +85,7 @@ export function registerCelInputRoutes(router: IRouter<IntegrationAssistantRoute
 
           const parameters = {
             dataStreamName: dataStreamTitle,
+            validateCelTask,
             path: celDetails.path,
             authType: celDetails.auth,
             openApiPathDetails: JSON.parse(celDetails.openApiDetails?.operation ?? ''),

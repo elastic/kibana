@@ -26,9 +26,12 @@ export async function handleBuildProgram({
     api_query_summary: state.apiQuerySummary,
     ex_answer: EX_ANSWER_PROGRAM,
   });
+  const validateCelTask = state.validateCelTask;
+  const taskInstance = await validateCelTask.validateCelProgram(program.trim());
+  const formattedProgram = await validateCelTask.pollTaskManager(taskInstance);
 
   return {
-    currentProgram: program.trim(),
+    currentProgram: formattedProgram,
     lastExecutedChain: 'buildCelProgram',
   };
 }

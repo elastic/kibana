@@ -16,7 +16,12 @@ import type {
   PluginStartContract as ActionsPluginStart,
   PluginSetupContract as ActionsPluginSetup,
 } from '@kbn/actions-plugin/server/plugin';
+import {
+  TaskManagerSetupContract,
+  TaskManagerStartContract,
+} from '@kbn/task-manager-plugin/server';
 import { ESProcessorItem, SamplesFormat, CelAuthType } from '../common';
+import { ValidateCelTask } from './graphs/cel/validation/validate_task';
 
 export interface IntegrationAssistantPluginSetup {
   setIsAvailable: (isAvailable: boolean) => void;
@@ -27,10 +32,12 @@ export interface IntegrationAssistantPluginStart {}
 export interface IntegrationAssistantPluginSetupDependencies {
   licensing: LicensingPluginSetup;
   actions: ActionsPluginSetup;
+  taskManager: TaskManagerSetupContract;
 }
 export interface IntegrationAssistantPluginStartDependencies {
   licensing: LicensingPluginStart;
   actions: ActionsPluginStart;
+  taskManager: TaskManagerStartContract;
 }
 
 export interface SimplifiedProcessor {
@@ -96,6 +103,7 @@ export interface CelInputState {
   configFields: object;
   redactVars: string[];
   results: object;
+  validateCelTask: ValidateCelTask;
 }
 
 export interface EcsMappingState {
