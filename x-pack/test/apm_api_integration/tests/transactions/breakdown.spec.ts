@@ -64,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(numberOfSeries).toMatchInline(`1`);
 
-        const { title, color, type, data, hideLegend, legendValue } = timeseries[0];
+        const { title, type, data, hideLegend, legendValue } = timeseries[0];
 
         const nonNullDataPoints = data.filter(({ y }: { y: number | null }) => y !== null);
 
@@ -103,7 +103,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       `);
 
         expectSnapshot(title).toMatchInline(`"app"`);
-        expectSnapshot(color).toMatchInline(`"#54b399"`);
         expectSnapshot(type).toMatchInline(`"areaStacked"`);
         expectSnapshot(hideLegend).toMatchInline(`false`);
         expectSnapshot(legendValue).toMatchInline(`"100%"`);

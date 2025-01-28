@@ -8,7 +8,9 @@
  */
 
 import React from 'react';
-import { Observable, of } from 'rxjs';
+import { of } from 'rxjs';
+import { applicationServiceMock } from '@kbn/core-application-browser-mocks';
+import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { indexPatternEditorPluginMock } from '@kbn/data-view-editor-plugin/public/mocks';
 
 export const hasUserDataView = jest.fn();
@@ -17,18 +19,8 @@ export const hasESData = jest.fn();
 jest.doMock('@kbn/kibana-react-plugin/public', () => ({
   useKibana: jest.fn().mockReturnValue({
     services: {
-      application: {
-        currentAppId$: new Observable<string | undefined>(),
-        navigateToUrl: jest.fn(),
-        capabilities: {
-          navLinks: {
-            integrations: {
-              canAccessFleet: false,
-            },
-          },
-        },
-      },
-      http: { basePath: { prepend: jest.fn((path: string) => (path ? path : 'path')) } },
+      application: applicationServiceMock.createStartContract(),
+      http: httpServiceMock.createStartContract(),
       dataViews: {
         hasUserDataView: jest.fn(),
         hasData: {

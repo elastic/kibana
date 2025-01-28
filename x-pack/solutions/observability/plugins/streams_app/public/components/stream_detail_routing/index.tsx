@@ -36,16 +36,19 @@ import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_a
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import React, { useCallback, useEffect } from 'react';
 import {
-  StreamChild,
   ReadStreamDefinition,
-  WiredStreamConfigDefinition,
   isRoot,
   isDescendantOf,
+  RoutingDefinition,
+  IngestUpsertRequest,
+  getAncestorsAndSelf,
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
 import { DraggableProvided } from '@hello-pangea/dnd';
+import { IToasts, Toast } from '@kbn/core/public';
 import { toMountPoint } from '@kbn/react-kibana-mount';
+import { cloneDeep } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { StreamsAppSearchBar } from '../streams_app_search_bar';
@@ -56,11 +59,37 @@ import { NestedView } from '../nested_view';
 import { PreviewTable } from '../preview_table';
 import { StreamDeleteModal } from '../stream_delete_modal';
 import { AssetImage } from '../asset_image';
+import {
+  EMPTY_EQUALS_CONDITION,
+  alwaysToEmptyEquals,
+  emptyEqualsToAlways,
+} from '../../util/condition';
 
-function useRoutingState({ definition }: { definition?: ReadStreamDefinition }) {
-  const [childUnderEdit, setChildUnderEdit] = React.useState<
-    { isNew: boolean; child: StreamChild } | undefined
-  >();
+interface ChildUnderEdit {
+  isNew: boolean;
+  child: RoutingDefinition;
+}
+
+function useRoutingState({
+  definition,
+  toasts,
+}: {
+  definition?: ReadStreamDefinition;
+  toasts: IToasts;
+}) {
+  const [lastDisplayedToast, setLastDisplayedToast] = React.useState<Toast | undefined>();
+
+  const [childUnderEdit, setChildUnderEdit] = React.useState<ChildUnderEdit | undefined>();
+
+  const selectChildUnderEdit = useCallback(
+    (child: ChildUnderEdit | undefined) => {
+      if (lastDisplayedToast) {
+        toasts.remove(lastDisplayedToast.id);
+      }
+      setChildUnderEdit(child);
+    },
+    [lastDisplayedToast, toasts]
+  );
 
   // Child streams: either represents the child streams as they are, or the new order from drag and drop.
   const [childStreams, setChildStreams] = React.useState<
@@ -83,6 +112,9 @@ function useRoutingState({ definition }: { definition?: ReadStreamDefinition }) 
 
   const onChildStreamDragEnd = useCallback(
     (event: DropResult) => {
+      if (lastDisplayedToast) {
+        toasts.remove(lastDisplayedToast.id);
+      }
       setDraggingChildStream(undefined);
       if (typeof event.source.index === 'number' && typeof event.destination?.index === 'number') {
         setChildStreams([
@@ -90,7 +122,7 @@ function useRoutingState({ definition }: { definition?: ReadStreamDefinition }) 
         ]);
       }
     },
-    [childStreams]
+    [childStreams, lastDisplayedToast, toasts]
   );
 
   const cancelChanges = useCallback(() => {
@@ -104,9 +136,10 @@ function useRoutingState({ definition }: { definition?: ReadStreamDefinition }) 
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
   return {
+    setLastDisplayedToast,
     debouncedChildUnderEdit,
     childUnderEdit,
-    setChildUnderEdit,
+    selectChildUnderEdit,
     saveInProgress,
     setSaveInProgress,
     showDeleteModal,
@@ -129,7 +162,7 @@ export function StreamDetailRouting({
 }) {
   const { appParams, core } = useKibana();
   const theme = useEuiTheme().euiTheme;
-  const routingAppState = useRoutingState({ definition });
+  const routingAppState = useRoutingState({ definition, toasts: core.notifications.toasts });
 
   const {
     dependencies: {
@@ -174,9 +207,9 @@ export function StreamDetailRouting({
       {routingAppState.showDeleteModal && routingAppState.childUnderEdit && (
         <StreamDeleteModal
           closeModal={closeModal}
-          clearChildUnderEdit={() => routingAppState.setChildUnderEdit(undefined)}
+          clearChildUnderEdit={() => routingAppState.selectChildUnderEdit(undefined)}
           refreshDefinition={refreshDefinition}
-          id={routingAppState.childUnderEdit.child.name}
+          id={routingAppState.childUnderEdit.child.destination}
           availableStreams={availableStreams}
         />
       )}
@@ -288,6 +321,7 @@ function ControlBar({
     if (!routingAppState.childUnderEdit) {
       return;
     }
+
     return streamsRepositoryClient.fetch('POST /api/streams/{id}/_fork', {
       signal,
       params: {
@@ -295,9 +329,9 @@ function ControlBar({
           id: definition.name,
         },
         body: {
-          condition: routingAppState.childUnderEdit.child.condition,
+          if: emptyEqualsToAlways(routingAppState.childUnderEdit.child.if),
           stream: {
-            name: routingAppState.childUnderEdit.child.name,
+            name: routingAppState.childUnderEdit.child.destination,
           },
         },
       },
@@ -312,21 +346,25 @@ function ControlBar({
 
     const childUnderEdit = routingAppState.childUnderEdit?.child;
     const { name, stream } = definition;
-    return streamsRepositoryClient.fetch('PUT /api/streams/{id}', {
+
+    const routing = routingAppState.childStreams.map((child) =>
+      child.destination === childUnderEdit?.destination ? childUnderEdit : child
+    );
+
+    const request = {
+      ingest: {
+        ...stream.ingest,
+        routing,
+      },
+    } as IngestUpsertRequest;
+
+    return streamsRepositoryClient.fetch('PUT /api/streams/{id}/_ingest', {
       signal,
       params: {
         path: {
           id: name,
         },
-        body: {
-          ...stream,
-          ingest: {
-            ...stream.ingest,
-            routing: routingAppState.childStreams.map((child) =>
-              child.name === childUnderEdit?.name ? childUnderEdit : child
-            ),
-          },
-        } as WiredStreamConfigDefinition,
+        body: request,
       },
     });
   }
@@ -349,7 +387,7 @@ function ControlBar({
       }
 
       routingAppState.setSaveInProgress(false);
-      notifications.toasts.addSuccess({
+      const toast = notifications.toasts.addSuccess({
         title: i18n.translate('xpack.streams.streamDetailRouting.saved', {
           defaultMessage: 'Stream saved',
         }),
@@ -357,11 +395,12 @@ function ControlBar({
           <EuiFlexGroup justifyContent="flexEnd" gutterSize="s">
             <EuiFlexItem grow={false}>
               <EuiButton
+                data-test-subj="streamsAppSaveOrUpdateChildrenOpenStreamInNewTabButton"
                 size="s"
                 target="_blank"
                 href={router.link('/{key}/{tab}/{subtab}', {
                   path: {
-                    key: routingAppState.childUnderEdit?.child.name!,
+                    key: routingAppState.childUnderEdit?.child.destination!,
                     tab: 'management',
                     subtab: 'route',
                   },
@@ -376,16 +415,18 @@ function ControlBar({
           core
         ),
       });
-      routingAppState.setChildUnderEdit(undefined);
+      routingAppState.setLastDisplayedToast(toast);
+      routingAppState.selectChildUnderEdit(undefined);
       refreshDefinition();
     } catch (error) {
       routingAppState.setSaveInProgress(false);
-      notifications.toasts.addError(error, {
+      const toast = notifications.toasts.addError(error, {
         title: i18n.translate('xpack.streams.failedToSave', {
           defaultMessage: 'Failed to save',
         }),
         toastMessage: 'body' in error ? error.body.message : error.message,
       });
+      routingAppState.setLastDisplayedToast(toast);
     }
   }
 
@@ -462,13 +503,12 @@ function PreviewPanel({
 
   const previewSampleFetch = useStreamsAppFetch(
     ({ signal }) => {
-      if (
-        !definition ||
-        !routingAppState.debouncedChildUnderEdit ||
-        !routingAppState.debouncedChildUnderEdit.isNew
-      ) {
+      const { debouncedChildUnderEdit } = routingAppState;
+
+      if (!definition || !debouncedChildUnderEdit || !debouncedChildUnderEdit.isNew) {
         return Promise.resolve({ documents: [] });
       }
+
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/_sample', {
         signal,
         params: {
@@ -476,14 +516,15 @@ function PreviewPanel({
             id: definition.name,
           },
           body: {
-            condition: routingAppState.debouncedChildUnderEdit.child.condition,
+            if: emptyEqualsToAlways(debouncedChildUnderEdit.child.if),
             start: start?.valueOf(),
             end: end?.valueOf(),
-            number: 100,
+            size: 100,
           },
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [definition, routingAppState.debouncedChildUnderEdit, streamsRepositoryClient, start, end],
     {
       disableToastOnError: true,
@@ -640,7 +681,7 @@ function ChildStreamList({
   availableStreams,
   routingAppState: {
     childUnderEdit,
-    setChildUnderEdit,
+    selectChildUnderEdit,
     childStreams,
     onChildStreamDragEnd,
     onChildStreamDragStart,
@@ -685,34 +726,41 @@ function ChildStreamList({
           <EuiDroppable droppableId="routing_children_reordering" spacing="none">
             <EuiFlexGroup direction="column" gutterSize="xs">
               {childStreams.map((child, i) => (
-                <EuiFlexItem key={`${child.name}-${i}-flex-item`} grow={false}>
+                <EuiFlexItem key={`${child.destination}-${i}-flex-item`} grow={false}>
                   <EuiDraggable
-                    key={child.name}
+                    key={child.destination}
                     index={i}
-                    draggableId={child.name}
+                    draggableId={child.destination}
                     hasInteractiveChildren={true}
                     customDragHandle={true}
                     spacing="none"
                   >
                     {(provided) => (
-                      <NestedView key={i} isBeingDragged={draggingChildStream === child.name}>
+                      <NestedView
+                        key={i}
+                        isBeingDragged={draggingChildStream === child.destination}
+                      >
                         <RoutingStreamEntry
                           draggableProvided={provided}
                           child={
-                            !childUnderEdit?.isNew && child.name === childUnderEdit?.child.name
+                            !childUnderEdit?.isNew &&
+                            child.destination === childUnderEdit?.child.destination
                               ? childUnderEdit.child
                               : child
                           }
-                          edit={!childUnderEdit?.isNew && child.name === childUnderEdit?.child.name}
+                          edit={
+                            !childUnderEdit?.isNew &&
+                            child.destination === childUnderEdit?.child.destination
+                          }
                           onEditStateChange={() => {
-                            if (child.name === childUnderEdit?.child.name) {
-                              setChildUnderEdit(undefined);
+                            if (child.destination === childUnderEdit?.child.destination) {
+                              selectChildUnderEdit(undefined);
                             } else {
-                              setChildUnderEdit({ isNew: false, child });
+                              selectChildUnderEdit({ isNew: false, child });
                             }
                           }}
                           onChildChange={(newChild) => {
-                            setChildUnderEdit({
+                            selectChildUnderEdit({
                               isNew: false,
                               child: newChild,
                             });
@@ -733,10 +781,10 @@ function ChildStreamList({
               child={childUnderEdit.child}
               onChildChange={(newChild) => {
                 if (!newChild) {
-                  setChildUnderEdit(undefined);
+                  selectChildUnderEdit(undefined);
                   return;
                 }
-                setChildUnderEdit({
+                selectChildUnderEdit({
                   isNew: true,
                   child: newChild,
                 });
@@ -750,15 +798,11 @@ function ChildStreamList({
                 iconType="plus"
                 data-test-subj="streamsAppStreamDetailRoutingAddRuleButton"
                 onClick={() => {
-                  setChildUnderEdit({
+                  selectChildUnderEdit({
                     isNew: true,
                     child: {
-                      name: `${definition.name}.child`,
-                      condition: {
-                        field: '',
-                        operator: 'eq',
-                        value: '',
-                      },
+                      destination: `${definition.name}.child`,
+                      if: cloneDeep(EMPTY_EQUALS_CONDITION),
                     },
                   });
                 }}
@@ -777,8 +821,7 @@ function ChildStreamList({
 
 function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }) {
   const router = useStreamsAppRouter();
-  const breadcrumbs: EuiBreadcrumb[] = definition.name.split('.').map((_part, pos, parts) => {
-    const parentId = parts.slice(0, pos + 1).join('.');
+  const breadcrumbs: EuiBreadcrumb[] = getAncestorsAndSelf(definition.name).map((parentId) => {
     const isBreadcrumbsTail = parentId === definition.name;
 
     return {
@@ -821,13 +864,15 @@ function RoutingStreamEntry({
   availableStreams,
 }: {
   draggableProvided: DraggableProvided;
-  child: StreamChild;
-  onChildChange: (child: StreamChild) => void;
+  child: RoutingDefinition;
+  onChildChange: (child: RoutingDefinition) => void;
   onEditStateChange: () => void;
   edit?: boolean;
   availableStreams: string[];
 }) {
-  const children = availableStreams.filter((stream) => isDescendantOf(child.name, stream)).length;
+  const children = availableStreams.filter((stream) =>
+    isDescendantOf(child.destination, stream)
+  ).length;
   const router = useStreamsAppRouter();
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="s">
@@ -839,7 +884,10 @@ function RoutingStreamEntry({
                 color="transparent"
                 paddingSize="s"
                 {...draggableProvided.dragHandleProps}
-                aria-label="Drag Handle"
+                aria-label={i18n.translate(
+                  'xpack.streams.routingStreamEntry.euiPanel.dragHandleLabel',
+                  { defaultMessage: 'Drag Handle' }
+                )}
               >
                 <EuiIcon type="grab" />
               </EuiPanel>
@@ -847,11 +895,11 @@ function RoutingStreamEntry({
             <EuiFlexGroup gutterSize="xs" alignItems="center">
               <EuiLink
                 href={router.link('/{key}/{tab}/{subtab}', {
-                  path: { key: child.name, tab: 'management', subtab: 'route' },
+                  path: { key: child.destination, tab: 'management', subtab: 'route' },
                 })}
                 data-test-subj="streamsAppRoutingStreamEntryButton"
               >
-                <EuiText size="s">{child.name}</EuiText>
+                <EuiText size="s">{child.destination}</EuiText>
               </EuiLink>
               {children > 0 && (
                 <EuiBadge color="hollow">
@@ -875,25 +923,16 @@ function RoutingStreamEntry({
           })}
         />
       </EuiFlexGroup>
-      {child.condition && (
-        <ConditionEditor
-          readonly={!edit}
-          condition={child.condition}
-          onConditionChange={(condition) => {
-            onChildChange({
-              ...child,
-              condition,
-            });
-          }}
-        />
-      )}
-      {!child.condition && (
-        <EuiText>
-          {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
-            defaultMessage: 'No condition, no documents will be routed',
-          })}
-        </EuiText>
-      )}
+      <ConditionEditor
+        readonly={!edit}
+        condition={alwaysToEmptyEquals(child.if)}
+        onConditionChange={(condition) => {
+          onChildChange({
+            ...child,
+            if: condition,
+          });
+        }}
+      />
     </EuiPanel>
   );
 }
@@ -902,8 +941,8 @@ function NewRoutingStreamEntry({
   child,
   onChildChange,
 }: {
-  child: StreamChild;
-  onChildChange: (child?: StreamChild) => void;
+  child: RoutingDefinition;
+  onChildChange: (child?: RoutingDefinition) => void;
 }) {
   return (
     <EuiPanel hasShadow={false} hasBorder paddingSize="s">
@@ -916,36 +955,27 @@ function NewRoutingStreamEntry({
         >
           <EuiFieldText
             data-test-subj="streamsAppRoutingStreamEntryNameField"
-            value={child.name}
+            value={child.destination}
             fullWidth
             compressed
             onChange={(e) => {
               onChildChange({
                 ...child,
-                name: e.target.value,
+                destination: e.target.value,
               });
             }}
           />
         </EuiFormRow>
-        {child.condition && (
-          <ConditionEditor
-            readonly={false}
-            condition={child.condition}
-            onConditionChange={(condition) => {
-              onChildChange({
-                ...child,
-                condition,
-              });
-            }}
-          />
-        )}
-        {!child.condition && (
-          <EuiText>
-            {i18n.translate('xpack.streams.streamDetailRouting.noCondition', {
-              defaultMessage: 'No condition, no documents will be routed',
-            })}
-          </EuiText>
-        )}
+        <ConditionEditor
+          readonly={false}
+          condition={child.if}
+          onConditionChange={(condition) => {
+            onChildChange({
+              ...child,
+              if: condition,
+            });
+          }}
+        />
       </EuiFlexGroup>
     </EuiPanel>
   );

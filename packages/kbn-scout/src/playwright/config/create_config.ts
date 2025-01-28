@@ -8,26 +8,34 @@
  */
 
 import { defineConfig, PlaywrightTestConfig, devices } from '@playwright/test';
-import { scoutPlaywrightReporter } from '@kbn/scout-reporting';
+import {
+  scoutFailedTestsReporter,
+  scoutPlaywrightReporter,
+  generateTestRunId,
+} from '@kbn/scout-reporting';
 import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import { ScoutPlaywrightOptions, ScoutTestOptions, VALID_CONFIG_MARKER } from '../types';
 
 export function createPlaywrightConfig(options: ScoutPlaywrightOptions): PlaywrightTestConfig {
+  const runId = generateTestRunId();
+
   return defineConfig<ScoutTestOptions>({
     testDir: options.testDir,
+    globalSetup: options.globalSetup,
     /* Run tests in files in parallel */
     fullyParallel: false,
     /* Fail the build on CI if you accidentally left test.only in the source code. */
     forbidOnly: !!process.env.CI,
     /* Retry on CI only */
-    retries: process.env.CI ? 2 : 0,
+    retries: 0, // disable retry for Playwright runner
     /* Opt out of parallel tests on CI. */
     workers: options.workers ?? 1,
     /* Reporter to use. See https://playwright.dev/docs/test-reporters */
     reporter: [
       ['html', { outputFolder: './output/reports', open: 'never' }], // HTML report configuration
       ['json', { outputFile: './output/reports/test-results.json' }], // JSON report
-      scoutPlaywrightReporter({ name: 'scout-playwright' }), // Scout report
+      scoutPlaywrightReporter({ name: 'scout-playwright', runId }), // Scout events report
+      scoutFailedTestsReporter({ name: 'scout-playwright-failed-tests', runId }), // Scout failed test report
     ],
     /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
     use: {

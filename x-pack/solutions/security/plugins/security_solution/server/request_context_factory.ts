@@ -34,6 +34,7 @@ import { buildMlAuthz } from './lib/machine_learning/authz';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
 import { PrivmonDataClient } from './lib/entity_analytics/privmon/privmon_data_client';
+import { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 
 export interface IRequestContextFactory {
   create(
@@ -177,7 +178,13 @@ export class RequestContextFactory implements IRequestContextFactory {
           request,
           currentUser: coreContext.security.authc.getCurrentUser(),
           spaceId: getSpaceId(),
-          packageService: startPlugins.fleet?.packageService,
+          dependencies: {
+            inferenceClient: startPlugins.inference.getClient({ request }),
+            rulesClient,
+            actionsClient,
+            savedObjectsClient: coreContext.savedObjects.client,
+            packageService: startPlugins.fleet?.packageService,
+          },
         })
       ),
 
@@ -252,6 +259,15 @@ export class RequestContextFactory implements IRequestContextFactory {
             dataViewsService,
           })
       ),
+      getAssetInventoryClient: memoize(() => {
+        const clusterClient = coreContext.elasticsearch.client;
+        const logger = options.logger;
+        return new AssetInventoryDataClient({
+          clusterClient,
+          logger,
+          experimentalFeatures: config.experimentalFeatures,
+        });
+      }),
     };
   }
 }

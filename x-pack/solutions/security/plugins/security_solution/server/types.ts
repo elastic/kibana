@@ -39,6 +39,7 @@ import type { IDetectionRulesClient } from './lib/detection_engine/rule_manageme
 import type { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import type { SiemRuleMigrationsClient } from './lib/siem_migrations/rules/siem_rule_migrations_service';
 import type { PrivmonDataClient } from './lib/entity_analytics/privmon/privmon_data_client';
+import type { AssetInventoryDataClient } from './lib/asset_inventory/asset_inventory_data_client';
 export { AppClient };
 
 export interface SecuritySolutionApiRequestHandlerContext {
@@ -65,6 +66,7 @@ export interface SecuritySolutionApiRequestHandlerContext {
   getSiemRuleMigrationsClient: () => SiemRuleMigrationsClient;
   getInferenceClient: () => InferenceClient;
   getPrivmonDataClient: () => PrivmonDataClient;
+  getAssetInventoryClient: () => AssetInventoryDataClient;
 }
 
 export type SecuritySolutionRequestHandlerContext = CustomRequestHandlerContext<{

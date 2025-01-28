@@ -18,7 +18,7 @@
     "patterns": [
       "_rollup/job/{id}/_stop"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/rollup-stop-job.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/rollup-stop-job.html",
     "availability": {
       "stack": true,
       "serverless": false

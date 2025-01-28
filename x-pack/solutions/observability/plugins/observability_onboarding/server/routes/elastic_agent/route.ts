@@ -18,7 +18,12 @@ const generateConfig = createObservabilityOnboardingServerRoute({
   params: t.type({
     query: t.type({ onboardingId: t.string }),
   }),
-  options: { tags: [] },
+  security: {
+    authz: {
+      enabled: false,
+      reason: 'Authorization is checked by the Saved Object client',
+    },
+  },
   async handler(resources): Promise<string> {
     const {
       params: {
@@ -32,7 +37,7 @@ const generateConfig = createObservabilityOnboardingServerRoute({
     const authApiKey = getAuthenticationAPIKey(request);
 
     const coreStart = await core.start();
-    const savedObjectsClient = coreStart.savedObjects.createInternalRepository();
+    const savedObjectsClient = coreStart.savedObjects.getScopedClient(request);
 
     const elasticsearchUrl = plugins.cloud?.setup?.elasticsearchUrl
       ? [plugins.cloud?.setup?.elasticsearchUrl]
