@@ -23,7 +23,7 @@ import type {
   SearchAfterAndBulkCreateParams,
   SearchAfterAndBulkCreateReturnType,
   SignalSourceHit,
-  LoggedRequestsEnabled,
+  LoggedRequestsConfig,
 } from '../types';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { GenericBulkCreateResponse } from '../factories';
@@ -36,7 +36,7 @@ const createLoggedRequestsConfig = (
   isLoggedRequestsEnabled: boolean | undefined,
   sortIds: estypes.SortResults | undefined,
   page: number
-): LoggedRequestsEnabled | undefined => {
+): LoggedRequestsConfig | undefined => {
   if (!isLoggedRequestsEnabled) {
     return undefined;
   }
@@ -133,7 +133,7 @@ export const searchAfterAndBulkCreateFactory = async ({
             trackTotalHits,
             sortOrder,
             additionalFilters,
-            loggedRequestsEnabled: createLoggedRequestsConfig(
+            loggedRequestsConfig: createLoggedRequestsConfig(
               isLoggedRequestsEnabled,
               sortIds,
               searchingIteration

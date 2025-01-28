@@ -157,7 +157,7 @@ const multiTermsCompositeNonRetryable = async ({
       pageSize: 0,
       primaryTimestamp,
       secondaryTimestamp,
-      loggedRequestsEnabled: isLoggedRequestsEnabled
+      loggedRequestsConfig: isLoggedRequestsEnabled
         ? {
             type: 'findNewTerms',
             description: i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(
@@ -207,7 +207,7 @@ const multiTermsCompositeNonRetryable = async ({
         pageSize: 0,
         primaryTimestamp,
         secondaryTimestamp,
-        loggedRequestsEnabled: isLoggedRequestsEnabled
+        loggedRequestsConfig: isLoggedRequestsEnabled
           ? {
               type: 'findDocuments',
               description: i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(

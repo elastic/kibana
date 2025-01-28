@@ -409,7 +409,7 @@ export interface SearchAfterAndBulkCreateReturnType {
   loggedRequests?: RulePreviewLoggedRequest[];
 }
 
-export interface LoggedRequestsEnabled {
+export interface LoggedRequestsConfig {
   type: string;
   description: string;
   skipRequestQuery?: boolean;

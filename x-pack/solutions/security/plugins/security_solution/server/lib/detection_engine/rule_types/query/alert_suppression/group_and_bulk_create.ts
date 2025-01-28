@@ -202,7 +202,7 @@ export const groupAndBulkCreate = async ({
         secondaryTimestamp: runOpts.secondaryTimestamp,
         runtimeMappings: runOpts.runtimeMappings,
         additionalFilters: bucketHistoryFilter,
-        loggedRequestsEnabled: isLoggedRequestsEnabled
+        loggedRequestsConfig: isLoggedRequestsEnabled
           ? {
               type: 'findDocuments',
               description: i18n.FIND_EVENTS_DESCRIPTION,
