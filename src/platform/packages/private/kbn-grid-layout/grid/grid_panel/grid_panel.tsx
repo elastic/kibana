@@ -9,8 +9,9 @@
 
 import React, { useEffect, useMemo, useState } from 'react';
 import { combineLatest, skip } from 'rxjs';
+
+import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 
 import { GridLayoutStateManager } from '../types';
 import { DragHandle, DragHandleApi } from './drag_handle';
@@ -78,17 +79,17 @@ export const GridPanel = ({
             const { position: draggingPosition } = activePanel;
             const runtimeSettings = gridLayoutStateManager.runtimeSettings$.getValue();
 
-              ref.style.zIndex = `${euiThemeVars.euiZModal}`;
-              if (currentInteractionEvent?.type === 'resize') {
-                // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
-                ref.style.width = `${Math.max(
-                  draggingPosition.right - draggingPosition.left,
-                  runtimeSettings.columnPixelWidth
-                )}px`;
-                ref.style.height = `${Math.max(
-                  draggingPosition.bottom - draggingPosition.top,
-                  runtimeSettings.rowHeight
-                )}px`;
+            ref.style.zIndex = `${euiTheme.levels.modal}`;
+            if (currentInteractionEvent?.type === 'resize') {
+              // if the current panel is being resized, ensure it is not shrunk past the size of a single cell
+              ref.style.width = `${Math.max(
+                draggingPosition.right - draggingPosition.left,
+                runtimeSettings.columnPixelWidth
+              )}px`;
+              ref.style.height = `${Math.max(
+                draggingPosition.bottom - draggingPosition.top,
+                runtimeSettings.rowHeight
+              )}px`;
 
               // undo any "lock to grid" styles **except** for the top left corner, which stays locked
               ref.style.gridColumnStart = `${panel.column + 1}`;
