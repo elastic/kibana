@@ -7,24 +7,27 @@
 
 import type { FC, PropsWithChildren } from 'react';
 import React from 'react';
-import { css } from '@emotion/css';
+import { css } from '@emotion/react';
 
-import { EuiSpacer, EuiCodeBlock, useEuiPaddingSize, EuiFlexItem } from '@elastic/eui';
+import { useEuiPaddingSize, EuiText, EuiSpacer } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import type { Type } from '@kbn/securitysolution-io-ts-alerting-types';
 import type { RulePreviewLogs } from '../../../../../common/api/detection_engine';
 import * as i18n from './translations';
 import { PreferenceFormattedDate } from '../../../../common/components/formatted_date';
 import { OptimizedAccordion } from './optimized_accordion';
+import { LoggedRequestsQuery } from './logged_requests_query';
 import { useAccordionStyling } from './use_accordion_styling';
+import { LoggedRequestsPages, isPageViewSupported } from './logged_requests_pages';
 
-const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
+const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs & { ruleType: Type }>> = ({
   startedAt,
   duration,
-  requests,
+  requests = [],
+  ruleType,
 }) => {
   const paddingLarge = useEuiPaddingSize('l');
   const cssStyles = useAccordionStyling();
-
   return (
     <OptimizedAccordion
       data-test-subj="preview-logged-requests-item-accordion"
@@ -48,29 +51,26 @@ const LoggedRequestsItemComponent: FC<PropsWithChildren<RulePreviewLogs>> = ({
         ${cssStyles}
       `}
     >
-      {(requests ?? []).map((request, key) => (
-        <EuiFlexItem
-          key={key}
-          css={css`
-            padding-left: ${paddingLarge};
-          `}
-        >
-          <EuiSpacer size="l" />
-          <span data-test-subj="preview-logged-request-description">
-            {request?.description ?? null} {request?.duration ? `[${request.duration}ms]` : null}
-          </span>
+      {requests.length > 2 ? (
+        <>
           <EuiSpacer size="s" />
-          <EuiCodeBlock
-            language="json"
-            isCopyable
-            overflowHeight={300}
-            isVirtualized
-            data-test-subj="preview-logged-request-code-block"
+          <EuiText
+            color="warning"
+            size="s"
+            css={css`
+              margin-left: ${paddingLarge};
+            `}
           >
-            {request.request}
-          </EuiCodeBlock>
-        </EuiFlexItem>
-      ))}
+            {i18n.REQUESTS_SAMPLE_WARNING}
+          </EuiText>
+          <EuiSpacer size="s" />
+        </>
+      ) : null}
+      {isPageViewSupported(ruleType) ? (
+        <LoggedRequestsPages requests={requests} ruleType={ruleType} />
+      ) : (
+        requests.map((request, key) => <LoggedRequestsQuery key={key} {...request} />)
+      )}
     </OptimizedAccordion>
   );
 };

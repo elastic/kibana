@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { PROXY_MODE } from '../constants';
+import { PROXY_MODE, SECURITY_MODEL } from '../constants';
 
 // Values returned from ES GET /_remote/info
 /**
@@ -113,7 +113,7 @@ export function deserializeCluster(
     proxySocketConnections,
     connectedSocketsCount,
     serverName,
-    securityModel: clusterCredentials ? 'api_key' : 'certificate',
+    securityModel: clusterCredentials ? SECURITY_MODEL.API : SECURITY_MODEL.CERTIFICATE,
   };
 
   if (transport) {
