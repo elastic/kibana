@@ -48,13 +48,13 @@
       "observabilityAIAssistant",
       "aiops",
       "fieldsMetadata",
-      "logsDataAccess",
+      "logsDataAccess"
     ],
     "requiredBundles": [
       "kibanaUtils",
       "kibanaReact",
       "unifiedSearch",
-      "savedObjects",
+      "savedObjects"
     ],
     "extraPublicDirs": [
       "common"
