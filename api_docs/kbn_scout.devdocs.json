@@ -549,9 +549,9 @@
               "\nGet the URL for an app"
             ],
             "signature": [
-              "(appName: string, options?: ",
+              "(appName: string, options?: { space?: string | undefined; pathOptions?: ",
               "PathOptions",
-              " | undefined) => string"
+              " | undefined; } | undefined) => string"
             ],
             "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
             "deprecated": false,
@@ -580,17 +580,41 @@
                 "type": "Object",
                 "tags": [],
                 "label": "options",
-                "description": [
-                  "optional modifications to apply to the URL"
-                ],
-                "signature": [
-                  "PathOptions",
-                  " | undefined"
-                ],
+                "description": [],
                 "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
                 "deprecated": false,
                 "trackAdoption": false,
-                "isRequired": false
+                "children": [
+                  {
+                    "parentPluginId": "@kbn/scout",
+                    "id": "def-common.KibanaUrl.app.$2.space",
+                    "type": "string",
+                    "tags": [],
+                    "label": "space",
+                    "description": [],
+                    "signature": [
+                      "string | undefined"
+                    ],
+                    "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  },
+                  {
+                    "parentPluginId": "@kbn/scout",
+                    "id": "def-common.KibanaUrl.app.$2.pathOptions",
+                    "type": "Object",
+                    "tags": [],
+                    "label": "pathOptions",
+                    "description": [],
+                    "signature": [
+                      "PathOptions",
+                      " | undefined"
+                    ],
+                    "path": "packages/kbn-scout/src/common/services/kibana_url.ts",
+                    "deprecated": false,
+                    "trackAdoption": false
+                  }
+                ]
               }
             ],
             "returnComment": []
@@ -1591,6 +1615,159 @@
       },
       {
         "parentPluginId": "@kbn/scout",
+        "id": "def-common.ingestTestDataHook",
+        "type": "Function",
+        "tags": [],
+        "label": "ingestTestDataHook",
+        "description": [],
+        "signature": [
+          "(config: ",
+          "FullConfig",
+          "<{}, {}>, archives: string[]) => Promise<void>"
+        ],
+        "path": "packages/kbn-scout/src/playwright/global_hooks/data_ingestion.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ingestTestDataHook.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "FullConfig",
+              "<{}, {}>"
+            ],
+            "path": "packages/kbn-scout/src/playwright/global_hooks/data_ingestion.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ingestTestDataHook.$2",
+            "type": "Array",
+            "tags": [],
+            "label": "archives",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "packages/kbn-scout/src/playwright/global_hooks/data_ingestion.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.spaceTest",
+        "type": "Function",
+        "tags": [],
+        "label": "spaceTest",
+        "description": [],
+        "signature": [
+          "TestType",
+          "<",
+          "PlaywrightTestArgs",
+          " & ",
+          "PlaywrightTestOptions",
+          " & { browserAuth: ",
+          "BrowserAuthFixture",
+          "; } & { page: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.ScoutPage",
+            "text": "ScoutPage"
+          },
+          "; } & { pageObjects: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.PageObjects",
+            "text": "PageObjects"
+          },
+          "; } & { validateTags: void; }, ",
+          "PlaywrightWorkerArgs",
+          " & ",
+          "PlaywrightWorkerOptions",
+          " & { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; config: ",
+          "ScoutTestConfig",
+          "; kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; esClient: ",
+          "default",
+          "; kbnClient: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          "; samlAuth: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.SamlSessionManager",
+            "text": "SamlSessionManager"
+          },
+          "; } & { scoutSpace: ",
+          "ScoutSpaceParallelFixture",
+          "; } & { scoutSpace: ",
+          "ScoutSpaceParallelFixture",
+          "; } & { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; scoutSpace: ",
+          "ScoutSpaceParallelFixture",
+          "; } & { scoutSpace: ",
+          "ScoutSpaceParallelFixture",
+          "; }>"
+        ],
+        "path": "packages/kbn-scout/src/playwright/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
         "id": "def-common.test",
         "type": "Function",
         "tags": [],
@@ -1603,28 +1780,84 @@
           " & ",
           "PlaywrightTestOptions",
           " & { browserAuth: ",
-          "LoginFixture",
-          "; } & ",
+          "BrowserAuthFixture",
+          "; } & { page: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
             "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutTestFixtures",
-            "text": "ScoutTestFixtures"
+            "section": "def-common.ScoutPage",
+            "text": "ScoutPage"
           },
-          " & { validateTags: void; }, ",
+          "; log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; } & { pageObjects: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.PageObjects",
+            "text": "PageObjects"
+          },
+          "; } & { validateTags: void; }, ",
           "PlaywrightWorkerArgs",
           " & ",
           "PlaywrightWorkerOptions",
-          " & ",
+          " & { log: ",
+          {
+            "pluginId": "@kbn/tooling-log",
+            "scope": "common",
+            "docId": "kibKbnToolingLogPluginApi",
+            "section": "def-common.ToolingLog",
+            "text": "ToolingLog"
+          },
+          "; config: ",
+          "ScoutTestConfig",
+          "; kbnUrl: ",
           {
             "pluginId": "@kbn/scout",
             "scope": "common",
             "docId": "kibKbnScoutPluginApi",
-            "section": "def-common.ScoutWorkerFixtures",
-            "text": "ScoutWorkerFixtures"
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
           },
-          ">"
+          "; esClient: ",
+          "default",
+          "; kbnClient: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.KbnClient",
+            "text": "KbnClient"
+          },
+          "; samlAuth: ",
+          {
+            "pluginId": "@kbn/test",
+            "scope": "common",
+            "docId": "kibKbnTestPluginApi",
+            "section": "def-common.SamlSessionManager",
+            "text": "SamlSessionManager"
+          },
+          "; } & { esArchiver: ",
+          "EsArchiverFixture",
+          "; } & { uiSettings: ",
+          "UiSettingsFixture",
+          "; } & { kbnUrl: ",
+          {
+            "pluginId": "@kbn/scout",
+            "scope": "common",
+            "docId": "kibKbnScoutPluginApi",
+            "section": "def-common.KibanaUrl",
+            "text": "KibanaUrl"
+          },
+          "; }>"
         ],
         "path": "packages/kbn-scout/src/playwright/index.ts",
         "deprecated": false,
@@ -1633,92 +1866,6 @@
       }
     ],
     "interfaces": [
-      {
-        "parentPluginId": "@kbn/scout",
-        "id": "def-common.EsArchiverFixture",
-        "type": "Interface",
-        "tags": [],
-        "label": "EsArchiverFixture",
-        "description": [],
-        "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.EsArchiverFixture.loadIfNeeded",
-            "type": "Function",
-            "tags": [],
-            "label": "loadIfNeeded",
-            "description": [
-              "\nLoads an Elasticsearch archive if the specified data index is not present."
-            ],
-            "signature": [
-              "(name: string, performance?: ",
-              {
-                "pluginId": "@kbn/es-archiver",
-                "scope": "common",
-                "docId": "kibKbnEsArchiverPluginApi",
-                "section": "def-common.LoadActionPerfOptions",
-                "text": "LoadActionPerfOptions"
-              },
-              " | undefined) => Promise<Record<string, ",
-              "IndexStats",
-              ">>"
-            ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "@kbn/scout",
-                "id": "def-common.EsArchiverFixture.loadIfNeeded.$1",
-                "type": "string",
-                "tags": [],
-                "label": "name",
-                "description": [
-                  "The name of the archive to load."
-                ],
-                "signature": [
-                  "string"
-                ],
-                "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              },
-              {
-                "parentPluginId": "@kbn/scout",
-                "id": "def-common.EsArchiverFixture.loadIfNeeded.$2",
-                "type": "Object",
-                "tags": [],
-                "label": "performance",
-                "description": [
-                  "An object of type LoadActionPerfOptions to measure and\nreport performance metrics during the load operation."
-                ],
-                "signature": [
-                  {
-                    "pluginId": "@kbn/es-archiver",
-                    "scope": "common",
-                    "docId": "kibKbnEsArchiverPluginApi",
-                    "section": "def-common.LoadActionPerfOptions",
-                    "text": "LoadActionPerfOptions"
-                  },
-                  " | undefined"
-                ],
-                "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": false
-              }
-            ],
-            "returnComment": [
-              "A Promise that resolves to an object containing index statistics."
-            ]
-          }
-        ],
-        "initialIsOpen": false
-      },
       {
         "parentPluginId": "@kbn/scout",
         "id": "def-common.PageObjects",
@@ -1791,6 +1938,197 @@
       },
       {
         "parentPluginId": "@kbn/scout",
+        "id": "def-common.ScoutParallelTestFixtures",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScoutParallelTestFixtures",
+        "description": [],
+        "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelTestFixtures.browserAuth",
+            "type": "Object",
+            "tags": [],
+            "label": "browserAuth",
+            "description": [],
+            "signature": [
+              "BrowserAuthFixture"
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelTestFixtures.page",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "page",
+            "description": [],
+            "signature": [
+              "Page",
+              " & { gotoApp: (appName: string, options?: { referer?: string | undefined; timeout?: number | undefined; waitUntil?: \"load\" | \"domcontentloaded\" | \"networkidle\" | \"commit\" | undefined; } | undefined) => Promise<",
+              "Response",
+              " | null>; waitForLoadingIndicatorHidden: () => Promise<",
+              "ElementHandle",
+              "<HTMLElement | SVGElement> | null>; testSubj: { check: (selector: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; click: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; clickCount?: number | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; dblclick: (selector: string, options?: { button?: \"right\" | \"left\" | \"middle\" | undefined; delay?: number | undefined; force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; fill: (selector: string, value: string, options?: { force?: boolean | undefined; noWaitAfter?: boolean | undefined; strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; focus: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<void>; getAttribute: (selector: string, name: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string | null>; hover: (selector: string, options?: { force?: boolean | undefined; modifiers?: (\"Alt\" | \"Control\" | \"Meta\" | \"Shift\" | \"ControlOrMeta\")[] | undefined; noWaitAfter?: boolean | undefined; position?: { x: number; y: number; } | undefined; strict?: boolean | undefined; timeout?: number | undefined; trial?: boolean | undefined; } | undefined) => Promise<void>; innerText: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<string>; isEnabled: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isChecked: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isHidden: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; isVisible: (selector: string, options?: { strict?: boolean | undefined; timeout?: number | undefined; } | undefined) => Promise<boolean>; locator: (selector: string, options?: { has?: ",
+              "Locator",
+              " | undefined; hasNot?: ",
+              "Locator",
+              " | undefined; hasNotText?: string | RegExp | undefined; hasText?: string | RegExp | undefined; } | undefined) => ",
+              "Locator",
+              "; waitForSelector: (selector: string, options?: PageWaitForSelectorOptions | undefined) => Promise<",
+              "ElementHandle",
+              "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; }; }"
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelTestFixtures.pageObjects",
+            "type": "Object",
+            "tags": [],
+            "label": "pageObjects",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.PageObjects",
+                "text": "PageObjects"
+              }
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
+        "id": "def-common.ScoutParallelWorkerFixtures",
+        "type": "Interface",
+        "tags": [],
+        "label": "ScoutParallelWorkerFixtures",
+        "description": [],
+        "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelWorkerFixtures.log",
+            "type": "Object",
+            "tags": [],
+            "label": "log",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/tooling-log",
+                "scope": "common",
+                "docId": "kibKbnToolingLogPluginApi",
+                "section": "def-common.ToolingLog",
+                "text": "ToolingLog"
+              }
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelWorkerFixtures.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              "ScoutTestConfig"
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelWorkerFixtures.kbnUrl",
+            "type": "Object",
+            "tags": [],
+            "label": "kbnUrl",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/scout",
+                "scope": "common",
+                "docId": "kibKbnScoutPluginApi",
+                "section": "def-common.KibanaUrl",
+                "text": "KibanaUrl"
+              }
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelWorkerFixtures.kbnClient",
+            "type": "Object",
+            "tags": [],
+            "label": "kbnClient",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/test",
+                "scope": "common",
+                "docId": "kibKbnTestPluginApi",
+                "section": "def-common.KbnClient",
+                "text": "KbnClient"
+              }
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelWorkerFixtures.esClient",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutParallelWorkerFixtures.scoutSpace",
+            "type": "Object",
+            "tags": [],
+            "label": "scoutSpace",
+            "description": [],
+            "signature": [
+              "ScoutSpaceParallelFixture"
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/parallel_run_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/scout",
         "id": "def-common.ScoutPlaywrightOptions",
         "type": "Interface",
         "tags": [],
@@ -1806,7 +2144,7 @@
           },
           " extends Pick<",
           "PlaywrightTestConfig",
-          "<{}, {}>, \"workers\" | \"testDir\">"
+          "<{}, {}>, \"workers\" | \"testDir\" | \"globalSetup\">"
         ],
         "path": "packages/kbn-scout/src/playwright/types/index.ts",
         "deprecated": false,
@@ -1831,7 +2169,21 @@
             "label": "workers",
             "description": [],
             "signature": [
-              "2 | 1 | undefined"
+              "2 | 1 | 3 | undefined"
+            ],
+            "path": "packages/kbn-scout/src/playwright/types/index.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutPlaywrightOptions.globalSetup",
+            "type": "string",
+            "tags": [],
+            "label": "globalSetup",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "packages/kbn-scout/src/playwright/types/index.ts",
             "deprecated": false,
@@ -1847,7 +2199,7 @@
         "tags": [],
         "label": "ScoutTestFixtures",
         "description": [],
-        "path": "packages/kbn-scout/src/playwright/fixtures/types/test_scope.ts",
+        "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1859,9 +2211,9 @@
             "label": "browserAuth",
             "description": [],
             "signature": [
-              "LoginFixture"
+              "BrowserAuthFixture"
             ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/test_scope.ts",
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1888,7 +2240,7 @@
               "ElementHandle",
               "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; }; }"
             ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/test_scope.ts",
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1908,7 +2260,7 @@
                 "text": "PageObjects"
               }
             ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/test_scope.ts",
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1968,10 +2320,8 @@
         "type": "Interface",
         "tags": [],
         "label": "ScoutWorkerFixtures",
-        "description": [
-          "\nThe `ScoutWorkerFixtures` type defines the set of fixtures that are available"
-        ],
-        "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+        "description": [],
+        "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1991,7 +2341,7 @@
                 "text": "ToolingLog"
               }
             ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2005,7 +2355,7 @@
             "signature": [
               "ScoutTestConfig"
             ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2025,21 +2375,7 @@
                 "text": "KibanaUrl"
               }
             ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutWorkerFixtures.esClient",
-            "type": "Object",
-            "tags": [],
-            "label": "esClient",
-            "description": [],
-            "signature": [
-              "default"
-            ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2059,7 +2395,35 @@
                 "text": "KbnClient"
               }
             ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutWorkerFixtures.esClient",
+            "type": "Object",
+            "tags": [],
+            "label": "esClient",
+            "description": [],
+            "signature": [
+              "default"
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/scout",
+            "id": "def-common.ScoutWorkerFixtures.esArchiver",
+            "type": "Object",
+            "tags": [],
+            "label": "esArchiver",
+            "description": [],
+            "signature": [
+              "EsArchiverFixture"
+            ],
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2073,47 +2437,7 @@
             "signature": [
               "UiSettingsFixture"
             ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutWorkerFixtures.esArchiver",
-            "type": "Object",
-            "tags": [],
-            "label": "esArchiver",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/scout",
-                "scope": "common",
-                "docId": "kibKbnScoutPluginApi",
-                "section": "def-common.EsArchiverFixture",
-                "text": "EsArchiverFixture"
-              }
-            ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "@kbn/scout",
-            "id": "def-common.ScoutWorkerFixtures.samlAuth",
-            "type": "Object",
-            "tags": [],
-            "label": "samlAuth",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/test",
-                "scope": "common",
-                "docId": "kibKbnTestPluginApi",
-                "section": "def-common.SamlSessionManager",
-                "text": "SamlSessionManager"
-              }
-            ],
-            "path": "packages/kbn-scout/src/playwright/fixtures/types/worker_scope.ts",
+            "path": "packages/kbn-scout/src/playwright/fixtures/single_thread_fixtures.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2148,7 +2472,7 @@
           "ElementHandle",
           "<HTMLElement | SVGElement> | null>; typeWithDelay: (selector: string, text: string, options?: { delay: number; } | undefined) => Promise<void>; clearInput: (selector: string) => Promise<void>; }; }"
         ],
-        "path": "packages/kbn-scout/src/playwright/fixtures/types/test_scope.ts",
+        "path": "packages/kbn-scout/src/playwright/fixtures/test/scout_page/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

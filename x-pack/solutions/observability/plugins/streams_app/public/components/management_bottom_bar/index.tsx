@@ -35,6 +35,7 @@ export function ManagementBottomBar({
   return (
     <EuiFlexGroup justifyContent="flexEnd" alignItems="center" responsive={false} gutterSize="s">
       <EuiButtonEmpty
+        data-test-subj="streamsAppManagementBottomBarCancelChangesButton"
         color="text"
         size="s"
         iconType="cross"
@@ -46,6 +47,7 @@ export function ManagementBottomBar({
         })}
       </EuiButtonEmpty>
       <EuiButton
+        data-test-subj="streamsAppManagementBottomBarButton"
         disabled={disabled}
         color="primary"
         fill
