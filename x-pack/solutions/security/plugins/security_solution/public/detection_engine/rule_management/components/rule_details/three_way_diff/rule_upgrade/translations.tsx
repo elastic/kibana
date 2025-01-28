@@ -19,11 +19,20 @@ export const TOTAL_NUM_OF_FIELDS = (count: number) => (
   />
 );
 
-export const NUM_OF_FIELDS_WITH_UPDATES = (count: number) => (
+export const VERSION_UPDATE_INFO = (
+  numOfFieldsWithUpdates: number,
+  currentVersionNumber: number,
+  targetVersionNumber: number
+) => (
   <FormattedMessage
-    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.numOfFieldsWithUpdates"
-    defaultMessage="{countValue} {count, plural, one {field} other {fields}} in Elastic update"
-    values={{ countValue: <strong>{count}</strong>, count }}
+    id="xpack.securitySolution.detectionEngine.rules.upgradeRules.diffTab.versionUpdateInfo"
+    defaultMessage="{numOfFieldsWithUpdatesValue} {numOfFieldsWithUpdates, plural, one {field} other {fields}} changed in Elastic update from version {currentVersionNumber} to {targetVersionNumber}"
+    values={{
+      numOfFieldsWithUpdatesValue: <strong>{numOfFieldsWithUpdates}</strong>,
+      numOfFieldsWithUpdates,
+      currentVersionNumber,
+      targetVersionNumber,
+    }}
   />
 );
 

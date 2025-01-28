@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { unzip as unzipAsyncCallback } from 'zlib';
-import pRetry from 'p-retry';
 import type { APIReturnType } from '@kbn/apm-plugin/public/services/rest/create_call_apm_api';
 import type { ApmSourceMap } from '@kbn/apm-plugin/server/routes/source_maps/create_apm_source_map_index_template';
 import type { SourceMap } from '@kbn/apm-plugin/server/routes/source_maps/route';
@@ -31,8 +30,9 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const registry = getService('registry');
   const apmApiClient = getService('apmApiClient');
   const es = getService('es');
+  const retry = getService('retry');
 
-  function waitForSourceMapCount(expectedCount: number) {
+  async function waitForSourceMapCount(expectedCount: number) {
     const getSourceMapCount = async () => {
       const res = await es.search({
         index: '.apm-source-map',
@@ -49,8 +49,11 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       throw new Error(`Expected ${expectedCount} source maps, got ${actualCount}`);
     };
-
-    return pRetry(getSourceMapCount, { minTimeout: 100, retries: 10, factor: 1.5 }); // max wait is ~17s (https://www.wolframalpha.com/input?i2d=true&i=sum+100*Power%5B1.5%2Cj%5D%5C%2844%29+j%3D1+to+10)
+    return await retry.tryWithRetries('waitForSourceMapCount', getSourceMapCount, {
+      retryCount: 10,
+      retryDelay: 100,
+      timeout: 17_000,
+    });
   }
 
   async function deleteAllApmSourceMaps() {

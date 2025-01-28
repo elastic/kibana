@@ -5914,18 +5914,6 @@
             {
               "plugin": "ml",
               "path": "x-pack/platform/plugins/shared/ml/server/plugin.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
-            },
-            {
-              "plugin": "enterpriseSearch",
-              "path": "x-pack/solutions/search/plugins/enterprise_search/server/lib/check_access.ts"
             }
           ]
         }
@@ -5988,7 +5976,7 @@
             },
             {
               "plugin": "observabilityAIAssistant",
-              "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
+              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
             },
             {
               "plugin": "transform",
@@ -6008,11 +5996,11 @@
             },
             {
               "plugin": "fleet",
-              "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
+              "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
             },
             {
               "plugin": "fleet",
-              "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/transform_api_keys.ts"
+              "path": "x-pack/platform/plugins/shared/fleet/server/services/api_keys/security.ts"
             },
             {
               "plugin": "fleet",

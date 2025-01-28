@@ -21,7 +21,7 @@
     "patterns": [
       "_template/{name}"
     ],
-    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/indices-templates-v1.html",
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-templates-v1.html",
     "availability": {
       "stack": true,
       "serverless": false
