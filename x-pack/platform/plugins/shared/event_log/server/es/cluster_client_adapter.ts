@@ -180,7 +180,7 @@ export class ClusterClientAdapter<
 
       const response = await esClient.bulk({
         body: bulkBody,
-        refresh: 'wait_for',
+        refresh: true,
       });
 
       return response;
