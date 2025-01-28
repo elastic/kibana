@@ -108,4 +108,4 @@ const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
       citation: contentReferenceBlock(reference),
     };
   };
-}
+};

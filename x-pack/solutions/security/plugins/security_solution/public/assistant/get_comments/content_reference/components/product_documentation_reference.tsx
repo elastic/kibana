@@ -20,7 +20,6 @@ export const ProductDocumentationReference: React.FC<Props> = ({
   contentReferenceNode,
   productDocumentationContentReference,
 }) => {
-
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}

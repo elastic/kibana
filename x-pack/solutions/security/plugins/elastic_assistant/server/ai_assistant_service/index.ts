@@ -107,7 +107,9 @@ export class AIAssistantService {
     this.conversationsDataStream = this.createDataStream({
       resource: 'conversations',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: this.contentReferencesEnabled ? conversationsContentReferencesFieldMap : conversationsFieldMap,
+      fieldMap: this.contentReferencesEnabled
+        ? conversationsContentReferencesFieldMap
+        : conversationsFieldMap,
     });
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',

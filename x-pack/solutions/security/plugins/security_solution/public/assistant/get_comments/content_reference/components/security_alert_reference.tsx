@@ -24,25 +24,23 @@ export const SecurityAlertReference: React.FC<Props> = ({
 }) => {
   const { navigateToApp } = useKibana().services.application;
 
-  const onClick = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    navigateToApp('security', {
-      path: `alerts/redirect/${securityAlertContentReference.alertId}`,
-      openInNewTab: true
-    })
-  }, [navigateToApp, securityAlertContentReference])
-
+  const onClick = useCallback(
+    (e: React.MouseEvent) => {
+      e.preventDefault();
+      navigateToApp('security', {
+        path: `alerts/redirect/${securityAlertContentReference.alertId}`,
+        openInNewTab: true,
+      });
+    },
+    [navigateToApp, securityAlertContentReference]
+  );
 
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="SecurityAlertReference"
     >
-      <EuiLink
-        onClick={onClick}
-      >
-        {SECURITY_ALERT_REFERENCE_LABEL}
-      </EuiLink>
+      <EuiLink onClick={onClick}>{SECURITY_ALERT_REFERENCE_LABEL}</EuiLink>
     </PopoverReference>
   );
 };
