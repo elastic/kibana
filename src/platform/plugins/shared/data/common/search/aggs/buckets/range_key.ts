@@ -44,7 +44,7 @@ function findCustomLabel(from: RangeValue, to: RangeValue, ranges?: Ranges) {
 
 const getRangeValue = (bucket: unknown, key: string): RangeValue => {
   const value = bucket && typeof bucket === 'object' && key in bucket && (bucket as any)[key];
-  return value == null || ['string', 'number'].includes(value) ? value : null;
+  return value == null || ['string', 'number'].includes(typeof value) ? value : null;
 };
 
 const getRangeFromBucket = (bucket: unknown): BucketLike => {
