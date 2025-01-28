@@ -121,7 +121,7 @@ describe('getDefaultGraphState', () => {
   });
 
   it('returns the expected default end', () => {
-    const state = getDefaultGraphState();
+    const state = getDefaultGraphState({ prompts });
 
     expect(state.end?.default?.()).toBeUndefined();
   });
@@ -129,13 +129,13 @@ describe('getDefaultGraphState', () => {
   it('returns the expected end when it is provided', () => {
     const end = '2025-01-02T00:00:00.000Z';
 
-    const state = getDefaultGraphState({ end });
+    const state = getDefaultGraphState({ prompts, end });
 
     expect(state.end?.default?.()).toEqual(end);
   });
 
   it('returns the expected default filter to be undefined', () => {
-    const state = getDefaultGraphState();
+    const state = getDefaultGraphState({ prompts });
 
     expect(state.filter?.default?.()).toBeUndefined();
   });
@@ -162,13 +162,13 @@ describe('getDefaultGraphState', () => {
       },
     };
 
-    const state = getDefaultGraphState({ filter });
+    const state = getDefaultGraphState({ prompts, filter });
 
     expect(state.filter?.default?.()).toEqual(filter);
   });
 
   it('returns the expected default start to be undefined', () => {
-    const state = getDefaultGraphState();
+    const state = getDefaultGraphState({ prompts });
 
     expect(state.start?.default?.()).toBeUndefined();
   });
@@ -176,7 +176,7 @@ describe('getDefaultGraphState', () => {
   it('returns the expected start when it is provided', () => {
     const start = '2025-01-01T00:00:00.000Z';
 
-    const state = getDefaultGraphState({ start });
+    const state = getDefaultGraphState({ prompts, start });
 
     expect(state.start?.default?.()).toEqual(start);
   });

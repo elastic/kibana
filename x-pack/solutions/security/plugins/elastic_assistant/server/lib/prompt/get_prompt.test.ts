@@ -312,7 +312,7 @@ describe('get_prompt', () => {
       expect(result).toBe(DEFAULT_SYSTEM_PROMPT);
     });
 
-    it('returns an empty string when no prompts are found', async () => {
+    it('throws an error when no prompts are found', async () => {
       savedObjectsClient.find.mockResolvedValue({
         page: 1,
         per_page: 20,
@@ -320,15 +320,17 @@ describe('get_prompt', () => {
         saved_objects: [],
       });
 
-      const result = await getPrompt({
-        savedObjectsClient,
-        promptId: 'nonexistent-prompt',
-        promptGroupId: 'nonexistent-prompt',
-        actionsClient,
-        connectorId: 'connector-123',
-      });
-
-      expect(result).toBe('');
+      await expect(
+        getPrompt({
+          savedObjectsClient,
+          promptId: 'nonexistent-prompt',
+          promptGroupId: 'nonexistent-group',
+          actionsClient,
+          connectorId: 'connector-123',
+        })
+      ).rejects.toThrow(
+        'Prompt not found for promptId: nonexistent-prompt and promptGroupId: nonexistent-group'
+      );
     });
 
     it('handles invalid connector configuration gracefully when provider is "inference"', async () => {
@@ -394,7 +396,7 @@ describe('get_prompt', () => {
     it('returns prompts matching the provided promptIds', async () => {
       const result = await getPromptsByGroupId({
         savedObjectsClient,
-        promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
+        promptIds: [promptDictionary.systemPrompt],
         promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
         model: 'gpt-4o',
@@ -403,18 +405,14 @@ describe('get_prompt', () => {
       });
       expect(savedObjectsClient.find).toHaveBeenCalledWith({
         type: 'security-ai-prompt',
-        searchFields: ['promptId'],
-        search: `${promptGroupId.aiAssistant}-*`,
+        searchFields: ['promptGroupId'],
+        search: promptGroupId.aiAssistant,
       });
 
       expect(result).toEqual([
         {
           promptId: promptDictionary.systemPrompt,
           prompt: 'Hello world this is a system prompt',
-        },
-        {
-          promptId: promptDictionary.userPrompt,
-          prompt: '',
         },
       ]);
     });
@@ -475,7 +473,7 @@ describe('get_prompt', () => {
     it('returns prompts matching the provided promptIds when inference connector is given', async () => {
       const result = await getPromptsByGroupId({
         savedObjectsClient,
-        promptIds: [promptDictionary.systemPrompt, promptDictionary.userPrompt],
+        promptIds: [promptDictionary.systemPrompt],
         promptGroupId: promptGroupId.aiAssistant,
         connector: {
           actionTypeId: '.inference',
@@ -498,11 +496,25 @@ describe('get_prompt', () => {
           promptId: promptDictionary.systemPrompt,
           prompt: 'Hello world this is a system prompt for bedrock',
         },
-        {
-          promptId: promptDictionary.userPrompt,
-          prompt: '',
-        },
       ]);
+    });
+    it('throws an error when a prompt is missing', async () => {
+      savedObjectsClient.find.mockResolvedValue({
+        page: 1,
+        per_page: 20,
+        total: 0,
+        saved_objects: [],
+      });
+
+      await expect(
+        getPromptsByGroupId({
+          savedObjectsClient,
+          promptIds: [promptDictionary.systemPrompt, 'fake-id'],
+          promptGroupId: promptGroupId.aiAssistant,
+          actionsClient,
+          connectorId: 'connector-123',
+        })
+      ).rejects.toThrow('Prompt not found for promptId: fake-id and promptGroupId: aiAssistant');
     });
   });
 });
