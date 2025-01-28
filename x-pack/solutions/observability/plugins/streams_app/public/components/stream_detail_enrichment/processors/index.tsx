@@ -224,6 +224,7 @@ export function EditProcessorPanel({
       hasBorder
       color={isDraft ? 'subdued' : undefined}
       css={css`
+        border: ${euiTheme.border.thin};
         padding: ${euiTheme.size.m};
       `}
     >

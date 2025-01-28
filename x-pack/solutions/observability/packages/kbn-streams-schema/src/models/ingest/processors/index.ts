@@ -96,10 +96,14 @@ export const isDissectProcessorDefinition = createIsNarrowSchema(
   dissectProcessorDefinitionSchema
 );
 
+const processorTypes: ProcessorType[] = (processorDefinitionSchema as z.ZodUnion<any>).options.map(
+  (option: z.ZodUnion<any>['options'][number]) => Object.keys(option.shape)[0]
+);
+
 export function getProcessorType<TProcessorDefinition extends ProcessorDefinition>(
   processor: TProcessorDefinition
 ): ProcessorTypeOf<TProcessorDefinition> {
-  return Object.keys(processor)[0] as ProcessorTypeOf<TProcessorDefinition>;
+  return processorTypes.find((type) => type in processor) as ProcessorTypeOf<TProcessorDefinition>;
 }
 
 export function getProcessorConfig<TProcessorDefinition extends ProcessorDefinition>(

@@ -62,10 +62,7 @@ export function StreamDetailEnrichmentContent({
   const { error, isLoading, refreshSamples, simulation, samples } = useProcessingSimulator({
     definition,
     processors,
-    condition: {
-      field: processors[0] ? getProcessorConfig(processors[0]).field : '',
-      operator: 'exists',
-    },
+    fields: [],
   });
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
@@ -134,7 +131,11 @@ export function StreamDetailEnrichmentContent({
                     ))}
                   </SortableList>
                   <EuiSpacer size="s" />
-                  <AddProcessorPanel definition={definition} onAddProcessor={addProcessor} />
+                  <AddProcessorPanel
+                    key={processors.length} // Used to force reset the inner form state once a new processor is added
+                    definition={definition}
+                    onAddProcessor={addProcessor}
+                  />
                 </EuiPanel>
               </EuiResizablePanel>
 
