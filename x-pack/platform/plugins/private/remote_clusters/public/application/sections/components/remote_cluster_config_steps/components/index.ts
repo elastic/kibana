@@ -4,9 +4,6 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-import { i18n } from '@kbn/i18n';
-
-export const SETUP_GUIDE_TITLE = i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
-  defaultMessage: 'Setup Guide',
-});
+export { ActionButtons } from './action_buttons';
+export { RequestFlyout } from './request_flyout';
+export { SaveError } from './save_error';
