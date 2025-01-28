@@ -70,7 +70,9 @@ export const getApiKeyManager = ({
         request
       );
 
-      const soClient = core.savedObjects.getScopedClient(request);
+      const soClient = core.savedObjects.getScopedClient(request, {
+        includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+      });
 
       await soClient.create(EntityDiscoveryApiKeyType.name, apiKey, {
         id: ENTITY_STORE_API_KEY_SO_ID,

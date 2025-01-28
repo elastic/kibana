@@ -104,6 +104,7 @@ export const enableEntityDiscoveryRoute = createEntityManagerServerRoute({
       const soClient = core.savedObjects.getClient({
         includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
       });
+
       const existingApiKey = await readEntityDiscoveryAPIKey(server);
 
       if (existingApiKey !== undefined) {
