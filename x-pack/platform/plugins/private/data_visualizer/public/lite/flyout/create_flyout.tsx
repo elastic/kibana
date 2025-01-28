@@ -15,7 +15,6 @@ import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
 import { FileUploadLiteFlyoutContents } from './flyout';
 import type { OpenFileUploadLiteContext } from '../../register_ui_actions';
-// import { getMlGlobalServices } from '../../../application/util/get_services';
 
 export interface FileUploadResults {
   index: string;
@@ -23,11 +22,6 @@ export interface FileUploadResults {
   dataView?: { id: string; title: string };
   inferenceId?: string;
   files: Array<{ fileName: string; docCount: number; fileFormat: string; documentType: string }>;
-}
-
-export interface FlyoutComponentProps {
-  setUploadResults?: (results: FileUploadResults) => void;
-  onClose?: () => void;
 }
 
 export function createFlyout(
@@ -62,7 +56,6 @@ export function createFlyout(
                 ...coreStart,
                 share,
                 data,
-                // mlServices: getMlGlobalServices(coreStart, data.dataViews),
               }}
             >
               <FileUploadLiteFlyoutContents

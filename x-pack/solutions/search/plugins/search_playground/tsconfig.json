@@ -49,6 +49,7 @@
     "@kbn/inference-endpoint-ui-common",
     "@kbn/inference-common",
     "@kbn/alerts-ui-shared",
+    "@kbn/ui-actions-plugin",
   ],
   "exclude": [
     "target/**/*",

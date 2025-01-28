@@ -137,22 +137,7 @@ export class ImportView extends Component {
         pipelineId,
         createPipeline,
       },
-      (state) => {
-        // horrible hack!!!!!!!!!!!!!!
-        if (state.imported && this.props.setUploadResults !== undefined) {
-          this.props.setUploadResults({
-            index: this.state.index,
-            pipelineId: this.state.pipelineId,
-            docCount: this.state.docCount,
-            fileName: this.props.fileName,
-            fileFormat: this.props.results.format,
-            documentType: this.props.results.document_type,
-            inferenceId: this.state.inferenceId,
-          });
-        }
-
-        return this.setState(state);
-      }
+      (state) => this.setState(state)
     );
   };
 
