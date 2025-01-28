@@ -6,9 +6,9 @@
  */
 
 import pMap from 'p-map';
-import { chunk, flatten, truncate } from 'lodash';
+import { chunk, flatten } from 'lodash';
 import agent from 'elastic-apm-node';
-import { KibanaRequest, Logger, SecurityServiceStart } from '@kbn/core/server';
+import { KibanaRequest, Logger } from '@kbn/core/server';
 import { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
@@ -30,7 +30,6 @@ export interface TaskSchedulingOpts {
   taskStore: TaskStore;
   middleware: Middleware;
   taskManagerId: string;
-  security: SecurityServiceStart;
 }
 
 /**
@@ -60,7 +59,6 @@ export class TaskScheduling {
   private store: TaskStore;
   private logger: Logger;
   private middleware: Middleware;
-  private security: SecurityServiceStart;
 
   /**
    * Initializes the task manager, preventing any further addition of middleware,
@@ -71,34 +69,6 @@ export class TaskScheduling {
     this.logger = opts.logger;
     this.middleware = opts.middleware;
     this.store = opts.taskStore;
-    this.security = opts.security;
-  }
-
-  private async createAPIKey(request?: KibanaRequest) {
-    if (!request) {
-      return null;
-    }
-
-    if (!this.security.authc.apiKeys.areAPIKeysEnabled()) {
-      throw Error('API keys are not enabled, cannot create API key.');
-    }
-
-    const user = this.security.authc.getCurrentUser(request);
-    if (!user) {
-      throw Error('Cannot authenticate current user.');
-    }
-
-    const apiKeyCreateResult = await this.security.authc.apiKeys.grantAsInternalUser(request, {
-      name: truncate(`TaskManager: ${user.username}}`, { length: 256 }),
-      role_descriptors: {},
-      metadata: { managed: true },
-    });
-
-    if (!apiKeyCreateResult) {
-      throw Error('Cannot create API key.');
-    }
-
-    return Buffer.from(`${apiKeyCreateResult.id}:${apiKeyCreateResult.api_key}`).toString('base64');
   }
 
   /**
@@ -112,16 +82,9 @@ export class TaskScheduling {
     options?: Record<string, unknown>,
     request?: KibanaRequest
   ): Promise<ConcreteTaskInstance> {
-    const apiKey = await this.createAPIKey(request);
-
-    const taskInstanceWithApiKey = {
-      ...taskInstance,
-      ...(apiKey ? { apiKey } : {}),
-    };
-
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
       ...options,
-      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstanceWithApiKey, this.logger),
+      taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
 
     const traceparent =
@@ -129,11 +92,14 @@ export class TaskScheduling {
         ? agent.currentTraceparent
         : '';
 
-    return await this.store.schedule({
-      ...modifiedTask,
-      traceparent: traceparent || '',
-      enabled: modifiedTask.enabled ?? true,
-    });
+    return await this.store.schedule(
+      {
+        ...modifiedTask,
+        traceparent: traceparent || '',
+        enabled: modifiedTask.enabled ?? true,
+      },
+      request
+    );
   }
 
   /**
@@ -144,7 +110,8 @@ export class TaskScheduling {
    */
   public async bulkSchedule(
     taskInstances: TaskInstanceWithDeprecatedFields[],
-    options?: Record<string, unknown>
+    options?: Record<string, unknown>,
+    request?: KibanaRequest
   ): Promise<ConcreteTaskInstance[]> {
     const traceparent =
       agent.currentTransaction && agent.currentTransaction.type !== 'request'

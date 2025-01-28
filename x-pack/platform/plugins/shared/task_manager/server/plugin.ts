@@ -24,6 +24,10 @@ import {
 } from '@kbn/core/server';
 import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/server';
 import {
+  EncryptedSavedObjectsPluginStart,
+  EncryptedSavedObjectsPluginSetup,
+} from '@kbn/encrypted-saved-objects-plugin/server';
+import {
   registerDeleteInactiveNodesTaskDefinition,
   scheduleDeleteInactiveNodesTaskDefinition,
 } from './kibana_discovery_service/delete_inactive_nodes_task';
@@ -64,6 +68,7 @@ export interface TaskManagerSetupContract {
    * @param taskDefinitions - The Kibana task definitions dictionary
    */
   registerTaskDefinitions: (taskDefinitions: TaskDefinitionRegistry) => void;
+  registerEncryptedSavedObjects: (plugin: EncryptedSavedObjectsPluginSetup) => void;
 }
 
 export type TaskManagerStartContract = Pick<
@@ -81,6 +86,7 @@ export type TaskManagerStartContract = Pick<
     removeIfExists: TaskStore['remove'];
   } & {
     getRegisteredTypes: () => string[];
+    registerEncryptedSavedObjectsPlugin: (plugin: EncryptedSavedObjectsPluginStart) => void;
   };
 
 export interface TaskManagerPluginsStart {
@@ -123,6 +129,7 @@ export class TaskManagerPlugin
   private kibanaDiscoveryService?: KibanaDiscoveryService;
   private heapSizeLimit: number = 0;
   private numOfKibanaInstances$: Subject<number> = new BehaviorSubject(1);
+  private canEncryptSavedObjects: boolean;
 
   constructor(private readonly initContext: PluginInitializerContext) {
     this.initContext = initContext;
@@ -133,6 +140,7 @@ export class TaskManagerPlugin
     this.nodeRoles = initContext.node.roles;
     this.shouldRunBackgroundTasks = this.nodeRoles.backgroundTasks;
     this.adHocTaskCounter = new AdHocTaskCounter();
+    this.canEncryptSavedObjects = false;
   }
 
   isNodeBackgroundTasksOnly() {
@@ -154,6 +162,7 @@ export class TaskManagerPlugin
       });
 
     setupSavedObjects(core.savedObjects, this.config);
+
     this.taskManagerId = this.initContext.env.instanceUuid;
 
     if (!this.taskManagerId) {
@@ -264,6 +273,15 @@ export class TaskManagerPlugin
       registerTaskDefinitions: (taskDefinition: TaskDefinitionRegistry) => {
         this.definitions.registerTaskDefinitions(taskDefinition);
       },
+      registerEncryptedSavedObjects: (plugin) => {
+        plugin.registerType({
+          type: TASK_SO_NAME,
+          attributesToEncrypt: new Set(['apiKey']),
+          attributesToIncludeInAAD: new Set(['id', 'taskType']),
+          enforceRandomId: false,
+        });
+        this.canEncryptSavedObjects = plugin.canEncrypt;
+      },
     };
   }
 
@@ -292,6 +310,7 @@ export class TaskManagerPlugin
     const taskStore = new TaskStore({
       serializer,
       savedObjectsRepository,
+      savedObjectsService: savedObjects,
       esClient: elasticsearch.client.asInternalUser,
       index: TASK_MANAGER_INDEX,
       definitions: this.definitions,
@@ -301,6 +320,7 @@ export class TaskManagerPlugin
       logger: this.logger,
       requestTimeouts: this.config.request_timeouts,
       security,
+      canEncryptSavedObjects: this.canEncryptSavedObjects,
     });
 
     const isServerless = this.initContext.env.packageInfo.buildFlavor === 'serverless';
@@ -387,7 +407,6 @@ export class TaskManagerPlugin
       taskStore,
       middleware: this.middleware,
       taskManagerId: taskStore.taskManagerId,
-      security,
     });
 
     scheduleDeleteInactiveNodesTaskDefinition(this.logger, taskScheduling).catch(() => {});
@@ -398,6 +417,7 @@ export class TaskManagerPlugin
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
         taskStore.aggregate(opts),
       get: (id: string) => taskStore.get(id),
+      bulkGetEncryptedTask: (ids: string[]) => taskStore.bulkGetEncryptedTask(ids),
       remove: (id: string) => taskStore.remove(id),
       bulkRemove: (ids: string[]) => taskStore.bulkRemove(ids),
       removeIfExists: (id: string) => removeIfExists(taskStore, id),
@@ -410,6 +430,13 @@ export class TaskManagerPlugin
       bulkUpdateSchedules: (...args) => taskScheduling.bulkUpdateSchedules(...args),
       getRegisteredTypes: () => this.definitions.getAllTypes(),
       bulkUpdateState: (...args) => taskScheduling.bulkUpdateState(...args),
+      registerEncryptedSavedObjectsPlugin: (plugin) => {
+        taskStore.registerEncryptedSavedObjectsClient(
+          plugin.getClient({
+            includedHiddenTypes: [TASK_SO_NAME],
+          })
+        );
+      },
     };
   }
 

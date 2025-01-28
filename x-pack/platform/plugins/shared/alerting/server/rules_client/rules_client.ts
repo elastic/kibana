@@ -209,8 +209,8 @@ export class RulesClient {
 
   public getScheduleFrequency = () => getScheduleFrequency(this.context);
 
-  public scheduleTaskWithApiKey = (id: string, request: KibanaRequest) => {
-    this.context.taskManager.schedule(
+  public scheduleTaskWithApiKey = async (id: string, request: KibanaRequest) => {
+    await this.context.taskManager.schedule(
       {
         id,
         taskType: 'taskWithApiKey',
@@ -226,11 +226,19 @@ export class RulesClient {
     );
   };
 
-  public removeTaskWithApiKey = (id: string) => {
-    this.context.taskManager.remove(id);
+  public removeTaskWithApiKey = async (id: string) => {
+    try {
+      await this.context.taskManager.remove(id);
+    } catch (e) {
+      this.context.logger.warn(`Failed to remove task by id: ${e}`);
+    }
   };
 
-  public bulkRemoveTasksWithApiKey = (ids: string[]) => {
-    this.context.taskManager.bulkRemove(ids);
+  public bulkRemoveTasksWithApiKey = async (ids: string[]) => {
+    try {
+      await this.context.taskManager.bulkRemove(ids);
+    } catch (e) {
+      this.context.logger.warn(`Failed to bulk remove tasks by id: ${e}`);
+    }
   };
 }

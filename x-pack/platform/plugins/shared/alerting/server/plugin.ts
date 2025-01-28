@@ -291,6 +291,8 @@ export class AlertingPlugin {
       );
     }
 
+    plugins.taskManager.registerEncryptedSavedObjects(plugins.encryptedSavedObjects);
+
     const taskManagerStartPromise = core
       .getStartServices()
       .then(([_, alertingStart]) => alertingStart.taskManager);
@@ -366,8 +368,8 @@ export class AlertingPlugin {
             services[0].http.basePath.set(fakeRequest, path);
 
             // Getting access to scoped clients using the API key
-            const scopedClusterClient = services[0].elasticsearch.client.asScoped(fakeRequest);
-            const savedObjectsClient = services[0].savedObjects.getScopedClient(fakeRequest);
+            // const scopedClusterClient = services[0].elasticsearch.client.asScoped(fakeRequest);
+            // const savedObjectsClient = services[0].savedObjects.getScopedClient(fakeRequest);
 
             console.log(`TASK WITH API KEY - ${taskInstance.id}`);
             console.log(JSON.stringify(taskInstance, null, 2));
@@ -539,6 +541,8 @@ export class AlertingPlugin {
       licenseState,
     } = this;
     licenseState?.setNotifyUsage(plugins.licensing.featureUsage.notifyUsage);
+
+    plugins.taskManager.registerEncryptedSavedObjectsPlugin(plugins.encryptedSavedObjects);
 
     const encryptedSavedObjectsClient = plugins.encryptedSavedObjects.getClient({
       includedHiddenTypes: [RULE_SAVED_OBJECT_TYPE, AD_HOC_RUN_SAVED_OBJECT_TYPE],
