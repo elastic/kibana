@@ -103,7 +103,7 @@
     ],
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAiAssistant": [
-      "platform/plugins/shared/observability_solution/observability_ai_assistant",
+      "platform/plugins/shared/observability_ai_assistant",
       "solutions/observability/plugins/observability_ai_assistant_app"
     ],
     "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
@@ -130,7 +130,7 @@
     ],
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",
-    "xpack.searchSharedUI": "solutions/search/packages/search/shared_ui",
+    "xpack.searchSharedUI": "solutions/search/packages/shared_ui",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
     "xpack.searchIndices": "solutions/search/plugins/search_indices",
     "xpack.searchNavigation": "solutions/search/plugins/search_solution/search_navigation",

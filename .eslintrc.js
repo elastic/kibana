@@ -320,6 +320,10 @@ module.exports = {
         'src/**/*.{js,mjs,ts,tsx}',
         'x-pack/**/*.{js,mjs,ts,tsx}',
         'packages/**/*.{js,mjs,ts,tsx}',
+        'src/platform/packages/**/*.{js,mjs,ts,tsx}',
+        'src/core/packages/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/packages/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/*/packages/**/*.{js,mjs,ts,tsx}',
       ],
       plugins: ['formatjs'],
       rules: {
@@ -924,7 +928,7 @@ module.exports = {
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/ux/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/slo/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'no-console': ['warn', { allow: ['error'] }],
@@ -944,7 +948,7 @@ module.exports = {
         'x-pack/solutions/observability/plugins/observability/**/*.stories.*',
         'x-pack/solutions/observability/plugins/exploratory_view/**/*.stories.*',
         'x-pack/solutions/observability/plugins/slo/**/*.stories.*',
-        'x-pack/packages/observability/**/*.{js,mjs,ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         'react/function-component-definition': [
@@ -958,9 +962,10 @@ module.exports = {
     },
     {
       files: [
-        'x-pack/plugins/observability_solution/**/*.{ts,tsx}',
-        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
-        'x-pack/packages/observability/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/{streams,streams_app}/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
       ],
       rules: {
         'react-hooks/exhaustive-deps': [
@@ -975,17 +980,17 @@ module.exports = {
     {
       files: [
         'x-pack/platform/plugins/shared/aiops/**/*.tsx',
-        'x-pack/plugins/observability_solution/**/*.tsx',
-        'x-pack/plugins/{streams,streams_app}/**/*.{ts,tsx}',
-        'src/plugins/ai_assistant_management/**/*.tsx',
-        'x-pack/packages/observability/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/observability_solution/**/*.{ts,tsx}',
+        'x-pack/solutions/observability/plugins/**/*.{ts,tsx}',
+        'src/platform/plugins/shared/ai_assistant_management/**/*.tsx',
+        'x-pack/solutions/observability/packages/**/*.{ts,tsx}',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
       },
     },
     {
-      files: ['x-pack/plugins/search*/**/*.tsx', 'x-pack/packages/search/**/*.tsx'],
+      files: ['x-pack/solutions/search/**/*.tsx'],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'warn',
       },
@@ -994,7 +999,7 @@ module.exports = {
       files: [
         'x-pack/solutions/observability/plugins/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
         'x-pack/solutions/observability/packages/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
-        'src/plugins/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
+        'src/platform/plugins/shared/ai_assistant_management/**/!(*.stories.tsx|*.test.tsx|*.storybook_decorator.tsx|*.mock.tsx)',
       ],
       rules: {
         '@kbn/i18n/strings_should_be_translated_with_i18n': 'warn',
@@ -1097,8 +1102,8 @@ module.exports = {
         'x-pack/platform/plugins/private/data_visualizer/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/shared/ml/**/*.{js,mjs,ts,tsx}',
         'x-pack/platform/plugins/private/transform/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/private/ml/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/packages/shared/ml/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/packages/private/ml/**/*.{js,mjs,ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/consistent-type-imports': 'error',
@@ -1568,7 +1573,11 @@ module.exports = {
     {
       // typescript for front and back end
       files: [
-        'x-pack/plugins/{alerting,stack_alerts,actions,task_manager,event_log}/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/alerting/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/stack_alerts/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/actions/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/task_manager/**/*.{ts,tsx}',
+        'x-pack/platform/plugins/shared/event_log/**/*.{ts,tsx}',
       ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
@@ -1576,7 +1585,10 @@ module.exports = {
     },
     {
       // typescript only for back end
-      files: ['x-pack/plugins/{stack_connectors,triggers_actions_ui}/server/**/*.ts'],
+      files: [
+        'x-pack/platform/plugins/shared/stack_connectors/server/**/*.ts',
+        'x-pack/platform/plugins/shared/triggers_actions_ui/server/**/*.ts',
+      ],
       rules: {
         '@typescript-eslint/no-explicit-any': 'error',
       },
@@ -1708,7 +1720,7 @@ module.exports = {
       // All files
       files: [
         'x-pack/solutions/search/plugins/serverless_search/**/*.{ts,tsx}',
-        'packages/kbn-search-*',
+        'x-pack/solutions/search/packages/kbn-search-*',
       ],
       rules: {
         '@kbn/telemetry/event_generating_elements_should_be_instrumented': 'error',
@@ -1872,7 +1884,8 @@ module.exports = {
         'x-pack/test/encrypted_saved_objects_api_integration/**/*.{js,mjs,ts,tsx}',
 
         'x-pack/platform/plugins/shared/security/**/*.{js,mjs,ts,tsx}',
-        'x-pack/packages/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/packages/private/security/**/*.{js,mjs,ts,tsx}',
+        'x-pack/platform/packages/shared/security/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/security_api_integration/**/*.{js,mjs,ts,tsx}',
         'x-pack/test/security_functional/**/*.{js,mjs,ts,tsx}',
 
@@ -1927,7 +1940,6 @@ module.exports = {
     {
       files: [
         'src/platform/packages/shared/kbn-analytics/**',
-        // 'packages/kbn-telemetry-tools/**',
         'src/platform/plugins/private/kibana_usage_collection/**',
         'src/platform/plugins/shared/usage_collection/**',
         'src/platform/plugins/shared/telemetry/**',
@@ -1948,7 +1960,6 @@ module.exports = {
         'x-pack/platform/plugins/shared/global_search/**',
         'x-pack/platform/plugins/shared/cloud/**',
         'src/platform/packages/shared/kbn-config-schema',
-        'src/plugins/status_page/**',
         'src/platform/plugins/shared/saved_objects_management/**',
         'src/platform/packages/shared/kbn-analytics/**',
         'packages/kbn-telemetry-tools/**',
@@ -1973,10 +1984,9 @@ module.exports = {
     {
       files: [
         'src/core/{server,public,common}/index.ts',
-        'src/plugins/*/{server,public,common}/index.ts',
-        'src/plugins/*/*/{server,public,common}/index.ts',
-        'x-pack/plugins/*/{server,public,common}/index.ts',
-        'x-pack/plugins/*/*/{server,public,common}/index.ts',
+        'src/platform/plugins/**/{server,public,common}/index.ts',
+        'x-pack/platform/plugins/**/{server,public,common}/index.ts',
+        'x-pack/solutions/*/plugins/**/{server,public,common}/index.ts',
       ],
       rules: {
         '@kbn/eslint/no_export_all': 'error',
