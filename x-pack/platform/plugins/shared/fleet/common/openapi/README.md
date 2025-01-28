@@ -2,7 +2,7 @@
 
 The current self-contained spec file, available [as JSON](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.json) or [as YAML](https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.yaml), can be used for online tools like those found at https://openapi.tools/.
 
-For example, [click here to view the specification in the Swagger UI](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/elastic/kibana/master/x-pack/plugins/fleet/common/openapi/bundled.json).
+For example, [click here to view the specification in the Swagger UI](https://petstore.swagger.io/?url=https://raw.githubusercontent.com/elastic/kibana/fafafe2113932be70e6044b6b6941937e8540ecb/x-pack/platform/plugins/shared/fleet/common/openapi/bundled.json).
 
 A guide about the openApi specification can be found at [https://swagger.io/docs/specification/about/](https://swagger.io/docs/specification/about/).
 
