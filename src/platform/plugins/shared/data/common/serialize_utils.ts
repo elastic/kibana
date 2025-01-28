@@ -41,6 +41,6 @@ export function deserializeField(field: SerializedValue) {
 }
 
 export function serializeField(field: RawValue): SerializedValue {
-  if (!SerializableField.isSerializable(field)) return field;
+  if (field == null || !SerializableField.isSerializable(field)) return field;
   return field.serialize();
 }
