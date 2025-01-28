@@ -17,8 +17,3 @@ export const textWithEditContainerCss = css`
     margin-bottom: 0;
   }
 `;
-export const editIconCss = css`
-  button {
-    margin-left: -${euiThemeVars.euiSizeM};
-  }
-`;
