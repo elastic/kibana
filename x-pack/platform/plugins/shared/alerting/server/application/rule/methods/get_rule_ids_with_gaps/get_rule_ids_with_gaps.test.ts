@@ -5,20 +5,44 @@
  * 2.0.
  */
 
-import { loggerMock } from '@kbn/logging-mocks';
-import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
-import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { AlertingAuthorization } from '../../../../authorization';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
 import {
-  AlertingAuthorizationEntity,
-  AlertingAuthorizationFilterType,
-} from '../../../../authorization';
-import { getRuleIdsWithGaps } from './get_rule_ids_with_gaps';
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
+import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { ConstructorOptions, RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
 
 describe('getRuleIdsWithGaps', () => {
-  let context: any;
+  let rulesClient: RulesClient;
+  let eventLogClient: ReturnType<typeof eventLogClientMock.create>;
+  let rulesClientParams: jest.Mocked<ConstructorOptions>;
+
+  const kibanaVersion = 'v8.0.0';
+  const taskManager = taskManagerMock.createStart();
+  const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+  const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
+  const authorization = alertingAuthorizationMock.create();
+  const actionsAuthorization = actionsAuthorizationMock.create();
   const auditLogger = auditLoggerMock.create();
-  const mockEventLogClient = eventLogClientMock.create();
+  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+  const backfillClient = backfillClientMock.create();
+  const logger = loggingSystemMock.create().get();
+  const eventLogger = eventLoggerMock.create();
 
   const params = {
     start: '2024-01-01T00:00:00.000Z',
@@ -26,23 +50,51 @@ describe('getRuleIdsWithGaps', () => {
     statuses: ['unfilled', 'partially_filled'],
   };
 
-  const mockAuthFilter = {
-    filter: { type: 'mock_filter' },
-  };
+  const filter = { type: 'mock_filter' };
 
   beforeEach(() => {
-    context = {
-      authorization: {
-        getFindAuthorizationFilter: jest.fn().mockResolvedValue(mockAuthFilter),
-      },
-      logger: loggerMock.create(),
-      auditLogger,
-      getEventLogClient: jest.fn().mockResolvedValue(mockEventLogClient),
-    };
-    (auditLogger.log as jest.Mock).mockClear();
+    eventLogClient = eventLogClientMock.create();
 
-    // Default mock response for aggregateEventsWithAuthFilter
-    mockEventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+    rulesClientParams = {
+      taskManager,
+      ruleTypeRegistry,
+      unsecuredSavedObjectsClient,
+      authorization: authorization as unknown as AlertingAuthorization,
+      actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
+      spaceId: 'default',
+      namespace: 'default',
+      getUserName: jest.fn(),
+      createAPIKey: jest.fn(),
+      logger,
+      internalSavedObjectsRepository,
+      encryptedSavedObjectsClient: encryptedSavedObjects,
+      getActionsClient: jest.fn(),
+      getEventLogClient: jest.fn(),
+      kibanaVersion,
+      auditLogger,
+      maxScheduledPerMinute: 10000,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      isAuthenticationTypeAPIKey: jest.fn(),
+      getAuthenticationAPIKey: jest.fn(),
+      getAlertIndicesAlias: jest.fn(),
+      alertsService: null,
+      backfillClient,
+      isSystemAction: jest.fn(),
+      connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+      eventLogger,
+    } as jest.Mocked<ConstructorOptions>;
+
+    jest.clearAllMocks();
+    rulesClient = new RulesClient(rulesClientParams);
+    rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+    authorization.getFindAuthorizationFilter.mockResolvedValue({
+      filter,
+      ensureRuleTypeIsAuthorized() {},
+    });
+
+    // Set default response for eventLogClient
+    eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
       aggregations: {
         unique_rule_ids: {
           buckets: [],
@@ -57,27 +109,26 @@ describe('getRuleIdsWithGaps', () => {
 
   describe('authorization', () => {
     it('should get authorization filter with correct parameters', async () => {
-      await getRuleIdsWithGaps(context, params);
-
-      expect(context.authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
-        authorizationEntity: AlertingAuthorizationEntity.Rule,
-        filterOpts: {
-          type: AlertingAuthorizationFilterType.KQL,
-          fieldNames: {
-            ruleTypeId: 'kibana.alert.rule.rule_type_id',
-            consumer: 'kibana.alert.rule.consumer',
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+        aggregations: {
+          unique_rule_ids: {
+            buckets: [],
           },
         },
       });
+
+      await rulesClient.getRuleIdsWithGaps(params);
+
+      expect(authorization.getFindAuthorizationFilter).toHaveBeenCalled();
     });
 
     it('should throw and log audit event when authorization fails', async () => {
       const authError = new Error('Authorization failed');
-      context.authorization.getFindAuthorizationFilter.mockRejectedValue(authError);
+      authorization.getFindAuthorizationFilter.mockRejectedValue(authError);
 
-      await expect(getRuleIdsWithGaps(context, params)).rejects.toThrow('Authorization failed');
+      await expect(rulesClient.getRuleIdsWithGaps(params)).rejects.toThrow('Authorization failed');
 
-      expect(auditLogger.log).toHaveBeenCalledWith(
+      expect(rulesClientParams.auditLogger!.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
             action: 'rule_get_rules_with_gaps',
@@ -100,15 +151,15 @@ describe('getRuleIdsWithGaps', () => {
         },
       };
 
-      mockEventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
         aggregations: mockAggregations,
       });
 
-      const result = await getRuleIdsWithGaps(context, params);
+      const result = await rulesClient.getRuleIdsWithGaps(params);
 
-      expect(mockEventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
-        mockAuthFilter.filter,
+        filter,
         expect.objectContaining({
           filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z" AND (kibana.alert.rule.gap.status : unfilled OR kibana.alert.rule.gap.status : partially_filled)`,
           aggs: { unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } } },
@@ -122,7 +173,7 @@ describe('getRuleIdsWithGaps', () => {
     });
 
     it('should handle empty aggregation results', async () => {
-      mockEventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
+      eventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
         aggregations: {
           unique_rule_ids: {
             buckets: [],
@@ -130,7 +181,16 @@ describe('getRuleIdsWithGaps', () => {
         },
       });
 
-      const result = await getRuleIdsWithGaps(context, params);
+      const result = await rulesClient.getRuleIdsWithGaps(params);
+
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+        RULE_SAVED_OBJECT_TYPE,
+        filter,
+        expect.objectContaining({
+          filter: expect.stringContaining('event.action: gap AND event.provider: alerting'),
+          aggs: { unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } } },
+        })
+      );
 
       expect(result).toEqual({
         total: 0,
@@ -144,21 +204,14 @@ describe('getRuleIdsWithGaps', () => {
         end: params.end,
       };
 
-      mockEventLogClient.aggregateEventsWithAuthFilter.mockResolvedValue({
-        aggregations: {
-          unique_rule_ids: {
-            buckets: [],
-          },
-        },
-      });
+      await rulesClient.getRuleIdsWithGaps(paramsWithoutStatuses);
 
-      await getRuleIdsWithGaps(context, paramsWithoutStatuses);
-
-      expect(mockEventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
+      expect(eventLogClient.aggregateEventsWithAuthFilter).toHaveBeenCalledWith(
         RULE_SAVED_OBJECT_TYPE,
-        mockAuthFilter.filter,
+        filter,
         expect.objectContaining({
           filter: `event.action: gap AND event.provider: alerting AND kibana.alert.rule.gap.range <= "2024-01-02T00:00:00.000Z" AND kibana.alert.rule.gap.range >= "2024-01-01T00:00:00.000Z"`,
+          aggs: { unique_rule_ids: { terms: { field: 'rule.id', size: 10000 } } },
         })
       );
     });
@@ -167,12 +220,12 @@ describe('getRuleIdsWithGaps', () => {
   describe('error handling', () => {
     it('should handle and wrap errors from event log client', async () => {
       const error = new Error('Event log client error');
-      mockEventLogClient.aggregateEventsWithAuthFilter.mockRejectedValue(error);
+      eventLogClient.aggregateEventsWithAuthFilter.mockRejectedValue(error);
 
-      await expect(getRuleIdsWithGaps(context, params)).rejects.toThrow(
+      await expect(rulesClient.getRuleIdsWithGaps(params)).rejects.toThrow(
         'Failed to find rules with gaps'
       );
-      expect(context.logger.error).toHaveBeenCalled();
+      expect(rulesClientParams.logger!.error).toHaveBeenCalled();
     });
   });
 });

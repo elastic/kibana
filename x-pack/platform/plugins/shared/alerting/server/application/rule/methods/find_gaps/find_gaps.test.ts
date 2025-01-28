@@ -5,16 +5,32 @@
  * 2.0.
  */
 
-import { findGaps } from './find_gaps';
-import { getRule } from '../get/get_rule';
-import { loggerMock } from '@kbn/logging-mocks';
-import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { ActionsAuthorization } from '@kbn/actions-plugin/server';
+import { actionsAuthorizationMock } from '@kbn/actions-plugin/server/mocks';
+import { AlertingAuthorization } from '../../../../authorization';
+import { alertingAuthorizationMock } from '../../../../authorization/alerting_authorization.mock';
+import { ruleTypeRegistryMock } from '../../../../rule_type_registry.mock';
+import { loggingSystemMock } from '@kbn/core-logging-server-mocks';
+import {
+  savedObjectsClientMock,
+  savedObjectsRepositoryMock,
+} from '@kbn/core-saved-objects-api-server-mocks';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
-import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
+import { uiSettingsServiceMock } from '@kbn/core-ui-settings-server-mocks';
+import { backfillClientMock } from '../../../../backfill_client/backfill_client.mock';
+import { ConnectorAdapterRegistry } from '../../../../connector_adapters/connector_adapter_registry';
+import { ConstructorOptions, RulesClient } from '../../../../rules_client';
 import { RULE_SAVED_OBJECT_TYPE } from '../../../../saved_objects';
+import { ReadOperations, AlertingAuthorizationEntity } from '../../../../authorization';
+import { getRule } from '../get/get_rule';
 
 jest.mock('../get/get_rule');
-jest.mock('../../../../lib/rule_gaps/find_gaps');
+
+const mockedGetRule = getRule as jest.MockedFunction<typeof getRule>;
 
 const mockRule = {
   id: '1',
@@ -44,9 +60,22 @@ const mockRule = {
 };
 
 describe('findGaps', () => {
-  const mockedGetRule = getRule as jest.MockedFunction<typeof getRule>;
+  let rulesClient: RulesClient;
+  let eventLogClient: ReturnType<typeof eventLogClientMock.create>;
+  let rulesClientParams: jest.Mocked<ConstructorOptions>;
+
+  const kibanaVersion = 'v8.0.0';
+  const taskManager = taskManagerMock.createStart();
+  const ruleTypeRegistry = ruleTypeRegistryMock.create();
+  const unsecuredSavedObjectsClient = savedObjectsClientMock.create();
+  const encryptedSavedObjects = encryptedSavedObjectsMock.createClient();
+  const authorization = alertingAuthorizationMock.create();
+  const actionsAuthorization = actionsAuthorizationMock.create();
   const auditLogger = auditLoggerMock.create();
-  let context: any;
+  const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
+  const backfillClient = backfillClientMock.create();
+  const logger = loggingSystemMock.create().get();
+  const eventLogger = eventLoggerMock.create();
 
   const params = {
     ruleId: '1',
@@ -57,16 +86,52 @@ describe('findGaps', () => {
   };
 
   beforeEach(() => {
-    context = {
-      authorization: {
-        ensureAuthorized: jest.fn(),
-      },
-      logger: loggerMock.create(),
+    eventLogClient = eventLogClientMock.create();
+
+    rulesClientParams = {
+      taskManager,
+      ruleTypeRegistry,
+      unsecuredSavedObjectsClient,
+      authorization: authorization as unknown as AlertingAuthorization,
+      actionsAuthorization: actionsAuthorization as unknown as ActionsAuthorization,
+      spaceId: 'default',
+      namespace: 'default',
+      getUserName: jest.fn(),
+      createAPIKey: jest.fn(),
+      logger,
+      internalSavedObjectsRepository,
+      encryptedSavedObjectsClient: encryptedSavedObjects,
+      getActionsClient: jest.fn(),
+      getEventLogClient: jest.fn(),
+      kibanaVersion,
       auditLogger,
-      getEventLogClient: jest.fn().mockResolvedValue(eventLogClientMock.create()),
-    };
-    (auditLogger.log as jest.Mock).mockClear();
+      maxScheduledPerMinute: 10000,
+      minimumScheduleInterval: { value: '1m', enforce: false },
+      isAuthenticationTypeAPIKey: jest.fn(),
+      getAuthenticationAPIKey: jest.fn(),
+      getAlertIndicesAlias: jest.fn(),
+      alertsService: null,
+      backfillClient,
+      isSystemAction: jest.fn(),
+      connectorAdapterRegistry: new ConnectorAdapterRegistry(),
+      uiSettings: uiSettingsServiceMock.createStartContract(),
+      eventLogger,
+    } as jest.Mocked<ConstructorOptions>;
+
+    jest.clearAllMocks();
+    rulesClient = new RulesClient(rulesClientParams);
+    rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
+    // Mock getRule to return mock rule
     mockedGetRule.mockResolvedValue(mockRule);
+
+    // Mock eventLogClient.findEventsBySavedObjectIds
+    eventLogClient.findEventsBySavedObjectIds.mockResolvedValue({
+      total: 0,
+      data: [],
+      page: 1,
+      per_page: 10,
+    });
   });
 
   afterEach(() => {
@@ -75,9 +140,9 @@ describe('findGaps', () => {
 
   describe('authorization', () => {
     it('should authorize and find gaps successfully', async () => {
-      await findGaps(context, params);
+      await rulesClient.findGaps(params);
 
-      expect(context.authorization.ensureAuthorized).toHaveBeenCalledWith({
+      expect(authorization.ensureAuthorized).toHaveBeenCalledWith({
         ruleTypeId: mockRule.alertTypeId,
         consumer: mockRule.consumer,
         operation: ReadOperations.FindGaps,
@@ -87,17 +152,17 @@ describe('findGaps', () => {
 
     it('should throw error when not authorized', async () => {
       const authError = new Error('Unauthorized');
-      context.authorization.ensureAuthorized.mockRejectedValue(authError);
+      authorization.ensureAuthorized.mockRejectedValue(authError);
 
-      await expect(findGaps(context, params)).rejects.toThrow(authError);
+      await expect(rulesClient.findGaps(params)).rejects.toThrow(authError);
     });
   });
 
   describe('auditLogger', () => {
     it('logs audit event when finding gaps successfully', async () => {
-      await findGaps(context, params);
+      await rulesClient.findGaps(params);
 
-      expect(auditLogger.log).toHaveBeenCalledWith(
+      expect(rulesClientParams.auditLogger!.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
             action: 'rule_find_gaps',
@@ -110,11 +175,11 @@ describe('findGaps', () => {
 
     it('logs audit event when not authorized to find gaps', async () => {
       const authError = new Error('Unauthorized');
-      context.authorization.ensureAuthorized.mockRejectedValue(authError);
+      authorization.ensureAuthorized.mockRejectedValue(authError);
 
-      await expect(findGaps(context, params)).rejects.toThrow(authError);
+      await expect(rulesClient.findGaps(params)).rejects.toThrow(authError);
 
-      expect(auditLogger.log).toHaveBeenCalledWith(
+      expect(rulesClientParams.auditLogger!.log).toHaveBeenCalledWith(
         expect.objectContaining({
           event: expect.objectContaining({
             action: 'rule_find_gaps',
@@ -135,16 +200,16 @@ describe('findGaps', () => {
       const error = new Error('Rule not found');
       mockedGetRule.mockRejectedValue(error);
 
-      await expect(findGaps(context, params)).rejects.toThrow('Failed to find gaps');
-      expect(context.logger.error).toHaveBeenCalled();
+      await expect(rulesClient.findGaps(params)).rejects.toThrow('Failed to find gaps');
+      expect(rulesClientParams.logger!.error).toHaveBeenCalled();
     });
 
     it('should handle errors from findGaps implementation', async () => {
       const error = new Error('Failed to find gaps');
-      context.getEventLogClient.mockRejectedValue(error);
+      eventLogClient.findEventsBySavedObjectIds.mockRejectedValue(error);
 
-      await expect(findGaps(context, params)).rejects.toThrow('Failed to find gaps');
-      expect(context.logger.error).toHaveBeenCalled();
+      await expect(rulesClient.findGaps(params)).rejects.toThrow('Failed to find gaps');
+      expect(rulesClientParams.logger!.error).toHaveBeenCalled();
     });
   });
 });

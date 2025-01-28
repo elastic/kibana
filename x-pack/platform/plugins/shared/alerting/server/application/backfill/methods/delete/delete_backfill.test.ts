@@ -29,6 +29,7 @@ import { SavedObject } from '@kbn/core-saved-objects-api-server';
 import { AdHocRunSO } from '../../../../data/ad_hoc_run/types';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { updateGaps } from '../../../../lib/rule_gaps/update/update_gaps';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 
 jest.mock('../../../../lib/rule_gaps/update/update_gaps', () => ({
   updateGaps: jest.fn(),
@@ -176,8 +177,8 @@ describe('deleteBackfill()', () => {
   });
 
   test('should call updateGaps with correct parameters when deleting backfill', async () => {
-    const mockEventLogClient = { mockEventLogClient: true } as any;
-    rulesClientParams.getEventLogClient.mockResolvedValue(mockEventLogClient);
+    const eventLogClient = eventLogClientMock.create();
+    rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
 
     await rulesClient.deleteBackfill('1');
 
@@ -199,7 +200,7 @@ describe('deleteBackfill()', () => {
     ]);
     expect(updateGapsCall.savedObjectsRepository).toBe(internalSavedObjectsRepository);
     expect(updateGapsCall.logger).toBe(logger);
-    expect(updateGapsCall.eventLogClient).toBe(mockEventLogClient);
+    expect(updateGapsCall.eventLogClient).toBe(eventLogClient);
     expect(updateGapsCall.shouldRefetchAllBackfills).toBe(true);
     expect(updateGapsCall.backfillClient).toBe(backfillClient);
   });
