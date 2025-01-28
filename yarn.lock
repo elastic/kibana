@@ -4680,7 +4680,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-server-mocks@link:packages/core/http/core-http-server-mocks":
+"@kbn/core-http-server-mocks@link:src/core/packages/http/server-mocks":
   version "0.0.0"
   uid ""
 
