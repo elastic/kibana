@@ -161,7 +161,6 @@ export function AddPanelFlyout({ dashboardApi }: { dashboardApi: DashboardApi })
                       'dashboard.editorMenu.addPanelFlyout.searchLabelText',
                       { defaultMessage: 'search field for panels' }
                     )}
-                    className="nsPanelSelectionFlyout__searchInput"
                     data-test-subj="dashboardPanelSelectionFlyout__searchInput"
                   />
                 </EuiFormRow>
