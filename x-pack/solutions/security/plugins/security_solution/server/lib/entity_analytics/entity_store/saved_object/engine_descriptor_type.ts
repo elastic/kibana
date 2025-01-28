@@ -31,21 +31,6 @@ export const entityEngineDescriptorTypeMappings: SavedObjectsType['mappings'] = 
       type: 'integer',
       index: false,
     },
-    delay: {
-      type: 'keyword',
-    },
-    timeout: {
-      type: 'keyword',
-    },
-    frequency: {
-      type: 'keyword',
-    },
-    docsPerSecond: {
-      type: 'float',
-    },
-    lookbackPeriod: {
-      type: 'keyword',
-    },
   },
 };
 
@@ -73,16 +58,6 @@ const version1: SavedObjectsModelVersion = {
 
 const version2: SavedObjectsModelVersion = {
   changes: [
-    {
-      type: 'mappings_addition',
-      addedMappings: {
-        delay: { type: 'keyword' },
-        timeout: { type: 'keyword' },
-        frequency: { type: 'keyword' },
-        docsPerSecond: { type: 'float' },
-        lookbackPeriod: { type: 'keyword' },
-      },
-    },
     {
       type: 'data_backfill',
       backfillFn: (document) => {
