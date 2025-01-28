@@ -4672,7 +4672,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-router-server-mocks@link:packages/core/http/core-http-router-server-mocks":
+"@kbn/core-http-router-server-mocks@link:src/core/packages/http/router-server-mocks":
   version "0.0.0"
   uid ""
 
