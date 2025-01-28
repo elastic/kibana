@@ -45,7 +45,6 @@ export default function ({ getService }: FtrProviderContext) {
       await security.user.create(userName2, {
         password,
         roles: [roleName2],
-        full_name: 'a kibana user',
       });
     });
 
