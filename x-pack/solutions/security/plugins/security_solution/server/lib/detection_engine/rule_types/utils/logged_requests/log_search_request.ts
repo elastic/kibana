@@ -5,10 +5,23 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 export const logSearchRequest = (searchRequest: estypes.SearchRequest): string => {
-  const { body, index, ...params } = searchRequest;
+  const {
+    aggregations,
+    aggs,
+    query,
+    _source,
+    sort,
+    search_after: searchAfter,
+    index,
+    version,
+    runtime_mappings: runtimeMappings,
+    fields,
+    size,
+    ...params
+  } = searchRequest;
   const urlParams = Object.entries(params)
     .reduce<string[]>((acc, [key, value]) => {
       if (value != null) {
@@ -21,7 +34,19 @@ export const logSearchRequest = (searchRequest: estypes.SearchRequest): string =
 
   const url = `/${index}/_search${urlParams ? `?${urlParams}` : ''}`;
 
-  if (body) {
+  if (query || aggregations) {
+    const body = {
+      size,
+      query,
+      fields,
+      aggs,
+      aggregations,
+      _source,
+      runtime_mappings: runtimeMappings,
+      sort,
+      search_after: searchAfter,
+      version,
+    };
     return `POST ${url}\n${JSON.stringify({ ...body }, null, 2)}`;
   }
 

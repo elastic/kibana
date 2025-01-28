@@ -553,7 +553,6 @@ describe('create_signals', () => {
       },
       _source: false,
       fields: ['@timestamp'],
-      runtime_mappings: undefined,
       sort: [
         {
           '@timestamp': {
