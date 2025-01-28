@@ -55,6 +55,7 @@ describe('ValueControlForm', () => {
       client: uiSettings,
     },
     core: coreMock.createStart(),
+    data: dataMock,
   };
 
   describe('Interval type', () => {
