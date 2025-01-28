@@ -185,7 +185,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       it('renders multiple attachment types correctly', async () => {
         const { userActions } = await findCaseUserActions({
           supertest,
-          caseId: originalCase.id,
+          caseID: originalCase.id,
         });
 
         const comments = userActions.filter((userAction) => userAction.type === 'comment');
