@@ -16,7 +16,6 @@ import type { UsageCollectionSetup } from '@kbn/usage-collection-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { HeatmapPublicConfig } from '../server/config';
 import { LEGACY_HEATMAP_CHARTS_LIBRARY } from '../common';
-import { heatmapVisType } from './vis_type';
 import { setDataViewsStart } from './services';
 
 /** @internal */
@@ -50,14 +49,17 @@ export class VisTypeHeatmapPlugin {
   ) {
     if (!core.uiSettings.get(LEGACY_HEATMAP_CHARTS_LIBRARY)) {
       const { readOnly } = this.initializerContext.config.get<HeatmapPublicConfig>();
-      visualizations.createBaseVisualization({
-        ...heatmapVisType({
-          showElasticChartsOptions: true,
-          palettes: charts.palettes,
-        }),
-        disableCreate: Boolean(readOnly),
-        disableEdit: Boolean(readOnly),
-      });
+      visualizations.createBaseVisualization('heatmap', async () => {
+        const { getHeatmapVisType } = await import('./vis_type/heatmap');
+        return {
+          ...getHeatmapVisType({
+            showElasticChartsOptions: true,
+            palettes: charts.palettes,
+          }),
+          disableCreate: Boolean(readOnly),
+          disableEdit: Boolean(readOnly),
+       };
+     });
     }
     return {};
   }

@@ -11,7 +11,5 @@ import { PluginInitializerContext } from '@kbn/core/public';
 import type { HeatmapPublicConfig } from '../server/config';
 import { VisTypeHeatmapPlugin } from './plugin';
 
-export { heatmapVisType } from './vis_type';
-
 export const plugin = (initializerContext: PluginInitializerContext<HeatmapPublicConfig>) =>
   new VisTypeHeatmapPlugin(initializerContext);

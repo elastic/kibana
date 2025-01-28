@@ -16,5 +16,3 @@ export function plugin(initializerContext: PluginInitializerContext<GaugePublicC
 }
 
 export type { VisTypeGaugePluginSetup, VisTypeGaugePluginStart } from './types';
-
-export { gaugeVisType, goalVisType } from './vis_type';
