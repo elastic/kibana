@@ -5,5 +5,8 @@
  * 2.0.
  */
 
-export { SetupGuideLayout } from './setup_guide';
-export { SETUP_GUIDE_TITLE } from './constants';
+import type { PluginsStart } from '../types';
+
+export function isAgentlessEnabled(start: PluginsStart): boolean {
+  return (start?.cloud?.isCloudEnabled ?? false) && (start.fleet?.agentless.enabled ?? false);
+}
