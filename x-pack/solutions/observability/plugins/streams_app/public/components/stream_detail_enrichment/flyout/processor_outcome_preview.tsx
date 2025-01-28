@@ -124,6 +124,7 @@ export const ProcessorOutcomePreview = ({
           </h3>
         </EuiTitle>
         <EuiButton
+          data-test-subj="streamsAppProcessorOutcomePreviewRunSimulationButton"
           iconType="play"
           color="accentSecondary"
           size="s"

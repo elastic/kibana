@@ -108,7 +108,7 @@ export function useErrorGroupListData({
       }
     },
     // only fetches agg results when main statistics are ready
-
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [mainStatistics.requestId, renderedItems, comparisonEnabled, offset],
     { preservePreviousData: false }
   );
