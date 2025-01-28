@@ -74,6 +74,10 @@ export function setupNodeEvents(on: Cypress.PluginEvents, config: Cypress.Plugin
   });
 
   on('before:browser:launch', (browser, launchOptions) => {
+    if (browser.name === 'chrome' && browser.isHeadless) {
+      launchOptions.args.push('--window-size=1400,1200');
+      launchOptions.args.push('--force-device-scale-factor=1');
+    }
     if (browser.name === 'electron' && browser.isHeadless) {
       launchOptions.preferences.width = 1440;
       launchOptions.preferences.height = 1600;

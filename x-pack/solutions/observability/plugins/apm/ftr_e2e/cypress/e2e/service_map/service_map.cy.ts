@@ -29,7 +29,6 @@ const detailedServiceMap = url.format({
   },
 });
 
-// Failing: See https://github.com/elastic/kibana/issues/207005
 describe('service map', () => {
   before(() => {
     synthtrace.index(
@@ -64,7 +63,7 @@ describe('service map', () => {
           imagesPath: '{spec_path}/snapshots',
           title: 'service_map',
           matchAgainstPath: 'cypress/e2e/service_map/snapshots/service_map.png',
-          maxDiffThreshold: 0.04, // maximum threshold above which the test should fail
+          maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
         })
       );
     });
@@ -81,7 +80,7 @@ describe('service map', () => {
           imagesPath: '{spec_path}/snapshots',
           title: 'detailed_service_map',
           matchAgainstPath: 'cypress/e2e/service_map/snapshots/detailed_service_map.png',
-          maxDiffThreshold: 0.04, // maximum threshold above which the test should fail
+          maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
         })
       );
     });
@@ -90,6 +89,7 @@ describe('service map', () => {
       it('shows empty state', () => {
         cy.visitKibana(serviceMapHref);
         // we need to dismiss the service-group call out first
+        cy.waitUntilPageContentIsLoaded();
         cy.getByTestSubj('apmUnifiedSearchBar').type('_id : foo{enter}');
         cy.wait('@serviceMap');
 
@@ -104,7 +104,8 @@ describe('service map', () => {
 function prepareCanvasForScreenshot() {
   cy.get('html, body').invoke('attr', 'style', 'height: auto; scroll-behavior: auto;');
 
-  cy.wait(300);
+  cy.wait(500);
+  cy.waitUntilPageContentIsLoaded();
   cy.getByTestSubj('centerServiceMap').click();
   cy.scrollTo('top');
 }
