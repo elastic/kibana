@@ -106,6 +106,7 @@ export const chatCompleteRoute = (
           const connector = connectors.length > 0 ? connectors[0] : undefined;
           actionTypeId = connector?.actionTypeId ?? '.gen-ai';
           const isOssModel = isOpenSourceModel(connector);
+          const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
           // replacements
           const anonymizationFieldsRes =
@@ -221,6 +222,7 @@ export const chatCompleteRoute = (
             response,
             telemetry,
             responseLanguage: request.body.responseLanguage,
+            savedObjectsClient,
             ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });
         } catch (err) {

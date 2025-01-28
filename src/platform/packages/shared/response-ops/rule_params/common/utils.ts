@@ -10,6 +10,7 @@
 import { schema } from '@kbn/config-schema';
 import { i18n } from '@kbn/i18n';
 import { isEmpty } from 'lodash';
+import { buildEsQuery as kbnBuildEsQuery } from '@kbn/es-query';
 
 export const jobsSelectionSchema = schema.object(
   {
@@ -48,6 +49,29 @@ export const validateIsStringElasticsearchJSONFilter = (value: string) => {
     return errorMessage;
   } catch (e) {
     return errorMessage;
+  }
+};
+
+export const validateKQLStringFilter = (value: string) => {
+  if (value === '') {
+    // Allow clearing the filter.
+    return;
+  }
+
+  try {
+    kbnBuildEsQuery(undefined, [{ query: value, language: 'kuery' }], [], {
+      allowLeadingWildcards: true,
+      queryStringOptions: {},
+      ignoreFilterIfFieldNotInIndex: false,
+    });
+  } catch (e) {
+    return i18n.translate(
+      'xpack.responseOps.ruleParams.customThreshold.schema.invalidFilterQuery',
+      {
+        defaultMessage: 'filterQuery must be a valid KQL filter (error: {errorMessage})',
+        values: { errorMessage: e?.message },
+      }
+    );
   }
 };
 

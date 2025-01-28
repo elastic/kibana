@@ -85,6 +85,9 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
+      await cisIntegration.selectSetupTechnology('agent-based');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+
       await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.clickSaveButton();
