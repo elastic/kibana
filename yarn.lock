@@ -4568,7 +4568,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-execution-context-server-mocks@link:packages/core/execution-context/core-execution-context-server-mocks":
+"@kbn/core-execution-context-server-mocks@link:src/core/packages/execution-context/server-mocks":
   version "0.0.0"
   uid ""
 
