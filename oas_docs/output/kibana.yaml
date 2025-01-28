@@ -26791,6 +26791,12 @@ paths:
                               type: boolean
                             is_preconfigured:
                               type: boolean
+                            kibana_api_key:
+                              nullable: true
+                              type: string
+                            kibana_url:
+                              nullable: true
+                              type: string
                             name:
                               type: string
                             preset:
@@ -26808,6 +26814,16 @@ paths:
                               additionalProperties: true
                               type: object
                               properties:
+                                kibana_api_key:
+                                  anyOf:
+                                    - additionalProperties: true
+                                      type: object
+                                      properties:
+                                        id:
+                                          type: string
+                                      required:
+                                        - id
+                                    - type: string
                                 service_token:
                                   anyOf:
                                     - additionalProperties: true
@@ -26887,6 +26903,8 @@ paths:
                                     - certificate
                                     - strict
                                   type: string
+                            sync_integrations:
+                              type: boolean
                             type:
                               enum:
                                 - remote_elasticsearch
@@ -27517,6 +27535,12 @@ paths:
                       type: boolean
                     is_preconfigured:
                       type: boolean
+                    kibana_api_key:
+                      nullable: true
+                      type: string
+                    kibana_url:
+                      nullable: true
+                      type: string
                     name:
                       type: string
                     preset:
@@ -27534,6 +27558,16 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        kibana_api_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
                         service_token:
                           anyOf:
                             - additionalProperties: false
@@ -27613,6 +27647,8 @@ paths:
                             - certificate
                             - strict
                           type: string
+                    sync_integrations:
+                      type: boolean
                     type:
                       enum:
                         - remote_elasticsearch
@@ -28206,6 +28242,12 @@ paths:
                             type: boolean
                           is_preconfigured:
                             type: boolean
+                          kibana_api_key:
+                            nullable: true
+                            type: string
+                          kibana_url:
+                            nullable: true
+                            type: string
                           name:
                             type: string
                           preset:
@@ -28223,6 +28265,16 @@ paths:
                             additionalProperties: true
                             type: object
                             properties:
+                              kibana_api_key:
+                                anyOf:
+                                  - additionalProperties: true
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                               service_token:
                                 anyOf:
                                   - additionalProperties: true
@@ -28302,6 +28354,8 @@ paths:
                                   - certificate
                                   - strict
                                 type: string
+                          sync_integrations:
+                            type: boolean
                           type:
                             enum:
                               - remote_elasticsearch
@@ -28989,6 +29043,12 @@ paths:
                             type: boolean
                           is_preconfigured:
                             type: boolean
+                          kibana_api_key:
+                            nullable: true
+                            type: string
+                          kibana_url:
+                            nullable: true
+                            type: string
                           name:
                             type: string
                           preset:
@@ -29006,6 +29066,16 @@ paths:
                             additionalProperties: true
                             type: object
                             properties:
+                              kibana_api_key:
+                                anyOf:
+                                  - additionalProperties: true
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                               service_token:
                                 anyOf:
                                   - additionalProperties: true
@@ -29085,6 +29155,8 @@ paths:
                                   - certificate
                                   - strict
                                 type: string
+                          sync_integrations:
+                            type: boolean
                           type:
                             enum:
                               - remote_elasticsearch
@@ -29702,6 +29774,12 @@ paths:
                       type: boolean
                     is_preconfigured:
                       type: boolean
+                    kibana_api_key:
+                      nullable: true
+                      type: string
+                    kibana_url:
+                      nullable: true
+                      type: string
                     name:
                       type: string
                     preset:
@@ -29719,6 +29797,16 @@ paths:
                       additionalProperties: false
                       type: object
                       properties:
+                        kibana_api_key:
+                          anyOf:
+                            - additionalProperties: false
+                              type: object
+                              properties:
+                                id:
+                                  type: string
+                              required:
+                                - id
+                            - type: string
                         service_token:
                           anyOf:
                             - additionalProperties: false
@@ -29798,6 +29886,8 @@ paths:
                             - certificate
                             - strict
                           type: string
+                    sync_integrations:
+                      type: boolean
                     type:
                       enum:
                         - remote_elasticsearch
@@ -30378,6 +30468,12 @@ paths:
                             type: boolean
                           is_preconfigured:
                             type: boolean
+                          kibana_api_key:
+                            nullable: true
+                            type: string
+                          kibana_url:
+                            nullable: true
+                            type: string
                           name:
                             type: string
                           preset:
@@ -30395,6 +30491,16 @@ paths:
                             additionalProperties: true
                             type: object
                             properties:
+                              kibana_api_key:
+                                anyOf:
+                                  - additionalProperties: true
+                                    type: object
+                                    properties:
+                                      id:
+                                        type: string
+                                    required:
+                                      - id
+                                  - type: string
                               service_token:
                                 anyOf:
                                   - additionalProperties: true
@@ -30474,6 +30580,8 @@ paths:
                                   - certificate
                                   - strict
                                 type: string
+                          sync_integrations:
+                            type: boolean
                           type:
                             enum:
                               - remote_elasticsearch
