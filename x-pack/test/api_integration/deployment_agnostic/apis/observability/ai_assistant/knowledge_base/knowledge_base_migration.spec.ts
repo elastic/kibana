@@ -67,11 +67,10 @@ export default function ApiTest({ getService }: DeploymentAgnosticFtrProviderCon
     return res.hits.hits;
   }
 
-  // Failing: See https://github.com/elastic/kibana/issues/206474
-  describe.skip('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
-    // Intentionally skipped on MKI because es_archiver.load is not allowed there, and because the migration scenario being tested is not relevant to MKI.
-    // https://github.com/elastic/obs-ai-assistant-team/issues/195
-    this.tags(['skipMKI']);
+  describe('When there are knowledge base entries (from 8.15 or earlier) that does not contain semantic_text embeddings', function () {
+    // Intentionally skipped in all serverless environnments (local and MKI)
+    // because the migration scenario being tested is not relevant to MKI and Serverless.
+    this.tags(['skipServerless']);
 
     before(async () => {
       await clearKnowledgeBase(es);
