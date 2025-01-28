@@ -5,21 +5,24 @@
  * 2.0.
  */
 
+import { errors } from '@elastic/elasticsearch';
+import {
+  ElasticsearchClient,
+  SavedObjectsClient,
+  type CoreSetup,
+  type Logger,
+  type LoggerFactory,
+} from '@kbn/core/server';
 import {
   ConcreteTaskInstance,
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import {
-  type Logger,
-  type CoreSetup,
-  type LoggerFactory,
-  SavedObjectsClient,
-  ElasticsearchClient,
-} from '@kbn/core/server';
-import { errors } from '@elastic/elasticsearch';
 import { getDeleteTaskRunResult } from '@kbn/task-manager-plugin/server/task';
+import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import { SLOConfig } from '../../types';
+import { StoredSLODefinition } from '../../domain/models';
+import { SO_SLO_TYPE } from '../../saved_objects';
 
 export const TYPE = 'slo:health-task';
 export const VERSION = '1.0.0';
@@ -72,7 +75,6 @@ export class HealthTask {
     this.logger.info(`[HealthTask] Started with 20m interval`);
 
     try {
-      await taskManager.removeIfExists(this.taskId);
       await taskManager.ensureScheduled({
         id: this.taskId,
         taskType: TYPE,
@@ -132,5 +134,20 @@ export class HealthTask {
 
   private async computeHealth(esClient: ElasticsearchClient, soClient: SavedObjectsClient) {
     this.logger.info('[HealthTask] Computing health...');
+
+    const finder = await soClient.createPointInTimeFinder<StoredSLODefinition>({
+      type: SO_SLO_TYPE,
+      perPage: 100,
+      namespaces: ['*'],
+    });
+
+    for await (const definitions of finder.find()) {
+      console.dir(definitions, { depth: 4 });
+
+      // extract the transform ID from every definitions.attributes using the id and revision
+      // get the transform stats for each transform ID
+    }
+
+    await finder.close();
   }
 }
