@@ -4840,7 +4840,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-overlays-browser-mocks@link:packages/core/overlays/core-overlays-browser-mocks":
+"@kbn/core-overlays-browser-mocks@link:src/core/packages/overlays/browser-mocks":
   version "0.0.0"
   uid ""
 

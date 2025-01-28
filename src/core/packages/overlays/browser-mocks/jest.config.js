@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/overlays/core-overlays-browser-mocks'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/overlays/browser-mocks'],
 };
