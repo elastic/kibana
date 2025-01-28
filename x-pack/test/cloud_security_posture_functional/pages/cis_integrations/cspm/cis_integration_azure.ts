@@ -117,7 +117,7 @@ export default function (providerContext: FtrProviderContext) {
     });
 
     describe('Azure Organization Manual Service Principle with Client Certificate', () => {
-      it.only('Azure Organization Manual Service Principle with Client Certificate Workflow', async () => {
+      it('Azure Organization Manual Service Principle with Client Certificate Workflow', async () => {
         await cisIntegration.clickOptionButton(CIS_AZURE_OPTION_TEST_ID);
         await cisIntegration.clickOptionButton(CIS_AZURE_SETUP_FORMAT_TEST_SUBJECTS.MANUAL);
         await cisIntegration.selectValue(
