@@ -25,8 +25,8 @@ const getRules = (namespace: string): RuleCreateProps[] => [
     enabled: true,
     description:
       'Identifies an unusually high number of authentication attempts from different IPs for a user.',
-    risk_score: 21,
-    severity: 'low',
+    risk_score: 60,
+    severity: 'high',
     output_index: '',
     author: ['Elastic'],
     from: 'now-45m',

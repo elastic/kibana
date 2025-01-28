@@ -22,7 +22,7 @@ const getJobs = (namespace: string): Array<{ job: MlJob; source: string }> => [
         'Security: Authentication - Detects unusually high number of login attempts from different IPs for a user.',
       groups: ['security', 'authentication'],
       analysis_config: {
-        bucket_span: '1m', // this is artificially low to make the rule fire quickly
+        bucket_span: '2m', // this is artificially low to make the rule fire quickly
         detectors: [
           {
             detector_description: 'Detects high number of authentication attempts for a user.',
