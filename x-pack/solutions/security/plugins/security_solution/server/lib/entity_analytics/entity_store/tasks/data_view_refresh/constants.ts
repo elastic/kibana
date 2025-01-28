@@ -8,5 +8,5 @@
 export const SCOPE = ['securitySolution'];
 export const TYPE = 'entity_store:data_view:refresh';
 export const VERSION = '1.0.0';
-export const INTERVAL = '10m';
+export const INTERVAL = '30m';
 export const TIMEOUT = '10m';
