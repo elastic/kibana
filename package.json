@@ -1406,7 +1406,7 @@
     "@kbn/core-notifications-browser-mocks": "link:src/core/packages/notifications/browser-mocks",
     "@kbn/core-overlays-browser-mocks": "link:src/core/packages/overlays/browser-mocks",
     "@kbn/core-plugins-browser-mocks": "link:src/core/packages/plugins/browser-mocks",
-    "@kbn/core-plugins-server-mocks": "link:packages/core/plugins/core-plugins-server-mocks",
+    "@kbn/core-plugins-server-mocks": "link:src/core/packages/plugins/server-mocks",
     "@kbn/core-preboot-server-mocks": "link:packages/core/preboot/core-preboot-server-mocks",
     "@kbn/core-rendering-browser-mocks": "link:packages/core/rendering/core-rendering-browser-mocks",
     "@kbn/core-rendering-server-mocks": "link:packages/core/rendering/core-rendering-server-mocks",

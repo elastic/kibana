@@ -4928,7 +4928,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-server-mocks@link:packages/core/plugins/core-plugins-server-mocks":
+"@kbn/core-plugins-server-mocks@link:src/core/packages/plugins/server-mocks":
   version "0.0.0"
   uid ""
 
