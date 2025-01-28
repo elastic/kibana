@@ -5,25 +5,21 @@
  * 2.0.
  */
 
-/* eslint-disable @typescript-eslint/naming-convention */
-
-import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import {
-  DissectProcessorDefinition,
   ReadStreamDefinition,
-  Condition,
-  ProcessorDefinition,
-  GrokProcessorDefinition,
+  FieldDefinition,
+  getProcessorConfig,
+  OrCondition,
+  UnaryOperator,
 } from '@kbn/streams-schema';
-import useAsyncFn from 'react-use/lib/useAsyncFn';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import { APIReturnType, StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
+import { useMemo } from 'react';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ProcessingDefinition } from '../types';
-import { DetectedField } from '../types';
-import { emptyEqualsToAlways } from '../../../util/condition';
+import { ProcessorDefinitionWithUIAttributes } from '../types';
+import { processorConverter } from '../utils';
 
 type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
 type SimulationRequestBody =
@@ -34,19 +30,17 @@ export interface UseProcessingSimulatorReturnType {
   isLoading: boolean;
   refreshSamples: () => void;
   samples: Array<Record<PropertyKey, unknown>>;
-  simulate: (
-    processing: ProcessingDefinition,
-    detectedFields?: DetectedField[]
-  ) => Promise<Simulation | null>;
   simulation?: Simulation | null;
 }
 
 export const useProcessingSimulator = ({
   definition,
-  condition,
+  fields,
+  processors,
 }: {
   definition: ReadStreamDefinition;
-  condition?: Condition;
+  fields: FieldDefinition[];
+  processors: ProcessorDefinitionWithUIAttributes[];
 }): UseProcessingSimulatorReturnType => {
   const { dependencies } = useKibana();
   const {
@@ -58,9 +52,15 @@ export const useProcessingSimulator = ({
     absoluteTimeRange: { start, end },
   } = useDateRange({ data });
 
-  const abortController = useAbortController();
+  const draftProcessors = useMemo(
+    () => processors.filter((processor) => processor.status === 'draft'),
+    [processors]
+  );
 
-  const serializedCondition = JSON.stringify(condition);
+  const samplingCondition: OrCondition = useMemo(
+    () => composeSamplingCondition(draftProcessors),
+    [draftProcessors]
+  );
 
   const {
     loading: isLoadingSamples,
@@ -77,7 +77,7 @@ export const useProcessingSimulator = ({
         params: {
           path: { id: definition.name },
           body: {
-            if: condition ? emptyEqualsToAlways(condition) : { always: {} },
+            if: samplingCondition,
             start: start?.valueOf(),
             end: end?.valueOf(),
             size: 100,
@@ -85,69 +85,62 @@ export const useProcessingSimulator = ({
         },
       });
     },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    [definition, streamsRepositoryClient, start, end, serializedCondition],
+    [definition, streamsRepositoryClient, start, end, samplingCondition],
     { disableToastOnError: true }
   );
 
   const sampleDocs = (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
 
-  const [{ loading: isLoadingSimulation, error, value }, simulate] = useAsyncFn(
-    (processingDefinition: ProcessingDefinition, detectedFields?: DetectedField[]) => {
+  const {
+    loading: isLoadingSimulation,
+    value: simulation,
+    error,
+  } = useStreamsAppFetch(
+    ({ signal }) => {
       if (!definition) {
         return Promise.resolve(null);
       }
 
-      const processorDefinition: ProcessorDefinition =
-        'grok' in processingDefinition.config
-          ? ({
-              grok: {
-                field: processingDefinition.config.grok.field,
-                ignore_failure: processingDefinition.config.grok.ignore_failure,
-                ignore_missing: processingDefinition.config.grok.ignore_missing,
-                if: emptyEqualsToAlways(processingDefinition.condition),
-                patterns: processingDefinition.config.grok.patterns,
-                pattern_definitions: processingDefinition.config.grok.pattern_definitions,
-              },
-            } satisfies GrokProcessorDefinition)
-          : ({
-              dissect: {
-                field: processingDefinition.config.dissect.field,
-                ignore_failure: processingDefinition.config.dissect.ignore_failure,
-                ignore_missing: processingDefinition.config.dissect.ignore_missing,
-                if: emptyEqualsToAlways(processingDefinition.condition),
-                pattern: processingDefinition.config.dissect.pattern,
-                append_separator: processingDefinition.config.dissect.append_separator,
-              },
-            } satisfies DissectProcessorDefinition);
-
-      const detected_fields = detectedFields
-        ? (detectedFields.filter(
-            (field) => field.type !== 'unmapped'
-          ) as SimulationRequestBody['detected_fields'])
-        : undefined;
+      // const detected_fields = detectedFields
+      //   ? (detectedFields.filter(
+      //       (field) => field.type !== 'unmapped'
+      //     ) as SimulationRequestBody['detected_fields'])
+      //   : undefined;
 
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
-        signal: abortController.signal,
+        signal,
         params: {
           path: { id: definition.name },
           body: {
             documents: sampleDocs,
-            processing: [processorDefinition],
-            detected_fields,
+            processing: draftProcessors.map(processorConverter.toAPIDefinition),
+            // detected_fields,
           },
         },
       });
     },
-    [definition, sampleDocs]
+    [definition, sampleDocs, draftProcessors],
+    { disableToastOnError: true }
   );
 
   return {
     isLoading: isLoadingSamples || isLoadingSimulation,
     error: error as IHttpFetchError<ResponseErrorBody> | undefined,
     refreshSamples,
-    simulate,
-    simulation: value,
+    simulation,
     samples: sampleDocs,
   };
+};
+
+const composeSamplingCondition = (processors: ProcessorDefinitionWithUIAttributes[]) => {
+  const uniqueFields = [
+    ...new Set(processors.map((processor) => getProcessorConfig(processor).field)),
+  ];
+
+  const conditions = uniqueFields.map((field) => ({
+    field,
+    operator: 'exists' as UnaryOperator,
+  }));
+
+  return { or: conditions };
 };

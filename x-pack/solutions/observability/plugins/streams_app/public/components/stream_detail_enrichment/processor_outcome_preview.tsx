@@ -35,32 +35,30 @@ import { UseControllerProps, useController, useFieldArray } from 'react-hook-for
 import { css } from '@emotion/react';
 import { flattenObject } from '@kbn/object-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { useKibana } from '../../../hooks/use_kibana';
-import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../../streams_app_search_bar';
-import { PreviewTable } from '../../preview_table';
-import { convertFormStateToProcessing } from '../utils';
-import { DetectedField, ProcessorFormState } from '../types';
-import { UseProcessingSimulatorReturnType } from '../hooks/use_processing_simulator';
+import { useKibana } from '../../hooks/use_kibana';
+import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
+import { PreviewTable } from '../preview_table';
+import { convertFormStateToProcessor } from './utils';
+import { DetectedField, ProcessorFormState } from './types';
+import { UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
 
 interface ProcessorOutcomePreviewProps {
   definition: ReadStreamDefinition;
-  formFields: ProcessorFormState;
+  columns: string[];
   isLoading: UseProcessingSimulatorReturnType['isLoading'];
   simulation: UseProcessingSimulatorReturnType['simulation'];
   samples: UseProcessingSimulatorReturnType['samples'];
   onRefreshSamples: UseProcessingSimulatorReturnType['refreshSamples'];
-  onSimulate: UseProcessingSimulatorReturnType['simulate'];
   simulationError: UseProcessingSimulatorReturnType['error'];
 }
 
 export const ProcessorOutcomePreview = ({
   definition,
-  formFields,
+  columns,
   isLoading,
   simulation,
   samples,
   onRefreshSamples,
-  onSimulate,
   simulationError,
 }: ProcessorOutcomePreviewProps) => {
   const { dependencies } = useKibana();
@@ -91,30 +89,30 @@ export const ProcessorOutcomePreview = ({
     return filterDocuments(selectedDocsFilter).map((doc) => doc.value);
   }, [samples, simulation?.documents, selectedDocsFilter]);
 
-  const detectedFieldsColumns = useMemo(
-    () =>
-      simulation?.detected_fields ? simulation.detected_fields.map((field) => field.name) : [],
-    [simulation?.detected_fields]
-  );
+  // const detectedFieldsColumns = useMemo(
+  //   () =>
+  //     simulation?.detected_fields ? simulation.detected_fields.map((field) => field.name) : [],
+  //   [simulation?.detected_fields]
+  // );
 
   const tableColumns = useMemo(() => {
     switch (selectedDocsFilter) {
       case 'outcome_filter_unmatched':
-        return [formFields.field];
+        return columns;
       case 'outcome_filter_matched':
       case 'outcome_filter_all':
       default:
-        return [formFields.field, ...detectedFieldsColumns];
+        return columns;
     }
-  }, [formFields.field, detectedFieldsColumns, selectedDocsFilter]);
+  }, [columns, selectedDocsFilter]);
 
-  const detectedFieldsEnabled =
-    isWiredReadStream(definition) &&
-    ((simulation && !isEmpty(simulation.detected_fields)) || !isEmpty(formFields.detected_fields));
+  // const detectedFieldsEnabled =
+  //   isWiredReadStream(definition) &&
+  //   ((simulation && !isEmpty(simulation.detected_fields)) || !isEmpty(formFields.detected_fields));
 
   return (
     <EuiPanel hasShadow={false} paddingSize="none">
-      <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
+      {/* <EuiFlexGroup alignItems="center" justifyContent="spaceBetween">
         <EuiTitle size="xs">
           <h3>
             {i18n.translate(
@@ -129,7 +127,7 @@ export const ProcessorOutcomePreview = ({
           color="accentSecondary"
           size="s"
           onClick={() => {
-            onSimulate(convertFormStateToProcessing(formFields), formFields.detected_fields);
+            onSimulate(convertFormStateToProcessor(formFields), formFields.detected_fields);
           }}
           isLoading={isLoading}
         >
@@ -139,8 +137,8 @@ export const ProcessorOutcomePreview = ({
           )}
         </EuiButton>
       </EuiFlexGroup>
-      <EuiSpacer />
-      {detectedFieldsEnabled && <DetectedFields detectedFields={simulation?.detected_fields} />}
+      <EuiSpacer /> */}
+      {/* {detectedFieldsEnabled && <DetectedFields detectedFields={simulation?.detected_fields} />} */}
       <OutcomeControls
         docsFilter={selectedDocsFilter}
         onDocsFilterChange={setSelectedDocsFilter}

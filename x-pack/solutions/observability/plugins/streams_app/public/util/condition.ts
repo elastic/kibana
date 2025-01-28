@@ -19,6 +19,8 @@ export const EMPTY_EQUALS_CONDITION: BinaryFilterCondition = Object.freeze({
   value: '',
 });
 
+export const ALWAYS_CONDITION: AlwaysCondition = Object.freeze({ always: {} });
+
 export function alwaysToEmptyEquals<T extends Condition>(condition: T): Exclude<T, AlwaysCondition>;
 
 export function alwaysToEmptyEquals(condition: Condition) {
@@ -30,7 +32,7 @@ export function alwaysToEmptyEquals(condition: Condition) {
 
 export function emptyEqualsToAlways(condition: Condition) {
   if (isEqual(condition, EMPTY_EQUALS_CONDITION)) {
-    return { always: {} };
+    return ALWAYS_CONDITION;
   }
   return condition;
 }

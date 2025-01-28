@@ -66,7 +66,7 @@ export const GrokPatternsEditor = () => {
         { defaultMessage: 'Grok patterns editor' }
       )}
     >
-      <EuiPanel color="subdued" paddingSize="m">
+      <EuiPanel color="subdued" paddingSize="s">
         <SortableList onDragItem={handlerPatternDrag}>
           {fieldsWithError.map((field, idx) => (
             <DraggablePatternInput
@@ -83,12 +83,11 @@ export const GrokPatternsEditor = () => {
             />
           ))}
         </SortableList>
-        <EuiSpacer size="m" />
+        <EuiSpacer size="s" />
         <EuiButtonEmpty
           data-test-subj="streamsAppGrokPatternsEditorAddPatternButton"
           onClick={handleAddPattern}
           iconType="plusInCircle"
-          flush="left"
         >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.grokEditor.addPattern',
@@ -132,7 +131,7 @@ const DraggablePatternInput = ({
     >
       {(provided) => (
         <EuiFormRow isInvalid={isInvalid} error={error?.message}>
-          <EuiFlexGroup gutterSize="m" responsive={false} alignItems="center">
+          <EuiFlexGroup gutterSize="s" responsive={false} alignItems="center">
             <EuiPanel
               color="transparent"
               paddingSize="xs"
