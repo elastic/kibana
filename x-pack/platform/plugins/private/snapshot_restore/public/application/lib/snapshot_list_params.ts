@@ -50,6 +50,17 @@ const resetSearchOptions = (listParams: SnapshotListParams): SnapshotListParams 
   searchOperator: undefined,
 });
 
+export const escapeString = (inputString: string) => {
+  // List of characters to unescape
+  const unescapeSpecialChars = /\\([{}()\\])/g;
+
+  // List of characters to escape
+  const escapeSpecialChars = /[{}()\\]/g;
+
+  // Unescape any special char and escape again to avoid double escaping
+  return inputString.replace(unescapeSpecialChars, '$1').replace(escapeSpecialChars, '\\$&');
+};
+
 // to init the query for repository and policyName search passed via url
 export const getQueryFromListParams = (
   listParams: SnapshotListParams,
@@ -59,7 +70,8 @@ export const getQueryFromListParams = (
   if (!searchField || !searchValue) {
     return Query.MATCH_ALL;
   }
-  return Query.parse(`${searchField}=${searchValue}`, { schema });
+
+  return Query.parse(`${searchField}=${escapeString(searchValue)}`, { schema });
 };
 
 export const getListParams = (listParams: SnapshotListParams, query: Query): SnapshotListParams => {

@@ -16,7 +16,12 @@ import { EuiSearchBarOnChangeArgs } from '@elastic/eui/src/components/search_bar
 import { EuiButton, EuiCallOut, EuiSearchBar, EuiSpacer, Query } from '@elastic/eui';
 import { SnapshotDeleteProvider } from '../../../../components';
 import { SnapshotDetails } from '../../../../../../common/types';
-import { getQueryFromListParams, SnapshotListParams, getListParams } from '../../../../lib';
+import {
+  getQueryFromListParams,
+  SnapshotListParams,
+  getListParams,
+  escapeString,
+} from '../../../../lib';
 
 const SEARCH_DEBOUNCE_VALUE_MS = 200;
 
@@ -117,6 +122,7 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
       })),
     },
   ];
+
   const reloadButton = (
     <EuiButton color="success" iconType="refresh" onClick={reload} data-test-subj="reloadButton">
       <FormattedMessage
@@ -131,6 +137,9 @@ export const SnapshotSearchBar: React.FunctionComponent<Props> = ({
 
   const onSearchBarChange = (args: EuiSearchBarOnChangeArgs) => {
     const { query: changedQuery, error: queryError } = args;
+    if (changedQuery) {
+      changedQuery.text = escapeString(changedQuery.text);
+    }
     if (queryError) {
       setError(queryError);
     } else if (changedQuery) {
