@@ -109,12 +109,15 @@ export const postActionsConnectorExecuteRoute = (
           const connector = connectors.length > 0 ? connectors[0] : undefined;
           const isOssModel = isOpenSourceModel(connector);
 
-          const conversationsDataClient =
-            await assistantContext.getAIAssistantConversationsDataClient();
-          const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
-
           const contentReferencesEnabled =
             assistantContext.getRegisteredFeatures(DEFAULT_PLUGIN_NAME).contentReferencesEnabled;
+
+          const conversationsDataClient =
+            await assistantContext.getAIAssistantConversationsDataClient(
+              { contentReferencesEnabled }
+            );
+          const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
+
           const contentReferencesStore =
             contentReferencesEnabled && contentReferencesStoreFactory();
 

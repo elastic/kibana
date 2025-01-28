@@ -38,11 +38,11 @@ export const contentReferenceComponentFactory = ({
       />
     );
 
-    if (contentReferences === undefined && loading) return defaultNode;
+    if (!contentReferences && loading) return defaultNode;
 
     const contentReference = contentReferences?.[contentReferenceNode.contentReferenceId];
 
-    if (contentReference === undefined) return null;
+    if (!contentReference) return null;
 
     switch (contentReference.type) {
       case 'KnowledgeBaseEntry':

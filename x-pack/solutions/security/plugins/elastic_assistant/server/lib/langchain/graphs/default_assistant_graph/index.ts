@@ -222,7 +222,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     ...(contentReferences ? { contentReferences } : {}),
   };
 
-  const isMetadataPopulated = Boolean(contentReferences) !== false;
+  const isMetadataPopulated = !!contentReferences;
 
   return {
     body: {

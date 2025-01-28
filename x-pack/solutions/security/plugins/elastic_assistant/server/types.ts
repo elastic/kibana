@@ -51,7 +51,7 @@ import type { InferenceServerStart } from '@kbn/inference-plugin/server';
 import { ProductDocBaseStartContract } from '@kbn/product-doc-base-plugin/server';
 import type { GetAIAssistantKnowledgeBaseDataClientParams } from './ai_assistant_data_clients/knowledge_base';
 import { AttackDiscoveryDataClient } from './lib/attack_discovery/persistence';
-import { AIAssistantConversationsDataClient } from './ai_assistant_data_clients/conversations';
+import { AIAssistantConversationsDataClient, GetAIAssistantConversationsDataClientParams } from './ai_assistant_data_clients/conversations';
 import type { GetRegisteredFeatures, GetRegisteredTools } from './services/app_context';
 import { AIAssistantDataClient } from './ai_assistant_data_clients';
 import { AIAssistantKnowledgeBaseDataClient } from './ai_assistant_data_clients/knowledge_base';
@@ -131,7 +131,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getServerBasePath: () => string;
   getSpaceId: () => string;
   getCurrentUser: () => AuthenticatedUser | null;
-  getAIAssistantConversationsDataClient: () => Promise<AIAssistantConversationsDataClient | null>;
+  getAIAssistantConversationsDataClient: (params?: GetAIAssistantConversationsDataClientParams) => Promise<AIAssistantConversationsDataClient | null>;
   getAIAssistantKnowledgeBaseDataClient: (
     params?: GetAIAssistantKnowledgeBaseDataClientParams
   ) => Promise<AIAssistantKnowledgeBaseDataClient | null>;

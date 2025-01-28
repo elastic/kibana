@@ -67,7 +67,7 @@ export const getUpdateScript = ({
         }
         if (message.metadata != null) {
           newMessage.metadata = [:];
-          if(message.metadata.content_references != null) {
+          if (message.metadata.content_references != null) {
             newMessage.metadata.content_references = message.metadata.content_references;
           }
         }
