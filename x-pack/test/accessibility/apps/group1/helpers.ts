@@ -17,6 +17,7 @@ export async function deleteAllPipelines(client: Client, logger: any) {
       try {
         await client.ingest.deletePipeline({ id: newId });
       } catch (error) {
+        // Some pipelines are default for specific indices. Removing them without updating or deleting the indices causes an expected error.
         await logger.debug(`Error deleting pipeline: ${newId}`);
       }
     });
