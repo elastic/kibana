@@ -45,9 +45,11 @@ import {
   type CapabilitiesLevel,
 } from './capabilities';
 import type { RuleMigrationStats } from '../types';
-import { getSuccessToast } from './success_notification';
+import { getSuccessToast } from './notifications/success_notification';
 import { RuleMigrationsStorage } from './storage';
 import * as i18n from './translations';
+import { getNoConnectorToast } from './notifications/no_connector_notification';
+import { getMissingCapabilitiesToast } from './notifications/missing_capabilities_notification';
 
 // use the default assistant namespace since it's the only one we use
 const NAMESPACE_TRACE_OPTIONS_SESSION_STORAGE_KEY =
@@ -143,9 +145,17 @@ export class SiemRulesMigrationsService {
     migrationId: string,
     retry?: SiemMigrationRetryFilter
   ): Promise<StartRuleMigrationResponse> {
+    const missingCapabilities = this.getMissingCapabilities('all');
+    if (missingCapabilities.length > 0) {
+      this.core.notifications.toasts.add(
+        getMissingCapabilitiesToast(missingCapabilities, this.core)
+      );
+      return { started: false };
+    }
     const connectorId = this.connectorIdStorage.get();
     if (!connectorId) {
-      throw new Error(i18n.MISSING_CONNECTOR_ERROR);
+      this.core.notifications.toasts.add(getNoConnectorToast(this.core));
+      return { started: false };
     }
 
     const langSmithSettings = this.traceOptionsStorage.get();
