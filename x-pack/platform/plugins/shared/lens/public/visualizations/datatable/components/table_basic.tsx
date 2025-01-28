@@ -32,7 +32,7 @@ import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
 import { getColorCategories } from '@kbn/chart-expressions-common';
-import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
+import { getOriginalId } from '@kbn/transpose-utils';
 import { CoreTheme } from '@kbn/core/public';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { LensTableRowContextMenuEvent } from '../../../types';
@@ -409,12 +409,8 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
-            categories: getColorCategories(
-              firstLocalTable.rows,
-              originalId,
-              isTransposeId(columnId),
-              [null]
-            ),
+            // Must use non-transposed data here to correctly collate categories across transposed columns
+            categories: getColorCategories(untransposedDataRef.current?.rows, originalId, [null]),
           }
         : {
             type: 'ranges',

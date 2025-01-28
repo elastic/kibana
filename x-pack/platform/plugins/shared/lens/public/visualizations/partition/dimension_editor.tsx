@@ -130,7 +130,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
     currentLayer.colorMapping
   );
   const table = props.frame.activeData?.[currentLayer.layerId];
-  const splitCategories = getColorCategories(table?.rows ?? [], props.accessor);
+  const splitCategories = getColorCategories(table?.rows, props.accessor);
 
   return (
     <>
