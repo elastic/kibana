@@ -117,7 +117,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('visBarHorizontal'),
       value: currentPeriod?.mostRequests.location ?? NOT_AVAILABLE_LABEL,
-      trend: currentPeriod?.mostRequests.timeseries,
+      trend: currentPeriod?.mostRequests.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -131,7 +131,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('bug'),
       value: currentPeriod?.mostCrashes.location ?? NOT_AVAILABLE_LABEL,
-      trend: currentPeriod?.mostCrashes.timeseries,
+      trend: currentPeriod?.mostCrashes.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -145,7 +145,7 @@ export function MobileLocationStats({
       }),
       icon: getIcon('timeslider'),
       value: currentPeriod?.mostSessions.location ?? NOT_AVAILABLE_LABEL,
-      trend: currentPeriod?.mostSessions.timeseries,
+      trend: currentPeriod?.mostSessions.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
     {
@@ -159,11 +159,10 @@ export function MobileLocationStats({
       }),
       icon: getIcon('launch'),
       value: currentPeriod?.mostLaunches.location ?? NOT_AVAILABLE_LABEL,
-      trend: currentPeriod?.mostLaunches.timeseries,
+      trend: currentPeriod?.mostLaunches.timeseries ?? [],
       trendShape: MetricTrendShape.Area,
     },
   ];
-
   return (
     <EuiFlexGroup direction="column">
       {metrics.map((metric, key) => (
