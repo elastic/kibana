@@ -8,7 +8,6 @@
 import {
   StreamDefinition,
   WiredStreamDefinition,
-  isDisabledLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isUnwiredStreamDefinition,
