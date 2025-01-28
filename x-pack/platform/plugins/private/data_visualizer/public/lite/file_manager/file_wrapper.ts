@@ -174,14 +174,15 @@ export class FileWrapper {
     return this.analyzedFile$.getValue().data;
   }
 
-  public async import(id: string, index: string, pipelineId: string, mappings: any, pipeline: any) {
+  public async import(id: string, index: string, mappings: any, pipelineId: string) {
     this.setStatus({ importStatus: STATUS.STARTED });
     const format = this.analyzedFile$.getValue().results!.format;
     const importer = await this.fileUpload.importerFactory(format, {
       excludeLinesPattern: this.analyzedFile$.getValue().results!.exclude_lines_pattern,
       multilineStartPattern: this.analyzedFile$.getValue().results!.multiline_start_pattern,
     });
-    importer.initializeWithoutCreate(index, mappings, pipeline);
+
+    importer.initializeWithoutCreate(index, mappings, this.getPipeline());
     const data = this.getData();
     if (data === null) {
       this.setStatus({ importStatus: STATUS.FAILED });

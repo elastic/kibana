@@ -9,6 +9,7 @@ import { chunk, intersection } from 'lodash';
 import moment from 'moment';
 import type {
   IndicesIndexSettings,
+  IngestDeletePipelineResponse,
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
@@ -86,9 +87,10 @@ export abstract class Importer implements IImporter {
     index: string,
     settings: IndicesIndexSettings,
     mappings: MappingTypeMapping,
-    pipeline: IngestPipeline | undefined
+    pipeline: IngestPipeline | undefined,
+    createPipelines?: IngestPipeline[]
   ) {
-    let ingestPipeline: IngestPipelineWrapper | undefined;
+    let ingestPipelineWrapper: IngestPipelineWrapper | undefined;
     if (pipeline !== undefined) {
       updatePipelineTimezone(pipeline);
 
@@ -99,10 +101,20 @@ export abstract class Importer implements IImporter {
       }
       // if no pipeline has been supplied,
       // send an empty object
-      ingestPipeline = {
+      ingestPipelineWrapper = {
         id: `${index}-pipeline`,
         pipeline,
       };
+    }
+
+    let createPipelinesWrappers: IngestPipelineWrapper[] | undefined;
+    if (createPipelines) {
+      createPipelinesWrappers = createPipelines.map((p, i) => {
+        return {
+          id: `${index}-${i}-pipeline`,
+          pipeline: p,
+        };
+      });
     }
 
     this._index = index;
@@ -124,7 +136,8 @@ export abstract class Importer implements IImporter {
       data: [],
       settings,
       mappings,
-      ingestPipeline,
+      ingestPipeline: ingestPipelineWrapper,
+      createPipelines: createPipelinesWrappers,
     });
   }
 
@@ -278,6 +291,20 @@ export abstract class Importer implements IImporter {
       body,
     });
   }
+
+  public async deletePipelines(pipelineIds: string[]) {
+    // remove_pipelines
+    const body = JSON.stringify({
+      pipelineIds,
+    });
+
+    return await getHttp().fetch<IngestDeletePipelineResponse[]>({
+      path: `/internal/file_upload/remove_pipelines`,
+      method: 'POST',
+      version: '1',
+      body,
+    });
+  }
 }
 
 function populateFailures(
@@ -374,6 +401,7 @@ export function callImportRoute({
   settings,
   mappings,
   ingestPipeline,
+  createPipelines,
 }: {
   id: string | undefined;
   index: string;
@@ -381,6 +409,7 @@ export function callImportRoute({
   settings: IndicesIndexSettings;
   mappings: MappingTypeMapping;
   ingestPipeline: IngestPipelineWrapper | undefined;
+  createPipelines?: IngestPipelineWrapper[];
 }) {
   const query = id !== undefined ? { id } : {};
   const body = JSON.stringify({
@@ -389,6 +418,7 @@ export function callImportRoute({
     settings,
     mappings,
     ingestPipeline,
+    createPipelines,
   });
 
   return getHttp().fetch<ImportResponse>({

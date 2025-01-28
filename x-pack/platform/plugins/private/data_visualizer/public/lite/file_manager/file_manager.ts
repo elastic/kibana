@@ -31,7 +31,7 @@ import type { FileUploadResults } from '../flyout/create_flyout';
 import type { FileClash } from './merge_tools';
 import {
   createMergedMappings,
-  createMergedPipeline,
+  // createMergedPipeline,
   getFormatClashes,
   getMappingClashInfo,
 } from './merge_tools';
@@ -50,6 +50,7 @@ export interface UploadStatus {
   pipelineCreated: STATUS;
   modelDeployed: STATUS;
   dataViewCreated: STATUS;
+  pipelinesDeleted: STATUS;
   fileImport: STATUS;
   filesStatus: AnalyzedFile[];
   fileClashes: FileClash[];
@@ -71,7 +72,7 @@ export class FileManager {
   private mappingsCheckSubscription: Subscription;
   private settings;
   private mappings: MappingTypeMapping | null = null;
-  private pipeline: IngestPipeline | null = null;
+  private pipelines: IngestPipeline[] | null = null;
   private inferenceId: string | null = null;
   private importer: IImporter | null = null;
   private timeFieldName: string | undefined | null = null;
@@ -83,6 +84,7 @@ export class FileManager {
     pipelineCreated: STATUS.NOT_STARTED,
     modelDeployed: STATUS.NA,
     dataViewCreated: STATUS.NA,
+    pipelinesDeleted: STATUS.NOT_STARTED,
     fileImport: STATUS.NOT_STARTED,
     filesStatus: [],
     fileClashes: [],
@@ -96,6 +98,7 @@ export class FileManager {
     private http: HttpSetup,
     private dataViewsContract: DataViewsServicePublic,
     private autoAddInferenceEndpointName: string | null = null,
+    private removePipelinesAfterImport: boolean = true,
     indexSettingsOverride: IndicesIndexSettings | undefined = undefined
   ) {
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
@@ -125,7 +128,7 @@ export class FileManager {
           });
         } else if (mappingsOk) {
           this.mappings = mergedMappings;
-          this.pipeline = this.createMergedPipeline();
+          this.pipelines = this.getPipelines();
           this.addSemanticTextField();
           this.setStatus({
             fileClashes: [],
@@ -220,16 +223,21 @@ export class FileManager {
     return createMergedMappings(files);
   }
 
-  private createMergedPipeline() {
+  // private createMergedPipeline() {
+  //   const files = this.getFiles();
+  //   return createMergedPipeline(files, this.commonFileFormat!);
+  // }
+
+  private getPipelines() {
     const files = this.getFiles();
-    return createMergedPipeline(files, this.commonFileFormat!);
+    return files.map((file) => file.getPipeline()!); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   }
 
   public async import(
     indexName: string,
     createDataView: boolean = true
   ): Promise<FileUploadResults | null> {
-    if (this.mappings === null || this.pipeline === null || this.commonFileFormat === null) {
+    if (this.mappings === null || this.pipelines === null || this.commonFileFormat === null) {
       return null;
       // should throw an error here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
@@ -269,7 +277,8 @@ export class FileManager {
         indexName,
         this.settings,
         this.mappings,
-        this.pipeline
+        this.pipelines[0],
+        this.pipelines
       );
       this.timeFieldName = this.importer.getTimeField();
       indexCreated = initializeImportResp.index !== undefined;
@@ -310,13 +319,12 @@ export class FileManager {
 
     try {
       await Promise.all(
-        files.map(async (file) => {
+        files.map(async (file, i) => {
           await file.import(
             initializeImportResp!.id,
             indexName,
-            initializeImportResp!.pipelineId!,
             this.mappings,
-            this.pipeline
+            `${indexName}-${i}-pipeline`
           );
         })
       );
@@ -338,6 +346,37 @@ export class FileManager {
     this.setStatus({
       fileImport: STATUS.COMPLETED,
     });
+
+    if (this.removePipelinesAfterImport) {
+      try {
+        this.setStatus({
+          pipelinesDeleted: STATUS.STARTED,
+        });
+        const deletePipelinesResp = await this.importer.deletePipelines(
+          this.pipelines.map((p, i) => `${indexName}-${i}-pipeline`)
+        );
+        this.setStatus({
+          pipelinesDeleted: STATUS.COMPLETED,
+        });
+        // eslint-disable-next-line no-console
+        console.log('deletePipelinesResp', deletePipelinesResp);
+      } catch (error) {
+        this.setStatus({
+          pipelinesDeleted: STATUS.FAILED,
+          errors: [
+            {
+              title: i18n.translate(
+                'xpack.dataVisualizer.file.fileManager.errorDeletingPipelines',
+                {
+                  defaultMessage: 'Error deleting pipelines',
+                }
+              ),
+              error,
+            },
+          ],
+        });
+      }
+    }
 
     const dataView = '';
     let dataViewResp;
@@ -423,7 +462,7 @@ export class FileManager {
       this.isTikaFormat() &&
       this.autoAddSemanticTextField &&
       this.autoAddInferenceEndpointName !== null &&
-      this.pipeline !== null &&
+      this.pipelines !== null &&
       this.mappings !== null
     ) {
       this.mappings.properties!.content = {
@@ -431,11 +470,13 @@ export class FileManager {
         inference_id: this.autoAddInferenceEndpointName,
       };
 
-      this.pipeline.processors.push({
-        set: {
-          field: 'content',
-          copy_from: 'attachment.content',
-        },
+      this.pipelines.forEach((pipeline) => {
+        pipeline.processors.push({
+          set: {
+            field: 'content',
+            copy_from: 'attachment.content',
+          },
+        });
       });
     }
   }

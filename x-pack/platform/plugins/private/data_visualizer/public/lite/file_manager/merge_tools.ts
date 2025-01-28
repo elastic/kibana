@@ -153,9 +153,11 @@ export function createMergedPipeline(files: FileWrapper[], commonFileFormat: str
 
   if (commonFileFormat === 'delimited') {
     const targetFields = new Set(
-      ...mergedPipeline.processors
-        .filter((p) => Object.keys(p)[0] === 'csv')
-        .map((p) => p.csv.target_fields)
+      [
+        ...mergedPipeline.processors
+          .filter((p) => Object.keys(p)[0] === 'csv')
+          .map((p) => p.csv.target_fields),
+      ].flat()
     );
 
     mergedPipeline.processors = mergedPipeline.processors.filter(

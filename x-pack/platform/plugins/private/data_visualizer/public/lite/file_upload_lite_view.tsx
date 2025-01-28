@@ -71,6 +71,7 @@ export const FileUploadLiteView: FC<Props> = ({
         http,
         dataStart.dataViews,
         autoAddInference ?? null,
+        true,
         indexSettings
       ),
     [autoAddInference, dataStart.dataViews, fileUpload, http, indexSettings]
