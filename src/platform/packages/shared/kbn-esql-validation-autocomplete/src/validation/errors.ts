@@ -14,6 +14,7 @@ import type {
   ESQLFunction,
   ESQLLocation,
   ESQLMessage,
+  ESQLSource,
 } from '@kbn/esql-ast';
 import { ESQLIdentifier } from '@kbn/esql-ast/src/types';
 import type { ErrorTypes, ErrorValues } from './types';
@@ -546,7 +547,7 @@ export const errors = {
       nestedAgg: fn.name,
     }),
 
-  invalidJoinIndex: (identifier: ESQLIdentifier): ESQLMessage =>
+  invalidJoinIndex: (identifier: ESQLSource): ESQLMessage =>
     errors.byId('invalidJoinIndex', identifier.location, {
       identifier: identifier.name,
     }),
