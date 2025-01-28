@@ -186,18 +186,14 @@ export function ChatBody({
   const handleFeedback = (feedback: Feedback) => {
     if (conversation.value?.conversation && 'user' in conversation.value) {
       const {
-        messages: _removedMessages,
-        conversation: innerConversation,
+        messages: _removedMessages, // Exclude messages
+        conversation: { title: _removedTitle, ...conversationRest }, // Exclude title
         ...rest
       } = conversation.value;
-
-      const { title: _removedTitle, ...conversationRest } = innerConversation;
 
       const conversationWithoutMessagesAndTitle = {
         ...rest,
         conversation: conversationRest,
-      } as Omit<Omit<Conversation, 'messages'>, 'conversation'> & {
-        conversation: Omit<Conversation['conversation'], 'title'>;
       };
 
       chatService.sendAnalyticsEvent({

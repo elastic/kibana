@@ -424,6 +424,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   expect(conversation.namespace).to.eql('default');
                   expect(conversation.public).to.eql(false);
                   expect(conversation.user?.name).to.eql('editor');
+
+                  expect(conversation.conversation).to.not.have.property('title');
+                  expect(conversation).to.not.have.property('messages');
                 });
               });
             });
@@ -482,6 +485,9 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                     expect(conversation.namespace).to.eql('default');
                     expect(conversation.public).to.eql(false);
                     expect(conversation.user?.name).to.eql('editor');
+
+                    expect(conversation.conversation).to.not.have.property('title');
+                    expect(conversation).to.not.have.property('messages');
                   });
                 });
               });
