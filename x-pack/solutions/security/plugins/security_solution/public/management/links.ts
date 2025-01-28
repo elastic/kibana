@@ -221,7 +221,7 @@ export const links: LinkItem = {
       path: ENTITY_ANALYTICS_PRIVILEGED_USERS_PATH,
       skipUrlState: true,
       hideTimeline: true,
-      capabilities: [`${SERVER_APP_ID}.entity-analytics`],
+      capabilities: [`${SECURITY_FEATURE_ID}.entity-analytics`],
       licenseType: 'platinum',
     },
     {

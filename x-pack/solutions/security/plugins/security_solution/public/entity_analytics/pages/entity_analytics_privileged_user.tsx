@@ -33,7 +33,7 @@ interface PrivilegedUserResponse {
 
 const fetchPrivilegedUsersData = (): Promise<PrivilegedUserResponse> =>
   KibanaServices.get().http.fetch('/api/privileged_users', {
-    prependBasePath: false,
+    prependBasePath: true,
     version: '2023-10-31',
     method: 'GET',
   });
