@@ -80,13 +80,6 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <AddMessageVariables
-                  messageVariables={messageVariables}
-                  onSelectEventHandler={onSelectMessageVariable}
-                  paramsProperty={paramsProperty}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {i18n.translate(
                     'xpack.triggerActionsUI.components.textAreaWithMessageVariables.optionalFieldLabel',
@@ -95,6 +88,13 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
                     }
                   )}
                 </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AddMessageVariables
+                  messageVariables={messageVariables}
+                  onSelectEventHandler={onSelectMessageVariable}
+                  paramsProperty={paramsProperty}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           );

@@ -187,15 +187,6 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           return (
             <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
               <EuiFlexItem grow={false}>
-                <AddMessageVariables
-                  buttonTitle={buttonTitle}
-                  messageVariables={messageVariables}
-                  onSelectEventHandler={onSelectMessageVariable}
-                  paramsProperty={paramsProperty}
-                  showButtonTitle={showButtonTitle}
-                />
-              </EuiFlexItem>
-              <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {i18n.translate(
                     'xpack.triggerActionsUI.components.jsonEditorWithMessageVariable.optionalFieldLabel',
@@ -204,6 +195,15 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
                     }
                   )}
                 </EuiText>
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <AddMessageVariables
+                  buttonTitle={buttonTitle}
+                  messageVariables={messageVariables}
+                  onSelectEventHandler={onSelectMessageVariable}
+                  paramsProperty={paramsProperty}
+                  showButtonTitle={showButtonTitle}
+                />
               </EuiFlexItem>
             </EuiFlexGroup>
           );
