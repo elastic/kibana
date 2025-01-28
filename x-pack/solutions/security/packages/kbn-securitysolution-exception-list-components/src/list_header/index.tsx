@@ -10,7 +10,14 @@
 import React from 'react';
 import { css } from '@emotion/react';
 import type { FC } from 'react';
-import { EuiIcon, EuiPageHeader, EuiText, useEuiFontSize, useEuiTheme } from '@elastic/eui';
+import {
+  EuiFlexGroup,
+  EuiIcon,
+  EuiPageHeader,
+  EuiText,
+  useEuiFontSize,
+  useEuiTheme,
+} from '@elastic/eui';
 import * as i18n from '../translations';
 import { MenuItems } from './menu_items';
 import { TextWithEdit } from '../text_with_edit';
@@ -75,10 +82,9 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
     font-size: ${useEuiFontSize('xs').fontSize};
   `;
   const descriptionContainerStyles = css`
-    // the component is a span due to being a child of a <p>; this allows us to apply the margin fix below.
-    display: inline-block;
     // negates the static EuiSpacer when using Title + Description in PageHeader
-    margin-top: -${euiTheme.size.l};
+    margin-top: -${euiTheme.size.m};
+    margin-bottom: ${euiTheme.size.s};
   `;
 
   return (
@@ -97,7 +103,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         responsive
         data-test-subj={`${dataTestSubj || ''}PageHeader`}
         description={
-          <span css={descriptionContainerStyles}>
+          <EuiFlexGroup direction="column" gutterSize="s" css={descriptionContainerStyles}>
             <TextWithEdit
               dataTestSubj={`${dataTestSubj || ''}Description`}
               textCss={subduedTextStyles}
@@ -113,7 +119,7 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
                 {listId}
               </EuiText>
             </span>
-          </span>
+          </EuiFlexGroup>
         }
         rightSideItems={[
           <MenuItems
