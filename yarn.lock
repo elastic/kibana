@@ -4472,7 +4472,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-browser-mocks@link:packages/core/deprecations/core-deprecations-browser-mocks":
+"@kbn/core-deprecations-browser-mocks@link:src/core/packages/deprecations/browser-mocks":
   version "0.0.0"
   uid ""
 
