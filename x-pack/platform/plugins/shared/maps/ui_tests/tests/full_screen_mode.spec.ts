@@ -22,7 +22,7 @@ test.describe(
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
       await pageObjects.maps.gotoNewMap();
-      await pageObjects.renderable.waitForRenderPoll();
+      await pageObjects.renderable.waitForRender();
     });
 
     test('Full screen mode', async ({ page }) => {

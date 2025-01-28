@@ -12,7 +12,7 @@ import { ScoutPage, expect } from '..';
 export class RenderablePage {
   constructor(private readonly page: ScoutPage) {}
 
-  async waitForRenderPoll(count: number = 1): Promise<void> {
+  async waitForRender(count: number = 1): Promise<void> {
     await expect(async () => await renderWait(count, this.page)).toPass({
       timeout: 10_000,
     });
