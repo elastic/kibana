@@ -212,6 +212,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             uiActions: pluginsStart.uiActions,
             unifiedSearch: pluginsStart.unifiedSearch,
             usageCollection: pluginsSetup.usageCollection,
+            spaces: pluginsStart.spaces,
           },
           params,
           this.isServerless,

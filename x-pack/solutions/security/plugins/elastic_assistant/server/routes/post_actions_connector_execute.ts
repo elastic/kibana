@@ -99,6 +99,7 @@ export const postActionsConnectorExecuteRoute = (
           // get the actions plugin start contract from the request context:
           const actions = ctx.elasticAssistant.actions;
           const inference = ctx.elasticAssistant.inference;
+          const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
           const productDocsAvailable =
             (await ctx.elasticAssistant.llmTasks.retrieveDocumentationAvailable()) ?? false;
           const actionsClient = await actions.getActionsClientWithRequest(request);
@@ -153,6 +154,7 @@ export const postActionsConnectorExecuteRoute = (
             request,
             response,
             telemetry,
+            savedObjectsClient,
             systemPrompt,
             ...(productDocsAvailable ? { llmTasks: ctx.elasticAssistant.llmTasks } : {}),
           });

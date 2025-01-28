@@ -114,6 +114,7 @@ import {
 import { ExecutionEventsTable } from '../../../rule_monitoring';
 import { ExecutionLogTable } from './execution_log_table/execution_log_table';
 import { RuleBackfillsInfo } from '../../../rule_gaps/components/rule_backfills_info';
+import { RuleGaps } from '../../../rule_gaps/components/rule_gaps';
 
 import * as ruleI18n from '../../../../detections/pages/detection_engine/rules/translations';
 
@@ -146,6 +147,7 @@ import { useManualRuleRunConfirmation } from '../../../rule_gaps/components/manu
 // eslint-disable-next-line no-restricted-imports
 import { useLegacyUrlRedirect } from './use_redirect_legacy_url';
 import { RuleDetailTabs, useRuleDetailsTabs } from './use_rule_details_tabs';
+import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 
 const RULE_EXCEPTION_LIST_TYPES = [
   ExceptionListTypeEnum.DETECTION,
@@ -286,7 +288,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
   const mlCapabilities = useMlCapabilities();
   const { globalFullScreen } = useGlobalFullScreen();
   const [filterGroup, setFilterGroup] = useState<Status>(FILTER_OPEN);
-
+  const storeGapsInEventLogEnabled = useIsExperimentalFeatureEnabled('storeGapsInEventLogEnabled');
   // TODO: Refactor license check + hasMlAdminPermissions to common check
   const hasMlPermissions = hasMlLicense(mlCapabilities) && hasMlAdminPermissions(mlCapabilities);
 
@@ -548,6 +550,8 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
     ruleActionsData != null && (ruleActionsData.responseActions || []).length > 0;
   const hasActions = hasNotificationActions || hasResponseActions;
 
+  const isRuleEnabled = isExistingRule && (rule?.enabled ?? false);
+
   return (
     <>
       <NeedAdminForUpdateRulesCallOut />
@@ -627,7 +631,7 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                             !hasUserCRUDPermission(canUserCRUD) ||
                             (isMlRule(rule?.type) && !hasMlPermissions)
                           }
-                          enabled={isExistingRule && (rule?.enabled ?? false)}
+                          enabled={isRuleEnabled}
                           startMlJobsIfNeeded={startMlJobsIfNeeded}
                           onChange={handleOnChangeEnabledRule}
                           ruleName={rule?.name}
@@ -796,6 +800,12 @@ const RuleDetailsPageComponent: React.FC<DetectionEngineComponentProps> = ({
                       theme={theme}
                     />
                     <EuiSpacer size="xl" />
+                    {storeGapsInEventLogEnabled && (
+                      <>
+                        <RuleGaps ruleId={ruleId} enabled={isRuleEnabled} />
+                        <EuiSpacer size="xl" />
+                      </>
+                    )}
                     <RuleBackfillsInfo ruleId={ruleId} />
                   </>
                 </Route>
