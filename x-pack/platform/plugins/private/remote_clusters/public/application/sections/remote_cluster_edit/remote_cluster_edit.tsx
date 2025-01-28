@@ -26,6 +26,8 @@ import { getRouter, redirect } from '../../services';
 import { setBreadcrumbs } from '../../services/breadcrumb';
 import { RemoteClusterPageTitle, RemoteClusterForm } from '../components';
 
+const FORM_MAX_WIDTH = 850;
+
 interface Props {
   isLoading: boolean;
   cluster: Cluster;
@@ -129,7 +131,7 @@ export const RemoteClusterEdit: React.FC<Props> = ({
 
   return (
     <EuiPageBody restrictWidth={true} data-test-subj="remote-clusters-edit">
-      <EuiPageSection paddingSize="none">
+      <EuiPageSection restrictWidth={FORM_MAX_WIDTH}>
         <RemoteClusterPageTitle
           title={
             <FormattedMessage
