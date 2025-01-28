@@ -6,7 +6,8 @@
  */
 
 import { invariant } from '@formatjs/intl-utils';
-import React, { createContext, useCallback, useContext, useMemo, useState } from 'react';
+import useSet from 'react-use/lib/useSet';
+import React, { createContext, useContext, useMemo } from 'react';
 
 export interface RulePreviewContextType {
   /**
@@ -27,20 +28,15 @@ interface RulePreviewContextProviderProps {
 }
 
 export function RulePreviewContextProvider({ children }: RulePreviewContextProviderProps) {
-  const [editedFields, setEditedFields] = useState<number>(0);
-
-  const setRuleIsEdited = useCallback((isEditing: boolean) => {
-    setEditedFields((prev) => {
-      return isEditing ? prev + 1 : prev - 1;
-    });
-  }, []);
+  const [editedFields, { add, remove }] = useSet(new Set([]));
 
   const contextValue: RulePreviewContextType = useMemo(
     () => ({
-      setRuleIsEdited,
-      isRuleEdited: editedFields > 0,
+      isEditingRule: editedFields.size > 0,
+      setFieldEditing: add,
+      setFieldReadonly: remove,
     }),
-    [setRuleIsEdited, editedFields]
+    [editedFields.size, add, remove]
   );
 
   return <RulePreviewContext.Provider value={contextValue}>{children}</RulePreviewContext.Provider>;

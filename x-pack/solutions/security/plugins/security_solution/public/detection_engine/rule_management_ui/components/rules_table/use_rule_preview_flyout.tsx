@@ -92,11 +92,11 @@ const RulePreviewFlyoutInternal = memo(function RulePreviewFlyoutInternal({
   rule: RuleResponse | undefined;
   closeRulePreview: () => void;
 }) {
-  const { isRuleEdited } = useRulePreviewContext();
+  const { isEditingRule } = useRulePreviewContext();
 
   const ruleActions = useMemo(
-    () => rule && ruleActionsFactory(rule, closeRulePreview, isRuleEdited),
-    [rule, ruleActionsFactory, closeRulePreview, isRuleEdited]
+    () => rule && ruleActionsFactory(rule, closeRulePreview, isEditingRule),
+    [rule, ruleActionsFactory, closeRulePreview, isEditingRule]
   );
   const extraTabs = useMemo(
     () => (rule && extraTabsFactory ? extraTabsFactory(rule) : []),

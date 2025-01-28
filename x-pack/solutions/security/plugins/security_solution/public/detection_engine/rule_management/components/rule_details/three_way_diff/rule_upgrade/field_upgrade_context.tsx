@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { createContext, useContext, useMemo } from 'react';
+import React, { createContext, useContext, useEffect, useMemo } from 'react';
 import { isEqual } from 'lodash';
 import { useBoolean } from '@kbn/react-hooks';
 import { useRulePreviewContext } from '../../../../../rule_management_ui/components/rules_table/upgrade_prebuilt_rules_table/rule_preview_context';
@@ -103,7 +103,11 @@ export function FieldUpgradeContextProvider({
     initialRightSideMode === FieldFinalSideMode.Edit
   );
 
-  const { setRuleIsEdited } = useRulePreviewContext();
+  const { setFieldEditing, setFieldReadonly } = useRulePreviewContext();
+
+  useEffect(() => {
+    editing ? setFieldEditing() : setFieldReadonly();
+  }, [setFieldEditing, setFieldReadonly, editing]);
 
   invariant(fieldDiff, `Field diff is not found for ${fieldName}.`);
 
@@ -129,14 +133,8 @@ export function FieldUpgradeContextProvider({
       finalDiffableRule,
       rightSideMode: editing ? FieldFinalSideMode.Edit : FieldFinalSideMode.Readonly,
       setRuleFieldResolvedValue,
-      setReadOnlyMode: () => {
-        setReadOnlyMode();
-        setRuleIsEdited(false);
-      },
-      setEditMode: () => {
-        setEditMode();
-        setRuleIsEdited(true);
-      },
+      setReadOnlyMode,
+      setEditMode,
     }),
     [
       fieldName,
@@ -147,7 +145,6 @@ export function FieldUpgradeContextProvider({
       setRuleFieldResolvedValue,
       setEditMode,
       setReadOnlyMode,
-      setRuleIsEdited,
     ]
   );
 
