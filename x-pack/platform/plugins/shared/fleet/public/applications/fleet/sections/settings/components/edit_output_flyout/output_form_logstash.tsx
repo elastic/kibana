@@ -116,7 +116,7 @@ export const OutputFormLogstashSection: React.FunctionComponent<Props> = (props)
         label={i18n.translate(
           'xpack.fleet.settings.editOutputFlyout.sslCertificateAuthoritiesInputLabel',
           {
-            defaultMessage: 'Server SSL certificate authorities (optional)',
+            defaultMessage: 'Server SSL certificate authorities',
           }
         )}
         multiline={true}

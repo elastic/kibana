@@ -205,7 +205,7 @@ export const AddFleetServerHostStepContent = ({
                 data-test-subj="fleetServerHostsFlyout.certificateInput"
                 placeholder={i18n.translate(
                   'xpack.fleet.settings.fleetServerHostsFlyout.certificatePlaceholder',
-                  { defaultMessage: 'Specify ssl certificate' }
+                  { defaultMessage: 'Specify SSL certificate' }
                 )}
                 {...inputs.certificateInput.props}
               />
@@ -236,7 +236,7 @@ export const AddFleetServerHostStepContent = ({
               label={
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetServerHostsFlyout.certificateAuthoritiesLabel"
-                  defaultMessage="Server SSL certificate authorities (optional)"
+                  defaultMessage="Server SSL certificate authorities"
                 />
               }
             >
@@ -296,7 +296,7 @@ export const AddFleetServerHostStepContent = ({
               label={
                 <FormattedMessage
                   id="xpack.fleet.settings.fleetServerHostsFlyout.esCertificateAuthoritiesLabel"
-                  defaultMessage="Elasticsearch Certificate Authorities (optional)"
+                  defaultMessage="Elasticsearch Certificate Authorities"
                 />
               }
             >
