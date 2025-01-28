@@ -4788,7 +4788,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-metrics-collectors-server-mocks@link:packages/core/metrics/core-metrics-collectors-server-mocks":
+"@kbn/core-metrics-collectors-server-mocks@link:src/core/packages/metrics/collectors-server-mocks":
   version "0.0.0"
   uid ""
 
