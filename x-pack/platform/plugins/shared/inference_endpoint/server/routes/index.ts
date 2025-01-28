@@ -131,11 +131,24 @@ export const getInferenceServicesRoute = (
 
           const { config, secrets } = request.body;
 
-          await esClient.inference.delete({
-            inference_id: config.inferenceId,
-            task_type: config.taskType as InferenceTaskType,
-            force: true,
-          });
+          let inferenceExists = false;
+          try {
+            await esClient?.inference.get({
+              inference_id: config?.inferenceId,
+              task_type: config?.taskType as InferenceTaskType,
+            });
+            inferenceExists = true;
+          } catch (e) {
+            /* throws error if inference endpoint by id does not exist */
+          }
+
+          if (inferenceExists) {
+            await esClient.inference.delete({
+              inference_id: config.inferenceId,
+              task_type: config.taskType as InferenceTaskType,
+              force: true,
+            });
+          }
 
           const result = await addInferenceEndpoint(esClient, config, secrets);
 
