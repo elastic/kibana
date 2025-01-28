@@ -16,8 +16,6 @@ import { schema, type TypeOf } from '@kbn/config-schema';
  */
 export const stateSchemaByVersion = {
   1: {
-    // A task that was created < 8.10 will go through this "up" migration
-    // to ensure it matches the v1 schema.
     up: (state: Record<string, unknown>) => ({
       lastExecutionTimestamp: state.lastExecutionTimestamp || undefined,
       runs: state.runs || 0,

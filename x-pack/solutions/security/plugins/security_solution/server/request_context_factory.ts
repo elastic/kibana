@@ -10,6 +10,8 @@ import { memoize } from 'lodash';
 import type { Logger, KibanaRequest, RequestHandlerContext } from '@kbn/core/server';
 
 import type { BuildFlavor } from '@kbn/config';
+import { EntityDiscoveryApiKeyType } from '@kbn/entityManager-plugin/server/saved_objects';
+import { getApiKeyManager } from './lib/entity_analytics/entity_store/auth/api_key';
 import { DEFAULT_SPACE_ID } from '../common/constants';
 import { AppClientFactory } from './client';
 import type { ConfigType } from './config';
@@ -78,7 +80,7 @@ export class RequestContextFactory implements IRequestContextFactory {
 
     const { lists, ruleRegistry, security } = plugins;
 
-    const [_, startPlugins] = await core.getStartServices();
+    const [coreStart, startPlugins] = await core.getStartServices();
     const frameworkRequest = await buildFrameworkRequest(context, request);
     const coreContext = await context.core;
     const licensing = await context.licensing;
@@ -233,7 +235,11 @@ export class RequestContextFactory implements IRequestContextFactory {
       getEntityStoreDataClient: memoize(() => {
         const clusterClient = coreContext.elasticsearch.client;
         const logger = options.logger;
-        const soClient = coreContext.savedObjects.client;
+
+        const soClient = coreContext.savedObjects.getClient({
+          includedHiddenTypes: [EntityDiscoveryApiKeyType.name],
+        });
+
         return new EntityStoreDataClient({
           namespace: getSpaceId(),
           clusterClient,
@@ -247,6 +253,13 @@ export class RequestContextFactory implements IRequestContextFactory {
           config: config.entityAnalytics.entityStore,
           experimentalFeatures: config.experimentalFeatures,
           telemetry: core.analytics,
+          apiKeyManager: getApiKeyManager({
+            core: coreStart,
+            logger,
+            security: startPlugins.security,
+            encryptedSavedObjects: startPlugins.encryptedSavedObjects,
+            request,
+          }),
         });
       }),
       getAssetInventoryClient: memoize(() => {

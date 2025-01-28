@@ -13,38 +13,29 @@ import type {
   TaskManagerSetupContract,
   TaskManagerStartContract,
 } from '@kbn/task-manager-plugin/server';
-import type { ExperimentalFeatures } from '../../../../../common';
-import { getEnabledStoreEntityTypes } from '../../../../../common/entity_analytics/entity_store/utils';
+import type { ExperimentalFeatures } from '../../../../../../common';
+import { getEnabledStoreEntityTypes } from '../../../../../../common/entity_analytics/entity_store/utils';
 import {
   EngineComponentResourceEnum,
   type EntityType,
-} from '../../../../../common/api/entity_analytics/entity_store';
+} from '../../../../../../common/api/entity_analytics/entity_store';
 import {
   defaultState,
   stateSchemaByVersion,
   type LatestTaskStateSchema as EntityStoreFieldRetentionTaskState,
 } from './state';
 import { SCOPE, TIMEOUT, TYPE, VERSION } from './constants';
-import type { EntityAnalyticsRoutesDeps } from '../../types';
+import type { EntityAnalyticsRoutesDeps } from '../../../types';
 
-import { executeFieldRetentionEnrichPolicy } from '../elasticsearch_assets';
+import { executeFieldRetentionEnrichPolicy } from '../../elasticsearch_assets';
 
-import { getEntitiesIndexName } from '../utils';
+import { getEntitiesIndexName } from '../../utils';
 import {
   FIELD_RETENTION_ENRICH_POLICY_EXECUTION_EVENT,
   ENTITY_STORE_USAGE_EVENT,
-} from '../../../telemetry/event_based/events';
-import { VERSIONS_BY_ENTITY_TYPE } from '../entity_definitions/constants';
-
-const logFactory =
-  (logger: Logger, taskId: string) =>
-  (message: string): void =>
-    logger.info(`[Entity Store] [task ${taskId}]: ${message}`);
-
-const debugLogFactory =
-  (logger: Logger, taskId: string) =>
-  (message: string): void =>
-    logger.debug(`[Entity Store] [task ${taskId}]: ${message}`);
+} from '../../../../telemetry/event_based/events';
+import { VERSIONS_BY_ENTITY_TYPE } from '../../entity_definitions/constants';
+import { entityStoreTaskDebugLogFactory, entityStoreTaskLogFactory } from '../utils';
 
 const getTaskName = (): string => TYPE;
 
@@ -105,7 +96,7 @@ export const registerEntityStoreFieldRetentionEnrichTask = ({
       title: 'Entity Analytics Entity Store - Execute Enrich Policy Task',
       timeout: TIMEOUT,
       stateSchemaByVersion,
-      createTaskRunner: createTaskRunnerFactory({
+      createTaskRunner: createEntityStoreFieldRetentionEnrichTaskRunnerFactory({
         logger,
         telemetry,
         getStoreSize,
@@ -128,7 +119,7 @@ export const startEntityStoreFieldRetentionEnrichTask = async ({
   interval: string;
 }) => {
   const taskId = getTaskId(namespace);
-  const log = logFactory(logger, taskId);
+  const log = entityStoreTaskLogFactory(logger, taskId);
   log('starting task');
 
   log('attempting to schedule');
@@ -173,7 +164,7 @@ export const removeEntityStoreFieldRetentionEnrichTask = async ({
   }
 };
 
-export const runTask = async ({
+export const runEntityStoreFieldRetentionEnrichTask = async ({
   executeEnrichPolicy,
   getStoreSize,
   isCancelled,
@@ -194,8 +185,8 @@ export const runTask = async ({
 }> => {
   const state = taskInstance.state as EntityStoreFieldRetentionTaskState;
   const taskId = taskInstance.id;
-  const log = logFactory(logger, taskId);
-  const debugLog = debugLogFactory(logger, taskId);
+  const log = entityStoreTaskLogFactory(logger, taskId);
+  const debugLog = entityStoreTaskDebugLogFactory(logger, taskId);
   try {
     const taskStartTime = moment().utc().toISOString();
     log('running task');
@@ -255,7 +246,7 @@ export const runTask = async ({
   }
 };
 
-const createTaskRunnerFactory =
+const createEntityStoreFieldRetentionEnrichTaskRunnerFactory =
   ({
     logger,
     telemetry,
@@ -274,7 +265,7 @@ const createTaskRunnerFactory =
     const isCancelled = () => cancelled;
     return {
       run: async () =>
-        runTask({
+        runEntityStoreFieldRetentionEnrichTask({
           executeEnrichPolicy,
           getStoreSize,
           isCancelled,
