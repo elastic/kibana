@@ -434,20 +434,20 @@ export class JobsListViewUI extends Component {
     const noJobsFound = !loading && jobIds.length === 0;
 
     return (
-      <SpaceManagementContextWrapper>
-        <div data-test-subj="ml-jobs-list">
-          <NodeAvailableWarning />
+      <div data-test-subj="ml-jobs-list">
+        <NodeAvailableWarning />
 
-          <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
+        <JobsAwaitingNodeWarning jobCount={jobsAwaitingNodeCount} />
 
-          <SavedObjectsWarning
-            onCloseFlyout={this.onRefreshClick}
-            forceRefresh={loading || isRefreshing}
-          />
+        <SavedObjectsWarning
+          onCloseFlyout={this.onRefreshClick}
+          forceRefresh={loading || isRefreshing}
+        />
 
-          <UpgradeWarning />
+        <UpgradeWarning />
 
-          <>
+        <>
+          <SpaceManagementContextWrapper>
             {noJobsFound ? <AnomalyDetectionEmptyState /> : null}
 
             {jobIds.length > 0 ? (
@@ -517,54 +517,54 @@ export class JobsListViewUI extends Component {
                 </div>
               </>
             ) : null}
+          </SpaceManagementContextWrapper>
 
-            <EditJobFlyout
-              euiTheme={this.props.euiTheme}
-              setShowFunction={this.setShowEditJobFlyoutFunction}
-              unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
-              refreshJobs={() => this.refreshJobSummaryList()}
-              allJobIds={jobIds}
-            />
-            <JobListDatafeedChartFlyout
-              setShowFunction={this.setShowDatafeedChartFlyoutFunction}
-              unsetShowFunction={this.unsetShowDatafeedChartFlyoutFunction}
-              refreshJobs={() => this.refreshJobSummaryList()}
-            />
-            <StopDatafeedsConfirmModal
-              setShowFunction={this.setShowStopDatafeedsConfirmModalFunction}
-              unsetShowFunction={this.unsetShowStopDatafeedsConfirmModalFunction}
-              refreshJobs={() => this.refreshJobSummaryList()}
-              allJobIds={jobIds}
-            />
-            <CloseJobsConfirmModal
-              setShowFunction={this.setShowCloseJobsConfirmModalFunction}
-              unsetShowFunction={this.unsetShowCloseJobsConfirmModalFunction}
-              refreshJobs={() => this.refreshJobSummaryList()}
-            />
-            <DeleteJobModal
-              setShowFunction={this.setShowDeleteJobModalFunction}
-              unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-              refreshJobs={() => this.refreshJobSummaryList()}
-            />
-            <ResetJobModal
-              setShowFunction={this.setShowResetJobModalFunction}
-              unsetShowFunction={this.unsetShowResetJobModalFunction}
-              refreshJobs={() => this.refreshJobSummaryList()}
-            />
-            <StartDatafeedModal
-              setShowFunction={this.setShowStartDatafeedModalFunction}
-              unsetShowFunction={this.unsetShowDeleteJobModalFunction}
-              getShowCreateAlertFlyoutFunction={this.getShowCreateAlertFlyoutFunction}
-              refreshJobs={() => this.refreshJobSummaryList()}
-            />
-            <JobListMlAnomalyAlertFlyout
-              setShowFunction={this.setShowCreateAlertFlyoutFunction}
-              unsetShowFunction={this.unsetShowCreateAlertFlyoutFunction}
-              onSave={this.onRefreshClick}
-            />
-          </>
-        </div>
-      </SpaceManagementContextWrapper>
+          <EditJobFlyout
+            euiTheme={this.props.euiTheme}
+            setShowFunction={this.setShowEditJobFlyoutFunction}
+            unsetShowFunction={this.unsetShowEditJobFlyoutFunction}
+            refreshJobs={() => this.refreshJobSummaryList()}
+            allJobIds={jobIds}
+          />
+          <JobListDatafeedChartFlyout
+            setShowFunction={this.setShowDatafeedChartFlyoutFunction}
+            unsetShowFunction={this.unsetShowDatafeedChartFlyoutFunction}
+            refreshJobs={() => this.refreshJobSummaryList()}
+          />
+          <StopDatafeedsConfirmModal
+            setShowFunction={this.setShowStopDatafeedsConfirmModalFunction}
+            unsetShowFunction={this.unsetShowStopDatafeedsConfirmModalFunction}
+            refreshJobs={() => this.refreshJobSummaryList()}
+            allJobIds={jobIds}
+          />
+          <CloseJobsConfirmModal
+            setShowFunction={this.setShowCloseJobsConfirmModalFunction}
+            unsetShowFunction={this.unsetShowCloseJobsConfirmModalFunction}
+            refreshJobs={() => this.refreshJobSummaryList()}
+          />
+          <DeleteJobModal
+            setShowFunction={this.setShowDeleteJobModalFunction}
+            unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+            refreshJobs={() => this.refreshJobSummaryList()}
+          />
+          <ResetJobModal
+            setShowFunction={this.setShowResetJobModalFunction}
+            unsetShowFunction={this.unsetShowResetJobModalFunction}
+            refreshJobs={() => this.refreshJobSummaryList()}
+          />
+          <StartDatafeedModal
+            setShowFunction={this.setShowStartDatafeedModalFunction}
+            unsetShowFunction={this.unsetShowDeleteJobModalFunction}
+            getShowCreateAlertFlyoutFunction={this.getShowCreateAlertFlyoutFunction}
+            refreshJobs={() => this.refreshJobSummaryList()}
+          />
+          <JobListMlAnomalyAlertFlyout
+            setShowFunction={this.setShowCreateAlertFlyoutFunction}
+            unsetShowFunction={this.unsetShowCreateAlertFlyoutFunction}
+            onSave={this.onRefreshClick}
+          />
+        </>
+      </div>
     );
   }
 
