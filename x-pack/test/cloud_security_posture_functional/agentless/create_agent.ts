@@ -29,7 +29,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const AWS_SINGLE_ACCOUNT_TEST_ID = 'awsSingleTestId';
 
   // Failing: See https://github.com/elastic/kibana/issues/208495
-  describe.skip('Agentless cloud', function () {
+  describe('Agentless cloud', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
     let cisIntegrationAws: typeof pageObjects.cisAddIntegration.cisAws;
     let mockApiServer: http.Server;
