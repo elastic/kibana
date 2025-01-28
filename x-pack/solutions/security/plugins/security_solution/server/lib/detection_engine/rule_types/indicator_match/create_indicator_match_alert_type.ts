@@ -19,7 +19,7 @@ import type { BuildReasonMessage } from '../utils/reason_formatters';
 
 export const createIndicatorMatchAlertType = (
   createOptions: CreateRuleOptions
-): SecurityAlertType<ThreatRuleParams, {}, {}, 'default'> => {
+): SecurityAlertType<ThreatRuleParams, { isLoggedRequestsEnabled?: boolean }, {}, 'default'> => {
   const {
     eventsTelemetry,
     version,
@@ -108,6 +108,7 @@ export const createIndicatorMatchAlertType = (
           secondaryTimestamp,
           intendedTimestamp,
         });
+      const isLoggedRequestsEnabled = Boolean(state?.isLoggedRequestsEnabled);
 
       const result = await indicatorMatchExecutor({
         inputIndex,
@@ -131,6 +132,7 @@ export const createIndicatorMatchAlertType = (
         licensing,
         experimentalFeatures,
         scheduleNotificationResponseActionsService,
+        isLoggedRequestsEnabled,
       });
       return { ...result, state };
     },

@@ -38,6 +38,7 @@ import { THREAT_PIT_KEEP_ALIVE } from '../../../../../../common/cti/constants';
 import { getMaxSignalsWarning, getSafeSortIds } from '../../utils/utils';
 import { getDataTierFilter } from '../../utils/get_data_tier_filter';
 import { getQueryFields } from '../../utils/get_query_fields';
+import type { RulePreviewLoggedRequest } from '../../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
 
 export const createThreatSignals = async ({
   alertId,
@@ -75,6 +76,7 @@ export const createThreatSignals = async ({
   licensing,
   experimentalFeatures,
   scheduleNotificationResponseActionsService,
+  isLoggedRequestsEnabled,
 }: CreateThreatSignalsOptions): Promise<SearchAfterAndBulkCreateReturnType> => {
   const threatMatchedFields = getMatchedFields(threatMapping);
   const threatFieldsLength = threatMatchedFields.threat.length;
@@ -85,6 +87,8 @@ export const createThreatSignals = async ({
     threatIndex,
     ruleExecutionLogger,
   });
+
+  const loggedRequests: RulePreviewLoggedRequest[] = [];
 
   const params = completeRule.ruleParams;
   ruleExecutionLogger.debug('Indicator matching rule starting');
