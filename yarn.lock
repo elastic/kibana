@@ -4740,7 +4740,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-browser-mocks@link:packages/core/lifecycle/core-lifecycle-browser-mocks":
+"@kbn/core-lifecycle-browser-mocks@link:src/core/packages/lifecycle/browser-mocks":
   version "0.0.0"
   uid ""
 
