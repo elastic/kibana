@@ -1380,7 +1380,7 @@
     "@kbn/core-deprecations-browser-mocks": "link:src/core/packages/deprecations/browser-mocks",
     "@kbn/core-deprecations-server-mocks": "link:src/core/packages/deprecations/server-mocks",
     "@kbn/core-doc-links-browser-mocks": "link:src/core/packages/doc-links/browser-mocks",
-    "@kbn/core-doc-links-server-mocks": "link:packages/core/doc-links/core-doc-links-server-mocks",
+    "@kbn/core-doc-links-server-mocks": "link:src/core/packages/doc-links/server-mocks",
     "@kbn/core-elasticsearch-client-server-mocks": "link:packages/core/elasticsearch/core-elasticsearch-client-server-mocks",
     "@kbn/core-elasticsearch-server-mocks": "link:packages/core/elasticsearch/core-elasticsearch-server-mocks",
     "@kbn/core-environment-server-mocks": "link:packages/core/environment/core-environment-server-mocks",
