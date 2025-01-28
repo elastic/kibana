@@ -15,6 +15,8 @@ import {
   AdHocRunAuditAction,
   adHocRunAuditEvent,
 } from '../../../../rules_client/common/audit_events';
+import { transformAdHocRunToBackfillResult } from '../../transforms';
+import { updateGaps } from '../../../../lib/rule_gaps/update/update_gaps';
 
 export async function deleteBackfill(context: RulesClientContext, id: string): Promise<{}> {
   return await retryIfConflicts(
@@ -82,11 +84,39 @@ async function deleteWithOCC(context: RulesClientContext, { id }: { id: string }
       })
     );
 
+    const actionsClient = await context.getActionsClient();
+
+    const backfillResult = transformAdHocRunToBackfillResult({
+      adHocRunSO: result,
+      isSystemAction: (connectorId: string) => actionsClient.isSystemAction(connectorId),
+    });
+
     // delete the saved object
     const removeResult = await context.unsecuredSavedObjectsClient.delete(
       AD_HOC_RUN_SAVED_OBJECT_TYPE,
-      id
+      id,
+      {
+        refresh: 'wait_for',
+      }
     );
+
+    if ('rule' in backfillResult) {
+      const eventLogClient = await context.getEventLogClient();
+
+      await updateGaps({
+        ruleId: backfillResult.rule.id,
+        start: new Date(backfillResult.start),
+        end: backfillResult.end ? new Date(backfillResult.end) : new Date(),
+        backfillSchedule: backfillResult.schedule,
+        savedObjectsRepository: context.internalSavedObjectsRepository,
+        logger: context.logger,
+        eventLogClient,
+        eventLogger: context.eventLogger,
+        shouldRefetchAllBackfills: true,
+        backfillClient: context.backfillClient,
+        actionsClient,
+      });
+    }
 
     // remove the associated task
     await context.taskManager.removeIfExists(id);
