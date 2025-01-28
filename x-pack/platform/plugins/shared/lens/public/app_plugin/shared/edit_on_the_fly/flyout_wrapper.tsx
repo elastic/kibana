@@ -19,6 +19,7 @@ import {
   EuiLink,
   EuiBetaBadge,
   EuiText,
+  EuiCallOut,
 } from '@elastic/eui';
 import { euiThemeVars } from '@kbn/ui-theme';
 import { css } from '@emotion/react';
@@ -37,6 +38,7 @@ export const FlyoutWrapper = ({
   onCancel,
   navigateToLensEditor,
   onApply,
+  isReadOnly,
 }: FlyoutWrapperProps) => {
   return (
     <>
@@ -92,7 +94,7 @@ export const FlyoutWrapper = ({
                 </h2>
               </EuiTitle>
             </EuiFlexItem>
-            {navigateToLensEditor && (
+            {navigateToLensEditor && !isReadOnly && (
               <EuiFlexItem grow={false}>
                 <EuiText size="xs">
                   <EuiLink onClick={navigateToLensEditor} data-test-subj="navigateToLensEditorLink">
@@ -106,6 +108,19 @@ export const FlyoutWrapper = ({
           </EuiFlexGroup>
         </EuiFlyoutHeader>
       )}
+      {isInlineFlyoutVisible && isReadOnly ? (
+        <EuiCallOut
+          title={i18n.translate('xpack.lens.config.readOnly', {
+            defaultMessage: 'Read only panel changes will revert after closing',
+          })}
+          aria-label={i18n.translate('xpack.lens.config.readOnly', {
+            defaultMessage: 'Read only panel changes will revert after closing',
+          })}
+          color="warning"
+          iconType="warning"
+          size="s"
+        />
+      ) : null}
 
       <EuiFlyoutBody
         className="lnsEditFlyoutBody"
@@ -154,23 +169,25 @@ export const FlyoutWrapper = ({
                 />
               </EuiButtonEmpty>
             </EuiFlexItem>
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                onClick={onApply}
-                fill
-                aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
-                  defaultMessage: 'Apply changes',
-                })}
-                disabled={Boolean(isNewPanel) ? false : !isSaveable}
-                iconType="check"
-                data-test-subj="applyFlyoutButton"
-              >
-                <FormattedMessage
-                  id="xpack.lens.config.applyFlyoutLabel"
-                  defaultMessage="Apply and close"
-                />
-              </EuiButton>
-            </EuiFlexItem>
+            {isReadOnly ? null : (
+              <EuiFlexItem grow={false}>
+                <EuiButton
+                  onClick={onApply}
+                  fill
+                  aria-label={i18n.translate('xpack.lens.config.applyFlyoutAriaLabel', {
+                    defaultMessage: 'Apply changes',
+                  })}
+                  disabled={Boolean(isNewPanel) ? false : !isSaveable}
+                  iconType="check"
+                  data-test-subj="applyFlyoutButton"
+                >
+                  <FormattedMessage
+                    id="xpack.lens.config.applyFlyoutLabel"
+                    defaultMessage="Apply and close"
+                  />
+                </EuiButton>
+              </EuiFlexItem>
+            )}
           </EuiFlexGroup>
         </EuiFlyoutFooter>
       )}
