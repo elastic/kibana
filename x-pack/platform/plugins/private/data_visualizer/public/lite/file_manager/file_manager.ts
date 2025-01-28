@@ -223,14 +223,9 @@ export class FileManager {
     return createMergedMappings(files);
   }
 
-  // private createMergedPipeline() {
-  //   const files = this.getFiles();
-  //   return createMergedPipeline(files, this.commonFileFormat!);
-  // }
-
   private getPipelines() {
     const files = this.getFiles();
-    return files.map((file) => file.getPipeline()!); // !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
+    return files.map((file) => file.getPipeline());
   }
 
   public async import(
@@ -238,8 +233,11 @@ export class FileManager {
     createDataView: boolean = true
   ): Promise<FileUploadResults | null> {
     if (this.mappings === null || this.pipelines === null || this.commonFileFormat === null) {
+      this.setStatus({
+        overallImportStatus: STATUS.FAILED,
+      });
+
       return null;
-      // should throw an error here !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
     }
 
     this.setStatus({

@@ -95,89 +95,6 @@ export function createMergedMappings(files: FileWrapper[]) {
   return { mergedMappings, mappingClashes };
 }
 
-export function createMergedPipeline(files: FileWrapper[], commonFileFormat: string) {
-  // const pipelines = new Map<string, any>(
-  //   files.map((file) => [file.getFileName(), file.getPipeline()])
-  // );
-  const pipelines = files.map((file) => file.getPipeline() ?? { processors: [], description: '' });
-  const pipelineString = pipelines.map((p) => JSON.stringify(p));
-  if (pipelineString.every((p) => p === pipelineString[0])) {
-    // eslint-disable-next-line no-console
-    console.log('pipeline strings are the same');
-
-    return pipelines[0];
-  }
-
-  const stringifiedProcessorsPerFile = pipelines.map(({ processors }) =>
-    processors.map((p) => ({ processorString: JSON.stringify(p), processor: p }))
-  );
-
-  // const processorsPerFile = pipelines.map(({ processors }) => processors);
-
-  // const processorClashes: any[] = [];
-
-  // const mergedProcessorsMap = processorsPerFile.reduce((acc, processors) => {
-  //   processors.forEach((processor) => {
-
-  //     if (!acc.has(processor.field)) {
-  //       acc.set(processor.field, processor);
-  //     } else {
-  //       if (JSON.stringify(acc.get(processor.field)) !== JSON.stringify(processor)) {
-  //         processorClashes.push({
-  //           fieldName: processor.processor.field,
-  //           processorTypes: [acc.get(processor.processor.field).type, processor.processor.type],
-  //         });
-  //       }
-  //     }
-  //   });
-  //   return acc;
-  // }, new Map<string, any>());
-
-  // console.log('mergedProcessorsMap', mergedProcessorsMap);
-
-  const mergedStringifiedProcessorMap = stringifiedProcessorsPerFile.reduce((acc, processors) => {
-    processors.forEach((processor) => {
-      if (!acc.has(processor.processorString)) {
-        acc.set(processor.processorString, processor.processor);
-      }
-    });
-    return acc;
-  }, new Map<string, any>());
-
-  // console.log('processorClashes', processorClashes);
-
-  const mergedPipeline = {
-    ...pipelines[0],
-    processors: Array.from(mergedStringifiedProcessorMap.values()),
-  };
-
-  if (commonFileFormat === 'delimited') {
-    const targetFields = new Set(
-      [
-        ...mergedPipeline.processors
-          .filter((p) => Object.keys(p)[0] === 'csv')
-          .map((p) => p.csv.target_fields),
-      ].flat()
-    );
-
-    mergedPipeline.processors = mergedPipeline.processors.filter(
-      (p) => Object.keys(p)[0] !== 'csv'
-    );
-    mergedPipeline.processors.splice(0, 0, {
-      csv: {
-        field: 'message',
-        target_fields: Array.from(targetFields),
-        ignore_missing: false,
-      },
-    });
-  }
-
-  // eslint-disable-next-line no-console
-  console.log('mergedPipeline', mergedPipeline);
-
-  return mergedPipeline ?? null;
-}
-
 export function getMappingClashInfo(
   mappingClashes: MappingClash[],
   filesStatus: AnalyzedFile[]
@@ -197,10 +114,6 @@ export function getMappingClashInfo(
 
   const middleIndex = Math.floor(clashCounts.length / 2);
 
-  // const median =
-  //   clashCounts.length % 2 === 0
-  //     ? (clashCounts[middleIndex - 1].count + clashCounts[middleIndex].count) / 2
-  //     : clashCounts[middleIndex].count;#
   const median = clashCounts[middleIndex].count;
 
   const medianAboveZero = median > 0;

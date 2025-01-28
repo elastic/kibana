@@ -7,7 +7,10 @@
 
 import { BehaviorSubject } from 'rxjs';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
-import type { FindFileStructureResponse } from '@kbn/file-upload-plugin/common/types';
+import type {
+  FindFileStructureResponse,
+  IngestPipeline,
+} from '@kbn/file-upload-plugin/common/types';
 import { isTikaType } from '../../../common/utils/tika_utils';
 import { processResults, readFile } from '../../application/common/components/utils';
 import { analyzeTikaFile } from '../../application/file_data_visualizer/components/file_data_visualizer_view/tika_analyzer';
@@ -164,8 +167,13 @@ export class FileWrapper {
   public getMappings() {
     return this.analyzedFile$.getValue().results?.mappings;
   }
-  public getPipeline() {
-    return this.analyzedFile$.getValue().results?.ingest_pipeline;
+  public getPipeline(): IngestPipeline {
+    return (
+      this.analyzedFile$.getValue().results?.ingest_pipeline ?? {
+        description: '',
+        processors: [],
+      }
+    );
   }
   public getFormat() {
     return this.analyzedFile$.getValue().results?.format;
