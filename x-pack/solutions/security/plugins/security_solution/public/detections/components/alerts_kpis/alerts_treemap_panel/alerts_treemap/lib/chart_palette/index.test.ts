@@ -36,11 +36,11 @@ describe('getFillColor', () => {
     });
 
     it('returns the expected fill color when risk score is 100', () => {
-      expect(getFillColor({ riskScore: 100, colorPalette })).toEqual('#BD271E');
+      expect(getFillColor({ riskScore: 100, colorPalette })).toEqual('#bd271e');
     });
 
     it('returns the expected fill color when risk score is greater than 100', () => {
-      expect(getFillColor({ riskScore: 101, colorPalette })).toEqual('#BD271E');
+      expect(getFillColor({ riskScore: 101, colorPalette })).toEqual('#bd271e');
     });
 
     it('returns the expected fill color when risk score is greater than RISK_SCORE_CRITICAL', () => {

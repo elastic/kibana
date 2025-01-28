@@ -14,9 +14,9 @@ jest.mock('@elastic/eui', () => ({
 }));
 
 const EXPECTED_SEVERITY_COLOR_AMSTERDAM = {
-  low: '#54b399',
-  medium: '#f1d86f',
-  high: '#ff7e62',
+  low: '#54B399',
+  medium: '#F1D86F',
+  high: '#FF7E62',
   critical: '#bd271e',
 };
 

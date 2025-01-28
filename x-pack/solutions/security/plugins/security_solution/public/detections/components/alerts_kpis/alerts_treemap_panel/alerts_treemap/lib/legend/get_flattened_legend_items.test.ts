@@ -112,19 +112,19 @@ describe('getFlattenedLegendItems', () => {
         value: 'mimikatz process started',
       },
       {
-        color: '#BD271E',
+        color: '#bd271e',
         count: 3,
         field: 'host.name',
         value: 'Host-k8iyfzraq9',
       },
       {
-        color: '#BD271E',
+        color: '#bd271e',
         count: 1,
         field: 'host.name',
         value: 'Host-3fbljiq8rj',
       },
       {
-        color: '#BD271E',
+        color: '#bd271e',
         count: 1,
         field: 'host.name',
         value: 'Host-r4y6xi92ob',
@@ -135,7 +135,7 @@ describe('getFlattenedLegendItems', () => {
         value: 'Threshold rule',
       },
       {
-        color: '#BD271E',
+        color: '#bd271e',
         count: 1,
         field: 'host.name',
         value: 'Host-r4y6xi92ob',
