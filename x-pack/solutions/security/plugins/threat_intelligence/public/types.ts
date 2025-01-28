@@ -8,16 +8,11 @@
 import { ComponentType, NamedExoticComponent, ReactElement, ReactNode, VFC } from 'react';
 import { CoreStart } from '@kbn/core/public';
 import { DataPublicPluginStart } from '@kbn/data-plugin/public';
-import {
-  DataViewField,
-  type DataViewSpec,
-  DataViewsPublicPluginStart,
-  FieldSpec,
-} from '@kbn/data-views-plugin/public';
+import { type DataViewSpec, DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
 import { Storage } from '@kbn/kibana-utils-plugin/public';
 import { TimelinesUIStart } from '@kbn/timelines-plugin/public';
 import type { TriggersAndActionsUIPublicPluginStart as TriggersActionsStart } from '@kbn/triggers-actions-ui-plugin/public';
-import { DataViewBase, Filter, Query, TimeRange } from '@kbn/es-query';
+import { Filter, Query, TimeRange } from '@kbn/es-query';
 import { BrowserField } from '@kbn/rule-registry-plugin/common';
 import { Store } from 'redux';
 import { DataProvider } from '@kbn/timelines-plugin/common';
@@ -25,10 +20,6 @@ import { Start as InspectorPluginStart } from '@kbn/inspector-plugin/public';
 import { CasesPublicSetup, CasesPublicStart } from '@kbn/cases-plugin/public/types';
 import { CreateExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 import { Policy } from './modules/block_list/hooks/use_policies';
-
-export interface SecuritySolutionDataViewBase extends DataViewBase {
-  fields: Array<FieldSpec & DataViewField>;
-}
 
 // eslint-disable-next-line @typescript-eslint/no-empty-interface
 export interface ThreatIntelligencePluginSetup {}
@@ -66,7 +57,6 @@ export type BrowserFields = Readonly<Record<string, Partial<BrowserField>>>;
 
 export interface SelectedDataView {
   sourcererDataView: DataViewSpec;
-  indexPattern: SecuritySolutionDataViewBase;
   browserFields: BrowserFields;
   selectedPatterns: string[];
   loading: boolean;
@@ -139,6 +129,11 @@ export interface SecuritySolutionPluginContext {
     from,
     to,
   }: UseInvestigateInTimelineProps) => () => Promise<void>;
+
+  /**
+   * Whether the current user has access to timeline
+   */
+  hasAccessToTimeline: boolean;
 
   useQuery: () => Query;
 

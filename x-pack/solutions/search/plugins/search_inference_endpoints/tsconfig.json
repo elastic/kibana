@@ -38,7 +38,6 @@
     "@kbn/licensing-plugin",
     "@kbn/inference-endpoint-ui-common",
     "@kbn/es-ui-shared-plugin",
-    "@kbn/search-connectors",
     "@kbn/safer-lodash-set"
   ],
   "exclude": [

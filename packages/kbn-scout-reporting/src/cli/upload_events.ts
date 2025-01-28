@@ -10,7 +10,7 @@
 import fs from 'node:fs';
 import { Command } from '@kbn/dev-cli-runner';
 import { createFlagError } from '@kbn/dev-cli-errors';
-import { ScoutReportDataStream } from '../reporting/report';
+import { ScoutReportDataStream } from '../reporting/report/events';
 import { getValidatedESClient } from './common';
 
 export const uploadEvents: Command<void> = {

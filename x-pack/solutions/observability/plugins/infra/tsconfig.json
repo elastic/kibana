@@ -108,7 +108,6 @@
     "@kbn/observability-alerting-rule-utils",
     "@kbn/core-application-browser",
     "@kbn/shared-ux-page-no-data-types",
-    "@kbn/xstate-utils",
     "@kbn/entityManager-plugin",
     "@kbn/zod",
     "@kbn/observability-utils-server",
@@ -116,7 +115,8 @@
     "@kbn/config",
     "@kbn/observability-utils-common",
     "@kbn/charts-theme",
-    "@kbn/response-ops-rule-params"
+    "@kbn/response-ops-rule-params",
+    "@kbn/core-test-helpers-model-versions"
   ],
   "exclude": ["target/**/*"]
 }

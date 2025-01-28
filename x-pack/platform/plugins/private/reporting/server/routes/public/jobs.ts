@@ -24,6 +24,12 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
     router.get(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: jobHandlers.validate,
         options: { tags: [ROUTE_TAG_CAN_REDIRECT], access: 'public' },
       },
@@ -39,6 +45,12 @@ export function registerJobInfoRoutesPublic(reporting: ReportingCore) {
     router.delete(
       {
         path,
+        security: {
+          authz: {
+            enabled: false,
+            reason: 'This route is opted out from authorization',
+          },
+        },
         validate: jobHandlers.validate,
         options: { access: 'public' },
       },

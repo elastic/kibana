@@ -7,16 +7,7 @@
 
 import type { EntityRiskScoreRecord, RiskScoreInput } from '../../api/entity_analytics/common';
 
-export enum RiskScoreEntity {
-  host = 'host',
-  user = 'user',
-  // TODO Add service when FE is updated https://github.com/elastic/security-team/issues/11326
-}
-// TODO: Remove this when FE is updated https://github.com/elastic/security-team/issues/11326
-export const SERVICE_RISK_SCORE_ENTITY = 'service';
-
 export interface InitRiskEngineResult {
-  legacyRiskEngineDisabled: boolean;
   riskEngineResourcesInstalled: boolean;
   riskEngineConfigurationCreated: boolean;
   riskEngineEnabled: boolean;

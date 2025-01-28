@@ -14,7 +14,7 @@ import { i18n } from '@kbn/i18n';
 import { toMountPoint } from '@kbn/react-kibana-mount';
 import { XJson } from '@kbn/es-ui-shared-plugin/public';
 import { isQuotaExceededError } from '../../../services/history';
-import { DEFAULT_VARIABLES } from '../../../../common/constants';
+import { DEFAULT_VARIABLES, KIBANA_API_PREFIX } from '../../../../common/constants';
 import { getStorage, StorageKeys } from '../../../services';
 import { sendRequest } from '../../hooks';
 import { Actions } from '../../stores/request';
@@ -824,5 +824,17 @@ export class MonacoEditorActionsProvider {
     if (req.restoreMethod === RestoreMethod.RESTORE_AND_EXECUTE) {
       this.sendRequests(dispatch, context);
     }
+  }
+
+  /*
+   * Returns true if any of the selected requests is an internal Kibana request
+   * (starting with the kbn: prefix). Returns false otherwise
+   */
+  public async isKbnRequestSelected(): Promise<boolean> {
+    const requests = await this.getRequests();
+    if (requests.length < 1) {
+      return false;
+    }
+    return requests.some((request) => request.url.startsWith(KIBANA_API_PREFIX));
   }
 }

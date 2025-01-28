@@ -68,6 +68,7 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   let lastError;
   let attemptCounter = 0;
   const addText = (str: string | undefined) => (str ? ` waiting for '${str}'` : '');
+  const attemptMsg = (counter: number) => ` - Attempt #: ${counter}`;
 
   while (true) {
     // Aborting if no retry attempts are left (opt-in)
@@ -91,9 +92,12 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     // Run opt-in onFailureBlock before the next attempt
     if (lastError && onFailureBlock) {
       const before = await runAttempt(onFailureBlock);
-      if ('error' in before) {
-        log.debug(`--- onRetryBlock error: ${before.error.message} - Attempt #: ${attemptCounter}`);
-      }
+      if ('error' in before)
+        log.debug(
+          `--- onRetryBlock error: ${before.error.message}${
+            retryCount ? attemptMsg(attemptCounter) : ''
+          }`
+        );
     }
 
     const attempt = await runAttempt(block);
@@ -103,15 +107,18 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     }
 
     if ('error' in attempt) {
-      if (lastError && lastError.message === attempt.error.message) {
+      if (lastError && lastError.message === attempt.error.message)
         log.debug(
-          `--- ${methodName} failed again with the same message... - Attempt #: ${attemptCounter}`
+          `--- ${methodName} failed again with the same message...${
+            retryCount ? attemptMsg(attemptCounter) : ''
+          }`
         );
-      } else {
+      else
         log.debug(
-          `--- ${methodName} error: ${attempt.error.message} - Attempt #: ${attemptCounter}`
+          `--- ${methodName} error: ${attempt.error.message}${
+            retryCount ? attemptMsg(attemptCounter) : ''
+          }`
         );
-      }
 
       lastError = attempt.error;
     }

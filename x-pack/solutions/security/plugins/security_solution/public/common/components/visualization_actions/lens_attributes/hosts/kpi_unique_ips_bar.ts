@@ -7,6 +7,7 @@
 
 import type { GetLensAttributes, LensAttributes } from '../../types';
 import { SOURCE_CHART_LABEL, DESTINATION_CHART_LABEL, UNIQUE_COUNT } from '../../translations';
+import { getDestinationIpColor, getSourceIpColor } from '../common/utils/unique_ips_palette';
 const columnSourceIp = '32f66676-f4e1-48fd-b7f8-d4de38318601';
 const columnSourceFilter = 'f8bfa719-5c1c-4bf2-896e-c318d77fc08e';
 
@@ -96,7 +97,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }
             layerType: 'data',
             seriesType: 'bar_horizontal_stacked',
             xAccessor: columnSourceFilter,
-            yConfig: [{ color: euiTheme.colors.vis.euiColorVis4, forAccessor: columnSourceIp }],
+            yConfig: [{ color: getSourceIpColor(euiTheme), forAccessor: columnSourceIp }],
           },
           {
             accessors: [columnDestinationIp],
@@ -104,9 +105,7 @@ export const getKpiUniqueIpsBarLensAttributes: GetLensAttributes = ({ euiTheme }
             layerType: 'data',
             seriesType: 'bar_horizontal_stacked',
             xAccessor: columnDestinationFilter,
-            yConfig: [
-              { color: euiTheme.colors.vis.euiColorVis2, forAccessor: columnDestinationIp },
-            ],
+            yConfig: [{ color: getDestinationIpColor(euiTheme), forAccessor: columnDestinationIp }],
           },
         ],
         legend: { isVisible: false, position: 'right', showSingleSeries: false },

@@ -34,8 +34,6 @@ const engineDescriptionRegistry: Record<EntityType, EntityDescription> = {
   universal: universalEntityEngineDescription,
   service: serviceEntityEngineDescription,
 };
-export const getAvailableEntityDescriptions = () =>
-  Object.keys(engineDescriptionRegistry) as EntityType[];
 
 interface EngineDescriptionParams {
   entityType: EntityType;
@@ -44,6 +42,7 @@ interface EngineDescriptionParams {
   requestParams?: {
     indexPattern?: string;
     fieldHistoryLength?: number;
+    lookbackPeriod?: string;
   };
   defaultIndexPatterns: string[];
 }
@@ -61,7 +60,10 @@ export const createEngineDescription = (options: EngineDescriptionParams) => {
   const settings: EntityEngineInstallationDescriptor['settings'] = {
     syncDelay: `${config.syncDelay.asSeconds()}s`,
     frequency: `${config.frequency.asSeconds()}s`,
-    lookbackPeriod: description.settings?.lookbackPeriod || DEFAULT_LOOKBACK_PERIOD,
+    lookbackPeriod:
+      requestParams?.lookbackPeriod ||
+      description.settings?.lookbackPeriod ||
+      DEFAULT_LOOKBACK_PERIOD,
     timestampField: description.settings?.timestampField || DEFAULT_TIMESTAMP_FIELD,
   };
 
@@ -71,6 +73,7 @@ export const createEngineDescription = (options: EngineDescriptionParams) => {
     update('settings', assign(settings)),
     updateIndexPatterns(indexPatterns),
     updateRetentionFields(fieldHistoryLength),
+    setDefaultDynamic,
     addIndexMappings
   ) as EntityEngineInstallationDescriptor;
 
@@ -93,3 +96,5 @@ const updateRetentionFields = (fieldHistoryLength: number) =>
 
 const addIndexMappings = (description: EntityEngineInstallationDescriptor) =>
   set('indexMappings', generateIndexMappings(description), description);
+
+const setDefaultDynamic = update('dynamic', (dynamic = false) => dynamic);

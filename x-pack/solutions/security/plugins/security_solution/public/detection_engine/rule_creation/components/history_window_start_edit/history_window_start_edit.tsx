@@ -15,7 +15,8 @@ import { validateHistoryWindowStart } from './validate_history_window_start';
 const COMPONENT_PROPS = {
   idAria: 'historyWindowSize',
   dataTestSubj: 'historyWindowSize',
-  timeTypes: ['m', 'h', 'd'],
+  units: ['m', 'h', 'd'],
+  minValue: 0,
 };
 
 interface HistoryWindowStartEditProps {

@@ -14,7 +14,7 @@ import { getHostedPolicies, isHostedAgent } from './hosted_agent';
 jest.mock('../agent_policy', () => {
   return {
     agentPolicyService: {
-      getByIDs: jest.fn().mockResolvedValue([
+      getByIds: jest.fn().mockResolvedValue([
         { id: 'hosted-policy', is_managed: true },
         { id: 'regular-policy', is_managed: false },
       ]),

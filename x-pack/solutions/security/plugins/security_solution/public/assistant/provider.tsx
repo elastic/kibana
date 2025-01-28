@@ -144,6 +144,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
     docLinks: { ELASTIC_WEBSITE_URL, DOC_LINK_VERSION },
     userProfile,
     chrome,
+    productDocBase,
   } = useKibana().services;
 
   let inferenceEnabled = false;
@@ -235,6 +236,7 @@ export const AssistantProvider: FC<PropsWithChildren<unknown>> = ({ children }) 
       http={http}
       inferenceEnabled={inferenceEnabled}
       navigateToApp={navigateToApp}
+      productDocBase={productDocBase}
       title={ASSISTANT_TITLE}
       toasts={toasts}
       currentAppId={currentAppId ?? 'securitySolutionUI'}
