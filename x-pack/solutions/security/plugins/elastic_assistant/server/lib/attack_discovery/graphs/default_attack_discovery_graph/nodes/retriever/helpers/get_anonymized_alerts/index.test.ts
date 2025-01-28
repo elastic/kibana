@@ -121,6 +121,50 @@ describe('getAnonymizedAlerts', () => {
     });
   });
 
+  it('calls getOpenAndAcknowledgedAlertsQuery with the optional filter parameters', async () => {
+    const start = '2025-01-01T00:00:00.000Z';
+    const end = '2025-01-02T00:00:00.000Z';
+    const filter = {
+      bool: {
+        must: [],
+        filter: [
+          {
+            match_phrase: {
+              'user.name': 'root',
+            },
+          },
+        ],
+        should: [],
+        must_not: [
+          {
+            match_phrase: {
+              'host.name': 'foo',
+            },
+          },
+        ],
+      },
+    };
+
+    await getAnonymizedAlerts({
+      alertsIndexPattern,
+      end,
+      esClient: mockEsClient,
+      filter,
+      replacements: mockReplacements,
+      size,
+      start,
+    });
+
+    expect(getOpenAndAcknowledgedAlertsQuery).toHaveBeenCalledWith({
+      alertsIndexPattern,
+      anonymizationFields: [],
+      end,
+      filter,
+      size,
+      start,
+    });
+  });
+
   it('returns the expected transformed (anonymized) raw data', async () => {
     const result = await getAnonymizedAlerts({
       alertsIndexPattern,
