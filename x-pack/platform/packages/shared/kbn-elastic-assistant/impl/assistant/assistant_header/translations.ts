@@ -66,7 +66,7 @@ export const SHOW_REAL_VALUES = i18n.translate(
 export const ANONYMIZE_VALUES = i18n.translate(
   'xpack.elasticAssistant.assistant.settings.anonymizeValues',
   {
-    defaultMessage: 'Anonymize values',
+    defaultMessage: 'Show anonymize values',
   }
 );
 
@@ -86,16 +86,16 @@ export const CHAT_OPTIONS = i18n.translate(
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
-export const ANONYMIZE_VALUES_SHORTCUT = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.anonymizeValues.keyboardShortcut',
+export const ANONYMIZE_VALUES_TOOLTIP = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.anonymizeValues.tooltip',
   {
     values: { keyboardShortcut: isMac ? '⌥ a' : 'Alt a' },
-    defaultMessage: 'Keyboard shortcut: {keyboardShortcut}',
+    defaultMessage: 'Toggle to reveal or hide field values in your chat stream. The data sent to the LLM is still anonymized based on settings in the Anonymization panel. Keyboard shortcut: {keyboardShortcut}',
   }
 );
 
-export const SHOW_CITATIONS_SHORTCUT = i18n.translate(
-  'xpack.elasticAssistant.assistant.settings.showCitationsLabel.keyboardShortcut',
+export const SHOW_CITATIONS_TOOLTIP = i18n.translate(
+  'xpack.elasticAssistant.assistant.settings.showCitationsLabel.tooltip',
   {
     values: { keyboardShortcut: isMac ? '⌥ c' : 'Alt c' },
     defaultMessage: 'Keyboard shortcut: {keyboardShortcut}',

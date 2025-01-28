@@ -39,7 +39,7 @@ export const EsqlQueryReference: React.FC<Props> = ({
       path: url.path,
       openInNewTab: true
     })
-  }, [locator])
+  }, [locator, esqlContentReference.query, navigateToApp])
 
   return (
     <PopoverReference

@@ -177,7 +177,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           <EuiToolTip
             position="left"
             key={'anonymize-values-tooltip'}
-            content={i18n.ANONYMIZE_VALUES_SHORTCUT}
+            content={i18n.ANONYMIZE_VALUES_TOOLTIP}
           >
             <EuiContextMenuItem
               aria-label={'anonymize-values'}
@@ -196,7 +196,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
             <EuiToolTip
               position="left"
               key={'show-citations-tooltip'}
-              content={i18n.SHOW_CITATIONS_SHORTCUT}
+              content={i18n.SHOW_CITATIONS_TOOLTIP}
             >
               <EuiContextMenuItem
                 aria-label={'show-citations'}
@@ -229,9 +229,9 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       ],
       [
         contentReferencesVisible,
-        setContentReferencesVisible,
+        onChangeContentReferencesVisible,
         showAnonymizedValues,
-        setShowAnonymizedValues,
+        onChangeContentReferencesVisible,
         euiTheme.colors.textDanger,
         handleNavigateToAnonymization,
         handleNavigateToKnowledgeBase,
