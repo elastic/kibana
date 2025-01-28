@@ -138,7 +138,7 @@ function validateFunctionLiteralArg(
   }
   if (isTimeIntervalItem(actualArg)) {
     // check first if it's a valid interval string
-    if (!inKnownTimeInterval(actualArg)) {
+    if (!inKnownTimeInterval(actualArg.unit)) {
       messages.push(
         getMessageFromId({
           messageId: 'unknownInterval',
@@ -1225,13 +1225,9 @@ function validateCommand(
                 currentCommandIndex,
               })
             );
-          }
-
-          if (isSettingItem(arg)) {
+          } else if (isSettingItem(arg)) {
             messages.push(...validateSetting(arg, commandDef.modes[0], command, references));
-          }
-
-          if (isOptionItem(arg)) {
+          } else if (isOptionItem(arg)) {
             messages.push(
               ...validateOption(
                 arg,
@@ -1240,15 +1236,13 @@ function validateCommand(
                 references
               )
             );
-          }
-          if (isColumnItem(arg) || isIdentifier(arg)) {
+          } else if (isColumnItem(arg) || isIdentifier(arg)) {
             if (command.name === 'stats' || command.name === 'inlinestats') {
               messages.push(errors.unknownAggFunction(arg));
             } else {
               messages.push(...validateColumnForCommand(arg, command.name, references));
             }
-          }
-          if (isTimeIntervalItem(arg)) {
+          } else if (isTimeIntervalItem(arg)) {
             messages.push(
               getMessageFromId({
                 messageId: 'unsupportedTypeForCommand',
@@ -1260,8 +1254,7 @@ function validateCommand(
                 locations: arg.location,
               })
             );
-          }
-          if (isSourceItem(arg)) {
+          } else if (isSourceItem(arg)) {
             messages.push(...validateSource(arg, command.name, references));
           }
         }
@@ -1334,6 +1327,8 @@ export const ignoreErrorsMap: Record<keyof ESQLCallbacks, ErrorTypes[]> = {
   getPolicies: ['unknownPolicy'],
   getPreferences: [],
   getFieldsMetadata: [],
+  getVariablesByType: [],
+  canSuggestVariables: [],
   getJoinIndices: [],
 };
 

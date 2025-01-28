@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Find lists API endpoint
+  title: Find value lists API endpoint
   version: '2023-10-31'
 paths:
   /api/lists/_find:
@@ -8,27 +8,32 @@ paths:
       x-labels: [serverless, ess]
       operationId: FindLists
       x-codegen-enabled: true
-      summary: Get lists
-      description: Get a paginated subset of lists. By default, the first page is returned, with 20 results per page.
+      summary: Get value lists
+      description: Get a paginated subset of value lists. By default, the first page is returned, with 20 results per page.
       parameters:
         - name: page
           in: query
           required: false
-          description: The page number to return
+          description: The page number to return.
           schema:
             type: integer
+            example: 1
         - name: per_page
           in: query
           required: false
-          description: The number of lists to return per page
+          description: The number of value lists to return per page.
           schema:
             type: integer
+            example: 20
         - name: sort_field
           in: query
           required: false
-          description: Determines which field is used to sort the results
+          description: Determines which field is used to sort the results.
           schema:
-            $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+            type: string
+            minLength: 1
+            format: nonempty
+            example: name
         - name: sort_order
           in: query
           required: false
@@ -36,13 +41,11 @@ paths:
           schema:
             type: string
             enum: [desc, asc]
+            example: asc
         - name: cursor
           in: query
           required: false
-          description: |
-            Returns the list that come after the last list returned in the previous call
-            (use the cursor value returned in the previous call). This parameter uses
-            the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.
+          description: 'Returns the lists that come after the last lists returned in the previous call (use the `cursor` value returned in the previous call). This parameter uses the `tie_breaker_id` field to ensure all lists are sorted and returned correctly.'
           schema:
             $ref: '#/components/schemas/FindListsCursor'
         - name: filter
@@ -82,6 +85,30 @@ paths:
                   - per_page
                   - total
                   - cursor
+              examples:
+                ipList:
+                  value:
+                    data:
+                      - id: ip_list
+                        type: ip
+                        name: Simple list with an ip
+                        description: This list describes bad internet ip
+                        immutable: false
+                        '@timestamp': |
+                          2025-01-08T04:47:34.273Z
+                        version: 1
+                        _version: WzAsMV0=
+                        tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                        created_at: |
+                          2025-01-08T04:47:34.273Z
+                        created_by: elastic
+                        updated_at: |
+                          2025-01-08T04:47:34.273Z
+                        updated_by: elastic
+                    page: 1
+                    per_page: 20
+                    total: 1
+                    cursor: WzIwLFsiZjU1MDgxODgtYjFlOS00ZTZlLTk2NjItZDAzOWE3ZDg5ODk5Il1d
         400:
           description: Invalid input data response
           content:
@@ -90,29 +117,56 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request query]: page: Expected number, received nan'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [GET /api/lists/_find?page=1&per_page=20] is unauthorized for user, this action is granted by the Kibana privileges [lists-read]'
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500
 
 components:
   schemas:
     FindListsCursor:
-      $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/primitives.schema.yaml#/components/schemas/NonEmptyString'
+      type: string
+      minLength: 1
+      format: nonempty
+      example: WzIwLFsiYjU3Yzc2MmMtMzAzNi00NjVjLTliZmItN2JmYjVlNmU1MTVhIl1d
 
     FindListsFilter:
       type: string
+      example: 'value:127.0.0.1'

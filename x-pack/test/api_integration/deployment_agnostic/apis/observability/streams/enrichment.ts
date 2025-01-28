@@ -7,7 +7,7 @@
 
 import expect from '@kbn/expect';
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
-import { WiredStreamConfigDefinition } from '@kbn/streams-schema';
+import { IngestStreamUpsertRequest } from '@kbn/streams-schema';
 import {
   disableStreams,
   enableStreams,
@@ -35,7 +35,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         stream: {
           name: 'logs.nginx',
         },
-        condition: {
+        if: {
           field: 'host.name',
           operator: 'eq' as const,
           value: 'routeme',
@@ -50,50 +50,51 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     it('Place processing steps', async () => {
-      const body: WiredStreamConfigDefinition = {
-        ingest: {
-          processing: [
-            {
-              config: {
+      const body: IngestStreamUpsertRequest = {
+        dashboards: [],
+        stream: {
+          ingest: {
+            lifecycle: { inherit: {} },
+            processing: [
+              {
                 grok: {
                   field: 'message',
                   patterns: [
                     '%{TIMESTAMP_ISO8601:inner_timestamp} %{LOGLEVEL:log.level} %{GREEDYDATA:message2}',
                   ],
+                  if: { always: {} },
                 },
               },
-            },
-            {
-              config: {
+              {
                 dissect: {
                   field: 'message2',
                   pattern: '%{log.logger} %{message3}',
+                  if: {
+                    field: 'log.level',
+                    operator: 'eq',
+                    value: 'info',
+                  },
                 },
               },
-              condition: {
-                field: 'log.level',
-                operator: 'eq',
-                value: 'info',
-              },
-            },
-          ],
-          routing: [],
-          wired: {
-            fields: {
-              '@timestamp': {
-                type: 'date',
-              },
-              message: {
-                type: 'match_only_text',
-              },
-              message2: {
-                type: 'match_only_text',
-              },
-              'host.name': {
-                type: 'keyword',
-              },
-              'log.level': {
-                type: 'keyword',
+            ],
+            routing: [],
+            wired: {
+              fields: {
+                '@timestamp': {
+                  type: 'date',
+                },
+                message: {
+                  type: 'match_only_text',
+                },
+                message2: {
+                  type: 'match_only_text',
+                },
+                'host.name': {
+                  type: 'keyword',
+                },
+                'log.level': {
+                  type: 'keyword',
+                },
               },
             },
           },

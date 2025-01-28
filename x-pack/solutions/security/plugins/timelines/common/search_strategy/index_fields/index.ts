@@ -50,14 +50,14 @@ export interface IndexFieldsStrategyRequestById extends IEsSearchRequest {
 }
 
 /**
- * @deprecated use kibana data views api https://github.com/elastic/kibana/blob/83f1fb4f26219f32cab43706db78d544c7bc2f6d/src/platform/plugins/shared/data_views/common/data_views/data_views.ts#L294
+ * @deprecated use kibana data views api https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data_views/common/data_views/data_views.ts#L139
  */
 export type IndexFieldsStrategyRequest<T extends 'indices' | 'dataView'> = T extends 'dataView'
   ? IndexFieldsStrategyRequestById
   : IndexFieldsStrategyRequestByIndices;
 
 /**
- * @deprecated use kibana data views api https://github.com/elastic/kibana/blob/83f1fb4f26219f32cab43706db78d544c7bc2f6d/src/platform/plugins/shared/data_views/common/data_views/data_views.ts#L294
+ * @deprecated use kibana data views api https://github.com/elastic/kibana/blob/main/src/platform/plugins/shared/data_views/common/data_views/data_views.ts#L139
  */
 export interface IndexFieldsStrategyResponse extends IEsSearchResponse {
   indexFields: IndexField[];
