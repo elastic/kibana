@@ -202,7 +202,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
             color="text"
             className="dataGridInTableSearch__button"
             aria-label={i18n.translate('dataGridInTableSearch.buttonSearch', {
-              defaultMessage: 'Search in the table',
+              defaultMessage: 'Find in table',
             })}
             css={css`
               /* to make the transition between the button and input more seamless for cases where a custom toolbar is not used */
