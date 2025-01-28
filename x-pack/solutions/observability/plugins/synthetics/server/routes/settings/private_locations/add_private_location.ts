@@ -8,7 +8,6 @@
 import { schema, TypeOf } from '@kbn/config-schema';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { v4 as uuidV4 } from 'uuid';
-import { INTEGRATED_SOLUTIONS } from '@kbn/uptime-plugin/common/constants';
 import { PrivateLocationRepository } from '../../../repositories/private_location_repository';
 import { PRIVATE_LOCATION_WRITE_API } from '../../../feature';
 import { migrateLegacyPrivateLocations } from './migrate_legacy_private_locations';
@@ -16,8 +15,6 @@ import { SyntheticsRestApiRouteFactory } from '../../types';
 import { SYNTHETICS_API_URLS } from '../../../../common/constants';
 import { toClientContract, toSavedObjectContract } from './helpers';
 import { PrivateLocation } from '../../../../common/runtime_types';
-
-const data = INTEGRATED_SOLUTIONS;
 
 export const PrivateLocationSchema = schema.object({
   label: schema.string(),

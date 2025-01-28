@@ -1020,19 +1020,6 @@ module.exports = {
       },
     },
     {
-      // disable imports from legacy uptime plugin
-      files: ['x-pack/solutions/observability/plugins/synthetics/**/*.{js,mjs,ts,tsx}'],
-      rules: {
-        'no-restricted-imports': [
-          'error',
-          {
-            patterns: ['**/uptime-plugin/*'],
-            paths: RESTRICTED_IMPORTS,
-          },
-        ],
-      },
-    },
-    {
       files: [
         'x-pack/solutions/observability/plugins/apm/**/*.{js,mjs,ts,tsx}',
         'x-pack/solutions/observability/plugins/apm_data_access/**/*.{js,mjs,ts,tsx}',
