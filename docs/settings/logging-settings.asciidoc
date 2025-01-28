@@ -86,4 +86,7 @@ The following table serves as a quick reference for different logging configurat
 | `logging.loggers[].<logger>.appenders`
 | Determines the appender to apply to a specific logger context as an array. Optional and falls back to the appender(s) of the `root` logger if not specified.
 
+|[[enable-http-debug-logs]] `deprecation.enable_http_debug_logs`
+| Optional boolean to log debug messages when a deprecated API is called. Default is `false`.
+
 |===

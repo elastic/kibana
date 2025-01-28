@@ -5,8 +5,4 @@
  * 2.0.
  */
 
-import { i18n } from '@kbn/i18n';
-
-export const SETUP_GUIDE_TITLE = i18n.translate('xpack.enterpriseSearch.setupGuide.title', {
-  defaultMessage: 'Setup Guide',
-});
+export const AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION = '1.13.0-preview02';
