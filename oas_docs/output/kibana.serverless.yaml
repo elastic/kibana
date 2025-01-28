@@ -37586,8 +37586,8 @@ paths:
           content:
             application/json; Elastic-Api-Version=2023-10-31:
               schema:
-                $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryResponse'
-          description: Successful request returning the deleted Knowledge Base Entry
+                $ref: '#/components/schemas/Security_AI_Assistant_API_DeleteResponseFields'
+          description: Successful request returning the deleted Knowledge Base Entry's ID
         '400':
           content:
             application/json; Elastic-Api-Version=2023-10-31:
@@ -43855,6 +43855,13 @@ components:
         title:
           description: The conversation title.
           type: string
+      required:
+        - id
+    Security_AI_Assistant_API_DeleteResponseFields:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_NonEmptyString'
       required:
         - id
     Security_AI_Assistant_API_DocumentEntry:

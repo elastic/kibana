@@ -693,8 +693,8 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/KnowledgeBaseEntryResponse'
-          description: Successful request returning the deleted Knowledge Base Entry
+                $ref: '#/components/schemas/DeleteResponseFields'
+          description: Successful request returning the deleted Knowledge Base Entry's ID
         '400':
           content:
             application/json:
@@ -1264,6 +1264,13 @@ components:
         title:
           description: The conversation title.
           type: string
+      required:
+        - id
+    DeleteResponseFields:
+      type: object
+      properties:
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
       required:
         - id
     DocumentEntry:
