@@ -5008,7 +5008,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-browser-mocks@link:packages/core/saved-objects/core-saved-objects-browser-mocks":
+"@kbn/core-saved-objects-browser-mocks@link:src/core/packages/saved-objects/browser-mocks":
   version "0.0.0"
   uid ""
 
