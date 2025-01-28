@@ -34,7 +34,7 @@ and enrichments on your data.
 [cols="50, 50"]
 |===
 
-a| {ref}/index-mgmt.html[Index Management]
+| {ref}/index-mgmt.html[Index Management]
 | View index settings, mappings, and statistics and perform operations, such as refreshing,
 flushing, and clearing the cache. Practicing good index management ensures
 that your data is stored cost effectively.
@@ -109,7 +109,7 @@ above a certain percentage.
 [cols="50, 50"]
 |===
 
-a| <<xpack-security, Users>>
+| <<xpack-security, Users>>
 |View the users that have been defined on your cluster.
 Add or delete users and assign roles that give users
 specific privileges.
@@ -136,7 +136,7 @@ Kerberos, PKI, OIDC, and SAML.
 [cols="50, 50"]
 |===
 
-a| <<data-views, Data Views>>
+| <<data-views, Data Views>>
 |Manage the fields in the data views that retrieve your data from {es}.
 
 | <<managing-saved-objects, Saved Objects>>
@@ -157,7 +157,7 @@ for example, when you have a large volume of data or when the performance of you
 A space is isolated from all other spaces,
 so you can tailor it to your needs without impacting others.
 
-a| <<advanced-options, Advanced Settings>>
+| <<advanced-options, Advanced Settings>>
 | Customize {kib} to suit your needs. Change the format for displaying dates, turn on dark mode,
 set the timespan for notification messages, and much more.
 
@@ -210,5 +210,3 @@ include::{kibana-root}/docs/management/managing-tags.asciidoc[]
 include::{kibana-root}/docs/management/upgrade-assistant.asciidoc[]
 
 include::{kibana-root}/docs/management/watcher-ui/index.asciidoc[]
-
-

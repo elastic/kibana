@@ -42,7 +42,12 @@ export const DissectPatternDefinition = () => {
           defaultMessage="Pattern used to dissect the specified field. The pattern is defined by the parts of the string to discard. Use a {keyModifier} to alter the dissection behavior."
           values={{
             keyModifier: (
-              <EuiLink target="_blank" external href={esDocUrl}>
+              <EuiLink
+                data-test-subj="streamsAppDissectPatternDefinitionKeyModifierLink"
+                target="_blank"
+                external
+                href={esDocUrl}
+              >
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.dissectPatternDefinitionsLink',
                   { defaultMessage: 'key modifier' }
