@@ -28,7 +28,6 @@
     "@kbn/kibana-utils-plugin",
     "@kbn/esql-validation-autocomplete",
     "@kbn/monaco",
-    "@kbn/esql-ast",
     "@kbn/search-types",
     "@kbn/react-kibana-context-render",
     "@kbn/react-kibana-mount",
