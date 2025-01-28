@@ -34,9 +34,10 @@ export const initSideNavigation = async (services: Services) => {
         const management = footerGroup?.children.find((child) => child.link === 'management');
         if (management) {
           management.renderAs = 'panelOpener';
-          management.id = 'stack_management';
+          management.id = 'stack_management'; // This id can't be changed as we use it to open the panel programmatically from the S.M. landing page (available through global search only)
           management.spaceBefore = null;
           management.children = stackManagementLinks;
+          delete management.link; // no landing page for stack management
         }
       })
     )
