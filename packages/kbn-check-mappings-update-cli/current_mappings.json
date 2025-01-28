@@ -2199,6 +2199,14 @@
       "key": {
         "type": "keyword"
       },
+      "kibana_api_key": {
+        "index": false,
+        "type": "keyword"
+      },
+      "kibana_url": {
+        "index": false,
+        "type": "keyword"
+      },
       "name": {
         "type": "keyword"
       },
@@ -2250,6 +2258,14 @@
       "secrets": {
         "dynamic": false,
         "properties": {
+          "kibana_api_key": {
+            "dynamic": false,
+            "properties": {
+              "id": {
+                "type": "keyword"
+              }
+            }
+          },
           "password": {
             "dynamic": false,
             "properties": {
@@ -2291,6 +2307,9 @@
       },
       "ssl": {
         "type": "binary"
+      },
+      "sync_integrations": {
+        "type": "boolean"
       },
       "timeout": {
         "type": "integer"
