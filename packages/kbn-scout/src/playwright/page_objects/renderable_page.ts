@@ -9,11 +9,7 @@
 
 import { retryForSuccess } from '@kbn/ftr-common-functional-services';
 import { ToolingLog } from '@kbn/tooling-log';
-import { ScoutPage } from '..';
-
-const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
-const RENDER_COMPLETE_PENDING_SELECTOR = '[data-render-complete="false"]';
-const DATA_LOADING_SELECTOR = '[data-loading]';
+import { ScoutPage, expect } from '..';
 
 export class RenderablePage {
   constructor(private readonly page: ScoutPage, private readonly log: ToolingLog) {}
@@ -23,26 +19,35 @@ export class RenderablePage {
       retryCount: 10,
       timeout: 10_000,
       methodName: 'waitForRender()',
-      block: async () => {
-        const renderCompleteLocator = this.page.locator(RENDER_COMPLETE_SELECTOR);
-        const renderPendingDataTitleLocator = this.page
-          .locator(RENDER_COMPLETE_PENDING_SELECTOR)
-          .and(this.page.locator('data-title'));
-        const loadingLocator = this.page.locator(DATA_LOADING_SELECTOR);
-
-        await renderCompleteLocator.waitFor({ timeout: 1000 });
-        const completedElementsCount = await renderCompleteLocator.count();
-
-        if (completedElementsCount < count) {
-          const pendingTitles = await renderPendingDataTitleLocator.all();
-          throw new Error(
-            `${completedElementsCount} elements completed rendering, still waiting on a total of ${count} - ${pendingTitles}`
-          );
-        }
-
-        const loadingCount = await loadingLocator.count();
-        if (loadingCount > 0) throw new Error(`${loadingCount} elements still loading contents`);
-      },
+      block: async () => await renderWait(count, this.page),
     });
   }
+  async waitForRenderPoll(count: number = 1): Promise<void> {
+    await expect(async () => await renderWait(count, this.page)).toPass({
+      timeout: 10_000,
+    });
+  }
+}
+
+const RENDER_COMPLETE_SELECTOR = '[data-render-complete="true"]';
+const RENDER_COMPLETE_PENDING_SELECTOR = '[data-render-complete="false"]';
+const DATA_LOADING_SELECTOR = '[data-loading]';
+
+async function renderWait(count: number, page: ScoutPage) {
+  const renderCompleteLocator = page.locator(RENDER_COMPLETE_SELECTOR);
+  const renderPendingDataTitleLocator = page
+    .locator(RENDER_COMPLETE_PENDING_SELECTOR)
+    .and(page.locator('data-title'));
+  const loadingLocator = page.locator(DATA_LOADING_SELECTOR);
+
+  await renderCompleteLocator.waitFor({ timeout: 1000 });
+  const completedElementsCount = await renderCompleteLocator.count();
+
+  if (completedElementsCount < count)
+    throw new Error(
+      `${completedElementsCount} elements completed rendering, still waiting on a total of ${count} - ${await renderPendingDataTitleLocator.all()}`
+    );
+
+  const loadingCount = await loadingLocator.count();
+  if (loadingCount > 0) throw new Error(`${loadingCount} elements still loading contents`);
 }
