@@ -8,8 +8,9 @@
  */
 
 function booleanFromEnv(varName: string, defaultValue: boolean = false): boolean {
-  const truthyStrings = ['1', 'yes', 'true'];
-  return truthyStrings.includes((process.env[varName] || 'false').toLowerCase()) || defaultValue;
+  const envValue = process.env[varName];
+  if (envValue === undefined || envValue.trim().length === 0) return defaultValue;
+  return ['1', 'yes', 'true'].includes(envValue.trim().toLowerCase());
 }
 
 export const SCOUT_REPORTER_ENABLED = booleanFromEnv('SCOUT_REPORTER_ENABLED');
