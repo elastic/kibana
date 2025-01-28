@@ -236,7 +236,7 @@ export function InternalDashboardTopNav({
         }
       );
     }
-  }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs]);
+  }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs, lastSavedId]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
