@@ -10,12 +10,8 @@
 import { ToolingLog } from '@kbn/tooling-log';
 
 export class ScoutLogger extends ToolingLog {
-  private log: ToolingLog;
-
   constructor() {
-    super({ level: 'verbose', writeTo: process.stdout });
-
-    this.log = new ToolingLog({ level: 'verbose', writeTo: process.stdout }, { context: 'scout' });
+    super({ level: 'verbose', writeTo: process.stdout }, { context: 'scout' });
     this.serviceLoaded('logger');
   }
 
@@ -24,7 +20,7 @@ export class ScoutLogger extends ToolingLog {
    * @param name unique name of the service
    */
   public serviceLoaded(name: string) {
-    this.log.debug(`[service] ${name}`);
+    this.debug(`[service] ${name}`);
   }
 }
 

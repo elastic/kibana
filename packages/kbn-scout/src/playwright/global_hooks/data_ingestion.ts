@@ -22,11 +22,11 @@ export async function ingestTestDataHook(config: FullConfig, archives: string[])
   const log = getLogger();
 
   if (archives.length === 0) {
-    log.info('[scout setup] no test data to ingest');
+    log.debug('[setup] no test data to ingest');
     return;
   }
 
-  return measurePerformance(log, '[scout setup]: ingestTestDataHook', async () => {
+  return measurePerformance(log, '[setup]: ingestTestDataHook', async () => {
     // TODO: This should be configurable local vs cloud
     const configName = 'local';
     const projectUse = config.projects[0].use as ScoutTestOptions;
@@ -36,7 +36,7 @@ export async function ingestTestDataHook(config: FullConfig, archives: string[])
     const kbnClient = getKbnClient(scoutConfig, log);
     const esArchiver = getEsArchiver(esClient, kbnClient, log);
 
-    log.info('[setup] loading test data (only if indexes do not exist)...');
+    log.debug('[setup] loading test data (only if indexes do not exist)...');
     for (const archive of archives) {
       await esArchiver.loadIfNeeded(archive);
     }

@@ -21,7 +21,7 @@ export function createScoutConfig(
   }
 
   const configPath = path.join(configDir, `${configName}.json`);
-  log.info(`Reading test servers confiuration from file: ${configPath}`);
+  log.info(`[config] Reading test servers confiuration from file: ${configPath}`);
 
   const config = JSON.parse(fs.readFileSync(configPath, 'utf-8')) as ScoutTestConfig;
 
