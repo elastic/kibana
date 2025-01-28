@@ -641,6 +641,10 @@ Index Management by running this series of requests in Console:
 external LLM APIs. Its goals are:
 
 
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/inference_endpoint/README.md[inferenceEndpoint]
+|A Kibana plugin
+
+
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/infra/README.md[infra]
 |This is the home of the infra plugin, which aims to provide a solution for
 the infrastructure monitoring use-case within Kibana.
@@ -664,10 +668,6 @@ the infrastructure monitoring use-case within Kibana.
 
 |{kib-repo}blob/{branch}/x-pack/solutions/observability/plugins/investigate_app/README.md[investigateApp]
 |undefined
-
-
-|{kib-repo}blob/{branch}/x-pack/solutions/security/plugins/kubernetes_security/README.md[kubernetesSecurity]
-|This plugin provides interactive visualizations of your Kubernetes workload and session data.
 
 
 |{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/lens/readme.md[lens]
@@ -740,7 +740,7 @@ Elastic.
 |This plugin provides shared components and services for use across observability solutions, as well as the observability landing page UI.
 
 
-|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/README.md[observabilityAIAssistant]
+|{kib-repo}blob/{branch}/x-pack/platform/plugins/shared/observability_ai_assistant/README.md[observabilityAIAssistant]
 |This document gives an overview of the features of the Observability AI Assistant at the time of writing, and how to use them. At a high level, the Observability AI Assistant offers contextual insights, and a chat functionality that we enrich with function calling, allowing the LLM to hook into the user's data. We also allow the LLM to store things it considers new information as embeddings into Elasticsearch, and query this knowledge base when it decides it needs more information, using ELSER.
 
 

@@ -8,8 +8,11 @@
 import type { IEsSearchResponse } from '@kbn/search-types';
 
 import { EntityIdentifierFields, EntityType } from '../../../../entity_analytics/types';
-import { EntityRiskLevels, EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
-import type { EntityRiskScoreRecord } from '../../../../api/entity_analytics/common';
+import { EntityRiskLevelsEnum } from '../../../../api/entity_analytics/common';
+import type {
+  EntityRiskScoreRecord,
+  EntityRiskLevels,
+} from '../../../../api/entity_analytics/common';
 import type { Inspect, Maybe, SortField } from '../../../common';
 
 export interface RiskScoreStrategyResponse<T extends EntityType> extends IEsSearchResponse {
@@ -23,7 +26,7 @@ export interface RiskStats extends EntityRiskScoreRecord {
   multipliers: string[];
 }
 
-export const RiskSeverity = EntityRiskLevels.enum;
+export const RiskSeverity = EntityRiskLevelsEnum;
 export type RiskSeverity = EntityRiskLevels;
 
 export type EntityRiskScore<T extends EntityType> = {

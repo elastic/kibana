@@ -342,25 +342,21 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         totalItemCount: totalAgents,
         pageSizeOptions,
       }}
-      selection={
-        !authz.fleet.allAgents
-          ? undefined
-          : {
-              selected,
-              onSelectionChange,
-              selectable: isAgentSelectable,
-              selectableMessage: (selectable, agent) => {
-                if (selectable) return '';
-                if (!agent.active) {
-                  return 'This agent is not active';
-                }
-                if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
-                  return 'This action is not available for agents enrolled in an externally managed agent policy';
-                }
-                return '';
-              },
-            }
-      }
+      selection={{
+        selected,
+        onSelectionChange,
+        selectable: isAgentSelectable,
+        selectableMessage: (selectable, agent) => {
+          if (selectable) return '';
+          if (!agent.active) {
+            return 'This agent is not active';
+          }
+          if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+            return 'This action is not available for agents enrolled in an externally managed agent policy';
+          }
+          return '';
+        },
+      }}
       onChange={onTableChange}
       sorting={sorting}
     />

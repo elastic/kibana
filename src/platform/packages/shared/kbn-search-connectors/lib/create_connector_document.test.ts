@@ -32,6 +32,7 @@ describe('createConnectorDocument', () => {
       api_key_secret_id: null,
       configuration: {},
       custom_scheduling: {},
+      deleted: false,
       description: null,
       error: null,
       features: null,
