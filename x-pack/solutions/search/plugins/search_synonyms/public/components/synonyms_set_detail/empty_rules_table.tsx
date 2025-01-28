@@ -28,7 +28,7 @@ export const SynonymsSetEmptyRuleTable: React.FC<SynonymsSetEmptyRuleTableProps>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink>
+        <EuiLink data-test-subj="searchSynonymsSynonymsSetEmptyRuleTableViewDocumentationLink">
           {i18n.translate('xpack.searchSynonyms.synonymsSetEmptyRuleTable.viewDocumentation', {
             defaultMessage: 'View documentation',
           })}

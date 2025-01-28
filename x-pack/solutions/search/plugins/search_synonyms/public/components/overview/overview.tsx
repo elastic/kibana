@@ -96,7 +96,11 @@ export const SearchSynonymsOverview = () => {
           <SynonymSets />
         )}
         {!isInitialLoading && synonymsData && synonymsData._meta.totalItemCount === 0 && (
-          <EmptyPrompt />
+          <EmptyPrompt
+            getStartedAction={() => {
+              setIsCreateModalVisible(true);
+            }}
+          />
         )}
       </KibanaPageTemplate.Section>
       {embeddableConsole}

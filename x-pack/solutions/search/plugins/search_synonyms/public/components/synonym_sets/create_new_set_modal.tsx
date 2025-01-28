@@ -49,7 +49,14 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
       </EuiModalHeader>
 
       <EuiModalBody>
-        <EuiForm id={formId} component="form">
+        <EuiForm
+          id={formId}
+          component="form"
+          onSubmit={(e) => {
+            e.preventDefault();
+            createSynonymsSet({ synonymsSetId: name });
+          }}
+        >
           <EuiFormRow
             label={i18n.translate('xpack.searchSynonyms.createSynonymsSetModal.nameLabel', {
               defaultMessage: 'Name',
