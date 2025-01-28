@@ -163,6 +163,7 @@ export function MobileLocationStats({
       trendShape: MetricTrendShape.Area,
     },
   ];
+
   return (
     <EuiFlexGroup direction="column">
       {metrics.map((metric, key) => (
