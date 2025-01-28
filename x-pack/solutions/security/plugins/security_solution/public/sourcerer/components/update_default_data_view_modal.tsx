@@ -27,7 +27,7 @@ interface Props {
   missingPatterns: string[];
   onDismissModal: () => void;
   onContinue: () => void;
-  onUpdate: () => void;
+  onAddDataView: () => void;
 }
 const MyEuiModal = styled(EuiModal)`
   .euiModal__flex {
@@ -39,8 +39,8 @@ const MyEuiModal = styled(EuiModal)`
   }
 `;
 
-export const UpdateDefaultDataViewModal = React.memo<Props>(
-  ({ isShowing, onDismissModal, onContinue, onUpdate, missingPatterns }) =>
+export const CreateAdHocDataViewModal = React.memo<Props>(
+  ({ isShowing, onDismissModal, onContinue, onAddDataView: onUpdate, missingPatterns }) =>
     isShowing ? (
       <MyEuiModal onClose={onDismissModal} data-test-subj="sourcerer-update-data-view-modal">
         <EuiModalHeader>
@@ -90,4 +90,4 @@ export const UpdateDefaultDataViewModal = React.memo<Props>(
     ) : null
 );
 
-UpdateDefaultDataViewModal.displayName = 'UpdateDefaultDataViewModal';
+CreateAdHocDataViewModal.displayName = 'UpdateDefaultDataViewModal';

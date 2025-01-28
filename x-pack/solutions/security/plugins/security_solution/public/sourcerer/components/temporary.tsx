@@ -19,7 +19,7 @@ import {
 import React, { useMemo } from 'react';
 import * as i18n from './translations';
 import { Blockquote, ResetButton } from './helpers';
-import { UpdateDefaultDataViewModal } from './update_default_data_view_modal';
+import { CreateAdHocDataViewModal } from './update_default_data_view_modal';
 import { TimelineId } from '../../../common/types';
 import { TimelineTypeEnum } from '../../../common/api/timeline';
 import { timelineSelectors } from '../../timelines/store';
@@ -217,12 +217,12 @@ export const TemporarySourcerer = React.memo<TemporarySourcererProps>(
         onUpdate={onUpdateStepOne}
         selectedPatterns={selectedPatterns}
       />
-      <UpdateDefaultDataViewModal
+      <CreateAdHocDataViewModal
         isShowing={isShowingUpdateModal}
         missingPatterns={missingPatterns}
         onDismissModal={onDismissModal}
         onContinue={onContinueWithoutUpdate}
-        onUpdate={onUpdateStepTwo}
+        onAddDataView={onUpdateStepTwo}
       />
     </>
   )

@@ -99,7 +99,7 @@ export const ALERTS_BADGE_TITLE = i18n.translate(
 export const DEPRECATED_BADGE_TITLE = i18n.translate(
   'xpack.securitySolution.indexPatterns.updateAvailableBadgeTitle',
   {
-    defaultMessage: 'Update available',
+    defaultMessage: 'Action required',
   }
 );
 
