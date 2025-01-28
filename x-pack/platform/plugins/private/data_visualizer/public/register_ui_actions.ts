@@ -7,20 +7,12 @@
 
 import type { CoreSetup } from '@kbn/core/public';
 import type { UiActionsSetup } from '@kbn/ui-actions-plugin/public';
-import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import { OPEN_FILE_UPLOAD_LITE_TRIGGER } from '@kbn/file-upload-common';
 import type { DataVisualizerStartDependencies } from './application/common/types/data_visualizer_plugin';
 import {
-  OPEN_FILE_UPLOAD_LITE_TRIGGER,
   createOpenFileUploadLiteAction,
   createOpenFileUploadLiteTrigger,
 } from './lite/file_upload_lite_action';
-import type { FileUploadResults } from './lite/flyout/create_flyout';
-
-export interface OpenFileUploadLiteContext {
-  onUploadComplete?: (results: FileUploadResults | null) => void;
-  indexSettings?: IndicesIndexSettings;
-  autoAddInference?: string;
-}
 
 export function registerUiActions(
   uiActions: UiActionsSetup,

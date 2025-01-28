@@ -20,6 +20,7 @@ import type {
   MappingTypeMapping,
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { AnalyzedFile } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
 import {
@@ -27,7 +28,6 @@ import {
   getInferenceId,
 } from '../../application/file_data_visualizer/components/import_view/import';
 import { AutoDeploy } from '../../application/file_data_visualizer/components/import_view/auto_deploy';
-import type { FileUploadResults } from '../flyout/create_flyout';
 import type { FileClash } from './merge_tools';
 import {
   createMergedMappings,

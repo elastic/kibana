@@ -50,6 +50,7 @@
     "@kbn/inference-common",
     "@kbn/alerts-ui-shared",
     "@kbn/ui-actions-plugin",
+    "@kbn/file-upload-common",
   ],
   "exclude": [
     "target/**/*",

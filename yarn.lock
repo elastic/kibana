@@ -5780,6 +5780,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/file-upload-common@link:x-pack/platform/packages/shared/file-upload-common":
+  version "0.0.0"
+  uid ""
+
 "@kbn/file-upload-plugin@link:x-pack/platform/plugins/private/file_upload":
   version "0.0.0"
   uid ""

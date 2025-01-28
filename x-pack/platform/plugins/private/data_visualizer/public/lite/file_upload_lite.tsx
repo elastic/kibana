@@ -9,10 +9,10 @@ import React from 'react';
 import { KibanaContextProvider } from '@kbn/kibana-react-plugin/public';
 import { KibanaRenderContextProvider } from '@kbn/react-kibana-context-render';
 import type { IndicesIndexSettings } from '@elastic/elasticsearch/lib/api/types';
+import type { FileUploadResults } from '@kbn/file-upload-common';
 import type { ResultLinks } from '../../common/app';
 import type { GetAdditionalLinks } from '../application/common/components/results_links';
 import { getCoreStart, getPluginsStart } from '../kibana_services';
-import type { FileUploadResults } from './flyout/create_flyout';
 import { FileUploadLiteView } from './file_upload_lite_view';
 
 export interface Props {
@@ -23,8 +23,6 @@ export interface Props {
   indexSettings?: IndicesIndexSettings;
   onClose?: () => void;
 }
-
-export type FileDataVisualizerLiteSpec = typeof FileDataVisualizerLite;
 
 export const FileDataVisualizerLite: FC<Props> = ({
   getAdditionalLinks,
@@ -47,7 +45,7 @@ export const FileDataVisualizerLite: FC<Props> = ({
   };
 
   const EmptyContext: FC<PropsWithChildren<unknown>> = ({ children }) => <>{children}</>;
-  const CloudContext = cloud?.CloudContextProvider || EmptyContext;
+  const CloudContext = cloud?.CloudContextProvider ?? EmptyContext;
 
   return (
     <KibanaRenderContextProvider {...coreStart}>

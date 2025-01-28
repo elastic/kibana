@@ -13,16 +13,8 @@ import { toMountPoint } from '@kbn/react-kibana-mount';
 import type { SharePluginStart } from '@kbn/share-plugin/public';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 import type { CoreStart } from '@kbn/core/public';
+import type { FileUploadResults, OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import { FileUploadLiteFlyoutContents } from './flyout';
-import type { OpenFileUploadLiteContext } from '../../register_ui_actions';
-
-export interface FileUploadResults {
-  index: string;
-  pipelineId?: string;
-  dataView?: { id: string; title: string };
-  inferenceId?: string;
-  files: Array<{ fileName: string; docCount: number; fileFormat: string; documentType: string }>;
-}
 
 export function createFlyout(
   coreStart: CoreStart,

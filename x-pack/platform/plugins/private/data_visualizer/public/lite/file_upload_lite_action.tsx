@@ -8,25 +8,21 @@
 import { i18n } from '@kbn/i18n';
 import type { Trigger, UiActionsActionDefinition } from '@kbn/ui-actions-plugin/public';
 import type { CoreSetup } from '@kbn/core/public';
-// import type { DataVisualizerCoreSetup } from '../plugin';
 import {
-  // OPEN_FILE_UPLOAD_LITE_ACTION,
-  // OPEN_FILE_UPLOAD_LITE_TRIGGER,
-  type OpenFileUploadLiteContext,
-} from '../register_ui_actions';
+  OPEN_FILE_UPLOAD_LITE_ACTION,
+  OPEN_FILE_UPLOAD_LITE_TRIGGER,
+} from '@kbn/file-upload-common';
+
+import type { OpenFileUploadLiteContext } from '@kbn/file-upload-common';
 import type { DataVisualizerStartDependencies } from '../application/common/types/data_visualizer_plugin';
-
-export const OPEN_FILE_UPLOAD_LITE_ACTION = 'openFileUploadLiteTrigger';
-
-export const OPEN_FILE_UPLOAD_LITE_TRIGGER = 'OPEN_FILE_UPLOAD_LITE_TRIGGER';
 
 export const createOpenFileUploadLiteTrigger: Trigger = {
   id: OPEN_FILE_UPLOAD_LITE_TRIGGER,
-  title: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
-    defaultMessage: 'Create categorization anomaly detection job',
+  title: i18n.translate('xpack.dataVisualizer.file.lite.actions.triggerTitle', {
+    defaultMessage: 'Open file upload UI',
   }),
-  description: i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
-    defaultMessage: 'Create categorization anomaly detection job',
+  description: i18n.translate('xpack.dataVisualizer.file.lite.actions.triggerDescription', {
+    defaultMessage: 'Open file upload UI',
   }),
 };
 
@@ -40,8 +36,8 @@ export function createOpenFileUploadLiteAction(
       return 'machineLearningApp';
     },
     getDisplayName: () =>
-      i18n.translate('xpack.ml.actions.createADJobFromPatternAnalysis', {
-        defaultMessage: 'Create categorization anomaly detection job',
+      i18n.translate('xpack.dataVisualizer.file.lite.actions.displayName', {
+        defaultMessage: 'Open file upload UI',
       }),
     async execute({
       onUploadComplete,
