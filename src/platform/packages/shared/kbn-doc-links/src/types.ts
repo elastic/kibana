@@ -254,6 +254,7 @@ export interface DocLinks {
     readonly secureSavedObject: string;
     readonly xpackSecurity: string;
     readonly dashboardImportExport: string;
+    readonly upgradeNotes: string;
   };
   readonly upgradeAssistant: {
     readonly overview: string;
