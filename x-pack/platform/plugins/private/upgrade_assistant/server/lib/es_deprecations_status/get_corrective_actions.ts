@@ -16,7 +16,7 @@ interface Actions {
   actions: Action[];
 }
 
-type EsMetadata = Actions & {
+export type EsMetadata = Actions & {
   [key: string]: string;
 };
 

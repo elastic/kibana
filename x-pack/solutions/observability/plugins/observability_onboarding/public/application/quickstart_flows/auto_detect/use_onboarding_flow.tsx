@@ -9,6 +9,8 @@ import useInterval from 'react-use/lib/useInterval';
 import { useKibana } from '@kbn/kibana-react-plugin/public';
 import useAsync from 'react-use/lib/useAsync';
 import { type AssetSOObject, type GetBulkAssetsResponse } from '@kbn/fleet-plugin/common';
+import { useEffect, useState } from 'react';
+import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
 import { getOnboardingStatus } from './get_onboarding_status';
 import { getInstalledIntegrations } from './get_installed_integrations';
@@ -32,8 +34,9 @@ export const DASHBOARDS = {
 
 export function useOnboardingFlow() {
   const {
-    services: { fleet },
+    services: { fleet, analytics },
   } = useKibana<ObservabilityOnboardingContextValue>();
+  const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
 
   // Create onboarding session
   const { data, error, refetch } = useFetcher(
@@ -98,12 +101,25 @@ export function useOnboardingFlow() {
         ),
       };
     });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [installedIntegrations.length]);
 
   useInterval(
     refetchProgress,
     progressStatus === FETCH_STATUS.SUCCESS && status !== 'dataReceived' ? 3000 : null
   );
+
+  useEffect(() => {
+    if (status === 'dataReceived' && !dataReceivedTelemetrySent) {
+      setDataReceivedTelemetrySent(true);
+      analytics.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+        flow_type: 'autoDetect',
+        flow_id: onboardingId,
+        step: 'logs-ingest',
+        step_status: 'complete',
+      });
+    }
+  }, [analytics, dataReceivedTelemetrySent, onboardingId, status]);
 
   return {
     data,
