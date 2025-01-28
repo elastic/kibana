@@ -29,6 +29,7 @@ export function ApmStacktrace({ hit, dataView }: { hit: DataTableRecord; dataVie
     id: hit.raw._id || '',
     index: hit.raw._index,
     dataView,
+    requestSource: true,
   });
 
   useEffect(() => {
