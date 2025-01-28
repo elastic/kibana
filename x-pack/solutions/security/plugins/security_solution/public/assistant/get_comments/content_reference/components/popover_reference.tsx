@@ -7,8 +7,8 @@
 
 import { EuiPopover } from '@elastic/eui';
 import React, { useCallback, useMemo, useState } from 'react';
-import { ContentReferenceButton } from './content_reference_button';
 import { css } from '@emotion/css';
+import { ContentReferenceButton } from './content_reference_button';
 
 interface Props {
   contentReferenceCount: number;
@@ -26,13 +26,16 @@ export const PopoverReference: React.FC<React.PropsWithChildren<Props>> = ({
   const closePopover = useCallback(() => setIsPopoverOpen(false), []);
   const openPopover = useCallback(() => setIsPopoverOpen(true), []);
 
-  const button = useMemo(() => (
-    <ContentReferenceButton
-      onClick={togglePopover}
-      onMouseEnter={openPopover}
-      contentReferenceCount={contentReferenceCount}
-    />
-  ), [contentReferenceCount, openPopover, togglePopover]);
+  const button = useMemo(
+    () => (
+      <ContentReferenceButton
+        onClick={togglePopover}
+        onMouseEnter={openPopover}
+        contentReferenceCount={contentReferenceCount}
+      />
+    ),
+    [contentReferenceCount, openPopover, togglePopover]
+  );
 
   return (
     <EuiPopover
@@ -43,7 +46,7 @@ export const PopoverReference: React.FC<React.PropsWithChildren<Props>> = ({
       anchorPosition="upCenter"
       className={css`
         vertical-align: baseline;
-        `}
+      `}
       {...rest}
     >
       {children}

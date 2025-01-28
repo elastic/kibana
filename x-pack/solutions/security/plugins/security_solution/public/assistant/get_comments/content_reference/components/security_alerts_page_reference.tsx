@@ -13,7 +13,6 @@ import { PopoverReference } from './popover_reference';
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
 import { useKibana } from '../../../../common/lib/kibana';
 
-
 interface Props {
   contentReferenceNode: ContentReferenceNode;
   securityAlertsPageContentReference: SecurityAlertsPageContentReference;
@@ -23,24 +22,25 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({
   contentReferenceNode,
   securityAlertsPageContentReference,
 }) => {
-    const { navigateToApp } = useKibana().services.application;
-  
-    const onClick = useCallback((e: React.MouseEvent) => {
+  const { navigateToApp } = useKibana().services.application;
+
+  const onClick = useCallback(
+    (e: React.MouseEvent) => {
       e.preventDefault();
       navigateToApp('security', {
         path: `alerts`,
-        openInNewTab: true
-      })
-    }, [navigateToApp])
-  
+        openInNewTab: true,
+      });
+    },
+    [navigateToApp]
+  );
+
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="SecurityAlertsPageReference"
     >
-      <EuiLink onClick={onClick}>
-        {SECURITY_ALERTS_PAGE_REFERENCE_LABEL}
-      </EuiLink>
+      <EuiLink onClick={onClick}>{SECURITY_ALERTS_PAGE_REFERENCE_LABEL}</EuiLink>
     </PopoverReference>
   );
 };
