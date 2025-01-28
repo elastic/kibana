@@ -6,6 +6,7 @@
  */
 
 import InferenceFlyoutWrapper from '@kbn/inference-endpoint-ui-common';
+import { coreMock as mockCore } from '@kbn/core/public/mocks';
 import { useKibana } from '../../hooks/use_kibana';
 import React from 'react';
 import { render, screen } from '@testing-library/react';
@@ -18,18 +19,14 @@ const mockUseKibana = useKibana as jest.Mock;
 const mockInferenceFlyoutWrapper = InferenceFlyoutWrapper as jest.Mock;
 
 describe('AddInferenceFlyoutWrapper', () => {
-  const mockHttp = {};
-  const mockToasts = {};
+  const mockServices = mockCore.createStart();
   const mockOnFlyoutClose = jest.fn();
   const mockReloadFn = jest.fn();
 
   beforeEach(() => {
     jest.clearAllMocks();
     mockUseKibana.mockReturnValue({
-      services: {
-        http: mockHttp,
-        notifications: { toasts: mockToasts },
-      },
+      services: mockServices,
     });
 
     mockInferenceFlyoutWrapper.mockImplementation(({ onSubmitSuccess }) => {
@@ -47,8 +44,8 @@ describe('AddInferenceFlyoutWrapper', () => {
     expect(mockInferenceFlyoutWrapper).toHaveBeenCalledWith(
       expect.objectContaining({
         onFlyoutClose: mockOnFlyoutClose,
-        http: mockHttp,
-        toasts: mockToasts,
+        http: mockServices.http,
+        toasts: mockServices.notifications.toasts,
         onSubmitSuccess: expect.any(Function),
       }),
       expect.any(Object)

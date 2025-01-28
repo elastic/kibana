@@ -15,26 +15,22 @@ export const addInferenceEndpoint = async (
   config: Config,
   secrets: Secrets
 ) => {
-  try {
-    /* task settings property is required in the API call 
+  /* task settings property is required in the API call 
     but no needed for inference or connector creation
     */
-    const taskSettings = {};
-    const serviceSettings = {
-      ...unflattenObject(config?.providerConfig ?? {}),
-      ...unflattenObject(secrets?.providerSecrets ?? {}),
-    };
+  const taskSettings = {};
+  const serviceSettings = {
+    ...unflattenObject(config?.providerConfig ?? {}),
+    ...unflattenObject(secrets?.providerSecrets ?? {}),
+  };
 
-    return await esClient.inference.put({
-      inference_id: config?.inferenceId ?? '',
-      task_type: config?.taskType as InferenceTaskType,
-      inference_config: {
-        service: config?.provider,
-        service_settings: serviceSettings,
-        task_settings: taskSettings,
-      },
-    });
-  } catch (e) {
-    throw e;
-  }
+  return await esClient.inference.put({
+    inference_id: config?.inferenceId ?? '',
+    task_type: config?.taskType as InferenceTaskType,
+    inference_config: {
+      service: config?.provider,
+      service_settings: serviceSettings,
+      task_settings: taskSettings,
+    },
+  });
 };

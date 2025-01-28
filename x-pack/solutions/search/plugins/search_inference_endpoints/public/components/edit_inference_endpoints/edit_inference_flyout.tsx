@@ -8,9 +8,9 @@
 import { InferenceFlyoutWrapper } from '@kbn/inference-endpoint-ui-common/src/components/inference_flyout_wrapper';
 import React, { useCallback } from 'react';
 import { InferenceEndpoint } from '@kbn/inference-endpoint-ui-common';
+import { flattenObject } from '@kbn/object-utils';
 import { useKibana } from '../../hooks/use_kibana';
 import { useQueryInferenceEndpoints } from '../../hooks/use_inference_endpoints';
-import { flattenObject } from '../../utils/flatten_object';
 import { InferenceEndpointUI } from '../all_inference_endpoints/types';
 
 interface EditInterfaceFlyoutProps {

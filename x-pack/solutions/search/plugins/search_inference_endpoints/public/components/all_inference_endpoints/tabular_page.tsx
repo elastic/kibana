@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback, useMemo, useState } from 'react';
 
 import { EuiBasicTable, EuiBasicTableColumn, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { InferenceAPIConfigResponse } from '@kbn/ml-trained-models-utils';
@@ -90,83 +90,86 @@ export const TabularPage: React.FC<TabularPageProps> = ({ inferenceEndpoints }) 
     searchKey
   );
 
-  const tableColumns: Array<EuiBasicTableColumn<InferenceEndpointUI>> = [
-    {
-      field: 'endpoint',
-      name: i18n.ENDPOINT,
-      'data-test-subj': 'endpointCell',
-      render: (endpoint: string, additionalInfo: InferenceEndpointUI) => {
-        if (endpoint) {
-          return <EndpointInfo inferenceId={endpoint} provider={additionalInfo.provider} />;
-        }
+  const tableColumns = useMemo<Array<EuiBasicTableColumn<InferenceEndpointUI>>>(
+    () => [
+      {
+        field: 'endpoint',
+        name: i18n.ENDPOINT,
+        'data-test-subj': 'endpointCell',
+        render: (endpoint: string, additionalInfo: InferenceEndpointUI) => {
+          if (endpoint) {
+            return <EndpointInfo inferenceId={endpoint} provider={additionalInfo.provider} />;
+          }
 
-        return null;
+          return null;
+        },
+        sortable: true,
+        width: '300px',
       },
-      sortable: true,
-      width: '300px',
-    },
-    {
-      field: 'provider',
-      name: i18n.SERVICE_PROVIDER,
-      'data-test-subj': 'providerCell',
-      render: (provider: InferenceAPIConfigResponse) => {
-        if (provider) {
-          return <ServiceProvider providerEndpoint={provider} />;
-        }
+      {
+        field: 'provider',
+        name: i18n.SERVICE_PROVIDER,
+        'data-test-subj': 'providerCell',
+        render: (provider: InferenceAPIConfigResponse) => {
+          if (provider) {
+            return <ServiceProvider providerEndpoint={provider} />;
+          }
 
-        return null;
+          return null;
+        },
+        sortable: false,
+        width: '285px',
       },
-      sortable: false,
-      width: '285px',
-    },
-    {
-      field: 'type',
-      name: i18n.TASK_TYPE,
-      'data-test-subj': 'typeCell',
-      render: (type: TaskTypes) => {
-        if (type) {
-          return <TaskType type={type} />;
-        }
+      {
+        field: 'type',
+        name: i18n.TASK_TYPE,
+        'data-test-subj': 'typeCell',
+        render: (type: TaskTypes) => {
+          if (type) {
+            return <TaskType type={type} />;
+          }
 
-        return null;
+          return null;
+        },
+        sortable: false,
+        width: '100px',
       },
-      sortable: false,
-      width: '100px',
-    },
-    {
-      actions: [
-        {
-          name: i18n.ENDPOINT_VIEW_ACTION_LABEL,
-          description: i18n.ENDPOINT_VIEW_ACTION_LABEL,
-          icon: 'eye',
-          type: 'icon',
-          onClick: (item: InferenceEndpointUI) => displayInferenceFlyout(item),
-          'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
-        },
-        {
-          name: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
-          description: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
-          icon: 'copyClipboard',
-          type: 'icon',
-          onClick: (item: { endpoint: string }) => copyContent(item.endpoint),
-          'data-test-subj': 'inference-endpoints-action-copy-id-label',
-        },
-        {
-          name: i18n.ENDPOINT_DELETE_ACTION_LABEL,
-          description: i18n.ENDPOINT_DELETE_ACTION_LABEL,
-          icon: 'trash',
-          type: 'icon',
-          enabled: (item: { endpoint: string }) => !isEndpointPreconfigured(item.endpoint),
-          onClick: (item: InferenceEndpointUI) => displayDeleteActionitem(item),
-          'data-test-subj': (item: { endpoint: string }) =>
-            isEndpointPreconfigured(item.endpoint)
-              ? 'inferenceUIDeleteAction-preconfigured'
-              : 'inferenceUIDeleteAction-user-defined',
-        },
-      ],
-      width: '165px',
-    },
-  ];
+      {
+        actions: [
+          {
+            name: i18n.ENDPOINT_VIEW_ACTION_LABEL,
+            description: i18n.ENDPOINT_VIEW_ACTION_LABEL,
+            icon: 'eye',
+            type: 'icon',
+            onClick: (item) => displayInferenceFlyout(item),
+            'data-test-subj': 'inference-endpoints-action-view-endpoint-label',
+          },
+          {
+            name: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
+            description: i18n.ENDPOINT_COPY_ID_ACTION_LABEL,
+            icon: 'copyClipboard',
+            type: 'icon',
+            onClick: (item) => copyContent(item.endpoint),
+            'data-test-subj': 'inference-endpoints-action-copy-id-label',
+          },
+          {
+            name: i18n.ENDPOINT_DELETE_ACTION_LABEL,
+            description: i18n.ENDPOINT_DELETE_ACTION_LABEL,
+            icon: 'trash',
+            type: 'icon',
+            enabled: (item) => !isEndpointPreconfigured(item.endpoint),
+            onClick: (item) => displayDeleteActionitem(item),
+            'data-test-subj': (item) =>
+              isEndpointPreconfigured(item.endpoint)
+                ? 'inferenceUIDeleteAction-preconfigured'
+                : 'inferenceUIDeleteAction-user-defined',
+          },
+        ],
+        width: '165px',
+      },
+    ],
+    [copyContent, displayDeleteActionitem, displayInferenceFlyout]
+  );
 
   const handleTableChange = useCallback(
     ({ page, sort }: any) => {

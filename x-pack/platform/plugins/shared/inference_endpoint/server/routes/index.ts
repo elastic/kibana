@@ -17,6 +17,18 @@ import { InferenceServicesGetResponse } from '../types';
 import { INFERENCE_ENDPOINT_INTERNAL_API_VERSION } from '../../common';
 import { addInferenceEndpoint } from '../lib/add_inference_endpoint';
 
+const inferenceEndpointSchema = schema.object({
+  config: schema.object({
+    inferenceId: schema.string(),
+    provider: schema.string(),
+    taskType: schema.string(),
+    providerConfig: schema.any(),
+  }),
+  secrets: schema.object({
+    providerSecrets: schema.any(),
+  }),
+});
+
 export const getInferenceServicesRoute = (
   router: IRouter<RequestHandlerContext>,
   logger: Logger
@@ -67,17 +79,7 @@ export const getInferenceServicesRoute = (
         version: INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            body: schema.object({
-              config: schema.object({
-                inferenceId: schema.string(),
-                provider: schema.string(),
-                taskType: schema.string(),
-                providerConfig: schema.any(),
-              }),
-              secrets: schema.object({
-                providerSecrets: schema.any(),
-              }),
-            }),
+            body: inferenceEndpointSchema,
           },
         },
       },
@@ -94,9 +96,6 @@ export const getInferenceServicesRoute = (
 
           return response.ok({
             body: result,
-            headers: {
-              'content-type': 'application/json',
-            },
           });
         } catch (err) {
           logger.error(err);
@@ -118,17 +117,7 @@ export const getInferenceServicesRoute = (
         version: INFERENCE_ENDPOINT_INTERNAL_API_VERSION,
         validate: {
           request: {
-            body: schema.object({
-              config: schema.object({
-                inferenceId: schema.string(),
-                provider: schema.string(),
-                taskType: schema.string(),
-                providerConfig: schema.any(),
-              }),
-              secrets: schema.object({
-                providerSecrets: schema.any(),
-              }),
-            }),
+            body: inferenceEndpointSchema,
           },
         },
       },
@@ -151,9 +140,6 @@ export const getInferenceServicesRoute = (
           const result = await addInferenceEndpoint(esClient, config, secrets);
 
           return response.ok({
-            headers: {
-              'content-type': 'application/json',
-            },
             body: result,
           });
         } catch (err) {
