@@ -44,6 +44,7 @@ import {
   useDebounceWithOptions,
   onKeyDownResizeHandler,
   onMouseDownResizeHandler,
+  getEditorOverwrites,
   type MonacoMessage,
 } from './helpers';
 import { addQueriesToCache } from './history_local_storage';
@@ -55,8 +56,6 @@ import {
   esqlEditorStyles,
 } from './esql_editor.styles';
 import type { ESQLEditorProps, ESQLEditorDeps } from './types';
-
-import './overwrite.scss';
 
 // for editor width smaller than this value we want to start hiding some text
 const BREAKPOINT_WIDTH = 540;
@@ -90,6 +89,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   isLoading,
   isDisabled,
   hideRunQueryText,
+  hideRunQueryButton,
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
@@ -106,7 +106,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 }: ESQLEditorProps) {
   const popoverRef = useRef<HTMLDivElement>(null);
   const datePickerOpenStatusRef = useRef<boolean>(false);
-  const { euiTheme } = useEuiTheme();
+  const theme = useEuiTheme();
   const kibana = useKibana<ESQLEditorDeps>();
   const {
     dataViews,
@@ -314,7 +314,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   });
 
   const styles = esqlEditorStyles(
-    euiTheme,
+    theme.euiTheme,
     editorHeight,
     Boolean(editorMessages.errors.length),
     Boolean(editorMessages.warnings.length),
@@ -680,13 +680,13 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const editorPanel = (
     <>
-      {Boolean(editorIsInline) && (
+      {Boolean(editorIsInline) && !hideRunQueryButton && (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
           justifyContent="flexEnd"
           css={css`
-            padding: ${euiTheme.size.s};
+            padding: ${theme.euiTheme.size.s};
           `}
         >
           <EuiFlexItem grow={false}>
@@ -730,6 +730,7 @@ export const ESQLEditor = memo(function ESQLEditor({
               <div css={styles.editorContainer}>
                 <CodeEditor
                   languageId={ESQL_LANG_ID}
+                  classNameCss={getEditorOverwrites(theme)}
                   value={code}
                   options={codeEditorOptions}
                   width="100%"
@@ -859,8 +860,8 @@ export const ESQLEditor = memo(function ESQLEditor({
             tabIndex={0}
             style={{
               ...popoverPosition,
-              backgroundColor: euiTheme.colors.emptyShade,
-              borderRadius: euiTheme.border.radius.small,
+              backgroundColor: theme.euiTheme.colors.emptyShade,
+              borderRadius: theme.euiTheme.border.radius.small,
               position: 'absolute',
               overflow: 'auto',
             }}
