@@ -1117,55 +1117,6 @@
         }
       }
     },
-    "/api/cases/status": {
-      "get": {
-        "summary": "Get case status summary",
-        "operationId": "getCaseStatusDefaultSpace",
-        "description": "Returns the number of cases that are open, closed, and in progress. Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find cases API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.\n",
-        "deprecated": true,
-        "tags": [
-          "cases"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/owner_filter"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "properties": {
-                    "count_closed_cases": {
-                      "type": "integer"
-                    },
-                    "count_in_progress_cases": {
-                      "type": "integer"
-                    },
-                    "count_open_cases": {
-                      "type": "integer"
-                    }
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/cases/tags": {
       "get": {
         "summary": "Get case tags",
@@ -1223,9 +1174,6 @@
         "parameters": [
           {
             "$ref": "#/components/parameters/case_id"
-          },
-          {
-            "$ref": "#/components/parameters/includeComments"
           }
         ],
         "responses": {
@@ -1627,47 +1575,6 @@
                 "examples": {
                   "pushCaseResponse": {
                     "$ref": "#/components/examples/push_case_response"
-                  }
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Authorization information is missing or invalid.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/4xx_response"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/cases/{caseId}/user_actions": {
-      "get": {
-        "summary": "Get case activity",
-        "description": "Returns all user activity for a case. Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find user actions API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.\n",
-        "deprecated": true,
-        "operationId": "getCaseActivityDefaultSpace",
-        "tags": [
-          "cases"
-        ],
-        "parameters": [
-          {
-            "$ref": "#/components/parameters/case_id"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Indicates a successful call.",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/user_actions_response_properties"
                   }
                 }
               }
@@ -2155,16 +2062,6 @@
         "schema": {
           "type": "string",
           "example": "9c235210-6834-11ea-a78c-6ffb38a34414"
-        }
-      },
-      "includeComments": {
-        "in": "query",
-        "name": "includeComments",
-        "description": "Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.",
-        "deprecated": true,
-        "schema": {
-          "type": "boolean",
-          "default": true
         }
       },
       "comment_id": {
@@ -4551,140 +4448,6 @@
                 ]
               }
             }
-          }
-        }
-      },
-      "action_types": {
-        "type": "string",
-        "description": "The type of action.",
-        "enum": [
-          "assignees",
-          "create_case",
-          "comment",
-          "connector",
-          "delete_case",
-          "description",
-          "pushed",
-          "tags",
-          "title",
-          "status",
-          "settings",
-          "severity"
-        ],
-        "example": "create_case"
-      },
-      "user_actions_response_properties": {
-        "type": "object",
-        "required": [
-          "action",
-          "action_id",
-          "case_id",
-          "comment_id",
-          "created_at",
-          "created_by",
-          "owner",
-          "payload",
-          "type"
-        ],
-        "properties": {
-          "action": {
-            "$ref": "#/components/schemas/actions"
-          },
-          "action_id": {
-            "type": "string",
-            "example": "22fd3e30-03b1-11ed-920c-974bfa104448"
-          },
-          "case_id": {
-            "type": "string",
-            "example": "22df07d0-03b1-11ed-920c-974bfa104448"
-          },
-          "comment_id": {
-            "type": "string",
-            "nullable": true,
-            "example": "578608d0-03b1-11ed-920c-974bfa104448"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "example": "2022-05-13T09:16:17.416Z"
-          },
-          "created_by": {
-            "type": "object",
-            "properties": {
-              "email": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "full_name": {
-                "type": "string",
-                "example": null,
-                "nullable": true
-              },
-              "username": {
-                "type": "string",
-                "example": "elastic",
-                "nullable": true
-              },
-              "profile_uid": {
-                "type": "string",
-                "example": "u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0"
-              }
-            },
-            "required": [
-              "email",
-              "full_name",
-              "username"
-            ]
-          },
-          "owner": {
-            "$ref": "#/components/schemas/owner"
-          },
-          "payload": {
-            "oneOf": [
-              {
-                "$ref": "#/components/schemas/payload_alert_comment"
-              },
-              {
-                "$ref": "#/components/schemas/payload_assignees"
-              },
-              {
-                "$ref": "#/components/schemas/payload_connector"
-              },
-              {
-                "$ref": "#/components/schemas/payload_create_case"
-              },
-              {
-                "$ref": "#/components/schemas/payload_delete"
-              },
-              {
-                "$ref": "#/components/schemas/payload_description"
-              },
-              {
-                "$ref": "#/components/schemas/payload_pushed"
-              },
-              {
-                "$ref": "#/components/schemas/payload_settings"
-              },
-              {
-                "$ref": "#/components/schemas/payload_severity"
-              },
-              {
-                "$ref": "#/components/schemas/payload_status"
-              },
-              {
-                "$ref": "#/components/schemas/payload_tags"
-              },
-              {
-                "$ref": "#/components/schemas/payload_title"
-              },
-              {
-                "$ref": "#/components/schemas/payload_user_comment"
-              }
-            ]
-          },
-          "type": {
-            "$ref": "#/components/schemas/action_types"
           }
         }
       },

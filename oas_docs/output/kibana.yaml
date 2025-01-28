@@ -5671,7 +5671,6 @@ paths:
       operationId: getCaseDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_case_id'
-        - $ref: '#/components/parameters/Cases_includeComments'
       responses:
         '200':
           content:
@@ -5954,32 +5953,6 @@ paths:
                 $ref: '#/components/schemas/Cases_4xx_response'
           description: Authorization information is missing or invalid.
       summary: Attach a file to a case
-      tags:
-        - cases
-  /api/cases/{caseId}/user_actions:
-    get:
-      deprecated: true
-      description: |
-        Returns all user activity for a case. Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find user actions API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the case you're seeking.
-      operationId: getCaseActivityDefaultSpace
-      parameters:
-        - $ref: '#/components/parameters/Cases_case_id'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                items:
-                  $ref: '#/components/schemas/Cases_user_actions_response_properties'
-                type: array
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
-          description: Authorization information is missing or invalid.
-      summary: Get case activity
       tags:
         - cases
   /api/cases/{caseId}/user_actions/_find:
@@ -6660,37 +6633,6 @@ paths:
                 $ref: '#/components/schemas/Cases_4xx_response'
           description: Authorization information is missing or invalid.
       summary: Get case creators
-      tags:
-        - cases
-  /api/cases/status:
-    get:
-      deprecated: true
-      description: |
-        Returns the number of cases that are open, closed, and in progress. Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find cases API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
-      operationId: getCaseStatusDefaultSpace
-      parameters:
-        - $ref: '#/components/parameters/Cases_owner_filter'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  count_closed_cases:
-                    type: integer
-                  count_in_progress_cases:
-                    type: integer
-                  count_open_cases:
-                    type: integer
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
-          description: Authorization information is missing or invalid.
-      summary: Get case status summary
       tags:
         - cases
   /api/cases/tags:
@@ -46643,14 +46585,6 @@ components:
           minItems: 1
           type: string
         type: array
-    Cases_includeComments:
-      deprecated: true
-      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
-      in: query
-      name: includeComments
-      schema:
-        default: true
-        type: boolean
     Cases_kbn_xsrf:
       description: Cross-site request forgery protection
       in: header
@@ -47406,23 +47340,6 @@ components:
           type: integer
       title: Unsuccessful cases API response
       type: object
-    Cases_action_types:
-      description: The type of action.
-      enum:
-        - assignees
-        - create_case
-        - comment
-        - connector
-        - delete_case
-        - description
-        - pushed
-        - tags
-        - title
-        - status
-        - settings
-        - severity
-      example: create_case
-      type: string
     Cases_actions:
       enum:
         - add
@@ -49173,76 +49090,6 @@ components:
         - payload
         - type
         - version
-    Cases_user_actions_response_properties:
-      type: object
-      properties:
-        action:
-          $ref: '#/components/schemas/Cases_actions'
-        action_id:
-          example: 22fd3e30-03b1-11ed-920c-974bfa104448
-          type: string
-        case_id:
-          example: 22df07d0-03b1-11ed-920c-974bfa104448
-          type: string
-        comment_id:
-          example: 578608d0-03b1-11ed-920c-974bfa104448
-          nullable: true
-          type: string
-        created_at:
-          example: '2022-05-13T09:16:17.416Z'
-          format: date-time
-          type: string
-        created_by:
-          type: object
-          properties:
-            email:
-              example: null
-              nullable: true
-              type: string
-            full_name:
-              example: null
-              nullable: true
-              type: string
-            profile_uid:
-              example: u_J41Oh6L9ki-Vo2tOogS8WRTENzhHurGtRc87NgEAlkc_0
-              type: string
-            username:
-              example: elastic
-              nullable: true
-              type: string
-          required:
-            - email
-            - full_name
-            - username
-        owner:
-          $ref: '#/components/schemas/Cases_owner'
-        payload:
-          oneOf:
-            - $ref: '#/components/schemas/Cases_payload_alert_comment'
-            - $ref: '#/components/schemas/Cases_payload_assignees'
-            - $ref: '#/components/schemas/Cases_payload_connector'
-            - $ref: '#/components/schemas/Cases_payload_create_case'
-            - $ref: '#/components/schemas/Cases_payload_delete'
-            - $ref: '#/components/schemas/Cases_payload_description'
-            - $ref: '#/components/schemas/Cases_payload_pushed'
-            - $ref: '#/components/schemas/Cases_payload_settings'
-            - $ref: '#/components/schemas/Cases_payload_severity'
-            - $ref: '#/components/schemas/Cases_payload_status'
-            - $ref: '#/components/schemas/Cases_payload_tags'
-            - $ref: '#/components/schemas/Cases_payload_title'
-            - $ref: '#/components/schemas/Cases_payload_user_comment'
-        type:
-          $ref: '#/components/schemas/Cases_action_types'
-      required:
-        - action
-        - action_id
-        - case_id
-        - comment_id
-        - created_at
-        - created_by
-        - owner
-        - payload
-        - type
     Cases_user_comment_response_properties:
       title: Case response properties for user comments
       type: object
