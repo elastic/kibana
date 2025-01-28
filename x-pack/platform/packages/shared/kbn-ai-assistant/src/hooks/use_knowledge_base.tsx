@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { useMemo, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import {
   type AbortableAsyncState,
   useAbortableAsync,
@@ -25,11 +25,9 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const { notifications, ml } = useKibana().services;
   const service = useAIAssistantAppService();
 
-  const status = useAbortableAsync(
+  const statusRequest = useAbortableAsync(
     ({ signal }) => {
-      return service.callApi('GET /internal/observability_ai_assistant/kb/status', {
-        signal,
-      });
+      return service.callApi('GET /internal/observability_ai_assistant/kb/status', { signal });
     },
     [service]
   );
@@ -37,46 +35,101 @@ export function useKnowledgeBase(): UseKnowledgeBaseResult {
   const [isInstalling, setIsInstalling] = useState(false);
 
   const [installError, setInstallError] = useState<Error>();
+  const [isPollingForDeployment, setIsPollingForDeployment] = useState(false);
 
-  return useMemo(() => {
-    let attempts: number = 0;
+  const install = useCallback(async () => {
+    setIsInstalling(true);
+    setIsPollingForDeployment(false);
+    setInstallError(undefined);
+
+    let attempts = 0;
     const MAX_ATTEMPTS = 5;
 
-    const install = (): Promise<void> => {
-      setIsInstalling(true);
-      return service
-        .callApi('POST /internal/observability_ai_assistant/kb/setup', {
-          signal: null,
-        })
-        .then(() => ml.mlApi?.savedObjects.syncSavedObjects())
-        .then(() => {
-          status.refresh();
-        })
-        .catch((error) => {
+    try {
+      // install
+      await retrySetupIfError();
+
+      if (ml.mlApi?.savedObjects.syncSavedObjects) {
+        await ml.mlApi.savedObjects.syncSavedObjects();
+      }
+
+      // do one refresh to get an initial status
+      await statusRequest.refresh();
+
+      // start polling for readiness
+      setIsPollingForDeployment(true);
+    } catch (e) {
+      setInstallError(e);
+      notifications!.toasts.addError(e, {
+        title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
+          defaultMessage: 'Could not create inference endpoint',
+        }),
+      });
+      setIsInstalling(false);
+    }
+
+    async function retrySetupIfError() {
+      while (true) {
+        try {
+          await service.callApi('POST /internal/observability_ai_assistant/kb/setup', {
+            signal: null,
+          });
+          break;
+        } catch (error) {
           if (
             (error.body?.statusCode === 503 || error.body?.statusCode === 504) &&
             attempts < MAX_ATTEMPTS
           ) {
             attempts++;
-            return install();
+            continue;
           }
-          setInstallError(error);
-          notifications!.toasts.addError(error, {
-            title: i18n.translate('xpack.aiAssistant.errorSettingUpInferenceEndpoint', {
-              defaultMessage: 'Could not create inference endpoint',
-            }),
-          });
-        })
-        .finally(() => {
-          setIsInstalling(false);
-        });
-    };
+          throw error;
+        }
+      }
+    }
+  }, [ml, service, notifications, statusRequest]);
 
-    return {
-      status,
-      install,
-      isInstalling,
-      installError,
+  // poll the status if isPollingForDeployment === true
+  // stop when ready === true or some error
+  useEffect(() => {
+    if (!isPollingForDeployment) {
+      return;
+    }
+
+    const interval = setInterval(async () => {
+      // re-fetch /status
+      await statusRequest.refresh();
+      const { value: currentStatus } = statusRequest;
+
+      // check if the model is now ready
+      if (currentStatus?.ready) {
+        // done installing
+        setIsInstalling(false);
+        setIsPollingForDeployment(false);
+        clearInterval(interval);
+        return;
+      }
+
+      // if "deployment failed" state
+      if (currentStatus?.model_stats?.deployment_state === 'failed') {
+        setInstallError(new Error('model deployment failed'));
+        setIsInstalling(false);
+        setIsPollingForDeployment(false);
+        clearInterval(interval);
+        return;
+      }
+    }, 5000);
+
+    // cleanup the interval if unmount
+    return () => {
+      clearInterval(interval);
     };
-  }, [status, isInstalling, installError, service, ml, notifications]);
+  }, [isPollingForDeployment, statusRequest]);
+
+  return {
+    status: statusRequest,
+    install,
+    isInstalling,
+    installError,
+  };
 }
