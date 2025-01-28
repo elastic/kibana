@@ -28,52 +28,10 @@ export const NAME_REQUIRED_ERROR_MESSAGE = i18n.translate(
   }
 );
 
-export const SPLUNK_QUERY_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.splunkQueryTitle',
-  {
-    defaultMessage: 'Splunk query',
-  }
-);
-
-export const ESQL_TRANSLATION_TITLE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.esqlTranslationTitle',
-  {
-    defaultMessage: 'ES|QL translation',
-  }
-);
-
-export const TRANSLATED_QUERY_AREAL_LABEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.queryArealLabel',
-  {
-    defaultMessage: 'Translated query',
-  }
-);
-
 export const INSTALLED_LABEL = i18n.translate(
   'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.installedLabel',
   {
     defaultMessage: 'Installed',
-  }
-);
-
-export const EDIT = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.editButtonLabel',
-  {
-    defaultMessage: 'Edit',
-  }
-);
-
-export const SAVE = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.saveButtonLabel',
-  {
-    defaultMessage: 'Save',
-  }
-);
-
-export const CANCEL = i18n.translate(
-  'xpack.securitySolution.siemMigrations.rules.translationDetails.translationTab.cancelButtonLabel',
-  {
-    defaultMessage: 'Cancel',
   }
 );
 

@@ -10,6 +10,7 @@
 import { hapiMocks } from '@kbn/hapi-mocks';
 import type {
   LifecycleResponseFactory,
+  OnPreAuthToolkit,
   OnPreResponseToolkit,
   OnPostAuthToolkit,
   OnPreRoutingToolkit,
@@ -27,7 +28,9 @@ const createLifecycleResponseFactoryMock = (): jest.Mocked<LifecycleResponseFact
   customError: jest.fn(),
 });
 
-type ToolkitMock = jest.Mocked<OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit>;
+type ToolkitMock = jest.Mocked<
+  OnPreAuthToolkit & OnPreResponseToolkit & OnPostAuthToolkit & OnPreRoutingToolkit
+>;
 
 const createToolkitMock = (): ToolkitMock => {
   return {
