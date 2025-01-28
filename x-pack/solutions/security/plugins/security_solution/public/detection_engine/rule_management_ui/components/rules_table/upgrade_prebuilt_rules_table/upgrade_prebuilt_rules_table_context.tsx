@@ -270,7 +270,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
     [rulesUpgradeState]
   );
   const ruleActionsFactory = useCallback(
-    (rule: RuleResponse, closeRulePreview: () => void, isRuleEdited: () => boolean) => {
+    (rule: RuleResponse, closeRulePreview: () => void, isRuleEdited: boolean) => {
       const ruleUpgradeState = rulesUpgradeState[rule.rule_id];
       if (!ruleUpgradeState) {
         return null;
@@ -284,7 +284,7 @@ export const UpgradePrebuiltRulesTableContextProvider = ({
             isRefetching ||
             isUpgradingSecurityPackages ||
             (ruleUpgradeState.hasUnresolvedConflicts && !hasRuleTypeChange) ||
-            isRuleEdited()
+            isRuleEdited
           }
           onClick={() => {
             if (hasRuleTypeChange) {

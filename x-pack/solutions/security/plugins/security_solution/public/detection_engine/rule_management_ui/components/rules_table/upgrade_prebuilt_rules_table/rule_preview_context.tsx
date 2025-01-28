@@ -10,14 +10,14 @@ import React, { createContext, useCallback, useContext, useMemo, useState } from
 
 export interface RulePreviewContextType {
   /**
-   * Sets a field as currently being edited in the rule upgrade flyout
+   * Sets the rule is being edited in the rule upgrade flyout
    */
-  setRuleIsEdited: (fieldName: string, editing: boolean) => void;
+  setRuleIsEdited: (editing: boolean) => void;
 
   /**
-   * Returns whether any field is currently being edited in the rule upgrade flyout
+   * Returns whether the rule is being edited in the rule upgrade flyout
    */
-  isRuleEdited: () => boolean;
+  isRuleEdited: boolean;
 }
 
 const RulePreviewContext = createContext<RulePreviewContextType | null>(null);
@@ -27,30 +27,20 @@ interface RulePreviewContextProviderProps {
 }
 
 export function RulePreviewContextProvider({ children }: RulePreviewContextProviderProps) {
-  const [editedFields, setEditedFields] = useState<Record<string, boolean>>({});
+  const [editedFields, setEditedFields] = useState<number>(0);
 
-  const setRuleIsEdited = useCallback((fieldName: string, isEditing: boolean) => {
+  const setRuleIsEdited = useCallback((isEditing: boolean) => {
     setEditedFields((prev) => {
-      const updatedMap = { ...prev };
-      if (isEditing) {
-        updatedMap[fieldName] = true;
-      } else {
-        delete updatedMap[fieldName];
-      }
-      return updatedMap;
+      return isEditing ? prev + 1 : prev - 1;
     });
   }, []);
-
-  const isRuleEdited = useCallback(() => {
-    return Object.keys(editedFields).length > 0;
-  }, [editedFields]);
 
   const contextValue: RulePreviewContextType = useMemo(
     () => ({
       setRuleIsEdited,
-      isRuleEdited,
+      isRuleEdited: editedFields > 0,
     }),
-    [setRuleIsEdited, isRuleEdited]
+    [setRuleIsEdited, editedFields]
   );
 
   return <RulePreviewContext.Provider value={contextValue}>{children}</RulePreviewContext.Provider>;

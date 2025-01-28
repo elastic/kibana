@@ -131,11 +131,11 @@ export function FieldUpgradeContextProvider({
       setRuleFieldResolvedValue,
       setReadOnlyMode: () => {
         setReadOnlyMode();
-        setRuleIsEdited(fieldName, false);
+        setRuleIsEdited(false);
       },
       setEditMode: () => {
         setEditMode();
-        setRuleIsEdited(fieldName, true);
+        setRuleIsEdited(true);
       },
     }),
     [

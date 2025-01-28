@@ -60,7 +60,7 @@ export function FieldFinalSideHeader(): JSX.Element {
               disabled={!form?.isValid}
               onClick={() => {
                 handleSave();
-                setRuleIsEdited(fieldName, false);
+                setRuleIsEdited(false);
               }}
             >
               {hasConflict ? i18n.SAVE_AND_ACCEPT : i18n.SAVE}

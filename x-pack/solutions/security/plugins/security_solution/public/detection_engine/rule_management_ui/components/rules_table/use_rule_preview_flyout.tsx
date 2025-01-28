@@ -20,7 +20,7 @@ interface UseRulePreviewFlyoutBaseParams {
   ruleActionsFactory: (
     rule: RuleResponse,
     closeRulePreview: () => void,
-    isRuleEdited: () => boolean
+    isRuleEdited: boolean
   ) => ReactNode;
   extraTabsFactory?: (rule: RuleResponse) => EuiTabbedContentTab[];
   subHeaderFactory?: (rule: RuleResponse) => ReactNode;
