@@ -20,6 +20,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
   const queryBar = getService('queryBar');
+  const monacoEditor = getService('monacoEditor');
+  const security = getService('security');
   const { common, discover, timePicker, unifiedFieldList, header } = getPageObjects([
     'common',
     'discover',
@@ -28,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     'header',
   ]);
   const defaultSettings = { defaultIndex: 'logstash-*' };
-  const security = getService('security');
 
   describe('discover data grid in-table search', function describeIndexTests() {
     before(async () => {
@@ -78,6 +79,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('uses different colors for highlights in the table', async () => {
       await discover.selectTextBaseLang();
+      await header.waitUntilLoadingHasFinished();
+      await discover.waitUntilSearchingHasFinished();
+      const testQuery = `from logstash-* | sort @timestamp | limit 10`;
+      await monacoEditor.setCodeEditorValue(testQuery);
+      await testSubjects.click('querySubmitButton');
       await header.waitUntilLoadingHasFinished();
       await discover.waitUntilSearchingHasFinished();
 
