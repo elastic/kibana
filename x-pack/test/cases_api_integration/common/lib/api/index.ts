@@ -20,7 +20,6 @@ import {
   CASE_CONFIGURE_SAVED_OBJECT,
   CASE_REPORTERS_URL,
   CASE_SAVED_OBJECT,
-  CASE_STATUS_URL,
   CASE_TAGS_URL,
   CASE_USER_ACTION_SAVED_OBJECT,
   INTERNAL_CASE_METRICS_URL,
@@ -48,7 +47,6 @@ import {
   CasesBulkGetResponse,
   CasesFindResponse,
   CasesPatchRequest,
-  CasesStatusResponse,
   CustomFieldPutRequest,
   GetRelatedCasesByAlertResponse,
   SimilarCasesSearchRequest,
@@ -448,26 +446,6 @@ export const updateCase = async ({
     .expect(expectedHttpCode);
 
   return cases;
-};
-
-export const getAllCasesStatuses = async ({
-  supertest,
-  expectedHttpCode = 200,
-  auth = { user: superUser, space: null },
-  query = {},
-}: {
-  supertest: SuperTest.Agent;
-  expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
-  query?: Record<string, unknown>;
-}): Promise<CasesStatusResponse> => {
-  const { body: statuses } = await supertest
-    .get(`${getSpaceUrlPrefix(auth.space)}${CASE_STATUS_URL}`)
-    .auth(auth.user.username, auth.user.password)
-    .query({ ...query })
-    .expect(expectedHttpCode);
-
-  return statuses;
 };
 
 export const getCase = async ({
