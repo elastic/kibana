@@ -229,6 +229,9 @@ export interface FleetStartContract {
    * services
    */
   fleetSetupCompleted: () => Promise<void>;
+  agentless: {
+    enabled: boolean;
+  };
   authz: {
     fromRequest(request: KibanaRequest): Promise<FleetAuthz>;
   };
@@ -805,6 +808,9 @@ export class FleetPlugin
     return {
       authz: {
         fromRequest: getAuthzFromRequest,
+      },
+      agentless: {
+        enabled: this.configInitialValue.agentless?.enabled ?? false,
       },
       fleetSetupCompleted: () => fleetSetupPromise,
       packageService: this.setupPackageService(

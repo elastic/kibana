@@ -91,6 +91,7 @@ export function AddProcessorFlyout({
       )}
       confirmButton={
         <EuiButton
+          data-test-subj="streamsAppAddProcessorFlyoutAddProcessorButton"
           onClick={methods.handleSubmit(handleSubmit)}
           disabled={!methods.formState.isValid && methods.formState.isSubmitted}
         >
@@ -177,6 +178,7 @@ export function EditProcessorFlyout({
       }
       confirmButton={
         <EuiButton
+          data-test-subj="streamsAppEditProcessorFlyoutUpdateProcessorButton"
           onClick={methods.handleSubmit(handleSubmit)}
           disabled={!methods.formState.isValid}
         >
