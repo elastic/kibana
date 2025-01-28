@@ -93,7 +93,7 @@ export interface OutputOptions<
    */
   modelName?: string;
   /**
-   * Function calling mode, defaults to "native".
+   * Function calling mode, defaults to "auto".
    */
   functionCalling?: FunctionCallingMode;
   /**
