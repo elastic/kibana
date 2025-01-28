@@ -147,6 +147,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [definition, dataViews, streamsRepositoryClient, start, end]
   );
 
@@ -337,6 +338,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
               </EuiText>
               <EuiFlexGroup justifyContent="center">
                 <EuiButton
+                  data-test-subj="streamsAppChildStreamListCreateChildStreamButton"
                   iconType="plusInCircle"
                   href={router.link('/{key}/management/{subtab}', {
                     path: {
