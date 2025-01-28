@@ -88,14 +88,14 @@ export const chatCompleteRoute = (
           }
 
           const contentReferencesEnabled =
-          ctx.elasticAssistant.getRegisteredFeatures(
-            DEFAULT_PLUGIN_NAME
-          ).contentReferencesEnabled;
+            ctx.elasticAssistant.getRegisteredFeatures(
+              DEFAULT_PLUGIN_NAME
+            ).contentReferencesEnabled;
 
           const conversationsDataClient =
-            await ctx.elasticAssistant.getAIAssistantConversationsDataClient(
-              {contentReferencesEnabled}
-            );
+            await ctx.elasticAssistant.getAIAssistantConversationsDataClient({
+              contentReferencesEnabled,
+            });
 
           const anonymizationFieldsDataClient =
             await ctx.elasticAssistant.getAIAssistantAnonymizationFieldsDataClient();

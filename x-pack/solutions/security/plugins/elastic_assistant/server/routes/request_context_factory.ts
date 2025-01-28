@@ -152,7 +152,7 @@ export class RequestContextFactory implements IRequestContextFactory {
           licensing: context.licensing,
           logger: this.logger,
           currentUser,
-          contentReferencesEnabled: params?.contentReferencesEnabled
+          contentReferencesEnabled: params?.contentReferencesEnabled,
         });
       }),
     };

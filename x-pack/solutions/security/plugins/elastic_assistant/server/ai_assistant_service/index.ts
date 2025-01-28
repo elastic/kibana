@@ -17,7 +17,10 @@ import { attackDiscoveryFieldMap } from '../lib/attack_discovery/persistence/fie
 import { defendInsightsFieldMap } from '../ai_assistant_data_clients/defend_insights/field_maps_configuration';
 import { getDefaultAnonymizationFields } from '../../common/anonymization';
 import { AssistantResourceNames, GetElser } from '../types';
-import { AIAssistantConversationsDataClient, GetAIAssistantConversationsDataClientParams } from '../ai_assistant_data_clients/conversations';
+import {
+  AIAssistantConversationsDataClient,
+  GetAIAssistantConversationsDataClientParams,
+} from '../ai_assistant_data_clients/conversations';
 import {
   InitializationPromise,
   ResourceInstallationHelper,
@@ -217,7 +220,7 @@ export class AIAssistantService {
           kibanaVersion: this.options.kibanaVersion,
           fieldMap: conversationsContentReferencesFieldMap,
         });
-        this.hasInitializedContentReferences = true
+        this.hasInitializedContentReferences = true;
       }
 
       await this.conversationsDataStream.install({
@@ -389,9 +392,7 @@ export class AIAssistantService {
     // If contentReferences are enable but the conversation field mappings with content references have not been initialized,
     // then call initializeResources which will create the datastreams with content references field mappings. After they have
     // been created, hasInitializedContentReferences will ensure they dont get created again.
-    if (
-      this.contentReferencesEnabled && !this.hasInitializedContentReferences
-    ) {
+    if (this.contentReferencesEnabled && !this.hasInitializedContentReferences) {
       await this.initializeResources();
     }
 

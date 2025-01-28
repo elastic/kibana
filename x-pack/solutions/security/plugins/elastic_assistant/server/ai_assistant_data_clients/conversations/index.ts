@@ -24,7 +24,7 @@ import { AIAssistantDataClient, AIAssistantDataClientParams } from '..';
  * configuration after initial plugin start
  */
 export interface GetAIAssistantConversationsDataClientParams {
-  contentReferencesEnabled?: boolean
+  contentReferencesEnabled?: boolean;
 }
 
 export class AIAssistantConversationsDataClient extends AIAssistantDataClient {

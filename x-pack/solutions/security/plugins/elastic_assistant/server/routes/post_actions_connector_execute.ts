@@ -113,9 +113,9 @@ export const postActionsConnectorExecuteRoute = (
             assistantContext.getRegisteredFeatures(DEFAULT_PLUGIN_NAME).contentReferencesEnabled;
 
           const conversationsDataClient =
-            await assistantContext.getAIAssistantConversationsDataClient(
-              { contentReferencesEnabled }
-            );
+            await assistantContext.getAIAssistantConversationsDataClient({
+              contentReferencesEnabled,
+            });
           const promptsDataClient = await assistantContext.getAIAssistantPromptsDataClient();
 
           const contentReferencesStore =

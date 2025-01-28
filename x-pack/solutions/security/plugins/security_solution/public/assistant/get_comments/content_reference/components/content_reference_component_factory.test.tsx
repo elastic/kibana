@@ -22,7 +22,7 @@ jest.mock('../../../../common/lib/kibana', () => ({
       application: {
         navigateToApp: jest.fn(),
       },
-    }
+    },
   }),
 }));
 

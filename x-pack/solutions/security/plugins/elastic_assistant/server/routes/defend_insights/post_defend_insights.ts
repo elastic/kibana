@@ -141,7 +141,6 @@ export const postDefendInsightsRoute = (router: IRouter<ElasticAssistantRequestH
             latestReplacements = { ...latestReplacements, ...newReplacements };
           };
 
-
           const assistantToolParams = getAssistantToolParams({
             endpointIds,
             insightType,
