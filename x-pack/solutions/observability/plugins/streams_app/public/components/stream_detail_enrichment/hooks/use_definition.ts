@@ -22,7 +22,27 @@ import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { useKibana } from '../../../hooks/use_kibana';
 import { processorConverter } from '../utils';
 
-export const useDefinition = (definition: ReadStreamDefinition, refreshDefinition: () => void) => {
+export interface UseDefinitionReturn {
+  processors: ProcessorDefinitionWithUIAttributes[];
+  hasChanges: boolean;
+  isSavingChanges: boolean;
+  addProcessor: (newProcessor: ProcessorDefinition, newFields?: DetectedField[]) => void;
+  updateProcessor: (
+    id: string,
+    processor: ProcessorDefinition,
+    status?: ProcessorDefinitionWithUIAttributes['status']
+  ) => void;
+  deleteProcessor: (id: string) => void;
+  reorderProcessors: (processors: ProcessorDefinitionWithUIAttributes[]) => void;
+  saveChanges: () => Promise<void>;
+  setProcessors: (processors: ProcessorDefinitionWithUIAttributes[]) => void;
+  resetChanges: () => void;
+}
+
+export const useDefinition = (
+  definition: ReadStreamDefinition,
+  refreshDefinition: () => void
+): UseDefinitionReturn => {
   const { core, dependencies } = useKibana();
 
   const { toasts } = core.notifications;
@@ -57,7 +77,8 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
   const hasChanges = useMemo(
     () =>
       processors.some((proc) => proc.status === 'draft' || proc.status === 'updated') ||
-      hasOrderChanged(processors, initialProcessors.current),
+      hasOrderChanged(processors, initialProcessors.current) ||
+      processors.length !== initialProcessors.current.length,
     [processors]
   );
 
@@ -71,7 +92,11 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
     }
   };
 
-  const updateProcessor = (id: string, processorUpdate: ProcessorDefinition) => {
+  const updateProcessor = (
+    id: string,
+    processorUpdate: ProcessorDefinition,
+    status: ProcessorDefinitionWithUIAttributes['status'] = 'updated'
+  ) => {
     setProcessors((prevProcs) =>
       prevProcs.map((proc) =>
         proc.id === id
@@ -79,14 +104,14 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
               ...processorUpdate,
               id,
               type: getProcessorType(processorUpdate),
-              status: 'updated',
+              status,
             }
           : proc
       )
     );
   };
 
-  const orderProcessors = (udpatedProcessors: ProcessorDefinitionWithUIAttributes[]) => {
+  const reorderProcessors = (udpatedProcessors: ProcessorDefinitionWithUIAttributes[]) => {
     setProcessors(udpatedProcessors);
   };
 
@@ -147,7 +172,7 @@ export const useDefinition = (definition: ReadStreamDefinition, refreshDefinitio
     addProcessor,
     updateProcessor,
     deleteProcessor,
-    orderProcessors,
+    reorderProcessors,
     resetChanges,
     saveChanges,
     setProcessors,

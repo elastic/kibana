@@ -21,13 +21,7 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ProcessorDefinition,
-  ReadStreamDefinition,
-  getProcessorType,
-  isDissectProcessorDefinition,
-  isGrokProcessorDefinition,
-} from '@kbn/streams-schema';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import React, { useMemo } from 'react';
 import { useForm, SubmitHandler, FormProvider } from 'react-hook-form';
@@ -36,7 +30,7 @@ import { useBoolean } from '@kbn/react-hooks';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { ProcessorTypeSelector } from './processor_type_selector';
-import { DetectedField, ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
+import { ProcessorFormState, ProcessorDefinitionWithUIAttributes } from '../types';
 import {
   getDefaultFormState,
   convertFormStateToProcessor,
@@ -44,6 +38,7 @@ import {
   isDissectProcessor,
 } from '../utils';
 import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
+import { UseDefinitionReturn } from '../hooks/use_definition';
 
 export interface ProcessorPanelProps {
   definition: ReadStreamDefinition;
@@ -51,13 +46,13 @@ export interface ProcessorPanelProps {
 
 export interface AddProcessorPanelProps extends ProcessorPanelProps {
   isInitiallyOpen?: boolean;
-  onAddProcessor: (newProcessing: ProcessorDefinition, newFields?: DetectedField[]) => void;
+  onAddProcessor: UseDefinitionReturn['addProcessor'];
 }
 
 export interface EditProcessorPanelProps extends ProcessorPanelProps {
   processor: ProcessorDefinitionWithUIAttributes;
-  onDeleteProcessor: (id: string) => void;
-  onUpdateProcessor: (id: string, processor: ProcessorDefinition) => void;
+  onDeleteProcessor: UseDefinitionReturn['deleteProcessor'];
+  onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
 }
 
 export function AddProcessorPanel({ onAddProcessor }: AddProcessorPanelProps) {
@@ -124,13 +119,18 @@ export function AddProcessorPanel({ onAddProcessor }: AddProcessorPanelProps) {
         extraAction={
           isOpen ? (
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiButtonEmpty onClick={hasChanges ? confirmDiscardAndClose : handleCancel} size="s">
+              <EuiButtonEmpty
+                data-test-subj="streamsAppAddProcessorPanelCancelButton"
+                onClick={hasChanges ? confirmDiscardAndClose : handleCancel}
+                size="s"
+              >
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
                   { defaultMessage: 'Cancel' }
                 )}
               </EuiButtonEmpty>
               <EuiButton
+                data-test-subj="streamsAppAddProcessorPanelAddProcessorButton"
                 size="s"
                 onClick={methods.handleSubmit(handleSubmit)}
                 disabled={!methods.formState.isValid && methods.formState.isSubmitted}
@@ -168,6 +168,9 @@ export function EditProcessorPanel({
 
   const processorDescription = getProcessorDescription(processor);
 
+  const isDraft = processor.status === 'draft';
+  const isUnsaved = isDraft || processor.status === 'updated';
+
   const defaultValues = useMemo(() => getDefaultFormState(processor.type, processor), [processor]);
 
   const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
@@ -182,7 +185,7 @@ export function EditProcessorPanel({
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
     const processorDefinition = convertFormStateToProcessor(data);
 
-    onUpdateProcessor(processor.id, processorDefinition);
+    onUpdateProcessor(processor.id, processorDefinition, isDraft ? 'draft' : 'updated');
     closePanel();
   };
 
@@ -216,9 +219,6 @@ export function EditProcessorPanel({
     </EuiFlexGroup>
   );
 
-  const isDraft = processor.status === 'draft';
-  const isUnsaved = isDraft || processor.status === 'updated';
-
   return (
     <EuiPanel
       hasBorder
@@ -250,13 +250,18 @@ export function EditProcessorPanel({
         extraAction={
           isOpen ? (
             <EuiFlexGroup alignItems="center" gutterSize="s">
-              <EuiButtonEmpty onClick={hasChanges ? confirmDiscardAndClose : handleCancel} size="s">
+              <EuiButtonEmpty
+                data-test-subj="streamsAppEditProcessorPanelCancelButton"
+                onClick={hasChanges ? confirmDiscardAndClose : handleCancel}
+                size="s"
+              >
                 {i18n.translate(
                   'xpack.streams.streamDetailView.managementTab.enrichment.processorPanel.cancel',
                   { defaultMessage: 'Cancel' }
                 )}
               </EuiButtonEmpty>
               <EuiButton
+                data-test-subj="streamsAppEditProcessorPanelUpdateProcessorButton"
                 size="s"
                 onClick={methods.handleSubmit(handleSubmit)}
                 disabled={!methods.formState.isValid}
@@ -278,6 +283,7 @@ export function EditProcessorPanel({
                 </EuiBadge>
               )}
               <EuiButtonIcon
+                data-test-subj="streamsAppEditProcessorPanelButton"
                 onClick={openPanel}
                 iconType="pencil"
                 color="text"
@@ -299,7 +305,11 @@ export function EditProcessorPanel({
             {formFields.type === 'grok' && <GrokProcessorForm />}
             {formFields.type === 'dissect' && <DissectProcessorForm />}
             <EuiHorizontalRule margin="m" />
-            <EuiButton color="danger" onClick={confirmDeletionAndClose}>
+            <EuiButton
+              data-test-subj="streamsAppEditProcessorPanelButton"
+              color="danger"
+              onClick={confirmDeletionAndClose}
+            >
               {deleteProcessorLabel}
             </EuiButton>
           </EuiForm>

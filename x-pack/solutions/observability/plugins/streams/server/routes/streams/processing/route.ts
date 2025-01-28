@@ -105,6 +105,7 @@ const prepareSimulationBody = (params: ProcessingSimulateParams) => {
       },
     };
   }
+  console.log('simulationBody', JSON.stringify(simulationBody, null, 2));
 
   return simulationBody;
 };

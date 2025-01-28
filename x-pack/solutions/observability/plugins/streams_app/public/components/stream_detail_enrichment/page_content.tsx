@@ -54,21 +54,22 @@ export function StreamDetailEnrichmentContent({
     deleteProcessor,
     resetChanges,
     saveChanges,
-    orderProcessors,
+    reorderProcessors,
     hasChanges,
     isSavingChanges,
   } = useDefinition(definition, refreshDefinition);
 
-  const { error, isLoading, refreshSamples, simulation, samples } = useProcessingSimulator({
-    definition,
-    processors,
-    fields: [],
-  });
+  const { error, isLoading, refreshSamples, simulation, samples, tableColumns } =
+    useProcessingSimulator({
+      definition,
+      processors,
+      fields: [],
+    });
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {
       const items = euiDragDropReorder(processors, source.index, destination.index);
-      orderProcessors(items);
+      reorderProcessors(items);
     }
   };
 
@@ -99,7 +100,7 @@ export function StreamDetailEnrichmentContent({
           {(EuiResizablePanel, EuiResizableButton) => (
             <>
               <EuiResizablePanel
-                initialSize={30}
+                initialSize={25}
                 minSize="400px"
                 tabIndex={0}
                 paddingSize="none"
@@ -141,10 +142,10 @@ export function StreamDetailEnrichmentContent({
 
               <EuiResizableButton indicator="border" accountForScrollbars="both" />
 
-              <EuiResizablePanel initialSize={70} minSize="300px" tabIndex={0} paddingSize="none">
+              <EuiResizablePanel initialSize={75} minSize="300px" tabIndex={0} paddingSize="none">
                 <SimulationPlayground
                   definition={definition}
-                  columns={['message']} // TODO: get columns from definition
+                  columns={tableColumns}
                   simulation={simulation}
                   samples={samples}
                   onRefreshSamples={refreshSamples}

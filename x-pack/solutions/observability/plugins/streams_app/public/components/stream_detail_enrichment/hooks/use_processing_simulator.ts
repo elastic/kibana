@@ -5,25 +5,26 @@
  * 2.0.
  */
 
+import { useMemo } from 'react';
+import { isEmpty } from 'lodash';
 import {
   ReadStreamDefinition,
   FieldDefinition,
   getProcessorConfig,
-  OrCondition,
   UnaryOperator,
+  Condition,
 } from '@kbn/streams-schema';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import { APIReturnType, StreamsAPIClientRequestParamsOf } from '@kbn/streams-plugin/public/api';
-import { useMemo } from 'react';
+import { APIReturnType } from '@kbn/streams-plugin/public/api';
 import { useStreamsAppFetch } from '../../../hooks/use_streams_app_fetch';
 import { useKibana } from '../../../hooks/use_kibana';
-import { ProcessorDefinitionWithUIAttributes } from '../types';
+import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
 
 type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
-type SimulationRequestBody =
-  StreamsAPIClientRequestParamsOf<'POST /api/streams/{id}/processing/_simulate'>['params']['body'];
+// type SimulationRequestBody =
+//   StreamsAPIClientRequestParamsOf<'POST /api/streams/{id}/processing/_simulate'>['params']['body'];
 
 export interface UseProcessingSimulatorReturnType {
   error?: IHttpFetchError<ResponseErrorBody>;
@@ -31,6 +32,7 @@ export interface UseProcessingSimulatorReturnType {
   refreshSamples: () => void;
   samples: Array<Record<PropertyKey, unknown>>;
   simulation?: Simulation | null;
+  tableColumns: string[];
 }
 
 export const useProcessingSimulator = ({
@@ -52,12 +54,13 @@ export const useProcessingSimulator = ({
     absoluteTimeRange: { start, end },
   } = useDateRange({ data });
 
+  console.log('processors', processors);
   const draftProcessors = useMemo(
     () => processors.filter((processor) => processor.status === 'draft'),
     [processors]
   );
 
-  const samplingCondition: OrCondition = useMemo(
+  const samplingCondition = useMemo(
     () => composeSamplingCondition(draftProcessors),
     [draftProcessors]
   );
@@ -89,7 +92,7 @@ export const useProcessingSimulator = ({
     { disableToastOnError: true }
   );
 
-  const sampleDocs = (samples?.documents ?? []) as Array<Record<PropertyKey, unknown>>;
+  const sampleDocs = samples?.documents as Array<Record<PropertyKey, unknown>>;
 
   const {
     loading: isLoadingSimulation,
@@ -97,7 +100,7 @@ export const useProcessingSimulator = ({
     error,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition) {
+      if (!definition || isEmpty(sampleDocs)) {
         return Promise.resolve(null);
       }
 
@@ -119,8 +122,13 @@ export const useProcessingSimulator = ({
         },
       });
     },
-    [definition, sampleDocs, draftProcessors],
+    [definition, sampleDocs, draftProcessors, streamsRepositoryClient],
     { disableToastOnError: true }
+  );
+
+  const tableColumns = useMemo(
+    () => getTableColumns(draftProcessors, simulation?.detected_fields ?? []),
+    [draftProcessors, simulation]
   );
 
   return {
@@ -128,14 +136,19 @@ export const useProcessingSimulator = ({
     error: error as IHttpFetchError<ResponseErrorBody> | undefined,
     refreshSamples,
     simulation,
-    samples: sampleDocs,
+    samples: sampleDocs ?? [],
+    tableColumns,
   };
 };
 
-const composeSamplingCondition = (processors: ProcessorDefinitionWithUIAttributes[]) => {
-  const uniqueFields = [
-    ...new Set(processors.map((processor) => getProcessorConfig(processor).field)),
-  ];
+const composeSamplingCondition = (
+  processors: ProcessorDefinitionWithUIAttributes[]
+): Condition | undefined => {
+  if (isEmpty(processors)) {
+    return undefined;
+  }
+
+  const uniqueFields = getUniqueSourceFields(processors);
 
   const conditions = uniqueFields.map((field) => ({
     field,
@@ -143,4 +156,17 @@ const composeSamplingCondition = (processors: ProcessorDefinitionWithUIAttribute
   }));
 
   return { or: conditions };
+};
+
+const getUniqueSourceFields = (processors: ProcessorDefinitionWithUIAttributes[]): string[] => {
+  return [...new Set(processors.map((processor) => getProcessorConfig(processor).field))];
+};
+
+const getTableColumns = (
+  processors: ProcessorDefinitionWithUIAttributes[],
+  fields: DetectedField[]
+) => {
+  const uniqueSourceFields = getUniqueSourceFields(processors);
+
+  return [...new Set([...uniqueSourceFields, ...fields.map((field) => field.name)])];
 };
