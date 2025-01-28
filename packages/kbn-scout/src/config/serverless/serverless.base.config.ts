@@ -99,6 +99,7 @@ export const defaultConfig: ScoutServerConfig = {
     serverArgs: [
       `--server.restrictInternalApis=true`,
       `--server.port=${servers.kibana.port}`,
+      `--server.prototypeHardening=true`,
       '--status.allowAnonymous=true',
       `--migrations.zdt.runOnRoles=${JSON.stringify(['ui'])}`,
       // We shouldn't embed credentials into the URL since Kibana requests to Elasticsearch should

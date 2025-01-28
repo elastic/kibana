@@ -9,23 +9,24 @@ import type {
   PluginSetupContract as ActionsPluginSetup,
   PluginStartContract as ActionsPluginStart,
 } from '@kbn/actions-plugin/server';
-import type {
+import {
   AuthenticatedUser,
   CoreRequestHandlerContext,
   CoreSetup,
   AnalyticsServiceSetup,
   CustomRequestHandlerContext,
+  ElasticsearchClient,
   IRouter,
   KibanaRequest,
   Logger,
   AuditLogger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import type { LlmTasksPluginStart } from '@kbn/llm-tasks-plugin/server';
 import { type MlPluginSetup } from '@kbn/ml-plugin/server';
 import { DynamicStructuredTool, Tool } from '@langchain/core/tools';
 import { SpacesPluginSetup, SpacesPluginStart } from '@kbn/spaces-plugin/server';
 import { TaskManagerSetupContract } from '@kbn/task-manager-plugin/server';
-import { ElasticsearchClient } from '@kbn/core/server';
 import {
   AttackDiscoveryPostRequestBody,
   DefendInsightsPostRequestBody,
@@ -146,6 +147,7 @@ export interface ElasticAssistantApiRequestHandlerContext {
   getAIAssistantAnonymizationFieldsDataClient: () => Promise<AIAssistantDataClient | null>;
   llmTasks: LlmTasksPluginStart;
   inference: InferenceServerStart;
+  savedObjectsClient: SavedObjectsClientContract;
   telemetry: AnalyticsServiceSetup;
 }
 /**

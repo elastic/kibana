@@ -12,6 +12,7 @@ import {
   KibanaRequest,
   KibanaResponseFactory,
   Logger,
+  SavedObjectsClientContract,
 } from '@kbn/core/server';
 import { StreamResponseWithHeaders } from '@kbn/ml-response-stream/server';
 
@@ -251,6 +252,7 @@ export interface LangChainExecuteParams {
   getElser: GetElser;
   response: KibanaResponseFactory;
   responseLanguage?: string;
+  savedObjectsClient: SavedObjectsClientContract;
   systemPrompt?: string;
 }
 export const langChainExecute = async ({
@@ -275,6 +277,7 @@ export const langChainExecute = async ({
   response,
   responseLanguage,
   isStream = true,
+  savedObjectsClient,
   systemPrompt,
 }: LangChainExecuteParams) => {
   // Fetch any tools registered by the request's originating plugin
@@ -334,6 +337,7 @@ export const langChainExecute = async ({
     request,
     replacements,
     responseLanguage,
+    savedObjectsClient,
     size: request.body.size,
     systemPrompt,
     telemetry,

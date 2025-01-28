@@ -80,7 +80,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       },
       llmTasks: startPlugins.llmTasks,
       inference: startPlugins.inference,
-
+      savedObjectsClient: coreStart.savedObjects.getScopedClient(request),
       telemetry: core.analytics,
 
       // Note: modelIdOverride is used here to enable setting up the KB using a different ELSER model, which
