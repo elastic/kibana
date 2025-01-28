@@ -5,4 +5,4 @@
  * 2.0.
  */
 
-export * from './set_synthetic_source';
+export { RemoteClusterReview } from './remote_cluster_review';
