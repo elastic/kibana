@@ -57,7 +57,7 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
               'xpack.idxMgmt.formWizard.stepSettings.validations.lookupIndexModeNumberOfShardsError',
               {
                 defaultMessage:
-                  'For a Lookup index mode, the number of shards can only be set to 1 or unset.',
+                  'Number of shards for lookup index mode can only be 1 or unset.',
               }
             );
           } else {
@@ -74,7 +74,6 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
       customValidate,
     });
 
-    console.log(error);
 
     return (
       <div data-test-subj="stepSettings">

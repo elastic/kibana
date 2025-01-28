@@ -338,7 +338,7 @@ describe('<TemplateCreate />', () => {
         await actions.completeStepThree('{ "index.number_of_shards": 2 }');
 
         expect(form.getErrorsMessages()).toContain(
-          'For a Lookup index mode, the number of shards can only be set to 1 or unset.'
+          'Number of shards for lookup index mode can only be 1 or unset.'
         );
       });
     });
