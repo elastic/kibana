@@ -9,22 +9,22 @@ import { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
-  KnowledgeBaseEntryCreateProps,
-  KnowledgeBaseEntryResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+  DeleteKnowledgeBaseEntryRequestParams,
+  DeleteKnowledgeBaseEntryResponse,
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
 
-export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRouter): void => {
+export const deleteKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
-    .post({
+    .delete({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+      path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
 
       security: {
         authz: {
@@ -37,11 +37,15 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(KnowledgeBaseEntryCreateProps),
+            params: buildRouteValidationWithZod(DeleteKnowledgeBaseEntryRequestParams),
           },
         },
       },
-      async (context, request, response): Promise<IKibanaResponse<KnowledgeBaseEntryResponse>> => {
+      async (
+        context,
+        request,
+        response
+      ): Promise<IKibanaResponse<DeleteKnowledgeBaseEntryResponse>> => {
         const assistantResponse = buildResponse(response);
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
@@ -57,23 +61,26 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
             return checkResponse.response;
           }
 
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
+          logger.debug(() => `Deleting KB Entry:\n${JSON.stringify(request.body)}`);
 
-          logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
-          const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
-            knowledgeBaseEntry: request.body,
-            global: request.body.users != null && request.body.users.length === 0,
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
+          const deleteResponse = await kbDataClient?.deleteKnowledgeBaseEntry({
+            knowledgeBaseEntryId: request.params.id,
             auditLogger: ctx.elasticAssistant.auditLogger,
-            telemetry: ctx.elasticAssistant.telemetry,
           });
 
-          if (createResponse == null) {
-            return assistantResponse.error({
-              body: `Knowledge Base Entry was not created`,
-              statusCode: 400,
+          if (deleteResponse?.docsDeleted) {
+            return response.ok({
+              body: {
+                id: deleteResponse?.docsDeleted[0],
+              },
             });
           }
-          return response.ok({ body: createResponse });
+
+          return assistantResponse.error({
+            body: deleteResponse?.errors?.[0].message ?? `Knowledge Base Entry was not deleted`,
+            statusCode: 400,
+          });
         } catch (err) {
           const error = transformError(err as Error);
           return assistantResponse.error({

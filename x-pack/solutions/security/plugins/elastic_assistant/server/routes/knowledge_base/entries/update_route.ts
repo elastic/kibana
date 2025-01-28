@@ -9,22 +9,23 @@ import { IKibanaResponse } from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import {
   API_VERSIONS,
-  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+  ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
+  UpdateKnowledgeBaseEntryRequestParams,
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
-  KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
+  KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
 
-export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRouter): void => {
+export const updateKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRouter): void => {
   router.versioned
-    .post({
+    .put({
       access: 'public',
-      path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL,
+      path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,
 
       security: {
         authz: {
@@ -37,7 +38,8 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            body: buildRouteValidationWithZod(KnowledgeBaseEntryCreateProps),
+            params: buildRouteValidationWithZod(UpdateKnowledgeBaseEntryRequestParams),
+            body: buildRouteValidationWithZod(KnowledgeBaseEntryUpdateProps),
           },
         },
       },
@@ -57,23 +59,24 @@ export const createKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
             return checkResponse.response;
           }
 
-          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
+          logger.debug(() => `Updating KB Entry:\n${JSON.stringify(request.body)}`);
 
-          logger.debug(() => `Creating KB Entry:\n${JSON.stringify(request.body)}`);
-          const createResponse = await kbDataClient?.createKnowledgeBaseEntry({
-            knowledgeBaseEntry: request.body,
-            global: request.body.users != null && request.body.users.length === 0,
+          const kbDataClient = await ctx.elasticAssistant.getAIAssistantKnowledgeBaseDataClient();
+          const updateResponse = await kbDataClient?.updateKnowledgeBaseEntry({
+            knowledgeBaseEntry: { ...request.body, id: request.params.id },
             auditLogger: ctx.elasticAssistant.auditLogger,
-            telemetry: ctx.elasticAssistant.telemetry,
           });
 
-          if (createResponse == null) {
-            return assistantResponse.error({
-              body: `Knowledge Base Entry was not created`,
-              statusCode: 400,
+          if (updateResponse?.updatedEntry) {
+            return response.ok({
+              body: updateResponse?.updatedEntry,
             });
           }
-          return response.ok({ body: createResponse });
+
+          return assistantResponse.error({
+            body: updateResponse?.errors?.[0].message ?? `Knowledge Base Entry was not created`,
+            statusCode: 400,
+          });
         } catch (err) {
           const error = transformError(err as Error);
           return assistantResponse.error({
