@@ -4532,7 +4532,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-elasticsearch-server-mocks@link:packages/core/elasticsearch/core-elasticsearch-server-mocks":
+"@kbn/core-elasticsearch-server-mocks@link:src/core/packages/elasticsearch/server-mocks":
   version "0.0.0"
   uid ""
 
