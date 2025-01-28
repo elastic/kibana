@@ -5,6 +5,4 @@
  * 2.0.
  */
 
-export { getProvider } from './get_provider';
-export { getModelId } from './get_model_id';
-export { getElasticModelProvider } from './get_elastic_model_provider';
+export { getProvider, getModelId, getElasticModelProvider } from './connector_config';
