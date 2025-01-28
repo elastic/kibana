@@ -346,8 +346,7 @@ export const RulesTableContextProvider = ({ children }: RulesTableContextProvide
 
   const refetchRulesAndRelatedData = useCallback(async () => {
     const response = await refetch();
-    await refetchSnoozeSettings();
-    await refetchGapInfo();
+    await Promise.allSettled([refetchSnoozeSettings(), refetchGapInfo()]);
     return response;
   }, [refetch, refetchSnoozeSettings, refetchGapInfo]);
 
