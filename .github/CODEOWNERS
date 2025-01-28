@@ -41,7 +41,6 @@ examples/unified_doc_viewer @elastic/kibana-core
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
-packages/core/rendering/core-rendering-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-api-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-base-server-mocks @elastic/kibana-core
 packages/core/saved-objects/core-saved-objects-browser-mocks @elastic/kibana-core
@@ -301,6 +300,7 @@ src/core/packages/rendering/browser @elastic/kibana-core
 src/core/packages/rendering/browser-internal @elastic/kibana-core
 src/core/packages/rendering/browser-mocks @elastic/kibana-core
 src/core/packages/rendering/server-internal @elastic/kibana-core
+src/core/packages/rendering/server-mocks @elastic/kibana-core
 src/core/packages/root/browser-internal @elastic/kibana-core
 src/core/packages/root/server-internal @elastic/kibana-core
 src/core/packages/saved-objects/api-browser @elastic/kibana-core

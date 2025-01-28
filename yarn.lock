@@ -4968,7 +4968,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-rendering-server-mocks@link:packages/core/rendering/core-rendering-server-mocks":
+"@kbn/core-rendering-server-mocks@link:src/core/packages/rendering/server-mocks":
   version "0.0.0"
   uid ""
 
