@@ -11,6 +11,10 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/butt
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import {
+  uiMetricService,
+  GRAPH_INVESTIGATION,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
@@ -32,8 +36,7 @@ import { useStartTransaction } from '../../../../common/lib/apm/use_start_transa
 import { GRAPH_ID, GraphVisualization } from '../components/graph_visualization';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
-import { useKibana } from '../../../../common/lib/kibana';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { METRIC_TYPE } from '../../../../common/lib/telemetry';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -90,7 +93,6 @@ const graphVisualizationButton: EuiButtonGroupOptionProps = {
  * Visualize view displayed in the document details expandable flyout left section
  */
 export const VisualizeTab = memo(() => {
-  const { telemetry } = useKibana().services;
   const { scopeId, getFieldsData, dataAsNestedObject, dataFormattedForFieldBrowser } =
     useDocumentDetailsContext();
   const { openPreviewPanel } = useExpandableFlyoutApi();
@@ -112,6 +114,8 @@ export const VisualizeTab = memo(() => {
             banner: ANALYZER_PREVIEW_BANNER,
           },
         });
+      } else if (optionId === GRAPH_ID) {
+        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
       }
     },
     [startTransaction, openPreviewPanel, key, scopeId]
@@ -120,6 +124,10 @@ export const VisualizeTab = memo(() => {
   useEffect(() => {
     if (panels.left?.path?.subTab) {
       setActiveVisualizationId(panels.left?.path?.subTab);
+
+      if (panels.left?.path?.subTab === GRAPH_ID) {
+        uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, GRAPH_INVESTIGATION);
+      }
     }
   }, [panels.left?.path?.subTab]);
 
@@ -138,12 +146,6 @@ export const VisualizeTab = memo(() => {
 
   if (hasGraphRepresentation && isGraphFeatureEnabled) {
     options.push(graphVisualizationButton);
-
-    if (activeVisualizationId === GRAPH_ID) {
-      telemetry.reportEvent(DocumentEventTypes.DetailsGraphInvestigationViewed, {
-        location: scopeId,
-      });
-    }
   }
 
   return (

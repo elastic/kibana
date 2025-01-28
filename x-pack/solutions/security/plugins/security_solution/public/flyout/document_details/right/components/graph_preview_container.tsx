@@ -5,12 +5,17 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useEffect } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
 import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
-import { EuiBetaBadge } from '@elastic/eui';
+import { EuiBetaBadge, useGeneratedHtmlId } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
+import {
+  uiMetricService,
+  GRAPH_PREVIEW,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING } from '../../../../../common/constants';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { GRAPH_PREVIEW_TEST_ID } from './test_ids';
@@ -18,14 +23,12 @@ import { GraphPreview } from './graph_preview';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useNavigateToGraphVisualization } from '../../shared/hooks/use_navigate_to_graph_visualization';
 import { ExpandablePanel } from '../../../shared/components/expandable_panel';
-import { useKibana } from '../../../../common/lib/kibana';
-import { DocumentEventTypes } from '../../../../common/lib/telemetry';
 
 /**
  * Graph preview under Overview, Visualizations. It shows a graph representation of entities.
  */
 export const GraphPreviewContainer: React.FC = () => {
-  const { telemetry } = useKibana().services;
+  const renderingId = useGeneratedHtmlId();
   const {
     dataAsNestedObject,
     getFieldsData,
@@ -75,11 +78,11 @@ export const GraphPreviewContainer: React.FC = () => {
     },
   });
 
-  if (hasGraphRepresentation) {
-    telemetry.reportEvent(DocumentEventTypes.DetailsGraphPreviewVisible, {
-      location: scopeId,
-    });
-  }
+  useEffect(() => {
+    if (hasGraphRepresentation) {
+      uiMetricService.trackUiMetric(METRIC_TYPE.LOADED, GRAPH_PREVIEW);
+    }
+  }, [hasGraphRepresentation, renderingId]);
 
   return (
     <ExpandablePanel

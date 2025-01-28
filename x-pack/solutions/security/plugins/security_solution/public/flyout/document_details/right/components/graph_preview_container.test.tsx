@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import React from 'react';
 import { render } from '@testing-library/react';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
+import {
+  uiMetricService,
+  GRAPH_PREVIEW,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
 import { TestProviders } from '../../../../common/mock';
-import React from 'react';
 import { DocumentDetailsContext } from '../../shared/context';
 import { mockContextValue } from '../../shared/mocks/mock_context';
 import { GraphPreviewContainer } from './graph_preview_container';
@@ -22,17 +27,14 @@ import {
   EXPANDABLE_PANEL_TOGGLE_ICON_TEST_ID,
 } from '../../../shared/components/test_ids';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { DocumentEventTypes, type TelemetryServiceStart } from '../../../../common/lib/telemetry';
 
-const mockTelemetry: TelemetryServiceStart = {
-  reportEvent: jest.fn(),
-};
-
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => {
-    return { services: { telemetry: mockTelemetry } };
+jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
+  uiMetricService: {
+    trackUiMetric: jest.fn(),
   },
 }));
+
+const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
 
 const mockUseUiSetting = jest.fn().mockReturnValue([true]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
@@ -184,11 +186,9 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
-    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
-      DocumentEventTypes.DetailsGraphPreviewVisible,
-      {
-        location: 'scopeId',
-      }
+    expect(uiMetricServiceMock.trackUiMetric).toHaveBeenCalledWith(
+      METRIC_TYPE.LOADED,
+      GRAPH_PREVIEW
     );
   });
 
@@ -241,11 +241,9 @@ describe('<GraphPreviewContainer />', () => {
         refetchOnWindowFocus: false,
       },
     });
-    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
-      DocumentEventTypes.DetailsGraphPreviewVisible,
-      {
-        location: 'scopeId',
-      }
+    expect(uiMetricServiceMock.trackUiMetric).toHaveBeenCalledWith(
+      METRIC_TYPE.LOADED,
+      GRAPH_PREVIEW
     );
   });
 
@@ -461,6 +459,6 @@ describe('<GraphPreviewContainer />', () => {
       },
     });
 
-    expect(mockTelemetry.reportEvent).not.toHaveBeenCalled();
+    expect(uiMetricServiceMock.trackUiMetric).not.toHaveBeenCalled();
   });
 });

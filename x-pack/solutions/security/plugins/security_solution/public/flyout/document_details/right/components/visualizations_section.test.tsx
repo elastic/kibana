@@ -10,6 +10,11 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import {
+  uiMetricService,
+  GRAPH_PREVIEW,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
   GRAPH_PREVIEW_TEST_ID,
@@ -28,7 +33,6 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
-import { DocumentEventTypes, type TelemetryServiceStart } from '../../../../common/lib/telemetry';
 
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
@@ -80,15 +84,13 @@ jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
 
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
 
-const mockTelemetry: TelemetryServiceStart = {
-  reportEvent: jest.fn(),
-};
-
-jest.mock('../../../../common/lib/kibana', () => ({
-  useKibana: () => {
-    return { services: { telemetry: mockTelemetry } };
+jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
+  uiMetricService: {
+    trackUiMetric: jest.fn(),
   },
 }));
+
+const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
 
 const panelContextValue = {
   ...mockContextValue,
@@ -170,9 +172,9 @@ describe('<VisualizationsSection />', () => {
     const { getByTestId } = renderVisualizationsSection();
 
     expect(getByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
-    expect(mockTelemetry.reportEvent).toHaveBeenCalledWith(
-      DocumentEventTypes.DetailsGraphPreviewVisible,
-      { location: 'scopeId' }
+    expect(uiMetricServiceMock.trackUiMetric).toHaveBeenCalledWith(
+      METRIC_TYPE.LOADED,
+      GRAPH_PREVIEW
     );
   });
 
