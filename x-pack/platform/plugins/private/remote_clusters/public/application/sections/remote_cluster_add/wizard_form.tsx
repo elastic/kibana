@@ -18,6 +18,8 @@ const SETUP_TRUST = 1;
 const CONFIGURE_CONNECTION = 2;
 const REVIEW = 3;
 
+const FORM_MAX_WIDTH = 850;
+
 interface Props {
   saveRemoteClusterConfig: (config: ClusterPayload) => void;
   onCancel: () => void;
@@ -98,7 +100,7 @@ export const RemoteClusterWizard = ({
   };
 
   return (
-    <EuiPageSection restrictWidth>
+    <EuiPageSection restrictWidth={FORM_MAX_WIDTH}>
       <EuiStepsHorizontal steps={stepDefinitions} />
       <EuiSpacer size="xl" />
 

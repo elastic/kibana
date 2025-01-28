@@ -7,15 +7,7 @@
 
 import React, { useContext } from 'react';
 import { FormattedMessage } from '@kbn/i18n-react';
-import {
-  EuiSpacer,
-  EuiText,
-  EuiLink,
-  EuiSteps,
-  EuiTitle,
-  EuiStepsProps,
-  EuiCallOut,
-} from '@elastic/eui';
+import { EuiSpacer, EuiText, EuiLink, EuiSteps, EuiTitle, EuiStepsProps } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { RequestError } from '../../../../../types';
 import { SECURITY_MODEL } from '../../../../../../common/constants';
@@ -55,14 +47,14 @@ export const RemoteClusterReview = ({
   const onPremSteps: EuiStepsProps['steps'] = [
     {
       title: i18n.translate('xpack.remoteClusters.remoteClusterForm.onPrem.step1.title', {
-        defaultMessage: 'Review the prerequisites',
+        defaultMessage: 'Confirm both clusters are compatible',
       }),
       status: 'incomplete',
       children: (
         <EuiText size="s">
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.onPrem.step1.paragraph"
-            defaultMessage="Ensure security features are enabled on both clusters, and that both clusters meet the {requirmentsLink} needed to enable the connection. "
+            defaultMessage="Ensure that both clusters meet the {requirmentsLink} needed to enable the connection."
             values={{
               requirmentsLink: (
                 <EuiLink
@@ -135,7 +127,7 @@ export const RemoteClusterReview = ({
           <EuiText size="s">
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.cloud.api.step1.paragraph1"
-              defaultMessage="On the deployment you will use as remote, use the {apiLink} or {kibanaLink} to create a cross-cluster API key. Configure it with access to the indices you want to use for cross-cluster search or cross-cluster replication."
+              defaultMessage="On the remote cluster or deployment, use the {apiLink} or {kibanaLink} to create a cross-cluster API key. Configure it with access to the indices you want to use for cross-cluster search or cross-cluster replication."
               values={{
                 apiLink: (
                   <EuiLink href={cloudCreateApiKey} external={true} target="_blank">
@@ -164,7 +156,7 @@ export const RemoteClusterReview = ({
           <EuiText size="s">
             <FormattedMessage
               id="xpack.remoteClusters.remoteClusterForm.cloud.api.step1.paragraph2"
-              defaultMessage="Copy the encoded key (encoded in the response) to a safe location. You will need it in the next step."
+              defaultMessage="Copy the encoded key (the “encoded” value from the response) to a safe location. You will need it in the next step."
             />
           </EuiText>
         </>
@@ -179,23 +171,54 @@ export const RemoteClusterReview = ({
         <>
           <EuiText size="s">
             <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cloud.api.step2.paragraph"
-              defaultMessage="To add the previously created API key in the local deployment's keystore, access your {localDeploymentLink} and click Manage. From the deployment menu, under Security > Remote connections, you will be able to add the API key. For detailed instructions, refer to the Cloud UI or {documentationLink}."
+              id="xpack.remoteClusters.remoteClusterForm.cloud.api.step2.intro"
+              defaultMessage="Add the key that you created to your local deployment's keystore:"
+            />
+          </EuiText>
+          <EuiText size="s">
+            <ol>
+              <li>
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.cloud.api.step2.list1"
+                  defaultMessage="Go to the {managementLink} page for your deployment."
+                  values={{
+                    managementLink: (
+                      <EuiLink href={cloudDeploymentUrl} target="_blank">
+                        {i18n.translate(
+                          'xpack.remoteClusters.remoteClusterForm.cloud.api.step2.list1.management',
+                          {
+                            defaultMessage: 'management',
+                          }
+                        )}
+                      </EuiLink>
+                    ),
+                  }}
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.cloud.api.step2.list2"
+                  defaultMessage="From the navigation menu, click Security."
+                />
+              </li>
+              <li>
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.cloud.api.step2.list3"
+                  defaultMessage="In the Remote connections section, add your API key."
+                />
+              </li>
+            </ol>
+          </EuiText>
+          <EuiSpacer size="l" />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.cloud.api.step2.end"
+              defaultMessage="Check {documentationLink} for more detailed instructions."
               values={{
-                localDeploymentLink: (
-                  <EuiLink href={cloudDeploymentUrl} target="_blank">
-                    {i18n.translate(
-                      'xpack.remoteClusters.remoteClusterForm.cloud.api.step2.paragraph.localDeployment',
-                      {
-                        defaultMessage: "local deployment's Cloud UI",
-                      }
-                    )}
-                  </EuiLink>
-                ),
                 documentationLink: (
                   <EuiLink href={cloudSetupTrustUrl} external={true} target="_blank">
                     {i18n.translate(
-                      'xpack.remoteClusters.remoteClusterForm.cloud.api.step2.paragraph.documentation',
+                      'xpack.remoteClusters.remoteClusterForm.cloud.api.step2.end.documentation',
                       {
                         defaultMessage: 'documentation',
                       }
@@ -216,7 +239,7 @@ export const RemoteClusterReview = ({
         <EuiText size="s">
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.onPrem.disclaimerInfo"
-            defaultMessage="Confirm the following requirements are met before you proceed. If all requirements are not met, the remote cluster will not connect."
+            defaultMessage="Check that the following requirements are completed to ensure that both clusters can communicate:"
           />
         </EuiText>
         <EuiSpacer size="l" />
@@ -225,101 +248,51 @@ export const RemoteClusterReview = ({
           titleSize="s"
           steps={onPremSteps}
         />
-        <EuiCallOut
-          title={
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.onPrem.trustWarningTitle"
-              defaultMessage="Trust must be established before you proceed"
-            />
-          }
-          color="warning"
-          iconType="warning"
-          size="s"
-        >
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.onPrem.trustWarningDescription"
-              defaultMessage='If the steps above are not completed, this Kibana configuration will show status of “not connected"'
-            />
-          </EuiText>
-        </EuiCallOut>
       </>
     );
   };
 
   const getCloudInfo = () => {
-    const cloudInfoSteps =
-      securityModel === SECURITY_MODEL.API ? (
-        <>
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cloud.disclaimerInfo"
-              defaultMessage="Make sure you complete the steps below before proceeding with saving this configuration."
-            />
-          </EuiText>
-          <EuiSpacer size="l" />
-          <EuiSteps titleSize="s" steps={cloudSteps} />
-        </>
-      ) : (
-        <>
-          <EuiTitle size="s">
-            <h3>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.cloud.cert.title"
-                defaultMessage="Set up trust through Cloud UI before proceeding with saving this configuration."
-              />
-            </h3>
-          </EuiTitle>
-          <EuiSpacer size="l" />
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cloud.cert.paragraph1"
-              defaultMessage="Go to Cloud UI of your local deployment and click “manage” next to the deployment you want to connect. From Security page in the deployment menu, you’ll be able to set up the connection in “Remote connections” section. "
-            />
-          </EuiText>
-          <EuiSpacer size="l" />
-          <EuiText size="s" data-test-subj="cloudCertDocumentation">
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cloud.cert.paragraph2"
-              defaultMessage="Refer to the steps in Cloud UI and/or {documentationLink} for detailed instructions for the types of clusters you’re connecting."
-              values={{
-                documentationLink: (
-                  <EuiLink href={cloudSetupTrustUrl} external={true} target="_blank">
-                    {i18n.translate(
-                      'xpack.remoteClusters.remoteClusterForm.cloud.cert.paragraph2.documentationLink',
-                      {
-                        defaultMessage: 'documentation',
-                      }
-                    )}
-                  </EuiLink>
-                ),
-              }}
-            />
-          </EuiText>
-          <EuiSpacer size="l" />
-        </>
-      );
-    return (
+    return securityModel === SECURITY_MODEL.API ? (
       <>
-        {cloudInfoSteps}
-        <EuiCallOut
-          title={
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterForm.cloud.disclaimerInfo"
+            defaultMessage="Make sure you complete the steps below before proceeding with saving this configuration."
+          />
+        </EuiText>
+        <EuiSpacer size="l" />
+        <EuiSteps titleSize="s" steps={cloudSteps} />
+      </>
+    ) : (
+      <>
+        <EuiTitle size="s">
+          <h3>
             <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cloud.trustWarningTitle"
-              defaultMessage="Remote cluster will not be connected until all steps are completed"
+              id="xpack.remoteClusters.remoteClusterForm.cloud.cert.title"
+              defaultMessage="Confirm trust is established."
             />
-          }
-          color="warning"
-          iconType="warning"
-          size="s"
-        >
-          <EuiText size="s">
-            <FormattedMessage
-              id="xpack.remoteClusters.remoteClusterForm.cloud.trustWarningDescription"
-              defaultMessage="If the steps above are not completed, this Kibana configuration will show status of “not connected”."
-            />
-          </EuiText>
-        </EuiCallOut>
+          </h3>
+        </EuiTitle>
+        <EuiSpacer size="l" />
+        <EuiText size="s">
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterForm.cloud.cert.paragraph"
+            defaultMessage="Before you proceed, ensure that trust is correctly configured between both clusters. If all requirements are not met, the remote cluster won't connect. {detailsLink}"
+            values={{
+              detailsLink: (
+                <EuiLink href={cloudSetupTrustUrl} external={true} target="_blank">
+                  {i18n.translate(
+                    'xpack.remoteClusters.remoteClusterForm.cloud.cert.paragraph.documentationLink',
+                    {
+                      defaultMessage: 'Read details.',
+                    }
+                  )}
+                </EuiLink>
+              ),
+            }}
+          />
+        </EuiText>
       </>
     );
   };

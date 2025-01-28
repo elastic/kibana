@@ -18,6 +18,7 @@ import {
   EuiLink,
   EuiFieldNumber,
   EuiCode,
+  EuiText,
 } from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
@@ -53,10 +54,12 @@ export const ConnectionModeCloud: FunctionComponent<Props> = (props) => {
       }
       description={
         <>
-          <FormattedMessage
-            id="xpack.remoteClusters.remoteClusterForm.sectionModeCloudDescription"
-            defaultMessage="Configure how to connect to the remote cluster."
-          />
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.sectionModeCloudDescription"
+              defaultMessage="Configure how to connect to the remote cluster."
+            />
+          </EuiText>
           <EuiSpacer size="l" />
           <EuiFormRow fullWidth>
             <EuiSwitch

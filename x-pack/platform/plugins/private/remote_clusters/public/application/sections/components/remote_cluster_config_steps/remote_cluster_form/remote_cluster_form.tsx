@@ -25,6 +25,7 @@ import {
   htmlIdGenerator,
   EuiSwitchEvent,
   useEuiTheme,
+  EuiText,
 } from '@elastic/eui';
 import { ReactNode } from 'react-markdown';
 import { Cluster, ClusterPayload } from '../../../../../../common/lib';
@@ -221,32 +222,22 @@ export const RemoteClusterForm: React.FC<Props> = ({
           </EuiTitle>
         }
         description={
-          <>
-            <p>
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
-                defaultMessage="If any of the remote clusters are unavailable, the query request fails. To avoid this and continue to send requests to other clusters, enable {optionName}. {learnMoreLink}"
-                values={{
-                  optionName: (
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.optionNameLabel"
-                        defaultMessage="Skip if unavailable"
-                      />
-                    </strong>
-                  ),
-                  learnMoreLink: (
-                    <EuiLink href={skippingDisconnectedClustersUrl} target="_blank">
-                      <FormattedMessage
-                        id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
-                        defaultMessage="Learn more."
-                      />
-                    </EuiLink>
-                  ),
-                }}
-              />
-            </p>
-          </>
+          <EuiText size="s">
+            <FormattedMessage
+              id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription"
+              defaultMessage="If any of the remote clusters are unavailable, the query request fails. To avoid this and continue to send requests to other clusters, enable Skip if unavailable. {learnMoreLink}"
+              values={{
+                learnMoreLink: (
+                  <EuiLink href={skippingDisconnectedClustersUrl} target="_blank">
+                    <FormattedMessage
+                      id="xpack.remoteClusters.remoteClusterForm.sectionSkipUnavailableDescription.learnMoreLinkLabel"
+                      defaultMessage="Learn more."
+                    />
+                  </EuiLink>
+                ),
+              }}
+            />
+          </EuiText>
         }
         fullWidth
       >
@@ -374,20 +365,22 @@ export const RemoteClusterForm: React.FC<Props> = ({
           }
           description={
             isCloudEnabled ? (
-              <FormattedMessage
-                id="xpack.remoteClusters.remoteClusterForm.cloud.sectionNameDescription"
-                defaultMessage="A unique identifier for the remote cluster. Must match the {remoteClusterName} in this deployment’s Cloud -> Security settings."
-                values={{
-                  remoteClusterName: (
-                    <strong>
-                      <FormattedMessage
-                        id="xpack.remoteClusters.remoteClusterForm.cloud.sectionNameDescription.remoteClusterName"
-                        defaultMessage="remote cluster name"
-                      />
-                    </strong>
-                  ),
-                }}
-              />
+              <EuiText size="s">
+                <FormattedMessage
+                  id="xpack.remoteClusters.remoteClusterForm.cloud.sectionNameDescription"
+                  defaultMessage="A unique identifier for the remote cluster. Must match the {remoteClusterName} in this deployment’s Cloud -> Security settings."
+                  values={{
+                    remoteClusterName: (
+                      <strong>
+                        <FormattedMessage
+                          id="xpack.remoteClusters.remoteClusterForm.cloud.sectionNameDescription.remoteClusterName"
+                          defaultMessage="remote cluster name"
+                        />
+                      </strong>
+                    ),
+                  }}
+                />
+              </EuiText>
             ) : (
               <FormattedMessage
                 id="xpack.remoteClusters.remoteClusterForm.stateful.sectionNameDescription"
