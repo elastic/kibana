@@ -4620,7 +4620,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-http-browser-mocks@link:packages/core/http/core-http-browser-mocks":
+"@kbn/core-http-browser-mocks@link:src/core/packages/http/browser-mocks":
   version "0.0.0"
   uid ""
 
