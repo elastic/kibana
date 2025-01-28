@@ -32,5 +32,5 @@ export const INTEGRATION_SUCCESS_SECTION = 'integrationSuccessSection';
 export const SAVE_ZIP_BUTTON = 'saveZipButton';
 
 export const CREATE_INTEGRATION_LANDING_PAGE = '/app/integrations/create';
-export const CREATE_INTEGRATION_ASSISTANT = '/app/integrations/create/assistant';
+export const CREATE_AUTOMATIC_IMPORT = '/app/integrations/create/assistant';
 export const CREATE_INTEGRATION_UPLOAD = '/app/integrations/create/upload';
