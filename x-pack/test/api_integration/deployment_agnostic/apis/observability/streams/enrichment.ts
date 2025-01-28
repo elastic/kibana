@@ -121,6 +121,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         inner_timestamp: '2023-01-01T00:00:10.000Z',
         message2: 'test',
         'log.level': 'error',
+        'stream.name': 'logs.nginx',
       });
     });
 
@@ -143,6 +144,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         'log.logger': 'mylogger',
         message2: 'mylogger this is the message',
         message3: 'this is the message',
+        'stream.name': 'logs.nginx',
       });
     });
 

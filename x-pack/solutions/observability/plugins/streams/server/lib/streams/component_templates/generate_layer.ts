@@ -34,6 +34,7 @@ export function generateLayer(
     }
     properties[field] = property;
   });
+  properties['stream.name'] = { type: 'constant_keyword', value: definition.name };
 
   return {
     name: getComponentTemplateName(id),

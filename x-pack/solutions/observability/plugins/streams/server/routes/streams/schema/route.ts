@@ -189,6 +189,12 @@ export const schemaFieldsSimulationRoute = createServerRoute({
           },
         },
       },
+      // prevent double-processing
+      pipeline_substitutions: {
+        [`${params.path.id}@stream.processing`]: {
+          processors: [],
+        },
+      },
     };
 
     // TODO: We should be using scopedClusterClient.asCurrentUser.simulate.ingest() but the ES JS lib currently has a bug. The types also aren't available yet, so we use any.
