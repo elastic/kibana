@@ -19,6 +19,12 @@ import type { SharePublicSetup, SharePublicStart } from '@kbn/share-plugin/publi
 import type { SavedObjectTaggingPluginStart } from '@kbn/saved-objects-tagging-plugin/public';
 import { NavigationPublicStart } from '@kbn/navigation-plugin/public/types';
 import { FieldsMetadataPublicStart } from '@kbn/fields-metadata-plugin/public';
+import {
+  UnwiredStreamDefinition,
+  UnwiredStreamGetResponse,
+  WiredStreamDefinition,
+  WiredStreamGetResponse,
+} from '@kbn/streams-schema';
 /* eslint-disable @typescript-eslint/no-empty-interface*/
 
 export interface ConfigSchema {}
@@ -47,3 +53,7 @@ export interface StreamsAppStartDependencies {
 export interface StreamsAppPublicSetup {}
 
 export interface StreamsAppPublicStart {}
+
+export type IngestStreamGetResponseWithName =
+  | (WiredStreamGetResponse & { stream: WiredStreamDefinition })
+  | (UnwiredStreamGetResponse & { stream: UnwiredStreamDefinition });

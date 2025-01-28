@@ -5,7 +5,6 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { isWiredStreamGetResponse } from '@kbn/streams-schema';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -14,6 +13,7 @@ import { EntityDetailViewWithoutParams, EntityViewTab } from '../entity_detail_v
 import { StreamDetailDashboardsView } from '../stream_detail_dashboards_view';
 import { StreamDetailManagement } from '../stream_detail_management';
 import { StreamDetailOverview } from '../stream_detail_overview';
+import { IngestStreamGetResponseWithName } from '../../types';
 
 export function StreamDetailView() {
   const params1 = useStreamsAppParams('/{key}/{tab}', true);
@@ -47,31 +47,13 @@ export function StreamDetailView() {
           },
         })
         .then((response) => {
-          if (isWiredStreamGetResponse(response)) {
-            return {
-              dashboards: response.dashboards,
-              inherited_fields: response.inherited_fields,
-              elasticsearch_assets: [],
-              effective_lifecycle: response.effective_lifecycle,
-              name: key,
-              stream: {
-                name: key,
-                ...response.stream,
-              },
-            };
-          }
-
           return {
-            dashboards: response.dashboards,
-            elasticsearch_assets: response.elasticsearch_assets,
-            inherited_fields: {},
-            effective_lifecycle: response.effective_lifecycle,
-            name: key,
+            ...response,
             stream: {
-              name: key,
               ...response.stream,
+              name: key,
             },
-          };
+          } as IngestStreamGetResponseWithName;
         });
     },
     [streamsRepositoryClient, key]
