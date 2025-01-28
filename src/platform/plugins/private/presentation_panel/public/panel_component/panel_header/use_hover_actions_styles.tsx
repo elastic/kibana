@@ -30,7 +30,6 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
       container: hoverActionsAnchor / size;
       border-radius: ${euiTheme.border.radius.medium};
       position: relative;
-      display: contents;
 
       ${showBorder
         ? css`

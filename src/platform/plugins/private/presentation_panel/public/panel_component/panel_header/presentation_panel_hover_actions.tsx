@@ -423,7 +423,7 @@ export const PresentationPanelHoverActions = ({
   );
 
   return (
-    <div
+    <span
       className={classNames('embPanel__hoverActionsAnchor', {
         'embPanel__hoverActionsAnchor--lockHoverActions': hasLockedHoverActions,
         'embPanel__hoverActionsAnchor--editMode': viewMode === 'edit',
@@ -499,6 +499,6 @@ export const PresentationPanelHoverActions = ({
           ) : null}
         </div>
       )}
-    </div>
+    </span>
   );
 };
