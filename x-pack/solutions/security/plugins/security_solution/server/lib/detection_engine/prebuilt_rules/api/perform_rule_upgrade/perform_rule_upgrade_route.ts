@@ -72,7 +72,8 @@ export const performRuleUpgradeRoute = (
           const ruleTriadsMap = await fetchRuleVersionsTriad({
             ruleAssetsClient,
             ruleObjectsClient,
-            versionSpecifiers,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            versionSpecifiers: versionSpecifiers as any,
           });
           const ruleGroups = getRuleGroups(ruleTriadsMap);
 

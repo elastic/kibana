@@ -101,6 +101,7 @@ export const RuleFieldsToUpgrade = z
   .strict();
 
 export type RuleUpgradeSpecifier = z.infer<typeof RuleUpgradeSpecifier>;
+// @ts-expect-error
 export const RuleUpgradeSpecifier = z.object({
   rule_id: RuleSignatureId,
   revision: z.number(),

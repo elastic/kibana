@@ -43,7 +43,8 @@ export const getUpgradeableRules = ({
             error: new Error(
               `Rule with rule_id "${rule.rule_id}" and version "${rule.version}" not found`
             ),
-            item: rule,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            item: rule as any,
           });
           return;
         }
@@ -66,7 +67,8 @@ export const getUpgradeableRules = ({
             error: new Error(
               `Revision mismatch for rule_id ${rule.rule_id}: expected ${currentRevision}, got ${rule.revision}`
             ),
-            item: rule,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            item: rule as any,
           });
           // Remove the rule from the list of upgradeable rules
           if (upgradeableRules.has(rule.rule_id)) {
