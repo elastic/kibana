@@ -12,7 +12,11 @@ import { i18n } from '@kbn/i18n';
 
 export function AddProcessorButton(props: EuiButtonPropsForButton) {
   return (
-    <EuiButton iconType="plusInCircle" {...props}>
+    <EuiButton
+      data-test-subj="streamsAppAddProcessorButtonAddAProcessorButton"
+      iconType="plusInCircle"
+      {...props}
+    >
       {i18n.translate(
         'xpack.streams.streamDetailView.managementTab.enrichmentEmptyPrompt.addProcessorAction',
         { defaultMessage: 'Add a processor' }

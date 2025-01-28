@@ -13,6 +13,7 @@ import {
   SingleDatasetLocatorParams,
   SINGLE_DATASET_LOCATOR_ID,
 } from '@kbn/deeplinks-observability/locators';
+import { OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT } from '../../../../common/telemetry_events';
 import { ObservabilityOnboardingPluginSetupDeps } from '../../../plugin';
 import { useWizard } from '.';
 import { FETCH_STATUS, useFetcher } from '../../../hooks/use_fetcher';
@@ -29,14 +30,14 @@ import { StepModal } from '../shared/step_panel';
 import { ApiKeyBanner } from './api_key_banner';
 import { WindowsInstallStep } from '../shared/windows_install_step';
 import { TroubleshootingLink } from '../shared/troubleshooting_link';
-import { useFlowProgressTelemetry } from '../../../hooks/use_flow_progress_telemetry';
 
 const defaultDatasetName = '';
 
 export function InstallElasticAgent() {
   const {
-    services: { share },
+    services: { share, analytics },
   } = useKibana<ObservabilityOnboardingPluginSetupDeps>();
+  const [dataReceivedTelemetrySent, setDataReceivedTelemetrySent] = useState(false);
 
   const singleDatasetLocator =
     share.url.locators.get<SingleDatasetLocatorParams>(SINGLE_DATASET_LOCATOR_ID);
@@ -71,6 +72,7 @@ export function InstallElasticAgent() {
       return callApi('GET /internal/observability_onboarding/logs/setup/privileges');
     }
     // FIXME: Dario could not find a reasonable fix for getState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { data: setup } = useFetcher((callApi) => {
@@ -105,6 +107,7 @@ export function InstallElasticAgent() {
     },
     // FIXME: Dario could not find a reasonable fix for getState()
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [monitoringRole?.hasPrivileges]
   );
 
@@ -134,6 +137,7 @@ export function InstallElasticAgent() {
       });
     }
     // FIXME: Dario could not find a reasonable fix for getState()
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const { apiKeyEncoded, onboardingId } = installShipperSetup ?? getState();
@@ -151,6 +155,7 @@ export function InstallElasticAgent() {
     },
     // FIXME: Dario could not find a reasonable fix for succesfullySavedOnboardingState
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [apiKeyEncoded, onboardingId, succesfullySavedOnboardingState]
   );
 
@@ -184,8 +189,6 @@ export function InstallElasticAgent() {
     }
   }, [progressSucceded, refetchProgress]);
 
-  useFlowProgressTelemetry(progressData?.progress, 'custom_logs');
-
   const getCheckLogsStep = useCallback(() => {
     const progress = progressData?.progress;
     if (progress) {
@@ -212,6 +215,19 @@ export function InstallElasticAgent() {
   const isInstallCompleted = progressData?.progress?.['ea-status']?.status === 'complete';
   const autoDownloadConfigStatus = (progressData?.progress?.['ea-config']?.status ??
     'incomplete') as EuiStepStatus;
+  const isIngestCompleted = progressData?.progress?.['logs-ingest']?.status === 'complete';
+
+  useEffect(() => {
+    if (isIngestCompleted && !dataReceivedTelemetrySent) {
+      setDataReceivedTelemetrySent(true);
+      analytics?.reportEvent(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT.eventType, {
+        flow_type: 'logFiles',
+        flow_id: onboardingId,
+        step: 'logs-ingest',
+        step_status: 'complete',
+      });
+    }
+  }, [analytics, dataReceivedTelemetrySent, isIngestCompleted, onboardingId]);
 
   return (
     <StepModal

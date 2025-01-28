@@ -13,6 +13,7 @@ import { addInternalBasePath } from '..';
 
 const bodySchema = schema.object({
   indexName: schema.string(),
+  indexMode: schema.string(),
 });
 
 export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDependencies) {
@@ -29,10 +30,13 @@ export function registerCreateRoute({ router, lib: { handleEsError } }: RouteDep
     },
     async (context, request, response) => {
       const { client } = (await context.core).elasticsearch;
-      const { indexName } = request.body as typeof bodySchema.type;
+      const { indexName, indexMode } = request.body as typeof bodySchema.type;
 
       const params: IndicesCreateRequest = {
         index: indexName,
+        settings: {
+          mode: indexMode,
+        },
       };
 
       try {

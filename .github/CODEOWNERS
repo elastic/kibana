@@ -48,7 +48,7 @@ x-pack/solutions/observability/plugins/apm/ftr_e2e @elastic/obs-ux-infra_service
 x-pack/solutions/observability/plugins/apm @elastic/obs-ux-infra_services-team
 packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-x-pack/solutions/observability/packages/kbn-apm-types @elastic/obs-ux-infra_services-team
+x-pack/platform/packages/shared/kbn-apm-types @elastic/obs-ux-infra_services-team
 src/platform/packages/shared/kbn-apm-utils @elastic/obs-ux-infra_services-team
 test/plugin_functional/plugins/app_link_test @elastic/kibana-core
 x-pack/test/usage_collection/plugins/application_usage_test @elastic/kibana-core
@@ -202,6 +202,7 @@ src/core/packages/http/common @elastic/kibana-core
 src/core/packages/http/context-server-internal @elastic/kibana-core
 packages/core/http/core-http-context-server-mocks @elastic/kibana-core
 test/plugin_functional/plugins/core_http @elastic/kibana-core
+src/core/packages/http/rate-limiter-internal @elastic/kibana-core
 src/core/packages/http/request-handler-context-server @elastic/kibana-core
 src/core/packages/http/request-handler-context-server-internal @elastic/kibana-core
 src/core/packages/http/resources-server @elastic/kibana-core
@@ -451,6 +452,7 @@ src/platform/plugins/private/event_annotation_listing @elastic/kibana-visualizat
 src/platform/plugins/private/event_annotation @elastic/kibana-visualizations
 x-pack/test/plugin_api_integration/plugins/event_log @elastic/response-ops
 x-pack/platform/plugins/shared/event_log @elastic/response-ops
+x-pack/platform/packages/shared/kbn-event-stacktrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/solutions/security/packages/expandable-flyout @elastic/security-threat-hunting-investigations
 packages/kbn-expect @elastic/kibana-operations @elastic/appex-qa
 x-pack/examples/exploratory_view_example @elastic/obs-ux-infra_services-team
@@ -564,6 +566,7 @@ test/plugin_functional/plugins/kbn_sample_panel_action @elastic/appex-sharedux
 test/plugin_functional/plugins/kbn_top_nav @elastic/kibana-core
 test/plugin_functional/plugins/kbn_tp_custom_visualizations @elastic/kibana-visualizations
 test/interpreter_functional/plugins/kbn_tp_run_pipeline @elastic/kibana-core
+x-pack/platform/packages/shared/kbn-key-value-metadata-table @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 x-pack/test/functional_cors/plugins/kibana_cors_test @elastic/kibana-security
 packages/kbn-kibana-manifest-schema @elastic/kibana-operations
 src/platform/plugins/private/kibana_overview @elastic/appex-sharedux
@@ -666,7 +669,7 @@ src/platform/packages/shared/kbn-object-versioning @elastic/appex-sharedux
 src/platform/packages/shared/kbn-object-versioning-utils @elastic/appex-sharedux
 x-pack/solutions/observability/plugins/observability_ai_assistant_app @elastic/obs-ai-assistant
 x-pack/solutions/observability/plugins/observability_ai_assistant_management @elastic/obs-ai-assistant
-x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant @elastic/obs-ai-assistant
+x-pack/platform/plugins/shared/observability_ai_assistant @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_common @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/observability_ai/observability_ai_server @elastic/obs-ai-assistant
 x-pack/solutions/observability/packages/alert_details @elastic/obs-ux-management-team
@@ -805,7 +808,7 @@ x-pack/solutions/search/plugins/search_solution/search_navigation @elastic/searc
 x-pack/solutions/search/plugins/search_notebooks @elastic/search-kibana
 x-pack/solutions/search/plugins/search_playground @elastic/search-kibana
 src/platform/packages/shared/kbn-search-response-warnings @elastic/kibana-data-discovery
-x-pack/solutions/search/packages/search/shared_ui @elastic/search-kibana
+x-pack/solutions/search/packages/shared_ui @elastic/search-kibana
 x-pack/solutions/search/plugins/search_synonyms @elastic/search-kibana
 src/platform/packages/shared/kbn-search-types @elastic/kibana-data-discovery
 x-pack/platform/plugins/shared/searchprofiler @elastic/kibana-management
