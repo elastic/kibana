@@ -242,6 +242,28 @@ export const KnowledgeBaseEntryCreateProps = z.discriminatedUnion('type', [
   IndexEntryCreateFields,
 ]);
 
+export type KnowledgeBaseEntryDeleteRequestParams = z.infer<
+  typeof KnowledgeBaseEntryDeleteRequestParams
+>;
+
+export const KnowledgeBaseEntryDeleteRequestParams = z.object({
+  id: NonEmptyString,
+});
+
+export type KnowledgeBaseEntryUpdateRequestParams = z.infer<
+  typeof KnowledgeBaseEntryUpdateRequestParams
+>;
+
+export const KnowledgeBaseEntryUpdateRequestParams = z.object({
+  id: NonEmptyString,
+});
+
+export type KnowledgeBaseEntryDeleteResponse = z.infer<typeof KnowledgeBaseEntryDeleteResponse>;
+
+export const KnowledgeBaseEntryDeleteResponse = z.object({
+  id: NonEmptyString,
+});
+
 export type KnowledgeBaseEntryUpdateProps = z.infer<typeof KnowledgeBaseEntryUpdateProps>;
 export const KnowledgeBaseEntryUpdateProps = z.discriminatedUnion('type', [
   DocumentEntryUpdateFields,
