@@ -1395,7 +1395,7 @@
     "@kbn/core-i18n-browser-mocks": "link:src/core/packages/i18n/browser-mocks",
     "@kbn/core-i18n-server-mocks": "link:src/core/packages/i18n/server-mocks",
     "@kbn/core-injected-metadata-browser-mocks": "link:src/core/packages/injected-metadata/browser-mocks",
-    "@kbn/core-integrations-browser-mocks": "link:packages/core/integrations/core-integrations-browser-mocks",
+    "@kbn/core-integrations-browser-mocks": "link:src/core/packages/integrations/browser-mocks",
     "@kbn/core-lifecycle-browser-mocks": "link:packages/core/lifecycle/core-lifecycle-browser-mocks",
     "@kbn/core-lifecycle-server-mocks": "link:packages/core/lifecycle/core-lifecycle-server-mocks",
     "@kbn/core-logging-browser-mocks": "link:packages/core/logging/core-logging-browser-mocks",

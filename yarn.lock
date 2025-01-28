@@ -4732,7 +4732,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-integrations-browser-mocks@link:packages/core/integrations/core-integrations-browser-mocks":
+"@kbn/core-integrations-browser-mocks@link:src/core/packages/integrations/browser-mocks":
   version "0.0.0"
   uid ""
 
