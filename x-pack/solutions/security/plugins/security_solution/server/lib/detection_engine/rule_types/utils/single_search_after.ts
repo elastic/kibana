@@ -11,12 +11,19 @@ import type {
   AlertInstanceState,
   RuleExecutorServices,
 } from '@kbn/alerting-plugin/server';
-import type { SignalSearchResponse, SignalSource, OverrideBodyQuery } from '../types';
+import type {
+  SignalSearchResponse,
+  SignalSource,
+  OverrideBodyQuery,
+  LoggedRequestsConfig,
+} from '../types';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
 import type { TimestampOverride } from '../../../../../common/api/detection_engine/model/rule_schema';
 import { withSecuritySpan } from '../../../../utils/with_security_span';
 import type { IRuleExecutionLogForExecutors } from '../../rule_monitoring';
+import type { RulePreviewLoggedRequest } from '../../../../../common/api/detection_engine/rule_preview/rule_preview.gen';
+import { logSearchRequest } from './logged_requests';
 
 export interface SingleSearchAfterParams {
   aggregations?: Record<string, estypes.AggregationsAggregationContainer>;
@@ -35,6 +42,7 @@ export interface SingleSearchAfterParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
+  loggedRequestsConfig?: LoggedRequestsConfig;
 }
 
 // utilize search_after for paging results into bulk.
@@ -57,12 +65,16 @@ export const singleSearchAfter = async <
   trackTotalHits,
   additionalFilters,
   overrideBody,
+  loggedRequestsConfig,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
   searchErrors: string[];
+  loggedRequests?: RulePreviewLoggedRequest[];
 }> => {
   return withSecuritySpan('singleSearchAfter', async () => {
+    const loggedRequests: RulePreviewLoggedRequest[] = [];
+
     try {
       const searchAfterQuery = buildEventsSearchQuery({
         aggregations,
@@ -88,7 +100,7 @@ export const singleSearchAfter = async <
       const start = performance.now();
       const { body: nextSearchAfterResult } =
         await services.scopedClusterClient.asCurrentUser.search<SignalSource, TAggregations>(
-          searchAfterQuery as estypes.SearchRequest,
+          searchAfterQuery,
           { meta: true }
         );
 
@@ -98,10 +110,22 @@ export const singleSearchAfter = async <
         errors: nextSearchAfterResult._shards.failures ?? [],
       });
 
+      if (loggedRequestsConfig) {
+        loggedRequests.push({
+          request: loggedRequestsConfig.skipRequestQuery
+            ? undefined
+            : logSearchRequest(searchAfterQuery),
+          description: loggedRequestsConfig.description,
+          request_type: loggedRequestsConfig.type,
+          duration: Math.round(end - start),
+        });
+      }
+
       return {
         searchResult: nextSearchAfterResult,
         searchDuration: makeFloatString(end - start),
         searchErrors,
+        loggedRequests,
       };
     } catch (exc) {
       ruleExecutionLogger.error(`Searching events operation failed: ${exc}`);
@@ -129,6 +153,7 @@ export const singleSearchAfter = async <
           searchResult: searchRes,
           searchDuration: '-1.0',
           searchErrors: exc.message,
+          loggedRequests,
         };
       }
 
