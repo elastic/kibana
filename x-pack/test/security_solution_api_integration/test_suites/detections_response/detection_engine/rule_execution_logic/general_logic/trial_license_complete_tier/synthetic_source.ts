@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
     };
   };
 
-  describe.only('@ess @serverless synthetic source', () => {
+  describe('@ess @serverless synthetic source', () => {
     describe('synthetic source limitations', () => {
       const index = 'ecs_compliant_synthetic_source';
       const { indexListOfDocuments } = dataGeneratorFactory({ es, index, log });
