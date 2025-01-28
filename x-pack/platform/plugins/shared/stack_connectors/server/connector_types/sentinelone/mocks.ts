@@ -170,6 +170,7 @@ class SentinelOneConnectorTestClass extends SentinelOneConnector {
     downloadRemoteScriptResults: Readable.from(['test']),
   };
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public requestSpy = jest.fn(async ({ url }: SubActionRequestParams<any>) => {
     const response = createAxiosResponseMock({});
 
