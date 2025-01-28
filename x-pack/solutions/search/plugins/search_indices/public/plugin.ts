@@ -103,7 +103,6 @@ export class SearchIndicesPlugin
     deps: SearchIndicesAppPluginStartDependencies
   ): SearchIndicesPluginStart {
     const { indexManagement } = deps;
-    const queryClient = initQueryClient(core.notifications.toasts);
     docLinks.setDocLinks(core.docLinks.links);
 
     if (this.pluginEnabled) {
