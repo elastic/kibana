@@ -29,7 +29,7 @@ export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = ()
       query: getLatestTestRunRouteQuerySchema,
     },
   },
-  handler: async ({ syntheticsEsClient, request, response }): Promise<Ping | undefined> => {
+  handler: async ({ syntheticsEsClient, request, response }): Promise<{ ping?: Ping }> => {
     const { from, to, monitorId, locationLabel } = request.query as GetPingsRouteRequest;
 
     const getPing = (fromVal: string) => {
@@ -47,9 +47,9 @@ export const syntheticsGetLatestTestRunRoute: SyntheticsRestApiRouteFactory = ()
     const ping = await getPing(from || 'now-1d');
 
     if (ping && from) {
-      return ping;
+      return { ping };
     } else {
-      return await getPing('now-1w');
+      return { ping: await getPing('now-1w') };
     }
   },
 });

@@ -60,8 +60,8 @@ export const fetchLatestTestRun = async ({
 }: {
   monitorId: string;
   locationLabel?: string;
-}): Promise<Ping> => {
-  return apiService.get<Ping>(SYNTHETICS_API_URLS.LATEST_TEST_RUN, {
+}): Promise<{ ping?: Ping }> => {
+  return apiService.get<{ ping?: Ping }>(SYNTHETICS_API_URLS.LATEST_TEST_RUN, {
     monitorId,
     locationLabel,
     version: INITIAL_REST_VERSION,
