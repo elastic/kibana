@@ -82,6 +82,7 @@ const ProcessorListItem = ({
           </EuiText>
         </EuiFlexItem>
         <EuiButtonIcon
+          data-test-subj="streamsAppProcessorListItemButton"
           onClick={openEditProcessor}
           iconType="pencil"
           color="text"
