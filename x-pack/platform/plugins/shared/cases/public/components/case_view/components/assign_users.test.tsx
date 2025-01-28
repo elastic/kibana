@@ -49,14 +49,14 @@ describe('AssignUsers', () => {
     expect(screen.getByText('No users are assigned')).toBeInTheDocument();
   });
 
-  it('does not show the suggest users edit button when the user does not have update permissions', () => {
+  it('does not show the suggest users edit button when the user does not have assign permissions', () => {
     appMockRender = createAppMockRenderer({ permissions: noAssignCasesPermissions() });
     appMockRender.render(<AssignUsers {...defaultProps} />);
 
     expect(screen.queryByText('case-view-assignees-edit')).not.toBeInTheDocument();
   });
 
-  it('does not show the assign users link when the user does not have update permissions', () => {
+  it('does not show the assign users link when the user does not have assign permissions', () => {
     appMockRender = createAppMockRenderer({ permissions: noAssignCasesPermissions() });
     appMockRender.render(<AssignUsers {...defaultProps} />);
 

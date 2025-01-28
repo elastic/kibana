@@ -14,6 +14,7 @@ import type {
   SavedObjectsFindResult,
   SavedObjectsUpdateResponse,
 } from '@kbn/core/server';
+import { isEqual } from 'lodash';
 
 import { nodeBuilder } from '@kbn/es-query';
 
@@ -193,12 +194,6 @@ async function getAlertComments({
   });
 }
 
-function haveSameElements(arr1?: string[], arr2?: string[]): boolean {
-  if (!arr1 || !arr2 || arr1.length !== arr2.length) return false;
-  const set1 = new Set(arr1);
-  return arr2.every((item) => set1.has(item));
-}
-
 /**
  * Returns what status the alert comment should have based on whether it is associated to a case.
  */
@@ -309,7 +304,7 @@ function partitionPatchRequest(
     }
     if (reqCase.assignees) {
       if (
-        !haveSameElements(
+        !isEqual(
           reqCase.assignees.map(({ uid }) => uid),
           foundCase?.attributes.assignees.map(({ uid }) => uid)
         ) &&

@@ -106,7 +106,7 @@ export const updateCaseStatus = async ({
 }: {
   supertest: SuperTest.Agent;
   caseId: string;
-  version?: string;
+  version: string;
   status?: CaseStatuses;
   expectedHttpCode?: number;
   auth?: { user: User; space: string | null };

@@ -550,7 +550,7 @@ export const casesV3NoAssignee: Role = {
         spaces: ['*'],
         base: [],
         feature: {
-          generalCasesV3: ['minimal_read', 'delete', 'case_reopen'],
+          generalCasesV3: ['minimal_read', 'cases_delete', 'case_reopen', 'create_comment'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -575,7 +575,7 @@ export const casesV3ReadAndAssignee: Role = {
         spaces: ['*'],
         base: [],
         feature: {
-          generalCasesV3: ['minimal_all', 'cases_assign'],
+          generalCasesV3: ['minimal_read', 'cases_assign'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -600,7 +600,7 @@ export const casesV2NoReopenWithCreateComment: Role = {
         spaces: ['*'],
         base: [],
         feature: {
-          generalCasesV2: ['read', 'update', 'create', 'delete', 'create_comment'],
+          generalCasesV2: ['read', 'update', 'create', 'cases_delete', 'create_comment'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -625,7 +625,7 @@ export const casesV2NoCreateCommentWithReopen: Role = {
         spaces: ['*'],
         base: [],
         feature: {
-          generalCasesV2: ['read', 'update', 'create', 'delete', 'case_reopen'],
+          generalCasesV2: ['read', 'update', 'create', 'cases_delete', 'case_reopen'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },

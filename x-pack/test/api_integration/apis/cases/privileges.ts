@@ -126,6 +126,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secReadCasesNoneUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesOnlyDeleteUser, owner: CASES_APP_ID },
       { user: obsCasesOnlyDeleteUser, owner: OBSERVABILITY_APP_ID },
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${
         user.username
@@ -169,6 +170,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesV3AllUser, owner: CASES_APP_ID },
       { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can delete a case`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -260,7 +262,7 @@ export default ({ getService }: FtrProviderContext): void => {
     ]) {
       it(`User ${
         user.username
-      } with role(s) ${user.roles.join()} can reopen a case, if it's closed, but otherwise can't change status`, async () => {
+      } with role(s) ${user.roles.join()} can reopen a case, if it's closed`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
         await updateCaseStatus({
           supertest: supertestWithoutAuth,
@@ -350,6 +352,7 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: casesV3AllUser, owner: CASES_APP_ID },
       { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
+      { user: casesV3NoAssigneeUser, owner: CASES_APP_ID },
     ]) {
       it(`User ${user.username} with role(s) ${user.roles.join()} can add comments`, async () => {
         const caseInfo = await createCase(supertest, getPostCaseRequest({ owner }));
@@ -424,6 +427,9 @@ export default ({ getService }: FtrProviderContext): void => {
       { user: secCasesV2AllUser, owner: SECURITY_SOLUTION_APP_ID },
       { user: obsCasesAllUser, owner: OBSERVABILITY_APP_ID },
       { user: obsCasesV2AllUser, owner: OBSERVABILITY_APP_ID },
+      { user: secCasesV3AllUser, owner: SECURITY_SOLUTION_APP_ID },
+      { user: casesV3AllUser, owner: CASES_APP_ID },
+      { user: obsCasesV3AllUser, owner: OBSERVABILITY_APP_ID },
     ]) {
       it(`User ${
         user.username

@@ -33,8 +33,9 @@ export const useItemsAction = <T,>({
   const { permissions } = useCasesContext();
   const [isFlyoutOpen, setIsFlyoutOpen] = useState<boolean>(false);
   const [selectedCasesToEdit, setSelectedCasesToEdit] = useState<CasesUI>([]);
-  const canUpdateStatus = permissions.update || permissions.assign;
-  const isActionDisabled = isDisabled || !canUpdateStatus;
+  const canUpdateStatus = permissions.update;
+  const canUpdateAssignee = permissions.assign;
+  const isActionDisabled = isDisabled || (!canUpdateStatus && !canUpdateAssignee);
 
   const onFlyoutClosed = useCallback(() => setIsFlyoutOpen(false), []);
   const openFlyout = useCallback(
