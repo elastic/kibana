@@ -60,13 +60,18 @@ const EntityAnalyticsPrivilegedUserComponent = () => {
         ) : (
           <EuiFlexGroup direction="row" wrap>
             <EuiFlexItem style={{ minWidth: 600 }}>
-              <RiskyUsersWithPrivilege isLoading={isLoading} data={data.riskPrivilegedUsers} />
+              <RiskyUsersWithPrivilege
+                isLoading={isLoading}
+                data={data.riskPrivilegedUsers}
+                privilegedUsers={data.newPrivilegedUsers}
+              />
             </EuiFlexItem>
 
             <EuiFlexItem style={{ minWidth: 600 }}>
               <SuccessfulPrivilegedAccess
                 isLoading={isLoading}
                 data={data.successfulPrivilegedAccess}
+                privilegedUsers={data.newPrivilegedUsers}
               />
             </EuiFlexItem>
 

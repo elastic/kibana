@@ -135,9 +135,9 @@ export const privilegedUsersRoute = (
 
           return response.ok({
             body: {
-              newPrivilegedUsers: privilegedUsers.slice(0, 5),
-              riskPrivilegedUsers: riskPrivilegedUsers.slice(0, 5),
-              successfulPrivilegedAccess: successfulPrivilegedAccess.slice(0, 5),
+              newPrivilegedUsers: privilegedUsers,
+              riskPrivilegedUsers,
+              successfulPrivilegedAccess,
             },
           });
         } catch (e) {
