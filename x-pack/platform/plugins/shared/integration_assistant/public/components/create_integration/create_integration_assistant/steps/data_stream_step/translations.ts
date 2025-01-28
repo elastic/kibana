@@ -127,19 +127,6 @@ export const ADD_OPEN_API_SPEC_DESCRIPTION = i18n.translate(
       'To successfully ingest CEL data from an API, provide the associated OpenAPI Specification (OAS) file.',
   }
 );
-export const TECH_PREVIEW = i18n.translate(
-  'xpack.integrationAssistant.step.dataStream.techPreviewBadge',
-  {
-    defaultMessage: 'Technical preview',
-  }
-);
-export const TECH_PREVIEW_TOOLTIP = i18n.translate(
-  'xpack.integrationAssistant.step.dataStream.techPreviewTooltip',
-  {
-    defaultMessage:
-      'This functionality is in technical preview and is subject to change. Please use with caution in production environments.',
-  }
-);
 
 export const LOGS_SAMPLE_LABEL = i18n.translate(
   'xpack.integrationAssistant.step.dataStream.logsSample.label',
