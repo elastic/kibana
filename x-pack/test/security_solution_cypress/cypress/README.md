@@ -153,6 +153,7 @@ If you belong to one of the teams listed in the table, please add new e2e specs 
 | `e2e/detection_response/detection_engine` | Detection Engine |
 | `e2e/ai_assistant` | AI Assistant |
 | `e2e/entity_analytics` | Entity Analytics |
+| `e2e/asset_inventory` | Cloud Security Posture |
 
 
 ### fixtures/
