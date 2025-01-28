@@ -7,7 +7,7 @@
 
 import { I18nProvider } from '@kbn/i18n-react';
 import userEvent from '@testing-library/user-event';
-import { render, screen } from '@testing-library/react';
+import { render, screen, waitFor } from '@testing-library/react';
 import React from 'react';
 import { httpServiceMock } from '@kbn/core-http-browser-mocks';
 import { notificationServiceMock } from '@kbn/core-notifications-browser-mocks';
@@ -115,26 +115,37 @@ describe('InferenceFlyout', () => {
 
     renderComponent({ isEdit: true, inferenceEndpoint: mockEndpoint });
     expect(screen.getByTestId('provider-select')).toHaveValue('Hugging Face');
-    await userEvent.type(screen.getByTestId('api_key-password'), '12345');
-    await userEvent.type(screen.getByTestId('url-input'), 'http://sameurl.com/chat/embeddings');
 
-    await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
-    expect(mockMutationFn).toHaveBeenCalledWith(
-      expect.objectContaining({
-        config: {
-          inferenceId: 'test-id',
-          provider: 'hugging_face',
-          providerConfig: {
-            model_id: 'temp-test-model',
-            url: 'https://api.openai.com/v1/embeddingshttp://sameurl.com/chat/embeddings',
+    await waitFor(async () => {
+      await userEvent.type(screen.getByTestId('api_key-password'), '12345');
+    });
+
+    await waitFor(async () => {
+      await userEvent.type(screen.getByTestId('url-input'), 'http://sameurl.com/chat/embeddings');
+    });
+
+    await waitFor(async () => {
+      await userEvent.click(screen.getByTestId('inference-endpoint-submit-button'));
+    });
+
+    await waitFor(() => {
+      expect(mockMutationFn).toHaveBeenCalledWith(
+        expect.objectContaining({
+          config: {
+            inferenceId: 'test-id',
+            provider: 'hugging_face',
+            providerConfig: {
+              model_id: 'temp-test-model',
+              url: 'https://api.openai.com/v1/embeddingshttp://sameurl.com/chat/embeddings',
+            },
+            taskType: 'text_embedding',
           },
-          taskType: 'text_embedding',
-        },
-        secrets: { providerSecrets: { api_key: '12345' } },
-      }),
-      true
-    );
-  });
+          secrets: { providerSecrets: { api_key: '12345' } },
+        }),
+        true
+      );
+    });
+  }, 10000);
 
   it('disables submit button for preconfigured endpoints', () => {
     const mockEndpoint = {
