@@ -355,10 +355,40 @@ export const createNavigationTree = ({
         breadcrumbStatus: 'hidden',
         children: [
           {
-            link: 'management',
+            id: 'stack_management',
             title: i18n.translate('xpack.serverlessObservability.nav.mngt', {
               defaultMessage: 'Management',
             }),
+            spaceBefore: null,
+            renderAs: 'panelOpener',
+            children: [
+              {
+                title: 'Data',
+                children: [{ link: 'management:dataViews' }, { link: 'management:data_quality' }],
+              },
+              {
+                title: 'Alerts and insights',
+                children: [
+                  { link: 'management:triggersActionsConnectors' },
+                  { link: 'management:maintenanceWindows' },
+                ],
+              },
+              {
+                title: 'Content',
+                children: [
+                  { link: 'management:objects' },
+                  { link: 'management:filesManagement' },
+                  { link: 'management:tags' },
+                ],
+              },
+              {
+                title: 'Other',
+                children: [
+                  { link: 'management:settings' },
+                  { link: 'management:securityAiAssistantManagement' },
+                ],
+              },
+            ],
           },
           {
             link: 'integrations',

@@ -6,8 +6,6 @@
  */
 
 import { CoreSetup, CoreStart, Plugin } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-import { appCategories, appIds } from '@kbn/management-cards-navigation';
 import { map, of } from 'rxjs';
 import { createNavigationTree } from './navigation_tree';
 import { createObservabilityDashboardRegistration } from './logs_signal/overview_registration';
@@ -46,10 +44,10 @@ export class ServerlessObservabilityPlugin
   }
 
   public start(
-    core: CoreStart,
+    _core: CoreStart,
     setupDeps: ServerlessObservabilityPublicStartDependencies
   ): ServerlessObservabilityPublicStart {
-    const { serverless, management, security } = setupDeps;
+    const { serverless } = setupDeps;
     const navigationTree$ = (setupDeps.streams?.status$ || of({ status: 'disabled' })).pipe(
       map(({ status }) => {
         return createNavigationTree({ streamsAvailable: status === 'enabled' });
@@ -57,30 +55,6 @@ export class ServerlessObservabilityPlugin
     );
     serverless.setProjectHome('/app/observability/landing');
     serverless.initNavigation('oblt', navigationTree$, { dataTestSubj: 'svlObservabilitySideNav' });
-    const aiAssistantIsEnabled = core.application.capabilities.observabilityAIAssistant?.show;
-    const extendCardNavDefinitions = aiAssistantIsEnabled
-      ? serverless.getNavigationCards(security.authz.isRoleManagementEnabled(), {
-          observabilityAiAssistantManagement: {
-            category: appCategories.OTHER,
-            title: i18n.translate('xpack.serverlessObservability.aiAssistantManagementTitle', {
-              defaultMessage: 'AI Assistant Settings',
-            }),
-            description: i18n.translate(
-              'xpack.serverlessObservability.aiAssistantManagementDescription',
-              {
-                defaultMessage:
-                  'Manage knowledge base and control assistant behavior, including response language.',
-              }
-            ),
-            icon: 'sparkles',
-          },
-        })
-      : undefined;
-    management.setupCardsNavigation({
-      enabled: true,
-      hideLinksTo: [appIds.RULES],
-      extendCardNavDefinitions,
-    });
 
     return {};
   }
