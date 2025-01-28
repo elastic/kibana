@@ -4368,7 +4368,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-apps-browser-mocks@link:packages/core/apps/core-apps-browser-mocks":
+"@kbn/core-apps-browser-mocks@link:src/core/packages/apps/browser-mocks":
   version "0.0.0"
   uid ""
 
