@@ -17,7 +17,7 @@ import { getElasticsearchQueryOrThrow, parseIndex, TransformGenerator } from '.'
 import {
   getSLOPipelineId,
   getSLOTransformId,
-  SLO_DESTINATION_INDEX_NAME,
+  SLI_DESTINATION_INDEX_NAME,
 } from '../../../common/constants';
 import { getSLOTransformTemplate } from '../../assets/transform_templates/slo_transform_template';
 import { SLODefinition } from '../../domain/models';
@@ -73,7 +73,7 @@ export class TimesliceMetricTransformGenerator extends TransformGenerator {
   private buildDestination(slo: SLODefinition) {
     return {
       pipeline: getSLOPipelineId(slo.id, slo.revision),
-      index: SLO_DESTINATION_INDEX_NAME,
+      index: SLI_DESTINATION_INDEX_NAME,
     };
   }
 
