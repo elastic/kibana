@@ -91,7 +91,7 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
               class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
-                <div
+                <span
                   class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-column"
                 >
                   <span
@@ -141,7 +141,7 @@ exports[`ExceptionListHeader should render edit modal 1`] = `
                       List_Id
                     </span>
                   </span>
-                </div>
+                </span>
               </p>
             </div>
           </div>
@@ -311,7 +311,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
               class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
-                <div
+                <span
                   class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-column"
                 >
                   <span
@@ -361,7 +361,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                       List_Id
                     </span>
                   </span>
-                </div>
+                </span>
               </p>
             </div>
           </div>
@@ -517,7 +517,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
               class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
-                <div
+                <span
                   class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-column"
                 >
                   <span
@@ -553,7 +553,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                       List_Id
                     </span>
                   </span>
-                </div>
+                </span>
               </p>
             </div>
           </div>
@@ -710,7 +710,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
               class="euiText emotion-euiText-constrainedWidth-m"
             >
               <p>
-                <div
+                <span
                   class="euiFlexGroup emotion-euiFlexGroup-s-flexStart-stretch-column"
                 >
                   <span
@@ -746,7 +746,7 @@ exports[`ExceptionListHeader should render the List Header with name, default de
                       List_Id
                     </span>
                   </span>
-                </div>
+                </span>
               </p>
             </div>
           </div>

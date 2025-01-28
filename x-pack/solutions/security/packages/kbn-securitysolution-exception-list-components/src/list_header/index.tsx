@@ -103,7 +103,12 @@ const ExceptionListHeaderComponent: FC<ExceptionListHeaderComponentProps> = ({
         responsive
         data-test-subj={`${dataTestSubj || ''}PageHeader`}
         description={
-          <EuiFlexGroup direction="column" gutterSize="s" css={descriptionContainerStyles}>
+          <EuiFlexGroup
+            direction="column"
+            gutterSize="s"
+            css={descriptionContainerStyles}
+            component="span"
+          >
             <TextWithEdit
               dataTestSubj={`${dataTestSubj || ''}Description`}
               textCss={subduedTextStyles}
