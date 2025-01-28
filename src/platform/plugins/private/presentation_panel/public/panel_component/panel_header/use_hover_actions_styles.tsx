@@ -27,6 +27,11 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         ${isEditMode ? editModeOutline : viewModeOutline}
       );
 
+      container: hoverActionsAnchor / size;
+      border-radius: ${euiTheme.border.radius.medium};
+      position: relative;
+      display: contents;
+
       ${showBorder
         ? css`
             .embPanel {
@@ -39,11 +44,6 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
               z-index: ${euiTheme.levels.menu};
             }
           `}
-
-      container: hoverActionsAnchor / size;
-      border-radius: ${euiTheme.border.radius.medium};
-      position: relative;
-      height: 100%;
 
       .embPanel__hoverActions {
         position: absolute;
