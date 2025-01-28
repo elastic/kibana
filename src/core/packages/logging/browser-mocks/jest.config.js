@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../../../..',
-  roots: ['<rootDir>/packages/core/logging/core-logging-browser-mocks'],
+  rootDir: '../../../../..',
+  roots: ['<rootDir>/src/core/packages/logging/browser-mocks'],
 };

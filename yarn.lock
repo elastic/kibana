@@ -4764,7 +4764,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-browser-mocks@link:packages/core/logging/core-logging-browser-mocks":
+"@kbn/core-logging-browser-mocks@link:src/core/packages/logging/browser-mocks":
   version "0.0.0"
   uid ""
 
