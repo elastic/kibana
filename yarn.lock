@@ -4720,7 +4720,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-injected-metadata-browser-mocks@link:packages/core/injected-metadata/core-injected-metadata-browser-mocks":
+"@kbn/core-injected-metadata-browser-mocks@link:src/core/packages/injected-metadata/browser-mocks":
   version "0.0.0"
   uid ""
 
