@@ -119,6 +119,7 @@ export const OptionsListPopoverSuggestions = ({
     if (canLoadMoreSuggestions) {
       options.push({
         key: 'loading-option',
+        'data-test-subj': 'optionslist--canLoadMore',
         className: 'optionslist--loadingMoreGroupLabel',
         label: OptionsListStrings.popover.getLoadingMoreMessage(),
         isGroupLabel: true,
@@ -158,6 +159,7 @@ export const OptionsListPopoverSuggestions = ({
 
   const renderOption = useCallback(
     (option: EuiSelectableOption, searchStringValue: string) => {
+      console.log('RENDER', option);
       if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
 
       return (
@@ -187,7 +189,7 @@ export const OptionsListPopoverSuggestions = ({
 
   return (
     <>
-      <div ref={listRef}>
+      <div data-test-subj="optionsList--scrollListener" ref={listRef}>
         <EuiSelectable
           options={selectableOptions}
           renderOption={(option) => renderOption(option, searchString)}
@@ -197,7 +199,7 @@ export const OptionsListPopoverSuggestions = ({
             selectableOptions.length
           )}
           emptyMessage={<OptionsListPopoverEmptyMessage showOnlySelected={showOnlySelected} />}
-          onChange={(newSuggestions, _, changedOption) => {
+          onChange={(_, __, changedOption) => {
             api.makeSelection(changedOption.key, showOnlySelected);
           }}
         >
