@@ -7,12 +7,15 @@
 
 import expect from '@kbn/expect';
 import originalExpect from 'expect';
+import { IndexTemplateName } from '@kbn/apm-synthtrace/src/lib/logs/custom_logsdb_index_templates';
 import { DatasetQualityFtrProviderContext } from './config';
 import {
+  createFailedLogRecord,
   datasetNames,
   defaultNamespace,
   getInitialTestLogs,
   getLogsForDataset,
+  processors,
   productionNamespace,
 } from './data';
 
@@ -33,10 +36,25 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
     version: '1.14.0',
   };
 
+  const failedDatasetName = datasetNames[1];
+  const failedDataStreamName = `logs-${failedDatasetName}-${defaultNamespace}`;
+
   describe('Dataset quality table', () => {
     before(async () => {
       // Install Integration and ingest logs for it
       await PageObjects.observabilityLogsExplorer.installPackage(pkg);
+
+      await synthtrace.createCustomPipeline(processors, 'synth.2@pipeline');
+      await synthtrace.createComponentTemplate({
+        name: 'synth.2@custom',
+        dataStreamOptions: {
+          failure_store: {
+            enabled: true,
+          },
+        },
+      });
+      await synthtrace.createIndexTemplate(IndexTemplateName.Synht2);
+
       // Ingest basic logs
       await synthtrace.index([
         // Ingest basic logs
@@ -54,6 +72,16 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
           count: 10,
           dataset: apacheAccessDatasetName,
           namespace: productionNamespace,
+        }),
+        createFailedLogRecord({
+          to: new Date().toISOString(),
+          count: 2,
+          dataset: failedDatasetName,
+        }),
+        getLogsForDataset({
+          to: new Date().toISOString(),
+          count: 4,
+          dataset: failedDatasetName,
         }),
       ]);
       await PageObjects.datasetQuality.navigateTo();
@@ -161,6 +189,30 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.toggleShowInactiveDatasets();
       const rows = await PageObjects.datasetQuality.getDatasetTableRows();
       expect(rows.length).to.eql(activeDatasets.length);
+    });
+
+    describe('Failed docs', () => {
+      it('shows failed docs percentage', async () => {
+        const cols = await PageObjects.datasetQuality.parseDatasetTable();
+
+        const failedDocsCol = cols[PageObjects.datasetQuality.texts.datasetFailedDocsColumn];
+        const failedDocsColCellTexts = await failedDocsCol.getCellTexts();
+        expect(failedDocsColCellTexts).to.eql(['0%', '0%', '20%', '0%']);
+      });
+
+      it('goes to discover page when percentage is clicked', async () => {
+        const rowIndexToOpen = 2;
+        const cols = await PageObjects.datasetQuality.parseDatasetTable();
+        const failedDocsCol = cols[PageObjects.datasetQuality.texts.datasetFailedDocsColumn];
+
+        await (await failedDocsCol.getCellChildren('a'))[rowIndexToOpen].click(); // Click percentage
+
+        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
+        originalExpect(datasetSelectorText).toMatch(`${failedDataStreamName}::failures`);
+
+        // Return to Dataset Quality Page
+        await PageObjects.datasetQuality.navigateTo();
+      });
     });
   });
 }
