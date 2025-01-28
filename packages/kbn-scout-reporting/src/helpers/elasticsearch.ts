@@ -14,22 +14,31 @@ import { createFailError } from '@kbn/dev-cli-errors';
 /**
  * Get an Elasticsearch client for which connectivity has been validated
  *
- * @param options Elasticsearch client options
- * @param log Logger instance
+ * @param esClientOptions Elasticsearch client options
+ * @param helperSettings Settings for this helper
+ * @param helperSettings.log Logger instance
+ * @param helperSettings.cli Set to `true` when invoked from a CLI context
  * @throws FailError if cluster information cannot be read from the target Elasticsearch instance
  */
 export async function getValidatedESClient(
-  options: ESClientOptions,
-  log: ToolingLog
+  esClientOptions: ESClientOptions,
+  helperSettings: {
+    log?: ToolingLog;
+    cli?: boolean;
+  }
 ): Promise<ESClient> {
-  const es = new ESClient(options);
+  const { log, cli = false } = helperSettings;
+  const es = new ESClient(esClientOptions);
 
   await es.info().then(
     (esInfo) => {
-      log.info(`Connected to Elasticsearch node '${esInfo.name}'`);
+      if (log !== undefined) {
+        log.info(`Connected to Elasticsearch node '${esInfo.name}'`);
+      }
     },
     (err) => {
-      throw createFailError(`Failed to connect to Elasticsearch\n${err}`);
+      const msg = `Failed to connect to Elasticsearch\n${err}`;
+      throw cli ? createFailError(msg) : Error(msg);
     }
   );
 
