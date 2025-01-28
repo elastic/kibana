@@ -77,6 +77,7 @@ export function LensEditConfigurationFlyout({
   onApply: onApplyCallback,
   onCancel: onCancelCallback,
   hideTimeFilterInfo,
+  isReadOnly,
 }: EditConfigPanelProps) {
   const euiTheme = useEuiTheme();
   const previousAttributes = useRef<TypedLensSerializedState['attributes']>(attributes);
@@ -416,6 +417,7 @@ export function LensEditConfigurationFlyout({
           isScrollable
           isNewPanel={isNewPanel}
           isSaveable={isSaveable}
+          isReadOnly={isReadOnly}
         >
           <LayerConfiguration
             // TODO: remove this once we support switching to any chart in Discover
@@ -449,6 +451,7 @@ export function LensEditConfigurationFlyout({
         isSaveable={isSaveable}
         isScrollable={false}
         isNewPanel={isNewPanel}
+        isReadOnly={isReadOnly}
       >
         <EuiFlexGroup
           css={css`
