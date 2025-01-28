@@ -129,12 +129,14 @@ async function _verifyPackageSignature({
 
   const message = await openpgp.createMessage({
     binary: pkgArchiveBuffer,
+    format: 'binary',
   });
 
   const verificationResult = await openpgp.verify({
     verificationKeys: verificationKey,
     signature,
     message,
+    format: 'binary',
     config: {
       // See https://github.com/openpgpjs/openpgpjs/blob/d6145ac73eebcf66bdeb0873aa60fc49361e1aeb/src/message.js#L800-L809
       // Essentially, since the sha1 key was reformmated to sha256 as part of https://github.com/elastic/elasticsearch/issues/85876,

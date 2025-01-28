@@ -20,7 +20,10 @@ export const ChildrenAffectedCallout = ({
   const router = useStreamsAppRouter();
   const childStreamLinks = childStreams.map((stream) => {
     return (
-      <EuiLink href={router.link('/{key}', { path: { key: stream.destination } })}>
+      <EuiLink
+        data-test-subj="streamsAppChildStreamLinksLink"
+        href={router.link('/{key}', { path: { key: stream.destination } })}
+      >
         {stream.destination}
       </EuiLink>
     );
