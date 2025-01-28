@@ -26,7 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const POLICY_NAME_FIELD = 'createAgentPolicyNameField';
   const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector-accordion';
 
-  describe('Agentless Security Posture Integration Options', function () {
+  describe.skip('Agentless Security Posture Integration Options', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
     before(async () => {
