@@ -53,6 +53,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       expect(classicStream).to.eql({
         name: TEST_STREAM_NAME,
         ingest: {
+          lifecycle: { inherit: {} },
           processing: [],
           routing: [],
           unwired: {},
@@ -113,6 +114,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       expect(stream).to.eql({
         ingest: {
+          lifecycle: { inherit: {} },
           processing: [
             {
               grok: {
