@@ -51,7 +51,7 @@ export const createSearchSessionsDeprecationsConfig: (
     return [
       {
         title: i18n.translate('data.deprecations.searchSessionsTitle', {
-          defaultMessage: 'Search sessions has been disabled by default',
+          defaultMessage: 'Search sessions will be disabled by default',
         }),
         message: buildMessage({ searchSessions, searchSessionsLink }),
         deprecationType: 'feature',

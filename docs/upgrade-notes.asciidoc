@@ -325,11 +325,11 @@ If your Kibana server is hosted behind a load balancer or reverse proxy we recom
 
 [discrete]
 [[known-issue-206998]]
-.Search sessions has been disabled by default (9.0.0)
+.Search sessions disabled by default (9.0.0)
 [%collapsible]
 ====
 *Details* +
-Starting from version 9.0.0, search sessions has been disabled by default. To view, manage, and restore search sessions, the feature needs to be explicitly re-enabled. 
+Starting from version 9.0.0, search sessions are disabled by default. To view, manage, and restore search sessions, the feature needs to be explicitly re-enabled. 
 
 *Impact* +
 Search sessions will be disabled unless they are explicitly enabled in config.yml.
