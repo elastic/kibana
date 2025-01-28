@@ -19,6 +19,7 @@ import {
   EuiPanel,
   EuiSpacer,
   EuiText,
+  EuiTitle,
 } from '@elastic/eui';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import type { InputType } from '../../../../../../common';
@@ -277,16 +278,34 @@ export const DataStreamStep = React.memo<DataStreamStepProps>(
                       </EuiText>
                       <EuiFlexGroup>
                         {celInputResult ? (
-                          <EuiFlexGroup>
-                            <EuiButton iconType="check" disabled data-test-subj="openApiConfigured">
-                              <EuiText size="xs">{i18n.OPEN_API_SPEC_BUTTON_CONFIGURED}</EuiText>
-                            </EuiButton>
-                            <EuiButtonEmpty
-                              iconType="pencil"
-                              onClick={() => setShowCelCreateFlyout(true)}
-                            >
-                              <EuiText size="xs">{i18n.EDIT_OPEN_API_SPEC_BUTTON}</EuiText>
-                            </EuiButtonEmpty>
+                          <EuiFlexGroup direction="column" gutterSize="s">
+                            <EuiFlexGroup>
+                              <EuiFlexItem grow={false}>
+                                <EuiButton
+                                  iconType="check"
+                                  color="success"
+                                  data-test-subj="openApiConfigured"
+                                >
+                                  <EuiText size="xs">
+                                    {i18n.OPEN_API_SPEC_BUTTON_CONFIGURED}
+                                  </EuiText>
+                                </EuiButton>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
+                            <EuiTitle size="xxxs">
+                              <h5>{integrationSettings?.apiSpecFileName}</h5>
+                            </EuiTitle>
+                            <EuiText size="xs">{integrationSettings?.celPath}</EuiText>
+                            <EuiFlexGroup>
+                              <EuiFlexItem grow={false}>
+                                <EuiButtonEmpty
+                                  iconType="pencil"
+                                  onClick={() => setShowCelCreateFlyout(true)}
+                                >
+                                  <EuiText size="xs">{i18n.EDIT_OPEN_API_SPEC_BUTTON}</EuiText>
+                                </EuiButtonEmpty>
+                              </EuiFlexItem>
+                            </EuiFlexGroup>
                           </EuiFlexGroup>
                         ) : (
                           <EuiFlexItem grow={false}>
