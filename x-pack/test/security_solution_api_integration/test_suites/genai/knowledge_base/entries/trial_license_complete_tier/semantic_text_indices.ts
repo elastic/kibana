@@ -32,7 +32,7 @@ export default ({ getService }: FtrProviderContext) => {
     it('should return all existing indices with `semantic_text` fields', async () => {
       const indices = await getKnowledgeBaseIndices({ supertest, log });
 
-      expect(indices).toEqual({ indices: ['semantic_text_fields'] });
+      expect(indices).toEqual({ semantic_text_fields: ['content'] });
     });
   });
 };
