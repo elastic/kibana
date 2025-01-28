@@ -53,7 +53,7 @@ describe('service map', () => {
       cy.intercept('GET', '/internal/apm/service-map?*').as('serviceMap');
     });
 
-    it.skip('shows nodes in service map', () => {
+    it('shows nodes in service map', () => {
       cy.visitKibana(serviceMapHref);
       cy.wait('@serviceMap');
 
