@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { SECURITY_MODEL } from '../constants';
 import { deserializeCluster, serializeCluster } from './cluster_serialization';
 
 describe('cluster_serialization', () => {
@@ -40,7 +41,7 @@ describe('cluster_serialization', () => {
         skipUnavailable: false,
         transportPingSchedule: '-1',
         transportCompress: false,
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
     });
 
@@ -72,7 +73,7 @@ describe('cluster_serialization', () => {
         transportPingSchedule: '-1',
         transportCompress: false,
         serverName: 'my_server_name',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
     });
 
@@ -94,7 +95,7 @@ describe('cluster_serialization', () => {
         maxConnectionsPerCluster: 3,
         initialConnectTimeout: '30s',
         skipUnavailable: false,
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
     });
 
@@ -128,7 +129,7 @@ describe('cluster_serialization', () => {
         skipUnavailable: false,
         transportPingSchedule: '-1',
         transportCompress: false,
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
     });
 
@@ -164,7 +165,7 @@ describe('cluster_serialization', () => {
         transportPingSchedule: '-1',
         transportCompress: false,
         serverName: 'localhost',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
     });
 
@@ -186,7 +187,7 @@ describe('cluster_serialization', () => {
         connectedNodesCount: 1,
         initialConnectTimeout: '30s',
         transportCompress: false,
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
     });
 
@@ -217,7 +218,7 @@ describe('cluster_serialization', () => {
         skipUnavailable: false,
         transportPingSchedule: '-1',
         transportCompress: false,
-        securityModel: 'api_key',
+        securityModel: SECURITY_MODEL.API,
       });
     });
   });
