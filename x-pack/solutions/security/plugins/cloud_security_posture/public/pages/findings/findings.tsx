@@ -18,6 +18,7 @@ import { LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY } from '../../common/const
 import { VULNERABILITIES_INDEX_NAME, FINDINGS_INDEX_NAME } from '../../../common/constants';
 import { getStatusForIndexName } from '../../../common/utils/helpers';
 import { Vulnerabilities } from '../vulnerabilities';
+import { GetFindingsExpandableFlyout } from '../../application/csp_router';
 
 type FindingsTabKey = 'vuln_mgmt' | 'configurations';
 
@@ -56,7 +57,11 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
   );
 };
 
-export const Findings = () => {
+export const Findings = ({
+  getFindingsExpandableFlyout,
+}: {
+  getFindingsExpandableFlyout: GetFindingsExpandableFlyout;
+}) => {
   const history = useHistory();
   const location = useLocation();
 
@@ -100,6 +105,10 @@ export const Findings = () => {
               <FormattedMessage id="xpack.csp.findings.title" defaultMessage="Findings" />
             </h1>
           </EuiTitle>
+          {/* {getFindingsExpandableFlyout({
+            ruleId: 'test-rule-id-from-findings-page',
+            resourceId: 'test-resource-from-findings-page',
+          })} */}
           <EuiSpacer />
           <EuiTabs size="l">
             <EuiTab
@@ -131,8 +140,14 @@ export const Findings = () => {
           path={cloudPosturePages.findings.path}
           render={() => <FindingsTabRedirecter lastTabSelected={lastTabSelected} />}
         />
-        <Route path={findingsNavigation.findings_default.path} component={Configurations} />
-        <Route path={findingsNavigation.findings_by_resource.path} component={Configurations} />
+        {/* <Route path={findingsNavigation.findings_default.path} component={Configurations} /> */}
+        <Route path={findingsNavigation.findings_default.path}>
+          <Configurations getFindingsExpandableFlyout={getFindingsExpandableFlyout} />
+        </Route>
+        <Route path={findingsNavigation.findings_by_resource.path}>
+          <Configurations getFindingsExpandableFlyout={getFindingsExpandableFlyout} />
+        </Route>
+        {/* <Route path={findingsNavigation.findings_by_resource.path} component={Configurations} /> */}
         <Route path={findingsNavigation.vulnerabilities.path} component={Vulnerabilities} />
         <Route
           path={findingsNavigation.vulnerabilities_by_resource.path}

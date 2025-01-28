@@ -7,6 +7,7 @@
 import React, { useEffect } from 'react';
 import { Filter } from '@kbn/es-query';
 import { EuiSpacer } from '@elastic/eui';
+import { GetFindingsExpandableFlyout } from '../../../application/csp_router';
 import { DEFAULT_GROUPING_TABLE_HEIGHT } from '../../../common/constants';
 import { EmptyState } from '../../../components/empty_state';
 import { CloudSecurityGrouping } from '../../../components/cloud_security_grouping';
@@ -74,7 +75,11 @@ const SubGrouping = ({
   );
 };
 
-export const LatestFindingsContainer = () => {
+export const LatestFindingsContainer = ({
+  getFindingsExpandableFlyout,
+}: {
+  getFindingsExpandableFlyout: GetFindingsExpandableFlyout;
+}) => {
   const { grouping, isFetching, urlQuery, setUrlQuery, onResetFilters, error, isEmptyResults } =
     useLatestFindingsGrouping({ groupPanelRenderer, getGroupStats: groupStatsRenderer });
 
@@ -99,6 +104,7 @@ export const LatestFindingsContainer = () => {
           groupSelectorComponent={groupSelectorComponent}
           nonPersistedFilters={[...(parentGroupFilters ? JSON.parse(parentGroupFilters) : [])]}
           showDistributionBar={selectedGroupOptions.includes('none')}
+          getFindingsExpandableFlyout={getFindingsExpandableFlyout}
         />
       );
     }
@@ -127,6 +133,7 @@ export const LatestFindingsContainer = () => {
             ]}
             height={DEFAULT_GROUPING_TABLE_HEIGHT}
             showDistributionBar={selectedGroupOptions.includes('none')}
+            getFindingsExpandableFlyout={getFindingsExpandableFlyout}
           />
         );
       };
