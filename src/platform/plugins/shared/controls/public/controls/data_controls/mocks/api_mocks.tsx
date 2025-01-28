@@ -39,7 +39,7 @@ export const getOptionsListMocks = () => {
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       setExclude: (next: boolean | undefined) => exclude$.next(next),
-      loadMoreSubject: new Subject<void>(v),
+      loadMoreSubject: new Subject<void>(),
     },
     stateManager: {
       searchString: new BehaviorSubject<string>(''),
