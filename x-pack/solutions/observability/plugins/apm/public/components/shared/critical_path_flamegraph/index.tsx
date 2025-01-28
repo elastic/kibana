@@ -10,9 +10,10 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, euiPaletteColorBlind } fr
 import { css } from '@emotion/css';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
-import React, { useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef } from 'react';
 import { i18n } from '@kbn/i18n';
-import type { FETCH_STATUS } from '../../../hooks/use_fetcher';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
 import { criticalPathToFlamegraph } from './critical_path_to_flamegraph';
@@ -30,6 +31,7 @@ export function CriticalPathFlamegraph(
   } & ({ serviceName: string; transactionName: string } | {})
 ) {
   const { start, end, traceIds, traceIdsFetchStatus } = props;
+  const { onPageReady } = usePerformanceContext();
 
   const serviceName = 'serviceName' in props ? props.serviceName : null;
   const transactionName = 'transactionName' in props ? props.transactionName : null;
@@ -62,6 +64,20 @@ export function CriticalPathFlamegraph(
       },
       [timerange, traceIds, serviceName, transactionName]
     );
+
+  useEffect(() => {
+    if (criticalPathFetchStatus === FETCH_STATUS.SUCCESS) {
+      onPageReady({
+        meta: { rangeFrom: start, rangeTo: end },
+        customMetrics: {
+          key1: 'metadata',
+          value1: Object.keys(criticalPath?.metadata || {}).length,
+          key2: 'traceIds',
+          value2: traceIds.length,
+        },
+      });
+    }
+  }, [criticalPathFetchStatus, criticalPath, traceIds, onPageReady, start, end]);
 
   const chartThemes = useChartThemes();
 
