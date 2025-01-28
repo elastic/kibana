@@ -21,7 +21,7 @@ export const AddPanelButton = ({ isDisabled }: { isDisabled?: boolean }) => {
   const dashboardApi = useDashboardApi();
 
   useEffect(() => {
-    // ensure opened dashboard is closed if a navigation event happens;
+    // ensure opened overlays are closed if a navigation event happens
     return () => {
       dashboardApi.clearOverlays();
     };
