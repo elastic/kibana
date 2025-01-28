@@ -71,6 +71,7 @@ export const registerEntityStoreDataViewRefreshTask = ({
       logger,
       security,
       encryptedSavedObjects,
+      namespace,
     });
 
     const { clusterClient, soClient } = await apiKeyManager.getClientFromApiKey();

@@ -259,6 +259,7 @@ export class RequestContextFactory implements IRequestContextFactory {
             security: startPlugins.security,
             encryptedSavedObjects: startPlugins.encryptedSavedObjects,
             request,
+            namespace: getSpaceId(),
           }),
         });
       }),
