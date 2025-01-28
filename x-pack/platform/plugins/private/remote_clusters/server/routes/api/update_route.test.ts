@@ -11,7 +11,7 @@ import { httpServerMock, httpServiceMock, coreMock } from '@kbn/core/server/mock
 
 import { licensingMock } from '@kbn/licensing-plugin/server/mocks';
 
-import { API_BASE_PATH } from '../../../common/constants';
+import { API_BASE_PATH, SECURITY_MODEL } from '../../../common/constants';
 
 import { handleEsError } from '../../shared_imports';
 
@@ -127,7 +127,7 @@ describe('UPDATE remote clusters', () => {
         seeds: ['127.0.0.1:9300'],
         skipUnavailable: true,
         mode: 'sniff',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
@@ -207,7 +207,7 @@ describe('UPDATE remote clusters', () => {
         name: 'test',
         skipUnavailable: true,
         mode: 'proxy',
-        securityModel: 'certificate',
+        securityModel: SECURITY_MODEL.CERTIFICATE,
       });
 
       expect(remoteInfoMockFn).toHaveBeenCalledWith();
