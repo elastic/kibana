@@ -5,7 +5,9 @@
  * 2.0.
  */
 
-export * from './common';
-export * from './read_streams';
-export * from './streams';
-export * from './stream_config';
+export * from './ingest';
+export * from './legacy';
+
+export * from './api';
+export * from './core';
+export * from './helpers';

@@ -17,16 +17,11 @@ import {
   EuiButtonIcon,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ReadStreamDefinition,
-  getProcessorType,
-  isDissectProcessor,
-  isGrokProcessor,
-} from '@kbn/streams-schema';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { useBoolean } from '@kbn/react-hooks';
 import { css } from '@emotion/react';
 import { EditProcessorFlyout, EditProcessorFlyoutProps } from './flyout';
-import { ProcessorDefinition } from './types';
+import { EnrichmentUIProcessorDefinition, isDissectProcessor, isGrokProcessor } from './types';
 
 export const DraggableProcessorListItem = ({
   processor,
@@ -51,7 +46,7 @@ export const DraggableProcessorListItem = ({
 
 interface ProcessorListItemProps {
   definition: ReadStreamDefinition;
-  processor: ProcessorDefinition;
+  processor: EnrichmentUIProcessorDefinition;
   hasShadow: EuiPanelProps['hasShadow'];
   onUpdateProcessor: EditProcessorFlyoutProps['onUpdateProcessor'];
   onDeleteProcessor: EditProcessorFlyoutProps['onDeleteProcessor'];
@@ -66,7 +61,7 @@ const ProcessorListItem = ({
 }: ProcessorListItemProps) => {
   const [isEditProcessorOpen, { on: openEditProcessor, off: closeEditProcessor }] = useBoolean();
 
-  const type = getProcessorType(processor);
+  const type = 'grok' in processor.config ? 'grok' : 'dissect';
   const description = getProcessorDescription(processor);
 
   return (
@@ -87,6 +82,7 @@ const ProcessorListItem = ({
           </EuiText>
         </EuiFlexItem>
         <EuiButtonIcon
+          data-test-subj="streamsAppProcessorListItemButton"
           onClick={openEditProcessor}
           iconType="pencil"
           color="text"
@@ -111,7 +107,7 @@ const ProcessorListItem = ({
   );
 };
 
-const getProcessorDescription = (processor: ProcessorDefinition) => {
+const getProcessorDescription = (processor: EnrichmentUIProcessorDefinition) => {
   if (isGrokProcessor(processor.config)) {
     return processor.config.grok.patterns.join(' • ');
   } else if (isDissectProcessor(processor.config)) {

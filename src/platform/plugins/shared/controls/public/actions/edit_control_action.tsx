@@ -11,10 +11,35 @@ import React from 'react';
 
 import { EuiButtonIcon, EuiToolTip } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import type { EmbeddableApiContext, HasUniqueId } from '@kbn/presentation-publishing';
+import {
+  apiHasType,
+  apiHasUniqueId,
+  hasEditCapabilities,
+  type EmbeddableApiContext,
+  type HasUniqueId,
+  apiHasParentApi,
+  apiCanAccessViewMode,
+  apiIsOfType,
+  getInheritedViewMode,
+} from '@kbn/presentation-publishing';
 import { IncompatibleActionError, type Action } from '@kbn/ui-actions-plugin/public';
 
-import { ACTION_EDIT_CONTROL } from '.';
+import { apiIsPresentationContainer } from '@kbn/presentation-containers';
+import { CONTROL_GROUP_TYPE } from '../../common';
+import { ACTION_EDIT_CONTROL } from './constants';
+import { DataControlApi } from '../controls/data_controls/types';
+
+const compatibilityCheck = (api: unknown): api is DataControlApi => {
+  return Boolean(
+    apiHasType(api) &&
+      apiHasUniqueId(api) &&
+      hasEditCapabilities(api) &&
+      apiHasParentApi(api) &&
+      apiCanAccessViewMode(api.parentApi) &&
+      apiIsOfType(api.parentApi, CONTROL_GROUP_TYPE) &&
+      apiIsPresentationContainer(api.parentApi)
+  );
+};
 
 export class EditControlAction implements Action<EmbeddableApiContext> {
   public readonly type = ACTION_EDIT_CONTROL;
@@ -48,12 +73,14 @@ export class EditControlAction implements Action<EmbeddableApiContext> {
   }
 
   public async isCompatible({ embeddable }: EmbeddableApiContext) {
-    const { isCompatible } = await import('./edit_control_action_compatibility_check');
-    return isCompatible(embeddable);
+    return (
+      compatibilityCheck(embeddable) &&
+      getInheritedViewMode(embeddable.parentApi) === 'edit' &&
+      embeddable.isEditingEnabled()
+    );
   }
 
   public async execute({ embeddable }: EmbeddableApiContext) {
-    const { compatibilityCheck } = await import('./edit_control_action_compatibility_check');
     if (!compatibilityCheck(embeddable)) throw new IncompatibleActionError();
     await embeddable.onEdit();
   }
