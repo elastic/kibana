@@ -19,7 +19,7 @@ export function SearchNavigationProvider({ getService, getPageObjects }: FtrProv
   return {
     async navigateToElasticsearchOverviewPage(basePath?: string) {
       await retry.tryForTime(60 * 1000, async () => {
-        await common.navigateToApp('elasticsearch/overview', {
+        await common.navigateToApp('enterpriseSearch', {
           shouldLoginIfPrompted: false,
           basePath,
         });
