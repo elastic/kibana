@@ -1371,7 +1371,7 @@
     "@kbn/core-application-browser-mocks": "link:src/core/packages/application/browser-mocks",
     "@kbn/core-apps-browser-mocks": "link:src/core/packages/apps/browser-mocks",
     "@kbn/core-base-browser-mocks": "link:src/core/packages/base/browser-mocks",
-    "@kbn/core-base-server-mocks": "link:packages/core/base/core-base-server-mocks",
+    "@kbn/core-base-server-mocks": "link:src/core/packages/base/server-mocks",
     "@kbn/core-capabilities-browser-mocks": "link:packages/core/capabilities/core-capabilities-browser-mocks",
     "@kbn/core-capabilities-server-mocks": "link:packages/core/capabilities/core-capabilities-server-mocks",
     "@kbn/core-chrome-browser-mocks": "link:packages/core/chrome/core-chrome-browser-mocks",
