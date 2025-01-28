@@ -11,7 +11,6 @@ import type { IKibanaResponse } from '@kbn/core/server';
 
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
-  contentReferencesStoreFactory,
   DEFEND_INSIGHTS,
   DefendInsightsPostRequestBody,
   DefendInsightsPostResponse,
