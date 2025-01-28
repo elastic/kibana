@@ -77,7 +77,12 @@ const availableProcessors: TAvailableProcessors = {
         defaultMessage="Uses {dissectLink} patterns to extract matches from a field."
         values={{
           dissectLink: (
-            <EuiLink external target="_blank" href={esDocUrl + 'dissect-processor.html'}>
+            <EuiLink
+              data-test-subj="streamsAppAvailableProcessorsDissectLink"
+              external
+              target="_blank"
+              href={esDocUrl + 'dissect-processor.html'}
+            >
               {i18n.translate('xpack.streams.availableProcessors.dissectLinkLabel', {
                 defaultMessage: 'dissect',
               })}
@@ -96,7 +101,12 @@ const availableProcessors: TAvailableProcessors = {
         defaultMessage="Uses {grokLink} expressions to extract matches from a field."
         values={{
           grokLink: (
-            <EuiLink external target="_blank" href={esDocUrl + 'grok-processor.html'}>
+            <EuiLink
+              data-test-subj="streamsAppAvailableProcessorsGrokLink"
+              external
+              target="_blank"
+              href={esDocUrl + 'grok-processor.html'}
+            >
               {i18n.translate('xpack.streams.availableProcessors.grokLinkLabel', {
                 defaultMessage: 'grok',
               })}

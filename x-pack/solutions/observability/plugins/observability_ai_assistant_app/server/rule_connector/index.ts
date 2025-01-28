@@ -11,7 +11,7 @@ import dedent from 'dedent';
 import { i18n } from '@kbn/i18n';
 import { schema, TypeOf } from '@kbn/config-schema';
 import { KibanaRequest, Logger } from '@kbn/core/server';
-import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common/connector_feature_config';
+import { AlertingConnectorFeatureId } from '@kbn/actions-plugin/common';
 import type {
   ActionType as ConnectorType,
   ActionTypeExecutorOptions as ConnectorTypeExecutorOptions,
