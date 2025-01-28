@@ -5,6 +5,7 @@ pageLoadAssetSize:
   aiops: 32733
   alerting: 106936
   apm: 64385
+  automaticImport: 25433
   banners: 17946
   canvas: 29355
   cases: 180037
@@ -84,7 +85,6 @@ pageLoadAssetSize:
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
-  integrationAssistant: 19524
   interactiveSetup: 80000
   inventory: 27430
   investigate: 17970
@@ -93,7 +93,6 @@ pageLoadAssetSize:
   kibanaReact: 74422
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
-  kubernetesSecurity: 77234
   lens: 57135
   licenseManagement: 41817
   licensing: 29004

@@ -65,7 +65,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      // await kibanaServer.savedObjects.cleanStandardList();
     });
     let monitorId = 'test-id';
 
@@ -256,7 +256,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...updates,
           revision: 3,
           url: 'https://www.google.com',
-          locations: [localLoc, pvtLoc],
+          locations: [localLoc, omit(pvtLoc, 'spaces')],
         })
       );
 
@@ -270,7 +270,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...updates,
           revision: 4,
           url: 'https://www.google.com',
-          locations: [pvtLoc],
+          locations: [omit(pvtLoc, 'spaces')],
         })
       );
     });
@@ -289,7 +289,7 @@ export default function ({ getService }: FtrProviderContext) {
           ...updates,
           revision: 5,
           url: 'https://www.google.com',
-          locations: [localLoc, pvtLoc],
+          locations: [localLoc, omit(pvtLoc, 'spaces')],
         })
       );
 
