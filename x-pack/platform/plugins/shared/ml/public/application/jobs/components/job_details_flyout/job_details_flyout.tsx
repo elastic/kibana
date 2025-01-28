@@ -20,6 +20,7 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import useMountedState from 'react-use/lib/useMountedState';
 import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
 import { useMlApi, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
 import { JobDetails } from '../../jobs_list/components/job_details';
@@ -44,14 +45,15 @@ export const JobDetailsFlyout = () => {
   const mlApi = useMlApi();
   const { displayErrorToast } = useToastNotificationService();
 
+  const isMounted = useMountedState();
   useEffect(() => {
-    let mounted = true;
     const fetchJobDetails = async () => {
+      if (!isMounted()) return;
       if (jobId) {
         setIsLoading(true);
         try {
           const job = await loadFullJob(mlApi, jobId);
-          if (mounted && job) {
+          if (job) {
             setJobDetails(job);
           }
         } catch (error) {
@@ -67,10 +69,7 @@ export const JobDetailsFlyout = () => {
       }
     };
     fetchJobDetails();
-    return () => {
-      mounted = false;
-    };
-  }, [jobId, mlApi, displayErrorToast]);
+  }, [jobId, mlApi, displayErrorToast, isMounted]);
 
   const navigateToPath = useNavigateToPath();
   const mlLocator = useMlLocator();

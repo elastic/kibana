@@ -70,6 +70,7 @@ export const AnomalyDetectionInfoButton: FC<Props> = ({
         },
       ] as EuiContextMenuPanelDescriptor[];
     },
+    // globalState is an object with references change on every render, so we are stringifying it here
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [
       jobId,

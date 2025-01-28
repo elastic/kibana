@@ -423,7 +423,10 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
                             )
                               return;
 
-                            if (onModelSnapshotAnnotationClick) {
+                            if (
+                              onModelSnapshotAnnotationClick &&
+                              annotations.lines?.[0]?.datum?.modelSnapshot
+                            ) {
                               onModelSnapshotAnnotationClick(
                                 // @ts-expect-error property 'modelSnapshot' does not exist on type
                                 annotations.lines[0].datum.modelSnapshot

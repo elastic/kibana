@@ -25,13 +25,7 @@ export const JobInfoFlyoutsManager = () => {
     <>
       <JobDetailsFlyout />
       {isDatafeedChartFlyoutOpen && activeJobId ? (
-        <DatafeedChartFlyout
-          onClose={() => {
-            closeActiveFlyout();
-          }}
-          jobId={activeJobId}
-          end={end}
-        />
+        <DatafeedChartFlyout onClose={closeActiveFlyout} jobId={activeJobId} end={end} />
       ) : null}
     </>
   );
