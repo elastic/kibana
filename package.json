@@ -692,7 +692,7 @@
     "@kbn/object-versioning-utils": "link:src/platform/packages/shared/kbn-object-versioning-utils",
     "@kbn/observability-ai-assistant-app-plugin": "link:x-pack/solutions/observability/plugins/observability_ai_assistant_app",
     "@kbn/observability-ai-assistant-management-plugin": "link:x-pack/solutions/observability/plugins/observability_ai_assistant_management",
-    "@kbn/observability-ai-assistant-plugin": "link:x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant",
+    "@kbn/observability-ai-assistant-plugin": "link:x-pack/platform/plugins/shared/observability_ai_assistant",
     "@kbn/observability-ai-common": "link:x-pack/solutions/observability/packages/observability_ai/observability_ai_common",
     "@kbn/observability-ai-server": "link:x-pack/solutions/observability/packages/observability_ai/observability_ai_server",
     "@kbn/observability-alert-details": "link:x-pack/solutions/observability/packages/alert_details",
