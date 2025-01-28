@@ -11,7 +11,7 @@ import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import { ProjectMonitorsRequest, ConfigKey } from '@kbn/synthetics-plugin/common/runtime_types';
 import { SYNTHETICS_API_URLS } from '@kbn/synthetics-plugin/common/constants';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
-import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/add_monitor_project';
+import { REQUEST_TOO_LARGE } from '@kbn/synthetics-plugin/server/routes/monitor_cruds/project_monitor/add_monitor_project';
 import {
   PROFILE_VALUES_ENUM,
   PROFILES_MAP,
@@ -1861,7 +1861,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ],
         })
         .expect(200);
-      expect(response.body).eql({
+      rawExpect(response.body).toEqual({
         createdMonitors: [],
         failedMonitors: [
           {
