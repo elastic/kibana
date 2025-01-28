@@ -24,7 +24,10 @@ import type { Dictionary } from '../../../../common/types/common';
 import { IdBadges } from './id_badges';
 import type { JobSelectorFlyoutProps } from './job_selector_flyout';
 import { BADGE_LIMIT, JobSelectorFlyoutContent } from './job_selector_flyout';
-import type { MlJobWithTimeRange } from '../../../../common/types/anomaly_detection_jobs';
+import type {
+  MlJobWithTimeRange,
+  MlSummaryJob,
+} from '../../../../common/types/anomaly_detection_jobs';
 import { ML_APPLY_TIME_RANGE_CONFIG } from '../../../../common/types/storage';
 import { FeedBackButton } from '../feedback_button';
 import { JobInfoFlyoutsProvider } from '../../jobs/components/job_details_flyout';
@@ -88,6 +91,7 @@ export interface JobSelectorProps {
   }) => void;
   selectedJobIds?: string[];
   selectedGroups?: GroupObj[];
+  selectedJobs?: MlSummaryJob[];
 }
 
 export interface JobSelectionMaps {
@@ -101,6 +105,7 @@ export function JobSelector({
   timeseriesOnly,
   selectedJobIds = [],
   selectedGroups = [],
+  selectedJobs = [],
   onSelectionChange,
 }: JobSelectorProps) {
   const [applyTimeRangeConfig, setApplyTimeRangeConfig] = useStorage(
@@ -169,6 +174,7 @@ export function JobSelector({
                   onLinkClick={() => setShowAllBarBadges(!showAllBarBadges)}
                   selectedJobIds={selectedJobIds}
                   selectedGroups={selectedGroups}
+                  selectedJobs={selectedJobs}
                   showAllBarBadges={showAllBarBadges}
                   page={page}
                   onRemoveJobId={removeJobId}

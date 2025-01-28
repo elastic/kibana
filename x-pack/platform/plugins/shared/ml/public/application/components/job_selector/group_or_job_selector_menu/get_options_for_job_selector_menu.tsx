@@ -25,6 +25,7 @@ export const getOptionsForJobSelectorMenuItems = ({
   onRemoveJobId,
   removeJobIdDisabled,
   showRemoveJobId,
+  isSingleMetricViewerDisabled,
   closePopover,
   globalState,
   setActiveFlyout,
@@ -37,6 +38,7 @@ export const getOptionsForJobSelectorMenuItems = ({
   onRemoveJobId: (jobOrGroupId: string[]) => void;
   removeJobIdDisabled: boolean;
   showRemoveJobId: boolean;
+  isSingleMetricViewerDisabled: boolean;
   closePopover: () => void;
   globalState: Record<string, any>;
   setActiveFlyout: (flyout: FlyoutType | null) => void;
@@ -56,6 +58,7 @@ export const getOptionsForJobSelectorMenuItems = ({
         },
       }
     ),
+    disabled: page === ML_PAGES.ANOMALY_EXPLORER && isSingleMetricViewerDisabled,
     icon: 'visLine',
     onClick: async () => {
       const mlLocator = share.url.locators.get(ML_APP_LOCATOR);
@@ -110,10 +113,7 @@ export const getOptionsForJobSelectorMenuItems = ({
             name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.removeJob', {
               defaultMessage: 'Remove from {page}',
               values: {
-                page:
-                  page === ML_PAGES.ANOMALY_EXPLORER
-                    ? ANOMALY_EXPLORER_TITLE
-                    : SINGLE_METRIC_VIEWER_TITLE,
+                page: ANOMALY_EXPLORER_TITLE,
               },
             }),
             disabled: removeJobIdDisabled,
@@ -133,7 +133,7 @@ export const getOptionsForJobSelectorMenuItems = ({
       isSeparator: true,
       key: 'separator2',
     } as EuiContextMenuPanelItemDescriptor,
-    viewInMenu,
+    ...(viewInMenu.disabled ? [] : [viewInMenu]),
     {
       name: i18n.translate('xpack.ml.overview.anomalyDetection.jobContextMenu.viewDatafeedCounts', {
         defaultMessage: 'View datafeed counts',

@@ -52,6 +52,7 @@ import {
   Tooltip,
   TooltipType,
 } from '@elastic/charts';
+import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { DATAFEED_STATE } from '../../../../../../common/constants/states';
 import type {
   CombinedJobWithStats,
@@ -425,10 +426,12 @@ export const DatafeedChartFlyout: FC<DatafeedChartFlyoutProps> = ({
 
                             if (
                               onModelSnapshotAnnotationClick &&
-                              annotations.lines?.[0]?.datum?.modelSnapshot
+                              isPopulatedObject<string, ModelSnapshot>(
+                                annotations.lines?.[0]?.datum,
+                                ['modelSnapshot']
+                              )
                             ) {
                               onModelSnapshotAnnotationClick(
-                                // @ts-expect-error property 'modelSnapshot' does not exist on type
                                 annotations.lines[0].datum.modelSnapshot
                               );
                             }

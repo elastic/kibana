@@ -5,13 +5,14 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import { EuiFlexItem, EuiLink, EuiText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { GroupSelectorMenu } from '../group_or_job_selector_menu/group_selector_menu';
 import type { GroupObj } from '../job_selector';
 import { AnomalyDetectionInfoButton } from '../group_or_job_selector_menu/job_selector_button';
 import type { MlPages } from '../../../../../common/constants/locator';
+import type { MlSummaryJob } from '../../../../../common/types/anomaly_detection_jobs';
 
 export interface IdBadgesProps {
   limit: number;
@@ -21,6 +22,7 @@ export interface IdBadgesProps {
   showAllBarBadges: boolean;
   page: MlPages;
   onRemoveJobId: (jobOrGroupId: string[]) => void;
+  selectedJobs: MlSummaryJob[];
 }
 
 export function IdBadges({
@@ -31,9 +33,13 @@ export function IdBadges({
   showAllBarBadges,
   page,
   onRemoveJobId,
+  selectedJobs,
 }: IdBadgesProps) {
   const badges = [];
-
+  const singleMetricViewerDisabledIds: string[] = useMemo(
+    () => selectedJobs.filter((job) => !job.isSingleMetricViewerJob).map((job) => job.id),
+    [selectedJobs]
+  );
   // Create group badges. Skip job ids here.
   for (let i = 0; i < selectedGroups.length; i++) {
     const currentGroup = selectedGroups[i];
@@ -45,7 +51,10 @@ export function IdBadges({
           page={page}
           onRemoveJobId={onRemoveJobId}
           removeJobIdDisabled={selectedJobIds.length < 2}
-          removeGroupDisabled={selectedGroups.length < 2}
+          removeGroupDisabled={
+            selectedGroups.length < 2 && selectedJobIds.length <= currentGroup.jobIds.length
+          }
+          singleMetricViewerDisabledIds={singleMetricViewerDisabledIds}
         />
       </EuiFlexItem>
     );
@@ -63,6 +72,7 @@ export function IdBadges({
           page={page}
           onRemoveJobId={onRemoveJobId}
           removeJobIdDisabled={selectedJobIds.length < 2}
+          isSingleMetricViewerDisabled={singleMetricViewerDisabledIds.includes(currentId)}
         />
       </EuiFlexItem>
     );

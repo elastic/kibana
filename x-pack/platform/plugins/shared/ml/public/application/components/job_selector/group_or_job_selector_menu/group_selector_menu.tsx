@@ -24,6 +24,7 @@ export const GroupSelectorMenu = ({
   onRemoveJobId,
   removeJobIdDisabled,
   removeGroupDisabled,
+  singleMetricViewerDisabledIds = [],
 }: {
   groupId: string;
   jobIds: string[];
@@ -31,6 +32,7 @@ export const GroupSelectorMenu = ({
   onRemoveJobId: (jobOrGroupId: string[]) => void;
   removeJobIdDisabled: boolean;
   removeGroupDisabled: boolean;
+  singleMetricViewerDisabledIds: string[];
 }) => {
   const [isPopoverOpen, setIsPopoverOpen] = useState(false);
   const { setActiveFlyout, setActiveJobId } = useJobInfoFlyouts();
@@ -87,13 +89,14 @@ export const GroupSelectorMenu = ({
       },
     ];
 
-    jobIds.forEach((jobId, idx) => {
+    jobIds.forEach((jobId) => {
       const options = getOptionsForJobSelectorMenuItems({
         jobId,
         page,
         onRemoveJobId,
         removeJobIdDisabled,
         showRemoveJobId: false,
+        isSingleMetricViewerDisabled: singleMetricViewerDisabledIds.includes(jobId),
         closePopover,
         globalState,
         setActiveFlyout,
