@@ -7,12 +7,12 @@
 
 import { get, isString } from 'lodash/fp';
 import React from 'react';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 
 import * as i18n from './translations';
 
 const EmptyWrapper = styled.span`
-  color: ${(props) => props.theme.euiTheme.colors.darkShade};
+  color: ${(props) => props.theme.eui.euiColorDarkShade};
 `;
 
 EmptyWrapper.displayName = 'EmptyWrapper';

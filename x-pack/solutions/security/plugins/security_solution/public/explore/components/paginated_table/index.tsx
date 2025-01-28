@@ -25,7 +25,7 @@ import {
 import { noop } from 'lodash/fp';
 import type { FC, ComponentType } from 'react';
 import React, { memo, useState, useMemo, useEffect, useCallback } from 'react';
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 
 import type { EntitiesListColumns } from '../../../entity_analytics/components/entity_store/hooks/use_entities_list_columns';
 import type { Direction } from '../../../../common/search_strategy';
@@ -374,20 +374,17 @@ const BasicTable = styled(EuiBasicTable as BasicTableType)`
 
 BasicTable.displayName = 'BasicTable';
 
-const FooterAction = styled(EuiFlexGroup)`
-  margin-top: ${({ theme }) => theme.euiTheme.size.xs};
-  align-items: center;
-`;
-
-FooterAction.defaultProps = {
+const FooterAction = styled(EuiFlexGroup).attrs(() => ({
   alignItems: 'center',
   responsive: false,
-};
+}))`
+  margin-top: ${({ theme }) => theme.eui.euiSizeXS};
+`;
 
 FooterAction.displayName = 'FooterAction';
 
 export const PaginationEuiFlexItem = styled(EuiFlexItem)`
-  @media only screen and (min-width: ${({ theme: { euiTheme } }) => euiTheme.breakpoint.m}) {
+  @media only screen and (min-width: ${({ theme }) => theme.eui.euiBreakpoints.m}) {
     .euiButtonIcon:last-child {
       margin-left: 28px;
     }
@@ -398,12 +395,12 @@ export const PaginationEuiFlexItem = styled(EuiFlexItem)`
 
     .euiPagination::before {
       bottom: 0;
-      color: ${({ theme: { euiTheme } }) => euiTheme.colors.disabled};
+      color: ${({ theme }) => theme.eui.euiButtonColorDisabled};
       content: '\\2026';
-      font-size: ${({ theme: { euiTheme } }) => euiTheme.size.s};
-      padding: 5px ${({ theme: { euiTheme } }) => euiTheme.size.s};
+      font-size: ${({ theme }) => theme.eui.euiFontSizeS};
+      padding: 5px ${({ theme }) => theme.eui.euiSizeS};
       position: absolute;
-      right: ${({ theme: { euiTheme } }) => euiTheme.size.l};
+      right: ${({ theme }) => theme.eui.euiSizeL};
     }
   }
 ` as typeof EuiFlexItem;

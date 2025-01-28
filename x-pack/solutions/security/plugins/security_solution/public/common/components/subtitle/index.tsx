@@ -6,20 +6,18 @@
  */
 
 import React from 'react';
-import { useEuiFontSize } from '@elastic/eui';
-import styled from '@emotion/styled';
-import { css } from '@emotion/react';
+import styled, { css } from 'styled-components';
 
 const Wrapper = styled.div`
-  ${({ theme: { euiTheme } }) => css`
+  ${({ theme }) => css`
     .siemSubtitle__item {
-      color: ${euiTheme.colors.subduedText};
-      font-size: ${useEuiFontSize('xs').fontSize};
-      line-height: ${useEuiFontSize('s').lineHeight};
+      color: ${theme.eui.euiTextSubduedColor};
+      font-size: ${theme.eui.euiFontSizeXS};
+      line-height: ${theme.eui.euiLineHeight};
 
-      @media only screen and (min-width: ${euiTheme.breakpoint.s}) {
+      @media only screen and (min-width: ${theme.eui.euiBreakpoints.s}) {
         display: inline-block;
-        margin-right: ${euiTheme.size.s};
+        margin-right: ${theme.eui.euiSize};
 
         &:last-child {
           margin-right: 0;

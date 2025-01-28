@@ -5,9 +5,8 @@
  * 2.0.
  */
 
-import styled from '@emotion/styled';
+import styled from 'styled-components';
 import React from 'react';
-import type { EuiPanelProps } from '@elastic/eui';
 import { EuiPanel } from '@elastic/eui';
 
 /**
@@ -26,16 +25,9 @@ import { EuiPanel } from '@elastic/eui';
  * Ref: https://www.styled-components.com/docs/faqs#why-am-i-getting-html-attribute-warnings
  * Ref: https://reactjs.org/blog/2017/09/08/dom-attributes-in-react-16.html
  */
-type PanelProps = EuiPanelProps & {
-  loading?: boolean;
-  height?: number;
-};
-
-export const Panel = styled(({ loading, ...props }: PanelProps) => (
-  <EuiPanel {...props} hasBorder />
-))`
+export const Panel = styled(({ loading, ...props }) => <EuiPanel {...props} hasBorder />)`
   position: relative;
-  ${({ loading }: PanelProps) =>
+  ${({ loading }) =>
     loading &&
     `
     overflow: hidden;

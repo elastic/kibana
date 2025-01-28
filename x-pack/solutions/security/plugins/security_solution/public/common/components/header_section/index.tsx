@@ -8,8 +8,8 @@
 import type { EuiTitleSize } from '@elastic/eui';
 import { EuiButtonIcon, EuiFlexGroup, EuiFlexItem, EuiIconTip, EuiTitle } from '@elastic/eui';
 import React, { useCallback } from 'react';
-import styled from '@emotion/styled';
-import { css } from '@emotion/react';
+import styled, { css } from 'styled-components';
+
 import classnames from 'classnames';
 import { InspectButton } from '../inspect';
 
@@ -23,32 +23,31 @@ interface HeaderProps {
   $hideSubtitle?: boolean; // eslint-disable-line react/no-unused-prop-types
 }
 
-const Header = styled.header<HeaderProps>(
-  ({ theme: { euiTheme }, height, border }) => css`
-    &.toggle-expand {
-      margin-bottom: ${euiTheme.size.l};
-    }
+const Header = styled.header<HeaderProps>`
+  &.toggle-expand {
+    margin-bottom: ${({ theme }) => theme.eui.euiSizeL};
+  }
 
-    .no-margin {
-      margin-top: 0 !important;
-      margin-bottom: 0 !important;
-    }
+  .no-margin {
+    margin-top: 0 !important;
+    margin-bottom: 0 !important;
+  }
 
-    ${height &&
+  ${({ height }) =>
+    height &&
     css`
       height: ${height}px;
     `}
+  margin-bottom: 0;
+  user-select: text;
 
-    margin-bottom: 0;
-    user-select: text;
-
-    ${border &&
+  ${({ border }) =>
+    border &&
     css`
-      border-bottom: ${euiTheme.border.thin};
-      padding-bottom: ${euiTheme.size.l};
+      border-bottom: ${({ theme }) => theme.eui.euiBorderThin};
+      padding-bottom: ${({ theme }) => theme.eui.euiSizeL};
     `}
-  `
-);
+`;
 Header.displayName = 'Header';
 
 export interface HeaderSectionProps extends HeaderProps {
