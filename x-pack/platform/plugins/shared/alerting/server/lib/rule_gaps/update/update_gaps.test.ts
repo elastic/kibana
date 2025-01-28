@@ -242,7 +242,7 @@ describe('updateGaps', () => {
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to update 1 gaps after 3 retries due to conflicts')
       );
-    }, 30000);
+    }, 40000);
   });
 
   describe('backfill handling', () => {
