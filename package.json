@@ -1419,7 +1419,7 @@
     "@kbn/core-status-server-mocks": "link:src/core/packages/status/server-mocks",
     "@kbn/core-test-helpers-kbn-server": "link:src/dev/packages/core-test-helpers-kbn-server",
     "@kbn/core-test-helpers-model-versions": "link:src/dev/packages/core-test-helpers-model-versions",
-    "@kbn/core-theme-browser-mocks": "link:packages/core/theme/core-theme-browser-mocks",
+    "@kbn/core-theme-browser-mocks": "link:src/core/packages/theme/browser-mocks",
     "@kbn/core-ui-settings-browser-mocks": "link:packages/core/ui-settings/core-ui-settings-browser-mocks",
     "@kbn/core-ui-settings-server-mocks": "link:packages/core/ui-settings/core-ui-settings-server-mocks",
     "@kbn/core-usage-data-server-mocks": "link:packages/core/usage-data/core-usage-data-server-mocks",

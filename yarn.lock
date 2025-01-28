@@ -5124,7 +5124,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-theme-browser-mocks@link:packages/core/theme/core-theme-browser-mocks":
+"@kbn/core-theme-browser-mocks@link:src/core/packages/theme/browser-mocks":
   version "0.0.0"
   uid ""
 
