@@ -187,7 +187,7 @@ function logEventDoc(logger: Logger, doc: Doc): void {
 }
 
 function logUpdateEventDoc(logger: Logger, docs: Array<Required<Doc>>): void {
-  logger.debug(`event updated: ${JSON.stringify(docs.length)}`);
+  logger.info(`event updated: ${JSON.stringify(docs.length)}`);
 }
 
 function indexEventDoc(esContext: EsContext, doc: Doc): void {
