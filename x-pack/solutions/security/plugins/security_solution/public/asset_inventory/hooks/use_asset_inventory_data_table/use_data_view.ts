@@ -8,6 +8,11 @@ import { useKibana } from '@kbn/kibana-react-plugin/public';
 import { useQuery } from '@tanstack/react-query';
 import type { DataPublicPluginStart } from '@kbn/data-plugin/public';
 
+/**
+ * Temporary hook to get the data view for a given index pattern
+ * TODO: use @kbn/cloud-security-posture/src/hooks/use_data_view once
+ * Asset Inventory is ready to create data views per space
+ */
 export const useDataView = (indexPattern: string) => {
   const {
     data: { dataViews },
