@@ -208,6 +208,7 @@ export const AdditionalOptionsFields: React.FC<AdditionalOptionsFieldsProps> = (
               direction="column"
               items={optionalProviderFormFields}
               setConfigEntry={onSetProviderConfigEntry}
+              isEdit={isEdit}
             />
             <EuiSpacer size="m" />
           </>
