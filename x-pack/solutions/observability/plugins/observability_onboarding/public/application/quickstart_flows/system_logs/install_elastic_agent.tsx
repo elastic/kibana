@@ -122,6 +122,7 @@ export function InstallElasticAgent() {
     },
     // FIXME: Dario could not find a reasonable fix for successfullyInstalledShipperSetup
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [apiKeyEncoded, onboardingId, successfullyInstalledShipperSetup]
   );
 
