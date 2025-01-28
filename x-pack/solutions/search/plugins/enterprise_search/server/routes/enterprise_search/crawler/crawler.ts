@@ -19,7 +19,7 @@ import { fetchCrawlerByIndexName } from '../../../lib/crawler/fetch_crawlers';
 import { recreateConnectorDocument } from '../../../lib/crawler/post_connector';
 import { updateHtmlExtraction } from '../../../lib/crawler/put_html_extraction';
 import { deleteIndex } from '../../../lib/indices/delete_index';
-import { RouteDependencies } from '../../../plugin';
+import type { RouteDependencies } from '../../../types';
 import { createError } from '../../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_handler';
 
