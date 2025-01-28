@@ -33,5 +33,3 @@ export type {
 export { tags } from './tags';
 
 export { ingestTestDataHook } from './global_hooks';
-
-export { ANNOTATIONS } from './annotations';

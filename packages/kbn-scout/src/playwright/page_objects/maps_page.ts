@@ -7,12 +7,20 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ScoutPage } from '..';
+import { ScoutPage, expect } from '..';
 
 export class MapsPage {
   constructor(private readonly page: ScoutPage) {}
 
   async gotoNewMap() {
     await this.page.gotoApp('maps');
+    await this.expectListingPage(false);
+  }
+
+  async expectListingPage(visible: boolean = true) {
+    const listingPage = this.page.getByTestId(`MapsLandingPage`);
+
+    if (visible) await expect(listingPage).toBeVisible();
+    else await expect(listingPage).not.toBeVisible();
   }
 }
