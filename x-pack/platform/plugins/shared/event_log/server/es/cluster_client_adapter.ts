@@ -183,6 +183,17 @@ export class ClusterClientAdapter<
         body: bulkBody,
       });
 
+      if (response.errors) {
+        const error = new Error('Error updating some bulk events');
+        error.stack +=
+          '\n' +
+          util.inspect(
+            response.items.filter((item) => 'error' in item),
+            { depth: null }
+          );
+        this.logger.error(error);
+      }
+
       return response;
     } catch (e) {
       this.logger.error(

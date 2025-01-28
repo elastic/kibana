@@ -2395,6 +2395,49 @@ describe('updateDocuments', () => {
       `error updating events in bulk: "Update failed"; docs: ${JSON.stringify([doc])}`
     );
   });
+
+  test('should log error when bulk response contains errors', async () => {
+    const doc = {
+      body: { foo: 'updated' },
+      index: 'test-index',
+      internalFields: {
+        _id: 'test-id',
+        _index: 'test-index',
+        _seq_no: 1,
+        _primary_term: 1,
+      },
+    };
+
+    const errorItem = {
+      update: {
+        _index: 'test-index',
+        _id: 'test-id',
+        status: 400,
+        error: {
+          type: 'version_conflict_engine_exception',
+          reason: 'version conflict',
+        },
+      },
+    };
+
+    const bulkResponse = {
+      took: 15,
+      items: [errorItem],
+      errors: true,
+    };
+
+    clusterClient.bulk.mockResponse(bulkResponse);
+
+    const response = await clusterClientAdapter.updateDocuments([doc as unknown as Required<Doc>]);
+
+    expect(response).toEqual(bulkResponse);
+    expect(logger.error).toHaveBeenCalled();
+    expect(logger.error).toHaveBeenCalledWith(
+      expect.objectContaining({
+        message: 'Error updating some bulk events',
+      })
+    );
+  });
 });
 
 type RetryableFunction = () => boolean;
