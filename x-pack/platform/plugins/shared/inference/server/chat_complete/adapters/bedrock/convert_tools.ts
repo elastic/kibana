@@ -95,7 +95,9 @@ export function fixSchemaArrayProperties<T extends ToolSchemaType>(schemaPart: T
     return {
       ...schemaPart,
       // Claude is prone to ignoring the "array" part of an array type
-      description: schemaPart.description + '. Must be provided as a JSON array',
+      description: schemaPart.description
+        ? `${schemaPart.description}. Must be provided as a JSON array`
+        : 'Must be provided as a JSON array',
       items: fixSchemaArrayProperties(schemaPart.items),
     };
   }
