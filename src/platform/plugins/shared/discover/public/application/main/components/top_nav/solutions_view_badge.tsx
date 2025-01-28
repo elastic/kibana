@@ -10,6 +10,7 @@
 import React, { useState, useMemo, type FunctionComponent } from 'react';
 import { EuiBadge, EuiPopover, EuiPopoverFooter, EuiText, EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { i18n } from '@kbn/i18n';
 import useObservable from 'react-use/lib/useObservable';
 import { of } from 'rxjs';
 import { useDiscoverServices } from '../../../../hooks/use_discover_services';
@@ -36,6 +37,13 @@ export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ b
     return null;
   }
 
+  const onClickAriaLabel = i18n.translate(
+    'discover.topNav.solutionsViewBadge.clickToLearnMoreAriaLabel',
+    {
+      defaultMessage: 'Click to learn more about the “solution view”',
+    }
+  );
+
   return (
     <EuiPopover
       button={
@@ -44,9 +52,9 @@ export const SolutionsViewBadge: FunctionComponent<{ badgeText: string }> = ({ b
           iconType="questionInCircle"
           iconSide="right"
           onClick={() => setIsPopoverOpen((value) => !value)}
-          onClickAriaLabel="Click to learn more about the “solution view”"
+          onClickAriaLabel={onClickAriaLabel}
           iconOnClick={() => setIsPopoverOpen((value) => !value)}
-          iconOnClickAriaLabel="Click to learn more about the “solution view”"
+          iconOnClickAriaLabel={onClickAriaLabel}
         >
           {badgeText}
         </EuiBadge>
