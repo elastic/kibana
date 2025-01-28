@@ -145,9 +145,6 @@ export const GridLayout = ({
           rowIndex={rowIndex}
           renderPanelContents={renderPanelContents}
           gridLayoutStateManager={gridLayoutStateManager}
-          ref={(element: HTMLDivElement | null) =>
-            (gridLayoutStateManager.rowRefs.current[rowIndex] = element)
-          }
         />
       );
     });

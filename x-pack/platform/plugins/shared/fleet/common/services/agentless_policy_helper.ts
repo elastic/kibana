@@ -31,14 +31,18 @@ export const getAgentlessAgentPolicyNameFromPackagePolicyName = (packagePolicyNa
 };
 
 export const isOnlyAgentlessIntegration = (
-  packageInfo: Pick<PackageInfo, 'policy_templates'> | undefined
+  packageInfo?: Pick<PackageInfo, 'policy_templates'>,
+  integrationToEnable?: string
 ) => {
   if (
-    packageInfo?.policy_templates &&
-    packageInfo?.policy_templates.length > 0 &&
-    packageInfo?.policy_templates.every((policyTemplate) =>
-      isOnlyAgentlessPolicyTemplate(policyTemplate)
-    )
+    packageInfo &&
+    packageInfo.policy_templates &&
+    packageInfo.policy_templates?.length > 0 &&
+    ((integrationToEnable &&
+      packageInfo.policy_templates?.find(
+        (p) => p.name === integrationToEnable && isOnlyAgentlessPolicyTemplate(p)
+      )) ||
+      packageInfo.policy_templates?.every((p) => isOnlyAgentlessPolicyTemplate(p)))
   ) {
     return true;
   }
