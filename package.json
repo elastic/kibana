@@ -1421,7 +1421,7 @@
     "@kbn/core-test-helpers-model-versions": "link:src/dev/packages/core-test-helpers-model-versions",
     "@kbn/core-theme-browser-mocks": "link:src/core/packages/theme/browser-mocks",
     "@kbn/core-ui-settings-browser-mocks": "link:src/core/packages/ui-settings/browser-mocks",
-    "@kbn/core-ui-settings-server-mocks": "link:packages/core/ui-settings/core-ui-settings-server-mocks",
+    "@kbn/core-ui-settings-server-mocks": "link:src/core/packages/ui-settings/server-mocks",
     "@kbn/core-usage-data-server-mocks": "link:packages/core/usage-data/core-usage-data-server-mocks",
     "@kbn/cypress-config": "link:packages/kbn-cypress-config",
     "@kbn/dependency-ownership": "link:packages/kbn-dependency-ownership",
