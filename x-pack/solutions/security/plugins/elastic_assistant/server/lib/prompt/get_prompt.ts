@@ -100,10 +100,44 @@ export const getPromptsByGroupId = async ({
  * @param provider  - provider. No need to provide if connector provided
  * @param savedObjectsClient - saved objects client
  */
-export const getPrompt = async (args: GetPromptArgs): Promise<string> => {
-  const { promptId, ...rest } = args;
-  const prompts = await getPromptsByGroupId({ ...rest, promptIds: [promptId] });
-  return prompts[0].prompt;
+export const getPrompt = async ({
+  actionsClient,
+  connector,
+  connectorId,
+  model: providedModel,
+  promptGroupId,
+  promptId,
+  provider: providedProvider,
+  savedObjectsClient,
+}: GetPromptArgs): Promise<string> => {
+  const { provider, model } = await resolveProviderAndModel({
+    providedProvider,
+    providedModel,
+    connectorId,
+    actionsClient,
+    providedConnector: connector,
+  });
+
+  const prompts = await savedObjectsClient.find<Prompt>({
+    type: promptSavedObjectType,
+    filter: `${promptSavedObjectType}.attributes.promptId: ${promptId} AND ${promptSavedObjectType}.attributes.promptGroupId: ${promptGroupId}`,
+    fields: ['provider', 'model', 'prompt'],
+  });
+
+  const prompt = findPromptEntry({
+    prompts: prompts?.saved_objects.map((p) => p.attributes) || [],
+    promptId,
+    promptGroupId,
+    provider,
+    model,
+  });
+  if (!prompt) {
+    throw new Error(
+      `Prompt not found for promptId: ${promptId} and promptGroupId: ${promptGroupId}`
+    );
+  }
+
+  return prompt;
 };
 
 const resolveProviderAndModel = async ({
