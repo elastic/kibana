@@ -319,7 +319,7 @@ describe('<TemplateCreate />', () => {
 
         expect(exists('indexModeCallout')).toBe(true);
         expect(find('indexModeCallout').text()).toContain(
-          'The index.mode setting has been set to Standard within the Logistics step.'
+          'The index.mode setting has been set to Lookup within the Logistics step.'
         );
       });
 
