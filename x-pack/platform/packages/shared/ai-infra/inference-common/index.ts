@@ -96,6 +96,7 @@ export {
   isInferenceRequestError,
   isInferenceRequestAbortedError,
 } from './src/errors';
+export { elasticModelDictionary } from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {

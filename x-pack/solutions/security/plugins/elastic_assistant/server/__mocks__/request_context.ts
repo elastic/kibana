@@ -54,8 +54,8 @@ export const createMockClients = () => {
       getCurrentUser: jest.fn(),
       inference: jest.fn(),
       llmTasks: jest.fn(),
+      savedObjectsClient: core.savedObjects.client,
     },
-    savedObjectsClient: core.savedObjects.client,
 
     licensing: {
       ...licensingMock.createRequestHandlerContext({ license }),
@@ -148,6 +148,7 @@ const createElasticAssistantRequestContextMock = (
     inference: { getClient: jest.fn() },
     llmTasks: { retrieveDocumentationAvailable: jest.fn(), retrieveDocumentation: jest.fn() },
     core: clients.core,
+    savedObjectsClient: clients.elasticAssistant.savedObjectsClient,
     telemetry: clients.elasticAssistant.telemetry,
   };
 };
