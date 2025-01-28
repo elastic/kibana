@@ -110,7 +110,7 @@ export const performBulkGet = async <T>(
 
         if (securityExtension && securityExtension.includeSavedObjectNames() && !isEmpty) {
           const nameAttribute = registry.getNameAttribute(type);
-          const nameFields = nameAttribute ? [nameAttribute] : ['name', 'title'];
+          const nameFields = nameAttribute !== 'unknown' ? [nameAttribute] : ['name', 'title'];
 
           return [...savedObjectFields, ...nameFields];
         }
