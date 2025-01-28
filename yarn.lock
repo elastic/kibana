@@ -4752,7 +4752,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-lifecycle-server-mocks@link:packages/core/lifecycle/core-lifecycle-server-mocks":
+"@kbn/core-lifecycle-server-mocks@link:src/core/packages/lifecycle/server-mocks":
   version "0.0.0"
   uid ""
 
