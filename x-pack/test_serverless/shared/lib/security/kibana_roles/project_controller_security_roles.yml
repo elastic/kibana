@@ -133,6 +133,7 @@ editor:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_actions.read
+        - feature_actions.endpoint_security_execute
         - feature_builtInAlerts.all
         - feature_osquery.all
         - feature_discover.all
@@ -320,6 +321,7 @@ t3_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_actions.read
+        - feature_actions.endpoint_security_execute
         - feature_builtInAlerts.all
         - feature_osquery.all
         - feature_discover.all
@@ -533,6 +535,7 @@ soc_manager:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_actions.all
+        - feature_actions.endpoint_security_execute
         - feature_builtInAlerts.all
         - feature_osquery.all
         - feature_indexPatterns.all
@@ -736,6 +739,7 @@ endpoint_operations_analyst:
         - feature_securitySolutionTimeline.all
         - feature_securitySolutionNotes.all
         - feature_actions.all
+        - feature_actions.endpoint_security_execute
         - feature_builtInAlerts.all
         - feature_osquery.all
         - feature_fleet.all
