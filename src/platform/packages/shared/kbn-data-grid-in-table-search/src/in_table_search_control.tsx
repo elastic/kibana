@@ -191,7 +191,7 @@ export const InTableSearchControl: React.FC<InTableSearchControlProps> = ({
       ) : (
         <EuiToolTip
           content={i18n.translate('dataGridInTableSearch.inputPlaceholder', {
-            defaultMessage: 'Search in the table',
+            defaultMessage: 'Find in table',
           })}
           delay="long"
         >
