@@ -38,7 +38,7 @@
   },
   {
     "name": "fleet_server",
-    "version": "1.5.0"
+    "version": "1.6.0"
   },
   {
     "name": "profiler_symbolizer",
@@ -56,6 +56,6 @@
   },
   {
     "name": "security_detection_engine",
-    "version": "8.16.4"
+    "version": "8.16.5"
   }
 ]

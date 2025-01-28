@@ -60,33 +60,50 @@ export enum EndsOptions {
 }
 
 export const RECURRENCE_END_OPTIONS = [
-  { id: 'never', label: i18n.CREATE_FORM_ENDS_NEVER },
-  { id: 'ondate', label: i18n.CREATE_FORM_ENDS_ON_DATE },
-  { id: 'afterx', label: i18n.CREATE_FORM_ENDS_AFTER_X },
+  {
+    id: 'never',
+    label: i18n.CREATE_FORM_ENDS_NEVER,
+    'data-test-subj': 'recurrenceEndOptionNever',
+  },
+  {
+    id: 'ondate',
+    label: i18n.CREATE_FORM_ENDS_ON_DATE,
+    'data-test-subj': 'recurrenceEndOptionOnDate',
+  },
+  {
+    id: 'afterx',
+    label: i18n.CREATE_FORM_ENDS_AFTER_X,
+    'data-test-subj': 'recurrenceEndOptionAfterX',
+  },
 ];
 
 export const CREATE_FORM_CUSTOM_FREQUENCY = (interval: number = 1) => [
   {
     text: i18n.CREATE_FORM_CUSTOM_FREQUENCY_DAILY(interval),
     value: Frequency.DAILY,
+    'data-test-subj': 'customFrequencyDaily',
   },
   {
     text: i18n.CREATE_FORM_CUSTOM_FREQUENCY_WEEKLY(interval),
     value: Frequency.WEEKLY,
+    'data-test-subj': 'customFrequencyWeekly',
   },
   {
     text: i18n.CREATE_FORM_CUSTOM_FREQUENCY_MONTHLY(interval),
     value: Frequency.MONTHLY,
+    'data-test-subj': 'customFrequencyMonthly',
   },
   {
     text: i18n.CREATE_FORM_CUSTOM_FREQUENCY_YEARLY(interval),
     value: Frequency.YEARLY,
+    'data-test-subj': 'customFrequencyYearly',
   },
 ];
 
 export const WEEKDAY_OPTIONS = ISO_WEEKDAYS.map((n) => ({
   id: String(n),
   label: moment().isoWeekday(n).format('ddd'),
+  'data-test-subj': `isoWeekdays${n}`,
 }));
 
 export const ISO_WEEKDAYS_TO_RRULE: Record<number, string> = {

@@ -5,10 +5,10 @@
     "functions": [
       {
         "parentPluginId": "@kbn/avc-banner",
-        "id": "def-public.AVCResultsBanner2024",
+        "id": "def-public.AVCResultsBanner",
         "type": "Function",
         "tags": [],
-        "label": "AVCResultsBanner2024",
+        "label": "AVCResultsBanner",
         "description": [],
         "signature": [
           "({ onDismiss }: React.PropsWithChildren<{ onDismiss: () => void; }>) => JSX.Element"
@@ -19,8 +19,8 @@
         "children": [
           {
             "parentPluginId": "@kbn/avc-banner",
-            "id": "def-public.AVCResultsBanner2024.$1",
-            "type": "CompoundType",
+            "id": "def-public.AVCResultsBanner.$1",
+            "type": "Object",
             "tags": [],
             "label": "{ onDismiss }",
             "description": [],
