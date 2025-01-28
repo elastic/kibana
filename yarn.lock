@@ -5168,7 +5168,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-usage-data-server-mocks@link:packages/core/usage-data/core-usage-data-server-mocks":
+"@kbn/core-usage-data-server-mocks@link:src/core/packages/usage-data/server-mocks":
   version "0.0.0"
   uid ""
 
