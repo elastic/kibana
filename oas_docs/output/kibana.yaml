@@ -5671,7 +5671,6 @@ paths:
       operationId: getCaseDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_case_id'
-        - $ref: '#/components/parameters/Cases_includeComments'
       responses:
         '200':
           content:
@@ -6634,37 +6633,6 @@ paths:
                 $ref: '#/components/schemas/Cases_4xx_response'
           description: Authorization information is missing or invalid.
       summary: Get case creators
-      tags:
-        - cases
-  /api/cases/status:
-    get:
-      deprecated: true
-      description: |
-        Returns the number of cases that are open, closed, and in progress. Deprecated in 8.1.0. This API is deprecated and will be removed in a future release; use the find cases API instead. You must have `read` privileges for the **Cases** feature in the **Management**, **Observability**, or **Security** section of the Kibana feature privileges, depending on the owner of the cases you're seeking.
-      operationId: getCaseStatusDefaultSpace
-      parameters:
-        - $ref: '#/components/parameters/Cases_owner_filter'
-      responses:
-        '200':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                type: object
-                properties:
-                  count_closed_cases:
-                    type: integer
-                  count_in_progress_cases:
-                    type: integer
-                  count_open_cases:
-                    type: integer
-          description: Indicates a successful call.
-        '401':
-          content:
-            application/json; Elastic-Api-Version=2023-10-31:
-              schema:
-                $ref: '#/components/schemas/Cases_4xx_response'
-          description: Authorization information is missing or invalid.
-      summary: Get case status summary
       tags:
         - cases
   /api/cases/tags:
@@ -46509,14 +46477,6 @@ components:
           minItems: 1
           type: string
         type: array
-    Cases_includeComments:
-      deprecated: true
-      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
-      in: query
-      name: includeComments
-      schema:
-        default: true
-        type: boolean
     Cases_kbn_xsrf:
       description: Cross-site request forgery protection
       in: header
@@ -54081,8 +54041,8 @@ components:
           type: integer
         request:
           $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
-      required:
-        - request
+        request_type:
+          $ref: '#/components/schemas/Security_Detections_API_NonEmptyString'
     Security_Detections_API_RulePreviewLogs:
       type: object
       properties:
