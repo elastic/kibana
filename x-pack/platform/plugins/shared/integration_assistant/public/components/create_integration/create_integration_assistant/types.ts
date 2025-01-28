@@ -37,15 +37,10 @@ export interface IntegrationSettings {
   logSamples?: string[];
   samplesFormat?: SamplesFormat;
   apiSpec?: Oas;
+  apiSpecFileName?: string;
   celUrl?: string;
   celPath?: string;
   celAuth?: CelAuthType;
-}
-
-export interface CelSettings {
-  suggestedPaths?: string[];
-  endpoint?: string;
-  auth?: CelAuthType;
 }
 
 export interface ApiPathOptions {

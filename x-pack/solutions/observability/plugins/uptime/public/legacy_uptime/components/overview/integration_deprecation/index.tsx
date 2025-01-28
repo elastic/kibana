@@ -28,6 +28,7 @@ export const IntegrationDeprecation = () => {
     return undefined;
     // FIXME: Dario thinks there is a better way to do this but
     // he's getting tired and maybe the Uptime folks can fix it
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [monitorList.isLoaded]);
   const hasIntegrationMonitors = !loading && data && data.hasIntegrationMonitors;
   const [shouldShowNotice, setShouldShowNotice] = useState(

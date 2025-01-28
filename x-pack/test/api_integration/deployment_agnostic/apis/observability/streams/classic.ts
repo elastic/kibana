@@ -101,7 +101,12 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       const body = asUnwiredStreamGetResponse(getResponse.body);
 
-      const { dashboards, stream, lifecycle, elasticsearch_assets: elasticsearchAssets } = body;
+      const {
+        dashboards,
+        stream,
+        effective_lifecycle: effectiveLifecycle,
+        elasticsearch_assets: elasticsearchAssets,
+      } = body;
 
       expect(dashboards).to.eql([]);
 
@@ -123,14 +128,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         },
       });
 
-      expect(lifecycle).to.eql(
-        isServerless
-          ? { type: 'dlm' }
-          : {
-              policy: 'logs',
-              type: 'ilm',
-            }
-      );
+      expect(effectiveLifecycle).to.eql(isServerless ? { dsl: {} } : { ilm: { policy: 'logs' } });
 
       expect(elasticsearchAssets).to.eql([
         {
