@@ -40,7 +40,7 @@ export function LensEmbeddableComponent({
     api.rendered$,
     // listen to view change mode but do not use its actual value
     // just call the Lens API to know whether it's in edit mode
-    api.viewMode
+    api.viewMode$
   );
   const canEdit = Boolean(api.isEditingEnabled?.());
 
@@ -48,7 +48,7 @@ export function LensEmbeddableComponent({
 
   // On unmount call all the cleanups
   useEffect(() => {
-    addLog(`Mounting Lens Embeddable component: ${api.defaultPanelTitle?.getValue()}`);
+    addLog(`Mounting Lens Embeddable component: ${api.defaultTitle$?.getValue()}`);
     return onUnmount;
   }, [api, onUnmount]);
 
@@ -58,11 +58,10 @@ export function LensEmbeddableComponent({
   // Publish the data attributes only if avaialble/visible
   const title = internalApi.getDisplayOptions()?.noPanelTitle
     ? undefined
-    : { 'data-title': api.panelTitle?.getValue() ?? api.defaultPanelTitle?.getValue() };
-  const description = api.panelDescription?.getValue()
+    : { 'data-title': api.title$?.getValue() ?? api.defaultTitle$?.getValue() };
+  const description = api.description$?.getValue()
     ? {
-        'data-description':
-          api.panelDescription?.getValue() ?? api.defaultPanelDescription?.getValue(),
+        'data-description': api.description$?.getValue() ?? api.defaultDescription$?.getValue(),
       }
     : undefined;
 

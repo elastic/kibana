@@ -5,11 +5,9 @@
  * 2.0.
  */
 
-import type { Logger, ElasticsearchClient, IScopedClusterClient } from '@kbn/core/server';
+import type { Logger, IScopedClusterClient } from '@kbn/core/server';
 
 import type { ExperimentalFeatures } from '../../../common';
-
-import { createKeywordBuilderPipeline, deleteKeywordBuilderPipeline } from './ingest_pipelines';
 
 interface AssetInventoryClientOpts {
   logger: Logger;
@@ -20,12 +18,7 @@ interface AssetInventoryClientOpts {
 // AssetInventoryDataClient is responsible for managing the asset inventory,
 // including initializing and cleaning up resources such as Elasticsearch ingest pipelines.
 export class AssetInventoryDataClient {
-  private esClient: ElasticsearchClient;
-
-  constructor(private readonly options: AssetInventoryClientOpts) {
-    const { clusterClient } = options;
-    this.esClient = clusterClient.asCurrentUser;
-  }
+  constructor(private readonly options: AssetInventoryClientOpts) {}
 
   // Enables the asset inventory by deferring the initialization to avoid blocking the main thread.
   public async enable() {
@@ -58,12 +51,7 @@ export class AssetInventoryDataClient {
   private async asyncSetup() {
     const { logger } = this.options;
     try {
-      logger.debug('creating keyword builder pipeline');
-      await createKeywordBuilderPipeline({
-        logger,
-        esClient: this.esClient,
-      });
-      logger.debug('keyword builder pipeline created');
+      logger.debug('Initializing asset inventory');
     } catch (err) {
       logger.error(`Error initializing asset inventory: ${err.message}`);
       await this.delete();
@@ -77,15 +65,6 @@ export class AssetInventoryDataClient {
     logger.debug(`Deleting asset inventory`);
 
     try {
-      logger.debug(`Deleting asset inventory keyword builder pipeline`);
-
-      await deleteKeywordBuilderPipeline({
-        logger,
-        esClient: this.esClient,
-      }).catch((err) => {
-        logger.error('Error on deleting keyword builder pipeline', err);
-      });
-
       logger.debug(`Deleted asset inventory`);
       return { deleted: true };
     } catch (err) {

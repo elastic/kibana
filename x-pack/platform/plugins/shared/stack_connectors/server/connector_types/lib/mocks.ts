@@ -5,6 +5,8 @@
  * 2.0.
  */
 
+/* eslint-disable @typescript-eslint/no-explicit-any */
+
 import { AxiosResponse } from 'axios';
 import { SubActionConnector } from '@kbn/actions-plugin/server';
 import { SubActionRequestParams } from '@kbn/actions-plugin/server/sub_action_framework/types';

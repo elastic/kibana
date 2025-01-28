@@ -41,7 +41,7 @@ function createEditApi(
     api,
     () => false, // DSL based
     services,
-    { getAppContext: () => ({ currentAppId: 'lens' }), viewMode: new BehaviorSubject(viewMode) }
+    { getAppContext: () => ({ currentAppId: 'lens' }), viewMode$: new BehaviorSubject(viewMode) }
   );
 }
 
