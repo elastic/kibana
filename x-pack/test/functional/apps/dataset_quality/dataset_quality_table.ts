@@ -118,14 +118,15 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       const cols = await PageObjects.datasetQuality.parseDatasetTable();
       const lastActivityCol = cols[PageObjects.datasetQuality.texts.datasetLastActivityColumn];
       const activityCells = await lastActivityCol.getCellTexts();
-      const lastActivityCell = activityCells[activityCells.length - 1];
-      const restActivityCells = activityCells.slice(0, -1);
+      const degradedActivityCell = activityCells[activityCells.length - 1];
+      const failedActivityCell = activityCells[activityCells.length - 2];
+      const restActivityCells = activityCells.slice(0, -2);
 
-      // The first cell of lastActivity should have data
-      expect(lastActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      // The following lastActivity cells should have data
+      expect(degradedActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
+      expect(failedActivityCell).to.not.eql(PageObjects.datasetQuality.texts.noActivityText);
       // The rest of the rows must show no activity
       expect(restActivityCells).to.eql([
-        PageObjects.datasetQuality.texts.noActivityText,
         PageObjects.datasetQuality.texts.noActivityText,
         PageObjects.datasetQuality.texts.noActivityText,
       ]);
