@@ -70,7 +70,7 @@ const useEnabledColumn = ({ hasCRUDPermissions, startMlJobs }: ColumnsProps): Ta
 
   const loadingIds = useMemo(
     () =>
-      ['disable', 'enable', 'edit', 'delete'].includes(loadingRulesAction ?? '')
+      ['disable', 'enable', 'edit', 'delete', 'run'].includes(loadingRulesAction ?? '')
         ? loadingRuleIds
         : [],
     [loadingRuleIds, loadingRulesAction]

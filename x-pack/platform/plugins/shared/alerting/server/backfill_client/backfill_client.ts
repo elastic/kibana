@@ -272,19 +272,25 @@ export class BackfillClient {
     });
 
     try {
-      for (const backfill of backfillSOs) {
-        await updateGaps({
-          backfillSchedule: backfill.schedule,
-          ruleId: backfill.rule.id,
-          start: new Date(backfill.start),
-          end: backfill?.end ? new Date(backfill.end) : new Date(),
-          eventLogger,
-          eventLogClient,
-          savedObjectsRepository: internalSavedObjectsRepository,
-          logger: this.logger,
-          backfillClient: this,
-          actionsClient,
-        });
+      // Process backfills in chunks of 10 to manage resource usage
+      for (let i = 0; i < backfillSOs.length; i += 10) {
+        const chunk = backfillSOs.slice(i, i + 10);
+        await Promise.all(
+          chunk.map((backfill) =>
+            updateGaps({
+              backfillSchedule: backfill.schedule,
+              ruleId: backfill.rule.id,
+              start: new Date(backfill.start),
+              end: backfill?.end ? new Date(backfill.end) : new Date(),
+              eventLogger,
+              eventLogClient,
+              savedObjectsRepository: internalSavedObjectsRepository,
+              logger: this.logger,
+              backfillClient: this,
+              actionsClient,
+            })
+          )
+        );
       }
     } catch {
       this.logger.warn(
