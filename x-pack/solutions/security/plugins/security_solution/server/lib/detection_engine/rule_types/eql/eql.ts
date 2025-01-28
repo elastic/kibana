@@ -56,6 +56,7 @@ import type { RulePreviewLoggedRequest } from '../../../../../common/api/detecti
 import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
+import { isEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -121,6 +122,8 @@ export const eqlExecutor = async ({
       uiSettingsClient: services.uiSettingsClient,
     });
 
+    const isSequenceQuery = isEqlSequenceQuery(ruleParams.query);
+
     const request = buildEqlSearchRequest({
       query: ruleParams.query,
       index: inputIndex,
@@ -174,7 +177,10 @@ export const eqlExecutor = async ({
       const { events, sequences } = response.hits;
 
       if (shardFailures) {
-        const shardFailureMessage = i18n.EQL_SHARD_FAILURE_MESSAGE(JSON.stringify(shardFailures));
+        const shardFailureMessage = i18n.EQL_SHARD_FAILURE_MESSAGE(
+          isSequenceQuery,
+          JSON.stringify(shardFailures)
+        );
         ruleExecutionLogger.error(shardFailureMessage);
         result.errors.push(shardFailureMessage);
       }
