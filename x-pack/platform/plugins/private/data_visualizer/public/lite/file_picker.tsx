@@ -37,7 +37,7 @@ export const FilePicker: FC<Props> = ({ fileManager: fm }) => {
         helpText={i18n.translate(
           'xpack.dataVisualizer.file.aboutPanel.supportedFormatsDescription',
           {
-            defaultMessage: 'Supported formats: PDF, TXT, MD, CSV, docx',
+            defaultMessage: 'Supported formats: PDF, TXT, CSV, log files and NDJSON',
           }
         )}
       >
