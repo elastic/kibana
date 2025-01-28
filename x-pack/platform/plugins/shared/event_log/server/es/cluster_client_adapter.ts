@@ -93,6 +93,7 @@ type GetQueryBodyWithAuthFilterOpts =
     })
   | AggregateEventsWithAuthFilter;
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 type AliasAny = any;
 
 const LEGACY_ID_CUTOFF_VERSION = '8.0.0';
