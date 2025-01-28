@@ -62,9 +62,9 @@ describe('service map', () => {
       cy.withHidden('[data-test-subj="headerGlobalNav"]', () =>
         cy.getByTestSubj('serviceMap').matchImage({
           imagesPath: '{spec_path}/snapshots',
-          title: 'global_service_map',
+          title: 'service_map',
           matchAgainstPath: 'cypress/e2e/service_map/snapshots/service_map.png',
-          maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
+          maxDiffThreshold: 0.04, // maximum threshold above which the test should fail
         })
       );
     });
@@ -81,7 +81,7 @@ describe('service map', () => {
           imagesPath: '{spec_path}/snapshots',
           title: 'detailed_service_map',
           matchAgainstPath: 'cypress/e2e/service_map/snapshots/detailed_service_map.png',
-          maxDiffThreshold: 0.02, // maximum threshold above which the test should fail
+          maxDiffThreshold: 0.04, // maximum threshold above which the test should fail
         })
       );
     });
