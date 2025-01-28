@@ -39,7 +39,7 @@ export function createCorePageObjects(page: ScoutPage, log: ToolingLog): PageObj
     discover: createLazyPageObject(DiscoverApp, page),
     filterBar: createLazyPageObject(FilterBar, page),
     maps: createLazyPageObject(MapsPage, page),
-    renderable: createLazyPageObject(RenderablePage, page, log),
+    renderable: createLazyPageObject(RenderablePage, page),
     // Add new page objects here
   };
 }

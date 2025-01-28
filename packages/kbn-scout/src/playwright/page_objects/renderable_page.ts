@@ -7,21 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { retryForSuccess } from '@kbn/ftr-common-functional-services';
-import { ToolingLog } from '@kbn/tooling-log';
 import { ScoutPage, expect } from '..';
 
 export class RenderablePage {
-  constructor(private readonly page: ScoutPage, private readonly log: ToolingLog) {}
+  constructor(private readonly page: ScoutPage) {}
 
-  async waitForRender(count: number = 1): Promise<void> {
-    await retryForSuccess(this.log, {
-      retryCount: 10,
-      timeout: 10_000,
-      methodName: 'waitForRender()',
-      block: async () => await renderWait(count, this.page),
-    });
-  }
   async waitForRenderPoll(count: number = 1): Promise<void> {
     await expect(async () => await renderWait(count, this.page)).toPass({
       timeout: 10_000,

@@ -28,6 +28,5 @@
     "@kbn/test-subj-selector",
     "@kbn/scout-info",
     "@kbn/scout-reporting",
-    "@kbn/ftr-common-functional-services"
   ]
 }
