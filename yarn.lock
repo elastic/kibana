@@ -4488,7 +4488,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-deprecations-server-mocks@link:packages/core/deprecations/core-deprecations-server-mocks":
+"@kbn/core-deprecations-server-mocks@link:src/core/packages/deprecations/server-mocks":
   version "0.0.0"
   uid ""
 
