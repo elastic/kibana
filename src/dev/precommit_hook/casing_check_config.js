@@ -130,7 +130,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
   ...KEBAB_CASE_DIRECTORY_GLOBS,
   'src/babel-*',
   'packages/*',
-  'packages/core/*/*',
+  'src/core/packages/*/*',
   'x-pack/packages/ai-infra/*',
   'packages/kbn-pm/src/utils/__fixtures__/*',
   'packages/kbn-check-prod-native-modules-cli/integration_tests/__fixtures__/*/node_modules/*',
