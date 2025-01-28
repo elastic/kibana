@@ -275,7 +275,7 @@ export const RemoteClusterReview = ({
           </h3>
         </EuiTitle>
         <EuiSpacer size="l" />
-        <EuiText size="s">
+        <EuiText size="s" data-test-subj="cloudCertDocumentation">
           <FormattedMessage
             id="xpack.remoteClusters.remoteClusterForm.cloud.cert.paragraph"
             defaultMessage="Before you proceed, ensure that trust is correctly configured between both clusters. If all requirements are not met, the remote cluster won't connect. {detailsLink}"
