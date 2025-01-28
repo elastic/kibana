@@ -16,7 +16,7 @@ export const javaDefinition: LanguageDefinition = {
     label: i18n.translate('xpack.serverlessSearch.languages.java.githubLabel', {
       defaultMessage: 'elasticsearch-java',
     }),
-    link: 'https://github.com/elastic/elasticsearch-java/tree/main/java-client',
+    link: 'https://github.com/elastic/elasticsearch-java',
   },
   // Code Snippets,
   installClient: `dependencies {
