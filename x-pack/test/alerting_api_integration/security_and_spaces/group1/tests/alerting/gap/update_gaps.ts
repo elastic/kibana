@@ -106,27 +106,29 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       // Wait for backfill to complete and verify all executions
       await waitForBackfillComplete(backfillId, space.id);
 
-      // Verify gap is now filled
-      const finalGapResponse = await supertest
-        .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          rule_id: ruleId,
-          start: gapStart,
-          end: gapEnd,
-        });
+      await retry.try(async () => {
+        // Verify gap is now filled
+        const finalGapResponse = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            rule_id: ruleId,
+            start: gapStart,
+            end: gapEnd,
+          });
 
-      expect(finalGapResponse.statusCode).to.eql(200);
-      expect(finalGapResponse.body.total).to.eql(1);
-      const finalGap = finalGapResponse.body.data[0];
-      expect(finalGap.status).to.eql('filled');
-      expect(finalGap.filled_duration_ms).to.eql(86400000);
-      expect(finalGap.unfilled_duration_ms).to.eql(0);
-      expect(finalGap.filled_intervals).to.have.length(1);
-      expect(finalGap.filled_intervals[0].gte).to.eql(gapStart);
-      expect(finalGap.filled_intervals[0].lte).to.eql(gapEnd);
-      expect(finalGap.unfilled_intervals).to.have.length(0);
-      expect(finalGap.in_progress_intervals).to.have.length(0);
+        expect(finalGapResponse.statusCode).to.eql(200);
+        expect(finalGapResponse.body.total).to.eql(1);
+        const finalGap = finalGapResponse.body.data[0];
+        expect(finalGap.status).to.eql('filled');
+        expect(finalGap.filled_duration_ms).to.eql(86400000);
+        expect(finalGap.unfilled_duration_ms).to.eql(0);
+        expect(finalGap.filled_intervals).to.have.length(1);
+        expect(finalGap.filled_intervals[0].gte).to.eql(gapStart);
+        expect(finalGap.filled_intervals[0].lte).to.eql(gapEnd);
+        expect(finalGap.unfilled_intervals).to.have.length(0);
+        expect(finalGap.in_progress_intervals).to.have.length(0);
+      });
     });
 
     it('should mark intervals as in_progress immediately after scheduling backfill', async () => {
@@ -264,29 +266,31 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
       // Wait for backfill to complete
       await waitForBackfillComplete(backfillId, space.id);
 
-      // Verify gap is partially filled
-      const finalGapResponse = await supertest
-        .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          rule_id: ruleId,
-          start: gapStart,
-          end: gapEnd,
-        });
+      await retry.try(async () => {
+        // Verify gap is partially filled
+        const finalGapResponse = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            rule_id: ruleId,
+            start: gapStart,
+            end: gapEnd,
+          });
 
-      expect(finalGapResponse.statusCode).to.eql(200);
-      expect(finalGapResponse.body.total).to.eql(1);
-      const gap = finalGapResponse.body.data[0];
-      expect(gap.status).to.eql('partially_filled');
-      expect(gap.filled_duration_ms).to.eql(12 * 60 * 60 * 1000);
-      expect(gap.filled_intervals[0].gte).to.eql(partialStart);
-      expect(gap.filled_intervals[0].lte).to.eql(gapEnd);
-      expect(gap.unfilled_intervals[0].gte).to.eql(gapStart);
-      expect(gap.unfilled_intervals[0].lte).to.eql(partialStart);
-      expect(gap.unfilled_duration_ms).to.be.eql(12 * 60 * 60 * 1000);
-      expect(gap.unfilled_intervals).to.have.length(1);
-      expect(gap.filled_intervals).to.have.length(1);
-      expect(gap.in_progress_intervals).to.have.length(0);
+        expect(finalGapResponse.statusCode).to.eql(200);
+        expect(finalGapResponse.body.total).to.eql(1);
+        const gap = finalGapResponse.body.data[0];
+        expect(gap.status).to.eql('partially_filled');
+        expect(gap.filled_duration_ms).to.eql(12 * 60 * 60 * 1000);
+        expect(gap.filled_intervals[0].gte).to.eql(partialStart);
+        expect(gap.filled_intervals[0].lte).to.eql(gapEnd);
+        expect(gap.unfilled_intervals[0].gte).to.eql(gapStart);
+        expect(gap.unfilled_intervals[0].lte).to.eql(partialStart);
+        expect(gap.unfilled_duration_ms).to.be.eql(12 * 60 * 60 * 1000);
+        expect(gap.unfilled_intervals).to.have.length(1);
+        expect(gap.filled_intervals).to.have.length(1);
+        expect(gap.in_progress_intervals).to.have.length(0);
+      });
     });
 
     it('should fill gap with multiple backfills', async () => {
@@ -344,27 +348,29 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         )
       );
 
-      // Verify gap is completely filled
-      const finalGapResponse = await supertest
-        .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          rule_id: ruleId,
-          start: fiveDaysGapStart.toISOString(),
-          end: fiveDaysGapEnd,
-        });
+      await retry.try(async () => {
+        // Verify gap is completely filled
+        const finalGapResponse = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            rule_id: ruleId,
+            start: fiveDaysGapStart.toISOString(),
+            end: fiveDaysGapEnd,
+          });
 
-      expect(finalGapResponse.statusCode).to.eql(200);
-      expect(finalGapResponse.body.total).to.eql(1);
-      const finalGap = finalGapResponse.body.data[0];
-      expect(finalGap.status).to.eql('filled');
-      expect(finalGap.filled_duration_ms).to.eql(432000000);
-      expect(finalGap.unfilled_duration_ms).to.eql(0);
-      expect(finalGap.filled_intervals).to.have.length(1);
-      expect(finalGap.filled_intervals[0].gte).to.eql(fiveDaysGapStart.toISOString());
-      expect(finalGap.filled_intervals[0].lte).to.eql(fiveDaysGapEnd);
-      expect(finalGap.unfilled_intervals).to.have.length(0);
-      expect(finalGap.in_progress_intervals).to.have.length(0);
+        expect(finalGapResponse.statusCode).to.eql(200);
+        expect(finalGapResponse.body.total).to.eql(1);
+        const finalGap = finalGapResponse.body.data[0];
+        expect(finalGap.status).to.eql('filled');
+        expect(finalGap.filled_duration_ms).to.eql(432000000);
+        expect(finalGap.unfilled_duration_ms).to.eql(0);
+        expect(finalGap.filled_intervals).to.have.length(1);
+        expect(finalGap.filled_intervals[0].gte).to.eql(fiveDaysGapStart.toISOString());
+        expect(finalGap.filled_intervals[0].lte).to.eql(fiveDaysGapEnd);
+        expect(finalGap.unfilled_intervals).to.have.length(0);
+        expect(finalGap.in_progress_intervals).to.have.length(0);
+      });
     });
 
     it('should update gap status after backfill is deleted', async () => {
@@ -429,25 +435,27 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
         .set('kbn-xsrf', 'foo')
         .expect(204);
 
-      // Verify gap status is updated
-      const finalGapResponse = await supertest
-        .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          rule_id: ruleId,
-          start: gapStart,
-          end: gapEnd,
-        });
+      await retry.try(async () => {
+        // Verify gap status is updated
+        const finalGapResponse = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            rule_id: ruleId,
+            start: gapStart,
+            end: gapEnd,
+          });
 
-      expect(finalGapResponse.statusCode).to.eql(200);
-      expect(finalGapResponse.body.total).to.eql(1);
-      const gap = finalGapResponse.body.data[0];
-      expect(gap.status).to.eql('unfilled');
-      expect(gap.in_progress_intervals).to.have.length(0);
-      expect(gap.unfilled_intervals).to.have.length(1);
-      expect(gap.unfilled_intervals[0].gte).to.eql(gapStart);
-      expect(gap.unfilled_intervals[0].lte).to.eql(gapEnd);
-      expect(gap.filled_intervals).to.have.length(0);
+        expect(finalGapResponse.statusCode).to.eql(200);
+        expect(finalGapResponse.body.total).to.eql(1);
+        const gap = finalGapResponse.body.data[0];
+        expect(gap.status).to.eql('unfilled');
+        expect(gap.in_progress_intervals).to.have.length(0);
+        expect(gap.unfilled_intervals).to.have.length(1);
+        expect(gap.unfilled_intervals[0].gte).to.eql(gapStart);
+        expect(gap.unfilled_intervals[0].lte).to.eql(gapEnd);
+        expect(gap.filled_intervals).to.have.length(0);
+      });
     });
 
     it('should handle task failures', async () => {
@@ -527,25 +535,27 @@ export default function updateGapsTests({ getService }: FtrProviderContext) {
 
       await waitForBackfillComplete(backfillId, space.id);
 
-      // Verify gap status is updated
-      const finalGapResponse = await supertest
-        .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
-        .set('kbn-xsrf', 'foo')
-        .send({
-          rule_id: ruleId,
-          start: gapStart,
-          end: gapEnd,
-        });
+      await retry.try(async () => {
+        // Verify gap status is updated
+        const finalGapResponse = await supertest
+          .post(`${getUrlPrefix(space.id)}/internal/alerting/rules/gaps/_find`)
+          .set('kbn-xsrf', 'foo')
+          .send({
+            rule_id: ruleId,
+            start: gapStart,
+            end: gapEnd,
+          });
 
-      expect(finalGapResponse.statusCode).to.eql(200);
-      expect(finalGapResponse.body.total).to.eql(1);
-      const gap = finalGapResponse.body.data[0];
-      expect(gap.status).to.eql('unfilled');
-      expect(gap.in_progress_intervals).to.have.length(0);
-      expect(gap.unfilled_intervals).to.have.length(1);
-      expect(gap.unfilled_intervals[0].gte).to.eql(gapStart);
-      expect(gap.unfilled_intervals[0].lte).to.eql(gapEnd);
-      expect(gap.filled_intervals).to.have.length(0);
+        expect(finalGapResponse.statusCode).to.eql(200);
+        expect(finalGapResponse.body.total).to.eql(1);
+        const gap = finalGapResponse.body.data[0];
+        expect(gap.status).to.eql('unfilled');
+        expect(gap.in_progress_intervals).to.have.length(0);
+        expect(gap.unfilled_intervals).to.have.length(1);
+        expect(gap.unfilled_intervals[0].gte).to.eql(gapStart);
+        expect(gap.unfilled_intervals[0].lte).to.eql(gapEnd);
+        expect(gap.filled_intervals).to.have.length(0);
+      });
     });
   });
 }

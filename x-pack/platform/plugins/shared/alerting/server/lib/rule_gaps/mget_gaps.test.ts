@@ -46,10 +46,7 @@ describe('mgetGaps', () => {
     const mockDocs = [{ _id: 'test-gap-id', _index: 'test-index' }];
 
     mockEventLogClient.findEventsByDocumentIds.mockResolvedValue({
-      total: 1,
       data: [createMockGapEvent()],
-      page: 1,
-      per_page: 1,
     });
 
     await mgetGaps({
@@ -65,10 +62,7 @@ describe('mgetGaps', () => {
 
   it('should transform response data to Gap objects', async () => {
     const mockResponse = {
-      total: 1,
       data: [createMockGapEvent()],
-      page: 1,
-      per_page: 1,
     };
 
     mockEventLogClient.findEventsByDocumentIds.mockResolvedValue(mockResponse);
@@ -94,10 +88,7 @@ describe('mgetGaps', () => {
 
   it('should return empty array when gaps are not found', async () => {
     mockEventLogClient.findEventsByDocumentIds.mockResolvedValue({
-      total: 0,
       data: [],
-      page: 1,
-      per_page: 1,
     });
 
     const result = await mgetGaps({
@@ -118,10 +109,7 @@ describe('mgetGaps', () => {
     ];
 
     mockEventLogClient.findEventsByDocumentIds.mockResolvedValue({
-      total: 2,
       data: [createMockGapEvent(), { ...createMockGapEvent(), _id: 'test-gap-id-2' }],
-      page: 1,
-      per_page: 2,
     });
 
     const result = await mgetGaps({
