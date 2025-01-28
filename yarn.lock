@@ -4416,7 +4416,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-server-mocks@link:packages/core/capabilities/core-capabilities-server-mocks":
+"@kbn/core-capabilities-server-mocks@link:src/core/packages/capabilities/server-mocks":
   version "0.0.0"
   uid ""
 
