@@ -167,10 +167,44 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             }),
           },
           {
-            link: 'management',
+            id: 'stack_management',
             title: i18n.translate('xpack.serverlessSearch.nav.mngt', {
               defaultMessage: 'Management',
             }),
+            spaceBefore: null,
+            renderAs: 'panelOpener',
+            children: [
+              {
+                title: 'Data',
+                children: [{ link: 'management:dataViews' }, { link: 'management:data_quality' }],
+              },
+              {
+                title: 'Access',
+                children: [{ link: 'management:api_keys' }, { cloudLink: 'userAndRoles' }],
+              },
+              {
+                title: 'Alerts and insights',
+                children: [
+                  { link: 'management:triggersActions' },
+                  { link: 'management:triggersActionsConnectors' },
+                ],
+              },
+              {
+                title: 'Content',
+                children: [
+                  { link: 'management:objects' },
+                  { link: 'management:filesManagement' },
+                  { link: 'management:tags' },
+                ],
+              },
+              {
+                title: 'Other',
+                children: [
+                  { link: 'management:settings' },
+                  { link: 'management:securityAiAssistantManagement' },
+                ],
+              },
+            ],
           },
           {
             id: 'cloudLinkDeployment',
