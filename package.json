@@ -1374,7 +1374,7 @@
     "@kbn/core-base-server-mocks": "link:src/core/packages/base/server-mocks",
     "@kbn/core-capabilities-browser-mocks": "link:src/core/packages/capabilities/browser-mocks",
     "@kbn/core-capabilities-server-mocks": "link:src/core/packages/capabilities/server-mocks",
-    "@kbn/core-chrome-browser-mocks": "link:packages/core/chrome/core-chrome-browser-mocks",
+    "@kbn/core-chrome-browser-mocks": "link:src/core/packages/chrome/browser-mocks",
     "@kbn/core-custom-branding-browser-mocks": "link:src/core/packages/custom-branding/browser-mocks",
     "@kbn/core-custom-branding-server-mocks": "link:src/core/packages/custom-branding/server-mocks",
     "@kbn/core-deprecations-browser-mocks": "link:packages/core/deprecations/core-deprecations-browser-mocks",

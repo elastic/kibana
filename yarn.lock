@@ -4428,7 +4428,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-chrome-browser-mocks@link:packages/core/chrome/core-chrome-browser-mocks":
+"@kbn/core-chrome-browser-mocks@link:src/core/packages/chrome/browser-mocks":
   version "0.0.0"
   uid ""
 
