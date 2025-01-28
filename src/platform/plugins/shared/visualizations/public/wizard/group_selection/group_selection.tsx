@@ -8,7 +8,7 @@
  */
 
 import { FormattedMessage } from '@kbn/i18n-react';
-import React, { ReactNode, useCallback, useEffect, useMemo, useState } from 'react';
+import React, { ReactNode, useCallback, useMemo } from 'react';
 import { orderBy } from 'lodash';
 import {
   EuiFlexGroup,

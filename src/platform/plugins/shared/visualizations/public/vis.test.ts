@@ -8,35 +8,15 @@
  */
 
 import { Vis } from './vis';
+import { BaseVisType, VisTypeDefinition } from './vis_types';
 
 jest.mock('./services', () => {
-  class MockVisualizationController {
-    constructor() {}
-
-    render(): Promise<void> {
-      return new Promise((resolve) => {
-        resolve();
-      });
-    }
-
-    destroy() {}
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-var-requires
-  const { BaseVisType } = require('./vis_types/base_vis_type');
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const { SearchSource } = require('@kbn/data-plugin/common/search/search_source');
   // eslint-disable-next-line @typescript-eslint/no-var-requires
   const stubIndexPattern = require('@kbn/data-plugin/common/stubs');
-  const visType = new BaseVisType({
-    name: 'pie',
-    title: 'pie',
-    icon: 'pie-icon',
-    visualization: MockVisualizationController,
-  });
 
   return {
-    getTypes: () => ({ get: () => visType }),
     getAggs: () => ({
       createAggConfigs: (indexPattern: any, cfg: any) => ({
         aggs: cfg.map((aggConfig: any) => ({ ...aggConfig, serialize: () => aggConfig })),
@@ -71,7 +51,11 @@ describe('Vis Class', function () {
   };
 
   beforeEach(async function () {
-    vis = new Vis('test', stateFixture as any);
+    vis = new Vis(new BaseVisType({
+      name: 'pie',
+      title: 'pie',
+      icon: 'pie-icon',
+    } as unknown as VisTypeDefinition<object>), stateFixture as any);
     await vis.setState(stateFixture as any);
   });
 
