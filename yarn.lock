@@ -4380,7 +4380,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-base-browser-mocks@link:packages/core/base/core-base-browser-mocks":
+"@kbn/core-base-browser-mocks@link:src/core/packages/base/browser-mocks":
   version "0.0.0"
   uid ""
 
