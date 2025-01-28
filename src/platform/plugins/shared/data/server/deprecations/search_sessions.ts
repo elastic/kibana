@@ -66,7 +66,7 @@ export const createSearchSessionsDeprecationsConfig: (
             }),
             i18n.translate('data.deprecations.searchSessions.manualStepTwoMessage', {
               defaultMessage:
-                'Alternatively, to continue using search sessions, open the kibana.yml config file and add the following: "data.search.sessions.enabled: true"',
+                'Alternatively, to continue using search sessions until 9.1, open the kibana.yml config file and add the following: "data.search.sessions.enabled: true"',
             }),
           ],
         },
