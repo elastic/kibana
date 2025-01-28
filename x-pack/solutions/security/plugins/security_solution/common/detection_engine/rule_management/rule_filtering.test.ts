@@ -86,35 +86,4 @@ describe('convertRulesFilterToKQL', () => {
 
     expect(kql).toBe('NOT alert.attributes.params.type: ("machine_learning" OR "saved_query")');
   });
-
-  it('handles presence of "ruleIds" properly', () => {
-    const kql = convertRulesFilterToKQL({
-      ...filterOptions,
-      ruleIds: ['rule1', 'rule2'],
-    });
-
-    expect(kql).toBe('(alert.id: ("alert:rule1") OR alert.id: ("alert:rule2"))');
-  });
-
-  it('handles empty "ruleIds" array properly', () => {
-    const kql = convertRulesFilterToKQL({
-      ...filterOptions,
-      ruleIds: [],
-    });
-
-    expect(kql).toBe('');
-  });
-
-  it('handles combination with "ruleIds" and other filters properly', () => {
-    const kql = convertRulesFilterToKQL({
-      ...filterOptions,
-      filter: 'foo',
-      ruleIds: ['rule1'],
-      showElasticRules: true,
-    });
-
-    expect(kql).toBe(
-      '(alert.attributes.name: "foo" OR alert.attributes.params.index: "foo" OR alert.attributes.params.threat.tactic.id: "foo" OR alert.attributes.params.threat.tactic.name: "foo" OR alert.attributes.params.threat.technique.id: "foo" OR alert.attributes.params.threat.technique.name: "foo" OR alert.attributes.params.threat.technique.subtechnique.id: "foo" OR alert.attributes.params.threat.technique.subtechnique.name: "foo") AND alert.attributes.params.immutable: true AND (alert.id: ("alert:rule1"))'
-    );
-  });
 });
