@@ -31,7 +31,7 @@
     "xpack.customBranding": "platform/plugins/private/custom_branding",
     "xpack.dashboard": "platform/plugins/shared/dashboard_enhanced",
     "xpack.dataQuality": "platform/plugins/shared/data_quality",
-    "xpack.datasetQuality": "platform/plugins/shared/observability_solution/dataset_quality",
+    "xpack.datasetQuality": "platform/plugins/shared/dataset_quality",
     "xpack.dataUsage": "platform/plugins/private/data_usage",
     "xpack.discover": "platform/plugins/private/discover_enhanced",
     "xpack.crossClusterReplication": "platform/plugins/private/cross_cluster_replication",
@@ -61,9 +61,9 @@
     "xpack.indexLifecycleMgmt": "platform/plugins/private/index_lifecycle_management",
     "xpack.inferenceEndpointUICommon": "platform/packages/shared/kbn-inference-endpoint-ui-common",
     "xpack.infra": "solutions/observability/plugins/infra",
-    "xpack.logsDataAccess": "platform/plugins/shared/observability_solution/logs_data_access",
+    "xpack.logsDataAccess": "platform/plugins/shared/logs_data_access",
     "xpack.logsExplorer": "solutions/observability/plugins/logs_explorer",
-    "xpack.logsShared": "platform/plugins/shared/observability_solution/logs_shared",
+    "xpack.logsShared": "platform/plugins/shared/logs_shared",
     "xpack.fleet": "platform/plugins/shared/fleet",
     "xpack.ingestPipelines": "platform/plugins/shared/ingest_pipelines",
     "xpack.integrationAssistant": "platform/plugins/shared/integration_assistant",
@@ -101,7 +101,7 @@
     ],
     "xpack.observability": "solutions/observability/plugins/observability",
     "xpack.observabilityAiAssistant": [
-      "platform/plugins/shared/observability_solution/observability_ai_assistant",
+      "platform/plugins/shared/observability_ai_assistant",
       "solutions/observability/plugins/observability_ai_assistant_app"
     ],
     "xpack.observabilityAiAssistantManagement": "solutions/observability/plugins/observability_ai_assistant_management",
@@ -124,7 +124,7 @@
     ],
     "xpack.runtimeFields": "platform/plugins/private/runtime_fields",
     "xpack.screenshotting": "platform/plugins/shared/screenshotting",
-    "xpack.searchSharedUI": "solutions/search/packages/search/shared_ui",
+    "xpack.searchSharedUI": "solutions/search/packages/shared_ui",
     "xpack.searchHomepage": "solutions/search/plugins/search_homepage",
     "xpack.searchIndices": "solutions/search/plugins/search_indices",
     "xpack.searchNavigation": "solutions/search/plugins/search_solution/search_navigation",
@@ -163,7 +163,8 @@
     "xpack.synthetics": ["solutions/observability/plugins/synthetics"],
     "xpack.ux": ["solutions/observability/plugins/ux"],
     "xpack.urlDrilldown": "platform/plugins/private/drilldowns/url_drilldown",
-    "xpack.watcher": "platform/plugins/private/watcher"
+    "xpack.watcher": "platform/plugins/private/watcher",
+    "xpack.eventStacktrace": "platform/packages/shared/kbn-event-stacktrace"
   },
   "exclude": ["examples"],
   "translations": [

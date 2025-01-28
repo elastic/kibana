@@ -12,6 +12,7 @@ import type {
   SavedObjectsClientContract,
 } from '@kbn/core/server';
 import {
+  docLinksServiceMock,
   elasticsearchServiceMock,
   httpServerMock,
   httpServiceMock,
@@ -88,6 +89,7 @@ describe('test endpoint routes', () => {
     perPage: 1,
   };
   const agentGenerator = new FleetAgentGenerator('seed');
+  const docLinks = docLinksServiceMock.createSetupContract();
 
   beforeEach(() => {
     mockScopedClient = elasticsearchServiceMock.createScopedClusterClient();
@@ -120,10 +122,14 @@ describe('test endpoint routes', () => {
     mockAgentPolicyService = startContract.fleetStartServices
       .agentPolicyService as jest.Mocked<AgentPolicyServiceInterface>;
 
-    registerEndpointRoutes(routerMock, {
-      ...createMockEndpointAppContext(),
-      service: endpointAppContextService,
-    });
+    registerEndpointRoutes(
+      routerMock,
+      {
+        ...createMockEndpointAppContext(),
+        service: endpointAppContextService,
+      },
+      docLinks
+    );
   });
 
   afterEach(() => endpointAppContextService.stop());
