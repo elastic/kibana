@@ -5032,7 +5032,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-migration-server-mocks@link:packages/core/saved-objects/core-saved-objects-migration-server-mocks":
+"@kbn/core-saved-objects-migration-server-mocks@link:src/core/packages/saved-objects/migration-server-mocks":
   version "0.0.0"
   uid ""
 
