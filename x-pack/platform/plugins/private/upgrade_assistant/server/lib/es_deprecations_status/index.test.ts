@@ -126,9 +126,15 @@ describe('getESUpgradeStatus', () => {
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
-
-    expect(upgradeStatus.deprecations).toHaveLength(0);
-    expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
+    const {
+      totalCriticalDeprecations,
+      migrationsDeprecations,
+      totalCriticalHealthIssues,
+      enrichedHealthIndicators,
+    } = upgradeStatus;
+    expect([...migrationsDeprecations, ...enrichedHealthIndicators]).toHaveLength(0);
+    expect(totalCriticalDeprecations).toBe(0);
+    expect(totalCriticalHealthIssues).toBe(0);
   });
 
   it('filters out ml_settings if featureSet.mlSnapshots is set to false', async () => {
@@ -140,7 +146,10 @@ describe('getESUpgradeStatus', () => {
     esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
 
     const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
-    expect(enabledUpgradeStatus.deprecations).toHaveLength(2);
+    expect([
+      ...enabledUpgradeStatus.migrationsDeprecations,
+      ...enabledUpgradeStatus.enrichedHealthIndicators,
+    ]).toHaveLength(2);
     expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
 
     const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
@@ -148,7 +157,10 @@ describe('getESUpgradeStatus', () => {
       mlSnapshots: false,
     });
 
-    expect(disabledUpgradeStatus.deprecations).toHaveLength(0);
+    expect([
+      ...disabledUpgradeStatus.migrationsDeprecations,
+      ...disabledUpgradeStatus.enrichedHealthIndicators,
+    ]).toHaveLength(0);
     expect(disabledUpgradeStatus.totalCriticalDeprecations).toBe(0);
   });
 
@@ -160,7 +172,10 @@ describe('getESUpgradeStatus', () => {
     esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
 
     const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });
-    expect(enabledUpgradeStatus.deprecations).toHaveLength(1);
+    expect([
+      ...enabledUpgradeStatus.migrationsDeprecations,
+      ...enabledUpgradeStatus.enrichedHealthIndicators,
+    ]).toHaveLength(1);
     expect(enabledUpgradeStatus.totalCriticalDeprecations).toBe(1);
 
     const disabledUpgradeStatus = await getESUpgradeStatus(esClient, {
@@ -168,7 +183,10 @@ describe('getESUpgradeStatus', () => {
       migrateDataStreams: false,
     });
 
-    expect(disabledUpgradeStatus.deprecations).toHaveLength(0);
+    expect([
+      ...disabledUpgradeStatus.migrationsDeprecations,
+      ...disabledUpgradeStatus.enrichedHealthIndicators,
+    ]).toHaveLength(0);
     expect(disabledUpgradeStatus.totalCriticalDeprecations).toBe(0);
   });
 
@@ -203,7 +221,10 @@ describe('getESUpgradeStatus', () => {
       reindexCorrectiveActions: false,
     });
 
-    expect(upgradeStatus.deprecations).toHaveLength(0);
+    expect([
+      ...upgradeStatus.migrationsDeprecations,
+      ...upgradeStatus.enrichedHealthIndicators,
+    ]).toHaveLength(0);
     expect(upgradeStatus.totalCriticalDeprecations).toBe(0);
   });
 
@@ -235,9 +256,11 @@ describe('getESUpgradeStatus', () => {
     });
 
     const upgradeStatus = await getESUpgradeStatus(esClient, featureSet);
-
-    expect(upgradeStatus.totalCriticalDeprecations).toBe(2);
-    expect(upgradeStatus.deprecations).toMatchInlineSnapshot(`
+    expect(upgradeStatus.totalCriticalHealthIssues + upgradeStatus.totalCriticalDeprecations).toBe(
+      2
+    );
+    expect([...upgradeStatus.enrichedHealthIndicators, ...upgradeStatus.migrationsDeprecations])
+      .toMatchInlineSnapshot(`
       Array [
         Object {
           "correctiveAction": Object {

@@ -56,7 +56,7 @@ A pre-aggregated document where `_doc_count` is the number of transaction events
 
 You can find all the APM transaction fields [here](https://www.elastic.co/guide/en/apm/server/current/exported-fields-apm-transaction.html).
 
-The decision to use aggregated transactions or not is determined in [`getSearchTransactionsEvents`](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/solutions/observability/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L53-L79) and then used to specify [the transaction index](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/solutions/observability/plugins/apm/server/lib/suggestions/get_suggestions.ts#L30-L32) and [the latency field](https://github.com/elastic/kibana/blob/a2ac439f56313b7a3fc4708f54a4deebf2615136/x-pack/solutions/observability/plugins/apm/server/lib/alerts/chart_preview/get_transaction_duration.ts#L62-L65)
+The decision to use aggregated transactions or not is determined in [`getSearchTransactionsEvents`](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L53-L79) and then used to specify [the transaction index](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/suggestions/get_suggestions.ts#L30-L32) and [the latency field](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/alerts/chart_preview/get_transaction_duration.ts#L62-L65)
 
 ### Latency
 
@@ -101,7 +101,7 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 }
 ```
 
-Please note: `metricset.name: transaction` was only recently introduced. To retain backwards compatability we still use the old filter `{ "exists": { "field": "transaction.duration.histogram" }}` when filtering for aggregated transactions ([see example](https://github.com/elastic/kibana/blob/2c8686770e64b82cf8e1db5a22327d40d5f8ce45/x-pack/solutions/observability/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L89-L95)).
+Please note: `metricset.name: transaction` was only recently introduced. To retain backwards compatability we still use the old filter `{ "exists": { "field": "transaction.duration.histogram" }}` when filtering for aggregated transactions ([see example](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/helpers/aggregated_transactions/index.ts#L89-L95)).
 
 ### Throughput
 
@@ -291,7 +291,7 @@ System metrics are captured periodically (every 60 seconds by default). You can 
 
 ![image](https://user-images.githubusercontent.com/209966/135990500-f85bd8d9-b5a5-4b7c-b9e1-0759eefb8a29.png)
 
-Used in: [Metrics section](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/solutions/observability/plugins/apm/server/lib/metrics/by_agent/shared/cpu/index.ts#L83)
+Used in: [Metrics section](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/metrics/by_agent/shared/cpu/index.ts#L83)
 
 Noteworthy fields: `system.cpu.total.norm.pct`, `system.process.cpu.total.norm.pct`
 
@@ -377,7 +377,7 @@ GET apm-*-metric-*,metrics-apm*/_search?terminate_after=1000
 }
 ```
 
-The above example is overly simplified. In reality [we do a bit more](https://github.com/elastic/kibana/blob/fe9b5332e157fd456f81aecfd4ffa78d9e511a66/x-pack/solutions/observability/plugins/apm/server/lib/metrics/by_agent/shared/memory/index.ts#L51-L71) to properly calculate memory usage inside containers. Please note that an [Exists Query](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html) is used in the filter context in the query to ensure that the memory fields exist.
+The above example is overly simplified. In reality [we do a bit more](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/metrics/by_agent/shared/memory/index.ts#L51-L71) to properly calculate memory usage inside containers. Please note that an [Exists Query](https://www.elastic.co/guide/en/elasticsearch/reference/current/query-dsl-exists-query.html) is used in the filter context in the query to ensure that the memory fields exist.
 
 # Span breakdown metrics
 
@@ -387,7 +387,7 @@ Span breakdown metrics are used to power the "Time spent by span type" graph. Ag
 
 ![image](https://user-images.githubusercontent.com/209966/135990865-9077ae3e-a7a4-4b5d-bdce-41dc832689ea.png)
 
-Used in: ["Time spent by span type" chart](https://github.com/elastic/kibana/blob/723370ab23573e50b3524a62c6b9998f2042423d/x-pack/solutions/observability/plugins/apm/server/lib/transactions/breakdown/index.ts#L48-L87)
+Used in: ["Time spent by span type" chart](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/transactions/breakdown/index.ts#L48-L87)
 
 Noteworthy fields: `transaction.name`, `transaction.type`, `span.type`, `span.subtype`, `span.self_time.*`
 
@@ -447,7 +447,7 @@ These metrics measure the count and total duration of requests from one service 
 
 ![image](https://user-images.githubusercontent.com/209966/135990117-170070da-2fc5-4014-a597-0dda0970854c.png)
 
-Used in: [Dependencies (latency)](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/solutions/observability/plugins/apm/server/lib/backends/get_latency_charts_for_backend.ts#L68-L79), [Dependencies (throughput)](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/solutions/observability/plugins/apm/server/lib/backends/get_throughput_charts_for_backend.ts#L67-L74) and [Service Map](https://github.com/elastic/kibana/blob/00bb59713ed115343eb70d4e39059476edafbade/x-pack/solutions/observability/plugins/apm/server/lib/service_map/get_service_map_backend_node_info.ts#L57-L67)
+Used in: [Dependencies (latency)](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/backends/get_latency_charts_for_backend.ts#L68-L79), [Dependencies (throughput)](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/backends/get_throughput_charts_for_backend.ts#L67-L74) and [Service Map](https://github.com/elastic/kibana/blob/main/x-pack/solutions/observability/plugins/apm/server/lib/service_map/get_service_map_backend_node_info.ts#L57-L67)
 
 Noteworthy fields: `span.destination.service.*`
 
