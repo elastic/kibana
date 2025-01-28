@@ -291,6 +291,7 @@ export const RemoteClusterReview = ({
                 </EuiLink>
               ),
             }}
+            data-test-subj="cloudCertDocumentation"
           />
         </EuiText>
       </>
