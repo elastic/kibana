@@ -112,7 +112,8 @@ export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; ki
     },
 
     async updateAlert({ id, threshold }: AlertType) {
-      await this.fillByTestSubj('ruleNameInput', id);
+      await page.click(byTestId('ruleFormStep-details'));
+      await this.fillByTestSubj('ruleDetailsNameInput', id);
       await this.selectAlertThreshold(threshold);
     },
 
