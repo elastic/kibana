@@ -51,7 +51,7 @@ export interface IEventLogService {
 }
 
 export interface IEventLogClientService {
-  getClient(request: KibanaRequest | string): IEventLogClient;
+  getClient(request: KibanaRequest): IEventLogClient;
 }
 
 export interface IEventLogClient {
