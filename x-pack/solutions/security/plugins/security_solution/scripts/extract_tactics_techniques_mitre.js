@@ -85,7 +85,7 @@ const getIdReference = (references) => {
   if (ref != null) {
     return {
       id: ref.external_id,
-      reference: `${ref.url}/`,
+      reference: ref.url,
     };
   } else {
     return { id: '', reference: '' };
