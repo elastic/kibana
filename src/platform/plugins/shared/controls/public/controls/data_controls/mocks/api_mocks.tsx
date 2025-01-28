@@ -19,6 +19,7 @@ import type {
   OptionsListSortingType,
   OptionsListSuggestions,
 } from '../../../../common/options_list';
+import { MIN_OPTIONS_LIST_REQUEST_SIZE } from '../options_list_control/constants';
 
 export const getOptionsListMocks = () => {
   const selectedOptions$ = new BehaviorSubject<OptionsListSelection[] | undefined>(undefined);
@@ -38,6 +39,7 @@ export const getOptionsListMocks = () => {
       fieldFormatter: new BehaviorSubject((value: string | number) => String(value)),
       makeSelection: jest.fn(),
       setExclude: (next: boolean | undefined) => exclude$.next(next),
+      loadMoreSubject: new BehaviorSubject<null>(null),
     },
     stateManager: {
       searchString: new BehaviorSubject<string>(''),
@@ -48,6 +50,7 @@ export const getOptionsListMocks = () => {
       sort: new BehaviorSubject<OptionsListSortingType | undefined>(undefined),
       selectedOptions: selectedOptions$ as PublishingSubject<OptionsListSelection[] | undefined>,
       searchTechnique: new BehaviorSubject<OptionsListSearchTechnique | undefined>(undefined),
+      requestSize: new BehaviorSubject<number>(MIN_OPTIONS_LIST_REQUEST_SIZE),
     },
     displaySettings: {} as OptionsListDisplaySettings,
     // setSelectedOptions and setExistsSelected are not exposed via API because
