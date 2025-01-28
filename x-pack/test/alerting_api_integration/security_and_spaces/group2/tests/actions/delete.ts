@@ -23,7 +23,7 @@ export default function deleteConnectorTests({ getService }: FtrProviderContext)
 
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
-  describe.only('delete', () => {
+  describe('delete', () => {
     const objectRemover = new ObjectRemover(supertest);
 
     before(async () => {
