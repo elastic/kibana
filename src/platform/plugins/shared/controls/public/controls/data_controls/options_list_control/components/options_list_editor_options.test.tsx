@@ -52,16 +52,27 @@ describe('Options list sorting button', () => {
     return component;
   };
 
-  test('run past timeout', async () => {
-    const component = mountComponent({
-      initialState: getMockedState({ runPastTimeout: false }),
-      field: { type: 'string' } as DataViewField,
+  describe('run past timeout', () => {
+    test('can toggle the setting', async () => {
+      const component = mountComponent({
+        initialState: getMockedState({ runPastTimeout: false }),
+        field: { type: 'string' } as DataViewField,
+      });
+      const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
+      expect(toggle.getAttribute('aria-checked')).toBe('false');
+      await userEvent.click(toggle);
+      expect(updateState).toBeCalledWith({ runPastTimeout: true });
+      expect(toggle.getAttribute('aria-checked')).toBe('true');
     });
-    const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
-    expect(toggle.getAttribute('aria-checked')).toBe('false');
-    await userEvent.click(toggle);
-    expect(updateState).toBeCalledWith({ runPastTimeout: true });
-    expect(toggle.getAttribute('aria-checked')).toBe('true');
+
+    test('setting is persisted', async () => {
+      const component = mountComponent({
+        initialState: getMockedState({ runPastTimeout: true }),
+        field: { type: 'string' } as DataViewField,
+      });
+      const toggle = component.getByTestId('optionsListControl__runPastTimeoutAdditionalSetting');
+      expect(toggle.getAttribute('aria-checked')).toBe('true');
+    });
   });
 
   test('selection options', async () => {
