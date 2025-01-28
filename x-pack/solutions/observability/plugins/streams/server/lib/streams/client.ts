@@ -343,7 +343,7 @@ export class StreamsClient {
       if (isDslLifecycle(definition.ingest.lifecycle)) {
         const dataStream = await this.getDataStream(definition.name);
         const effectiveLifecycle = getDataStreamLifecycle(dataStream);
-        if (isIlmLifecycle(effectiveLifecycle)) {
+        if (isIlmLifecycle(effectiveLifecycle as IngestStreamLifecycle)) {
           throw new MalformedStreamError(
             'Cannot use DSL for unwired stream as it is currently using ILM'
           );

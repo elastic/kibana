@@ -37,9 +37,7 @@ export type IngestStreamLifecycle =
 export type WiredIngestStreamEffectiveLifecycle = IngestStreamLifecycle & { from: string };
 
 export type UnwiredIngestStreamEffectiveLifecycle =
-  | IngestStreamLifecycleDSL
-  | IngestStreamLifecycleILM
-  | IngestStreamLifecycleInherit
+  | IngestStreamLifecycle
   | IngestStreamLifecycleDisabled;
 
 const dslLifecycleSchema = z.object({
@@ -56,12 +54,7 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.un
 ]);
 
 export const unwiredIngestStreamEffectiveLifecycleSchema: z.Schema<UnwiredIngestStreamEffectiveLifecycle> =
-  z.union([
-    dslLifecycleSchema,
-    ilmLifecycleSchema,
-    inheritLifecycleSchema,
-    disabledLifecycleSchema,
-  ]);
+  z.union([ingestStreamLifecycleSchema, disabledLifecycleSchema]);
 
 export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
   ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));
