@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React from 'react';
+import React, { useContext, useEffect } from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 import { EuiSpacer, EuiTab, EuiTabs, EuiTitle } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
@@ -12,6 +12,7 @@ import { Redirect, useHistory, useLocation, matchPath } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { findingsNavigation } from '@kbn/cloud-security-posture';
 import { useCspSetupStatusApi } from '@kbn/cloud-security-posture/src/hooks/use_csp_setup_status_api';
+import { SecuritySolutionContext } from '../../application/security_solution_context';
 import { Configurations } from '../configurations';
 import { cloudPosturePages } from '../../common/navigation/constants';
 import { LOCAL_STORAGE_FINDINGS_LAST_SELECTED_TAB_KEY } from '../../common/constants';
@@ -59,6 +60,22 @@ const FindingsTabRedirecter = ({ lastTabSelected }: { lastTabSelected?: Findings
 export const Findings = () => {
   const history = useHistory();
   const location = useLocation();
+  const securitySolutionContext = useContext(SecuritySolutionContext);
+
+  const { openFlyout } = securitySolutionContext.useExpandableFlyoutApi();
+
+  useEffect(() => {
+    openFlyout({
+      right: {
+        id: 'user-panel',
+        params: {
+          userName: 'John Doe',
+          scopeId: 'findings-table',
+          contextId: 'findings-table',
+        },
+      },
+    });
+  }, [openFlyout]);
 
   // restore the users most recent tab selection
   const [lastTabSelected, setLastTabSelected] = useLocalStorage<FindingsTabKey>(
