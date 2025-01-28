@@ -36,6 +36,7 @@ interface Props {
   indexMode?: IndexMode;
 }
 
+// The value of the number_of_shards setting that is allowed for lookup index mode
 const NUMBER_OF_SHARDS_LOOKUP_MODE = 1;
 
 export const StepSettings: React.FunctionComponent<Props> = React.memo(
@@ -43,25 +44,21 @@ export const StepSettings: React.FunctionComponent<Props> = React.memo(
     const { navigateToStep } = Forms.useFormWizardContext();
     const customValidate = useCallback(
       (json: string) => {
-        if (isJSON(json)) {
-          const settings = JSON.parse(json);
-          const numberOfShardsValue =
-            settings['index.number_of_shards'] ?? settings?.index?.number_of_shards;
-          if (
-            numberOfShardsValue &&
-            indexMode === LOOKUP_INDEX_MODE &&
-            (isNaN(Number(numberOfShardsValue)) ||
-              Number(numberOfShardsValue) !== NUMBER_OF_SHARDS_LOOKUP_MODE)
-          ) {
-            return i18n.translate(
-              'xpack.idxMgmt.formWizard.stepSettings.validations.lookupIndexModeNumberOfShardsError',
-              {
-                defaultMessage: 'Number of shards for lookup index mode can only be 1 or unset.',
-              }
-            );
-          } else {
-            return null;
-          }
+        if (!isJSON(json)) return null;
+        const settings = JSON.parse(json);
+        const numberOfShardsValue =
+          settings['index.number_of_shards'] ?? settings?.index?.number_of_shards;
+        if (
+          numberOfShardsValue != null &&
+          indexMode === LOOKUP_INDEX_MODE &&
+          (isNaN(numberOfShardsValue) || numberOfShardsValue !== NUMBER_OF_SHARDS_LOOKUP_MODE)
+        ) {
+          return i18n.translate(
+            'xpack.idxMgmt.formWizard.stepSettings.validations.lookupIndexModeNumberOfShardsError',
+            {
+              defaultMessage: 'Number of shards for lookup index mode can only be 1 or unset.',
+            }
+          );
         }
         return null;
       },
