@@ -94,8 +94,6 @@ export class InspectorPublicPlugin implements Plugin<Setup, Start> {
           if an inspector can be shown.`);
       }
 
-      console.log({ adapters, views, options });
-
       return core.overlays.openFlyout(
         toMountPoint(
           <InspectorPanel
