@@ -168,6 +168,7 @@ export const BedrockClientSendParamsSchema = schema.object({
   command: schema.any(),
   // Kibana related properties
   signal: schema.maybe(schema.any()),
+  telemetryMetadata: schema.maybe(TelemtryMetadataSchema),
 });
 
 export const BedrockClientSendResponseSchema = schema.object({}, { unknowns: 'allow' });

@@ -189,10 +189,6 @@ export class RuleMigrationsTaskClient {
     const model = await actionsClientChat.createModel({
       signal: abortController.signal,
       temperature: 0.05,
-      telemetryMetadata: {
-        pluginId: 'testplugin',
-        aggregateBy: 'testaggregate',
-      },
     });
 
     const ruleMigrationsRetriever = new RuleMigrationsRetriever(migrationId, {
