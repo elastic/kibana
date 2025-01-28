@@ -6,6 +6,7 @@
  */
 
 import { EuiButtonEmpty } from '@elastic/eui';
+import { css } from '@emotion/css';
 import React from 'react';
 
 type Props = React.ComponentProps<typeof EuiButtonEmpty> & {
@@ -19,19 +20,19 @@ export const ContentReferenceButton: React.FC<Props> = ({
   return (
     <EuiButtonEmpty
       size="xs"
-      style={{
-        padding: 0,
-        blockSize: 'auto',
-      }}
+      className={css`
+        padding: 0px;
+        block-size: auto;
+      `}
       data-test-subj="ContentReferenceButton"
       {...euiButtonEmptyProps}
     >
       <sup
-        style={{
-          verticalAlign: 'baseline',
-          position: 'relative',
-          top: '-0.3em',
-        }}
+        className={css`
+          vertical-align: baseline;
+          position: relative;
+          top: -0.3em;
+        `}
       >{`[${contentReferenceCount}]`}</sup>
     </EuiButtonEmpty>
   );

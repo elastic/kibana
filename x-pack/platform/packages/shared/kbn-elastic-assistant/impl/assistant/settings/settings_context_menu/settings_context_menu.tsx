@@ -21,6 +21,7 @@ import {
   EuiTitle,
   EuiHorizontalRule,
   EuiToolTip,
+  EuiSwitchEvent,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
@@ -102,6 +103,20 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       closePopover();
     }, [closePopover, showAlertSettingsModal]);
 
+    const onChangeContentReferencesVisible = useCallback(
+      (e: EuiSwitchEvent) => {
+        setContentReferencesVisible(e.target.checked);
+      },
+      [setContentReferencesVisible]
+    );
+
+    const onChangeShowAnonymizedValues = useCallback(
+      (e: EuiSwitchEvent) => {
+        setShowAnonymizedValues(e.target.checked);
+      },
+      [setShowAnonymizedValues]
+    );
+
     const items = useMemo(
       () => [
         <EuiContextMenuItem
@@ -172,7 +187,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
               <EuiSwitch
                 label={i18n.ANONYMIZE_VALUES}
                 checked={showAnonymizedValues}
-                onChange={(e) => setShowAnonymizedValues(e.target.checked)}
+                onChange={onChangeShowAnonymizedValues}
                 compressed
               />
             </EuiContextMenuItem>
@@ -191,7 +206,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
                 <EuiSwitch
                   label={i18n.SHOW_CITATIONS}
                   checked={contentReferencesVisible}
-                  onChange={(e) => setContentReferencesVisible(e.target.checked)}
+                  onChange={onChangeContentReferencesVisible}
                   compressed
                 />
               </EuiContextMenuItem>

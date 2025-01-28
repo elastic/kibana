@@ -141,7 +141,7 @@ describe('ProductDocumentationTool', () => {
       });
     });
 
-    it('does include citations if contentReferencesStore is false', async () => {
+    it('does not include citations if contentReferencesStore is false', async () => {
       const tool = PRODUCT_DOCUMENTATION_TOOL.getTool({
         ...defaultArgs,
         contentReferencesStore: false,

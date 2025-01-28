@@ -27,7 +27,7 @@ import {
 } from './create_resource_installation_helper';
 import {
   conversationsFieldMap,
-  conversationsFieldMapV2,
+  conversationsContentReferencesFieldMap,
 } from '../ai_assistant_data_clients/conversations/field_maps_configuration';
 import { assistantPromptsFieldMap } from '../ai_assistant_data_clients/prompts/field_maps_configuration';
 import { assistantAnonymizationFieldsFieldMap } from '../ai_assistant_data_clients/anonymization_fields/field_maps_configuration';
@@ -107,7 +107,7 @@ export class AIAssistantService {
     this.conversationsDataStream = this.createDataStream({
       resource: 'conversations',
       kibanaVersion: options.kibanaVersion,
-      fieldMap: this.contentReferencesEnabled ? conversationsFieldMapV2 : conversationsFieldMap,
+      fieldMap: this.contentReferencesEnabled ? conversationsContentReferencesFieldMap : conversationsFieldMap,
     });
     this.knowledgeBaseDataStream = this.createDataStream({
       resource: 'knowledgeBase',

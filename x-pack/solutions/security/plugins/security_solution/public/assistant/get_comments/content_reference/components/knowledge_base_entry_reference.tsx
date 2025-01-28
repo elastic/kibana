@@ -6,11 +6,13 @@
  */
 
 import type { KnowledgeBaseEntryContentReference } from '@kbn/elastic-assistant-common';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL } from './translations';
 import type { ContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
+import { useKibana } from '../../../../common/lib/kibana';
+
 
 interface Props {
   contentReferenceNode: ContentReferenceNode;
@@ -21,14 +23,23 @@ export const KnowledgeBaseEntryReference: React.FC<Props> = ({
   contentReferenceNode,
   knowledgeBaseEntryContentReference,
 }) => {
+  const { navigateToApp } = useKibana().services.application;
+
+  const onClick = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    navigateToApp('management', {
+      path: `kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${knowledgeBaseEntryContentReference.knowledgeBaseEntryId}`,
+      openInNewTab: true
+    })
+  }, [navigateToApp, knowledgeBaseEntryContentReference])
+
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="KnowledgeBaseEntryReference"
     >
       <EuiLink
-        href={`/app/management/kibana/securityAiAssistantManagement?tab=knowledge_base&entry_search_term=${knowledgeBaseEntryContentReference.knowledgeBaseEntryId}`}
-        target="_blank"
+        onClick={onClick}
       >
         {`${KNOWLEDGE_BASE_ENTRY_REFERENCE_LABEL}: ${knowledgeBaseEntryContentReference.knowledgeBaseEntryName}`}
       </EuiLink>

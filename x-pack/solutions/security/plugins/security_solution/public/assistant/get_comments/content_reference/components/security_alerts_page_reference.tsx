@@ -6,11 +6,13 @@
  */
 
 import type { SecurityAlertsPageContentReference } from '@kbn/elastic-assistant-common';
-import React from 'react';
+import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import type { ContentReferenceNode } from '../content_reference_parser';
 import { PopoverReference } from './popover_reference';
 import { SECURITY_ALERTS_PAGE_REFERENCE_LABEL } from './translations';
+import { useKibana } from '../../../../common/lib/kibana';
+
 
 interface Props {
   contentReferenceNode: ContentReferenceNode;
@@ -21,12 +23,22 @@ export const SecurityAlertsPageReference: React.FC<Props> = ({
   contentReferenceNode,
   securityAlertsPageContentReference,
 }) => {
+    const { navigateToApp } = useKibana().services.application;
+  
+    const onClick = useCallback((e: React.MouseEvent) => {
+      e.preventDefault();
+      navigateToApp('security', {
+        path: `alerts`,
+        openInNewTab: true
+      })
+    }, [navigateToApp])
+  
   return (
     <PopoverReference
       contentReferenceCount={contentReferenceNode.contentReferenceCount}
       data-test-subj="SecurityAlertsPageReference"
     >
-      <EuiLink href={`/app/security/alerts`} target="_blank">
+      <EuiLink onClick={onClick}>
         {SECURITY_ALERTS_PAGE_REFERENCE_LABEL}
       </EuiLink>
     </PopoverReference>

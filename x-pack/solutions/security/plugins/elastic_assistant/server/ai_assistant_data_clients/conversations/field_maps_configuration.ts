@@ -170,7 +170,7 @@ export const conversationsFieldMap: FieldMap = {
 } as const;
 
 // Once the `contentReferencesEnabled` feature flag is removed, the properties from the schema bellow should me moved into `conversationsFieldMap`
-export const conversationsFieldMapV2: FieldMap = {
+export const conversationsContentReferencesFieldMap: FieldMap = {
   ...conversationsFieldMap,
   'messages.metadata': {
     type: 'object',

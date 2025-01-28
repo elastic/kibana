@@ -49,6 +49,7 @@ import { ConnectorMissingCallout } from '../connectorland/connector_missing_call
 import { ConversationSidePanel } from './conversations/conversation_sidepanel';
 import { SelectedPromptContexts } from './prompt_editor/selected_prompt_contexts';
 import { AssistantHeader } from './assistant_header';
+import useEvent from 'react-use/lib/useEvent';
 
 export const CONVERSATION_SIDE_PANEL_WIDTH = 220;
 
@@ -222,33 +223,18 @@ const AssistantComponent: React.FC<Props> = ({
   }, [augmentMessageCodeBlocks, currentConversation, showAnonymizedValues]);
 
   // Keyboard shortcuts to toggle the visibility of content references and anonymized values
-  useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.altKey && event.code === 'KeyC') {
-        event.preventDefault();
-        setContentReferencesVisible(!contentReferencesVisible);
-      }
-      if (event.altKey && event.code === 'KeyA') {
-        event.preventDefault();
-        setShowAnonymizedValues(!showAnonymizedValues);
-      }
-    };
-
-    if (contentReferencesEnabled) {
-      window.addEventListener('keydown', handleKeyDown);
+  const onKeyDown = useCallback((event: KeyboardEvent) => {
+    if (event.altKey && event.code === 'KeyC') {
+      event.preventDefault();
+      setContentReferencesVisible(!contentReferencesVisible);
     }
-    return () => {
-      if (contentReferencesEnabled) {
-        window.removeEventListener('keydown', handleKeyDown);
-      }
-    };
-  }, [
-    contentReferencesEnabled,
-    setContentReferencesVisible,
-    contentReferencesVisible,
-    setShowAnonymizedValues,
-    showAnonymizedValues,
-  ]);
+    if (event.altKey && event.code === 'KeyA') {
+      event.preventDefault();
+      setShowAnonymizedValues(!showAnonymizedValues);
+    }
+  }, [setContentReferencesVisible , contentReferencesVisible, setShowAnonymizedValues, showAnonymizedValues]);
+
+  useEvent('keydown', onKeyDown)
 
   // Show missing connector callout if no connectors are configured
 

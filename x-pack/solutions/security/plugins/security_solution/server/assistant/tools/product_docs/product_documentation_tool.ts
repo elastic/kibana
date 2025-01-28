@@ -98,7 +98,7 @@ type EnrichedDocument = RetrieveDocumentationResultDoc & {
   citation: string;
 };
 
-function enrichDocument(contentReferencesStore: ContentReferencesStore) {
+const enrichDocument = (contentReferencesStore: ContentReferencesStore) => {
   return (document: RetrieveDocumentationResultDoc): EnrichedDocument => {
     const reference = contentReferencesStore.add((p) =>
       productDocumentationReference(p.id, document.title, document.url)
