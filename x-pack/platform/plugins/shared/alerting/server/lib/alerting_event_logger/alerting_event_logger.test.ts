@@ -35,6 +35,7 @@ import { TaskRunnerTimerSpan } from '../../task_runner/task_runner_timer';
 import { schema } from '@kbn/config-schema';
 import { RULE_SAVED_OBJECT_TYPE } from '../..';
 import { AD_HOC_RUN_SAVED_OBJECT_TYPE } from '../../saved_objects';
+import { GapBase } from '../rule_gaps/types';
 
 const mockNow = '2020-01-01T02:00:00.000Z';
 const eventLogger = eventLoggerMock.create();
@@ -1455,6 +1456,89 @@ describe('AlertingEventLogger', () => {
       });
 
       expect(alertingEventLogger.getEvent()!.message).toBe('first failure message');
+    });
+  });
+
+  describe('reportGap()', () => {
+    test('should throw error if alertingEventLogger has not been initialized', () => {
+      expect(() =>
+        alertingEventLogger.reportGap({
+          gap: { gte: '', lte: '' },
+        })
+      ).toThrowErrorMatchingInlineSnapshot(`"AlertingEventLogger not initialized"`);
+    });
+
+    test('should report gap event', () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      const range = {
+        gte: '2022-05-05T15:59:54.480Z',
+        lte: '2022-05-05T16:59:54.480Z',
+      };
+      alertingEventLogger.reportGap({ gap: range });
+
+      const gap: GapBase = {
+        status: 'unfilled' as const,
+        range,
+        filled_intervals: [],
+        unfilled_intervals: [range],
+        in_progress_intervals: [],
+        total_gap_duration_ms: 3600000,
+        filled_duration_ms: 0,
+        unfilled_duration_ms: 3600000,
+        in_progress_duration_ms: 0,
+      };
+
+      const event = createGapRecord(ruleContext, ruleData, [alertSO], gap);
+      expect(eventLogger.logEvent).toHaveBeenCalledWith(event);
+    });
+  });
+
+  describe('updateGaps', () => {
+    const mockInternalFields = {
+      _id: 'test-id',
+      _index: 'test-index',
+      _seq_no: 1,
+      _primary_term: 1,
+    };
+
+    const mockGap = {
+      status: 'filled' as const,
+      range: {
+        gte: '2022-05-05T15:59:54.480Z',
+        lte: '2022-05-05T16:59:54.480Z',
+      },
+      filled_intervals: [
+        {
+          gte: '2022-05-05T15:59:54.480Z',
+          lte: '2022-05-05T16:59:54.480Z',
+        },
+      ],
+      unfilled_intervals: [],
+      in_progress_intervals: [],
+      total_gap_duration_ms: 3600000,
+      filled_duration_ms: 3600000,
+      unfilled_duration_ms: 0,
+      in_progress_duration_ms: 0,
+    };
+
+    test('should call eventLogger.updateEvents with correct parameters', async () => {
+      alertingEventLogger.initialize({ context: ruleContext, runDate, ruleData });
+      await alertingEventLogger.updateGaps([{ internalFields: mockInternalFields, gap: mockGap }]);
+
+      expect(eventLogger.updateEvents).toHaveBeenCalledWith([
+        {
+          event: {
+            kibana: {
+              alert: {
+                rule: {
+                  gap: mockGap,
+                },
+              },
+            },
+          },
+          internalFields: mockInternalFields,
+        },
+      ]);
     });
   });
 });

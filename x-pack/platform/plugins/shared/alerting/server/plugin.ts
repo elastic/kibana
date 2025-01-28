@@ -535,6 +535,7 @@ export class AlertingPlugin {
       securityPluginStart: plugins.security,
       internalSavedObjectsRepository: core.savedObjects.createInternalRepository([
         RULE_SAVED_OBJECT_TYPE,
+        AD_HOC_RUN_SAVED_OBJECT_TYPE,
       ]),
       encryptedSavedObjectsClient,
       spaceIdToNamespace,
@@ -627,6 +628,7 @@ export class AlertingPlugin {
       supportsEphemeralTasks: plugins.taskManager.supportsEphemeralTasks(),
       uiSettings: core.uiSettings,
       usageCounter: this.usageCounter,
+      getEventLogClient: (request: KibanaRequest) => plugins.eventLog.getClient(request),
       isServerless: this.isServerless,
     });
 
