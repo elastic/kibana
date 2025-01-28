@@ -390,6 +390,7 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
+    slo: string;
     sloBurnRateRule: string;
     aiAssistant: string;
   }>;
