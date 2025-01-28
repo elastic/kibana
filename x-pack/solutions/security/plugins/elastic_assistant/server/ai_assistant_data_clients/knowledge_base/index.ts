@@ -652,6 +652,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   /**
    * Updates a Knowledge Base Entry.
    *
+   * @param auditLogger
    * @param knowledgeBaseEntryId
    */
   public updateKnowledgeBaseEntry = async ({
@@ -714,6 +715,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
   /**
    * Deletes a new Knowledge Base Entry.
    *
+   * @param auditLogger
    * @param knowledgeBaseEntryId
    */
   public deleteKnowledgeBaseEntry = async ({
