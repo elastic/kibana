@@ -16,6 +16,7 @@ export const DEFAULT_FILTER_OPTIONS: FilterOptions = {
   enabled: undefined,
   ruleExecutionStatus: undefined,
   gapSearchRange: defaultRangeValue,
+  showRulesWithGaps: false,
 };
 export const DEFAULT_SORTING_OPTIONS: SortingOptions = {
   field: 'enabled',
