@@ -147,7 +147,7 @@ describe('datatable toolbar', () => {
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
       rowHeight: 'custom',
-      rowHeightLines: 3,
+      rowHeightLines: 1,
     });
   });
 
@@ -160,7 +160,7 @@ describe('datatable toolbar', () => {
     expect(defaultProps.setState).toHaveBeenCalledTimes(1);
     expect(defaultProps.setState).toHaveBeenCalledWith({
       headerRowHeight: 'custom',
-      headerRowHeightLines: 1,
+      headerRowHeightLines: 3,
     });
   });
 
