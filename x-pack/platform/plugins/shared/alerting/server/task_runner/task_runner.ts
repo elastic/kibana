@@ -539,7 +539,9 @@ export class TaskRunner<
 
       // Set rule monitoring data
       this.ruleMonitoring.setMonitoring(runRuleParams.rule.monitoring);
-
+      if (this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range) {
+        this.ruleMonitoring.getLastRunMetricsSetters().setLastRunMetricsGapRange(null);
+      }
       (async () => {
         try {
           await clearExpiredSnoozes({
@@ -607,6 +609,13 @@ export class TaskRunner<
           hasError: executionStatus.error != null,
           runDate: this.runDate,
         });
+
+        const gap = this.ruleMonitoring.getMonitoring()?.run?.last_run?.metrics?.gap_range;
+        if (gap) {
+          this.alertingEventLogger.reportGap({
+            gap,
+          });
+        }
 
         if (!this.cancelled) {
           this.inMemoryMetrics.increment(IN_MEMORY_METRICS.RULE_EXECUTIONS);

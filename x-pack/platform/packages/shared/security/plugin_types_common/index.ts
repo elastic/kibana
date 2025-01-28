@@ -12,6 +12,7 @@ export type {
   AuthenticationProvider,
 } from './src/authentication';
 export type {
+  RemoteClusterPrivilege,
   Role,
   RoleIndexPrivilege,
   RoleKibanaPrivilege,
