@@ -282,6 +282,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 8.18/9.0
    */
   responseActionsMSDefenderEndpointEnabled: true,
+
+  /**
+   * Enables banner for informing users about changes in data collection.
+   */
+  eventCollectionDataReductionBannerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
