@@ -91,6 +91,10 @@ export default ({ getService }: FtrProviderContext) => {
             filter: '',
             fieldHistoryLength: 10,
             lookbackPeriod: '24h',
+            delay: '1m',
+            enrichPolicyExecutionInterval: '1h',
+            frequency: '1m',
+            timeout: '180s',
           });
         });
 
@@ -108,6 +112,10 @@ export default ({ getService }: FtrProviderContext) => {
             filter: '',
             fieldHistoryLength: 10,
             lookbackPeriod: '24h',
+            delay: '1m',
+            enrichPolicyExecutionInterval: '1h',
+            frequency: '1m',
+            timeout: '180s',
           });
         });
       });
@@ -127,6 +135,10 @@ export default ({ getService }: FtrProviderContext) => {
               filter: '',
               fieldHistoryLength: 10,
               lookbackPeriod: '24h',
+              delay: '1m',
+              enrichPolicyExecutionInterval: '1h',
+              frequency: '1m',
+              timeout: '180s',
             },
             {
               status: 'started',
@@ -135,6 +147,10 @@ export default ({ getService }: FtrProviderContext) => {
               filter: '',
               fieldHistoryLength: 10,
               lookbackPeriod: '24h',
+              delay: '1m',
+              enrichPolicyExecutionInterval: '1h',
+              frequency: '1m',
+              timeout: '180s',
             },
           ]);
         });
