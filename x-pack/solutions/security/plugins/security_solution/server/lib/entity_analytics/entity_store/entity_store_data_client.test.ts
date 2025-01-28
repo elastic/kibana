@@ -21,6 +21,7 @@ import { convertToEntityManagerDefinition } from './entity_definitions/entity_ma
 import { EntityType } from '../../../../common/search_strategy';
 import type { InitEntityEngineResponse } from '../../../../common/api/entity_analytics';
 import type { TaskManagerStartContract } from '@kbn/task-manager-plugin/server';
+import { defaultOptions } from './constants';
 
 const definition: EntityDefinition = convertToEntityManagerDefinition(
   {
@@ -356,8 +357,8 @@ describe('EntityStoreDataClient', () => {
 
     it('only enable engine for the given entityType', async () => {
       await dataClient.enable({
+        ...defaultOptions,
         entityTypes: [EntityType.host],
-        fieldHistoryLength: 1,
       });
 
       expect(spyInit).toHaveBeenCalledWith(EntityType.host, expect.anything(), expect.anything());
@@ -365,8 +366,8 @@ describe('EntityStoreDataClient', () => {
 
     it('does not enable engine when the given entity type is disabled', async () => {
       await dataClient.enable({
+        ...defaultOptions,
         entityTypes: [EntityType.universal],
-        fieldHistoryLength: 1,
       });
 
       expect(spyInit).not.toHaveBeenCalled();

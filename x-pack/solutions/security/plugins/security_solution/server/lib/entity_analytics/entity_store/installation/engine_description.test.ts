@@ -8,6 +8,7 @@
 import { duration } from 'moment';
 import { createEngineDescription } from './engine_description';
 import { convertToEntityManagerDefinition } from '../entity_definitions/entity_manager_conversion';
+import { defaultOptions } from '../constants';
 
 describe('getUnitedEntityDefinition', () => {
   const defaultIndexPatterns = ['test*'];
@@ -15,9 +16,7 @@ describe('getUnitedEntityDefinition', () => {
     const description = createEngineDescription({
       entityType: 'host',
       namespace: 'test',
-      requestParams: {
-        fieldHistoryLength: 10,
-      },
+      requestParams: defaultOptions,
       defaultIndexPatterns,
       config: {
         syncDelay: duration(60, 'seconds'),
@@ -265,9 +264,7 @@ describe('getUnitedEntityDefinition', () => {
     const description = createEngineDescription({
       entityType: 'user',
       namespace: 'test',
-      requestParams: {
-        fieldHistoryLength: 10,
-      },
+      requestParams: defaultOptions,
       defaultIndexPatterns,
       config: {
         syncDelay: duration(60, 'seconds'),
@@ -481,9 +478,7 @@ describe('getUnitedEntityDefinition', () => {
     const description = createEngineDescription({
       entityType: 'service',
       namespace: 'test',
-      requestParams: {
-        fieldHistoryLength: 10,
-      },
+      requestParams: defaultOptions,
       defaultIndexPatterns,
       config: {
         syncDelay: duration(60, 'seconds'),
