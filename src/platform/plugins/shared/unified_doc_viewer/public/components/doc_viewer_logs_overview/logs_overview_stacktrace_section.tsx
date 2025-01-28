@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { EuiAccordion, EuiHorizontalRule, EuiTitle, useGeneratedHtmlId } from '@elastic/eui';
+import { EuiThemeProvider } from '@kbn/kibana-react-plugin/common';
 import { DataTableRecord } from '@kbn/discover-utils';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
@@ -44,7 +45,9 @@ export function LogsOverviewStacktraceSection({
         initialIsOpen={false}
         data-test-subj="unifiedDocViewLogsOverviewStacktraceAccordion"
       >
-        <StacktraceContent hit={hit} dataView={dataView} />
+        <EuiThemeProvider>
+          <StacktraceContent hit={hit} dataView={dataView} />
+        </EuiThemeProvider>
       </EuiAccordion>
       <EuiHorizontalRule margin="xs" />
     </>
