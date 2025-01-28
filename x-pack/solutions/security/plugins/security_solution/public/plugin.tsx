@@ -343,7 +343,7 @@ export class Plugin implements IPlugin<PluginSetup, PluginStart, SetupPlugins, S
       investigations: subPlugins.investigations.start(),
       machineLearning: subPlugins.machineLearning.start(),
       siemMigrations: subPlugins.siemMigrations.start(
-        this.experimentalFeatures.siemMigrationsEnabled
+        !this.experimentalFeatures.siemMigrationsDisabled
       ),
     };
   }

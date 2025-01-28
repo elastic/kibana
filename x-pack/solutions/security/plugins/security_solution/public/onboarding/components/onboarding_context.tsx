@@ -72,6 +72,12 @@ const useFilteredConfig = (): OnboardingConfig => {
       if (item.experimentalFlagRequired && !experimentalFeatures[item.experimentalFlagRequired]) {
         return false;
       }
+      if (
+        item.disabledExperimentalFlagRequired &&
+        experimentalFeatures[item.disabledExperimentalFlagRequired]
+      ) {
+        return false;
+      }
       if (item.licenseTypeRequired && !license.isAtLeast(item.licenseTypeRequired)) {
         return false;
       }
