@@ -9,9 +9,10 @@ import { mockCasesContext } from '@kbn/cases-plugin/public/mocks/mock_cases_cont
 import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { createFilterManagerMock } from '@kbn/data-plugin/public/query/filter_manager/filter_manager.mock';
 import { createStubDataView } from '@kbn/data-views-plugin/common/data_view.stub';
+import { defaultAssistantFeatures } from '@kbn/elastic-assistant-common';
 import { UpsellingService } from '@kbn/security-solution-upselling/service';
 import { Router } from '@kbn/shared-ux-router';
-import { render, screen } from '@testing-library/react';
+import { fireEvent, render, screen } from '@testing-library/react';
 import React from 'react';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
@@ -37,6 +38,18 @@ const mockConnectors: unknown[] = [
     actionTypeId: '.gen-ai',
   },
 ];
+
+jest.mock('@kbn/elastic-assistant-common', () => {
+  const original = jest.requireActual('@kbn/elastic-assistant-common');
+
+  return {
+    ...original,
+    defaultAssistantFeatures: {
+      ...original.defaultAssistantFeatures,
+      attackDiscoveryAlertFiltering: jest.mocked<boolean>(false), // <-- feature flag is off by default
+    },
+  };
+});
 
 jest.mock('react-use/lib/useLocalStorage', () => jest.fn().mockReturnValue(['test-id', jest.fn()]));
 jest.mock('react-use/lib/useSessionStorage', () =>
@@ -210,6 +223,8 @@ describe('AttackDiscovery', () => {
     });
 
     (useLocalStorage as jest.Mock).mockReturnValue(['test-id', jest.fn()]);
+
+    (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = false; // reset feature flag to off
   });
 
   describe('page layout', () => {
@@ -500,6 +515,56 @@ describe('AttackDiscovery', () => {
 
     it('does NOT render the upgrade call to action', () => {
       expect(screen.queryByTestId('upgrade')).toBeNull();
+    });
+  });
+
+  describe('when the attackDiscoveryAlertFiltering feature flag is off', () => {
+    beforeEach(() => {
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+    });
+
+    it('invokes fetchAttackDiscoveries with just the size parameter when the generate button is clicked', () => {
+      const generate = screen.getAllByTestId('generate');
+
+      fireEvent.click(generate[0]);
+
+      expect(
+        (useAttackDiscovery as jest.Mock)().fetchAttackDiscoveries as jest.Mock
+      ).toHaveBeenCalledWith({ size: 20 });
+    });
+  });
+
+  describe('when the attackDiscoveryAlertFiltering feature flag is on', () => {
+    beforeEach(() => {
+      (defaultAssistantFeatures.attackDiscoveryAlertFiltering as jest.Mocked<boolean>) = true; // <-- feature flag is on
+
+      render(
+        <TestProviders>
+          <Router history={historyMock}>
+            <UpsellingProvider upsellingService={mockUpselling}>
+              <AttackDiscoveryPage />
+            </UpsellingProvider>
+          </Router>
+        </TestProviders>
+      );
+    });
+
+    it('invokes fetchAttackDiscoveries with the end, filter, size, and start parameters when the generate button is clicked,', () => {
+      const generate = screen.getAllByTestId('generate');
+
+      fireEvent.click(generate[0]);
+
+      expect(
+        (useAttackDiscovery as jest.Mock)().fetchAttackDiscoveries as jest.Mock
+      ).toHaveBeenCalledWith({ end: 'test-id', filter: undefined, size: 20, start: 'test-id' });
     });
   });
 

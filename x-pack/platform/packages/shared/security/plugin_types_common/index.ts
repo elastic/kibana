@@ -14,6 +14,7 @@ export type {
 export type {
   QueryRolesRole,
   QueryRolesResult,
+  RemoteClusterPrivilege,
   Role,
   RoleIndexPrivilege,
   RoleKibanaPrivilege,

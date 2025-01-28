@@ -2213,7 +2213,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -8669,7 +8669,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {

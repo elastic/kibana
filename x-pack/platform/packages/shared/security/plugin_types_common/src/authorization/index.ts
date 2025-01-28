@@ -10,6 +10,7 @@ export type { RawKibanaFeaturePrivileges, RawKibanaPrivileges } from './raw_kiba
 export type {
   QueryRolesRole,
   QueryRolesResult,
+  RemoteClusterPrivilege,
   Role,
   RoleKibanaPrivilege,
   RoleIndexPrivilege,
