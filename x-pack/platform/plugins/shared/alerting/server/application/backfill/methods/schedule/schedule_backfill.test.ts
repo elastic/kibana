@@ -24,6 +24,8 @@ import { fromKueryExpression } from '@kbn/es-query';
 import { auditLoggerMock } from '@kbn/security-plugin/server/audit/mocks';
 import { asyncForEach } from '@kbn/std';
 import { taskManagerMock } from '@kbn/task-manager-plugin/server/mocks';
+import { eventLoggerMock } from '@kbn/event-log-plugin/server/event_logger.mock';
+import { eventLogClientMock } from '@kbn/event-log-plugin/server/event_log_client.mock';
 import { ConstructorOptions, RulesClient } from '../../../../rules_client';
 import { ScheduleBackfillParam } from './types';
 import { adHocRunStatus } from '../../../../../common/constants';
@@ -39,6 +41,8 @@ const actionsAuthorization = actionsAuthorizationMock.create();
 const auditLogger = auditLoggerMock.create();
 const internalSavedObjectsRepository = savedObjectsRepositoryMock.create();
 const backfillClient = backfillClientMock.create();
+const eventLogger = eventLoggerMock.create();
+const eventLogClient = eventLogClientMock.create();
 
 const filter = fromKueryExpression(
   '((alert.attributes.alertTypeId:myType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myApp) or (alert.attributes.alertTypeId:myOtherType and alert.attributes.consumer:myOtherApp))'
@@ -71,6 +75,7 @@ const rulesClientParams: jest.Mocked<ConstructorOptions> = {
   isSystemAction: jest.fn(),
   connectorAdapterRegistry: new ConnectorAdapterRegistry(),
   uiSettings: uiSettingsServiceMock.createStartContract(),
+  eventLogger,
 };
 
 const fakeRuleName = 'fakeRuleName';
@@ -250,6 +255,8 @@ describe('scheduleBackfill()', () => {
 
   test('should successfully schedule backfill', async () => {
     const mockData = [getMockData(), getMockData({ ruleId: '2', end: '2023-11-17T08:00:00.000Z' })];
+    rulesClientParams.getEventLogClient.mockResolvedValue(eventLogClient);
+
     const result = await rulesClient.scheduleBackfill(mockData);
 
     expect(authorization.getFindAuthorizationFilter).toHaveBeenCalledWith({
@@ -402,77 +409,82 @@ describe('scheduleBackfill()', () => {
       message: 'User has scheduled backfill for rule [id=2] [name=fakeRuleName]',
     });
 
-    expect(backfillClient.bulkQueue).toHaveBeenCalledWith({
-      auditLogger,
-      params: mockData,
-      ruleTypeRegistry,
-      unsecuredSavedObjectsClient,
-      spaceId: 'default',
-      rules: [
-        {
-          id: existingDecryptedRule1.id,
-          legacyId: null,
-          actions: existingDecryptedRule1.attributes.actions,
-          alertTypeId: existingDecryptedRule1.attributes.alertTypeId,
-          apiKey: existingDecryptedRule1.attributes.apiKey,
-          apiKeyCreatedByUser: existingDecryptedRule1.attributes.apiKeyCreatedByUser,
-          consumer: existingDecryptedRule1.attributes.consumer,
-          createdAt: new Date(existingDecryptedRule1.attributes.createdAt),
-          createdBy: existingDecryptedRule1.attributes.createdBy,
-          enabled: true,
-          executionStatus: {
-            ...existingDecryptedRule1.attributes.executionStatus,
-            lastExecutionDate: new Date(
-              existingDecryptedRule1.attributes.executionStatus.lastExecutionDate
-            ),
+    expect(backfillClient.bulkQueue).toHaveBeenCalledWith(
+      expect.objectContaining({
+        auditLogger,
+        params: mockData,
+        ruleTypeRegistry,
+        unsecuredSavedObjectsClient,
+        spaceId: 'default',
+        rules: [
+          {
+            id: existingDecryptedRule1.id,
+            legacyId: null,
+            actions: existingDecryptedRule1.attributes.actions,
+            alertTypeId: existingDecryptedRule1.attributes.alertTypeId,
+            apiKey: existingDecryptedRule1.attributes.apiKey,
+            apiKeyCreatedByUser: existingDecryptedRule1.attributes.apiKeyCreatedByUser,
+            consumer: existingDecryptedRule1.attributes.consumer,
+            createdAt: new Date(existingDecryptedRule1.attributes.createdAt),
+            createdBy: existingDecryptedRule1.attributes.createdBy,
+            enabled: true,
+            executionStatus: {
+              ...existingDecryptedRule1.attributes.executionStatus,
+              lastExecutionDate: new Date(
+                existingDecryptedRule1.attributes.executionStatus.lastExecutionDate
+              ),
+            },
+            muteAll: existingDecryptedRule1.attributes.muteAll,
+            mutedInstanceIds: existingDecryptedRule1.attributes.mutedInstanceIds,
+            name: existingDecryptedRule1.attributes.name,
+            notifyWhen: existingDecryptedRule1.attributes.notifyWhen,
+            params: existingDecryptedRule1.attributes.params,
+            revision: existingDecryptedRule1.attributes.revision,
+            schedule: existingDecryptedRule1.attributes.schedule,
+            scheduledTaskId: existingDecryptedRule1.attributes.scheduledTaskId,
+            snoozeSchedule: existingDecryptedRule1.attributes.snoozeSchedule,
+            systemActions: existingDecryptedRule1.attributes.systemActions,
+            tags: existingDecryptedRule1.attributes.tags,
+            throttle: existingDecryptedRule1.attributes.throttle,
+            updatedAt: new Date(existingDecryptedRule1.attributes.updatedAt),
           },
-          muteAll: existingDecryptedRule1.attributes.muteAll,
-          mutedInstanceIds: existingDecryptedRule1.attributes.mutedInstanceIds,
-          name: existingDecryptedRule1.attributes.name,
-          notifyWhen: existingDecryptedRule1.attributes.notifyWhen,
-          params: existingDecryptedRule1.attributes.params,
-          revision: existingDecryptedRule1.attributes.revision,
-          schedule: existingDecryptedRule1.attributes.schedule,
-          scheduledTaskId: existingDecryptedRule1.attributes.scheduledTaskId,
-          snoozeSchedule: existingDecryptedRule1.attributes.snoozeSchedule,
-          systemActions: existingDecryptedRule1.attributes.systemActions,
-          tags: existingDecryptedRule1.attributes.tags,
-          throttle: existingDecryptedRule1.attributes.throttle,
-          updatedAt: new Date(existingDecryptedRule1.attributes.updatedAt),
-        },
-        {
-          id: existingDecryptedRule2.id,
-          legacyId: null,
-          actions: existingDecryptedRule2.attributes.actions,
-          alertTypeId: existingDecryptedRule2.attributes.alertTypeId,
-          apiKey: existingDecryptedRule2.attributes.apiKey,
-          apiKeyCreatedByUser: existingDecryptedRule2.attributes.apiKeyCreatedByUser,
-          consumer: existingDecryptedRule2.attributes.consumer,
-          createdAt: new Date(existingDecryptedRule2.attributes.createdAt),
-          createdBy: existingDecryptedRule2.attributes.createdBy,
-          enabled: true,
-          executionStatus: {
-            ...existingDecryptedRule2.attributes.executionStatus,
-            lastExecutionDate: new Date(
-              existingDecryptedRule2.attributes.executionStatus.lastExecutionDate
-            ),
+          {
+            id: existingDecryptedRule2.id,
+            legacyId: null,
+            actions: existingDecryptedRule2.attributes.actions,
+            alertTypeId: existingDecryptedRule2.attributes.alertTypeId,
+            apiKey: existingDecryptedRule2.attributes.apiKey,
+            apiKeyCreatedByUser: existingDecryptedRule2.attributes.apiKeyCreatedByUser,
+            consumer: existingDecryptedRule2.attributes.consumer,
+            createdAt: new Date(existingDecryptedRule2.attributes.createdAt),
+            createdBy: existingDecryptedRule2.attributes.createdBy,
+            enabled: true,
+            executionStatus: {
+              ...existingDecryptedRule2.attributes.executionStatus,
+              lastExecutionDate: new Date(
+                existingDecryptedRule2.attributes.executionStatus.lastExecutionDate
+              ),
+            },
+            muteAll: existingDecryptedRule2.attributes.muteAll,
+            mutedInstanceIds: existingDecryptedRule2.attributes.mutedInstanceIds,
+            name: existingDecryptedRule2.attributes.name,
+            notifyWhen: existingDecryptedRule2.attributes.notifyWhen,
+            params: existingDecryptedRule2.attributes.params,
+            revision: existingDecryptedRule2.attributes.revision,
+            schedule: existingDecryptedRule2.attributes.schedule,
+            scheduledTaskId: existingDecryptedRule2.attributes.scheduledTaskId,
+            snoozeSchedule: existingDecryptedRule2.attributes.snoozeSchedule,
+            systemActions: existingDecryptedRule2.attributes.systemActions,
+            tags: existingDecryptedRule2.attributes.tags,
+            throttle: existingDecryptedRule2.attributes.throttle,
+            updatedAt: new Date(existingDecryptedRule2.attributes.updatedAt),
           },
-          muteAll: existingDecryptedRule2.attributes.muteAll,
-          mutedInstanceIds: existingDecryptedRule2.attributes.mutedInstanceIds,
-          name: existingDecryptedRule2.attributes.name,
-          notifyWhen: existingDecryptedRule2.attributes.notifyWhen,
-          params: existingDecryptedRule2.attributes.params,
-          revision: existingDecryptedRule2.attributes.revision,
-          schedule: existingDecryptedRule2.attributes.schedule,
-          scheduledTaskId: existingDecryptedRule2.attributes.scheduledTaskId,
-          snoozeSchedule: existingDecryptedRule2.attributes.snoozeSchedule,
-          systemActions: existingDecryptedRule2.attributes.systemActions,
-          tags: existingDecryptedRule2.attributes.tags,
-          throttle: existingDecryptedRule2.attributes.throttle,
-          updatedAt: new Date(existingDecryptedRule2.attributes.updatedAt),
-        },
-      ],
-    });
+        ],
+        eventLogClient,
+        internalSavedObjectsRepository,
+        eventLogger,
+      })
+    );
     expect(result).toEqual(mockBulkQueueResult);
   });
 

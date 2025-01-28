@@ -20,6 +20,7 @@ const createAlertingEventLoggerMock = () => {
       logAction: jest.fn(),
       done: jest.fn(),
       reportGap: jest.fn(),
+      updateGaps: jest.fn(),
     };
   });
 };
