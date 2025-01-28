@@ -6,7 +6,7 @@
  */
 
 import { GetSLOSettingsResponse } from '@kbn/slo-schema';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from './constants';
 
 export const getListOfSloSummaryIndices = (
   settings: GetSLOSettingsResponse,
@@ -14,13 +14,13 @@ export const getListOfSloSummaryIndices = (
 ) => {
   const { useAllRemoteClusters, selectedRemoteClusters } = settings;
   if (!useAllRemoteClusters && selectedRemoteClusters.length === 0) {
-    return SLO_SUMMARY_DESTINATION_INDEX_PATTERN;
+    return SUMMARY_DESTINATION_INDEX_PATTERN;
   }
 
-  const indices: string[] = [SLO_SUMMARY_DESTINATION_INDEX_PATTERN];
+  const indices: string[] = [SUMMARY_DESTINATION_INDEX_PATTERN];
   clustersByName.forEach(({ name, isConnected }) => {
     if (isConnected && (useAllRemoteClusters || selectedRemoteClusters.includes(name))) {
-      indices.push(`${name}:${SLO_SUMMARY_DESTINATION_INDEX_PATTERN}`);
+      indices.push(`${name}:${SUMMARY_DESTINATION_INDEX_PATTERN}`);
     }
   });
 
