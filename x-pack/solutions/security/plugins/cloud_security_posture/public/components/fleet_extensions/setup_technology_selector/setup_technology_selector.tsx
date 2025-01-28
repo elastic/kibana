@@ -41,6 +41,7 @@ export const SetupTechnologySelector = ({
   const radioOptions: EuiRadioGroupOption[] = [
     {
       id: radioGroupItemId1,
+      value: SetupTechnology.AGENTLESS,
       label: (
         <EuiFlexGroup gutterSize="xs" direction="column" aria-label={'Deployment Modes Selection'}>
           <EuiFlexItem grow={false}>
@@ -66,6 +67,7 @@ export const SetupTechnologySelector = ({
     },
     {
       id: radioGroupItemId2,
+      value: SetupTechnology.AGENT_BASED,
       label: (
         <EuiFlexGroup gutterSize="xs" direction="column" aria-label={'Agent-based'}>
           <EuiFlexItem grow={false}>

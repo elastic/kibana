@@ -66,7 +66,6 @@ export const GCP_CREDENTIALS_TYPE_OPTIONS_TEST_SUBJ = {
 export const CIS_GCP_OPTION_TEST_SUBJ = 'cisGcpTestId';
 export const CIS_AZURE_OPTION_TEST_SUBJ = 'cisAzureTestId';
 
-export const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
 export const SETUP_TECHNOLOGY_SELECTOR_TEST_SUBJ = 'setup-technology-selector';
 export const SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_TEST_SUBJ =
   'setup-technology-selector-agentless-radio';
