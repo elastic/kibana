@@ -59,7 +59,6 @@ import { registerAnalyticsRoutes } from './routes/enterprise_search/analytics';
 import { registerApiKeysRoutes } from './routes/enterprise_search/api_keys';
 import { registerConfigDataRoute } from './routes/enterprise_search/config_data';
 import { registerConnectorRoutes } from './routes/enterprise_search/connectors';
-import { registerCrawlerRoutes } from './routes/enterprise_search/crawler/crawler';
 import { registerStatsRoutes } from './routes/enterprise_search/stats';
 import { registerTelemetryRoute } from './routes/enterprise_search/telemetry';
 
@@ -254,7 +253,6 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
     registerEnterpriseSearchRoutes(dependencies);
     // Enterprise Search Routes
     if (config.hasConnectors) registerConnectorRoutes(dependencies);
-    if (config.hasWebCrawler) registerCrawlerRoutes(dependencies);
     registerStatsRoutes(dependencies);
 
     // Analytics Routes (stand-alone product)
@@ -314,6 +312,7 @@ export class EnterpriseSearchPlugin implements Plugin<void, void, PluginsSetup, 
      * Register a config for the search guide
      */
     if (config.hasWebCrawler) {
+      // TODO: Do we remove this guide with the removal of native crawler?
       guidedOnboarding?.registerGuideConfig(websiteSearchGuideId, websiteSearchGuideConfig);
     }
     if (config.hasConnectors) {
