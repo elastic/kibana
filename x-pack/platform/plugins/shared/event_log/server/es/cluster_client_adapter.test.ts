@@ -2440,6 +2440,161 @@ describe('updateDocuments', () => {
   });
 });
 
+describe('queryEventsByDocumentIds', () => {
+  test('should successfully retrieve documents by ids', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockResponse({
+      docs: [
+        {
+          _index: 'test-index',
+          _id: 'test-id-1',
+          _seq_no: 1,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 1' },
+        },
+        {
+          _index: 'test-index',
+          _id: 'test-id-2',
+          _seq_no: 2,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 2' },
+        },
+      ],
+    });
+
+    const result = await clusterClientAdapter.queryEventsByDocumentIds(docs);
+
+    expect(clusterClient.mget).toHaveBeenCalledWith({
+      docs,
+    });
+
+    expect(result).toEqual({
+      data: [
+        {
+          message: 'test 1',
+          _id: 'test-id-1',
+          _index: 'test-index',
+          _seq_no: 1,
+          _primary_term: 1,
+        },
+        {
+          message: 'test 2',
+          _id: 'test-id-2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+    });
+  });
+
+  test('should handle not found documents', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockResponse({
+      docs: [
+        {
+          _index: 'test-index',
+          _id: 'test-id-1',
+          found: false,
+        },
+        {
+          _index: 'test-index',
+          _id: 'test-id-2',
+          _seq_no: 2,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 2' },
+        },
+      ],
+    });
+
+    const result = await clusterClientAdapter.queryEventsByDocumentIds(docs);
+
+    expect(logger.error).toHaveBeenCalledWith('Event not found: test-id-1');
+    expect(result).toEqual({
+      data: [
+        {
+          message: 'test 2',
+          _id: 'test-id-2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+    });
+  });
+
+  test('should handle documents with errors', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockResponse({
+      docs: [
+        {
+          _index: 'test-index',
+          _id: 'test-id-1',
+          error: {
+            type: 'document_missing_exception',
+            reason: 'Document missing',
+          },
+        },
+        {
+          _index: 'test-index',
+          _id: 'test-id-2',
+          _seq_no: 2,
+          _primary_term: 1,
+          found: true,
+          _source: { message: 'test 2' },
+        },
+      ],
+    });
+
+    const result = await clusterClientAdapter.queryEventsByDocumentIds(docs);
+
+    expect(logger.error).toHaveBeenCalledWith(
+      'Event not found: test-id-1, with error: Document missing'
+    );
+    expect(result).toEqual({
+      data: [
+        {
+          message: 'test 2',
+          _id: 'test-id-2',
+          _index: 'test-index',
+          _seq_no: 2,
+          _primary_term: 1,
+        },
+      ],
+    });
+  });
+
+  test('should throw error when mget fails', async () => {
+    const docs = [
+      { _id: 'test-id-1', _index: 'test-index' },
+      { _id: 'test-id-2', _index: 'test-index' },
+    ];
+
+    clusterClient.mget.mockRejectedValue(new Error('Failed to get documents'));
+
+    await expect(
+      clusterClientAdapter.queryEventsByDocumentIds(docs)
+    ).rejects.toThrowErrorMatchingInlineSnapshot(
+      `"error querying events by document ids: Failed to get documents"`
+    );
+  });
+});
+
 type RetryableFunction = () => boolean;
 
 const RETRY_UNTIL_DEFAULT_COUNT = 20;
