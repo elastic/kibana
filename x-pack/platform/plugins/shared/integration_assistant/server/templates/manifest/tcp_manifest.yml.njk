@@ -1,0 +1,59 @@
+- input: tcp
+  template_path: tcp.yml.hbs
+  title: |
+    {{ data_stream_title }}
+  description: |
+    {{ data_stream_description }}
+  vars:
+    - name: listen_address
+      type: text
+      title: Listen Address
+      description: |
+        Bind address for the listener. Use 0.0.0.0 to listen on all interfaces.
+      required: true
+      show_user: true
+      default: localhost
+    - name: listen_port
+      type: text
+      title: Listen port
+      description: |
+        Bind port for the listener.
+      required: true
+      show_user: true
+      default: 8080
+    - name: max_message_size
+      type: text
+      title: Max Message Size
+      description: The maximum size of the message received over TCP. The default is 20MiB
+      required: false
+      show_user: false
+    - name: framing
+      type: text
+      title: Framing
+      description: Specify the framing used to split incoming events. Can be one of delimiter or rfc6587. The default is delimiter
+      required: false
+      show_user: false
+    - name: line_delimiter
+      type: text
+      title: Line Delimiter
+      description: Specify the characters used to split the incoming events. The default is \n.
+      required: false
+      show_user: false
+    - name: max_connections
+      type: text
+      title: Max Connections
+      description: The at most number of connections to accept at any given point in time.
+      required: false
+      show_user: false
+    - name: timeout
+      type: text
+      title: Timeout
+      description: The duration of inactivity before a remote connection is closed. The default is 300s. Valid time units are ns, us, ms, s, m, h.
+      required: false
+      show_user: false
+    - name: keep_null
+      type: bool
+      title: Keep Null Values
+      description: If this option is set to true, fields with null values will be published in the output document. By default, keep_null is set to false.
+      required: false
+      show_user: false

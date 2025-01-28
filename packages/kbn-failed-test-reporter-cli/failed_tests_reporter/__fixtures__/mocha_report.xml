@@ -1,6 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
-<testsuites>
-  <testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3">
+<testsuites command-line="node scripts/functional_tests --config super-mocha-test.config.js">
+  <testsuite timestamp="2019-06-13T23:29:36" time="30.739" tests="1444" failures="2" skipped="3" command-line="node scripts/functional_tests --config super-mocha-test.config.js">
     <testcase name="code in multiple nodes &quot;before all&quot; hook" classname="X-Pack Mocha Tests.x-pack/legacy/plugins/code/server/__tests__/multi_node·ts" time="0.121">
       <system-out>
         <![CDATA[]]>

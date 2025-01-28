@@ -14,8 +14,11 @@ KBN_PATH_CONF=/home/kibana/config ./bin/kibana
 --
 
 The default host and port settings configure {kib} to run on `localhost:5601`. To change this behavior and allow remote users to connect, you'll need to update your `kibana.yml` file. You can also enable SSL and set a
-variety of other options. Finally, environment variables can be injected into
-configuration using `${MY_ENV_VAR}` syntax.
+variety of other options.
+
+Environment variables can be injected into configuration using `${MY_ENV_VAR}` syntax. By default, configuration validation
+will fail if an environment variable used in the config file is not present when Kibana starts. This behavior can be changed by using a default value
+for the environment variable, using the `${MY_ENV_VAR:defaultValue}` syntax.
 
 `console.ui.enabled`::
 Toggling this causes the server to regenerate assets on the next startup,
@@ -60,6 +63,9 @@ NOTE: The `frame-ancestors` directive can also be configured by using
 <<server-securityResponseHeaders-disableEmbedding, `server.securityResponseHeaders.disableEmbedding`>>. In that case, that takes precedence and any values in `csp.frame_ancestors`
 are ignored.
 
+`csp.report_only.form_action`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/form-action[Content Security Policy `form-action` directive] in reporting mode.
+
 `csp.report_uri`::
 Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy/report-uri[Content Security Policy `report-uri` directive].
 
@@ -79,10 +85,17 @@ enforce even rudimentary CSP rules, though {kib} is still accessible. This
 configuration is effectively ignored when <<csp-strict, `csp.strict`>> is enabled.
 *Default: `true`*
 
+`permissionsPolicy.report_to:`::
+Add sources for the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[Permissions Policy `report-to` directive].
+
 [[elasticsearch-maxSockets]] `elasticsearch.maxSockets`::
 The maximum number of sockets that can be used for communications with {es}.
 *Default: `Infinity`*
 
+[[elasticsearch-maxResponseSize]] `elasticsearch.maxResponseSize`::
+Either `false` or a `byteSize` value. When set, responses from {es} with a size higher than the defined limit will be rejected.
+This is intended to be used as a circuit-breaker mechanism to avoid memory errors in case of unexpectedly high responses coming from {es}.
+*Default: `false`*
 
 [[elasticsearch-maxIdleSockets]] `elasticsearch.maxIdleSockets`::
 The maximum number of idle sockets to keep open between {kib} and {es}. If more sockets become idle, they will be closed.
@@ -103,6 +116,9 @@ listed here must be on the same cluster. *Default: `[ "http://localhost:9200" ]`
 +
 To enable SSL/TLS for outbound connections to {es}, use the `https` protocol
 in this setting.
+
+[[elasticsearch-publicBaseUrl]] `elasticsearch.publicBaseUrl:`::
+The URL through which Elasticsearch is publicly accessible, if any. This will be shown to users in Kibana when they need connection details for your Elasticsearch cluster.
 
 [[elasticsearch-pingTimeout]] `elasticsearch.pingTimeout`::
 Time in milliseconds to wait for {es} to respond to pings.
@@ -367,7 +383,7 @@ deprecation warning at startup. This setting cannot end in a slash (`/`).
 [[server-publicBaseUrl]] `server.publicBaseUrl`::
 The publicly available URL that end-users access Kibana at. Must include the protocol, hostname, port
 (if different than the defaults for `http` and `https`, 80 and 443 respectively), and the
-<<server-basePath, `server.basePath`>> (if configured). This setting cannot end in a slash (`/`).
+<<server-basePath,`server.basePath`>> (when that setting is configured explicitly). This setting cannot end in a slash (`/`).
 
 [[server-compression]] `server.compression.enabled`::
 Set to `false` to disable HTTP compression for all responses. *Default: `true`*
@@ -405,7 +421,7 @@ disable, set to `null`. *Default:* `"nosniff"`
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Referrer-Policy[`Referrer-Policy`] header is used in all
 responses to the client from the {kib} server, and specifies what value is used. Allowed values are `no-referrer`,
 `no-referrer-when-downgrade`, `origin`, `origin-when-cross-origin`, `same-origin`, `strict-origin`, `strict-origin-when-cross-origin`,
-`unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"no-referrer-when-downgrade"`
+`unsafe-url`, or `null`. To disable, set to `null`. *Default:* `"strict-origin-when-cross-origin"`
 
 [[server-securityResponseHeaders-permissionsPolicy]] `server.securityResponseHeaders.permissionsPolicy`::
 experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy`] header
@@ -413,6 +429,12 @@ is used in all responses to the client from the {kib} server, and specifies what
 Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy` documentation] for defined
 directives, values, and text format. To disable, set to `null`.
 *Default:* `camera=(), display-capture=(), fullscreen=(self), geolocation=(), microphone=(), web-share=()`
+
+[[server-securityResponseHeaders-permissionsPolicyReportOnly]] `server.securityResponseHeaders.permissionsPolicyReportOnly`::
+experimental[] Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy-Report-Only`] header
+is used in all responses to the client from the {kib} server, and specifies what value is used. Allowed values are any text value or `null`.
+Refer to the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Permissions-Policy[`Permissions-Policy` documentation] for defined
+directives, values, and text format.
 
 [[server-securityResponseHeaders-disableEmbedding]]`server.securityResponseHeaders.disableEmbedding`::
 Controls whether the https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Content-Security-Policy[`Content-Security-Policy`] and
@@ -428,7 +450,7 @@ responses to the client from the {kib} server, and specifies what value is used.
 Header names and values to send on all responses to the client from the {kib} server. *Default: `{}`*
 
 [[server-shutdownTimeout]] `server.shutdownTimeout`::
-Sets the grace period for {kib} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected with a `503` response. *Default: `30s`*
+Sets the grace period for {kib} to attempt to resolve any ongoing HTTP requests after receiving a `SIGTERM`/`SIGINT` signal, and before shutting down. Any new HTTP requests received during this period are rejected, because the incoming socket is closed without further processing. *Default: `30s`*
 
 [[server-host]] `server.host`::
 This setting specifies the host of the
@@ -450,6 +472,48 @@ identifies this {kib} instance. *Default: `"your-hostname"`*
 {kib} is served by a back end server. This
 setting specifies the port to use. *Default: `5601`*
 
+[[server-protocol]] `server.protocol`::
+experimental[] The http protocol to use, either `http1` or `http2`. Set to `http1` to opt out of `HTTP/2` support when TLS is enabled. Use of `http1` may impact browser loading performance especially for dashboards with many panels.
+*Default*: `http2` if TLS is enabled, otherwise `http1`.
++
+NOTE: By default, enabling `http2` requires a valid `h2c` configuration, meaning that TLS must be enabled via <<server-ssl-enabled, `server.ssl.enabled`>>
+and <<server-ssl-supportedProtocols, `server.ssl.supportedProtocols`>>, if specified, must contain at least `TLSv1.2` or `TLSv1.3`. Strict validation of
+the `h2c` setup can be disabled by adding `server.http2.allowUnsecure: true` to the configuration.
+
+[[server-rate-limiter-enabled]] `server.rateLimiter.enabled`::
+Enables rate-limiting of requests to the {kib} server based on Node.js' Event Loop Utilization.
+If the average event loop utilization for the specified term exceeds the configured threshold, the server will respond with a `429 Too Many Requests` status code.
++
+This functionality should be used carefully as it may impact the server's availability.
+The configuration options vary per environment, so it is recommended to enable this option in a testing environment first, adjust the rate-limiter configuration, and then roll it out to production.
++
+*Default: `false`*
+
+`server.rateLimiter.elu`::
+The Event Loop Utilization (ELU) threshold for rate-limiting requests to the {kib} server.
+The ELU is a value between 0 and 1, representing the average event loop utilization over the specified term.
+If the average ELU exceeds this threshold, the server will respond with a `429 Too Many Requests` status code.
++
+In a multi-instance environment with autoscaling, this value is usually between 0.6 and 0.8 to give the autoscaler enough time to react.
+This value can be higher in a single-instance environment but should not exceed 1.0. In general, the lower the value, the more aggressive the rate limiting.
+And the highest possible option should be used to prevent the {kib} server from being terminated.
+
+`server.rateLimiter.term`::
+This value is one of `short`, `medium`, or `long`, representing the term over which the average event loop utilization is calculated.
+It uses exponential moving averages (EMA) to smooth out the utilization values.
+Each term corresponds to `15s`, `30s`, and `60s`, respectively.
++
+The term value also changes the way the rate limiter sees the trend in the load:
++
+- `short`: `elu.short > server.rateLimiter.term`;
+- `medium`: `elu.short > server.rateLimiter.elu AND elu.medium > server.rateLimiter.elu`;
+- `long`: `elu.short > server.rateLimiter.elu AND elu.medium > server.rateLimiter.elu AND elu.long > server.rateLimiter.elu`.
+
++
+This behavior prevents requests from being throttled if the load starts decreasing.
+In general, the shorter the term, the more aggressive the rate limiting.
+In the multi-instance environment, the `medium` term makes the most sense as it gives the {kib} server enough time to spin up a new instance and prevents the existing instances from being terminated.
+
 [[server-requestId-allowFromAnyIp]] `server.requestId.allowFromAnyIp`::
 Sets whether or not the `X-Opaque-Id` header should be trusted from any IP address for identifying requests in logs and forwarded to Elasticsearch.
 
@@ -457,11 +521,8 @@ Sets whether or not the `X-Opaque-Id` header should be trusted from any IP addre
 A list of IPv4 and IPv6 address which the `X-Opaque-Id` header should be trusted from. Normally this would be set to the IP addresses of the load balancers or reverse-proxy that end users use to access Kibana. If any are set, <<server-requestId-allowFromAnyIp, `server.requestId.allowFromAnyIp`>> must also be set to `false.`
 
 [[server-rewriteBasePath]] `server.rewriteBasePath`::
-Specifies whether {kib} should
-rewrite requests that are prefixed with <<server-basePath, `server.basePath`>> or require that they
-are rewritten by your reverse proxy. In {kib} 6.3 and earlier, the default is
-`false`. In {kib} 7.x, the setting is deprecated. In {kib} 8.0 and later, the
-default is `true`. *Default: `deprecated`*
+Specifies whether {kib} should rewrite requests that are prefixed with <<server-basePath,`server.basePath`>> or require that they
+are rewritten by your reverse proxy. *Default: `false`*
 
 [[server-socketTimeout]] `server.socketTimeout`::
 The number of milliseconds to wait before closing an
@@ -538,7 +599,9 @@ all http requests to https over the port configured as <<server-port, `server.po
 
 [[server-ssl-supportedProtocols]] `server.ssl.supportedProtocols`::
 An array of supported protocols with versions.
-Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.1, TLSv1.2, TLSv1.3*
+Valid protocols: `TLSv1`, `TLSv1.1`, `TLSv1.2`, `TLSv1.3`. *Default: TLSv1.2, TLSv1.3*
+Enabling `TLSv1.1` would require both setting the `--tls-min-1.1` option in the `node.options` configuration and adding `TLSv1.1` to `server.ssl.supportedProtocols`.
+`HTTP/2` requires the use of minimum `TLSv1.2` for secure connections.
 
 [[server-uuid]] `server.uuid`::
 The unique identifier for this {kib} instance. It must be a valid UUIDv4. It gets automatically generated on the first startup if not specified and persisted in the `data` path.
@@ -623,22 +686,23 @@ Set this value to false to disable the Upgrade Assistant UI. *Default: true*
 Set this value to change the {kib} interface language.
 Valid locales are: `en`, `zh-CN`, `ja-JP`, `fr-FR`. *Default: `en`*
 
-include::{kib-repo-dir}/settings/alert-action-settings.asciidoc[leveloffset=+1]
-include::{kib-repo-dir}/settings/apm-settings.asciidoc[]
-include::{kib-repo-dir}/settings/banners-settings.asciidoc[]
-include::{kib-repo-dir}/settings/cases-settings.asciidoc[leveloffset=+1]
-include::{kib-repo-dir}/settings/enterprise-search-settings.asciidoc[]
-include::{kib-repo-dir}/settings/fleet-settings.asciidoc[]
-include::{kib-repo-dir}/settings/i18n-settings.asciidoc[]
-include::{kib-repo-dir}/settings/logging-settings.asciidoc[]
-include::{kib-repo-dir}/settings/logs-ui-settings.asciidoc[]
-include::{kib-repo-dir}/settings/infrastructure-ui-settings.asciidoc[]
-include::{kib-repo-dir}/settings/monitoring-settings.asciidoc[]
-include::{kib-repo-dir}/settings/reporting-settings.asciidoc[]
-include::{kib-repo-dir}/settings/search-sessions-settings.asciidoc[]
+include::{kibana-root}/docs/settings/ai-assistant-settings.asciidoc[]
+include::{kibana-root}/docs/settings/alert-action-settings.asciidoc[]
+include::{kibana-root}/docs/settings/apm-settings.asciidoc[]
+include::{kibana-root}/docs/settings/banners-settings.asciidoc[]
+include::{kibana-root}/docs/settings/cases-settings.asciidoc[leveloffset=+1]
+include::{kibana-root}/docs/settings/enterprise-search-settings.asciidoc[]
+include::{kibana-root}/docs/settings/fleet-settings.asciidoc[]
+include::{kibana-root}/docs/settings/i18n-settings.asciidoc[]
+include::{kibana-root}/docs/settings/logging-settings.asciidoc[]
+include::{kibana-root}/docs/settings/logs-ui-settings.asciidoc[]
+include::{kibana-root}/docs/settings/infrastructure-ui-settings.asciidoc[]
+include::{kibana-root}/docs/settings/monitoring-settings.asciidoc[]
+include::{kibana-root}/docs/settings/reporting-settings.asciidoc[]
+include::{kibana-root}/docs/settings/search-sessions-settings.asciidoc[]
 include::secure-settings.asciidoc[]
-include::{kib-repo-dir}/settings/security-settings.asciidoc[]
-include::{kib-repo-dir}/settings/spaces-settings.asciidoc[]
-include::{kib-repo-dir}/settings/task-manager-settings.asciidoc[]
-include::{kib-repo-dir}/settings/telemetry-settings.asciidoc[]
-include::{kib-repo-dir}/settings/url-drilldown-settings.asciidoc[]
+include::{kibana-root}/docs/settings/security-settings.asciidoc[]
+include::{kibana-root}/docs/settings/spaces-settings.asciidoc[]
+include::{kibana-root}/docs/settings/task-manager-settings.asciidoc[]
+include::{kibana-root}/docs/settings/telemetry-settings.asciidoc[]
+include::{kibana-root}/docs/settings/url-drilldown-settings.asciidoc[]

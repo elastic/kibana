@@ -10,12 +10,12 @@ import { v4 as uuidv4 } from 'uuid';
 import { asyncForEach } from '@kbn/std';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const es = getService('es');
   const supertest = getService('supertest');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   const uninstallPackage = async (name: string, version: string) => {
     await supertest.delete(`/api/fleet/epm/packages/${name}/${version}`).set('kbn-xsrf', 'xxxx');
@@ -29,7 +29,7 @@ export default function (providerContext: FtrProviderContext) {
       .expect(200);
   };
 
-  describe('datastreams', async () => {
+  describe('datastreams', () => {
     describe('standard integration', () => {
       const pkgName = 'datastreams';
       const pkgVersion = '0.1.0';
@@ -39,7 +39,10 @@ export default function (providerContext: FtrProviderContext) {
       const namespaces = ['default', 'foo', 'bar'];
 
       skipIfNoDockerRegistry(providerContext);
-      setupFleetAndAgents(providerContext);
+
+      before(async () => {
+        await fleetAndAgents.setup();
+      });
 
       const writeMetricsDoc = (namespace: string) =>
         es.transport.request(
@@ -310,7 +313,10 @@ export default function (providerContext: FtrProviderContext) {
       const namespace = 'default';
 
       skipIfNoDockerRegistry(providerContext);
-      setupFleetAndAgents(providerContext);
+
+      before(async () => {
+        await fleetAndAgents.setup();
+      });
 
       const writeMetricDoc = (body: any = {}) =>
         es.transport.request(
@@ -365,6 +371,63 @@ export default function (providerContext: FtrProviderContext) {
         );
 
         expect(resMetricsDatastream.body.data_streams[0].indices.length).equal(2);
+      });
+    });
+
+    describe('dynamic template dimension', () => {
+      const writeMetricDoc = (body: any = {}) =>
+        es.transport.request(
+          {
+            method: 'POST',
+            path: `/metrics-prometheus.remote_write-default/_doc?refresh=true`,
+            body: {
+              '@timestamp': new Date().toISOString(),
+              prometheus: { labels: { test: 'label1' } },
+              agent: {
+                id: 'agent1',
+              },
+              cloud: {
+                account: {
+                  id: '1234',
+                },
+                availability_zone: 'eu',
+                instance: {
+                  id: '1234',
+                },
+                provider: 'aws',
+                region: 'eu',
+              },
+            },
+          },
+          { meta: true }
+        );
+
+      async function getMetricsDefaultBackingIndicesLength() {
+        const resLogsDatastream = await es.transport.request<any>(
+          {
+            method: 'GET',
+            path: `/_data_stream/metrics-prometheus.remote_write-default`,
+          },
+          { meta: true }
+        );
+
+        return resLogsDatastream.body.data_streams[0].indices.length;
+      }
+
+      it('should rollover datastream if dynamic template dimension mappings changed', async () => {
+        await installPackage('prometheus', '1.16.0');
+        await writeMetricDoc();
+
+        expect(await getMetricsDefaultBackingIndicesLength()).to.be(1);
+
+        await installPackage('prometheus', '1.17.0');
+
+        await writeMetricDoc();
+        expect(await getMetricsDefaultBackingIndicesLength()).to.be(2);
+      });
+
+      afterEach(async () => {
+        await uninstallPackage('prometheus', '1.17.0');
       });
     });
   });

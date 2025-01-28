@@ -18,6 +18,10 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
       await testSubjects.existOrFail('mlAnomaliesTable');
     },
 
+    async assertTableNotExists() {
+      await testSubjects.missingOrFail('mlAnomaliesTable');
+    },
+
     async getTableRows() {
       return await testSubjects.findAll('mlAnomaliesTable > ~mlAnomaliesListRow');
     },
@@ -219,7 +223,7 @@ export function MachineLearningAnomaliesTableProvider({ getService }: FtrProvide
     },
 
     async scrollRowIntoView(rowIndex: number) {
-      const rowSubj = await this.getRowSubjByRowIndex(rowIndex);
+      const rowSubj = (await this.getRowSubjByRowIndex(rowIndex)) ?? '';
       await testSubjects.scrollIntoView(rowSubj);
     },
   };

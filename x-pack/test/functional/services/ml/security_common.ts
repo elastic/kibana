@@ -21,6 +21,7 @@ export enum USER {
   ML_VIEWER_SPACE1 = 'ft_ml_viewer_space1',
   ML_VIEWER_ALL_SPACES = 'ft_ml_viewer_all_spaces',
   ML_UNAUTHORIZED = 'ft_ml_unauthorized',
+  ML_DISABLED = 'ft_ml_disabled',
 }
 
 export function MachineLearningSecurityCommonProvider({ getService }: FtrProviderContext) {
@@ -134,6 +135,29 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       kibana: [{ base: [], feature: { discover: ['read'] }, spaces: ['default'] }],
     },
     {
+      name: 'ft_ml_disabled',
+      elasticsearch: { cluster: [], indices: [], run_as: [] },
+      kibana: [
+        {
+          base: [],
+          feature: {
+            // FIXME: We need permission to save search in Discover to test the data viz embeddable
+            // change permission back to read once tests are moved out of ML
+            discover: ['all'],
+            visualize: ['add'],
+            dashboard: ['all'],
+            actions: ['all'],
+            savedObjectsManagement: ['all'],
+            advancedSettings: ['all'],
+            indexPatterns: ['all'],
+            generalCasesV2: ['all'],
+            ml: ['none'],
+          },
+          spaces: ['*'],
+        },
+      ],
+    },
+    {
       name: 'ft_all_space_ml_none',
       elasticsearch: { cluster: [], indices: [], run_as: [] },
       kibana: [
@@ -155,7 +179,7 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
             savedObjectsManagement: ['all'],
             advancedSettings: ['all'],
             indexPatterns: ['all'],
-            generalCases: ['all'],
+            generalCasesV2: ['all'],
           },
           spaces: ['*'],
         },
@@ -229,6 +253,12 @@ export function MachineLearningSecurityCommonProvider({ getService }: FtrProvide
       full_name: 'ML Unauthorized',
       password: 'mlu001',
       roles: ['ft_default_space_ml_none', 'ft_ml_source_readonly'],
+    },
+    {
+      name: 'ft_ml_disabled',
+      full_name: 'ML Disabled',
+      password: 'mlud001',
+      roles: ['ft_ml_disabled'],
     },
   ];
 

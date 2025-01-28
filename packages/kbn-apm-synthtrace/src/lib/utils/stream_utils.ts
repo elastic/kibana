@@ -1,16 +1,36 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { eachSeries } from 'async';
-import MultiStream from 'multistream';
-import { Duplex, Readable, Transform } from 'stream';
+import { Duplex, Readable, Transform, PassThrough } from 'stream';
+
+/**
+ * Pipe one or many streams sequentially into the destination stream. Once all
+ * source streams have been exhausted, the destination stream is ended.
+ * @param sources A collection of streams to read from
+ * @param destination The stream to pipe data to
+ */
+async function combineStreams(sources: Readable[], destination: PassThrough) {
+  for (const stream of sources) {
+    await new Promise((resolve, reject) => {
+      stream.on('end', resolve);
+      stream.on('error', reject);
+      stream.pipe(destination, { end: false });
+    });
+  }
+  destination.emit('end');
+}
 
 export function sequential(...streams: Readable[]) {
-  return new MultiStream(streams, { objectMode: true });
+  const output = new PassThrough({ objectMode: true });
+  combineStreams(streams, output).catch((err) => output.destroy(err));
+  return output;
 }
 
 export function fork(...streams: Transform[]): Duplex {

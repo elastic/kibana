@@ -71,7 +71,7 @@ affecting the cluster.
 
 Use *Graph* to reveal the relationships in your data.
 
-. Open the main menu, and then click *Graph*.
+. Go to *Graph*.
 +
 If you're new to {kib}, and don't yet have any data, follow the link to add sample data.
 This example uses the {kib} sample web logs data set.

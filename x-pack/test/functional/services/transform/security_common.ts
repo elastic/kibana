@@ -139,7 +139,7 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
       if (existingKeys.count > 0) {
         await Promise.all(
           existingKeys.api_keys.map(async (key) => {
-            esClient.security.invalidateApiKey({ ids: [key.id] });
+            await esClient.security.invalidateApiKey({ ids: [key.id] });
           })
         );
       }

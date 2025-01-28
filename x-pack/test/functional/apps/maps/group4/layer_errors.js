@@ -8,26 +8,26 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps', 'header']);
+  const { maps } = getPageObjects(['maps', 'header']);
   const inspector = getService('inspector');
   const testSubjects = getService('testSubjects');
   const comboBox = getService('comboBox');
 
   describe('layer errors', () => {
     before(async () => {
-      await PageObjects.maps.loadSavedMap('layer with errors');
+      await maps.loadSavedMap('layer with errors');
     });
 
     describe('Layer with invalid descriptor', () => {
       const INVALID_LAYER_NAME = 'fff76ebb-57a6-4067-a373-1d191b9bd1a3';
 
       it('should diplay error icon in legend', async () => {
-        await PageObjects.maps.hasErrorIconExistsOrFail(INVALID_LAYER_NAME);
+        await maps.hasErrorIconExistsOrFail(INVALID_LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.maps.removeLayer(INVALID_LAYER_NAME);
-        const exists = await PageObjects.maps.doesLayerExist(INVALID_LAYER_NAME);
+        await maps.removeLayer(INVALID_LAYER_NAME);
+        const exists = await maps.doesLayerExist(INVALID_LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -38,7 +38,7 @@ export default function ({ getPageObjects, getService }) {
       });
 
       it('should diplay error icon in legend', async () => {
-        await PageObjects.maps.hasErrorIconExistsOrFail('connections');
+        await maps.hasErrorIconExistsOrFail('connections');
       });
 
       it('should display "View details" button', async () => {
@@ -58,12 +58,12 @@ export default function ({ getPageObjects, getService }) {
       const LAYER_NAME = 'idThatDoesNotExitForESSearchSource';
 
       it('should diplay error icon in legend', async () => {
-        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
+        await maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.maps.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+        await maps.removeLayer(LAYER_NAME);
+        const exists = await maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -72,12 +72,12 @@ export default function ({ getPageObjects, getService }) {
       const LAYER_NAME = 'idThatDoesNotExitForESGeoGridSource';
 
       it('should diplay error icon in legend', async () => {
-        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
+        await maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.maps.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+        await maps.removeLayer(LAYER_NAME);
+        const exists = await maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -86,12 +86,12 @@ export default function ({ getPageObjects, getService }) {
       const LAYER_NAME = 'geo_shapes*';
 
       it('should diplay error icon in legend', async () => {
-        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
+        await maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.maps.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+        await maps.removeLayer(LAYER_NAME);
+        const exists = await maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -100,12 +100,12 @@ export default function ({ getPageObjects, getService }) {
       const LAYER_NAME = 'EMS_vector_shapes';
 
       it('should diplay error icon in legend', async () => {
-        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
+        await maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.maps.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+        await maps.removeLayer(LAYER_NAME);
+        const exists = await maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -114,12 +114,12 @@ export default function ({ getPageObjects, getService }) {
       const LAYER_NAME = 'EMS_tiles';
 
       it('should diplay error icon in legend', async () => {
-        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
+        await maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.maps.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+        await maps.removeLayer(LAYER_NAME);
+        const exists = await maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });
@@ -128,12 +128,12 @@ export default function ({ getPageObjects, getService }) {
       const LAYER_NAME = 'Custom_TMS';
 
       it('should diplay error icon in legend', async () => {
-        await PageObjects.maps.hasErrorIconExistsOrFail(LAYER_NAME);
+        await maps.hasErrorIconExistsOrFail(LAYER_NAME);
       });
 
       it('should allow deletion of layer', async () => {
-        await PageObjects.maps.removeLayer(LAYER_NAME);
-        const exists = await PageObjects.maps.doesLayerExist(LAYER_NAME);
+        await maps.removeLayer(LAYER_NAME);
+        const exists = await maps.doesLayerExist(LAYER_NAME);
         expect(exists).to.be(false);
       });
     });

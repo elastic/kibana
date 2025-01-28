@@ -14,45 +14,31 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-custom-branding-server-mocks",
-        "id": "def-common.customBrandingServiceMock",
+        "id": "def-server.customBrandingServiceMock",
         "type": "Object",
         "tags": [],
         "label": "customBrandingServiceMock",
         "description": [],
-        "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
+        "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-custom-branding-server-mocks",
-            "id": "def-common.customBrandingServiceMock.create",
+            "id": "def-server.customBrandingServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-custom-branding-server-internal",
-                "scope": "common",
-                "docId": "kibKbnCoreCustomBrandingServerInternalPluginApi",
-                "section": "def-common.CustomBrandingService",
-                "text": "CustomBrandingService"
-              },
+              "CustomBrandingService",
               ">"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
+            "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -60,7 +46,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-server-mocks",
-            "id": "def-common.customBrandingServiceMock.createSetupContract",
+            "id": "def-server.customBrandingServiceMock.createSetupContract",
             "type": "Function",
             "tags": [],
             "label": "createSetupContract",
@@ -68,7 +54,7 @@
             "signature": [
               "() => { register: jest.Mock<any, any, any>; getBrandingFor: jest.Mock<any, any, any>; }"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
+            "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -76,7 +62,7 @@
           },
           {
             "parentPluginId": "@kbn/core-custom-branding-server-mocks",
-            "id": "def-common.customBrandingServiceMock.createStartContract",
+            "id": "def-server.customBrandingServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -84,7 +70,7 @@
             "signature": [
               "() => {}"
             ],
-            "path": "packages/core/custom-branding/core-custom-branding-server-mocks/src/custom_branding_service.mock.ts",
+            "path": "src/core/packages/custom-branding/server-mocks/src/custom_branding_service.mock.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -94,5 +80,13 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

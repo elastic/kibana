@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { resolve, dirname, relative } from 'path';
@@ -17,6 +18,7 @@ import { AggregatedResult, Test, BaseReporter } from '@jest/reporters';
 
 import { escapeCdata } from '../../mocha/xml';
 import { getUniqueJunitReportPath } from '../../report_path';
+import { prettifyCommandLine } from '../../prettify_command_line';
 
 interface ReporterOptions {
   reportName?: string;
@@ -71,6 +73,7 @@ export default class JestJUnitReporter extends BaseReporter {
       tests: results.numTotalTests,
       failures: results.numFailedTests,
       skipped: results.numPendingTests,
+      'command-line': prettifyCommandLine(process.argv),
     });
 
     // top level test results are the files/suites
@@ -83,6 +86,7 @@ export default class JestJUnitReporter extends BaseReporter {
         failures: suite.numFailingTests,
         skipped: suite.numPendingTests,
         file: suite.testFilePath,
+        'command-line': prettifyCommandLine(process.argv),
       });
 
       // nested in there are the tests in that file

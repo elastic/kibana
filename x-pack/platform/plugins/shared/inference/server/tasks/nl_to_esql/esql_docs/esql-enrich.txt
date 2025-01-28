@@ -1,0 +1,60 @@
+# ENRICH
+
+The ENRICH command allows you to add data from existing indices as new columns using an enrich policy.
+
+## Syntax
+
+`ENRICH policy [ON match_field] [WITH [new_name1 = ]field1, [new_name2 = ]field2, ...]`
+
+### Parameters
+
+#### policy
+
+The name of the enrich policy. You need to create and execute the enrich policy first.
+
+#### match_field
+
+The match field. ENRICH uses its value to look for records in the enrich index. If not specified, the match will be performed on the column with the same name as the `match_field` defined in the enrich policy.
+
+#### new_nameX
+
+Allows you to change the name of the column that’s added for each of the enrich fields. Defaults to the enrich field name. If a column has the same name as the new name, it will be discarded. If a name (new or original) occurs more than once, only the rightmost duplicate creates a new column.
+
+#### fieldX
+
+The enrich fields from the enrich index that are added to the result as new columns. If a column with the same name as the enrich field already exists, the existing column will be replaced by the new column. If not specified, each of the enrich fields defined in the policy is added. A column with the same name as the enrich field will be dropped unless the enrich field is renamed.
+
+## Examples
+
+The following example uses the `languages_policy` enrich policy to add a new column for each enrich field defined in the policy. The match is performed using the `match_field` defined in the enrich policy and requires that the input table has a column with the same name (`language_code` in this example). ENRICH will look for records in the enrich index based on the match field value.
+
+```esql
+ROW language_code = "1"
+| ENRICH languages_policy
+```
+
+To use a column with a different name than the `match_field` defined in the policy as the match field, use `ON <column-name>`:
+
+```esql
+ROW a = "1"
+| ENRICH languages_policy ON a
+```
+
+By default, each of the enrich fields defined in the policy is added as a column. To explicitly select the enrich fields that are added, use `WITH <field1>, <field2>, ...`:
+
+```esql
+ROW a = "1"
+| ENRICH languages_policy ON a WITH language_name
+```
+
+You can rename the columns that are added using `WITH new_name=<field1>`:
+
+```esql
+ROW a = "1"
+| ENRICH languages_policy ON a WITH name = language_name
+```
+
+### Limitations
+- In case of name collisions, the newly created columns will override existing columns.
+- The ENRICH command only supports enrich policies of type `match`.
+- ENRICH only supports enriching on a column of type `keyword`.

@@ -31,15 +31,16 @@ export default function ({ getService, loadTestFile }: FtrProviderContext) {
 
       await ml.testResources.resetKibanaTimeZone();
     });
-
     loadTestFile(require.resolve('./index_data_visualizer'));
     loadTestFile(require.resolve('./index_data_visualizer_random_sampler'));
     loadTestFile(require.resolve('./index_data_visualizer_filters'));
     loadTestFile(require.resolve('./index_data_visualizer_grid_in_discover'));
+    loadTestFile(require.resolve('./index_data_visualizer_grid_in_discover_trial'));
     loadTestFile(require.resolve('./index_data_visualizer_grid_in_dashboard'));
     loadTestFile(require.resolve('./index_data_visualizer_actions_panel'));
     loadTestFile(require.resolve('./index_data_visualizer_data_view_management'));
     loadTestFile(require.resolve('./file_data_visualizer'));
     loadTestFile(require.resolve('./data_drift'));
+    loadTestFile(require.resolve('./esql_data_visualizer'));
   });
 }

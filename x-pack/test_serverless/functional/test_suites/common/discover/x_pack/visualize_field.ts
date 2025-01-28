@@ -16,6 +16,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const retry = getService('retry');
   const kibanaServer = getService('kibanaServer');
+  const dataViews = getService('dataViews');
   const PageObjects = getPageObjects([
     'common',
     'svlCommonPage',
@@ -47,7 +48,11 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
     beforeEach(async () => {
       await PageObjects.common.navigateToApp('discover');
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
       await setDiscoverTimeRange();
+      await PageObjects.header.waitUntilLoadingHasFinished();
+      await PageObjects.discover.waitUntilSearchingHasFinished();
     });
 
     after(async () => {
@@ -63,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.unifiedFieldList.expectFieldListItemVisualize('bytes');
     });
 
-    it('visualizes field to Lens and loads fields to the dimesion editor', async () => {
+    it('visualizes field to Lens and loads fields to the dimension editor', async () => {
       await PageObjects.unifiedFieldList.findFieldByName('bytes');
       await PageObjects.unifiedFieldList.clickFieldListItemVisualize('bytes');
       await PageObjects.header.waitUntilLoadingHasFinished();
@@ -104,7 +109,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       await PageObjects.header.waitUntilLoadingHasFinished();
       await retry.try(async () => {
         const breakdownLabel = await testSubjects.find(
-          'lnsDragDrop_draggable-Top 3 values of extension.raw'
+          'lnsDragDrop_domDraggable_Top 3 values of extension.raw'
         );
 
         const lnsWorkspace = await testSubjects.find('lnsWorkspace');
@@ -119,16 +124,15 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it('should visualize correctly using adhoc data view', async () => {
-      await PageObjects.discover.createAdHocDataView('logst', true);
-      await PageObjects.header.waitUntilLoadingHasFinished();
+      await dataViews.createFromSearchBar({
+        name: 'logst',
+        adHoc: true,
+        hasTimeField: true,
+      });
 
       await testSubjects.click('unifiedHistogramEditVisualization');
       await PageObjects.header.waitUntilLoadingHasFinished();
-
-      await retry.try(async () => {
-        const selectedPattern = await PageObjects.lens.getDataPanelIndexPattern();
-        expect(selectedPattern).to.eql('logst*');
-      });
+      await dataViews.waitForSwitcherToBe('logst*');
     });
 
     // TODO: ES|QL tests removed since ES|QL isn't supported in Serverless

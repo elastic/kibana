@@ -1,0 +1,71 @@
+openapi: 3.0.0
+
+info:
+  title: Apply DataView indices to all installed engines
+  version: '2023-10-31'
+paths:
+  /api/entity_store/engines/apply_dataview_indices:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ApplyEntityEngineDataviewIndices
+      summary: Apply DataView indices to all installed engines
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+
+        '207':
+          description: Partial successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                  result:
+                    type: array
+                    items:
+                      $ref: '#/components/schemas/EngineDataviewUpdateResult'
+                  errors:
+                    type: array
+                    items:
+                      type: string
+        '500':
+          description: Error response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  body:
+                    type: string
+                  statusCode:
+                    type: number
+components:
+  schemas:
+    EngineDataviewUpdateResult:
+      type: object
+      properties:
+        type:
+          type: string
+        changes:
+          type: object
+          properties:
+            indexPatterns:
+              type: array
+              items:
+                type: string
+      required:
+        - type

@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { range } from 'lodash';
 import moment from 'moment';
 import { cpus } from 'os';
@@ -24,7 +26,7 @@ export async function startHistoricalDataUpload({
   from: Date;
   to: Date;
 }) {
-  const { logger, esUrl, version } = await bootstrap(runOptions);
+  const { logger, esUrl, version, kibanaUrl } = await bootstrap(runOptions);
 
   const cores = cpus().length;
 
@@ -91,6 +93,7 @@ export async function startHistoricalDataUpload({
         workerId: workerIndex.toString(),
         esUrl,
         version,
+        kibanaUrl,
       };
       const worker = new Worker(Path.join(__dirname, './worker.js'), {
         workerData,

@@ -1,12 +1,14 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import type { OpenAPIV3 } from 'openapi-types';
+import { GenerationContext } from './get_generation_context';
 
 interface AdditionalProperties {
   /**
@@ -16,6 +18,11 @@ interface AdditionalProperties {
 }
 
 export type OpenApiDocument = OpenAPIV3.Document<AdditionalProperties>;
+export type OpenApiComponentsObject = OpenAPIV3.ComponentsObject;
+export type OpenApiSchemasObject = Record<
+  string,
+  OpenAPIV3.ReferenceObject | OpenAPIV3.SchemaObject
+>;
 
 // Override the OpenAPI types to add the x-codegen-enabled property to the
 // components object.
@@ -69,5 +76,12 @@ export interface NormalizedOperation {
   requestParams?: NormalizedSchemaItem;
   requestQuery?: NormalizedSchemaItem;
   requestBody?: NormalizedSchemaItem;
+  requestAttachment?: NormalizedSchemaItem;
   response?: NormalizedSchemaItem;
+}
+
+export interface ParsedSource {
+  sourcePath: string;
+  generatedPath: string;
+  generationContext: GenerationContext;
 }

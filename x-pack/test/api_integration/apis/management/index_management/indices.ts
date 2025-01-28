@@ -13,6 +13,7 @@ import { indicesHelpers } from './lib/indices.helpers';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
+  const es = getService('es');
   const { createIndex, deleteAllIndices, catIndex, indexStats } = indicesHelpers(getService);
 
   const {
@@ -22,14 +23,36 @@ export default function ({ getService }: FtrProviderContext) {
     flushIndex,
     refreshIndex,
     forceMerge,
-    unfreeze,
     list,
     reload,
     clearCache,
+    create,
   } = indicesApi(getService);
 
   describe('indices', () => {
     after(async () => await deleteAllIndices());
+
+    describe('create', () => {
+      it('should create an index', async () => {
+        const indexName = 'test-create-index-1';
+        await create(indexName, 'logsdb').expect(200);
+
+        const { body: indices } = await catIndex(indexName, 'i');
+        expect(indices.map((indexItem) => indexItem.i)).to.contain(indexName);
+
+        await es.indices.delete({ index: indexName });
+      });
+
+      it('should require index name to be provided', async () => {
+        const { body } = await create(undefined, 'standard').expect(400);
+        expect(body.message).to.contain('expected value of type [string]');
+      });
+
+      it('should require index mode to be provided', async () => {
+        const { body } = await create('test-create-index-2', undefined).expect(400);
+        expect(body.message).to.contain('expected value of type [string]');
+      });
+    });
 
     describe('clear cache', () => {
       it('should clear the cache on a single index', async () => {
@@ -148,20 +171,6 @@ export default function ({ getService }: FtrProviderContext) {
       it('should allow to define the number of segments', async () => {
         const index = await createIndex();
         await forceMerge(index, { maxNumSegments: 1 }).expect(200);
-      });
-    });
-
-    describe('unfreeze', () => {
-      it('should unfreeze an index', async () => {
-        const index = await createIndex();
-
-        // Even if the index is already unfrozen, calling the unfreeze api
-        // will have no effect on it and will return a 200.
-        await unfreeze(index).expect(200);
-        const {
-          body: [cat2],
-        } = await catIndex(index, 'sth');
-        expect(cat2.sth).to.be('false');
       });
     });
 

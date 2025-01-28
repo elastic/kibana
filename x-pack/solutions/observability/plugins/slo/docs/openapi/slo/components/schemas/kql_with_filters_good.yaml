@@ -1,0 +1,14 @@
+title: KQL query for good events
+description: The KQL query used to define the good events.
+oneOf:
+  - description: the KQL query to filter the documents with.
+    type: string
+    example: 'request.latency <= 150 and request.status_code : "2xx"'
+  - type: object
+    properties:
+      kqlQuery:
+        type: string
+      filters:
+        type: array
+        items:
+          $ref: "filter.yaml"

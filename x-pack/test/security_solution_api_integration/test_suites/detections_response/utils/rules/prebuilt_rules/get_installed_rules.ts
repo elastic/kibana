@@ -17,9 +17,7 @@ import { FindRulesResponse } from '@kbn/security-solution-plugin/common/api/dete
  * @returns Fleet install package response
  */
 
-export const getInstalledRules = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
-): Promise<FindRulesResponse> => {
+export const getInstalledRules = async (supertest: SuperTest.Agent): Promise<FindRulesResponse> => {
   const { body: rulesResponse } = await supertest
     .get(`${DETECTION_ENGINE_RULES_URL_FIND}?per_page=10000`)
     .set('kbn-xsrf', 'true')

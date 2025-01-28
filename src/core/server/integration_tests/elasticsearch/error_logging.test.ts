@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import {
@@ -74,7 +75,8 @@ describe('Error logging', () => {
           .map((call) => call[0])
           .find((call) => call.includes('logging elasticsearch error'));
 
-        expect(JSON.parse(ourCall)).toEqual({
+        const parsedLine = JSON.parse(ourCall);
+        expect(parsedLine).toEqual({
           '@timestamp': expect.any(String),
           ecs: {
             version: expect.any(String),
@@ -89,7 +91,12 @@ describe('Error logging', () => {
             pid: expect.any(Number),
             uptime: expect.any(Number),
           },
+          stack: expect.stringContaining('ResponseError: parsing_exception'),
         });
+        // it contains the offending line for troubleshooting.
+        expect(parsedLine.stack).toContain(
+          'src/core/server/integration_tests/elasticsearch/error_logging.test.ts:64:9'
+        );
       }
     });
   });

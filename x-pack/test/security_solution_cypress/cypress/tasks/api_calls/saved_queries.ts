@@ -41,23 +41,35 @@ export const createSavedQuery = (
     },
   });
 
-export const deleteSavedQueries = () => {
-  const kibanaIndexUrl = `${Cypress.env('ELASTICSEARCH_URL')}/.kibana_\*`;
-  rootRequest({
+export const getSavedQueries = () =>
+  rootRequest<{ total: number; savedQueries: SavedQuery[] }>({
     method: 'POST',
-    url: `${kibanaIndexUrl}/_delete_by_query?conflicts=proceed&refresh`,
+    url: `${SAVED_QUERY_BASE_URL}/_find`,
     body: {
-      query: {
-        bool: {
-          filter: [
-            {
-              match: {
-                type: 'query',
-              },
-            },
-          ],
-        },
-      },
+      page: 1,
+      perPage: 50,
+      search: '',
     },
+    headers: {
+      [ELASTIC_HTTP_VERSION_HEADER]: '1',
+    },
+  });
+
+export const deleteSavedQueries = () => {
+  getSavedQueries().then(($response) => {
+    if ($response.body.total !== 0) {
+      const savedQueriesId = $response.body.savedQueries.map((savedQuery) => {
+        return savedQuery.id;
+      });
+      savedQueriesId.forEach((id) => {
+        rootRequest({
+          method: 'DELETE',
+          url: `${SAVED_QUERY_BASE_URL}/${id}`,
+          headers: {
+            [ELASTIC_HTTP_VERSION_HEADER]: '1',
+          },
+        });
+      });
+    }
   });
 };

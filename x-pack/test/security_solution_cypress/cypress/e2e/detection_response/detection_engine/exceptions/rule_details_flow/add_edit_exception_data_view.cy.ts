@@ -27,10 +27,13 @@ import {
   openEditException,
   removeException,
   visitRuleDetailsPage,
-  waitForTheRuleToBeExecuted,
 } from '../../../../../tasks/rule_details';
 
-import { postDataView, deleteAlertsAndRules } from '../../../../../tasks/api_calls/common';
+import {
+  postDataView,
+  deleteAlertsAndRules,
+  deleteDataView,
+} from '../../../../../tasks/api_calls/common';
 import {
   NO_EXCEPTIONS_EXIST_PROMPT,
   EXCEPTION_ITEM_VIEWER_CONTAINER,
@@ -42,6 +45,8 @@ import {
 } from '../../../../../screens/exceptions';
 import { waitForAlertsToPopulate } from '../../../../../tasks/create_new_rule';
 
+const DATAVIEW = 'auditbeat-exceptions-*';
+
 describe(
   'Add exception using data views from rule details',
   { tags: ['@ess', '@serverless'] },
@@ -51,21 +56,21 @@ describe(
 
     before(() => {
       cy.task('esArchiverLoad', { archiveName: 'exceptions' });
-      login();
-      postDataView('exceptions-*');
     });
 
     after(() => {
-      cy.task('esArchiverUnload', 'exceptions');
+      cy.task('esArchiverUnload', { archiveName: 'exceptions' });
     });
 
     beforeEach(() => {
+      deleteDataView(DATAVIEW);
+      postDataView(DATAVIEW);
       login();
       deleteAlertsAndRules();
       createRule(
         getNewRule({
           query: 'agent.name:*',
-          data_view_id: 'exceptions-*',
+          data_view_id: DATAVIEW,
           rule_id: 'rule_testing',
           enabled: true,
         })
@@ -74,7 +79,7 @@ describe(
     });
 
     afterEach(() => {
-      cy.task('esArchiverUnload', 'exceptions_2');
+      cy.task('esArchiverUnload', { archiveName: 'exceptions_2' });
     });
 
     it('Creates an exception item and close all matching alerts', () => {
@@ -125,7 +130,6 @@ describe(
       // now that there are no more exceptions, the docs should match and populate alerts
       goToAlertsTab();
       goToOpenedAlertsOnRuleDetailsPage();
-      waitForTheRuleToBeExecuted();
       waitForAlertsToPopulate();
 
       cy.get(ALERTS_COUNT).should('exist');

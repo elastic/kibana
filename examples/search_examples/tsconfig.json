@@ -20,7 +20,6 @@
     "@kbn/data-views-plugin",
     "@kbn/inspector-plugin",
     "@kbn/kibana-utils-plugin",
-    "@kbn/kibana-react-plugin",
     "@kbn/navigation-plugin",
     "@kbn/share-plugin",
     "@kbn/developer-examples-plugin",
@@ -29,10 +28,12 @@
     "@kbn/utility-types",
     "@kbn/es-query",
     "@kbn/i18n",
-    "@kbn/core-mount-utils-browser-internal",
     "@kbn/config-schema",
     "@kbn/shared-ux-router",
-    "@kbn/search-response-warnings",
+    "@kbn/search-types",
     "@kbn/shared-ux-link-redirect-app",
+    "@kbn/react-kibana-mount",
+    "@kbn/search-response-warnings",
+    "@kbn/react-kibana-context-render",
   ]
 }

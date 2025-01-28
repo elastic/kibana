@@ -53,7 +53,8 @@ Any changes you make to `packs` from this field are not reflected in the UI on t
 While this allows you to use advanced Osquery functionality like pack discovery queries, you do lose the ability to manage packs defined this way from the Osquery *Packs* page.
 =========================
 
-. From the {kib} main menu, click *Fleet*, then the *Agent policies* tab.
+. Go to *Fleet* using the navigation menu or the 
+<<kibana-navigation-search,global search field>>, then open the *Agent policies* tab.
 
 . Click the name of the agent policy where you want to adjust the Osquery configuration. The configuration changes you make only apply to the policy you select.
 
@@ -136,7 +137,8 @@ and Osquerybeat in the agent directory. Refer to the {fleet-guide}/installation-
 
 To get more details in the logs, change the agent logging level to debug:
 
-. Open the main menu, and then select **Fleet**.
+. Go to **Fleet** using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 . Select the agent that you want to debug.
 

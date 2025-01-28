@@ -39,6 +39,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
     return (await targetElement._webElement.getId()) === (await activeElement._webElement.getId());
   };
 
+  // https://github.com/elastic/kibana/pull/190690
+  // fails after missing `awaits` were added
   describe('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
@@ -132,7 +134,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('comment area does not have focus on page load', async () => {
-        browser.refresh();
+        await browser.refresh();
         expect(await hasFocus('euiMarkdownEditorTextArea')).to.be(false);
       });
 
@@ -579,12 +581,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
       });
 
-      /**
-       * There is this bug https://github.com/elastic/kibana/issues/157280
-       * where this test randomly reproduces thus making the test flaky.
-       * Skipping for now until we fix it.
-       */
-      it.skip('should persist the draft of new comment while description is updated', async () => {
+      it('should persist the draft of new comment while description is updated', async () => {
         let commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -785,6 +782,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
 
+        await header.waitUntilLoadingHasFinished();
+
         await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
 
         await header.waitUntilLoadingHasFinished();
@@ -821,7 +820,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('pagination', async () => {
+    describe('pagination', () => {
       let createdCase: any;
 
       before(async () => {
@@ -869,17 +868,15 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
         expect(userActionsLists).length(2);
 
-        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(10);
+        expect(await userActionsLists[0].findAllByCssSelector('li')).length(10);
 
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+        expect(await userActionsLists[1].findAllByCssSelector('li')).length(4);
 
-        testSubjects.click('cases-show-more-user-actions');
+        await testSubjects.click('cases-show-more-user-actions');
 
         await header.waitUntilLoadingHasFinished();
 
-        expect(await userActionsLists[0].findAllByClassName('euiComment')).length(20);
-
-        expect(await userActionsLists[1].findAllByClassName('euiComment')).length(4);
+        expect(await userActionsLists[0].findAllByCssSelector('li')).length(20);
       });
     });
 
@@ -1241,6 +1238,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           defaultValue: false,
           required: true,
         },
+        {
+          key: 'valid_key_3',
+          label: 'Sync',
+          type: CustomFieldTypes.NUMBER as const,
+          defaultValue: 123,
+          required: true,
+        },
       ];
 
       before(async () => {
@@ -1258,6 +1262,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
               type: CustomFieldTypes.TOGGLE,
               value: true,
             },
+            {
+              key: 'valid_key_3',
+              type: CustomFieldTypes.NUMBER,
+              value: 1234,
+            },
           ],
         });
         await cases.casesTable.waitForCasesToBeListed();
@@ -1265,7 +1274,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
       });
 
-      afterEach(async () => {
+      after(async () => {
         await cases.api.deleteAllCases();
       });
 
@@ -1310,6 +1319,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
 
         expect(userActions).length(2);
+      });
+
+      it('updates a number custom field correctly', async () => {
+        const numberField = await testSubjects.find(
+          `case-number-custom-field-${customFields[2].key}`
+        );
+        expect(await numberField.getVisibleText()).equal('1234');
+
+        await testSubjects.click(`case-number-custom-field-edit-button-${customFields[2].key}`);
+
+        await retry.waitFor('custom field edit form to exist', async () => {
+          return await testSubjects.exists(
+            `case-number-custom-field-form-field-${customFields[2].key}`
+          );
+        });
+
+        const inputField = await testSubjects.find(
+          `case-number-custom-field-form-field-${customFields[2].key}`
+        );
+
+        await inputField.type('12345');
+
+        await testSubjects.click(`case-number-custom-field-submit-button-${customFields[2].key}`);
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await numberField.getVisibleText()).equal('123412345');
       });
     });
   });

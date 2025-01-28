@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Url from 'url';
@@ -68,7 +69,7 @@ export interface ReqOptions {
   description?: string;
   path: string;
   query?: Record<string, any>;
-  method: 'GET' | 'POST' | 'PUT' | 'DELETE';
+  method: 'GET' | 'POST' | 'PUT' | 'DELETE' | 'PATCH';
   body?: any;
   retries?: number;
   headers?: Record<string, string>;
@@ -96,6 +97,7 @@ export class KbnClientRequester {
       Url.parse(options.url).protocol === 'https:'
         ? new Https.Agent({
             ca: options.certificateAuthorities,
+            rejectUnauthorized: false,
           })
         : null;
   }
@@ -115,61 +117,90 @@ export class KbnClientRequester {
 
   async request<T>(options: ReqOptions): Promise<AxiosResponse<T>> {
     const url = this.resolveUrl(options.path);
-    const description = options.description || `${options.method} ${url}`;
+    const redacted = redactUrl(url);
     let attempt = 0;
     const maxAttempts = options.retries ?? DEFAULT_MAX_ATTEMPTS;
+    const msgOrThrow = errMsg({
+      redacted,
+      maxAttempts,
+      requestedRetries: options.retries !== undefined,
+      failedToGetResponseSvc: (error: Error) => isAxiosRequestError(error),
+      ...options,
+    });
 
     while (true) {
       attempt += 1;
-
       try {
-        const response = await Axios.request({
-          method: options.method,
-          url,
-          data: options.body,
-          params: options.query,
-          headers: {
-            ...options.headers,
-            'kbn-xsrf': 'kbn-client',
-            'x-elastic-internal-origin': 'kbn-client',
-          },
-          httpsAgent: this.httpsAgent,
-          responseType: options.responseType,
-          // work around https://github.com/axios/axios/issues/2791
-          transformResponse: options.responseType === 'text' ? [(x) => x] : undefined,
-          maxContentLength: 30000000,
-          maxBodyLength: 30000000,
-          paramsSerializer: (params) => Qs.stringify(params),
-        });
-
-        return response;
+        this.log.debug(`Requesting url (redacted): [${redacted}]`);
+        return await Axios.request(buildRequest(url, this.httpsAgent, options));
       } catch (error) {
-        const conflictOnGet = isConcliftOnGetError(error);
-        const requestedRetries = options.retries !== undefined;
-        const failedToGetResponse = isAxiosRequestError(error);
-
-        if (isIgnorableError(error, options.ignoreErrors)) {
-          return error.response;
-        }
-
-        let errorMessage;
-        if (conflictOnGet) {
-          errorMessage = `Conflict on GET (path=${options.path}, attempt=${attempt}/${maxAttempts})`;
-          this.log.error(errorMessage);
-        } else if (requestedRetries || failedToGetResponse) {
-          errorMessage = `[${description}] request failed (attempt=${attempt}/${maxAttempts}): ${error.message}`;
-          this.log.error(errorMessage);
-        } else {
-          throw error;
-        }
-
+        if (isIgnorableError(error, options.ignoreErrors)) return error.response;
         if (attempt < maxAttempts) {
           await delay(1000 * attempt);
           continue;
         }
-
-        throw new KbnClientRequesterError(`${errorMessage} -- and ran out of retries`, error);
+        throw new KbnClientRequesterError(
+          `${msgOrThrow(attempt, error)} -- and ran out of retries`,
+          error
+        );
       }
     }
   }
+}
+
+export function errMsg({
+  redacted,
+  requestedRetries,
+  maxAttempts,
+  failedToGetResponseSvc,
+  path,
+  method,
+  description,
+}: ReqOptions & {
+  redacted: string;
+  maxAttempts: number;
+  requestedRetries: boolean;
+  failedToGetResponseSvc: (x: Error) => boolean;
+}) {
+  return function errMsgOrReThrow(attempt: number, _: any) {
+    const result = isConcliftOnGetError(_)
+      ? `Conflict on GET (path=${path}, attempt=${attempt}/${maxAttempts})`
+      : requestedRetries || failedToGetResponseSvc(_)
+      ? `[${
+          description || `${method} - ${redacted}`
+        }] request failed (attempt=${attempt}/${maxAttempts}): ${_?.code}`
+      : '';
+    if (result === '') throw _;
+    return result;
+  };
+}
+
+export function redactUrl(_: string): string {
+  const url = new URL(_);
+  return url.password ? `${url.protocol}//${url.host}${url.pathname}` : _;
+}
+
+export function buildRequest(
+  url: any,
+  httpsAgent: Https.Agent | null,
+  { method, body, query, headers, responseType }: any
+) {
+  return {
+    method,
+    url,
+    data: body,
+    params: query,
+    headers: {
+      ...headers,
+      'kbn-xsrf': 'kbn-client',
+      'x-elastic-internal-origin': 'kbn-client',
+    },
+    httpsAgent,
+    responseType,
+    // work around https://github.com/axios/axios/issues/2791
+    transformResponse: responseType === 'text' ? [(x: any) => x] : undefined,
+    maxContentLength: 30000000,
+    maxBodyLength: 30000000,
+    paramsSerializer: (params: any) => Qs.stringify(params),
+  };
 }

@@ -16,7 +16,7 @@ import type SuperTest from 'supertest';
  * @returns Review Install prebuilt rules response
  */
 export const reviewPrebuiltRulesToInstall = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>
+  supertest: SuperTest.Agent
 ): Promise<ReviewRuleInstallationResponseBody> => {
   const response = await supertest
     .post(REVIEW_RULE_INSTALLATION_URL)

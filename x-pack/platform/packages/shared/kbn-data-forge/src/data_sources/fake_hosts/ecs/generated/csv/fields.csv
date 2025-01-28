@@ -1,0 +1,54 @@
+ECS_Version,Indexed,Field_Set,Field,Type,Level,Normalization,Example,Description
+8.0.0,true,base,@timestamp,date,core,,2016-05-23T08:05:34.853Z,Date/time when the event originated.
+8.0.0,true,base,labels,object,core,,"{""application"": ""foo-bar"", ""env"": ""production""}",Custom key/value pairs.
+8.0.0,true,base,message,match_only_text,core,,Hello World,Log message optimized for viewing in a log viewer.
+8.0.0,true,base,tags,keyword,core,array,"[""production"", ""env2""]",List of keywords used to tag each event.
+8.0.0,true,event,event.dataset,keyword,core,,apache.access,Name of the dataset.
+8.0.0,true,event,event.module,keyword,core,,apache,Name of the module this data is coming from.
+8.0.0,true,host,host.architecture,keyword,core,,x86_64,Operating system architecture.
+8.0.0,true,host,host.cpu.usage,scaled_float,extended,,,"Percent CPU used, between 0 and 1."
+8.0.0,true,host,host.disk.read.bytes,long,extended,,,The number of bytes read by all disks.
+8.0.0,true,host,host.disk.write.bytes,long,extended,,,The number of bytes written on all disks.
+8.0.0,true,host,host.domain,keyword,extended,,CONTOSO,Name of the directory the group is a member of.
+8.0.0,true,host,host.geo.city_name,keyword,core,,Montreal,City name.
+8.0.0,true,host,host.geo.continent_code,keyword,core,,NA,Continent code.
+8.0.0,true,host,host.geo.continent_name,keyword,core,,North America,Name of the continent.
+8.0.0,true,host,host.geo.country_iso_code,keyword,core,,CA,Country ISO code.
+8.0.0,true,host,host.geo.country_name,keyword,core,,Canada,Country name.
+8.0.0,true,host,host.geo.location,geo_point,core,,"{ ""lon"": -73.614830, ""lat"": 45.505918 }",Longitude and latitude.
+8.0.0,true,host,host.geo.name,keyword,extended,,boston-dc,User-defined description of a location.
+8.0.0,true,host,host.geo.postal_code,keyword,core,,94040,Postal code.
+8.0.0,true,host,host.geo.region_iso_code,keyword,core,,CA-QC,Region ISO code.
+8.0.0,true,host,host.geo.region_name,keyword,core,,Quebec,Region name.
+8.0.0,true,host,host.geo.timezone,keyword,core,,America/Argentina/Buenos_Aires,Time zone.
+8.0.0,true,host,host.hostname,keyword,core,,,Hostname of the host.
+8.0.0,true,host,host.id,keyword,core,,,Unique host id.
+8.0.0,true,host,host.ip,ip,core,array,,Host ip addresses.
+8.0.0,true,host,host.mac,keyword,core,array,"[""00-00-5E-00-53-23"", ""00-00-5E-00-53-24""]",Host MAC addresses.
+8.0.0,true,host,host.name,keyword,core,,,Name of the host.
+8.0.0,true,host,host.network.egress.bytes,long,extended,,,The number of bytes sent on all network interfaces.
+8.0.0,true,host,host.network.egress.packets,long,extended,,,The number of packets sent on all network interfaces.
+8.0.0,true,host,host.network.ingress.bytes,long,extended,,,The number of bytes received on all network interfaces.
+8.0.0,true,host,host.network.ingress.packets,long,extended,,,The number of packets received on all network interfaces.
+8.0.0,true,host,host.os.family,keyword,extended,,debian,"OS family (such as redhat, debian, freebsd, windows)."
+8.0.0,true,host,host.os.full,keyword,extended,,Mac OS Mojave,"Operating system name, including the version or code name."
+8.0.0,true,host,host.os.full.text,match_only_text,extended,,Mac OS Mojave,"Operating system name, including the version or code name."
+8.0.0,true,host,host.os.kernel,keyword,extended,,4.4.0-112-generic,Operating system kernel version as a raw string.
+8.0.0,true,host,host.os.name,keyword,extended,,Mac OS X,"Operating system name, without the version."
+8.0.0,true,host,host.os.name.text,match_only_text,extended,,Mac OS X,"Operating system name, without the version."
+8.0.0,true,host,host.os.platform,keyword,extended,,darwin,"Operating system platform (such centos, ubuntu, windows)."
+8.0.0,true,host,host.os.type,keyword,extended,,macos,"Which commercial OS family (one of: linux, macos, unix or windows)."
+8.0.0,true,host,host.os.version,keyword,extended,,10.14.1,Operating system version as a raw string.
+8.0.0,true,host,host.type,keyword,core,,,Type of host.
+8.0.0,true,host,host.uptime,long,extended,,1325,Seconds the host has been up.
+8.0.0,true,metricset,metricset.interval,long,custom,,,The interval of the data
+8.0.0,true,system,system.cpu.cores,integer,custom,,,Number of CPU cores
+8.0.0,true,system,system.cpu.system.pct,float,custom,,,Percentage of CPU usage by system processes
+8.0.0,true,system,system.cpu.total.norm.pct,float,custom,,,Percentage of CPU usage
+8.0.0,true,system,system.cpu.user.pct,float,custom,,,Percentage of CPU usage by user processes
+8.0.0,true,system,system.filesystem.used.pct,float,custom,,,Percentage of filesytem used by system processes
+8.0.0,true,system,system.load.1,float,custom,,,Load 1m by system processes
+8.0.0,true,system,system.memory.actual.used.pct,float,custom,,,Percentage of actual memory by system processes
+8.0.0,true,system,system.network.in.bytes,long,custom,,,Number of incoming bytes
+8.0.0,true,system,system.network.name,keyword,custom,,,Name of the network interface
+8.0.0,true,system,system.network.out.bytes,long,custom,,,Number of outgoing bytes

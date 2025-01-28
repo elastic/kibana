@@ -1,7 +1,9 @@
 {
-  "type": "shared-common",
+  "type": "core",
   "id": "@kbn/core",
   "owner": "@elastic/kibana-core",
+  "group": "platform",
+  "visibility": "shared",
   "description": "The core plugin has core functionality",
   "serviceFolders": ["http", "saved_objects", "chrome", "application"]
 }

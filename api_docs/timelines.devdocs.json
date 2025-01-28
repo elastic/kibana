@@ -15,7 +15,7 @@
         "signature": [
           "(arrayIndex: number) => number"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -50,7 +50,7 @@
         "signature": [
           "(element: HTMLElement | null | undefined) => boolean"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -64,7 +64,7 @@
             "signature": [
               "HTMLElement | null | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -85,7 +85,7 @@
         "signature": [
           "({ colindexAttribute, containerElement, ariaColindex, ariaRowindex, rowindexAttribute, }: { colindexAttribute: string; containerElement: Element | null; ariaColindex: number; ariaRowindex: number; rowindexAttribute: string; }) => FocusColumnResult"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -96,7 +96,7 @@
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  ariaColindex,\n  ariaRowindex,\n  rowindexAttribute,\n}",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -107,7 +107,7 @@
                 "tags": [],
                 "label": "colindexAttribute",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -121,7 +121,7 @@
                 "signature": [
                   "Element | null"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -132,7 +132,7 @@
                 "tags": [],
                 "label": "ariaColindex",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -143,7 +143,7 @@
                 "tags": [],
                 "label": "ariaRowindex",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -154,7 +154,7 @@
                 "tags": [],
                 "label": "rowindexAttribute",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -176,7 +176,7 @@
         "signature": [
           "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -187,7 +187,7 @@
             "tags": [],
             "label": "{\n  containerElement,\n  tableClassName,\n}",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -201,7 +201,7 @@
                 "signature": [
                   "HTMLElement | null"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -212,7 +212,7 @@
                 "tags": [],
                 "label": "tableClassName",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -234,7 +234,7 @@
         "signature": [
           "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -245,7 +245,7 @@
             "tags": [],
             "label": "{\n  containerElement,\n  tableClassName,\n}",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -259,7 +259,7 @@
                 "signature": [
                   "HTMLElement | null"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -270,7 +270,7 @@
                 "tags": [],
                 "label": "tableClassName",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -290,7 +290,7 @@
         "signature": [
           "(ariaRowindex: number) => string"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -304,7 +304,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -323,7 +323,7 @@
         "signature": [
           "(ariaRowindex: number) => string"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -337,7 +337,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -361,7 +361,7 @@
           "; shiftKey: boolean; tableHasFocus: (containerElement: HTMLElement | null) => boolean; tableClassName: string; }) => ",
           "SkipFocus"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -372,7 +372,7 @@
             "tags": [],
             "label": "{\n  containerElement,\n  getFocusedCell,\n  shiftKey,\n  tableHasFocus,\n  tableClassName,\n}",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -386,7 +386,7 @@
                 "signature": [
                   "HTMLElement | null"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -400,7 +400,7 @@
                 "signature": [
                   "({ containerElement, tableClassName, }: { containerElement: HTMLElement | null; tableClassName: string; }) => HTMLDivElement | null"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -415,7 +415,7 @@
                     "signature": [
                       "{ containerElement: HTMLElement | null; tableClassName: string; }"
                     ],
-                    "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -428,7 +428,7 @@
                 "tags": [],
                 "label": "shiftKey",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -442,7 +442,7 @@
                 "signature": [
                   "(containerElement: HTMLElement | null) => boolean"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -456,7 +456,7 @@
                     "signature": [
                       "HTMLElement | null"
                     ],
-                    "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                     "deprecated": false,
                     "trackAdoption": false,
                     "isRequired": false
@@ -471,7 +471,7 @@
                 "tags": [],
                 "label": "tableClassName",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -495,7 +495,7 @@
           "SkipFocus",
           "; }) => void"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -506,7 +506,7 @@
             "tags": [],
             "label": "{\n  onSkipFocusBackwards,\n  onSkipFocusForward,\n  skipFocus,\n}",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -520,7 +520,7 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -536,7 +536,7 @@
                 "signature": [
                   "() => void"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [],
@@ -552,7 +552,7 @@
                 "signature": [
                   "\"SKIP_FOCUS_BACKWARDS\" | \"SKIP_FOCUS_FORWARD\" | \"SKIP_FOCUS_NOOP\""
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -574,7 +574,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -588,7 +588,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -609,7 +609,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -623,7 +623,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -644,7 +644,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -658,7 +658,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -679,7 +679,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => boolean"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -693,7 +693,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -716,7 +716,7 @@
           "OnColumnFocused",
           "; rowindexAttribute: string; }) => void"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -727,7 +727,7 @@
             "tags": [],
             "label": "{\n  colindexAttribute,\n  containerElement,\n  event,\n  maxAriaColindex,\n  maxAriaRowindex,\n  onColumnFocused,\n  rowindexAttribute,\n}",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -738,7 +738,7 @@
                 "tags": [],
                 "label": "colindexAttribute",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -752,7 +752,7 @@
                 "signature": [
                   "HTMLDivElement | null"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -766,7 +766,7 @@
                 "signature": [
                   "React.KeyboardEvent<Element>"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -777,7 +777,7 @@
                 "tags": [],
                 "label": "maxAriaColindex",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -788,7 +788,7 @@
                 "tags": [],
                 "label": "maxAriaRowindex",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -802,7 +802,7 @@
                 "signature": [
                   "({ newFocusedColumn, newFocusedColumnAriaColindex, }: { newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }) => void"
                 ],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "returnComment": [],
@@ -817,7 +817,7 @@
                     "signature": [
                       "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
                     ],
-                    "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -830,7 +830,7 @@
                 "tags": [],
                 "label": "rowindexAttribute",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -852,7 +852,7 @@
         "signature": [
           "(event: React.KeyboardEvent<Element>) => void"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -866,7 +866,7 @@
             "signature": [
               "React.KeyboardEvent<Element>"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -895,7 +895,7 @@
           " extends ",
           "HoverActionComponentProps"
         ],
-        "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+        "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -939,7 +939,7 @@
               "EuiButtonIconProps",
               " & { href?: string | undefined; onClick?: React.MouseEventHandler<HTMLAnchorElement> | undefined; } & React.AnchorHTMLAttributes<HTMLAnchorElement> & { buttonRef?: React.Ref<HTMLAnchorElement> | undefined; })> | React.FunctionComponent<Props> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -953,7 +953,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -982,7 +982,7 @@
               },
               "[] | undefined"
             ],
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -996,7 +996,27 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "timelines",
+            "id": "def-public.AddToTimelineButtonProps.startServices",
+            "type": "Object",
+            "tags": [],
+            "label": "startServices",
+            "description": [],
+            "signature": [
+              "{ i18n: ",
+              "I18nStart",
+              "; analytics: ",
+              "AnalyticsServiceStart",
+              "; theme: ",
+              "ThemeServiceSetup",
+              "; }"
+            ],
+            "path": "x-pack/solutions/security/plugins/timelines/public/components/hover_actions/actions/add_to_timeline.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1018,7 +1038,7 @@
         "signature": [
           "\"aria-colindex\""
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1035,7 +1055,7 @@
         "signature": [
           "\"aria-rowindex\""
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1052,7 +1072,7 @@
         "signature": [
           "\"data-colindex\""
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1069,7 +1089,7 @@
         "signature": [
           "\"data-rowindex\""
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1086,7 +1106,7 @@
         "signature": [
           "1"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1101,7 +1121,7 @@
         "signature": [
           "({ newFocusedColumn, newFocusedColumnAriaColindex, }: { newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }) => void"
         ],
-        "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
@@ -1116,11 +1136,32 @@
             "signature": [
               "{ newFocusedColumn: HTMLDivElement | null; newFocusedColumnAriaColindex: number | null; }"
             ],
-            "path": "x-pack/plugins/timelines/common/utils/accessibility/helpers.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/accessibility/helpers.ts",
             "deprecated": false,
             "trackAdoption": false
           }
         ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-public.TimelinesStartServices",
+        "type": "Type",
+        "tags": [],
+        "label": "TimelinesStartServices",
+        "description": [],
+        "signature": [
+          "{ i18n: ",
+          "I18nStart",
+          "; analytics: ",
+          "AnalyticsServiceStart",
+          "; theme: ",
+          "ThemeServiceSetup",
+          "; }"
+        ],
+        "path": "x-pack/solutions/security/plugins/timelines/public/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
@@ -1132,7 +1173,7 @@
       "tags": [],
       "label": "TimelinesUIStart",
       "description": [],
-      "path": "x-pack/plugins/timelines/public/types.ts",
+      "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1140,16 +1181,40 @@
           "parentPluginId": "timelines",
           "id": "def-public.TimelinesUIStart.getHoverActions",
           "type": "Function",
-          "tags": [],
+          "tags": [
+            "deprecated"
+          ],
           "label": "getHoverActions",
           "description": [],
           "signature": [
             "() => ",
             "HoverActionsConfig"
           ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
-          "deprecated": false,
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
+          "deprecated": true,
           "trackAdoption": false,
+          "references": [
+            {
+              "plugin": "osquery",
+              "path": "x-pack/platform/plugins/shared/osquery/public/timelines/add_to_timeline_button.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            },
+            {
+              "plugin": "threatIntelligence",
+              "path": "x-pack/solutions/security/plugins/threat_intelligence/public/modules/timeline/components/add_to_timeline.tsx"
+            }
+          ],
           "children": [],
           "returnComment": []
         },
@@ -1163,7 +1228,7 @@
           "signature": [
             "() => any"
           ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1183,7 +1248,7 @@
             "LoadingPanelProps",
             ", string | React.JSXElementConstructor<any>>"
           ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1197,7 +1262,7 @@
               "signature": [
                 "LoadingPanelProps"
               ],
-              "path": "x-pack/plugins/timelines/public/types.ts",
+              "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1219,7 +1284,7 @@
             "LastUpdatedAtProps",
             ", string | React.JSXElementConstructor<any>>"
           ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1233,7 +1298,7 @@
               "signature": [
                 "LastUpdatedAtProps"
               ],
-              "path": "x-pack/plugins/timelines/public/types.ts",
+              "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1254,7 +1319,7 @@
             ") => ",
             "UseAddToTimeline"
           ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1272,7 +1337,7 @@
             "SensorAPI",
             ") => void"
           ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1292,7 +1357,7 @@
             "AnyAction",
             ">) => void"
           ],
-          "path": "x-pack/plugins/timelines/public/types.ts",
+          "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1309,7 +1374,7 @@
                 "AnyAction",
                 ">"
               ],
-              "path": "x-pack/plugins/timelines/public/types.ts",
+              "path": "x-pack/solutions/security/plugins/timelines/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1336,7 +1401,7 @@
       "tags": [],
       "label": "TimelinesPluginUI",
       "description": [],
-      "path": "x-pack/plugins/timelines/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/timelines/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1350,7 +1415,7 @@
       "tags": [],
       "label": "TimelinesPluginStart",
       "description": [],
-      "path": "x-pack/plugins/timelines/server/types.ts",
+      "path": "x-pack/solutions/security/plugins/timelines/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [],
@@ -1360,419 +1425,182 @@
   },
   "common": {
     "classes": [],
-    "functions": [],
-    "interfaces": [
+    "functions": [
       {
         "parentPluginId": "timelines",
-        "id": "def-common.BrowserField",
-        "type": "Interface",
-        "tags": [
-          "deprecated"
-        ],
-        "label": "BrowserField",
+        "id": "def-common.getDataFromFieldsHits",
+        "type": "Function",
+        "tags": [],
+        "label": "getDataFromFieldsHits",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-        "deprecated": true,
-        "trackAdoption": false,
-        "references": [
+        "signature": [
+          "(fields: ",
+          "Fields",
+          "<unknown[]>, prependField?: string | undefined, prependFieldCategory?: string | undefined) => ",
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+            "pluginId": "timelines",
+            "scope": "common",
+            "docId": "kibTimelinesPluginApi",
+            "section": "def-common.TimelineEventsDetailsItem",
+            "text": "TimelineEventsDetailsItem"
           },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/use_action_cell_data_provider.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/use_action_cell_data_provider.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/table/field_value_cell.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/utils.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/renderers/formatted_field.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/threatmatch_input/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/threatmatch_input/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/alerts_kpis/common/hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/alerts_kpis/common/hooks.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detections/components/alerts_kpis/common/hooks.ts"
-          }
+          "[]"
         ],
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.aggregatable",
-            "type": "boolean",
-            "tags": [],
-            "label": "aggregatable",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.category",
-            "type": "string",
-            "tags": [],
-            "label": "category",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.description",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "description",
-            "description": [],
-            "signature": [
-              "string | null"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.example",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "example",
-            "description": [],
-            "signature": [
-              "string | number | null"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.fields",
+            "id": "def-common.getDataFromFieldsHits.$1",
             "type": "Object",
             "tags": [],
             "label": "fields",
             "description": [],
             "signature": [
-              "{ [x: string]: Partial<",
-              {
-                "pluginId": "timelines",
-                "scope": "common",
-                "docId": "kibTimelinesPluginApi",
-                "section": "def-common.BrowserField",
-                "text": "BrowserField"
-              },
-              ">; }"
+              "Fields",
+              "<unknown[]>"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": true
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.format",
+            "id": "def-common.getDataFromFieldsHits.$2",
             "type": "string",
             "tags": [],
-            "label": "format",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.indexes",
-            "type": "Array",
-            "tags": [],
-            "label": "indexes",
+            "label": "prependField",
             "description": [],
             "signature": [
-              "string[]"
+              "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": false
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.name",
+            "id": "def-common.getDataFromFieldsHits.$3",
             "type": "string",
             "tags": [],
-            "label": "name",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.searchable",
-            "type": "boolean",
-            "tags": [],
-            "label": "searchable",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.type",
-            "type": "string",
-            "tags": [],
-            "label": "type",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.esTypes",
-            "type": "Array",
-            "tags": [],
-            "label": "esTypes",
+            "label": "prependFieldCategory",
             "description": [],
             "signature": [
-              "string[] | undefined"
+              "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
             "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.subType",
-            "type": "CompoundType",
-            "tags": [],
-            "label": "subType",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "@kbn/es-query",
-                "scope": "common",
-                "docId": "kibKbnEsQueryPluginApi",
-                "section": "def-common.IFieldSubType",
-                "text": "IFieldSubType"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.readFromDocValues",
-            "type": "boolean",
-            "tags": [],
-            "label": "readFromDocValues",
-            "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          },
-          {
-            "parentPluginId": "timelines",
-            "id": "def-common.BrowserField.runtimeField",
-            "type": "Object",
-            "tags": [],
-            "label": "runtimeField",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "dataViews",
-                "scope": "common",
-                "docId": "kibDataViewsPluginApi",
-                "section": "def-common.RuntimeField",
-                "text": "RuntimeField"
-              },
-              " | undefined"
-            ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-            "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "isRequired": false
           }
         ],
+        "returnComment": [],
         "initialIsOpen": false
       },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.isGeoField",
+        "type": "Function",
+        "tags": [],
+        "label": "isGeoField",
+        "description": [],
+        "signature": [
+          "(field: string) => boolean"
+        ],
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.isGeoField.$1",
+            "type": "string",
+            "tags": [],
+            "label": "field",
+            "description": [],
+            "signature": [
+              "string"
+            ],
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/field_formatters.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.toArray",
+        "type": "Function",
+        "tags": [],
+        "label": "toArray",
+        "description": [],
+        "signature": [
+          "<T>(value: T | T[] | null | undefined) => T[]"
+        ],
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/to_array.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.toArray.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T | T[] | null | undefined"
+            ],
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/to_array.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "timelines",
+        "id": "def-common.toObjectArrayOfStrings",
+        "type": "Function",
+        "tags": [],
+        "label": "toObjectArrayOfStrings",
+        "description": [],
+        "signature": [
+          "<T>(value: T | T[] | null) => { str: string; isObjectArray?: boolean | undefined; }[]"
+        ],
+        "path": "x-pack/solutions/security/plugins/timelines/common/utils/to_array.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "timelines",
+            "id": "def-common.toObjectArrayOfStrings.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "value",
+            "description": [],
+            "signature": [
+              "T | T[] | null"
+            ],
+            "path": "x-pack/solutions/security/plugins/timelines/common/utils/to_array.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      }
+    ],
+    "interfaces": [
       {
         "parentPluginId": "timelines",
         "id": "def-common.CursorType",
@@ -1780,7 +1608,7 @@
         "tags": [],
         "label": "CursorType",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1795,7 +1623,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1810,7 +1638,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1824,7 +1652,7 @@
         "tags": [],
         "label": "DataProvider",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1837,7 +1665,7 @@
             "description": [
               "Uniquely identifies a data provider"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1850,7 +1678,7 @@
             "description": [
               "Human readable"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1863,7 +1691,7 @@
             "description": [
               "\nWhen `false`, a data provider is temporarily disabled, but not removed from\nthe timeline. default: `true`"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1876,7 +1704,7 @@
             "description": [
               "\nWhen `true`, a data provider is excluding the match, but not removed from\nthe timeline. default: `false`"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1889,7 +1717,7 @@
             "description": [
               "\nReturns the KQL query who have been added by user"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1911,7 +1739,7 @@
                 "text": "QueryMatch"
               }
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1934,7 +1762,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1948,10 +1776,9 @@
               "\nReturns a DataProviderType"
             ],
             "signature": [
-              "DataProviderType",
-              " | undefined"
+              "\"default\" | \"template\" | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1967,27 +1794,27 @@
         ],
         "label": "DeprecatedRowRenderer",
         "description": [
-          "\nThis interface should not be used anymore.\nUse the one from `plugins/security_solution/common/types/timeline`."
+          "\nThis interface should not be used anymore.\nUse the one from `solutions/security/plugins/security_solution/common/types/timeline`."
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/events_viewer/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/events_viewer/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           }
         ],
         "children": [
@@ -2001,7 +1828,7 @@
             "signature": [
               "DeprecatedRowRendererId"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2023,7 +1850,7 @@
               },
               ") => boolean"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2043,7 +1870,7 @@
                     "text": "EcsSecurityExtension"
                   }
                 ],
-                "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2069,7 +1896,7 @@
               },
               "; isDraggable: boolean; scopeId: string; }) => React.ReactNode"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -2080,7 +1907,7 @@
                 "tags": [],
                 "label": "{\n    contextId,\n    data,\n    isDraggable,\n    scopeId,\n  }",
                 "description": [],
-                "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -2094,7 +1921,7 @@
                     "signature": [
                       "string | undefined"
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2114,7 +1941,7 @@
                         "text": "EcsSecurityExtension"
                       }
                     ],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2125,7 +1952,7 @@
                     "tags": [],
                     "label": "isDraggable",
                     "description": [],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   },
@@ -2136,7 +1963,7 @@
                     "tags": [],
                     "label": "scopeId",
                     "description": [],
-                    "path": "x-pack/plugins/timelines/common/types/timeline/rows/index.ts",
+                    "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/rows/index.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -2150,18 +1977,18 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.EqlOptionsData",
+        "id": "def-common.EqlFieldsComboBoxOptions",
         "type": "Interface",
         "tags": [],
-        "label": "EqlOptionsData",
+        "label": "EqlFieldsComboBoxOptions",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.EqlOptionsData.keywordFields",
+            "id": "def-common.EqlFieldsComboBoxOptions.keywordFields",
             "type": "Array",
             "tags": [],
             "label": "keywordFields",
@@ -2170,13 +1997,13 @@
               "EuiComboBoxOptionOption",
               "<string | number | string[] | undefined>[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.EqlOptionsData.dateFields",
+            "id": "def-common.EqlFieldsComboBoxOptions.dateFields",
             "type": "Array",
             "tags": [],
             "label": "dateFields",
@@ -2185,13 +2012,13 @@
               "EuiComboBoxOptionOption",
               "<string | number | string[] | undefined>[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.EqlOptionsData.nonDateFields",
+            "id": "def-common.EqlFieldsComboBoxOptions.nonDateFields",
             "type": "Array",
             "tags": [],
             "label": "nonDateFields",
@@ -2200,7 +2027,7 @@
               "EuiComboBoxOptionOption",
               "<string | number | string[] | undefined>[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2209,18 +2036,18 @@
       },
       {
         "parentPluginId": "timelines",
-        "id": "def-common.EqlOptionsSelected",
+        "id": "def-common.EqlOptions",
         "type": "Interface",
         "tags": [],
-        "label": "EqlOptionsSelected",
+        "label": "EqlOptions",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "timelines",
-            "id": "def-common.EqlOptionsSelected.eventCategoryField",
+            "id": "def-common.EqlOptions.eventCategoryField",
             "type": "string",
             "tags": [],
             "label": "eventCategoryField",
@@ -2228,13 +2055,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.EqlOptionsSelected.tiebreakerField",
+            "id": "def-common.EqlOptions.tiebreakerField",
             "type": "string",
             "tags": [],
             "label": "tiebreakerField",
@@ -2242,13 +2069,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.EqlOptionsSelected.timestampField",
+            "id": "def-common.EqlOptions.timestampField",
             "type": "string",
             "tags": [],
             "label": "timestampField",
@@ -2256,13 +2083,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.EqlOptionsSelected.query",
+            "id": "def-common.EqlOptions.query",
             "type": "string",
             "tags": [],
             "label": "query",
@@ -2270,13 +2097,13 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "timelines",
-            "id": "def-common.EqlOptionsSelected.size",
+            "id": "def-common.EqlOptions.size",
             "type": "number",
             "tags": [],
             "label": "size",
@@ -2284,7 +2111,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2298,7 +2125,7 @@
         "tags": [],
         "label": "FieldInfo",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2309,7 +2136,7 @@
             "tags": [],
             "label": "category",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2323,7 +2150,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2337,7 +2164,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2351,7 +2178,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2362,7 +2189,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2376,7 +2203,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2408,7 +2235,7 @@
           },
           ", \"format\">"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2421,7 +2248,7 @@
             "description": [
               "Where the field belong"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2438,7 +2265,7 @@
               "Maybe",
               "<string | number> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2455,7 +2282,7 @@
               "Maybe",
               "<string>[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2472,7 +2299,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2487,7 +2314,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2513,41 +2340,41 @@
           },
           " extends ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.IEsSearchResponse",
             "text": "IEsSearchResponse"
           },
           "<any>"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
           }
         ],
         "children": [
@@ -2568,7 +2395,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2582,7 +2409,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2598,7 +2425,7 @@
               "MappingRuntimeField",
               "; }"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2612,7 +2439,7 @@
         "tags": [],
         "label": "Inspect",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2626,7 +2453,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2640,7 +2467,7 @@
         "tags": [],
         "label": "LastTimeDetails",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2655,7 +2482,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2670,7 +2497,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2685,7 +2512,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2699,7 +2526,7 @@
         "tags": [],
         "label": "PaginationInputPaginated",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2712,7 +2539,7 @@
             "description": [
               "The activePage parameter defines the page of results you want to fetch"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2725,7 +2552,7 @@
             "description": [
               "The cursorStart parameter defines the start of the results to be displayed"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2738,7 +2565,7 @@
             "description": [
               "The fakePossibleCount parameter determines the total count in order to show 5 additional pages"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2751,7 +2578,7 @@
             "description": [
               "The querySize parameter is the number of items to be returned"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2765,7 +2592,7 @@
         "tags": [],
         "label": "QueryMatch",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2776,7 +2603,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2790,7 +2617,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2804,7 +2631,7 @@
             "signature": [
               "string | number | boolean | (string | number | boolean)[]"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2818,7 +2645,7 @@
             "signature": [
               "string | number | boolean | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2832,7 +2659,7 @@
             "signature": [
               "\"includes\" | \":\" | \":*\""
             ],
-            "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2856,7 +2683,7 @@
           },
           "<Field>"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2870,7 +2697,7 @@
             "signature": [
               "Field"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2890,7 +2717,7 @@
                 "text": "Direction"
               }
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2904,7 +2731,7 @@
         "tags": [],
         "label": "TimelineEdges",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2924,7 +2751,7 @@
                 "text": "TimelineItem"
               }
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2944,7 +2771,7 @@
                 "text": "CursorType"
               }
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2978,7 +2805,7 @@
           "EqlSearchResponse",
           "<unknown>>"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2999,7 +2826,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3010,7 +2837,7 @@
             "tags": [],
             "label": "totalCount",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3024,7 +2851,7 @@
             "signature": [
               "{ activePage: number; querySize: number; }"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3045,7 +2872,7 @@
               },
               " | null"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3069,15 +2896,15 @@
           },
           " extends ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.IEsSearchResponse",
             "text": "IEsSearchResponse"
           },
           "<any>"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3091,7 +2918,7 @@
             "signature": [
               "{ [x: string]: number; }"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3112,7 +2939,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3123,7 +2950,7 @@
             "tags": [],
             "label": "totalCount",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3137,7 +2964,7 @@
             "signature": [
               "{ activePage: number; querySize: number; }"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3160,7 +2987,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3174,7 +3001,7 @@
         "tags": [],
         "label": "TimelineEventsDetailsItem",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3189,7 +3016,7 @@
               "Maybe",
               "<number> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3203,7 +3030,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3214,7 +3041,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3229,7 +3056,7 @@
               "Maybe",
               "<string[]> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3243,7 +3070,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3254,7 +3081,7 @@
             "tags": [],
             "label": "isObjectArray",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3278,15 +3105,15 @@
           },
           " extends ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.IEsSearchResponse",
             "text": "IEsSearchResponse"
           },
           "<any>"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3309,7 +3136,7 @@
               },
               "[]> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3332,7 +3159,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3355,7 +3182,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3370,7 +3197,7 @@
               "Maybe",
               "<object> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/details/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3394,15 +3221,15 @@
           },
           " extends ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.IEsSearchResponse",
             "text": "IEsSearchResponse"
           },
           "<any>"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3416,7 +3243,7 @@
             "signature": [
               "string | null"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3439,7 +3266,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3453,7 +3280,7 @@
         "tags": [],
         "label": "TimelineItem",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3464,7 +3291,7 @@
             "tags": [],
             "label": "_id",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3479,7 +3306,7 @@
               "Maybe",
               "<string> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3500,7 +3327,7 @@
               },
               "[]"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3520,7 +3347,7 @@
                 "text": "EcsSecurityExtension"
               }
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3544,15 +3371,15 @@
           },
           " extends ",
           {
-            "pluginId": "data",
+            "pluginId": "@kbn/search-types",
             "scope": "common",
-            "docId": "kibDataSearchPluginApi",
+            "docId": "kibKbnSearchTypesPluginApi",
             "section": "def-common.IEsSearchResponse",
             "text": "IEsSearchResponse"
           },
           "<any>"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3563,7 +3390,7 @@
             "tags": [],
             "label": "destinationIpCount",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3586,7 +3413,7 @@
               },
               "> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3597,7 +3424,7 @@
             "tags": [],
             "label": "hostCount",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3608,7 +3435,7 @@
             "tags": [],
             "label": "processCount",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3619,7 +3446,7 @@
             "tags": [],
             "label": "sourceIpCount",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3630,7 +3457,7 @@
             "tags": [],
             "label": "userCount",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/last_event_time/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3644,7 +3471,7 @@
         "tags": [],
         "label": "TimelineNonEcsData",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3655,7 +3482,7 @@
             "tags": [],
             "label": "field",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3670,7 +3497,7 @@
               "Maybe",
               "<string[]> | undefined"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/all/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3684,7 +3511,7 @@
         "tags": [],
         "label": "TimerangeInput",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3697,7 +3524,7 @@
             "description": [
               "The interval string to use for last bucket. The format is '{value}{unit}'. For example '5m' would return the metrics for the last 5 minutes of the timespan."
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3710,7 +3537,7 @@
             "description": [
               "The end of the timerange"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3723,7 +3550,7 @@
             "description": [
               "The beginning of the timerange"
             ],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3737,7 +3564,7 @@
         "tags": [],
         "label": "TotalValue",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -3748,7 +3575,7 @@
             "tags": [],
             "label": "value",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -3759,7 +3586,7 @@
             "tags": [],
             "label": "relation",
             "description": [],
-            "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+            "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -3775,7 +3602,7 @@
         "tags": [],
         "label": "Direction",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/common/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3787,7 +3614,7 @@
         "tags": [],
         "label": "LastEventIndexKey",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3799,7 +3626,7 @@
         "tags": [],
         "label": "TimelineEventsQueries",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/api/search_strategy/model/timeline_events_queries.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/model/timeline_events_queries.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -3826,25 +3653,25 @@
           },
           "; }"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           }
         ],
         "initialIsOpen": false
@@ -3859,527 +3686,377 @@
         "label": "BrowserFields",
         "description": [],
         "signature": [
-          "{ [x: string]: Partial<",
-          {
-            "pluginId": "timelines",
-            "scope": "common",
-            "docId": "kibTimelinesPluginApi",
-            "section": "def-common.BrowserField",
-            "text": "BrowserField"
-          },
-          ">; }"
+          "{ [x: string]: ",
+          "FieldCategory",
+          "; }"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/timeline/cells/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/timeline/cells/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/header_actions/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/header_actions/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/types/header_actions/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/lib/kuery/index.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/enrichment_summary.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/threat_summary_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/cti_details/threat_summary_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/flyout/body.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/flyout/body.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/control_columns/transform_control_columns.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/control_columns/transform_control_columns.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/get_alert_summary_rows.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/get_alert_summary_rows.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/alert_summary_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/alert_summary_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/mock.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/mock.ts"
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/solutions/security/packages/data_table/common/types/header_actions/index.ts"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/common/types/header_actions/index.ts"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/column_headers/helpers.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/column_headers/helpers.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/store/sourcerer/model.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/store/sourcerer/model.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/containers/source/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/query_bar/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/edit_data_provider/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_badge.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_badge.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/columns.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_fields_browser.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/overview/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/overview/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/insights/related_alerts_by_source_event.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/insights/related_alerts_by_source_event.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/insights/related_alerts_by_session.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/insights/related_alerts_by_session.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/insights/insights.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/insights/insights.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_details.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/event_details/event_details.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/expandable_event.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/expandable_event.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/body/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/event_details/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/timelines/components/side_panel/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/top_n/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/top_n/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/left/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/right/context.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/detection_engine/rule_creation_ui/components/step_define_rule/index.tsx"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/mock/mock_source.ts"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/timeline/cells/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/timeline/cells/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/header_actions/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/common/types/header_actions/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/lib/kuery/index.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/control_columns/transform_control_columns.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/control_columns/transform_control_columns.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.test.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/mock.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/sourcerer/store/model.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/use_data_view.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/containers/source/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/helpers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/edit_data_provider/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_actions.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_badge.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/provider_item_badge.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/add_data_provider_popover.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/empty.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/data_providers/providers.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/body/column_headers/helpers.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/drag_and_drop/drag_drop_context_wrapper.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/top_n/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/top_n/index.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/hooks/use_event_details.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/context.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/tabs/table_tab.tsx"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/tabs/shared/utils.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/timelines/components/timeline/tabs/shared/utils.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/right/utils/enriched_field_info.ts"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/mock/mock_source.ts"
+            "path": "x-pack/solutions/security/packages/data_table/mock/mock_source.ts"
+          },
+          {
+            "plugin": "@kbn/securitysolution-data-table",
+            "path": "x-pack/solutions/security/packages/data_table/mock/mock_source.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
+          },
+          {
+            "plugin": "securitySolution",
+            "path": "x-pack/solutions/security/plugins/security_solution/public/flyout/document_details/shared/mocks/mock_browser_fields.ts"
           }
         ],
         "initialIsOpen": false
@@ -4400,7 +4077,23 @@
           "DataTableCellAction",
           "[] | undefined; category?: string | undefined; columnHeaderType: ",
           "ColumnHeaderType",
-          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: string | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
+          "; description?: string | null | undefined; esTypes?: string[] | undefined; example?: string | number | null | undefined; format?: ",
+          {
+            "pluginId": "fieldFormats",
+            "scope": "common",
+            "docId": "kibFieldFormatsPluginApi",
+            "section": "def-common.SerializedFieldFormat",
+            "text": "SerializedFieldFormat"
+          },
+          "<{}, ",
+          {
+            "pluginId": "@kbn/utility-types",
+            "scope": "common",
+            "docId": "kibKbnUtilityTypesPluginApi",
+            "section": "def-common.SerializableRecord",
+            "text": "SerializableRecord"
+          },
+          "> | undefined; linkField?: string | undefined; placeholder?: string | undefined; subType?: ",
           {
             "pluginId": "@kbn/es-query",
             "scope": "common",
@@ -4410,7 +4103,7 @@
           },
           " | undefined; type?: string | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/actions/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/actions/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4423,9 +4116,7 @@
         "label": "DataProvidersAnd",
         "description": [],
         "signature": [
-          "{ type?: ",
-          "DataProviderType",
-          " | undefined; id: string; name: string; enabled: boolean; kqlQuery: string; excluded: boolean; queryMatch: ",
+          "{ id: string; type?: \"default\" | \"template\" | undefined; name: string; enabled: boolean; excluded: boolean; kqlQuery: string; queryMatch: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4435,7 +4126,7 @@
           },
           "; }"
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4450,7 +4141,7 @@
         "signature": [
           "\"DELETED_SECURITY_SOLUTION_DATA_VIEW\""
         ],
-        "path": "x-pack/plugins/timelines/common/constants.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4464,7 +4155,7 @@
         ],
         "label": "DeprecatedCellValueElementProps",
         "description": [
-          "\nThe following props are provided to the function called by `renderCellValue`.\nWarning: This type might be outdated. Therefore, migrate to the new one from\n`plugins/security_solution/common/types/timeline/cells/index.ts`."
+          "\nThe following props are provided to the function called by `renderCellValue`.\nWarning: This type might be outdated. Therefore, migrate to the new one from\n`solutions/security/plugins/security_solution/common/types/timeline/cells/index.ts`."
         ],
         "signature": [
           "EuiDataGridCellValueElementProps",
@@ -4518,49 +4209,27 @@
           },
           "[] | undefined; setFlyoutAlert?: ((alertId: string) => void) | undefined; scopeId: string; truncate?: boolean | undefined; key?: string | undefined; closeCellPopover?: (() => void) | undefined; enableActions?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/cells/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/cells/index.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "@kbn/securitysolution-data-table",
-            "path": "x-pack/packages/security-solution/data_table/components/data_table/index.tsx"
+            "path": "x-pack/solutions/security/packages/data_table/components/data_table/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/events_viewer/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/common/components/events_viewer/index.tsx"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/common/components/events_viewer/index.tsx"
           }
         ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "timelines",
-        "id": "def-common.EMPTY_INDEX_FIELDS",
-        "type": "Array",
-        "tags": [],
-        "label": "EMPTY_INDEX_FIELDS",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "dataViews",
-            "scope": "common",
-            "docId": "kibDataViewsPluginApi",
-            "section": "def-common.FieldSpec",
-            "text": "FieldSpec"
-          },
-          "[]"
-        ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
-        "deprecated": false,
-        "trackAdoption": false,
         "initialIsOpen": false
       },
       {
@@ -4573,7 +4242,7 @@
         "signature": [
           "\"events\" | \"sessions\""
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4590,7 +4259,7 @@
         "signature": [
           "\":*\""
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4608,11 +4277,11 @@
             "pluginId": "timelines",
             "scope": "common",
             "docId": "kibTimelinesPluginApi",
-            "section": "def-common.EqlOptionsSelected",
-            "text": "EqlOptionsSelected"
+            "section": "def-common.EqlOptions",
+            "text": "EqlOptions"
           }
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/eql/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4632,33 +4301,33 @@
           " : ",
           "IndexFieldsStrategyRequestByIndices"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": true,
         "trackAdoption": false,
         "references": [
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/common/search_strategy/index_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/common/search_strategy/index_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/server/search_strategy/endpoint_fields/index.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
           },
           {
             "plugin": "securitySolution",
-            "path": "x-pack/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
+            "path": "x-pack/solutions/security/plugins/security_solution/public/management/pages/endpoint_hosts/store/middleware.ts"
           }
         ],
         "initialIsOpen": false
@@ -4675,7 +4344,7 @@
         "signature": [
           "\":\""
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4692,7 +4361,7 @@
         "signature": [
           "\"includes\" | \":\" | \":*\""
         ],
-        "path": "x-pack/plugins/timelines/common/types/timeline/data_provider/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/types/timeline/data_provider/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4713,9 +4382,9 @@
             "section": "def-common.Direction",
             "text": "Direction"
           },
-          "; esTypes?: string[] | undefined; type?: string | undefined; }[]; language: \"eql\"; fieldRequested: string[]; id?: string | undefined; params?: any; defaultIndex?: string[] | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { id: string; params: Record<string, any>; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; must: {}[]; must_not: {}[]; should: {}[]; }; } | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; timestampField?: string | undefined; size?: number | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { id: string; params: Record<string, any>; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+          "; type?: string | undefined; esTypes?: string[] | undefined; }[]; language: \"eql\"; fieldRequested: string[]; params?: any; id?: string | undefined; size?: number | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; timestampField?: string | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; eventCategoryField?: string | undefined; tiebreakerField?: string | undefined; runTimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/eql.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/eql.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4728,7 +4397,7 @@
         "label": "TimelineEventsAllOptionsInput",
         "description": [],
         "signature": [
-          "{ sort: { field: string; esTypes: string[]; direction: ",
+          "{ sort: { field: string; direction: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4736,7 +4405,7 @@
             "section": "def-common.Direction",
             "text": "Direction"
           },
-          "; type?: string | undefined; }[]; fields: (string | { field: string; include_unmapped: boolean; })[]; language: \"kuery\" | \"lucene\"; fieldRequested: string[]; factoryQueryType: ",
+          "; esTypes: string[]; type?: string | undefined; }[]; fields: (string | { field: string; include_unmapped: boolean; })[]; language: \"kuery\" | \"lucene\"; fieldRequested: string[]; factoryQueryType: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4744,9 +4413,9 @@
             "section": "def-common.TimelineEventsQueries",
             "text": "TimelineEventsQueries"
           },
-          ".all; id?: string | undefined; params?: any; defaultIndex?: string[] | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; filterQuery?: any; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { id: string; params: Record<string, any>; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+          ".all; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterQuery?: any; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; excludeEcsData?: boolean | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_all.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4759,7 +4428,7 @@
         "label": "TimelineEventsDetailsRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ indexName: string; factoryQueryType: ",
+          "{ indexName: string; eventId: string; factoryQueryType: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4767,9 +4436,9 @@
             "section": "def-common.TimelineEventsQueries",
             "text": "TimelineEventsQueries"
           },
-          ".details; eventId: string; id?: string | undefined; params?: any; defaultIndex?: string[] | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; must: {}[]; must_not: {}[]; should: {}[]; }; } | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { id: string; params: Record<string, any>; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; }"
+          ".details; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; pagination?: Zod.objectInputType<{ activePage: Zod.ZodNumber; cursorStart: Zod.ZodOptional<Zod.ZodNumber>; querySize: Zod.ZodNumber; }, Zod.ZodTypeAny, \"passthrough\"> | undefined; authFilter?: {} | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_details.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_details.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4782,7 +4451,7 @@
         "label": "TimelineEventsLastEventTimeRequestOptionsInput",
         "description": [],
         "signature": [
-          "{ details: { hostName?: string | null | undefined; userName?: string | null | undefined; ip?: string | null | undefined; }; factoryQueryType: ",
+          "{ details: { ip?: string | null | undefined; hostName?: string | null | undefined; userName?: string | null | undefined; }; factoryQueryType: ",
           {
             "pluginId": "timelines",
             "scope": "common",
@@ -4798,9 +4467,9 @@
             "section": "def-common.LastEventIndexKey",
             "text": "LastEventIndexKey"
           },
-          "; id?: string | undefined; params?: any; defaultIndex?: string[] | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
+          "; params?: any; id?: string | undefined; indexType?: string | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/events_last_event_time.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4821,9 +4490,9 @@
             "section": "def-common.TimelineEventsQueries",
             "text": "TimelineEventsQueries"
           },
-          ".kpi; id?: string | undefined; params?: any; defaultIndex?: string[] | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; script?: string | { source: string; } | { id: string; params: Record<string, any>; } | undefined; fetch_fields?: string[] | undefined; format?: string | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; must: {}[]; must_not: {}[]; should: {}[]; }; } | undefined; indexType?: string | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
+          ".kpi; params?: any; id?: string | undefined; runtimeMappings?: Record<string, { type: \"boolean\" | \"geo_point\" | \"ip\" | \"keyword\" | \"date\" | \"long\" | \"double\" | \"lookup\"; format?: string | undefined; script?: string | { source: string; } | { params: Record<string, any>; id: string; } | undefined; fetch_fields?: string[] | undefined; input_field?: string | undefined; target_field?: string | undefined; target_index?: string | undefined; }> | undefined; indexType?: string | undefined; timerange?: { interval: string; from: string; to: string; } | undefined; defaultIndex?: string[] | undefined; entityType?: \"events\" | \"sessions\" | undefined; filterQuery?: string | Record<string, any> | { range: Record<string, { format: string; gte: number; lte: number; }>; } | { query_string: { query: string; analyze_wildcard: boolean; }; } | { match: Record<string, { query: string; operator: string; zero_terms_query: string; }>; } | { term: Record<string, string>; } | { bool: { filter: {}[]; should: {}[]; must: {}[]; must_not: {}[]; }; } | undefined; filterStatus?: \"open\" | \"closed\" | \"acknowledged\" | undefined; }"
         ],
-        "path": "x-pack/plugins/timelines/common/api/search_strategy/timeline/kpi.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/api/search_strategy/timeline/kpi.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -4837,7 +4506,7 @@
         "tags": [],
         "label": "EMPTY_BROWSER_FIELDS",
         "description": [],
-        "path": "x-pack/plugins/timelines/common/search_strategy/index_fields/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/index_fields/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -4853,7 +4522,7 @@
         "signature": [
           "{ readonly EVENTS: \"events\"; readonly SESSIONS: \"sessions\"; }"
         ],
-        "path": "x-pack/plugins/timelines/common/search_strategy/timeline/events/index.ts",
+        "path": "x-pack/solutions/security/plugins/timelines/common/search_strategy/timeline/events/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

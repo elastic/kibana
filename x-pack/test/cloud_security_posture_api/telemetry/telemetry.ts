@@ -10,8 +10,9 @@ import {
   ELASTIC_HTTP_VERSION_HEADER,
   X_ELASTIC_INTERNAL_ORIGIN_REQUEST,
 } from '@kbn/core-http-common';
-import { data, MockTelemetryFindings } from './data';
+import { data } from './data';
 import type { FtrProviderContext } from '../ftr_provider_context';
+import { waitForPluginInitialized, EsIndexDataProvider } from '../utils';
 
 const FINDINGS_INDEX = 'logs-cloud_security_posture.findings_latest-default';
 
@@ -20,52 +21,20 @@ export default function ({ getService }: FtrProviderContext) {
   const retry = getService('retry');
   const es = getService('es');
   const supertest = getService('supertest');
-  const log = getService('log');
-
-  /**
-   * required before indexing findings
-   */
-  const waitForPluginInitialized = (): Promise<void> =>
-    retry.try(async () => {
-      log.debug('Check CSP plugin is initialized');
-      const response = await supertest
-        .get('/internal/cloud_security_posture/status?check=init')
-        .set(ELASTIC_HTTP_VERSION_HEADER, '1')
-        .expect(200);
-      expect(response.body).to.eql({ isPluginInitialized: true });
-      log.debug('CSP plugin is initialized');
-    });
-
-  const index = {
-    remove: () =>
-      es.deleteByQuery({
-        index: FINDINGS_INDEX,
-        query: { match_all: {} },
-        refresh: true,
-      }),
-
-    add: async (mockTelemetryFindings: MockTelemetryFindings[]) => {
-      const operations = mockTelemetryFindings.flatMap((doc) => [
-        { index: { _index: FINDINGS_INDEX } },
-        doc,
-      ]);
-
-      const response = await es.bulk({ refresh: 'wait_for', index: FINDINGS_INDEX, operations });
-      expect(response.errors).to.eql(false);
-    },
-  };
+  const logger = getService('log');
+  const findingsIndexProvider = new EsIndexDataProvider(es, FINDINGS_INDEX);
 
   describe('Verify cloud_security_posture telemetry payloads', async () => {
     before(async () => {
-      await waitForPluginInitialized();
+      await waitForPluginInitialized({ retry, logger, supertest });
     });
 
     afterEach(async () => {
-      await index.remove();
+      await findingsIndexProvider.deleteAll();
     });
 
     it('includes only KSPM findings', async () => {
-      await index.add(data.kspmFindings);
+      await findingsIndexProvider.addBulk(data.kspmFindings, false);
 
       const {
         body: [{ stats: apiResponse }],
@@ -119,7 +88,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes only CSPM findings', async () => {
-      await index.add(data.cspmFindings);
+      await findingsIndexProvider.addBulk(data.cspmFindings, false);
 
       const {
         body: [{ stats: apiResponse }],
@@ -165,8 +134,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes CSPM and KSPM findings', async () => {
-      await index.add(data.kspmFindings);
-      await index.add(data.cspmFindings);
+      await findingsIndexProvider.addBulk(data.kspmFindings, false);
+      await findingsIndexProvider.addBulk(data.cspmFindings, false);
 
       const {
         body: [{ stats: apiResponse }],
@@ -244,7 +213,7 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it(`'includes only KSPM findings without posture_type'`, async () => {
-      await index.add(data.kspmFindingsNoPostureType);
+      await findingsIndexProvider.addBulk(data.kspmFindingsNoPostureType, false);
 
       const {
         body: [{ stats: apiResponse }],
@@ -299,8 +268,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('includes KSPM findings without posture_type and CSPM findings as well', async () => {
-      await index.add(data.kspmFindingsNoPostureType);
-      await index.add(data.cspmFindings);
+      await findingsIndexProvider.addBulk(data.kspmFindingsNoPostureType, false);
+      await findingsIndexProvider.addBulk(data.cspmFindings, false);
 
       const {
         body: [{ stats: apiResponse }],

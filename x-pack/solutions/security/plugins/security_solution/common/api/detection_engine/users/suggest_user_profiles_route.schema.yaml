@@ -1,0 +1,25 @@
+openapi: 3.0.0
+info:
+  title: Suggest user profiles API endpoint
+  version: '1'
+paths:
+  /internal/detection_engine/users/_find:
+    summary: Suggests user profiles based on provided search term
+    post:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: SuggestUserProfiles
+      description: Suggests user profiles.
+      parameters:
+        - name: searchTerm
+          in: query
+          required: false
+          description: 'Query string used to match name-related fields in user profiles. The following fields are treated as name-related: username, full_name and email'
+          schema:
+            type: string
+      responses:
+        200:
+          description: Indicates a successful call.
+        400:
+          description: Invalid request.

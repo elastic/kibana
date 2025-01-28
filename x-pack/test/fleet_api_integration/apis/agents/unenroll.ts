@@ -10,7 +10,6 @@ import { v4 as uuidv4 } from 'uuid';
 
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { setupFleetAndAgents } from './services';
 import { skipIfNoDockerRegistry } from '../../helpers';
 
 export default function (providerContext: FtrProviderContext) {
@@ -18,6 +17,7 @@ export default function (providerContext: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const supertest = getService('supertest');
   const esClient = getService('es');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   describe('fleet_unenroll_agent', () => {
     skipIfNoDockerRegistry(providerContext);
@@ -25,8 +25,8 @@ export default function (providerContext: FtrProviderContext) {
     let outputAPIKeyId: string;
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-    setupFleetAndAgents(providerContext);
     beforeEach(async () => {
       await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/agents');
@@ -277,7 +277,7 @@ export default function (providerContext: FtrProviderContext) {
       await new Promise((resolve, reject) => {
         let attempts = 0;
         const intervalId = setInterval(async () => {
-          if (attempts > 3) {
+          if (attempts > 10) {
             clearInterval(intervalId);
             reject(new Error('action timed out'));
           }
@@ -285,7 +285,6 @@ export default function (providerContext: FtrProviderContext) {
           const {
             body: { items: actionStatuses },
           } = await supertest.get(`/api/fleet/agents/action_status`).set('kbn-xsrf', 'xxx');
-
           const action = actionStatuses?.find((a: any) => a.actionId === actionId);
           if (action && action.nbAgentsActioned === action.nbAgentsActionCreated) {
             clearInterval(intervalId);

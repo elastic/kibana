@@ -1,0 +1,22 @@
+{
+  "type": "plugin",
+  "id": "@kbn/runtime-fields-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "private",
+  "plugin": {
+    "id": "runtimeFields",
+    "browser": true,
+    "server": false,
+    "configPath": [
+      "xpack",
+      "runtime_fields"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "esUiShared"
+    ]
+  }
+}

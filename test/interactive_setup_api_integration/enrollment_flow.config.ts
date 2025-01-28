@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import fs from 'fs/promises';
@@ -37,7 +38,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         ...manualConfigurationFlowTestsConfig.get('esTestCluster.serverArgs'),
         'xpack.security.enrollment.enabled=true',
         `xpack.security.http.ssl.keystore.path=${caPath}`,
-        'xpack.security.http.ssl.keystore.password=storepass',
+        'xpack.security.http.ssl.keystore.secure_password=storepass',
       ],
     },
 

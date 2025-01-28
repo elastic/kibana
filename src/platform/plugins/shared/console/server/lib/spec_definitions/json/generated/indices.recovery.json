@@ -1,0 +1,24 @@
+{
+  "indices.recovery": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "active_only": "__flag__",
+      "detailed": "__flag__"
+    },
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_recovery",
+      "{index}/_recovery"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/indices-recovery.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

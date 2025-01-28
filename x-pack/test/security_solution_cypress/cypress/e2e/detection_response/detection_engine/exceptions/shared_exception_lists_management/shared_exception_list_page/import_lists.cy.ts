@@ -16,6 +16,7 @@ import {
   importExceptionListWithSelectingCreateNewOption,
   validateImportExceptionListWentSuccessfully,
   validateImportExceptionListFailedBecauseExistingListFound,
+  validateImportExceptionListCreateNewOptionDisabled,
 } from '../../../../../../tasks/exceptions_table';
 import { login } from '../../../../../../tasks/login';
 import { visit } from '../../../../../../tasks/navigation';
@@ -23,6 +24,7 @@ import { EXCEPTIONS_URL } from '../../../../../../urls/navigation';
 
 describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] }, () => {
   const LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/7_16_exception_list.ndjson';
+  const ENDPOINT_LIST_TO_IMPORT_FILENAME = 'cypress/fixtures/endpoint_exception_list.ndjson';
   beforeEach(() => {
     login();
     visit(EXCEPTIONS_URL);
@@ -30,54 +32,76 @@ describe('Import Lists', { tags: ['@ess', '@serverless', '@skipInServerless'] },
     cy.intercept(/(\/api\/exception_lists\/_import)/).as('import');
   });
 
-  it('Should import exception list successfully if the list does not exist', () => {
-    importExceptionLists(LIST_TO_IMPORT_FILENAME);
+  describe('Exception Lists', () => {
+    it('Should import exception list successfully if the list does not exist', () => {
+      importExceptionLists(LIST_TO_IMPORT_FILENAME);
 
-    validateImportExceptionListWentSuccessfully();
+      validateImportExceptionListWentSuccessfully();
 
-    cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN).click();
+      cy.get(IMPORT_SHARED_EXCEPTION_LISTS_CLOSE_BTN).click();
 
-    // Validate table items count
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+      // Validate table items count
+      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+    });
+
+    it('Should not import exception list if it exists', () => {
+      importExceptionLists(LIST_TO_IMPORT_FILENAME);
+
+      validateImportExceptionListFailedBecauseExistingListFound();
+
+      // Validate table items count
+      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+    });
+
+    it('Should import exception list if it exists but the user selected overwrite checkbox', () => {
+      importExceptionLists(LIST_TO_IMPORT_FILENAME);
+
+      validateImportExceptionListFailedBecauseExistingListFound();
+
+      // Validate table items count
+      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+
+      importExceptionListWithSelectingOverwriteExistingOption();
+
+      validateImportExceptionListWentSuccessfully();
+
+      // Validate table items count
+      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+    });
+
+    it('Should import exception list if it exists but the user selected create new checkbox', () => {
+      importExceptionLists(LIST_TO_IMPORT_FILENAME);
+
+      validateImportExceptionListFailedBecauseExistingListFound();
+
+      // Validate table items count
+      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
+
+      importExceptionListWithSelectingCreateNewOption();
+
+      validateImportExceptionListWentSuccessfully();
+      // Validate table items count
+      cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
+    });
   });
 
-  it('Should not import exception list if it exists', () => {
-    importExceptionLists(LIST_TO_IMPORT_FILENAME);
+  describe('Endpoint Security Exception List', () => {
+    before(() => {
+      login();
+      visit(EXCEPTIONS_URL);
 
-    validateImportExceptionListFailedBecauseExistingListFound();
+      // Make sure we have Endpoint Security Exception List
+      importExceptionLists(ENDPOINT_LIST_TO_IMPORT_FILENAME);
+    });
 
-    // Validate table items count
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-  });
+    it('Should not allow to import or create a second Endpoint Security Exception List', () => {
+      // Try to import another Endpoint Security Exception List
+      importExceptionLists(ENDPOINT_LIST_TO_IMPORT_FILENAME);
 
-  it('Should import exception list if it exists but the user selected overwrite checkbox', () => {
-    importExceptionLists(LIST_TO_IMPORT_FILENAME);
+      validateImportExceptionListFailedBecauseExistingListFound();
 
-    validateImportExceptionListFailedBecauseExistingListFound();
-
-    // Validate table items count
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-
-    importExceptionListWithSelectingOverwriteExistingOption();
-
-    validateImportExceptionListWentSuccessfully();
-
-    // Validate table items count
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-  });
-
-  it('Should import exception list if it exists but the user selected create new checkbox', () => {
-    importExceptionLists(LIST_TO_IMPORT_FILENAME);
-
-    validateImportExceptionListFailedBecauseExistingListFound();
-
-    // Validate table items count
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '1');
-
-    importExceptionListWithSelectingCreateNewOption();
-
-    validateImportExceptionListWentSuccessfully();
-    // Validate table items count
-    cy.contains(EXCEPTIONS_TABLE_SHOWING_LISTS, '2');
+      // Validate that "Create new list" option is disabled
+      validateImportExceptionListCreateNewOptionDisabled();
+    });
   });
 });

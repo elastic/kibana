@@ -1,0 +1,14 @@
+{
+  "name": "@kbn/eui-provider-dev-warning",
+  "version": "1.0.0",
+  "main": "target/test/plugin_functional/plugins/eui_provider_dev_warning",
+  "kibana": {
+    "version": "kibana",
+    "templateVersion": "1.0.0"
+  },
+  "license": "Elastic License 2.0 OR AGPL-3.0-only OR SSPL-1.0",
+  "scripts": {
+    "kbn": "node ../../../../scripts/kbn.js",
+    "build": "rm -rf './target' && ../../../../node_modules/.bin/tsc"
+  }
+}

@@ -31,6 +31,7 @@ export default function ({ getService }: FtrProviderContext) {
       await esTestIndexTool.setup();
       await es.indices.create({ index: authorizationIndex });
     });
+
     after(async () => {
       await esTestIndexTool.destroy();
       await es.indices.delete({ index: authorizationIndex });
@@ -38,11 +39,11 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('should handle execute request appropriately', async () => {
-      const { body: createdAction } = await supertest
+      const { body: createdConnector } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My action',
+          name: 'My connector',
           connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -52,12 +53,12 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
-      const reference = `actions-execute-1:${Spaces.space1.id}:${createdAction.id}`;
+      const reference = `actions-execute-1:${Spaces.space1.id}:${createdConnector.id}`;
       const response = await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdAction.id}/_execute`
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdConnector.id}/_execute`
         )
         .set('kbn-xsrf', 'foo')
         .send({
@@ -92,30 +93,30 @@ export default function ({ getService }: FtrProviderContext) {
 
       await validateEventLog({
         spaceId: Spaces.space1.id,
-        actionId: createdAction.id,
+        actionId: createdConnector.id,
         actionTypeId: 'test.index-record',
         outcome: 'success',
-        message: `action executed: test.index-record:${createdAction.id}: My action`,
-        startMessage: `action started: test.index-record:${createdAction.id}: My action`,
+        message: `action executed: test.index-record:${createdConnector.id}: My connector`,
+        startMessage: `action started: test.index-record:${createdConnector.id}: My connector`,
         source: ActionExecutionSourceType.HTTP_REQUEST,
       });
     });
 
     it('should handle failed executions', async () => {
-      const { body: createdAction } = await supertest
+      const { body: createdConnector } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'failing action',
+          name: 'failing connector',
           connector_type_id: 'test.failing',
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       const reference = `actions-failure-1:${Spaces.space1.id}`;
       const response = await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdAction.id}/_execute`
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdConnector.id}/_execute`
         )
         .set('kbn-xsrf', 'foo')
         .send({
@@ -127,31 +128,31 @@ export default function ({ getService }: FtrProviderContext) {
 
       expect(response.status).to.eql(200);
       expect(response.body).to.eql({
-        connector_id: createdAction.id,
+        connector_id: createdConnector.id,
         status: 'error',
         message: 'an error occurred while running the action',
         service_message: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
         retry: true,
-        errorSource: TaskErrorSource.USER,
+        errorSource: TaskErrorSource.FRAMEWORK,
       });
 
       await validateEventLog({
         spaceId: Spaces.space1.id,
-        actionId: createdAction.id,
+        actionId: createdConnector.id,
         actionTypeId: 'test.failing',
         outcome: 'failure',
-        message: `action execution failure: test.failing:${createdAction.id}: failing action`,
+        message: `action execution failure: test.failing:${createdConnector.id}: failing connector`,
         errorMessage: `an error occurred while running the action: expected failure for .kibana-alerting-test-data actions-failure-1:space1; retry: true`,
         source: ActionExecutionSourceType.HTTP_REQUEST,
       });
     });
 
-    it(`shouldn't execute an action from another space`, async () => {
-      const { body: createdAction } = await supertest
+    it(`shouldn't execute a connector from another space`, async () => {
+      const { body: createdConnector } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My action',
+          name: 'My connector',
           connector_type_id: 'test.index-record',
           config: {
             unencrypted: `This value shouldn't get encrypted`,
@@ -161,11 +162,13 @@ export default function ({ getService }: FtrProviderContext) {
           },
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       const reference = `actions-execute-2:${Spaces.space1.id}`;
       await supertest
-        .post(`${getUrlPrefix(Spaces.other.id)}/api/actions/action/${createdAction.id}/_execute`)
+        .post(
+          `${getUrlPrefix(Spaces.other.id)}/api/actions/connector/${createdConnector.id}/_execute`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           params: {
@@ -177,25 +180,25 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(404, {
           statusCode: 404,
           error: 'Not Found',
-          message: `Saved object [action/${createdAction.id}] not found`,
+          message: `Saved object [action/${createdConnector.id}] not found`,
         });
     });
 
     it('should handle execute request appropriately and have proper callCluster and savedObjectsClient authorization', async () => {
       const reference = `actions-execute-3:${Spaces.space1.id}`;
-      const { body: createdAction } = await supertest
+      const { body: createdConnector } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'My action',
+          name: 'My connector',
           connector_type_id: 'test.authorization',
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       const response = await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdAction.id}/_execute`
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdConnector.id}/_execute`
         )
         .set('kbn-xsrf', 'foo')
         .send({
@@ -230,23 +233,23 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it('should notify feature usage when executing a gold action type', async () => {
-      const { body: createdAction } = await supertest
+    it('should notify feature usage when executing a gold connector type', async () => {
+      const { body: createdConnector } = await supertest
         .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector`)
         .set('kbn-xsrf', 'foo')
         .send({
-          name: 'Noop action type',
+          name: 'Noop connector type',
           connector_type_id: 'test.noop',
           secrets: {},
           config: {},
         })
         .expect(200);
-      objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
+      objectRemover.add(Spaces.space1.id, createdConnector.id, 'connector', 'actions');
 
       const executionStart = new Date();
       await supertest
         .post(
-          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdAction.id}/_execute`
+          `${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${createdConnector.id}/_execute`
         )
         .set('kbn-xsrf', 'foo')
         .send({
@@ -266,79 +269,20 @@ export default function ({ getService }: FtrProviderContext) {
       expect(new Date(noopFeature.last_used).getTime()).to.be.greaterThan(executionStart.getTime());
     });
 
-    describe('legacy', () => {
-      it('should handle execute request appropriately', async () => {
-        const { body: createdAction } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'My action',
-            actionTypeId: 'test.index-record',
-            config: {
-              unencrypted: `This value shouldn't get encrypted`,
-            },
-            secrets: {
-              encrypted: 'This value should be encrypted',
-            },
-          })
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
-
-        const reference = `actions-execute-1:${Spaces.space1.id}:${createdAction.id}`;
-        const response = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}/_execute`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            params: {
-              reference,
-              index: ES_TEST_INDEX_NAME,
-              message: 'Testing 123',
-            },
-          });
-
-        expect(response.status).to.eql(200);
-      });
-
-      it('should handle failed executions', async () => {
-        const { body: createdAction } = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            name: 'failing action',
-            actionTypeId: 'test.failing',
-          })
-          .expect(200);
-        objectRemover.add(Spaces.space1.id, createdAction.id, 'action', 'actions');
-
-        const reference = `actions-failure-1:${Spaces.space1.id}:${createdAction.id}`;
-        const response = await supertest
-          .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/action/${createdAction.id}/_execute`)
-          .set('kbn-xsrf', 'foo')
-          .send({
-            params: {
-              reference,
-              index: ES_TEST_INDEX_NAME,
-            },
-          });
-
-        expect(response.status).to.eql(200);
-        expect(response.body).to.eql({
-          actionId: createdAction.id,
-          status: 'error',
-          message: 'an error occurred while running the action',
-          serviceMessage: `expected failure for ${ES_TEST_INDEX_NAME} ${reference}`,
-          retry: true,
-          errorSource: TaskErrorSource.USER,
-        });
-      });
-    });
-
+    /**
+     * The test are using a test endpoint that calls the actions client.
+     * The route is defined here x-pack/test/alerting_api_integration/common/plugins/alerts/server/routes.ts.
+     * The public execute API does not allows the execution of system actions. We use the
+     * test route to test the execution of system actions
+     */
     it('should execute system actions correctly', async () => {
       const connectorId = 'system-connector-test.system-action';
-      const name = 'System action: test.system-action';
+      const name = 'Test system action';
 
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${connectorId}/_execute`)
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/${connectorId}/_execute_connector`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           params: {},
@@ -358,12 +302,20 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
+    /**
+     * The test are using a test endpoint that calls the actions client.
+     * The route is defined here x-pack/test/alerting_api_integration/common/plugins/alerts/server/routes.ts.
+     * The public execute API does not allows the execution of system actions. We use the
+     * test route to test the execution of system actions
+     */
     it('should execute system actions with kibana privileges correctly', async () => {
       const connectorId = 'system-connector-test.system-action-kibana-privileges';
-      const name = 'System action: test.system-action-kibana-privileges';
+      const name = 'Test system action with kibana privileges';
 
       const response = await supertest
-        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${connectorId}/_execute`)
+        .post(
+          `${getUrlPrefix(Spaces.space1.id)}/api/alerts_fixture/${connectorId}/_execute_connector`
+        )
         .set('kbn-xsrf', 'foo')
         .send({
           params: {},
@@ -381,6 +333,21 @@ export default function ({ getService }: FtrProviderContext) {
         source: ActionExecutionSourceType.HTTP_REQUEST,
         spaceAgnostic: true,
       });
+    });
+
+    /**
+     * The public execute API does not allows the execution of system actions.
+     */
+    it('should not allow the execution of system actions through the public execute endpoint', async () => {
+      const connectorId = 'system-connector-test.system-action-kibana-privileges';
+
+      await supertest
+        .post(`${getUrlPrefix(Spaces.space1.id)}/api/actions/connector/${connectorId}/_execute`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          params: {},
+        })
+        .expect(400);
     });
   });
 

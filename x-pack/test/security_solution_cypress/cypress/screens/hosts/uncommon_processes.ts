@@ -9,4 +9,4 @@ export const PROCESS_NAME_FIELD = '[data-test-subj="cellActions-renderContent-pr
 
 export const UNCOMMON_PROCESSES_TABLE = '[data-test-subj="table-uncommonProcesses-loading-false"]';
 
-export const HOSTS_VISUALIZATION = '[data-test-subj="stat-hosts"]';
+export const HOSTS_VISUALIZATION = '[data-test-subj="hosts"]';

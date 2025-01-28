@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Client } from '@elastic/elasticsearch';
@@ -36,6 +37,7 @@ export class SynthtraceEsClient<TFields extends Fields> {
 
   private pipelineCallback: (base: Readable) => NodeJS.WritableStream;
   protected dataStreams: string[] = [];
+  protected indices: string[] = [];
 
   constructor(options: { client: Client; logger: Logger } & SynthtraceEsClientOptions) {
     this.client = options.client;
@@ -46,19 +48,50 @@ export class SynthtraceEsClient<TFields extends Fields> {
   }
 
   async clean() {
-    this.logger.info(`Cleaning data streams ${this.dataStreams.join(',')}`);
+    this.logger.info(`Cleaning data streams: "${this.dataStreams.join(',')}"`);
 
-    await this.client.indices.deleteDataStream({
-      name: this.dataStreams.join(','),
-      expand_wildcards: ['open', 'hidden'],
-    });
+    const resolvedIndices = this.indices.length
+      ? (
+          await this.client.indices.resolveIndex({
+            name: this.indices.join(','),
+            expand_wildcards: ['open', 'hidden'],
+            ignore_unavailable: true,
+          })
+        ).indices.map((index: { name: string }) => index.name)
+      : [];
+
+    if (resolvedIndices.length) {
+      this.logger.info(`Cleaning indices: "${resolvedIndices.join(',')}"`);
+    }
+
+    await Promise.all([
+      ...(this.dataStreams.length
+        ? [
+            this.client.indices.deleteDataStream({
+              name: this.dataStreams.join(','),
+              expand_wildcards: ['open', 'hidden'],
+            }),
+          ]
+        : []),
+      ...(resolvedIndices.length
+        ? [
+            this.client.indices.delete({
+              index: resolvedIndices.join(','),
+              expand_wildcards: ['open', 'hidden'],
+              ignore_unavailable: true,
+              allow_no_indices: true,
+            }),
+          ]
+        : []),
+    ]);
   }
 
   async refresh() {
-    this.logger.info(`Refreshing ${this.dataStreams.join(',')}`);
+    const allIndices = this.dataStreams.concat(this.indices);
+    this.logger.info(`Refreshing "${allIndices.join(',')}"`);
 
     return this.client.indices.refresh({
-      index: this.dataStreams,
+      index: allIndices,
       allow_no_indices: true,
       ignore_unavailable: true,
       expand_wildcards: ['open', 'hidden'],

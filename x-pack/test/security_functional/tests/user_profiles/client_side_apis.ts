@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { parse as parseCookie } from 'tough-cookie';
+
+import expect from '@kbn/expect';
 import { adminTestUser } from '@kbn/test';
-import { FtrProviderContext } from '../../ftr_provider_context';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const PageObjects = getPageObjects(['security', 'common']);

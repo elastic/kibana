@@ -1,0 +1,56 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`TimeIntervalParamEditor should match snapshot 1`] = `
+<EuiFormRow
+  display="rowCompressed"
+  fullWidth={true}
+  helpText={
+    <React.Fragment>
+      <Memo(MemoizedFormattedMessage)
+        defaultMessage="Select an option or create a custom value. Examples: 30s, 20m, 24h, 2d, 1w, 1M"
+        id="visDefaultEditor.controls.timeInterval.selectOptionHelpText"
+      />
+    </React.Fragment>
+  }
+  isInvalid={true}
+  label="Minimum interval"
+>
+  <EuiComboBox
+    async={false}
+    compressed={true}
+    data-test-subj="visEditorInterval"
+    fullWidth={true}
+    isClearable={true}
+    isInvalid={true}
+    noSuggestions={false}
+    onBlur={[MockFunction]}
+    onChange={[Function]}
+    onCreateOption={[Function]}
+    optionMatcher={[Function]}
+    options={
+      Array [
+        Object {
+          "key": "auto",
+          "label": "Auto",
+        },
+        Object {
+          "key": "ms",
+          "label": "Millisecond",
+        },
+        Object {
+          "key": "s",
+          "label": "Second",
+        },
+      ]
+    }
+    placeholder="Select an interval"
+    selectedOptions={Array []}
+    singleSelection={
+      Object {
+        "asPlainText": true,
+      }
+    }
+    sortMatchesBy="none"
+  />
+</EuiFormRow>
+`;

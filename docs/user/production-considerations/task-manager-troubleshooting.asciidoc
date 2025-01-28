@@ -181,7 +181,6 @@ The API returns the following:
           "persistence": {
             "recurring": 88,
             "non_recurring": 4,
-            "ephemeral": 8
           },
           "result_frequency_percent_as_number": {
             "alerting:.index-threshold": {
@@ -608,11 +607,10 @@ Resolving that would require deeper investigation into the {kib} Server Log, whe
 
 [[task-manager-theory-spikes-in-non-recurring-tasks]]
 *Theory*:
-Spikes in non-recurring and ephemeral tasks are consuming a high percentage of the available capacity
+Spikes in non-recurring tasks are consuming a high percentage of the available capacity
 
 *Diagnosis*:
 Task Manager uses ad-hoc non-recurring tasks to load balance operations across multiple {kib} instances.
-Additionally, {kib} can use Task Manager to allocate resources for expensive operations by executing an ephemeral task. Ephemeral tasks are identical in operation to non-recurring tasks, but are not persisted and cannot be load balanced across {kib} instances.
 
 Evaluating the preceding health stats, you see the following output under `stats.runtime.value.execution.persistence`:
 
@@ -620,13 +618,11 @@ Evaluating the preceding health stats, you see the following output under `stats
 --------------------------------------------------
 {
   "recurring": 88, # <1>
-  "non_recurring": 4, # <2>
-  "ephemeral": 8 # <3>
+  "non_recurring": 12, # <2>
 },
 --------------------------------------------------
 <1> 88% of executed tasks are recurring tasks
-<2> 4% of executed tasks are non-recurring tasks
-<3> 8% of executed tasks are ephemeral tasks
+<2> 12% of executed tasks are non-recurring tasks
 
 You can infer from these stats that the majority of executions consist of recurring tasks at 88%.
 You can use the `execution.persistence` stats to evaluate the ratio of consumed capacity, but on their own, you should not make assumptions about the sufficiency of the available capacity.
@@ -645,7 +641,7 @@ To assess the capacity, you should evaluate these stats against the `load` under
 }
 --------------------------------------------------
 
-You can infer from these stats that it is very unusual for Task Manager to run out of capacity, so the capacity is likely sufficient to handle the amount of non-recurring and ephemeral tasks.
+You can infer from these stats that it is very unusual for Task Manager to run out of capacity, so the capacity is likely sufficient to handle the amount of non-recurring tasks.
 
 Suppose you have an alternate scenario, where you see the following output under `stats.runtime.value.execution.persistence`:
 
@@ -653,15 +649,13 @@ Suppose you have an alternate scenario, where you see the following output under
 --------------------------------------------------
 {
   "recurring": 60, # <1>
-  "non_recurring": 30, # <2>
-  "ephemeral": 10 # <3>
+  "non_recurring": 40, # <2>
 },
 --------------------------------------------------
 <1> 60% of executed tasks are recurring tasks
-<2> 30% of executed tasks are non-recurring tasks
-<3> 10% of executed tasks are ephemeral tasks
+<2> 40% of executed tasks are non-recurring tasks
 
-You can infer from these stats that even though most executions are recurring tasks, a substantial percentage of executions are non-recurring and ephemeral tasks at 40%.
+You can infer from these stats that even though most executions are recurring tasks, a substantial percentage of executions are non-recurring tasks at 40%.
 
 Evaluating the `load` under `stats.runtime.value`, you see the following:
 
@@ -678,9 +672,9 @@ Evaluating the `load` under `stats.runtime.value`, you see the following:
 --------------------------------------------------
 
 You can infer from these stats that it is quite common for this {kib} instance to run out of capacity.
-Given the high rate of non-recurring and ephemeral tasks, it would be reasonable to assess that there is insufficient capacity in the {kib} cluster to handle the amount of tasks.
+Given the high rate of non-recurring tasks, it would be reasonable to assess that there is insufficient capacity in the {kib} cluster to handle the amount of tasks.
 
-Keep in mind that these stats give you a glimpse at a moment in time, and even though there has been insufficient capacity in recent minutes, this might not be true in other times where fewer non-recurring or ephemeral tasks are used. We recommend tracking these stats over time and identifying the source of these tasks before making sweeping changes to your infrastructure.
+Keep in mind that these stats give you a glimpse at a moment in time, and even though there has been insufficient capacity in recent minutes, this might not be true in other times where fewer non-recurring tasks are used. We recommend tracking these stats over time and identifying the source of these tasks before making sweeping changes to your infrastructure.
 
 [[task-manager-health-evaluate-the-workload]]
 ===== Evaluate the Workload
@@ -997,11 +991,12 @@ Task Manager has run out of Available Workers:
 [source, txt]
 --------------------------------------------------
 server log [12:41:33.672] [info][plugins][taskManager][taskManager] [Task Ownership]: Task Manager has skipped Claiming Ownership of available tasks at it has ran out Available Workers.
+server log [12:41:33.672] [warn][plugins][taskManager][taskManager] taskManager plugin is now degraded: Task Manager is unhealthy - Reason: setting HealthStatus.Error because of expired hot timestamps
 --------------------------------------------------
 
 This log message tells us that Task Manager is not managing to keep up with the sheer amount of work it has been tasked with completing. This might mean that rules are not running at the frequency that was expected (instead of running every 5 minutes, it runs every 7-8 minutes, just as an example).
 
-By default Task Manager is limited to 10 tasks and this can be bumped up by setting a higher number in the kibana.yml file using the `xpack.task_manager.max_workers` configuration. It is important to keep in mind that a higher number of tasks running at any given time means more load on both Kibana and Elasticsearch, so only change this setting if increasing load in your environment makes sense.
+By default Task Manager is limited to 10 tasks and this can be bumped up by setting a higher number in the `kibana.yml` file using the `xpack.task_manager.capacity` configuration. It is important to keep in mind that a higher number of tasks running at any given time means more load on both Kibana and Elasticsearch; only change this setting if increasing load in your environment makes sense.
 
 Another approach to addressing this might be to tell workers to run at a higher rate, rather than adding more of them, which would be configured using xpack.task_manager.poll_interval. This value dictates how often Task Manager checks to see if there’s more work to be done and uses milliseconds (by default it is 3000, which means an interval of 3 seconds).
 

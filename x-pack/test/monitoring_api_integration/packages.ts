@@ -30,15 +30,14 @@ export const getPackagesArgs = (): string[] => {
 
 export const bundledPackagesLocation = path.join(path.dirname(__filename), '/fixtures/packages');
 
-export function installPackage(
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
-  packageName: SupportedPackage
-) {
+export async function installPackage(supertest: SuperTest.Agent, packageName: SupportedPackage) {
   const pkg = PACKAGES.find(({ name }) => name === packageName);
   const request = supertest
     .post('/api/fleet/epm/packages')
     .set('kbn-xsrf', 'xxx')
     .set('content-type', 'application/zip');
+  // wait 10s before uploading again to avoid getting 429 from upload endpoint
+  await new Promise((resolve) => setTimeout(resolve, 10000));
 
   return new Promise<void>((resolve, reject) => {
     createReadStream(path.join(bundledPackagesLocation, `${pkg!.name}-${pkg!.version}.zip`))

@@ -10,8 +10,7 @@ import { FtrProviderContext } from '../ftr_provider_context';
 export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
-  const config = getService('config');
-  const pageObjects = getPageObjects(['security', 'common']);
+  const pageObjects = getPageObjects(['security', 'common', 'header']);
   const retry = getService('retry');
   const deployment = getService('deployment');
   const log = getService('log');
@@ -19,11 +18,6 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   const svlUserManager = getService('svlUserManager');
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
-
-  const delay = (ms: number) =>
-    new Promise((resolve) => {
-      setTimeout(resolve, ms);
-    });
 
   /**
    * Delete browser cookies, clear session and local storages
@@ -70,9 +64,12 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
   };
 
   return {
+    /**
+     * Login to Kibana using SAML authentication with provided project-specfic role
+     */
     async loginWithRole(role: string) {
       log.debug(`Fetch the cookie for '${role}' role`);
-      const sidCookie = await svlUserManager.getSessionCookieForRole(role);
+      const sidCookie = await svlUserManager.getInteractiveUserSessionCookieWithRoleScope(role);
       await retry.waitForWithTimeout(
         `Logging in by setting browser cookie for '${role}' role`,
         30_000,
@@ -100,14 +97,14 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
             .set(svlCommonApi.getInternalRequestHeader())
             .set({ Cookie: `sid=${browserCookies[0].value}` });
 
-          const userData = await svlUserManager.getUserData(role);
+          const email = await svlUserManager.getEmail(role);
           // email returned from API call must match the email for the specified role
-          if (body.email === userData.email) {
+          if (body.email === email) {
             log.debug(`The new cookie is properly set for  '${role}' role`);
           } else {
             log.debug(`API response body: ${JSON.stringify(body)}`);
             throw new Error(
-              `Cookie is not set properly, expected email is '${userData.email}', but found '${body.email}'`
+              `Cookie is not set properly, expected email is '${email}', but found '${body.email}'`
             );
           }
           // Verifying that we are logged in
@@ -121,12 +118,50 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       );
     },
 
+    /**
+     *
+     * Login to Kibana using SAML authentication with Admin role
+     */
     async loginAsAdmin() {
       await this.loginWithRole('admin');
     },
 
+    /**
+     *
+     * Login to Kibana using SAML authentication with Viewer role
+     */
+    async loginAsViewer() {
+      await this.loginWithRole('viewer');
+    },
+
+    /**
+     *
+     * Login to Kibana using SAML authentication with Editor role (observability, security)
+     */
+    async loginAsEditor() {
+      await this.loginWithRole('editor');
+    },
+
+    /**
+     * Login to Kibana using SAML authentication with Developer role (search)
+     */
+    async loginAsDeveloper() {
+      await this.loginWithRole('developer');
+    },
+
+    /**
+     * Login to Kibana using SAML authentication with Editor/Developer role
+     */
     async loginWithPrivilegedRole() {
       await this.loginWithRole(svlUserManager.DEFAULT_ROLE);
+    },
+
+    /**
+     *
+     * Login to Kibana using SAML authentication with custom role
+     */
+    async loginWithCustomRole() {
+      await this.loginWithRole(svlUserManager.CUSTOM_ROLE);
     },
 
     async navigateToLoginForm() {
@@ -138,106 +173,27 @@ export function SvlCommonPageProvider({ getService, getPageObjects }: FtrProvide
       });
     },
 
-    async forceLogout() {
-      log.debug('SvlCommonPage.forceLogout');
-      if (await find.existsByDisplayedByCssSelector('.login-form', 2000)) {
-        log.debug('Already on the login page, not forcing anything');
-        return;
-      }
-
-      await cleanBrowserState();
-
-      log.debug(`Navigating to ${deployment.getHostPort()}/logout to force the logout`);
-      await browser.get(deployment.getHostPort() + '/logout');
-
-      // After logging out, the user can be redirected to various locations depending on the context. By default, we
-      // expect the user to be redirected to the login page. However, if the login page is not available for some reason,
-      // we should simply wait until the user is redirected *elsewhere*.
-      // Timeout has been doubled here in attempt to quiet the flakiness
-      await retry.waitForWithTimeout('URL redirects to finish', 40000, async () => {
-        const urlBefore = await browser.getCurrentUrl();
-        delay(1000);
-        const urlAfter = await browser.getCurrentUrl();
-        log.debug(`Expecting before URL '${urlBefore}' to equal after URL '${urlAfter}'`);
-        return urlAfter === urlBefore;
-      });
-
-      const currentUrl = await browser.getCurrentUrl();
-
-      // Logout might trigger multiple redirects, but in the end we expect the Cloud login page
-      return currentUrl.includes('/login') || currentUrl.includes('/projects');
-    },
-
-    async login() {
-      await this.forceLogout();
-
-      // adding sleep to settle down logout
-      await pageObjects.common.sleep(2500);
-
-      await retry.waitForWithTimeout(
-        'Waiting for successful authentication',
-        90_000,
-        async () => {
-          if (!(await testSubjects.exists('loginUsername', { timeout: 1000 }))) {
-            await this.navigateToLoginForm();
-
-            await testSubjects.setValue('loginUsername', config.get('servers.kibana.username'));
-            await testSubjects.setValue('loginPassword', config.get('servers.kibana.password'));
-            await testSubjects.click('loginSubmit');
-          }
-
-          if (await testSubjects.exists('userMenuButton', { timeout: 10_000 })) {
-            log.debug('userMenuButton is found, logged in passed');
-            return true;
-          } else {
-            throw new Error(`Failed to login to Kibana via UI`);
-          }
-        },
-        async () => {
-          // Sometimes authentication fails and user is redirected to Cloud login page
-          // [plugins.security.authentication] Authentication attempt failed: UNEXPECTED_SESSION_ERROR
-          const currentUrl = await browser.getCurrentUrl();
-          if (currentUrl.startsWith('https://cloud.elastic.co')) {
-            log.debug(
-              'Probably authentication attempt failed, we are at Cloud login page. Retrying from scratch'
-            );
-          } else {
-            const authError = await testSubjects.exists('promptPage', { timeout: 2500 });
-            if (authError) {
-              log.debug('Probably SAML callback page, doing logout again');
-              await pageObjects.security.forceLogout({ waitForLoginPage: false });
-            } else {
-              const isOnLoginPage = await testSubjects.exists('loginUsername', { timeout: 1000 });
-              if (isOnLoginPage) {
-                log.debug(
-                  'Probably ES user profile activation failed, waiting 2 seconds and pressing Login button again'
-                );
-                await delay(2000);
-                await testSubjects.click('loginSubmit');
-              } else {
-                log.debug('New behaviour, trying to navigate and login again');
-              }
-            }
-          }
-        }
-      );
-      log.debug('Logged in successfully');
-    },
-
     async assertProjectHeaderExists() {
       await testSubjects.existOrFail('kibanaProjectHeader');
     },
 
     async clickUserAvatar() {
-      await testSubjects.click('userMenuAvatar');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.click('userMenuAvatar', 10_000);
     },
 
     async assertUserAvatarExists() {
-      await testSubjects.existOrFail('userMenuAvatar');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('userMenuAvatar', {
+        timeout: 10_000,
+      });
     },
 
     async assertUserMenuExists() {
-      await testSubjects.existOrFail('userMenu');
+      await pageObjects.header.waitUntilLoadingHasFinished();
+      await testSubjects.existOrFail('userMenu', {
+        timeout: 10_000,
+      });
     },
   };
 }

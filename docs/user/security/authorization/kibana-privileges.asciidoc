@@ -1,22 +1,21 @@
-[role="xpack"]
 [[kibana-privileges]]
-=== {kib} privileges
+= {kib} privileges
 
 {kib} privileges grant users access to features within {kib}. Roles have privileges to determine whether users have write or read access.
 
-==== Base privileges
+== Base privileges
 Assigning a base privilege grants access to all {kib} features, such as *Discover*, *Dashboard*, *Visualize Library*, and *Canvas*.
 [[kibana-privileges-all]]
 `all`:: Grants full read-write access.
 `read`:: Grants read-only access.
 
-===== Assigning base privileges
+=== Assigning base privileges
 From the role management screen:
 
 [role="screenshot"]
 image::security/images/assign-base-privilege.png[Assign base privilege]
 
-From the <<role-management-api-put, role management API>>:
+Using the {api-kibana}/group/endpoint-roles[role APIs]:
 [source,js]
 --------------------------------------------------
 PUT /api/security/role/my_kibana_role
@@ -37,23 +36,23 @@ PUT /api/security/role/my_kibana_role
 
 
 [[kibana-feature-privileges]]
-==== Feature privileges
+== Feature privileges
 Assigning a feature privilege grants access to a specific feature.
 
 `all`:: Grants full read-write access.
 `read`:: Grants read-only access.
 
-===== Sub-feature privileges
+=== Sub-feature privileges
 Some features allow for finer access control than the `all` and `read` privileges.
-This additional level of control is a https://www.elastic.co/subscriptions[subscription feature].
+This additional level of control is a {subscriptions}[subscription feature].
 
-===== Assigning feature privileges
+=== Assigning feature privileges
 From the role management screen:
 
 [role="screenshot"]
 image::security/images/assign-subfeature-privilege.png[Assign feature privilege]
 
-From the <<role-management-api-put, role management API>>:
+Using the {api-kibana}/group/endpoint-roles[role APIs]:
 [source,js]
 --------------------------------------------------
 PUT /api/security/role/my_kibana_role

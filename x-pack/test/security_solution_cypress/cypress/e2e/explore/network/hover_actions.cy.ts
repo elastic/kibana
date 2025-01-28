@@ -36,7 +36,7 @@ describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'network');
+    cy.task('esArchiverUnload', { archiveName: 'network' });
   });
 
   beforeEach(() => {
@@ -46,6 +46,14 @@ describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
     });
     openHoverActions();
     mouseoverOnToOverflowItem();
+  });
+
+  it('Copy value', () => {
+    cy.document().then((doc) => cy.spy(doc, 'execCommand').as('execCommand'));
+
+    clickOnCopyValue();
+
+    cy.get('@execCommand').should('have.been.calledOnceWith', 'copy');
   });
 
   it('Adds global filter - filter in', () => {
@@ -74,13 +82,5 @@ describe('Hover actions', { tags: ['@ess', '@serverless'] }, () => {
   it('Show topN', () => {
     clickOnShowTopN();
     cy.get(TOP_N_CONTAINER).should('exist').should('contain.text', 'Top destination.domain');
-  });
-
-  it('Copy value', () => {
-    cy.document().then((doc) => cy.spy(doc, 'execCommand').as('execCommand'));
-
-    clickOnCopyValue();
-
-    cy.get('@execCommand').should('have.been.calledOnceWith', 'copy');
   });
 });

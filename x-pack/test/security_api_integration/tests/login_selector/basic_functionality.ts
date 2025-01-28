@@ -5,22 +5,25 @@
  * 2.0.
  */
 
-import { parse as parseCookie, Cookie } from 'tough-cookie';
 import { readFileSync } from 'fs';
+import type { Cookie } from 'tough-cookie';
+import { parse as parseCookie } from 'tough-cookie';
 import url from 'url';
+
 import { CA_CERT_PATH } from '@kbn/dev-utils';
 import expect from '@kbn/expect';
-import type { AuthenticationProvider } from '@kbn/security-plugin/common';
-import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 import {
   getMutualAuthenticationResponseToken,
   getSPNEGOToken,
 } from '@kbn/security-api-integration-helpers/kerberos/kerberos_tools';
+import { getStateAndNonce } from '@kbn/security-api-integration-helpers/oidc/oidc_tools';
 import {
   getSAMLRequestId,
   getSAMLResponse,
 } from '@kbn/security-api-integration-helpers/saml/saml_tools';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import type { AuthenticationProvider } from '@kbn/security-plugin/common';
+
+import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
   const randomness = getService('randomness');

@@ -20,11 +20,13 @@ export default createTestConfig({
   suiteTags: { exclude: ['skipSvlOblt'] },
   services,
   // add feature flags
-  kbnServerArgs: ['--xpack.infra.enabled=true', '--xpack.security.roleManagementEnabled=true'],
+  kbnServerArgs: [
+    '--xpack.security.roleManagementEnabled=true', // needed to check composite feautures in /observability/platform_security/authorization.ts
+  ],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/observability/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.dfa.enabled=false', 'xpack.ml.nlp.enabled=false'],
+  esServerArgs: ['xpack.ml.dfa.enabled=false'],
 });

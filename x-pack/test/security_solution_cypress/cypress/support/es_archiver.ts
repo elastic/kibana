@@ -54,10 +54,34 @@ export const esArchiver = (
     baseDir: '../es_archives',
   });
 
+  const ftrEsArchiverInstance = new EsArchiver({
+    log,
+    client,
+    kbnClient,
+    baseDir: '../../functional/es_archives/security_solution',
+  });
+
   on('task', {
-    esArchiverLoad: async ({ archiveName, ...options }) =>
-      esArchiverInstance.load(archiveName, options),
-    esArchiverUnload: async (archiveName) => esArchiverInstance.unload(archiveName),
+    esArchiverLoad: async ({ archiveName, type = 'cypress', ...options }) => {
+      if (type === 'cypress') {
+        return esArchiverInstance.load(archiveName, options);
+      } else if (type === 'ftr') {
+        return ftrEsArchiverInstance.load(archiveName, options);
+      } else {
+        throw new Error(
+          `Unable to load the specified archive: ${JSON.stringify({ archiveName, type, options })}`
+        );
+      }
+    },
+    esArchiverUnload: async ({ archiveName, type = 'cypress' }) => {
+      if (type === 'cypress') {
+        return esArchiverInstance.unload(archiveName);
+      } else if (type === 'ftr') {
+        return ftrEsArchiverInstance.unload(archiveName);
+      } else {
+        throw new Error('It is not possible to unload the archive.');
+      }
+    },
   });
 
   return esArchiverInstance;

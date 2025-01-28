@@ -1,56 +1,80 @@
-steps: 
+steps:
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management.sh
     label: 'Serverless Rule Management - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      machineType: n2-standard-4
+      preemptible: true
     depends_on:
       - build
       - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 5
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_serverless_rule_management_prebuilt_rules.sh
     label: 'Serverless Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      machineType: n2-standard-4
+      preemptible: true
     depends_on:
       - build
       - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 4
+    parallelism: 1
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management.sh
     label: 'Rule Management - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      machineType: n2-standard-4
+      preemptible: true
     depends_on:
       - build
       - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 8
+    parallelism: 4
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1
 
   - command: .buildkite/scripts/steps/functional/security_solution_rule_management_prebuilt_rules.sh
     label: 'Rule Management - Prebuilt Rules - Security Solution Cypress Tests'
     agents:
-      queue: n2-4-spot
+      machineType: n2-standard-4
+      preemptible: true
     depends_on:
       - build
       - quick_checks
+      - checks
+      - linting
+      - linting_with_types
+      - check_types
+      - check_oas_snapshot
     timeout_in_minutes: 60
-    parallelism: 6
+    parallelism: 2
     retry:
       automatic:
-        - exit_status: '*'
+        - exit_status: '-1'
           limit: 1

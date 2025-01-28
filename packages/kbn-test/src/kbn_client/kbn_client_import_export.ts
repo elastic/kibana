@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { inspect } from 'util';
@@ -54,7 +55,7 @@ export class KbnClientImportExport {
     return absolutePath;
   }
 
-  async load(path: string, options?: { space?: string }) {
+  async load(path: string, options?: { space?: string; createNewCopies?: boolean }) {
     const src = this.resolveAndValidatePath(path);
     this.log.debug('resolved import for', path, 'to', src);
 
@@ -64,19 +65,20 @@ export class KbnClientImportExport {
     const formData = new FormData();
     formData.append('file', objects.map((obj) => JSON.stringify(obj)).join('\n'), 'import.ndjson');
 
+    const query = options?.createNewCopies ? { createNewCopies: true } : { overwrite: true };
+
     // TODO: should we clear out the existing saved objects?
     const resp = await this.req<ImportApiResponse>(options?.space, {
       method: 'POST',
       path: '/api/saved_objects/_import',
-      query: {
-        overwrite: true,
-      },
+      query,
       body: formData,
       headers: formData.getHeaders(),
     });
 
     if (resp.data.success) {
       this.log.success('import success');
+      return resp.data;
     } else {
       throw createFailError(
         `failed to import all saved objects: ${inspect(resp.data, {

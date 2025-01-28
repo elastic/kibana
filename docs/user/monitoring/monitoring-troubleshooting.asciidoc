@@ -65,3 +65,5 @@ monitoring data for other products in the cluster.
 . Set the time filter to “Last 1 hour”.  When monitoring data appears in your
 cluster, the page automatically refreshes with the monitoring summary.
 
+. If using {agent}, ensure that all integration assets have been installed in
+the monitoring cluster.

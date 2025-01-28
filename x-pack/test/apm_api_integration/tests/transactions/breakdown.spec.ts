@@ -18,27 +18,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const transactionType = 'request';
   const transactionName = 'GET /api';
 
-  registry.when('Breakdown when data is not loaded', { config: 'basic', archives: [] }, () => {
-    it('handles the empty state', async () => {
-      const response = await apmApiClient.readUser({
-        endpoint: 'GET /internal/apm/services/{serviceName}/transaction/charts/breakdown',
-        params: {
-          path: { serviceName: 'opbeans-node' },
-          query: {
-            start,
-            end,
-            transactionType,
-            environment: 'ENVIRONMENT_ALL',
-            kuery: '',
-          },
-        },
-      });
-
-      expect(response.status).to.be(200);
-      expect(response.body).to.eql({ timeseries: [] });
-    });
-  });
-
   registry.when(
     'Breakdown when data is loaded',
     { config: 'basic', archives: [archiveName] },
@@ -85,7 +64,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
         expectSnapshot(numberOfSeries).toMatchInline(`1`);
 
-        const { title, color, type, data, hideLegend, legendValue } = timeseries[0];
+        const { title, type, data, hideLegend, legendValue } = timeseries[0];
 
         const nonNullDataPoints = data.filter(({ y }: { y: number | null }) => y !== null);
 
@@ -124,7 +103,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       `);
 
         expectSnapshot(title).toMatchInline(`"app"`);
-        expectSnapshot(color).toMatchInline(`"#54b399"`);
         expectSnapshot(type).toMatchInline(`"areaStacked"`);
         expectSnapshot(hideLegend).toMatchInline(`false`);
         expectSnapshot(legendValue).toMatchInline(`"100%"`);

@@ -10,7 +10,7 @@
       "siem-read-alias": {
       }
     },
-    "index": "suspicious-source-event-001",
+    "index": "auditbeat-suspicious-source-event-001",
     "mappings": {
       "properties": {
         "@timestamp": {

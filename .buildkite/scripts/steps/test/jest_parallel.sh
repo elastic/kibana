@@ -8,6 +8,8 @@ export JOB=${BUILDKITE_PARALLEL_JOB:-0}
 # a jest failure will result in the script returning an exit code of 10
 exitCode=0
 results=()
+configs=""
+failedConfigs=""
 
 if [[ "$1" == 'jest.config.js' ]]; then
   # we used to run jest tests in parallel but started to see a lot of flakiness in libraries like react-dom/test-utils:
@@ -22,9 +24,28 @@ else
 fi
 
 export TEST_TYPE
-echo "--- downloading jest test run order"
-download_artifact jest_run_order.json .
-configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
+
+# Added section for tracking and retrying failed configs
+FAILED_CONFIGS_KEY="${BUILDKITE_STEP_ID}${TEST_TYPE}${JOB}"
+
+if [[ ! "$configs" && "${BUILDKITE_RETRY_COUNT:-0}" == "1" ]]; then
+  configs=$(buildkite-agent meta-data get "$FAILED_CONFIGS_KEY" --default '')
+  if [[ "$configs" ]]; then
+    echo "--- Retrying only failed configs"
+    echo "$configs"
+  fi
+fi
+
+if [ "$configs" == "" ]; then
+  echo "--- downloading jest test run order"
+  download_artifact jest_run_order.json .
+  configs=$(jq -r 'getpath([env.TEST_TYPE]) | .groups[env.JOB | tonumber].names | .[]' jest_run_order.json)
+fi
+
+if [ "$configs" == "" ]; then
+  echo "unable to determine configs to run"
+  exit 1
+fi
 
 echo "+++ ⚠️ WARNING ⚠️"
 echo "
@@ -36,7 +57,17 @@ echo "
 while read -r config; do
   echo "--- $ node scripts/jest --config $config"
 
-  cmd="NODE_OPTIONS=\"--max-old-space-size=14336\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+  # --trace-warnings to debug
+  # Node.js process-warning detected:
+  # Warning: Closing file descriptor 24 on garbage collection
+  cmd="NODE_OPTIONS=\"--max-old-space-size=12288 --trace-warnings"
+
+  if [ "${KBN_ENABLE_FIPS:-}" == "true" ]; then
+    cmd=$cmd" --enable-fips --openssl-config=$HOME/nodejs.cnf"
+  fi
+
+  cmd=$cmd"\" node ./scripts/jest --config=\"$config\" $parallelism --coverage=false --passWithNoTests"
+
   echo "actual full command is:"
   echo "$cmd"
   echo ""
@@ -66,8 +97,18 @@ while read -r config; do
     exitCode=10
     echo "Jest exited with code $lastCode"
     echo "^^^ +++"
+
+    if [[ "$failedConfigs" ]]; then
+      failedConfigs="${failedConfigs}"$'\n'"$config"
+    else
+      failedConfigs="$config"
+    fi
   fi
 done <<< "$configs"
+
+if [[ "$failedConfigs" ]]; then
+  buildkite-agent meta-data set "$FAILED_CONFIGS_KEY" "$failedConfigs"
+fi
 
 echo "--- Jest configs complete"
 printf "%s\n" "${results[@]}"

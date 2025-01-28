@@ -1,16 +1,17 @@
 [[console-kibana]]
-== Run API requests
+== Run API requests with Console
 
-Interact with the REST APIs of {es} and {kib} with *Console*. With *Console*, you can:
-
-* Send requests and view the responses
-* View API documentation
-* Get your request history
-
-To get started, open the main menu, click *Dev Tools*, then click *Console*.
+**Console** lets you interact with https://www.elastic.co/guide/en/elasticsearch/reference/current/rest-apis.html[{es} APIs] and https://www.elastic.co/docs/api[{kib} APIs] from within {kib}.
 
 [role="screenshot"]
-image::dev-tools/console/images/console.png["Console"]
+image::dev-tools/console/images/console.png["Console", width="75%"]
+
+To go to **Console**, find **Dev Tools** in the navigation menu or use the <<kibana-navigation-search,global search bar>>.
+
+You can also find Console directly on certain Search solution and Elasticsearch serverless project pages, where you can expand it from the footer. This Console, called **Persistent Console**, has the same capabilities and shares the same history as the Console in **Dev Tools**.
+
+[role="screenshot"]
+image::dev-tools/console/images/persistent-console.png["Console", width="75%"]
 
 [float]
 [[console-api]]
@@ -48,11 +49,6 @@ Prepend requests to a {kib} API endpoint with `kbn:`
 GET kbn:/api/index_management/indices
 --------------------------------------------------
 
-When you paste the command into *Console*, {kib} automatically converts it
-to *Console* syntax.  Alternatively, if you want to see *Console* syntax in cURL,
-click the action icon (image:dev-tools/console/images/wrench.png[]) and select *Copy as cURL*.
-Once copied, the username and password will need to be provided
-for the calls to work from external environments.
 
 [float]
 [[console-autocomplete]]
@@ -60,8 +56,9 @@ for the calls to work from external environments.
 
 When you're typing a command, *Console* makes context-sensitive suggestions.
 These suggestions show you the parameters for each API and speed up your typing.
-To configure your preferences for autocomplete, go to
-<<configuring-console, Settings>>.
+
+You can configure your preferences for autocomplete in the
+<<configuring-console, Console settings>>.
 
 [float]
 [[console-comments]]
@@ -155,74 +152,106 @@ GET /locations/_search
 ==== Auto-formatting
 
 The auto-formatting
-capability can help you format requests. Select one or more requests that you
-want to format, click the action icon (image:dev-tools/console/images/wrench.png[]),
-and then select *Auto indent*.
-
-For example, you might have a request formatted like this:
-
-[role="screenshot"]
-image::dev-tools/console/images/unformatted-request.png["Unformatted request", width=75%]
-
-*Console* adjusts the JSON body of the request to apply the indents.
-
-[role="screenshot"]
-image::dev-tools/console/images/formatted-request.png["Formatted request", width=75%]
-
-If you select *Auto indent* on a request that is already well formatted,
-*Console* collapses the request body to a single line per document.
-This is helpful when working with the {es} {ref}/docs-bulk.html[bulk APIs].
+capability can help you format requests to be more readable. Select one or more requests that you
+want to format, open the contextual menu, and then select *Auto indent*.
 
 [float]
-[[console-request]]
-=== Submit requests
+[[keyboard-shortcuts]]
+==== Keyboard shortcuts
 
-When you're ready to submit the request to {es}, click the green triangle.
+Go to line number::
+`Ctrl/Cmd` + `L`
 
-You can select multiple requests and submit them together.
-*Console* sends the requests to {es} one by one and shows the output
-in the response pane. Submitting multiple requests is helpful
-when you're debugging an issue or trying query
-combinations in multiple scenarios.
+Auto-indent current request::
+`Ctrl/Cmd` + `I`
+
+Jump to next request end::
+`Ctrl/Cmd` + `↓`
+
+Jump to previous request end::
+`Ctrl/Cmd` + `↑`
+
+Open documentation for current request::
+`Ctrl/Cmd` + `/`
+
+Run current request::
+`Ctrl/Cmd` + `Enter`
+
+Apply current or topmost term in autocomplete menu::
+`Enter` or `Tab`
+
+Close autocomplete menu::
+`Esc`
+
+Navigate items in autocomplete menu::
+`↓` + `↑`
+
+
 
 [float]
 [[console-view-api]]
-=== View API docs
+==== View API docs
 
-To view the documentation for an API endpoint, click
-the action icon (image:dev-tools/console/images/wrench.png[]) and select
-*Open documentation*.
+To view the documentation for an API endpoint, select the request, then open the contextual menu and select
+*Open API reference*.
+
+[float]
+[[console-request]]
+=== Run requests
+
+When you're ready to run a request, select the request, and click the play button.
+
+The result of the request execution is displayed in the response panel, where you can see:
+
+* the JSON response
+* the HTTP status code corresponding to the request
+* The execution time, in ms.
+
+TIP: You can select multiple requests and submit them together.
+*Console* executes the requests one by one. Submitting multiple requests is helpful
+when you're debugging an issue or trying query
+combinations in multiple scenarios.
+
+
+
+[float]
+[[import-export-console-requests]]
+=== Import and export requests
+
+You can export requests:
+
+* **to a TXT file**, by using the **Export requests** button. When using this method, all content of the input panel is copied, including comments, requests, and payloads. All of the formatting is preserved and allows you to re-import the file later, or to a different environment, using the **Import requests** button. 
++
+TIP: When importing a TXT file containing Console requests, the current content of the input panel is replaced. Export it first if you don't want to lose it, or find it in the **History** tab if you already ran the requests.
+
+* by copying them individually as **curl**, **JavaScript**, or **Python**. To do this, select a request, then open the contextual menu and select **Copy as**. When using this action, requests are copied individually to your clipboard. You can save your favorite language to make the copy action faster the next time you use it.
++
+When running copied requests from an external environment, you'll need to add https://www.elastic.co/docs/api/doc/kibana/authentication[authentication information] to the request.
 
 [float]
 [[console-history]]
 === Get your request history
 
-*Console* maintains a list of the last 500 requests that {es} successfully executed.
-To view your most recent requests, click *History*. If you select a request
-and click *Apply*, {kib} adds it to the editor at the current cursor position.
+*Console* maintains a list of the last 500 requests that you tried to execute.
+To view them, open the *History* tab. 
+
+You can run a request from your history again by selecting the request and clicking **Add and run**. If you want to add it back to the Console input panel without running it yet, click **Add** instead. It is added to the editor at the current cursor position.
 
 [float]
 [[configuring-console]]
 === Configure Console settings
 
-You can configure the *Console* font size, JSON syntax,
-and autocomplete suggestions in *Settings*.
+Go to the **Config** tab of **Console** to customize its display, autocomplete, and accessibility settings.
 
-[role="screenshot"]
-image::dev-tools/console/images/console-settings.png["Console Settings", width=60%]
 
 [float]
-[[keyboard-shortcuts]]
-=== Get keyboard shortcuts
-
-For a list of available keyboard
-shortcuts, click *Help*.
-
-[float]
-[[console-settings]]
+[[disable-console]]
 === Disable Console
 
 If you don’t want to use *Console*, you can disable it by setting `console.ui.enabled`
 to `false` in your `kibana.yml` configuration file. Changing this setting
 causes the server to regenerate assets on the next startup,
 which might cause a delay before pages start being served.
+
+You can also choose to only disable the persistent console that shows in the footer of several Kibana pages. To do that, go to **Stack Management** > **Advanced Settings**, and turn off the `devTools:enablePersistentConsole` setting.
+

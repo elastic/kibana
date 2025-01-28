@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { getFileHash, GlobalTask } from '../../lib';
@@ -14,18 +15,27 @@ export const VerifyExistingNodeBuilds: GlobalTask = {
   global: true,
   description: 'Verifying previously downloaded node.js build for all platforms',
   async run(config, log) {
-    const shasums = await getNodeShasums(log, config.getNodeVersion());
+    const builds: Array<{ downloadPath: string; shaChecksum: string }> = [];
+    for (const platform of config.getNodePlatforms()) {
+      for (const nodeInfo of getNodeDownloadInfo(config, platform)) {
+        const shasums = await getNodeShasums(log, config.getNodeVersion(), nodeInfo.variant);
+        if (!builds.some((build) => build.downloadPath === nodeInfo.downloadName)) {
+          builds.push({
+            downloadPath: nodeInfo.downloadPath,
+            shaChecksum: shasums[nodeInfo.downloadName],
+          });
+        }
+      }
+    }
 
     await Promise.all(
-      config.getNodePlatforms().map(async (platform) => {
-        const { downloadPath, downloadName } = getNodeDownloadInfo(config, platform);
-
+      builds.map(async ({ shaChecksum, downloadPath }) => {
         const sha256 = await getFileHash(downloadPath, 'sha256');
-        if (sha256 !== shasums[downloadName]) {
+        if (sha256 !== shaChecksum) {
           throw new Error(`Download at ${downloadPath} does not match expected checksum ${sha256}`);
         }
 
-        log.success(`Download for ${platform.getNodeArch()} matches checksum`);
+        log.success(`Download at ${downloadPath} matches checksum`);
       })
     );
   },

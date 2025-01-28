@@ -21,7 +21,8 @@ export default function ({ getService }: FtrProviderContext) {
     it('should fetch an index settings', async () => {
       const index = await createIndex();
 
-      const { body } = await getIndexSettings(index).expect(200);
+      const { status, body } = await getIndexSettings(index);
+      expect(status).to.eql(200);
 
       // Verify we fetch the corret index settings
       expect(body.settings.index.provided_name).to.be(index);
@@ -83,7 +84,7 @@ export default function ({ getService }: FtrProviderContext) {
       // Make sure none of the settings have been removed from ES API
       expectedSettings.forEach((setting) => {
         try {
-          expect(body.defaults.index.hasOwnProperty(setting)).to.be(true);
+          expect(Object.hasOwn(body.defaults.index, setting)).to.be(true);
         } catch {
           throw new Error(`Expected setting "${setting}" not found.`);
         }

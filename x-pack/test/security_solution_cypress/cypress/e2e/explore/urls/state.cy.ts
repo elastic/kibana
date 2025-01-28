@@ -59,8 +59,8 @@ const ABSOLUTE_DATE = {
   endTime: 'Aug 1, 2019 @ 20:33:29.186',
   endTimeTimeline: '2019-08-02T21:03:29.186Z',
   endTimeTimelineFormatted: 'Aug 2, 2019 @ 21:03:29.186',
-  newEndTimeTyped: 'Aug 01, 2019 @ 15:03:29.186',
-  newStartTimeTyped: 'Aug 01, 2019 @ 14:33:29.186',
+  newEndTimeTyped: 'Aug 1, 2019 @ 15:03:29.186',
+  newStartTimeTyped: 'Aug 1, 2019 @ 14:33:29.186',
   startTime: 'Aug 1, 2019 @ 20:03:29.186',
   startTimeTimeline: '2019-08-02T20:03:29.186Z',
   startTimeTimelineFormatted: 'Aug 2, 2019 @ 20:03:29.186',
@@ -68,7 +68,9 @@ const ABSOLUTE_DATE = {
   firefoxStartTimeTyped: '2019-08-01T14:33:29',
 };
 
-describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
+const mockTimeline = getTimeline();
+
+describe('url state', { tags: ['@ess', '@skipInServerless'] }, () => {
   beforeEach(() => {
     login();
   });
@@ -298,17 +300,17 @@ describe('url state', { tags: ['@ess', '@brokenInServerless'] }, () => {
 
     cy.intercept('PATCH', '/api/timeline').as('timeline');
     cy.get(LOADING_INDICATOR).should('not.exist');
-    addNameToTimelineAndSave(getTimeline().title);
+    addNameToTimelineAndSave(mockTimeline.title);
     cy.wait('@timeline').then(({ response }) => {
       closeTimeline();
       cy.wrap(response?.statusCode).should('eql', 200);
-      const timelineId = response?.body.data.persistTimeline.timeline.savedObjectId;
+      const timelineId = response?.body.savedObjectId;
       visitWithTimeRange('/app/home');
       visitWithTimeRange(`/app/security/timelines?timeline=(id:'${timelineId}',isOpen:!t)`);
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('exist');
       cy.get(DATE_PICKER_APPLY_BUTTON_TIMELINE).should('not.have.text', 'Updating');
       cy.get(TIMELINE_TITLE).should('be.visible');
-      cy.get(TIMELINE_TITLE).should('have.text', getTimeline().title);
+      cy.get(TIMELINE_TITLE).should('have.text', mockTimeline.title);
     });
   });
 });

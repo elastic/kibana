@@ -1,0 +1,30 @@
+{
+  "dangling_indices.delete_dangling_index": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "accept_data_loss": "__flag__",
+      "master_timeout": [
+        "-1",
+        "0"
+      ],
+      "timeout": [
+        "-1",
+        "0"
+      ]
+    },
+    "methods": [
+      "DELETE"
+    ],
+    "patterns": [
+      "_dangling/{index_uuid}"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/{branch}/dangling-index-delete.html",
+    "availability": {
+      "stack": true,
+      "serverless": false
+    }
+  }
+}

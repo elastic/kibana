@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import supertest from 'supertest';
@@ -19,7 +20,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -36,6 +37,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -54,8 +56,17 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'delete');
+
     const config = setupConfig();
-    registerDeleteRoute(router, { config, coreUsageData, logger });
+    const access = 'public';
+    registerDeleteRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });
@@ -72,6 +83,7 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
     expect(result.body).toEqual({});
     expect(coreUsageStatsClient.incrementSavedObjectsDelete).toHaveBeenCalledWith({
       request: expect.anything(),
+      types: ['index-pattern'],
     });
   });
 
@@ -116,5 +128,14 @@ describe('DELETE /api/saved_objects/{type}/{id}', () => {
       .delete('/api/saved_objects/index-pattern/logstash-*')
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes deprecation configuration to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .delete('/api/saved_objects/index-pattern/logstash-*')
+      .expect(200);
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

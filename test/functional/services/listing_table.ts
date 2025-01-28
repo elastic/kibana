@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -30,6 +31,12 @@ export class ListingTableService extends FtrService {
     toggleButtonTestSubject: 'tagFilterPopoverButton',
   });
 
+  private readonly userPopoverToggle = this.ctx.getService('menuToggle').create({
+    name: 'User Popover',
+    menuTestSubject: 'userSelectableList',
+    toggleButtonTestSubject: 'userFilterPopoverButton',
+  });
+
   private async getSearchFilter() {
     return await this.testSubjects.find('tableListSearchBox');
   }
@@ -47,14 +54,14 @@ export class ListingTableService extends FtrService {
    */
   public async setSearchFilterValue(value: string) {
     const searchFilter = await this.getSearchFilter();
-    searchFilter.type(value);
+    await searchFilter.type(value);
   }
 
   /**
    * Clears search input on landing page
    */
   public async clearSearchFilter() {
-    this.testSubjects.click('clearSearchButton');
+    await this.testSubjects.click('clearSearchButton');
   }
 
   private async getAllItemsNamesOnCurrentPage(): Promise<string[]> {
@@ -69,21 +76,17 @@ export class ListingTableService extends FtrService {
 
   private async getAllSelectableItemsNamesOnCurrentPage(): Promise<string[]> {
     const visualizationNames = [];
-    // TODO - use .euiTableRow-isSelectable when it's working again (https://github.com/elastic/eui/issues/7515)
-    const rows = await this.find.allByCssSelector('.euiTableRow');
+    const rows = await this.find.allByCssSelector('.euiTableRow-isSelectable');
     for (let i = 0; i < rows.length; i++) {
-      const checkbox = await rows[i].findByCssSelector('.euiCheckbox__input');
-      if (await checkbox.isEnabled()) {
-        const link = await rows[i].findByCssSelector('.euiLink');
-        visualizationNames.push(await link.getVisibleText());
-      }
+      const link = await rows[i].findByCssSelector('.euiLink');
+      visualizationNames.push(await link.getVisibleText());
     }
     this.log.debug(`Found ${visualizationNames.length} selectable visualizations on current page`);
     return visualizationNames;
   }
 
   public async waitUntilTableIsLoaded() {
-    return this.retry.try(async () => {
+    await this.retry.try(async () => {
       const isLoaded = await this.find.existsByDisplayedByCssSelector(
         '[data-test-subj="itemsInMemTable"]:not(.euiBasicTable-loading)'
       );
@@ -94,6 +97,18 @@ export class ListingTableService extends FtrService {
         throw new Error('Waiting');
       }
     });
+  }
+
+  public async loadNextPageIfAvailable() {
+    const morePages = !(
+      (await this.testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
+    );
+    if (morePages) {
+      await this.testSubjects.click('pagerNextButton');
+      await this.waitUntilTableIsLoaded();
+    }
+
+    return morePages;
   }
 
   /**
@@ -108,13 +123,7 @@ export class ListingTableService extends FtrService {
       visualizationNames = visualizationNames.concat(
         await this.getAllSelectableItemsNamesOnCurrentPage()
       );
-      morePages = !(
-        (await this.testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
-      );
-      if (morePages) {
-        await this.testSubjects.click('pagerNextButton');
-        await this.waitUntilTableIsLoaded();
-      }
+      morePages = await this.loadNextPageIfAvailable();
     }
     return visualizationNames;
   }
@@ -143,6 +152,29 @@ export class ListingTableService extends FtrService {
   }
 
   /**
+   * Select users in the searchbar's user filter.
+   */
+  public async selectUsers(...userNames: string[]): Promise<void> {
+    await this.openUsersPopover();
+    // select users
+    for (const userName of userNames) {
+      await this.testSubjects.click(`userProfileSelectableOption-${userName}`);
+    }
+    await this.closeUsersPopover();
+    await this.waitUntilTableIsLoaded();
+  }
+
+  public async openUsersPopover(): Promise<void> {
+    this.log.debug('ListingTable.openUsersPopover');
+    await this.userPopoverToggle.open();
+  }
+
+  public async closeUsersPopover(): Promise<void> {
+    this.log.debug('ListingTable.closeUsersPopover');
+    await this.userPopoverToggle.close();
+  }
+
+  /**
    * Navigates through all pages on Landing page and returns array of items names
    */
   public async getAllItemsNames(): Promise<string[]> {
@@ -151,13 +183,7 @@ export class ListingTableService extends FtrService {
     let visualizationNames: string[] = [];
     while (morePages) {
       visualizationNames = visualizationNames.concat(await this.getAllItemsNamesOnCurrentPage());
-      morePages = !(
-        (await this.testSubjects.getAttribute('pagination-button-next', 'disabled')) === 'true'
-      );
-      if (morePages) {
-        await this.testSubjects.click('pagerNextButton');
-        await this.waitUntilTableIsLoaded();
-      }
+      morePages = await this.loadNextPageIfAvailable();
     }
     return visualizationNames;
   }
@@ -239,6 +265,10 @@ export class ListingTableService extends FtrService {
 
       await searchFilter.type(name);
       await this.common.pressEnterKey();
+      const filterValue = await this.getSearchFilterValue();
+      if (filterValue !== name) {
+        throw new Error(`the input value has not updated properly`);
+      }
     });
 
     await this.waitUntilTableIsLoaded();

@@ -1,0 +1,30 @@
+{
+  "type": "plugin",
+  "id": "@kbn/telemetry-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "telemetry",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "telemetryCollectionManager",
+      "usageCollection",
+      "screenshotMode"
+    ],
+    "optionalPlugins": [
+      "home",
+      "security"
+    ],
+    "requiredBundles": [
+      "kibanaUtils"
+    ],
+    "enabledOnAnonymousPages": true,
+    "extraPublicDirs": [
+      "common/constants"
+    ]
+  }
+}

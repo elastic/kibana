@@ -8,35 +8,77 @@
 // We're using the mocks for jest unit tests as expected data in the integration tests here.
 // This makes sure should the assertions for the integration tests need to be updated,
 // that also the jest unit tests use mocks that are not outdated.
-import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_terms';
-import { significantLogPatterns as artificialLogSignificantLogPatterns } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/significant_log_patterns';
-import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups';
-import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/final_significant_item_groups_textfield';
-import { topTerms } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/top_terms';
-import { topTermsGroups } from '@kbn/aiops-plugin/common/__mocks__/artificial_logs/top_terms_groups';
+import { significantTerms as artificialLogSignificantTerms } from '@kbn/aiops-test-utils/artificial_logs/significant_terms';
+import { significantLogPatterns as artificialLogSignificantLogPatterns } from '@kbn/aiops-test-utils/artificial_logs/significant_log_patterns';
+import { finalSignificantItemGroups as artificialLogsSignificantItemGroups } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups';
+import { finalSignificantItemGroupsTextfield as artificialLogsSignificantItemGroupsTextfield } from '@kbn/aiops-test-utils/artificial_logs/final_significant_item_groups_textfield';
+import { topTerms } from '@kbn/aiops-test-utils/artificial_logs/top_terms';
+import { topTermsGroups } from '@kbn/aiops-test-utils/artificial_logs/top_terms_groups';
 import type {
   AiopsLogRateAnalysisSchema,
   AiopsLogRateAnalysisApiVersion as ApiVersion,
-} from '@kbn/aiops-plugin/common/api/log_rate_analysis/schema';
+} from '@kbn/aiops-log-rate-analysis/api/schema';
 import {
   frequentItemSetsLargeArraysGroups,
   frequentItemSetsLargeArraysSignificantItems,
-} from '../../../functional/apps/aiops/log_rate_analysis/test_data/__mocks__/frequent_item_sets_large_arrays';
+} from '@kbn/aiops-test-utils/frequent_item_sets_large_arrays';
 
 import type { TestData } from './types';
 
-export const API_VERSIONS: ApiVersion[] = ['1', '2'];
+export const API_VERSIONS: ApiVersion[] = ['2', '3'];
+export const API_VERSIONS_FIELD_CANDIDATES: ApiVersion[] = ['3'];
+
+const expectedEcommerceFieldCandidates = [
+  'category.keyword',
+  'currency',
+  'customer_first_name.keyword',
+  'customer_full_name.keyword',
+  'customer_gender',
+  'customer_id',
+  'customer_last_name.keyword',
+  'customer_phone',
+  'day_of_week',
+  'email',
+  'geoip.city_name',
+  'geoip.continent_name',
+  'geoip.country_iso_code',
+  'geoip.region_name',
+  'manufacturer.keyword',
+  'order_id',
+  'products._id.keyword',
+  'products.category.keyword',
+  'products.manufacturer.keyword',
+  'products.product_name.keyword',
+  'products.sku',
+  'sku',
+  'type',
+  'user',
+];
+
+const expectedArtificialLogsFieldCandidates = {
+  isECS: false,
+  keywordFieldCandidates: ['response_code', 'url', 'user', 'version'],
+  selectedKeywordFieldCandidates: ['response_code', 'url', 'user', 'version'],
+  selectedTextFieldCandidates: [],
+  textFieldCandidates: [],
+};
+
+const expectedArtificialLogsFieldCandidatesWithTextfield = {
+  ...expectedArtificialLogsFieldCandidates,
+  selectedTextFieldCandidates: ['message'],
+  textFieldCandidates: ['message'],
+};
 
 export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestData<T>> => [
   {
     testName: 'ecommerce',
     esArchive: 'x-pack/test/functional/es_archives/ml/ecommerce',
     requestBody: {
-      baselineMax: 1561719083292,
-      baselineMin: 1560954147006,
-      deviationMax: 1562254538692,
-      deviationMin: 1561986810992,
-      end: 2147483647000,
+      baselineMax: 1687949483292,
+      baselineMin: 1687184547006,
+      deviationMax: 1688484938692,
+      deviationMin: 1688217210992,
+      end: 2273714047000,
       index: 'ft_ecommerce',
       searchQuery: '{"match_all":{}}',
       start: 0,
@@ -75,7 +117,15 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
         },
       ],
       groups: [],
+      histogramActionsLength: 1,
       histogramLength: 20,
+      fieldCandidates: {
+        isECS: false,
+        keywordFieldCandidates: expectedEcommerceFieldCandidates,
+        selectedKeywordFieldCandidates: expectedEcommerceFieldCandidates,
+        selectedTextFieldCandidates: [],
+        textFieldCandidates: [],
+      },
     },
   },
   {
@@ -98,7 +148,9 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       noIndexActionsLength: 3,
       significantItems: artificialLogSignificantTerms,
       groups: artificialLogsSignificantItemGroups,
+      histogramActionsLength: 1,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidates,
     },
   },
   {
@@ -121,7 +173,9 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       noIndexActionsLength: 3,
       significantItems: topTerms,
       groups: topTermsGroups,
+      histogramActionsLength: 1,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidates,
     },
   },
   {
@@ -144,7 +198,9 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       noIndexActionsLength: 3,
       significantItems: topTerms,
       groups: topTermsGroups,
+      histogramActionsLength: 1,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidates,
     },
   },
   {
@@ -167,7 +223,9 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       noIndexActionsLength: 3,
       significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
       groups: artificialLogsSignificantItemGroupsTextfield,
+      histogramActionsLength: 2,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidatesWithTextfield,
     },
   },
   {
@@ -190,7 +248,9 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       noIndexActionsLength: 3,
       significantItems: artificialLogSignificantTerms,
       groups: artificialLogsSignificantItemGroups,
+      histogramActionsLength: 1,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidates,
     },
   },
   {
@@ -213,7 +273,9 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       noIndexActionsLength: 3,
       significantItems: [...artificialLogSignificantTerms, ...artificialLogSignificantLogPatterns],
       groups: artificialLogsSignificantItemGroupsTextfield,
+      histogramActionsLength: 2,
       histogramLength: 20,
+      fieldCandidates: expectedArtificialLogsFieldCandidatesWithTextfield,
     },
   },
   {
@@ -236,7 +298,15 @@ export const getLogRateAnalysisTestData = <T extends ApiVersion>(): Array<TestDa
       noIndexActionsLength: 3,
       groups: frequentItemSetsLargeArraysGroups,
       significantItems: frequentItemSetsLargeArraysSignificantItems,
-      histogramLength: 1,
+      histogramActionsLength: 2,
+      histogramLength: 20,
+      fieldCandidates: {
+        isECS: false,
+        keywordFieldCandidates: ['items'],
+        selectedKeywordFieldCandidates: ['items'],
+        selectedTextFieldCandidates: [],
+        textFieldCandidates: [],
+      },
     },
   },
 ];

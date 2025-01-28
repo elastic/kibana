@@ -27,7 +27,7 @@
         "tags": [],
         "label": "CategorizeFieldContext",
         "description": [],
-        "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+        "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
                 "text": "DataViewField"
               }
             ],
-            "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,7 +67,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -78,7 +78,7 @@
             "tags": [],
             "label": "originatingApp",
             "description": [],
-            "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -92,7 +92,7 @@
             "signature": [
               "{ from: number; to: number; field?: { name: string; value: string; } | undefined; } | undefined"
             ],
-            "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -106,7 +106,7 @@
         "tags": [],
         "label": "CreateCategorizationADJobContext",
         "description": [],
-        "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
+        "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,7 +126,7 @@
                 "text": "DataViewField"
               }
             ],
-            "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -146,7 +146,7 @@
                 "text": "DataView"
               }
             ],
-            "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -160,7 +160,7 @@
             "signature": [
               "QueryDslQueryContainer"
             ],
-            "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -174,7 +174,7 @@
             "signature": [
               "{ from: string; to: string; mode?: \"absolute\" | \"relative\" | undefined; }"
             ],
-            "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -194,7 +194,7 @@
         "signature": [
           "\"ACTION_CATEGORIZE_FIELD\""
         ],
-        "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+        "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -209,7 +209,7 @@
         "signature": [
           "\"CATEGORIZE_FIELD_TRIGGER\""
         ],
-        "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+        "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -224,7 +224,7 @@
         "signature": [
           "\"createMLADCategorizationJobAction\""
         ],
-        "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
+        "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -239,7 +239,7 @@
         "signature": [
           "\"CREATE_PATTERN_ANALYSIS_TO_ML_AD_JOB_TRIGGER\""
         ],
-        "path": "x-pack/packages/ml/ui_actions/src/ml/ui_actions.ts",
+        "path": "x-pack/platform/packages/private/ml/ui_actions/src/ml/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -253,7 +253,7 @@
         "tags": [],
         "label": "categorizeFieldTrigger",
         "description": [],
-        "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+        "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -264,7 +264,7 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -275,7 +275,7 @@
             "tags": [],
             "label": "title",
             "description": [],
-            "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -286,7 +286,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "x-pack/packages/ml/ui_actions/src/aiops/ui_actions.ts",
+            "path": "x-pack/platform/packages/private/ml/ui_actions/src/aiops/ui_actions.ts",
             "deprecated": false,
             "trackAdoption": false
           }

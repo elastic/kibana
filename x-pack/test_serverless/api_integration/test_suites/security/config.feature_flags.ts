@@ -18,11 +18,11 @@ export default createTestConfig({
   },
   suiteTags: { exclude: ['skipSvlSec'] },
   // add feature flags
-  kbnServerArgs: ['--xpack.security.roleManagementEnabled=true'],
+  kbnServerArgs: [],
   // load tests in the index file
   testFiles: [require.resolve('./index.feature_flags.ts')],
 
   // include settings from project controller
   // https://github.com/elastic/project-controller/blob/main/internal/project/security/config/elasticsearch.yml
-  esServerArgs: ['xpack.ml.nlp.enabled=false'],
+  esServerArgs: ['xpack.ml.nlp.enabled=true'],
 });

@@ -1,0 +1,196 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`useUrlParams deletes keys that do not have truthy values 1`] = `
+<MountWithReduxProvider>
+  <Provider
+    store={
+      Object {
+        "dispatch": [MockFunction],
+        "getState": [MockFunction] {
+          "calls": Array [
+            Array [],
+            Array [],
+            Array [],
+            Array [],
+            Array [],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+          ],
+        },
+        "replaceReducer": [MockFunction],
+        "subscribe": [MockFunction] {
+          "calls": Array [
+            Array [
+              [Function],
+            ],
+            Array [
+              [Function],
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+        "undefined": [MockFunction],
+      }
+    }
+  >
+    <UseUrlParamsTestComponent
+      hook={[Function]}
+      updateParams={
+        Object {
+          "pagination": "",
+        }
+      }
+    >
+      <div>
+        {"pagination":"foo","absoluteDateRangeStart":20,"absoluteDateRangeEnd":20,"autorefreshInterval":300000,"autorefreshIsPaused":false,"dateRangeStart":"now-12","dateRangeEnd":"now","filters":"","excludedFilters":"","search":"","statusFilter":"","focusConnectorField":false,"query":""}
+      </div>
+      <button
+        id="setUrlParams"
+        onClick={[Function]}
+      >
+        Set url params
+      </button>
+      <button
+        id="getUrlParams"
+        onClick={[Function]}
+      >
+        Get url params
+      </button>
+    </UseUrlParamsTestComponent>
+  </Provider>
+</MountWithReduxProvider>
+`;
+
+exports[`useUrlParams gets the expected values using the context 1`] = `
+<MountWithReduxProvider>
+  <Provider
+    store={
+      Object {
+        "dispatch": [MockFunction],
+        "getState": [MockFunction] {
+          "calls": Array [
+            Array [],
+            Array [],
+            Array [],
+            Array [],
+            Array [],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+            Object {
+              "type": "return",
+              "value": Object {
+                "selectedFilters": null,
+              },
+            },
+          ],
+        },
+        "replaceReducer": [MockFunction],
+        "subscribe": [MockFunction] {
+          "calls": Array [
+            Array [
+              [Function],
+            ],
+            Array [
+              [Function],
+            ],
+          ],
+          "results": Array [
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+            Object {
+              "type": "return",
+              "value": undefined,
+            },
+          ],
+        },
+        "undefined": [MockFunction],
+      }
+    }
+  >
+    <UseUrlParamsTestComponent
+      hook={[Function]}
+    >
+      <div>
+        {"absoluteDateRangeStart":20,"absoluteDateRangeEnd":20,"autorefreshInterval":300000,"autorefreshIsPaused":false,"dateRangeStart":"now-15m","dateRangeEnd":"now","filters":"","excludedFilters":"","search":"","statusFilter":"","focusConnectorField":false,"query":""}
+      </div>
+      <button
+        id="setUrlParams"
+        onClick={[Function]}
+      >
+        Set url params
+      </button>
+      <button
+        id="getUrlParams"
+        onClick={[Function]}
+      >
+        Get url params
+      </button>
+    </UseUrlParamsTestComponent>
+  </Provider>
+</MountWithReduxProvider>
+`;

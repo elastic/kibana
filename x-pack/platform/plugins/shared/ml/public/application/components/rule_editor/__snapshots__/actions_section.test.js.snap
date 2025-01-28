@@ -1,0 +1,268 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActionsSection renders with no actions selected 1`] = `
+<Fragment>
+  <EuiText>
+    <p>
+      <MemoizedFormattedMessage
+        defaultMessage="Choose the actions to take when the job rule matches an anomaly."
+        id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiCheckbox
+        checked={false}
+        id="skip_result_cb"
+        label={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Skip result (recommended)"
+            id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
+          />
+        }
+        onChange={[MockFunction]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiIconTip
+        content={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="The result will not be created."
+            id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
+          />
+        }
+        position="right"
+        size="s"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiCheckbox
+        checked={false}
+        id="skip_model_update_cb"
+        label={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Skip model update"
+            id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
+          />
+        }
+        onChange={[MockFunction]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiIconTip
+        content={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="The value for that series will not be used to update the model."
+            id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
+          />
+        }
+        position="right"
+        size="s"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`ActionsSection renders with skip_result and skip_model_update selected 1`] = `
+<Fragment>
+  <EuiText>
+    <p>
+      <MemoizedFormattedMessage
+        defaultMessage="Choose the actions to take when the job rule matches an anomaly."
+        id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiCheckbox
+        checked={true}
+        id="skip_result_cb"
+        label={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Skip result (recommended)"
+            id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
+          />
+        }
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiIconTip
+        content={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="The result will not be created."
+            id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
+          />
+        }
+        position="right"
+        size="s"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiCheckbox
+        checked={true}
+        id="skip_model_update_cb"
+        label={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Skip model update"
+            id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
+          />
+        }
+        onChange={[Function]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiIconTip
+        content={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="The value for that series will not be used to update the model."
+            id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
+          />
+        }
+        position="right"
+        size="s"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;
+
+exports[`ActionsSection renders with skip_result selected 1`] = `
+<Fragment>
+  <EuiText>
+    <p>
+      <MemoizedFormattedMessage
+        defaultMessage="Choose the actions to take when the job rule matches an anomaly."
+        id="xpack.ml.ruleEditor.actionsSection.chooseActionsDescription"
+      />
+    </p>
+  </EuiText>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiCheckbox
+        checked={true}
+        id="skip_result_cb"
+        label={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Skip result (recommended)"
+            id="xpack.ml.ruleEditor.actionsSection.skipResultLabel"
+          />
+        }
+        onChange={[MockFunction]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiIconTip
+        content={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="The result will not be created."
+            id="xpack.ml.ruleEditor.actionsSection.resultWillNotBeCreatedTooltip"
+          />
+        }
+        position="right"
+        size="s"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+  <EuiSpacer
+    size="s"
+  />
+  <EuiFlexGroup
+    alignItems="center"
+    gutterSize="s"
+    responsive={false}
+  >
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiCheckbox
+        checked={false}
+        id="skip_model_update_cb"
+        label={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="Skip model update"
+            id="xpack.ml.ruleEditor.actionsSection.skipModelUpdateLabel"
+          />
+        }
+        onChange={[MockFunction]}
+      />
+    </EuiFlexItem>
+    <EuiFlexItem
+      grow={false}
+    >
+      <EuiIconTip
+        content={
+          <Memo(MemoizedFormattedMessage)
+            defaultMessage="The value for that series will not be used to update the model."
+            id="xpack.ml.ruleEditor.actionsSection.valueWillNotBeUsedToUpdateModelTooltip"
+          />
+        }
+        position="right"
+        size="s"
+      />
+    </EuiFlexItem>
+  </EuiFlexGroup>
+</Fragment>
+`;

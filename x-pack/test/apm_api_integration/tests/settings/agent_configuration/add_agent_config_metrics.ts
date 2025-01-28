@@ -9,14 +9,14 @@ import type { ApmSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { Readable } from 'stream';
 
 export function addAgentConfigEtagMetric({
-  synthtraceEsClient,
+  apmSynthtraceEsClient,
   timestamp,
   etag,
 }: {
-  synthtraceEsClient: ApmSynthtraceEsClient;
+  apmSynthtraceEsClient: ApmSynthtraceEsClient;
   timestamp: number;
   etag: string;
 }) {
   const agentConfigMetric = observer().agentConfig().etag(etag).timestamp(timestamp);
-  return synthtraceEsClient.index(Readable.from([agentConfigMetric]));
+  return apmSynthtraceEsClient.index(Readable.from([agentConfigMetric]));
 }

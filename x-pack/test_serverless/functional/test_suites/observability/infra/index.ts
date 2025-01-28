@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ loadTestFile }: FtrProviderContext) {
   describe('Observability Infra', function () {
-    loadTestFile(require.resolve('./header_menu'));
     loadTestFile(require.resolve('./navigation'));
     loadTestFile(require.resolve('./node_details'));
     loadTestFile(require.resolve('./hosts_page'));

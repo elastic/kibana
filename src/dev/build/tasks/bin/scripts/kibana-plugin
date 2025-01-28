@@ -15,7 +15,12 @@ done
 
 DIR="$(dirname "${SCRIPT}")/.."
 CONFIG_DIR=${KBN_PATH_CONF:-"$DIR/config"}
-NODE="${DIR}/node/bin/node"
+{{#darwin}}
+NODE="${DIR}/node/default/bin/node"
+{{/darwin}}
+{{#linux}}
+NODE="${DIR}/node/glibc-217/bin/node"
+{{/linux}}
 test -x "$NODE"
 if [ ! -x "$NODE" ]; then
   echo "unable to find usable node.js executable."

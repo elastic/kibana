@@ -46,7 +46,9 @@ import {
   TIMELINE_TEMPLATE_DETAILS,
   DATA_VIEW_DETAILS,
   EDIT_RULE_SETTINGS_LINK,
+  INTERVAL_ABBR_VALUE,
 } from '../../../../screens/rule_details';
+import { GLOBAL_SEARCH_BAR_FILTER_ITEM } from '../../../../screens/search_bar';
 
 import {
   getRulesManagementTableRows,
@@ -61,8 +63,10 @@ import {
   createAndEnableRule,
   createRuleWithoutEnabling,
   fillAboutRuleAndContinue,
+  fillDefineCustomRule,
   fillDefineCustomRuleAndContinue,
   fillScheduleRuleAndContinue,
+  openAddFilterPopover,
   waitForAlertsToPopulate,
 } from '../../../../tasks/create_new_rule';
 
@@ -70,10 +74,12 @@ import { login } from '../../../../tasks/login';
 import { visit } from '../../../../tasks/navigation';
 import { openRuleManagementPageViaBreadcrumbs } from '../../../../tasks/rules_management';
 import { getDetails, waitForTheRuleToBeExecuted } from '../../../../tasks/rule_details';
+import { fillAddFilterForm } from '../../../../tasks/search_bar';
 
 import { CREATE_RULE_URL } from '../../../../urls/navigation';
 
-describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
+// Skipping in MKI due to flake
+describe('Custom query rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   describe('Custom detection rules creation with data views', () => {
     const rule = getDataViewRule();
     const expectedUrls = rule.references?.join('');
@@ -139,12 +145,16 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       });
       cy.get(DEFINITION_DETAILS).should('not.contain', INDEX_PATTERNS_DETAILS);
       cy.get(SCHEDULE_DETAILS).within(() => {
-        getDetails(RUNS_EVERY_DETAILS).should('have.text', `${rule.interval}`);
+        getDetails(RUNS_EVERY_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${rule.interval}`);
         const humanizedDuration = getHumanizedDuration(
           rule.from ?? 'now-6m',
           rule.interval ?? '5m'
         );
-        getDetails(ADDITIONAL_LOOK_BACK_DETAILS).should('have.text', `${humanizedDuration}`);
+        getDetails(ADDITIONAL_LOOK_BACK_DETAILS)
+          .find(INTERVAL_ABBR_VALUE)
+          .should('have.text', `${humanizedDuration}`);
       });
 
       waitForTheRuleToBeExecuted();
@@ -175,6 +185,18 @@ describe('Custom query rules', { tags: ['@ess', '@serverless'] }, () => {
       cy.get(EDIT_RULE_SETTINGS_LINK).click();
 
       cy.get(RULE_NAME_HEADER).should('contain', 'Edit rule settings');
+    });
+
+    it('Adds filter on define step', () => {
+      visit(CREATE_RULE_URL);
+      fillDefineCustomRule(rule);
+      openAddFilterPopover();
+      fillAddFilterForm({
+        key: 'host.name',
+        operator: 'exists',
+      });
+      // Check that newly added filter exists
+      cy.get(GLOBAL_SEARCH_BAR_FILTER_ITEM).should('have.text', 'host.name: exists');
     });
   });
 });

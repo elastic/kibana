@@ -5,7 +5,8 @@
  * 2.0.
  */
 
-import { EXPAND_ALERT_BTN } from '../../screens/alerts';
+import { EXPAND_ALERT_BTN as TIMELINE_EXPAND_ALERT_BTN } from '../../screens/timeline';
+import { EXPAND_ALERT_BTN as ALERTS_TABLE_EXPAND_ALERT_BTN } from '../../screens/alerts';
 import { DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE } from '../../screens/expandable_flyout/alert_details_right_panel';
 import {
   DOCUMENT_DETAILS_FLYOUT_FOOTER_ADD_TO_NEW_CASE_CREATE_BUTTON,
@@ -17,10 +18,16 @@ import {
 import { openTakeActionButtonAndSelectItem } from './alert_details_right_panel';
 
 /**
- * Find the first alert row in the alerts table then click on the expand icon button to open the flyout
+ * Find the alert row at index in the alerts table then click on the expand icon button to open the flyout
  */
-export const expandFirstAlertExpandableFlyout = () => {
-  cy.get(EXPAND_ALERT_BTN).first().click();
+export const expandAlertAtIndexExpandableFlyout = (index = 0) => {
+  cy.get(ALERTS_TABLE_EXPAND_ALERT_BTN).eq(index).click();
+};
+/**
+ * Find the alert row at index in the timeline table then click on the expand icon button to open the flyout
+ */
+export const expandAlertInTimelineAtIndexExpandableFlyout = (index = 0) => {
+  cy.get(TIMELINE_EXPAND_ALERT_BTN).eq(index).click();
 };
 
 /**

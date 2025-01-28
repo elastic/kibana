@@ -1,0 +1,15 @@
+{
+  "type": "plugin",
+  "id": "@kbn/entity-manager-fixture-plugin",
+  "owner": "@elastic/obs-entities",
+  "plugin": {
+    "id": "entityManagerFixture",
+    "server": true,
+    "browser": false,
+    "requiredPlugins": [
+      "encryptedSavedObjects",
+      "security",
+    ],
+    "optionalPlugins": []
+  }
+}

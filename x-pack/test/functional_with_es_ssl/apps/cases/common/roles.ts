@@ -25,7 +25,7 @@ export const casesReadDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCases: ['minimal_read', 'cases_delete'],
+          generalCasesV2: ['minimal_read', 'cases_delete'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -49,7 +49,31 @@ export const casesNoDelete: Role = {
     kibana: [
       {
         feature: {
-          generalCases: ['minimal_all'],
+          generalCasesV2: ['minimal_all'],
+          actions: ['all'],
+          actionsSimulators: ['all'],
+        },
+        spaces: ['*'],
+      },
+    ],
+  },
+};
+
+export const casesReadAndEditSettings: Role = {
+  name: 'cases_read_and_edit_settings',
+  privileges: {
+    elasticsearch: {
+      indices: [
+        {
+          names: ['*'],
+          privileges: ['all'],
+        },
+      ],
+    },
+    kibana: [
+      {
+        feature: {
+          generalCasesV2: ['minimal_read', 'cases_settings'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -73,7 +97,7 @@ export const casesAll: Role = {
     kibana: [
       {
         feature: {
-          generalCases: ['all'],
+          generalCasesV2: ['all'],
           actions: ['all'],
           actionsSimulators: ['all'],
         },
@@ -83,4 +107,4 @@ export const casesAll: Role = {
   },
 };
 
-export const roles = [casesReadDelete, casesNoDelete, casesAll];
+export const roles = [casesReadDelete, casesNoDelete, casesAll, casesReadAndEditSettings];

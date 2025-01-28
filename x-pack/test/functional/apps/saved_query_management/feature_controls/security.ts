@@ -16,9 +16,9 @@ export default function (ctx: FtrProviderContext) {
   const { getPageObjects, getService } = ctx;
   const savedQuerySecurityUtils = getSavedQuerySecurityUtils(ctx);
   const esArchiver = getService('esArchiver');
-  const security = getService('security');
+  const securityService = getService('security');
   const globalNav = getService('globalNav');
-  const PageObjects = getPageObjects([
+  const { common, discover, security, dashboard, maps, visualize } = getPageObjects([
     'common',
     'discover',
     'security',
@@ -36,7 +36,7 @@ export default function (ctx: FtrProviderContext) {
     const name = `global_saved_query_${appName}`;
     const password = `password_${name}_${appPrivilege}_${globalPrivilege}`;
 
-    await security.role.create(name, {
+    await securityService.role.create(name, {
       elasticsearch: {
         indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
       },
@@ -51,40 +51,40 @@ export default function (ctx: FtrProviderContext) {
       ],
     });
 
-    await security.user.create(`${name}-user`, {
+    await securityService.user.create(`${name}-user`, {
       password,
       roles: [name],
       full_name: 'test user',
     });
 
-    await PageObjects.security.login(`${name}-user`, password, {
+    await security.login(`${name}-user`, password, {
       expectSpaceSelector: false,
     });
   }
 
   async function logout(appName: AppName) {
     const name = `global_saved_query_${appName}`;
-    await PageObjects.security.forceLogout();
-    await security.role.delete(name);
-    await security.user.delete(`${name}-user`);
+    await security.forceLogout();
+    await securityService.role.delete(name);
+    await securityService.user.delete(`${name}-user`);
   }
 
   async function navigateToApp(appName: AppName) {
     switch (appName) {
       case 'discover':
-        await PageObjects.common.navigateToApp('discover');
-        await PageObjects.discover.selectIndexPattern('logstash-*');
+        await common.navigateToApp('discover');
+        await discover.selectIndexPattern('logstash-*');
         break;
       case 'dashboard':
-        await PageObjects.dashboard.navigateToApp();
-        await PageObjects.dashboard.gotoDashboardEditMode('A Dashboard');
+        await dashboard.navigateToApp();
+        await dashboard.loadSavedDashboard('A Dashboard');
         break;
       case 'maps':
-        await PageObjects.maps.openNewMap();
+        await maps.openNewMap();
         break;
       case 'visualize':
-        await PageObjects.visualize.navigateToNewVisualization();
-        await PageObjects.visualize.clickVisType('lens');
+        await visualize.navigateToNewVisualization();
+        await visualize.clickVisType('lens');
         break;
       default:
         break;
@@ -103,13 +103,13 @@ export default function (ctx: FtrProviderContext) {
         await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/logstash_functional');
 
         // ensure we're logged out, so we can log in as the appropriate users
-        await PageObjects.security.forceLogout();
+        await security.forceLogout();
       });
 
       after(async () => {
         // logout, so the other tests don't accidentally run as the custom users we're testing below
         // NOTE: Logout needs to happen before anything else to avoid flaky behavior
-        await PageObjects.security.forceLogout();
+        await security.forceLogout();
 
         await kibanaServer.importExport.unload(
           'x-pack/test/functional/fixtures/kbn_archiver/dashboard/feature_controls/security/security.json'
@@ -122,7 +122,7 @@ export default function (ctx: FtrProviderContext) {
         before(async () => {
           await login(appName, 'read', 'all');
           await navigateToApp(appName);
-          await PageObjects.common.waitForTopNavToBeVisible();
+          await common.waitForTopNavToBeVisible();
         });
 
         after(async () => {

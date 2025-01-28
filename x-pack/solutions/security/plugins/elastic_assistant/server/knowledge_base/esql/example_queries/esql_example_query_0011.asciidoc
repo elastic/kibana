@@ -1,0 +1,15 @@
+//11. Unusual file creations by web server user
+//Helpful when answering questions on using the LIKE command (wildcard searches) and aggregations
+FROM logs-*
+| WHERE @timestamp > NOW() - 50 day
+| WHERE host.os.type == "linux" and event.type == "creation" and user.name in ("www-data", "apache", "nginx", "httpd", "tomcat", "lighttpd", "glassfish", "weblogic") and (
+file.path like "/var/www/*" or
+file.path like "/var/tmp/*" or
+file.path like "/tmp/*" or
+file.path like "/dev/shm/*"
+)
+| STATS file_count = COUNT(file.path), host_count = COUNT(host.name) by file.path, host.name, process.name, user.name
+// Alter this threshold to make sense for your environment 
+| WHERE file_count <= 5
+| SORT file_count asc
+| LIMIT 100

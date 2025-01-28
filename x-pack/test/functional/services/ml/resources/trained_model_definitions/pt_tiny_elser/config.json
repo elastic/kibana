@@ -1,0 +1,17 @@
+{
+  "description": "Tiny ELSER model",
+  "model_type": "pytorch",
+  "inference_config": {
+    "text_expansion": {
+      "tokenization": {
+        "bert": {
+          "do_lower_case": true,
+          "with_special_tokens": true,
+          "max_sequence_length": 512,
+          "truncate": "first",
+          "span": -1
+        }
+      }
+    }
+  }
+}

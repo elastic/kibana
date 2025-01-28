@@ -1,0 +1,20 @@
+# CBRT
+
+The CBRT function calculates the cube root of a given number.
+
+## Syntax
+
+`CBRT(number)`
+
+### Parameters
+
+#### number
+
+This is a numeric expression. If the parameter is `null`, the function will also return `null`.
+
+## Examples
+
+```esql
+ROW d = 1000.0
+| EVAL c = cbrt(d)
+```

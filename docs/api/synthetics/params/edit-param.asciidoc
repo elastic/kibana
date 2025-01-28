@@ -26,13 +26,13 @@ You must have `all` privileges for the *Synthetics* feature in the *{observabili
 [[parameter-edit-request-body]]
 ==== Request body
 
-The request body should contain the following attributes:
+The request body can contain the following attributes, it can't be empty at least one attribute is required.:
 
 `key`::
-(Required, string) The key of the parameter.
+(Optional, string) The key of the parameter.
 
 `value`::
-(Required, string) The updated value associated with the parameter.
+(Optional, string) The updated value associated with the parameter.
 
 `description`::
 (Optional, string) The updated description of the parameter.

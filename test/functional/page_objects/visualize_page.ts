@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { VisualizeConstants } from '@kbn/visualizations-plugin/common/constants';
@@ -40,7 +41,7 @@ export class VisualizePageObject extends FtrService {
   private readonly elasticChart = this.ctx.getService('elasticChart');
   private readonly common = this.ctx.getPageObject('common');
   private readonly header = this.ctx.getPageObject('header');
-  private readonly visEditor = this.ctx.getPageObject('visEditor');
+  private readonly timePicker = this.ctx.getPageObject('timePicker');
   private readonly visChart = this.ctx.getPageObject('visChart');
   private readonly toasts = this.ctx.getService('toasts');
 
@@ -52,7 +53,7 @@ export class VisualizePageObject extends FtrService {
   remoteEsPrefix = 'ftr-remote:';
   defaultIndexString = 'logstash-*';
 
-  public async initTests(isNewLibrary = false) {
+  public async initTests(isLegacyChart = false) {
     await this.kibanaServer.savedObjects.clean({ types: ['visualization'] });
     await this.kibanaServer.importExport.load(
       'test/functional/fixtures/kbn_archiver/visualize.json'
@@ -61,13 +62,36 @@ export class VisualizePageObject extends FtrService {
     await this.kibanaServer.uiSettings.replace({
       defaultIndex: this.defaultIndexString,
       [FORMATS_UI_SETTINGS.FORMAT_BYTES_DEFAULT_PATTERN]: '0,0.[000]b',
-      'visualization:visualize:legacyHeatmapChartsLibrary': !isNewLibrary,
+      'visualization:visualize:legacyHeatmapChartsLibrary': isLegacyChart,
       'histogram:maxBars': 100,
+      'timepicker:timeDefaults': `{ "from": "${this.timePicker.defaultStartTimeUTC}", "to": "${this.timePicker.defaultEndTimeUTC}"}`,
     });
   }
 
-  public async gotoVisualizationLandingPage() {
-    await this.common.navigateToApp('visualize');
+  /**
+   *  Try to speed resets a bit if the Visualize Library breadcrumb is available
+   */
+  private async clickOnVisualizeLibraryBreadcrumb() {
+    // Try to navigate to the Visualize Listing page from breadcrumb if available
+    const selector = '[data-test-subj="breadcrumb first"][title="Visualize Library"]';
+    const visualizeLibraryBreadcrumb = await this.find.existsByCssSelector(selector);
+    if (visualizeLibraryBreadcrumb) {
+      await this.find.clickByCssSelector(selector);
+      // Lens offers a last modal before leaving the page for unsaved charts
+      // so close it as quick as possible
+      if (await this.testSubjects.exists('confirmModalConfirmButton')) {
+        await this.testSubjects.click('confirmModalConfirmButton');
+        return true;
+      }
+    }
+  }
+
+  public async gotoVisualizationLandingPage(
+    { forceRefresh }: { forceRefresh: boolean } = { forceRefresh: false }
+  ) {
+    if (forceRefresh || !(await this.clickOnVisualizeLibraryBreadcrumb())) {
+      await this.common.navigateToApp('visualize');
+    }
   }
 
   public async selectVisualizationsTab() {
@@ -83,7 +107,8 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickAggBasedVisualizations() {
-    await this.testSubjects.click('visGroupAggBasedExploreLink');
+    await this.clickLegacyTab();
+    await this.testSubjects.click('visType-aggbased');
   }
 
   public async goBackToGroups() {
@@ -102,7 +127,7 @@ export class VisualizePageObject extends FtrService {
       .map((chart) => $(chart).findTestSubject('visTypeTitle').text().trim());
   }
 
-  public async getPromotedVisTypes() {
+  public async getVisibleVisTypes() {
     const chartTypeField = await this.testSubjects.find('visNewDialogGroups');
     const $ = await chartTypeField.parseDomContent();
     const promotedVisTypes: string[] = [];
@@ -114,7 +139,7 @@ export class VisualizePageObject extends FtrService {
           promotedVisTypes.push(title);
         }
       });
-    return promotedVisTypes;
+    return promotedVisTypes.sort();
   }
 
   public async waitForVisualizationSelectPage() {
@@ -126,8 +151,8 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async clickRefresh(isNewChartLibrary = false) {
-    if ((await this.visChart.isNewChartsLibraryEnabled()) || isNewChartLibrary) {
+  public async clickRefresh(isLegacyChart = false) {
+    if ((await this.visChart.isNewChartsLibraryEnabled()) || !isLegacyChart) {
       await this.elasticChart.setNewChartUiDebugFlag();
     }
     await this.queryBar.clickQuerySubmitButton();
@@ -142,8 +167,15 @@ export class VisualizePageObject extends FtrService {
     });
   }
 
-  public async navigateToNewVisualization() {
-    await this.gotoVisualizationLandingPage();
+  /**
+   * Navigation now happens without URL refresh by default
+   * so a new "forceRefresh" option has been passed in order to
+   * address those scenarios where a full refresh is required (i.e. changing default settings)
+   */
+  public async navigateToNewVisualization(
+    options: { forceRefresh: boolean } = { forceRefresh: false }
+  ) {
+    await this.gotoVisualizationLandingPage(options);
     await this.header.waitUntilLoadingHasFinished();
     await this.clickNewVisualization();
     await this.waitForGroupsSelectPage();
@@ -158,8 +190,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async navigateToLensFromAnotherVisualization() {
-    const button = await this.testSubjects.find('visualizeEditInLensButton');
-    await button.click();
+    await this.testSubjects.click('visualizeEditInLensButton');
   }
 
   public async hasNavigateToLensButton() {
@@ -192,8 +223,8 @@ export class VisualizePageObject extends FtrService {
     await this.clickVisType('line');
   }
 
-  public async clickMarkdownWidget() {
-    await this.clickVisType('markdown');
+  public async clickLegacyTab() {
+    await this.testSubjects.click('groupModalLegacyTab');
   }
 
   public async clickMetric() {
@@ -225,6 +256,7 @@ export class VisualizePageObject extends FtrService {
   }
 
   public async clickVisualBuilder() {
+    await this.clickLegacyTab();
     await this.clickVisType('metrics');
   }
 
@@ -252,12 +284,10 @@ export class VisualizePageObject extends FtrService {
     return await this.hasVisType('maps');
   }
 
-  public async createSimpleMarkdownViz(vizName: string) {
+  public async createSimpleTSVBViz(vizName: string) {
     await this.gotoVisualizationLandingPage();
     await this.navigateToNewVisualization();
-    await this.clickMarkdownWidget();
-    await this.visEditor.setMarkdownTxt(vizName);
-    await this.visEditor.clickGo();
+    await this.clickVisualBuilder();
     await this.saveVisualization(vizName);
   }
 
@@ -419,7 +449,7 @@ export class VisualizePageObject extends FtrService {
     await this.testSubjects.setValue('savedObjectTitle', vizName);
 
     if (description) {
-      await this.testSubjects.setValue('viewDescription', description);
+      await this.testSubjects.setValue('savedObjectDescription', description);
     }
 
     const saveAsNewCheckboxExists = await this.testSubjects.exists('saveAsNewCheckbox');
@@ -487,14 +517,6 @@ export class VisualizePageObject extends FtrService {
     await this.header.waitUntilLoadingHasFinished();
     await this.testSubjects.existOrFail('visualizesaveAndReturnButton');
     await this.testSubjects.click('visualizesaveAndReturnButton');
-  }
-
-  public async getDeprecationWarningStatus() {
-    if (await this.visChart.isNewChartsLibraryEnabled()) {
-      await this.testSubjects.missingOrFail('vizDeprecationWarning');
-    } else {
-      await this.testSubjects.existOrFail('vizDeprecationWarning');
-    }
   }
 
   public async linkedToOriginatingApp() {

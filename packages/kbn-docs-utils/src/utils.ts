@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import path from 'path';
 import { ToolingLog } from '@kbn/tooling-log';
 import {
@@ -72,7 +74,7 @@ function escapeRegExp(regexp: string) {
 /**
  * If the file is at the top level, returns undefined, otherwise returns the
  * name of the first nested folder in the plugin. For example a path of
- * 'src/plugins/data/public/search_services/file.ts' would return 'search_service' while
+ * 'src/platform/plugins/shared/data/public/search_services/file.ts' would return 'search_service' while
  * 'src/plugin/data/server/file.ts' would return undefined.
  * @param filePath
  */

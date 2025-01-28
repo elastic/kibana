@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { DynamicSettings } from '@kbn/synthetics-plugin/common/runtime_types';
+import { DynamicSettings } from '@kbn/uptime-plugin/common/runtime_types';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
@@ -36,9 +36,9 @@ export function UptimeSettingsProvider({ getService }: FtrProviderContext) {
       const indInput = await testSubjects.find('heartbeat-indices-input-loaded', 5000);
       const expirationInput = await testSubjects.find('expiration-threshold-input-loaded', 5000);
       const ageInput = await testSubjects.find('age-threshold-input-loaded', 5000);
-      const heartbeatIndices = await indInput.getAttribute('value');
-      const expiration = await expirationInput.getAttribute('value');
-      const age = await ageInput.getAttribute('value');
+      const heartbeatIndices = (await indInput.getAttribute('value')) ?? '0';
+      const expiration = (await expirationInput.getAttribute('value')) ?? '0';
+      const age = (await ageInput.getAttribute('value')) ?? '0';
 
       return {
         heartbeatIndices,

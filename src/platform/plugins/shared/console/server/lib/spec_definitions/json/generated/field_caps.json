@@ -1,0 +1,37 @@
+{
+  "field_caps": {
+    "url_params": {
+      "error_trace": "__flag__",
+      "filter_path": [],
+      "human": "__flag__",
+      "pretty": "__flag__",
+      "allow_no_indices": "__flag__",
+      "expand_wildcards": [
+        "all",
+        "open",
+        "closed",
+        "hidden",
+        "none"
+      ],
+      "fields": [],
+      "ignore_unavailable": "__flag__",
+      "include_unmapped": "__flag__",
+      "filters": "",
+      "types": "",
+      "include_empty_fields": "__flag__"
+    },
+    "methods": [
+      "GET",
+      "POST"
+    ],
+    "patterns": [
+      "_field_caps",
+      "{index}/_field_caps"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/elasticsearch/reference/master/search-field-caps.html",
+    "availability": {
+      "stack": true,
+      "serverless": true
+    }
+  }
+}

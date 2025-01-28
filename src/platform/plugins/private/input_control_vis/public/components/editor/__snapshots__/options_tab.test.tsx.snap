@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`OptionsTab should renders OptionsTab 1`] = `
+<EuiForm>
+  <EuiFormRow
+    id="updateFiltersOnChange"
+  >
+    <EuiSwitch
+      checked={false}
+      data-test-subj="inputControlEditorUpdateFiltersOnChangeCheckbox"
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Update Kibana filters on each change"
+          id="inputControl.editor.optionsTab.updateFilterLabel"
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    id="useTimeFilter"
+  >
+    <EuiSwitch
+      checked={false}
+      data-test-subj="inputControlEditorUseTimeFilterCheckbox"
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Use time filter"
+          id="inputControl.editor.optionsTab.useTimeFilterLabel"
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+  <EuiFormRow
+    id="pinFilters"
+  >
+    <EuiSwitch
+      checked={false}
+      data-test-subj="inputControlEditorPinFiltersCheckbox"
+      label={
+        <Memo(MemoizedFormattedMessage)
+          defaultMessage="Pin filters for all applications"
+          id="inputControl.editor.optionsTab.pinFiltersLabel"
+        />
+      }
+      onChange={[Function]}
+    />
+  </EuiFormRow>
+</EuiForm>
+`;

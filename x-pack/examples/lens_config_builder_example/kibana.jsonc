@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/lens-config-builder-example-plugin",
+  "owner": "@elastic/kibana-visualizations",
+  "plugin": {
+    "id": "lensConfigBuilderExample",
+    "server": false,
+    "browser": true,
+    "configPath": [
+      "lens_config_builder_example"
+    ],
+    "requiredPlugins": [
+      "lens",
+      "data",
+      "embeddable",
+      "developerExamples"
+    ]
+  }
+}

@@ -16,6 +16,7 @@ export function MachineLearningDataVisualizerFileBasedProvider(
   { getService, getPageObjects }: FtrProviderContext,
   mlCommonUI: MlCommonUI
 ) {
+  const es = getService('es');
   const log = getService('log');
   const retry = getService('retry');
   const testSubjects = getService('testSubjects');
@@ -176,6 +177,47 @@ export function MachineLearningDataVisualizerFileBasedProvider(
     async closeCreateFilebeatConfig() {
       await testSubjects.click('fileBeatConfigFlyoutCloseButton');
       await testSubjects.missingOrFail('fileDataVisFilebeatConfigPanel');
+    },
+
+    async assertDocCountInIndex(index: string, expectedCount: number) {
+      await retry.tryForTime(60 * 1000, async () => {
+        const count = await this.getDocCountFromIndex(index);
+        expect(count).to.eql(
+          expectedCount,
+          `Expected document count in index '${index}' to be '${expectedCount}' (got '${count}')`
+        );
+      });
+    },
+
+    async getDocCountFromIndex(index: string) {
+      const resp = await es.search({
+        index,
+        body: {
+          size: 0,
+          query: {
+            match_all: {},
+          },
+        },
+      });
+      // @ts-expect-error incorrect type definition
+      return resp.hits.total?.value;
+    },
+
+    async assertFieldsFromIndex(index: string, fields: string[]) {
+      await retry.tryForTime(60 * 1000, async () => {
+        const sortedFields = fields.sort();
+        const fieldCaps = await es.fieldCaps({
+          index,
+          fields: '*',
+          filters: '-metadata',
+          include_empty_fields: false,
+        });
+        const fieldsFromIndex = Object.keys(fieldCaps.fields).sort();
+        expect(fieldsFromIndex).to.eql(
+          sortedFields,
+          `Expected fields to be ${sortedFields} (got ${fieldsFromIndex})`
+        );
+      });
     },
   };
 }

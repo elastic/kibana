@@ -1,0 +1,125 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`DocumentsPanel renders 1`] = `
+<FlyoutPanel
+  title="Documents"
+>
+  <EuiBasicTable
+    columns={
+      Array [
+        Object {
+          "field": "added",
+          "name": <EuiToolTip
+            content={
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Number of {index} operations the connector sent to the Elasticsearch _bulk API, including updates to existing documents. Note that the number of documents upserted and the number of documents in the index may differ."
+                id="searchConnectors.index.syncJobs.documents.upserted.tooltip"
+                values={
+                  Object {
+                    "index": <EuiCode>
+                      index
+                    </EuiCode>,
+                  }
+                }
+              />
+            }
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <React.Fragment>
+              Upserted
+              <EuiIcon
+                className="eui-alignTop"
+                color="subdued"
+                size="s"
+                type="questionInCircle"
+              />
+            </React.Fragment>
+          </EuiToolTip>,
+        },
+        Object {
+          "field": "removed",
+          "name": <EuiToolTip
+            content={
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Number of {delete} operations the connector sent to the Elasticsearch _bulk API. May include documents dropped by Sync Rules. Does not include documents dropped by ingest processors. Documents are deleted when the connector determines they are no longer present in the third-party source."
+                id="searchConnectors.index.syncJobs.documents.deleted.tooltip"
+                values={
+                  Object {
+                    "delete": <EuiCode>
+                      delete
+                    </EuiCode>,
+                  }
+                }
+              />
+            }
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <React.Fragment>
+              Deleted
+              <EuiIcon
+                className="eui-alignTop"
+                color="subdued"
+                size="s"
+                type="questionInCircle"
+              />
+            </React.Fragment>
+          </EuiToolTip>,
+        },
+        Object {
+          "field": "volume",
+          "name": <EuiToolTip
+            content={
+              <Memo(MemoizedFormattedMessage)
+                defaultMessage="Volume (in MB) of JSON data sent with {index} operations to the Elasticsearch _bulk API. The Elasticsearch index may be larger, depending on index mappings and settings, or smaller, if data is trimmed by ingest processors."
+                id="searchConnectors.index.syncJobs.documents.volume.tooltip"
+                values={
+                  Object {
+                    "index": <EuiCode>
+                      index
+                    </EuiCode>,
+                  }
+                }
+              />
+            }
+            delay="regular"
+            display="inlineBlock"
+            position="top"
+          >
+            <React.Fragment>
+              Volume
+              <EuiIcon
+                className="eui-alignTop"
+                color="subdued"
+                size="s"
+                type="questionInCircle"
+              />
+            </React.Fragment>
+          </EuiToolTip>,
+          "render": [Function],
+        },
+      ]
+    }
+    items={
+      Array [
+        Object {
+          "added": 10,
+          "removed": 0,
+          "total": 305,
+          "volume": 1120,
+        },
+      ]
+    }
+    noItemsMessage={
+      <EuiI18n
+        default="No items found"
+        token="euiBasicTable.noItemsMessage"
+      />
+    }
+    tableLayout="fixed"
+  />
+</FlyoutPanel>
+`;

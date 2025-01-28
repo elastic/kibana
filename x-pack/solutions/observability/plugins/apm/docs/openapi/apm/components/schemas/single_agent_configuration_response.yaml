@@ -1,0 +1,8 @@
+allOf:
+  - type: object
+    required:
+      - id
+    properties:
+      id:
+        type: string
+  - $ref: 'agent_configuration_object.yaml'

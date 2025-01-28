@@ -13,7 +13,7 @@
         "description": [
           "\nOptions for the {@link SavedObjectsTaggingApiUi.getSearchBarFilter | getSearchBarFilter api}\n"
         ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -29,7 +29,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,7 +45,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -61,7 +61,7 @@
         "description": [
           "\nOptions for the {@link SavedObjectsTaggingApiUi.getTableColumnDefinition | getTableColumnDefinition api}\n"
         ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -77,7 +77,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -91,7 +91,7 @@
         "tags": [],
         "label": "ITagsCache",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,7 +115,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -143,7 +143,7 @@
               },
               "[]>"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -154,7 +154,7 @@
                 "tags": [],
                 "label": "params",
                 "description": [],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -168,7 +168,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                    "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -187,7 +187,7 @@
         "tags": [],
         "label": "ParsedSearchQuery",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -198,7 +198,7 @@
             "tags": [],
             "label": "searchTerm",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -210,16 +210,10 @@
             "label": "tagReferences",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               "[]"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -231,16 +225,10 @@
             "label": "tagReferencesToExclude",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               "[]"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -251,7 +239,7 @@
             "tags": [],
             "label": "valid",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -267,7 +255,7 @@
         "description": [
           "\nOptions for the {@link SavedObjectsTaggingApiUi.parseSearchQuery | parseSearchQuery api}\n"
         ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -283,7 +271,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -299,7 +287,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -313,7 +301,7 @@
         "tags": [],
         "label": "SavedObjectsTaggingApi",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -335,7 +323,7 @@
                 "text": "ITagsClient"
               }
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -357,7 +345,7 @@
                 "text": "ITagsCache"
               }
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -379,7 +367,7 @@
                 "text": "SavedObjectsTaggingApiUi"
               }
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -395,7 +383,7 @@
         "description": [
           "\nReact components and utility methods to use the SO tagging feature\n"
         ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -419,7 +407,7 @@
               },
               " | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -433,7 +421,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -461,82 +449,10 @@
               },
               "[]"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
-            "returnComment": []
-          },
-          {
-            "parentPluginId": "savedObjectsTaggingOss",
-            "id": "def-public.SavedObjectsTaggingApiUi.hasTagDecoration",
-            "type": "Function",
-            "tags": [],
-            "label": "hasTagDecoration",
-            "description": [
-              "\nType-guard to safely manipulate tag-enhanced `SavedObject` from the `savedObject` plugin.\n"
-            ],
-            "signature": [
-              "(object: ",
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
-              ">) => object is ",
-              {
-                "pluginId": "savedObjectsTaggingOss",
-                "scope": "public",
-                "docId": "kibSavedObjectsTaggingOssPluginApi",
-                "section": "def-public.TagDecoratedSavedObject",
-                "text": "TagDecoratedSavedObject"
-              }
-            ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "children": [
-              {
-                "parentPluginId": "savedObjectsTaggingOss",
-                "id": "def-public.SavedObjectsTaggingApiUi.hasTagDecoration.$1",
-                "type": "Object",
-                "tags": [],
-                "label": "object",
-                "description": [],
-                "signature": [
-                  {
-                    "pluginId": "savedObjects",
-                    "scope": "public",
-                    "docId": "kibSavedObjectsPluginApi",
-                    "section": "def-public.SavedObject",
-                    "text": "SavedObject"
-                  },
-                  "<",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectAttributes",
-                    "text": "SavedObjectAttributes"
-                  },
-                  ">"
-                ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-                "deprecated": false,
-                "trackAdoption": false,
-                "isRequired": true
-              }
-            ],
             "returnComment": []
           },
           {
@@ -560,7 +476,7 @@
               " | undefined) => ",
               "SearchFilterConfig"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -581,7 +497,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -610,16 +526,10 @@
               " | undefined) => ",
               "EuiTableFieldDataColumnType",
               "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObject",
-                "text": "SavedObject"
-              },
+              "SavedObject",
               "<unknown>>"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -640,7 +550,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -659,16 +569,10 @@
             ],
             "signature": [
               "(tagName: string) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               " | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -682,7 +586,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -718,7 +622,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -734,7 +638,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -758,7 +662,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -777,24 +681,12 @@
             ],
             "signature": [
               "(references: (",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               " | ",
-              {
-                "pluginId": "@kbn/core-saved-objects-api-server",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                "section": "def-common.SavedObjectsFindOptionsReference",
-                "text": "SavedObjectsFindOptionsReference"
-              },
+              "SavedObjectsFindOptionsReference",
               ")[]) => string[]"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -807,24 +699,12 @@
                 "description": [],
                 "signature": [
                   "(",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   " | ",
-                  {
-                    "pluginId": "@kbn/core-saved-objects-api-server",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsApiServerPluginApi",
-                    "section": "def-common.SavedObjectsFindOptionsReference",
-                    "text": "SavedObjectsFindOptionsReference"
-                  },
+                  "SavedObjectsFindOptionsReference",
                   ")[]"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -844,7 +724,7 @@
             "signature": [
               "(tagName: string) => string | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -858,7 +738,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -877,24 +757,12 @@
             ],
             "signature": [
               "(references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[], newTagIds: string[]) => ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -906,16 +774,10 @@
                 "label": "references",
                 "description": [],
                 "signature": [
-                  {
-                    "pluginId": "@kbn/core-saved-objects-common",
-                    "scope": "common",
-                    "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                    "section": "def-common.SavedObjectReference",
-                    "text": "SavedObjectReference"
-                  },
+                  "SavedObjectReference",
                   "[]"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -930,7 +792,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -956,7 +818,7 @@
                 "text": "SavedObjectsTaggingApiUiComponent"
               }
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -972,7 +834,7 @@
         "description": [
           "\nReact UI components to be used to display the tagging feature in any application.\n"
         ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -996,7 +858,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1004,14 +866,14 @@
               {
                 "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUiComponent.TagList.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1025,7 +887,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1051,7 +913,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1059,14 +921,14 @@
               {
                 "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUiComponent.TagSelector.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1080,7 +942,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1106,7 +968,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
@@ -1114,14 +976,14 @@
               {
                 "parentPluginId": "savedObjectsTaggingOss",
                 "id": "def-public.SavedObjectsTaggingApiUiComponent.SavedObjectSaveModalTagSelector.$1",
-                "type": "CompoundType",
+                "type": "Uncategorized",
                 "tags": [],
                 "label": "props",
                 "description": [],
                 "signature": [
-                  "P & { children?: React.ReactNode; }"
+                  "P"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -1135,7 +997,7 @@
                 "signature": [
                   "any"
                 ],
-                "path": "node_modules/@types/react/index.d.ts",
+                "path": "node_modules/@types/react/ts5.0/index.d.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -1153,7 +1015,7 @@
         "description": [
           "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagList | TagList component}\n"
         ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1168,16 +1030,10 @@
             ],
             "signature": [
               "{ references: ",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectReference",
-                "text": "SavedObjectReference"
-              },
+              "SavedObjectReference",
               "[]; }"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1201,7 +1057,7 @@
               },
               ") => void) | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1221,7 +1077,7 @@
                     "text": "TagWithOptionalId"
                   }
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1249,7 +1105,7 @@
               },
               ") => JSX.Element) | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1269,7 +1125,7 @@
                     "text": "TagWithOptionalId"
                   }
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1289,7 +1145,7 @@
         "description": [
           "\nProps type for the {@link SavedObjectsTaggingApiUiComponent.TagSelector | TagSelector component}\n"
         ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1305,7 +1161,7 @@
             "signature": [
               "string[]"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1321,7 +1177,7 @@
             "signature": [
               "(ids: string[]) => void"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1335,7 +1191,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1369,7 +1225,7 @@
             "section": "def-common.Tag",
             "text": "Tag"
           },
-          " | { type: \"__create_option__\"; }>, \"options\" | \"selectedOptions\" | \"async\" | \"compressed\" | \"fullWidth\" | \"isClearable\" | \"singleSelection\" | \"prepend\" | \"append\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
+          " | { type: \"__create_option__\"; }>, \"options\" | \"prepend\" | \"append\" | \"async\" | \"isClearable\" | \"compressed\" | \"fullWidth\" | \"selectedOptions\" | \"optionMatcher\" | \"singleSelection\" | \"sortMatchesBy\"> & Partial<DefaultProps<",
           {
             "pluginId": "savedObjectsTaggingOss",
             "scope": "common",
@@ -1379,107 +1235,7 @@
           },
           " | { type: \"__create_option__\"; }>> & { initialSelection: string[]; onTagsSelected: (ids: string[]) => void; markOptional?: boolean | undefined; }"
         ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjectsTaggingOss",
-        "id": "def-public.SavedObjectTagDecoratorTypeGuard",
-        "type": "Type",
-        "tags": [],
-        "label": "SavedObjectTagDecoratorTypeGuard",
-        "description": [],
-        "signature": [
-          "(object: ",
-          {
-            "pluginId": "savedObjects",
-            "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
-            "section": "def-public.SavedObject",
-            "text": "SavedObject"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          },
-          ">) => object is ",
-          {
-            "pluginId": "savedObjectsTaggingOss",
-            "scope": "public",
-            "docId": "kibSavedObjectsTaggingOssPluginApi",
-            "section": "def-public.TagDecoratedSavedObject",
-            "text": "TagDecoratedSavedObject"
-          }
-        ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "returnComment": [],
-        "children": [
-          {
-            "parentPluginId": "savedObjectsTaggingOss",
-            "id": "def-public.SavedObjectTagDecoratorTypeGuard.$1",
-            "type": "Object",
-            "tags": [],
-            "label": "object",
-            "description": [],
-            "signature": [
-              {
-                "pluginId": "savedObjects",
-                "scope": "public",
-                "docId": "kibSavedObjectsPluginApi",
-                "section": "def-public.SavedObject",
-                "text": "SavedObject"
-              },
-              "<",
-              {
-                "pluginId": "@kbn/core-saved-objects-common",
-                "scope": "common",
-                "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-                "section": "def-common.SavedObjectAttributes",
-                "text": "SavedObjectAttributes"
-              },
-              ">"
-            ],
-            "path": "src/plugins/saved_objects_tagging_oss/public/api.ts",
-            "deprecated": false,
-            "trackAdoption": false
-          }
-        ],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "savedObjectsTaggingOss",
-        "id": "def-public.TagDecoratedSavedObject",
-        "type": "Type",
-        "tags": [],
-        "label": "TagDecoratedSavedObject",
-        "description": [],
-        "signature": [
-          {
-            "pluginId": "savedObjects",
-            "scope": "public",
-            "docId": "kibSavedObjectsPluginApi",
-            "section": "def-public.SavedObject",
-            "text": "SavedObject"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/core-saved-objects-common",
-            "scope": "common",
-            "docId": "kibKbnCoreSavedObjectsCommonPluginApi",
-            "section": "def-common.SavedObjectAttributes",
-            "text": "SavedObjectAttributes"
-          },
-          "> & { getTags(): string[]; setTags(tags: string[]): void; }"
-        ],
-        "path": "src/plugins/saved_objects_tagging_oss/public/decorator/types.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1493,7 +1249,7 @@
       "tags": [],
       "label": "SavedObjectTaggingOssPluginSetup",
       "description": [],
-      "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+      "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1517,7 +1273,7 @@
             },
             ">) => void"
           ],
-          "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+          "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1539,7 +1295,7 @@
                 },
                 ">"
               ],
-              "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+              "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1558,7 +1314,7 @@
       "tags": [],
       "label": "SavedObjectTaggingOssPluginStart",
       "description": [],
-      "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+      "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1574,7 +1330,7 @@
           "signature": [
             "() => boolean"
           ],
-          "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+          "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1600,7 +1356,7 @@
             },
             " | undefined"
           ],
-          "path": "src/plugins/saved_objects_tagging_oss/public/types.ts",
+          "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1625,12 +1381,82 @@
     "interfaces": [
       {
         "parentPluginId": "savedObjectsTaggingOss",
+        "id": "def-common.CreateTagOptions",
+        "type": "Interface",
+        "tags": [],
+        "label": "CreateTagOptions",
+        "description": [],
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-common.CreateTagOptions.id",
+            "type": "string",
+            "tags": [],
+            "label": "id",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-common.CreateTagOptions.overwrite",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "overwrite",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-common.CreateTagOptions.refresh",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "refresh",
+            "description": [],
+            "signature": [
+              "boolean | \"wait_for\" | undefined"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-common.CreateTagOptions.managed",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "savedObjectsTaggingOss",
         "id": "def-common.GetAllTagsOptions",
         "type": "Interface",
         "tags": [],
         "label": "GetAllTagsOptions",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1644,7 +1470,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1658,7 +1484,7 @@
         "tags": [],
         "label": "ITagsClient",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1679,7 +1505,13 @@
                 "text": "TagAttributes"
               },
               ", options?: ",
-              "CreateTagOptions",
+              {
+                "pluginId": "savedObjectsTaggingOss",
+                "scope": "common",
+                "docId": "kibSavedObjectsTaggingOssPluginApi",
+                "section": "def-common.CreateTagOptions",
+                "text": "CreateTagOptions"
+              },
               " | undefined) => Promise<",
               {
                 "pluginId": "savedObjectsTaggingOss",
@@ -1690,7 +1522,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1710,7 +1542,7 @@
                     "text": "TagAttributes"
                   }
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1723,10 +1555,16 @@
                 "label": "options",
                 "description": [],
                 "signature": [
-                  "CreateTagOptions",
+                  {
+                    "pluginId": "savedObjectsTaggingOss",
+                    "scope": "common",
+                    "docId": "kibSavedObjectsTaggingOssPluginApi",
+                    "section": "def-common.CreateTagOptions",
+                    "text": "CreateTagOptions"
+                  },
                   " | undefined"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1752,7 +1590,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1766,7 +1604,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1800,7 +1638,7 @@
               },
               "[]>"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1821,7 +1659,7 @@
                   },
                   " | undefined"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1847,7 +1685,7 @@
               },
               " | null>"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1861,7 +1699,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1873,7 +1711,7 @@
                 "tags": [],
                 "label": "options",
                 "description": [],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "children": [
@@ -1887,7 +1725,7 @@
                     "signature": [
                       "boolean | undefined"
                     ],
-                    "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                    "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                     "deprecated": false,
                     "trackAdoption": false
                   }
@@ -1906,7 +1744,7 @@
             "signature": [
               "(id: string) => Promise<void>"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1920,7 +1758,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1954,7 +1792,7 @@
               },
               ">"
             ],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1968,7 +1806,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1989,7 +1827,7 @@
                     "text": "TagAttributes"
                   }
                 ],
-                "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+                "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -2007,7 +1845,7 @@
         "tags": [],
         "label": "Tag",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2018,7 +1856,18 @@
             "tags": [],
             "label": "id",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "savedObjectsTaggingOss",
+            "id": "def-common.Tag.managed",
+            "type": "boolean",
+            "tags": [],
+            "label": "managed",
+            "description": [],
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2029,7 +1878,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2040,7 +1889,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2051,7 +1900,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2065,7 +1914,7 @@
         "tags": [],
         "label": "TagAttributes",
         "description": [],
-        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2076,7 +1925,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2087,7 +1936,7 @@
             "tags": [],
             "label": "description",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -2098,7 +1947,7 @@
             "tags": [],
             "label": "color",
             "description": [],
-            "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -2126,7 +1975,7 @@
           },
           ", \"id\"> & { id?: string | undefined; }"
         ],
-        "path": "src/plugins/saved_objects_tagging_oss/common/types.ts",
+        "path": "src/platform/plugins/shared/saved_objects_tagging_oss/common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

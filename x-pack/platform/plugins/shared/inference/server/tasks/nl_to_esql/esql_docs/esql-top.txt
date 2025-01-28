@@ -1,0 +1,37 @@
+# TOP
+
+The TOP function collects the top values for a specified field.
+
+## Syntax
+
+`TOP(field, limit, order)`
+
+### Parameters
+
+#### field
+
+The field for which the top values are to be collected.
+
+#### limit
+
+The maximum number of values to be collected.
+
+#### order
+
+The order in which the top values are calculated. It can be either `asc` (ascending) or `desc` (descending).
+
+## Examples
+
+Collect the top 3 salaries from the employees data:
+
+```esql
+FROM employees
+| STATS top_salaries = TOP(salary, 3, "desc"), top_salary = MAX(salary)
+```
+
+Collect the top 5 products in ascending order:
+
+```esql
+FROM sales
+| STATS top_products = TOP(product_id, 5, "asc"), max_sales = MAX(sales_amount)
+```

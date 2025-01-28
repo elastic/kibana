@@ -57,10 +57,27 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         1400,
         1024
       );
-      const actionsButton = await testSubjects.find('ruleActionsButton');
-      await actionsButton.click();
+    });
+
+    it('alerts UI screenshots', async () => {
+      await pageObjects.common.navigateToUrl(
+        'management',
+        'insightsAndAlerting/triggersActionsAlerts',
+        {
+          shouldUseHashForSubUrl: false,
+        }
+      );
+      await pageObjects.header.waitUntilLoadingHasFinished();
       await commonScreenshots.takeScreenshot(
-        'rule-details-disabling',
+        'stack-management-alerts-page',
+        screenshotDirectories,
+        1400,
+        1024
+      );
+      const queryMenu = await testSubjects.find('showQueryBarMenu');
+      await queryMenu.click();
+      await commonScreenshots.takeScreenshot(
+        'stack-management-alerts-query-menu',
         screenshotDirectories,
         1400,
         1024

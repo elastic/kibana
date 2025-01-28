@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -13,9 +14,9 @@ const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const returnTrue = () => true;
 
-const defaultOnFailure = (methodName: string) => (lastError: Error | undefined) => {
+const defaultOnFailure = (methodName: string) => (lastError: Error | undefined, reason: string) => {
   throw new Error(
-    `${methodName} timeout${lastError ? `: ${lastError.stack || lastError.message}` : ''}`
+    `${methodName} ${reason}\n${lastError ? `${lastError.stack || lastError.message}` : ''}`
   );
 };
 
@@ -44,36 +45,59 @@ interface Options<T> {
   onFailureBlock?: () => Promise<T>;
   onFailure?: ReturnType<typeof defaultOnFailure>;
   accept?: (v: T) => boolean;
+  description?: string;
   retryDelay?: number;
+  retryCount?: number;
 }
 
 export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
   const {
+    description,
     timeout,
     methodName,
     block,
     onFailureBlock,
+    onFailure = defaultOnFailure(methodName),
     accept = returnTrue,
     retryDelay = 502,
+    retryCount,
   } = options;
-  const { onFailure = defaultOnFailure(methodName) } = options;
 
   const start = Date.now();
   const criticalWebDriverErrors = ['NoSuchSessionError', 'NoSuchWindowError'];
   let lastError;
+  let attemptCounter = 0;
+  const addText = (str: string | undefined) => (str ? ` waiting for '${str}'` : '');
+  const attemptMsg = (counter: number) => ` - Attempt #: ${counter}`;
 
   while (true) {
+    // Aborting if no retry attempts are left (opt-in)
+    if (retryCount && ++attemptCounter > retryCount) {
+      onFailure(
+        lastError,
+        // optionally extend error message with description
+        `reached the limit of attempts${addText(description)}: ${
+          attemptCounter - 1
+        } out of ${retryCount}`
+      );
+    }
+    // Aborting if timeout is reached
     if (Date.now() - start > timeout) {
-      await onFailure(lastError);
-      throw new Error('expected onFailure() option to throw an error');
-    } else if (lastError && criticalWebDriverErrors.includes(lastError.name)) {
-      // Aborting retry since WebDriver session is invalid or browser window is closed
+      onFailure(lastError, `reached timeout ${timeout} ms${addText(description)}`);
+    }
+    // Aborting if WebDriver session is invalid or browser window is closed
+    if (lastError && criticalWebDriverErrors.includes(lastError.name)) {
       throw new Error('WebDriver session is invalid, retry was aborted');
-    } else if (lastError && onFailureBlock) {
+    }
+    // Run opt-in onFailureBlock before the next attempt
+    if (lastError && onFailureBlock) {
       const before = await runAttempt(onFailureBlock);
-      if ('error' in before) {
-        log.debug(`--- onRetryBlock error: ${before.error.message}`);
-      }
+      if ('error' in before)
+        log.debug(
+          `--- onRetryBlock error: ${before.error.message}${
+            retryCount ? attemptMsg(attemptCounter) : ''
+          }`
+        );
     }
 
     const attempt = await runAttempt(block);
@@ -83,11 +107,18 @@ export async function retryForSuccess<T>(log: ToolingLog, options: Options<T>) {
     }
 
     if ('error' in attempt) {
-      if (lastError && lastError.message === attempt.error.message) {
-        log.debug(`--- ${methodName} failed again with the same message...`);
-      } else {
-        log.debug(`--- ${methodName} error: ${attempt.error.message}`);
-      }
+      if (lastError && lastError.message === attempt.error.message)
+        log.debug(
+          `--- ${methodName} failed again with the same message...${
+            retryCount ? attemptMsg(attemptCounter) : ''
+          }`
+        );
+      else
+        log.debug(
+          `--- ${methodName} error: ${attempt.error.message}${
+            retryCount ? attemptMsg(attemptCounter) : ''
+          }`
+        );
 
       lastError = attempt.error;
     }

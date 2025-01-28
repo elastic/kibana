@@ -1,0 +1,308 @@
+openapi: 3.0.0
+info:
+  title: Common Knowledge Base Attributes
+  version: "not applicable"
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    InputSchema:
+      type: array
+      description: Array of objects defining the input schema, allowing the LLM to extract structured data to be used in retrieval
+      items:
+        type: object
+        required:
+          - fieldName
+          - fieldType
+          - description
+        properties:
+          fieldName:
+            type: string
+            description: Name of the field
+          fieldType:
+            type: string
+            description: Type of the field
+          description:
+            type: string
+            description: Description of the field
+
+    KnowledgeBaseEntryErrorSchema:
+      type: object
+      required:
+        - statusCode
+        - error
+        - message
+      additionalProperties: false
+      properties:
+        statusCode:
+          type: number
+        error:
+          type: string
+        message:
+          type: string
+
+    Metadata:
+      type: object
+      description: Metadata about a Knowledge Base Entry
+      required:
+        - "kbResource"
+        - "source"
+        - "required"
+      properties:
+        kbResource:
+          type: string
+          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
+        source:
+          type: string
+          description: Source document name or filepath
+        required:
+          type: boolean
+          description: Whether this resource should always be included
+
+    Vector:
+      type: object
+      description: Object containing Knowledge Base Entry text embeddings and modelId used to create the embeddings
+      required:
+        - "modelId"
+        - "tokens"
+      properties:
+        modelId:
+          type: string
+          description: ID of the model used to create the embeddings
+        tokens:
+          type: object
+          additionalProperties:
+            type: number
+          description: Tokens with their corresponding values
+
+    ###########
+    # Base Entry
+    ###########
+    BaseRequiredFields:
+      x-inline: true
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the Knowledge Base Entry
+      required:
+        - name
+
+    BaseDefaultableFields:
+      x-inline: true
+      type: object
+      properties:
+        namespace:
+          type: string
+          description: Kibana Space, defaults to 'default' space
+        users:
+          type: array
+          description: Users who have access to the Knowledge Base Entry, defaults to current user. Empty array provides access to all users.
+          items:
+            $ref: "../../common_attributes.schema.yaml#/components/schemas/User"
+
+    BaseCreateProps:
+      x-inline: true
+      allOf:
+        - $ref: "#/components/schemas/BaseRequiredFields"
+        - $ref: "#/components/schemas/BaseDefaultableFields"
+
+    BaseUpdateProps:
+      x-inline: true
+      allOf:
+        - $ref: "#/components/schemas/BaseCreateProps"
+          x-modify: partial
+        - type: object
+          properties:
+            id:
+              $ref: "../../common_attributes.schema.yaml#/components/schemas/NonEmptyString"
+          required:
+            - id
+
+    BaseResponseProps:
+      x-inline: true
+      allOf:
+        - $ref: "#/components/schemas/BaseRequiredFields"
+        - $ref: "#/components/schemas/BaseDefaultableFields"
+          x-modify: required
+
+    ResponseFields:
+      type: object
+      properties:
+        id:
+          $ref: "../../common_attributes.schema.yaml#/components/schemas/NonEmptyString"
+        createdAt:
+          description: Time the Knowledge Base Entry was created
+          type: string
+        createdBy:
+          description: User who created the Knowledge Base Entry
+          type: string
+        updatedAt:
+          description: Time the Knowledge Base Entry was last updated
+          type: string
+        updatedBy:
+          description: User who last updated the Knowledge Base Entry
+          type: string
+      required:
+        - id
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
+
+    SharedResponseProps:
+      x-inline: true
+      allOf:
+        - $ref: "#/components/schemas/BaseResponseProps"
+        - $ref: "#/components/schemas/ResponseFields"
+
+    ###########
+    # Document Knowledge Base Entry
+    ###########
+    DocumentEntryType:
+      type: string
+      enum:
+        - document
+
+    DocumentEntryRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [document]
+          description: Entry type
+        kbResource:
+          type: string
+          description: Knowledge Base resource name for grouping entries, e.g. 'esql', 'lens-docs', etc
+        source:
+          type: string
+          description: Source document name or filepath
+        text:
+          type: string
+          description: Knowledge Base Entry content
+
+      required:
+        - type
+        - kbResource
+        - source
+        - text
+
+    DocumentEntryOptionalFields:
+      type: object
+      properties:
+        required:
+          type: boolean
+          description: Whether this resource should always be included, defaults to false
+        vector:
+          $ref: "#/components/schemas/Vector"
+
+    DocumentEntryCreateFields:
+      allOf:
+        - $ref: "#/components/schemas/BaseCreateProps"
+        - $ref: "#/components/schemas/DocumentEntryRequiredFields"
+        - $ref: "#/components/schemas/DocumentEntryOptionalFields"
+
+    DocumentEntryUpdateFields:
+      allOf:
+        - $ref: "#/components/schemas/BaseUpdateProps"
+        - $ref: "#/components/schemas/DocumentEntryCreateFields"
+
+    DocumentEntryResponseFields:
+      allOf:
+        - $ref: "#/components/schemas/DocumentEntryRequiredFields"
+        - $ref: "#/components/schemas/DocumentEntryOptionalFields"
+
+    DocumentEntry:
+      allOf:
+        - $ref: "#/components/schemas/SharedResponseProps"
+        - $ref: "#/components/schemas/DocumentEntryResponseFields"
+
+    ###########
+    # Index Knowledge Base Entry
+    ###########
+    IndexEntryType:
+      type: string
+      enum:
+        - index
+
+    IndexEntryRequiredFields:
+      type: object
+      properties:
+        type:
+          type: string
+          enum: [index]
+          description: Entry type
+        index:
+          type: string
+          description: Index or Data Stream to query for Knowledge Base content
+        field:
+          type: string
+          description: Field to query for Knowledge Base content
+        description:
+          type: string
+          description: Description for when this index or data stream should be queried for Knowledge Base content. Passed to the LLM as a tool description
+        queryDescription:
+          type: string
+          description: Description of query field used to fetch Knowledge Base content. Passed to the LLM as part of the tool input schema
+      required:
+        - type
+        - index
+        - field
+        - description
+        - queryDescription
+
+    IndexEntryOptionalFields:
+      type: object
+      properties:
+        inputSchema:
+          $ref: "#/components/schemas/InputSchema"
+        outputFields:
+          type: array
+          description: Fields to extract from the query result, defaults to all fields if not provided or empty
+          items:
+            type: string
+
+    IndexEntryCreateFields:
+      allOf:
+        - $ref: "#/components/schemas/BaseCreateProps"
+        - $ref: "#/components/schemas/IndexEntryRequiredFields"
+        - $ref: "#/components/schemas/IndexEntryOptionalFields"
+
+    IndexEntryUpdateFields:
+      allOf:
+        - $ref: "#/components/schemas/BaseUpdateProps"
+        - $ref: "#/components/schemas/IndexEntryCreateFields"
+
+    IndexEntryResponseFields:
+      allOf:
+        - $ref: "#/components/schemas/IndexEntryRequiredFields"
+        - $ref: "#/components/schemas/IndexEntryOptionalFields"
+
+    IndexEntry:
+      allOf:
+        - $ref: "#/components/schemas/SharedResponseProps"
+        - $ref: "#/components/schemas/IndexEntryResponseFields"
+
+    ###################
+    # Combined Props
+    ###################
+    KnowledgeBaseEntryCreateProps:
+      discriminator:
+        propertyName: type
+      anyOf:
+        - $ref: "#/components/schemas/DocumentEntryCreateFields"
+        - $ref: "#/components/schemas/IndexEntryCreateFields"
+
+    KnowledgeBaseEntryUpdateProps:
+      discriminator:
+        propertyName: type
+      anyOf:
+        - $ref: "#/components/schemas/DocumentEntryUpdateFields"
+        - $ref: "#/components/schemas/IndexEntryUpdateFields"
+
+    KnowledgeBaseEntryResponse:
+      discriminator:
+        propertyName: type
+      anyOf:
+        - $ref: "#/components/schemas/DocumentEntry"
+        - $ref: "#/components/schemas/IndexEntry"

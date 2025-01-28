@@ -29,9 +29,9 @@
         "signature": [
           "({ children, ...props }: ",
           "BrowserRouterProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/router/impl/router.tsx",
+        "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "BrowserRouterProps"
             ],
-            "path": "packages/shared-ux/router/impl/router.tsx",
+            "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -64,9 +64,9 @@
         "signature": [
           "({ children, ...props }: ",
           "HashRouterProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/router/impl/router.tsx",
+        "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -80,7 +80,7 @@
             "signature": [
               "HashRouterProps"
             ],
-            "path": "packages/shared-ux/router/impl/router.tsx",
+            "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -99,9 +99,9 @@
         "signature": [
           "({ children, ...props }: ",
           "MemoryRouterProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/router/impl/router.tsx",
+        "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -115,7 +115,7 @@
             "signature": [
               "MemoryRouterProps"
             ],
-            "path": "packages/shared-ux/router/impl/router.tsx",
+            "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -136,9 +136,9 @@
         "signature": [
           "<T extends {}>({ children, component: Component, render, ...rest }: ",
           "RouteProps",
-          "<string, { [K: string]: string; } & T>) => JSX.Element"
+          "<string, { [K: string]: string; } & T>) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/router/impl/route.tsx",
+        "path": "src/platform/packages/shared/shared-ux/router/impl/route.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -153,7 +153,7 @@
               "RouteProps",
               "<string, { [K: string]: string; } & T>"
             ],
-            "path": "packages/shared-ux/router/impl/route.tsx",
+            "path": "src/platform/packages/shared/shared-ux/router/impl/route.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -172,9 +172,9 @@
         "signature": [
           "({ children, ...props }: ",
           "RouterProps",
-          ") => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/router/impl/router.tsx",
+        "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -188,7 +188,7 @@
             "signature": [
               "RouterProps"
             ],
-            "path": "packages/shared-ux/router/impl/router.tsx",
+            "path": "src/platform/packages/shared/shared-ux/router/impl/router.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -205,9 +205,9 @@
         "label": "Routes",
         "description": [],
         "signature": [
-          "({ legacySwitch, children, }: { legacySwitch?: boolean | undefined; children: React.ReactNode; }) => JSX.Element"
+          "({ legacySwitch, enableExecutionContextTracking, children, }: { legacySwitch?: boolean | undefined; enableExecutionContextTracking?: boolean | undefined; children: React.ReactNode; }) => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/router/impl/routes.tsx",
+        "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -216,9 +216,9 @@
             "id": "def-common.Routes.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  legacySwitch = true,\n  children,\n}",
+            "label": "{\n  legacySwitch = true,\n  enableExecutionContextTracking = false,\n  children,\n}",
             "description": [],
-            "path": "packages/shared-ux/router/impl/routes.tsx",
+            "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -232,7 +232,21 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "packages/shared-ux/router/impl/routes.tsx",
+                "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
+                "deprecated": false,
+                "trackAdoption": false
+              },
+              {
+                "parentPluginId": "@kbn/shared-ux-router",
+                "id": "def-common.Routes.$1.enableExecutionContextTracking",
+                "type": "CompoundType",
+                "tags": [],
+                "label": "enableExecutionContextTracking",
+                "description": [],
+                "signature": [
+                  "boolean | undefined"
+                ],
+                "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               },
@@ -244,9 +258,9 @@
                 "label": "children",
                 "description": [],
                 "signature": [
-                  "boolean | React.ReactChild | React.ReactFragment | React.ReactPortal | null | undefined"
+                  "string | number | boolean | React.ReactElement<any, string | React.JSXElementConstructor<any>> | Iterable<React.ReactNode> | React.ReactPortal | null | undefined"
                 ],
-                "path": "packages/shared-ux/router/impl/routes.tsx",
+                "path": "src/platform/packages/shared/shared-ux/router/impl/routes.tsx",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -260,6 +274,26 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
+    "objects": [
+      {
+        "parentPluginId": "@kbn/shared-ux-router",
+        "id": "def-common.SharedUXRouterContext",
+        "type": "Object",
+        "tags": [],
+        "label": "SharedUXRouterContext",
+        "description": [],
+        "signature": [
+          "React.Context<",
+          "SharedUXRouterContextValue",
+          "<Partial<",
+          "SharedUXExecutionContextSetup",
+          ">>>"
+        ],
+        "path": "src/platform/packages/shared/shared-ux/router/impl/services.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ]
   }
 }

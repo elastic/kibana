@@ -1,0 +1,642 @@
+openapi: 3.0.3
+info:
+  description: Run live queries, manage packs and saved queries.
+  title: Security Osquery API (Elastic Cloud and self-hosted)
+  version: '2023-10-31'
+servers:
+  - url: http://{kibana_host}:{port}
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+paths:
+  /api/osquery/live_queries:
+    get:
+      description: Get a list of all live queries.
+      operationId: OsqueryFindLiveQueries
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/FindLiveQueryRequestQuery'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Get live queries
+      tags:
+        - Security Osquery API
+    post:
+      description: Create and run a live query.
+      operationId: OsqueryCreateLiveQuery
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateLiveQueryRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Create a live query
+      tags:
+        - Security Osquery API
+  /api/osquery/live_queries/{id}:
+    get:
+      description: Get the details of a live query using the query ID.
+      operationId: OsqueryGetLiveQueryDetails
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Id'
+        - in: query
+          name: query
+          schema:
+            additionalProperties: true
+            type: object
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Get live query details
+      tags:
+        - Security Osquery API
+  /api/osquery/live_queries/{id}/results/{actionId}:
+    get:
+      description: Get the results of a live query using the query action ID.
+      operationId: OsqueryGetLiveQueryResults
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/Id'
+        - in: path
+          name: actionId
+          required: true
+          schema:
+            $ref: '#/components/schemas/Id'
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/GetLiveQueryResultsRequestQuery'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Get live query results
+      tags:
+        - Security Osquery API
+  /api/osquery/packs:
+    get:
+      description: Get a list of all query packs.
+      operationId: OsqueryFindPacks
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/FindPacksRequestQuery'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Get packs
+      tags:
+        - Security Osquery API
+    post:
+      description: Create a query pack.
+      operationId: OsqueryCreatePacks
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreatePacksRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Create a pack
+      tags:
+        - Security Osquery API
+  /api/osquery/packs/{id}:
+    delete:
+      description: Delete a query pack using the pack ID.
+      operationId: OsqueryDeletePacks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/PackId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Delete a pack
+      tags:
+        - Security Osquery API
+    get:
+      description: Get the details of a query pack using the pack ID.
+      operationId: OsqueryGetPacksDetails
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/PackId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Get pack details
+      tags:
+        - Security Osquery API
+    put:
+      description: |
+        Update a query pack using the pack ID.
+        > info
+        > You cannot update a prebuilt pack.
+      operationId: OsqueryUpdatePacks
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/PackId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdatePacksRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Update a pack
+      tags:
+        - Security Osquery API
+  /api/osquery/saved_queries:
+    get:
+      description: Get a list of all saved queries.
+      operationId: OsqueryFindSavedQueries
+      parameters:
+        - in: query
+          name: query
+          required: true
+          schema:
+            $ref: '#/components/schemas/FindSavedQueryRequestQuery'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Get saved queries
+      tags:
+        - Security Osquery API
+    post:
+      description: Create and run a saved query.
+      operationId: OsqueryCreateSavedQuery
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateSavedQueryRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Create a saved query
+      tags:
+        - Security Osquery API
+  /api/osquery/saved_queries/{id}:
+    delete:
+      description: Delete a saved query using the query ID.
+      operationId: OsqueryDeleteSavedQuery
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/SavedQueryId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Delete a saved query
+      tags:
+        - Security Osquery API
+    get:
+      description: Get the details of a saved query using the query ID.
+      operationId: OsqueryGetSavedQueryDetails
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/SavedQueryId'
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Get saved query details
+      tags:
+        - Security Osquery API
+    put:
+      description: |
+        Update a saved query using the query ID.
+        > info
+        > You cannot update a prebuilt saved query.
+      operationId: OsqueryUpdateSavedQuery
+      parameters:
+        - in: path
+          name: id
+          required: true
+          schema:
+            $ref: '#/components/schemas/SavedQueryId'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateSavedQueryRequestBody'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/DefaultSuccessResponse'
+          description: OK
+      summary: Update a saved query
+      tags:
+        - Security Osquery API
+components:
+  schemas:
+    ArrayQueries:
+      items:
+        $ref: '#/components/schemas/ArrayQueriesItem'
+      type: array
+    ArrayQueriesItem:
+      type: object
+      properties:
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        id:
+          $ref: '#/components/schemas/Id'
+        platform:
+          $ref: '#/components/schemas/PlatformOrUndefined'
+        query:
+          $ref: '#/components/schemas/Query'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+        version:
+          $ref: '#/components/schemas/VersionOrUndefined'
+    CreateLiveQueryRequestBody:
+      type: object
+      properties:
+        agent_all:
+          type: boolean
+        agent_ids:
+          items:
+            type: string
+          type: array
+        agent_platforms:
+          items:
+            type: string
+          type: array
+        agent_policy_ids:
+          items:
+            type: string
+          type: array
+        alert_ids:
+          items:
+            type: string
+          type: array
+        case_ids:
+          items:
+            type: string
+          type: array
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        event_ids:
+          items:
+            type: string
+          type: array
+        metadata:
+          nullable: true
+          type: object
+        pack_id:
+          $ref: '#/components/schemas/PackIdOrUndefined'
+        queries:
+          $ref: '#/components/schemas/ArrayQueries'
+        query:
+          $ref: '#/components/schemas/QueryOrUndefined'
+        saved_query_id:
+          $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+    CreatePacksRequestBody:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/EnabledOrUndefined'
+        name:
+          $ref: '#/components/schemas/PackName'
+        policy_ids:
+          $ref: '#/components/schemas/PolicyIdsOrUndefined'
+        queries:
+          $ref: '#/components/schemas/ObjectQueries'
+        shards:
+          $ref: '#/components/schemas/Shards'
+    CreateSavedQueryRequestBody:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionOrUndefined'
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        id:
+          $ref: '#/components/schemas/SavedQueryId'
+        interval:
+          $ref: '#/components/schemas/Interval'
+        platform:
+          $ref: '#/components/schemas/DescriptionOrUndefined'
+        query:
+          $ref: '#/components/schemas/QueryOrUndefined'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+        version:
+          $ref: '#/components/schemas/VersionOrUndefined'
+    DefaultSuccessResponse:
+      type: object
+      properties: {}
+    Description:
+      type: string
+    DescriptionOrUndefined:
+      $ref: '#/components/schemas/Description'
+      nullable: true
+    ECSMapping:
+      additionalProperties:
+        $ref: '#/components/schemas/ECSMappingItem'
+      type: object
+    ECSMappingItem:
+      type: object
+      properties:
+        field:
+          type: string
+        value:
+          oneOf:
+            - type: string
+            - items:
+                type: string
+              type: array
+    ECSMappingOrUndefined:
+      $ref: '#/components/schemas/ECSMapping'
+      nullable: true
+    Enabled:
+      type: boolean
+    EnabledOrUndefined:
+      $ref: '#/components/schemas/Enabled'
+      nullable: true
+    FindLiveQueryRequestQuery:
+      type: object
+      properties:
+        kuery:
+          $ref: '#/components/schemas/KueryOrUndefined'
+        page:
+          $ref: '#/components/schemas/PageOrUndefined'
+        pageSize:
+          $ref: '#/components/schemas/PageSizeOrUndefined'
+        sort:
+          $ref: '#/components/schemas/SortOrUndefined'
+        sortOrder:
+          $ref: '#/components/schemas/SortOrderOrUndefined'
+    FindPacksRequestQuery:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageOrUndefined'
+        pageSize:
+          $ref: '#/components/schemas/PageSizeOrUndefined'
+        sort:
+          $ref: '#/components/schemas/SortOrUndefined'
+        sortOrder:
+          $ref: '#/components/schemas/SortOrderOrUndefined'
+    FindSavedQueryRequestQuery:
+      type: object
+      properties:
+        page:
+          $ref: '#/components/schemas/PageOrUndefined'
+        pageSize:
+          $ref: '#/components/schemas/PageSizeOrUndefined'
+        sort:
+          $ref: '#/components/schemas/SortOrUndefined'
+        sortOrder:
+          $ref: '#/components/schemas/SortOrderOrUndefined'
+    GetLiveQueryResultsRequestQuery:
+      type: object
+      properties:
+        kuery:
+          $ref: '#/components/schemas/KueryOrUndefined'
+        page:
+          $ref: '#/components/schemas/PageOrUndefined'
+        pageSize:
+          $ref: '#/components/schemas/PageSizeOrUndefined'
+        sort:
+          $ref: '#/components/schemas/SortOrUndefined'
+        sortOrder:
+          $ref: '#/components/schemas/SortOrderOrUndefined'
+    Id:
+      type: string
+    Interval:
+      type: string
+    IntervalOrUndefined:
+      $ref: '#/components/schemas/Interval'
+      nullable: true
+    KueryOrUndefined:
+      nullable: true
+      type: string
+    ObjectQueries:
+      additionalProperties:
+        $ref: '#/components/schemas/ObjectQueriesItem'
+      type: object
+    ObjectQueriesItem:
+      type: object
+      properties:
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        id:
+          $ref: '#/components/schemas/Id'
+        platform:
+          $ref: '#/components/schemas/PlatformOrUndefined'
+        query:
+          $ref: '#/components/schemas/Query'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        saved_query_id:
+          $ref: '#/components/schemas/SavedQueryIdOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+        version:
+          $ref: '#/components/schemas/VersionOrUndefined'
+    PackId:
+      type: string
+    PackIdOrUndefined:
+      $ref: '#/components/schemas/PackId'
+      nullable: true
+    PackName:
+      type: string
+    PageOrUndefined:
+      nullable: true
+      type: integer
+    PageSizeOrUndefined:
+      nullable: true
+      type: integer
+    Platform:
+      type: string
+    PlatformOrUndefined:
+      $ref: '#/components/schemas/Platform'
+      nullable: true
+    PolicyIds:
+      items:
+        type: string
+      type: array
+    PolicyIdsOrUndefined:
+      $ref: '#/components/schemas/PolicyIds'
+      nullable: true
+    Query:
+      type: string
+    QueryOrUndefined:
+      $ref: '#/components/schemas/Query'
+      nullable: true
+    Removed:
+      type: boolean
+    RemovedOrUndefined:
+      $ref: '#/components/schemas/Removed'
+      nullable: true
+    SavedQueryId:
+      type: string
+    SavedQueryIdOrUndefined:
+      $ref: '#/components/schemas/SavedQueryId'
+      nullable: true
+    Shards:
+      additionalProperties:
+        type: number
+      type: object
+    Snapshot:
+      type: boolean
+    SnapshotOrUndefined:
+      $ref: '#/components/schemas/Snapshot'
+      nullable: true
+    SortOrderOrUndefined:
+      oneOf:
+        - nullable: true
+          type: string
+        - enum:
+            - asc
+            - desc
+    SortOrUndefined:
+      nullable: true
+      type: string
+    UpdatePacksRequestBody:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionOrUndefined'
+        enabled:
+          $ref: '#/components/schemas/EnabledOrUndefined'
+        id:
+          $ref: '#/components/schemas/PackId'
+        policy_ids:
+          $ref: '#/components/schemas/PolicyIdsOrUndefined'
+        queries:
+          $ref: '#/components/schemas/ObjectQueries'
+        shards:
+          $ref: '#/components/schemas/Shards'
+    UpdateSavedQueryRequestBody:
+      type: object
+      properties:
+        description:
+          $ref: '#/components/schemas/DescriptionOrUndefined'
+        ecs_mapping:
+          $ref: '#/components/schemas/ECSMappingOrUndefined'
+        id:
+          $ref: '#/components/schemas/SavedQueryId'
+        interval:
+          $ref: '#/components/schemas/IntervalOrUndefined'
+        platform:
+          $ref: '#/components/schemas/DescriptionOrUndefined'
+        query:
+          $ref: '#/components/schemas/QueryOrUndefined'
+        removed:
+          $ref: '#/components/schemas/RemovedOrUndefined'
+        snapshot:
+          $ref: '#/components/schemas/SnapshotOrUndefined'
+        version:
+          $ref: '#/components/schemas/VersionOrUndefined'
+    Version:
+      type: string
+    VersionOrUndefined:
+      $ref: '#/components/schemas/Version'
+      nullable: true
+  securitySchemes:
+    BasicAuth:
+      scheme: basic
+      type: http
+security:
+  - BasicAuth: []
+tags:
+  - description: Run live queries, manage packs and saved queries.
+    name: Security Osquery API
+    x-displayName: Security Osquery

@@ -10,18 +10,10 @@
   },
   "server": {
     "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
     "functions": [
       {
         "parentPluginId": "@kbn/telemetry-tools",
-        "id": "def-common.assertTelemetryPayload",
+        "id": "def-server.assertTelemetryPayload",
         "type": "Function",
         "tags": [],
         "label": "assertTelemetryPayload",
@@ -41,7 +33,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/telemetry-tools",
-            "id": "def-common.assertTelemetryPayload.$1",
+            "id": "def-server.assertTelemetryPayload.$1",
             "type": "Object",
             "tags": [],
             "label": "telemetrySchema",
@@ -52,7 +44,7 @@
             "children": [
               {
                 "parentPluginId": "@kbn/telemetry-tools",
-                "id": "def-common.assertTelemetryPayload.$1.root",
+                "id": "def-server.assertTelemetryPayload.$1.root",
                 "type": "Object",
                 "tags": [],
                 "label": "root",
@@ -66,7 +58,7 @@
               },
               {
                 "parentPluginId": "@kbn/telemetry-tools",
-                "id": "def-common.assertTelemetryPayload.$1.plugins",
+                "id": "def-server.assertTelemetryPayload.$1.plugins",
                 "type": "Object",
                 "tags": [],
                 "label": "plugins",
@@ -82,7 +74,7 @@
           },
           {
             "parentPluginId": "@kbn/telemetry-tools",
-            "id": "def-common.assertTelemetryPayload.$2",
+            "id": "def-server.assertTelemetryPayload.$2",
             "type": "Unknown",
             "tags": [],
             "label": "stats",
@@ -103,7 +95,7 @@
       },
       {
         "parentPluginId": "@kbn/telemetry-tools",
-        "id": "def-common.runTelemetryCheck",
+        "id": "def-server.runTelemetryCheck",
         "type": "Function",
         "tags": [],
         "label": "runTelemetryCheck",
@@ -120,7 +112,7 @@
       },
       {
         "parentPluginId": "@kbn/telemetry-tools",
-        "id": "def-common.runTelemetryExtract",
+        "id": "def-server.runTelemetryExtract",
         "type": "Function",
         "tags": [],
         "label": "runTelemetryExtract",
@@ -136,6 +128,14 @@
         "initialIsOpen": false
       }
     ],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
     "interfaces": [],
     "enums": [],
     "misc": [],

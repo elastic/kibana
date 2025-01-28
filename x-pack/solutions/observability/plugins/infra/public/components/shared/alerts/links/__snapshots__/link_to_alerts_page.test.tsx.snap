@@ -1,0 +1,51 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`LinkToAlertsPage component renders correctly with default props 1`] = `
+<div>
+  <a
+    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-both"
+    data-test-subj="test-link"
+    href="/app/observability/alerts?_a=(rangeFrom:'2024-04-01',rangeTo:'2024-04-15',status:all)"
+    rel="noreferrer"
+  >
+    <span
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+    >
+      <span
+        class="eui-textTruncate euiButtonEmpty__text"
+      >
+        Show all
+      </span>
+      <span
+        color="inherit"
+        data-euiicon-type="sortRight"
+      />
+    </span>
+  </a>
+</div>
+`;
+
+exports[`LinkToAlertsPage component renders correctly with optional props 1`] = `
+<div>
+  <a
+    class="euiButtonEmpty emotion-euiButtonDisplay-euiButtonEmpty-xs-empty-primary-flush-both"
+    data-test-subj="test-link"
+    href="/app/observability/alerts?_a=(kuery:'foo:bar',rangeFrom:'2024-04-01',rangeTo:'2024-04-15',status:all)"
+    rel="noreferrer"
+  >
+    <span
+      class="euiButtonEmpty__content emotion-euiButtonDisplayContent"
+    >
+      <span
+        class="eui-textTruncate euiButtonEmpty__text"
+      >
+        Show all
+      </span>
+      <span
+        color="inherit"
+        data-euiicon-type="sortRight"
+      />
+    </span>
+  </a>
+</div>
+`;

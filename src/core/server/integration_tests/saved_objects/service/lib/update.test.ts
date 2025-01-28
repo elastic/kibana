@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -17,7 +18,6 @@ import {
   getKibanaMigratorTestKit,
   startElasticsearch,
 } from '../../migrations/kibana_migrator_test_kit';
-import { delay } from '../../migrations/test_utils';
 import { getBaseMigratorParams } from '../../migrations/fixtures/zdt_base.fixtures';
 
 export const logFilePath = Path.join(__dirname, 'update.test.log');
@@ -30,7 +30,7 @@ describe('SOR - update API', () => {
     esServer = await startElasticsearch();
   });
 
-  const getType = (version: 'v1' | 'v2'): SavedObjectsType => {
+  const getCrossVersionType = (version: 'v1' | 'v2'): SavedObjectsType => {
     const versionMap: SavedObjectsModelVersionMap = {
       1: {
         changes: [],
@@ -74,16 +74,32 @@ describe('SOR - update API', () => {
     };
   };
 
+  const getFullUpdateType = (): SavedObjectsType => {
+    return {
+      name: 'update-test-type',
+      hidden: false,
+      namespaceType: 'single',
+      mappings: {
+        dynamic: false,
+        properties: {},
+      },
+      management: {
+        importableAndExportable: true,
+      },
+      switchToModelVersionAt: '8.10.0',
+      modelVersions: {},
+    };
+  };
+
   afterAll(async () => {
     await esServer?.stop();
-    await delay(10);
   });
 
   const setup = async () => {
     const { runMigrations: runMigrationV1, savedObjectsRepository: repositoryV1 } =
       await getKibanaMigratorTestKit({
         ...getBaseMigratorParams(),
-        types: [getType('v1')],
+        types: [getCrossVersionType('v1'), getFullUpdateType()],
       });
     await runMigrationV1();
 
@@ -93,7 +109,7 @@ describe('SOR - update API', () => {
       client: esClient,
     } = await getKibanaMigratorTestKit({
       ...getBaseMigratorParams(),
-      types: [getType('v2')],
+      types: [getCrossVersionType('v2'), getFullUpdateType()],
     });
     await runMigrationV2();
 
@@ -143,6 +159,49 @@ describe('SOR - update API', () => {
         },
       })
     );
+  });
+
+  it('supports update with attributes override', async () => {
+    const { repositoryV2: repository } = await setup();
+
+    await repository.create('update-test-type', { foo: 'bar' }, { id: 'my-id' });
+
+    let document = await repository.get('update-test-type', 'my-id');
+
+    expect(document.attributes).toEqual({
+      foo: 'bar',
+    });
+
+    await repository.update(
+      'update-test-type',
+      'my-id',
+      {
+        hello: 'dolly',
+      },
+      { mergeAttributes: true }
+    );
+
+    document = await repository.get('update-test-type', 'my-id');
+
+    expect(document.attributes).toEqual({
+      foo: 'bar',
+      hello: 'dolly',
+    });
+
+    await repository.update(
+      'update-test-type',
+      'my-id',
+      {
+        over: '9000',
+      },
+      { mergeAttributes: false }
+    );
+
+    document = await repository.get('update-test-type', 'my-id');
+
+    expect(document.attributes).toEqual({
+      over: '9000',
+    });
   });
 
   const fetchDoc = async (client: ElasticsearchClient, type: string, id: string) => {

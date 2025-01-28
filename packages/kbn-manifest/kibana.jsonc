@@ -1,0 +1,6 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/manifest",
+  "owner": "@elastic/kibana-core",
+  "devOnly": true
+}

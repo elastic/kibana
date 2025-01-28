@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { BehaviorSubject } from 'rxjs';
@@ -16,6 +17,7 @@ import { coreUsageStatsClientMock } from './core_usage_stats_client.mock';
 const createSetupContractMock = (usageStatsClient = coreUsageStatsClientMock.create()) => {
   const setupContract: jest.Mocked<InternalCoreUsageDataSetup> = {
     registerType: jest.fn(),
+    registerDeprecatedUsageFetch: jest.fn(),
     getClient: jest.fn().mockReturnValue(usageStatsClient),
     registerUsageCounter: jest.fn(),
     incrementUsageCounter: jest.fn(),
@@ -128,6 +130,9 @@ const createStartContractMock = () => {
         },
         environment: {
           memory: {
+            arrayBuffersBytes: 1,
+            externalBytes: 1,
+            residentSetSizeBytes: 1,
             heapSizeLimit: 1,
             heapTotalBytes: 1,
             heapUsedBytes: 1,

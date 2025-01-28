@@ -1,0 +1,24 @@
+openapi: 3.0.0
+info:
+  version: '1'
+  title: Asset Criticality Status Schema
+paths:
+  /internal/asset_criticality/status:
+    get:
+      x-labels: [ess, serverless]
+      x-internal: true
+      x-codegen-enabled: true
+      operationId: GetAssetCriticalityStatus
+      summary: Get Asset Criticality Status
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  asset_criticality_resources_installed:
+                    type: boolean
+        '400':
+          description: Invalid request

@@ -1,0 +1,22 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`should render 1`] = `
+<Fragment>
+  <EuiFormRow
+    error=""
+    isInvalid={false}
+    label="Data view"
+  >
+    <MockIndexPatternSelect
+      data-test-subj="mapGeoIndexPatternSelect"
+      indexPatternId="weblogs"
+      isClearable={false}
+      isDisabled={false}
+      isInvalid={false}
+      onChange={[Function]}
+      onNoIndexPatterns={[Function]}
+      placeholder="Select data view"
+    />
+  </EuiFormRow>
+</Fragment>
+`;

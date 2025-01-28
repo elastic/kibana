@@ -39,7 +39,7 @@ describe('Alert user assignment - Basic License', { tags: ['@ess'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   beforeEach(() => {

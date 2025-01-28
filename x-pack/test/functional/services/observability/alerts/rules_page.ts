@@ -6,6 +6,9 @@
  */
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
+const METRIC_THRESHOLD_RULE_TYPE_SELECTOR = 'metrics.alert.threshold-SelectOption';
+const CUSTOM_THRESHOLD_RULE_TYPE_SELECTOR = 'observability.rules.custom_threshold-SelectOption';
+
 export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
   const find = getService('find');
@@ -16,8 +19,9 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
   };
 
   const clickCreateRuleButton = async () => {
+    await testSubjects.existOrFail('createRuleButton');
     const createRuleButton = await testSubjects.find('createRuleButton');
-    return createRuleButton.click();
+    return await createRuleButton.click();
   };
 
   const clickRuleStatusDropDownMenu = async () => testSubjects.click('statusDropdown');
@@ -30,6 +34,30 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
     await find.clickByButtonText('metric-threshold');
   };
 
+  const clickOnInfrastructureCategory = async () => {
+    await testSubjects.existOrFail('ruleTypeModal');
+    const categories = await testSubjects.find('ruleTypeModal');
+    const category = await categories.findByCssSelector(`.euiFacetButton[title="Infrastructure"]`);
+    await category.click();
+  };
+
+  const clickOnMetricThresholdRule = async () => {
+    await testSubjects.existOrFail(METRIC_THRESHOLD_RULE_TYPE_SELECTOR);
+    await testSubjects.click(METRIC_THRESHOLD_RULE_TYPE_SELECTOR);
+  };
+
+  const clickOnObservabilityCategory = async () => {
+    await testSubjects.existOrFail('ruleTypeModal');
+    const categories = await testSubjects.find('ruleTypeModal');
+    const category = await categories.findByCssSelector(`.euiFacetButton[title="Observability"]`);
+    await category.click();
+  };
+
+  const clickOnCustomThresholdRule = async () => {
+    await testSubjects.existOrFail(CUSTOM_THRESHOLD_RULE_TYPE_SELECTOR);
+    await testSubjects.click(CUSTOM_THRESHOLD_RULE_TYPE_SELECTOR);
+  };
+
   return {
     getManageRulesPageHref,
     clickCreateRuleButton,
@@ -37,5 +65,9 @@ export function ObservabilityAlertsRulesProvider({ getService }: FtrProviderCont
     clickDisableFromDropDownMenu,
     clickLogsTab,
     clickOnRuleInEventLogs,
+    clickOnInfrastructureCategory,
+    clickOnMetricThresholdRule,
+    clickOnObservabilityCategory,
+    clickOnCustomThresholdRule,
   };
 }

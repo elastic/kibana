@@ -18,7 +18,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
   const log = getService('log');
 
-  describe('@ess @serverless @skipInQA install_large_prebuilt_rules_package', () => {
+  describe('@ess @serverless @skipInServerlessMKI install_large_prebuilt_rules_package', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
@@ -35,9 +35,12 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest
       );
-      expect(statusBeforePackageInstallation.rules_installed).toBe(0);
-      expect(statusBeforePackageInstallation.rules_not_installed).toBe(0);
-      expect(statusBeforePackageInstallation.rules_not_updated).toBe(0);
+
+      expect(statusBeforePackageInstallation).toMatchObject({
+        rules_installed: 0,
+        rules_not_installed: 0,
+        rules_not_updated: 0,
+      });
 
       // Install the package with 15000 prebuilt historical version of rules rules and 750 unique rules
       await installPrebuiltRulesAndTimelines(es, supertest);
@@ -47,9 +50,12 @@ export default ({ getService }: FtrProviderContext): void => {
         es,
         supertest
       );
-      expect(statusAfterPackageInstallation.rules_installed).toBe(750);
-      expect(statusAfterPackageInstallation.rules_not_installed).toBe(0);
-      expect(statusAfterPackageInstallation.rules_not_updated).toBe(0);
+
+      expect(statusAfterPackageInstallation).toMatchObject({
+        rules_installed: 750,
+        rules_not_installed: 0,
+        rules_not_updated: 0,
+      });
     });
   });
 };

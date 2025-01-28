@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import type { ApiKey } from '@kbn/security-plugin/common/model';
+
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService }: FtrProviderContext) {
@@ -23,17 +23,11 @@ export default function ({ getService }: FtrProviderContext) {
   };
 
   const cleanup = async () => {
-    // get existing keys which would affect test results
-    const { body: getResponseBody } = await supertest.get('/internal/security/api_key').expect(200);
-    const apiKeys: ApiKey[] = getResponseBody.apiKeys;
-    const existing = apiKeys.map(({ id, name }) => ({ id, name }));
-
-    // invalidate the keys
-    await supertest
-      .post(`/internal/security/api_key/invalidate`)
-      .set('kbn-xsrf', 'xxx')
-      .send({ apiKeys: existing, isAdmin: false })
-      .expect(200, { itemsInvalidated: existing, errors: [] });
+    await getService('es').deleteByQuery({
+      index: '.security-7',
+      body: { query: { match: { doc_type: 'api_key' } } },
+      refresh: true,
+    });
   };
 
   describe('Has Active API Keys: _has_active', () => {

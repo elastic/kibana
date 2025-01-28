@@ -1,0 +1,17 @@
+openapi: 3.0.1
+info:
+  title: Alerting
+  description: OpenAPI schema for alerting endpoints
+  version: '0.1'
+  contact:
+    name: Alerting Team
+  license:
+    name: Elastic License 2.0
+    url: https://www.elastic.co/licensing/elastic-license
+servers:
+  - url: /
+paths:
+  '/api/alerting/_health':
+    $ref: paths/api@alerting@_health.yaml
+  '/api/alerting/rule_types':
+    $ref: 'paths/api@alerting@rule_types.yaml'

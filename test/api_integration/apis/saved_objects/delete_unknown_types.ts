@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -11,6 +12,7 @@ import {
   MAIN_SAVED_OBJECT_INDEX,
   ANALYTICS_SAVED_OBJECT_INDEX,
 } from '@kbn/core-saved-objects-server';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import type { FtrProviderContext } from '../../ftr_provider_context';
 
 const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
@@ -48,7 +50,7 @@ export default function ({ getService }: FtrProviderContext) {
           id: hit._id,
         }))
         .sort((a, b) => {
-          return a.id > b.id ? 1 : -1;
+          return a.id! > b.id! ? 1 : -1;
         });
     };
 
@@ -71,6 +73,7 @@ export default function ({ getService }: FtrProviderContext) {
         .post(`/internal/saved_objects/deprecations/_delete_unknown_types`)
         .send({})
         .set('kbn-xsrf', 'true')
+        .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
         .expect(200)
         .then((resp) => {
           expect(resp.body).to.eql({ success: true });

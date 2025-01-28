@@ -40,7 +40,6 @@ export const completeTourWithNextButton = () => {
     goToNextStep(i);
   }
   createCase();
-  goToNextStep(7);
 };
 
 export const addToCase = () => {
@@ -55,7 +54,6 @@ export const completeTourWithActions = () => {
   addToCase();
   goToNextStep(5);
   createCase();
-  goToNextStep(7);
 };
 
 export const goToStep = (step: number) => {

@@ -76,12 +76,14 @@ export function defineActionTypes(
   actions.registerType(getNoAttemptsRateLimitedActionType());
   actions.registerType(getAuthorizationActionType(core));
   actions.registerType(getExcludedActionType());
+  actions.registerType(getHookedActionType());
 
   /**
    * System actions
    */
   actions.registerType(getSystemActionType());
   actions.registerType(getSystemActionTypeWithKibanaPrivileges());
+  actions.registerType(getSystemActionTypeWithConnectorAdapter());
 
   /** Sub action framework */
 
@@ -130,9 +132,100 @@ function getIndexRecordActionType() {
           secrets,
           reference: params.reference,
           source: 'action:test.index-record',
+          '@timestamp': new Date(),
         },
       });
       return { status: 'ok', actionId };
+    },
+  };
+  return result;
+}
+
+function getHookedActionType() {
+  const paramsSchema = schema.object({});
+  type ParamsType = TypeOf<typeof paramsSchema>;
+  const configSchema = schema.object({
+    index: schema.string(),
+    source: schema.string(),
+  });
+  type ConfigType = TypeOf<typeof configSchema>;
+  const secretsSchema = schema.object({
+    encrypted: schema.string(),
+  });
+  type SecretsType = TypeOf<typeof secretsSchema>;
+  const result: ActionType<ConfigType, SecretsType, ParamsType> = {
+    id: 'test.connector-with-hooks',
+    name: 'Test: Connector with hooks',
+    minimumLicenseRequired: 'gold',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      params: { schema: paramsSchema },
+      config: { schema: configSchema },
+      secrets: { schema: secretsSchema },
+    },
+    async executor({ config, secrets, params, services, actionId }) {
+      return { status: 'ok', actionId };
+    },
+    async preSaveHook({ connectorId, config, secrets, services, isUpdate, logger }) {
+      const body = {
+        state: {
+          connectorId,
+          config,
+          secrets,
+          isUpdate,
+        },
+        reference: 'pre-save',
+        source: config.source,
+      };
+      logger.info(`running hook pre-save for ${JSON.stringify(body)}`);
+      await services.scopedClusterClient.asInternalUser.index({
+        index: config.index,
+        refresh: 'wait_for',
+        body,
+      });
+    },
+    async postSaveHook({
+      connectorId,
+      config,
+      secrets,
+      services,
+      logger,
+      isUpdate,
+      wasSuccessful,
+    }) {
+      const body = {
+        state: {
+          connectorId,
+          config,
+          secrets,
+          isUpdate,
+          wasSuccessful,
+        },
+        reference: 'post-save',
+        source: config.source,
+      };
+      logger.info(`running hook post-save for ${JSON.stringify(body)}`);
+      await services.scopedClusterClient.asInternalUser.index({
+        index: config.index,
+        refresh: 'wait_for',
+        body,
+      });
+    },
+    async postDeleteHook({ connectorId, config, services, logger }) {
+      const body = {
+        state: {
+          connectorId,
+          config,
+        },
+        reference: 'post-delete',
+        source: config.source,
+      };
+      logger.info(`running hook post-delete for ${JSON.stringify(body)}`);
+      await services.scopedClusterClient.asInternalUser.index({
+        index: config.index,
+        refresh: 'wait_for',
+        body,
+      });
     },
   };
   return result;
@@ -447,7 +540,13 @@ function getSystemActionTypeWithKibanaPrivileges() {
     getKibanaPrivileges: () => ['cases:cases/createCase'],
     validate: {
       params: {
-        schema: schema.any(),
+        /**
+         * Adapter: x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         */
+        schema: schema.object({
+          index: schema.maybe(schema.string()),
+          reference: schema.maybe(schema.string()),
+        }),
       },
       config: {
         schema: schema.any(),
@@ -477,6 +576,70 @@ function getSystemActionTypeWithKibanaPrivileges() {
           params,
           reference,
           source: 'action:test.system-action-kibana-privileges',
+        },
+      });
+
+      return { status: 'ok', actionId };
+    },
+  };
+
+  return result;
+}
+
+function getSystemActionTypeWithConnectorAdapter() {
+  const result: ActionType<
+    {},
+    {},
+    { myParam: string; injected: string; index?: string; reference?: string }
+  > = {
+    id: 'test.system-action-connector-adapter',
+    name: 'Test system action with a connector adapter set',
+    minimumLicenseRequired: 'platinum',
+    supportedFeatureIds: ['alerting'],
+    validate: {
+      params: {
+        /**
+         * The injected params will be set by the
+         * connector adapter while executing the action.
+         *
+         * Adapter: x-pack/test/alerting_api_integration/common/plugins/alerts/server/connector_adapters.ts
+         */
+        schema: schema.object({
+          myParam: schema.string(),
+          injected: schema.string(),
+          index: schema.maybe(schema.string()),
+          reference: schema.maybe(schema.string()),
+        }),
+      },
+
+      config: {
+        schema: schema.any(),
+      },
+      secrets: {
+        schema: schema.any(),
+      },
+    },
+    isSystemActionType: true,
+    /**
+     * The executor writes a doc to the
+     * testing index. The test uses the doc
+     * to verify that the action is executed
+     * correctly
+     */
+    async executor({ params, services, actionId }) {
+      const { index, reference } = params;
+
+      if (index == null || reference == null) {
+        return { status: 'ok', actionId };
+      }
+
+      await services.scopedClusterClient.index({
+        index,
+        refresh: 'wait_for',
+        body: {
+          params,
+          reference,
+          source: 'action:test.system-action-connector-adapter',
         },
       });
 

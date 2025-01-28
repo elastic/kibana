@@ -33,10 +33,11 @@ all the "children" will be automatically included. However, when a "child" is ex
 
 ## Migrations and Backward compatibility
 
-As your plugin evolves, you may need to change your Saved Object type in a breaking way (for example, changing the type of an attribute, or removing
-an attribute). If that happens, you should write a migration to upgrade the Saved Objects that existed prior to the change.
+As your plugin evolves, you may need to change your Saved Object 
+type in a breaking way (for example, changing the type of an attribute, or removing
+an attribute). If that happens, you should write a new model version to upgrade the Saved Objects that existed prior to the change.
 
-<DocLink id="kibDevTutorialSavedObject" section="migrations" text="How to write a migration" />.
+<DocLink id="kibDevTutorialSavedObject" section="migrations" text="Defining model versions" />.
 
 ## Security
 

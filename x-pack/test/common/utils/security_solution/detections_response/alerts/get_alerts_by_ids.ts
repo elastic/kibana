@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { SearchResponse } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
+import { SearchResponse } from '@elastic/elasticsearch/lib/api/types';
 import type { ToolingLog } from '@kbn/tooling-log';
 import type SuperTest from 'supertest';
 import type { DetectionAlert } from '@kbn/security-solution-plugin/common/api/detection_engine';
@@ -23,7 +23,7 @@ import { routeWithNamespace } from '../route_with_namespace';
  * @param ids Array of the rule ids
  */
 export const getAlertsByIds = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog,
   ids: string[],
   size?: number,

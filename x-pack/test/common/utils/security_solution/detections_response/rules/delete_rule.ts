@@ -17,7 +17,7 @@ import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common
  * @param ruleId The rule id to delete
  */
 export const deleteRule = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   ruleId: string
 ): Promise<RuleResponse> => {
   const response = await supertest

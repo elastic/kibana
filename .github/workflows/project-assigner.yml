@@ -13,7 +13,6 @@ jobs:
         with:
           issue-mappings: |
             [
-              {"label": "Feature:Lens", "projectNumber": 32, "columnName": "Long-term goals"},
               {"label": "Team:DataDiscovery", "projectNumber": 44, "columnName": "Inbox"},
               {"label": "Feature:Canvas", "projectNumber": 38, "columnName": "Inbox"},
               {"label": "Feature:Dashboard", "projectNumber": 68, "columnName": "Inbox"},

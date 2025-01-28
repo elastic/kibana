@@ -1,0 +1,6 @@
+.dshSolutionToolbar__editorContextMenu {
+  max-height: 60vh;
+  overflow-y: scroll;
+  @include euiScrollBar;
+  @include euiOverflowShadow;
+}

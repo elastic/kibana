@@ -1,0 +1,51 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-performance-data-set-extraction
+  description: Runs single user performance tests and extract APM traces
+  links:
+    - url: 'https://buildkite.com/elastic/kibana-performance-data-set-extraction'
+      title: Pipeline link
+spec:
+  type: buildkite-pipeline
+  owner: 'group:kibana-operations'
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / performance-data-set-extraction
+      description: Runs single user performance tests and extract APM traces
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-performance-alerts'
+        BAZEL_CACHE_MODE: none
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      allow_rebuilds: true
+      branch_configuration: main
+      default_branch: main
+      repository: elastic/kibana
+      pipeline_file: .buildkite/pipelines/performance/data_set_extraction_daily.yml
+      skip_intermediate_builds: false
+      provider_settings:
+        trigger_mode: none
+        build_branches: true
+        prefix_pull_request_fork_branch_names: true
+        skip_pull_request_builds_for_existing_commits: true
+      teams:
+        everyone:
+          access_level: BUILD_AND_READ
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        appex-qa:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-tech-leads:
+          access_level: MANAGE_BUILD_AND_READ
+      schedules:
+        Extract APM traces:
+          cronline: 0 3/8 * * * Europe/Berlin
+          message: Extract APM traces
+          branch: main
+      tags:
+        - kibana

@@ -22,7 +22,7 @@ export default ({ getService }: FtrProviderContext): void => {
   const es = getService('es');
   const supertest = getService('supertest');
   const log = getService('log');
-  const retry = getService('retry');
+  const retryService = getService('retry');
 
   /* This test makes use of the mock packages created in the '/fleet_bundled_packages' folder,
   /* in order to assert that, in production environments, the latest stable version of the package
@@ -31,11 +31,11 @@ export default ({ getService }: FtrProviderContext): void => {
   /* (We use high mock version numbers to prevent clashes with real packages downloaded in other tests.)
   /* To do assertions on which packages have been installed, 99.0.0 has a single rule to install,
   /* while 99.0.1-beta.1 has 2 rules to install. Also, both packages have the version as part of the rule names. */
-  describe('@ess @serverless @skipInQA prerelease_packages', () => {
+  describe('@ess @serverless @skipInServerlessMKI prerelease_packages', () => {
     beforeEach(async () => {
       await deleteAllRules(supertest, log);
       await deleteAllPrebuiltRuleAssets(es, log);
-      await deletePrebuiltRulesFleetPackage(supertest);
+      await deletePrebuiltRulesFleetPackage({ supertest, es, log, retryService });
     });
 
     it('should install latest stable version and ignore prerelease packages', async () => {
@@ -49,8 +49,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const fleetPackageInstallationResponse = await installPrebuiltRulesPackageViaFleetAPI(
         es,
         supertest,
-        retry,
-        log
+        retryService
       );
 
       expect(fleetPackageInstallationResponse.items.length).toBe(1);

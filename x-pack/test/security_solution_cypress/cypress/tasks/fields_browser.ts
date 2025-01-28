@@ -75,6 +75,8 @@ export const toggleCategory = (category: string) => {
 };
 
 export const removesMessageField = () => {
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).clear();
+  cy.get(FIELDS_BROWSER_FILTER_INPUT).type('message');
   cy.get(FIELDS_BROWSER_MESSAGE_CHECKBOX).uncheck();
 };
 

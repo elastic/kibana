@@ -11,7 +11,7 @@ import { FtrProviderContext } from '../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const spacesService = getService('spaces');
-  const PageObjects = getPageObjects(['common', 'canvas', 'security', 'spaceSelector']);
+  const { common, canvas } = getPageObjects(['common', 'canvas']);
   const appsMenu = getService('appsMenu');
   const testSubjects = getService('testSubjects');
   const kibanaServer = getService('kibanaServer');
@@ -51,7 +51,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it('shows canvas navlink', async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
@@ -59,26 +59,26 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`landing page shows "Create new workpad" button`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', '', {
+        await common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
-        await PageObjects.canvas.expectCreateWorkpadButtonEnabled();
+        await canvas.expectCreateWorkpadButtonEnabled();
       });
 
       it(`allows a workpad to be created`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', '', {
+        await common.navigateToActualUrl('canvas', '', {
           ensureCurrentUrl: true,
           shouldLoginIfPrompted: false,
         });
 
         await testSubjects.click('create-workpad-button');
 
-        await PageObjects.canvas.expectAddElementButton();
+        await canvas.expectAddElementButton();
       });
 
       it(`allows a workpad to be edited`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await common.navigateToActualUrl(
           'canvas',
           '/workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
@@ -87,7 +87,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           }
         );
 
-        await PageObjects.canvas.expectAddElementButton();
+        await canvas.expectAddElementButton();
       });
     });
 
@@ -112,7 +112,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`doesn't show canvas navlink`, async () => {
-        await PageObjects.common.navigateToApp('home', {
+        await common.navigateToApp('home', {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
@@ -120,13 +120,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`create new workpad returns a 404`, async () => {
-        await PageObjects.common.navigateToActualUrl('canvas', '', {
+        await common.navigateToActualUrl('canvas', '', {
           basePath: '/s/custom_space',
           ensureCurrentUrl: false,
           shouldLoginIfPrompted: false,
         });
 
-        const messageText = await PageObjects.common.getJsonBodyText();
+        const messageText = await common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,
@@ -137,7 +137,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       it(`edit workpad returns a 404`, async () => {
-        await PageObjects.common.navigateToActualUrl(
+        await common.navigateToActualUrl(
           'canvas',
           'workpad/workpad-1705f884-6224-47de-ba49-ca224fe6ec31',
           {
@@ -146,7 +146,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
             shouldLoginIfPrompted: false,
           }
         );
-        const messageText = await PageObjects.common.getJsonBodyText();
+        const messageText = await common.getJsonBodyText();
         expect(messageText).to.eql(
           JSON.stringify({
             statusCode: 404,

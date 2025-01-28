@@ -75,7 +75,7 @@ export default function alertTests({ getService }: FtrProviderContext) {
   const esTestIndexTool = new ESTestIndexTool(es, retry);
   const esTestIndexToolOutput = new ESTestIndexTool(es, retry, ES_TEST_OUTPUT_INDEX_NAME);
 
-  describe('alert', async () => {
+  describe('alert', () => {
     const objectRemover = new ObjectRemover(supertest);
     let actionId: string;
 

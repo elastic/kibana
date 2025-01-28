@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import ChildProcess from 'child_process';
@@ -15,6 +16,7 @@ import { ToolingLog } from '@kbn/tooling-log';
 import { createTestEsCluster, kibanaServerTestUser } from '@kbn/test';
 import { observeLines } from '@kbn/stdio-dev-helpers';
 import { REPO_ROOT } from '@kbn/repo-info';
+import { getFips } from 'crypto';
 
 describe('migrator-only node', () => {
   const log = new ToolingLog({ writeTo: process.stdout, level: 'debug' });
@@ -29,6 +31,7 @@ describe('migrator-only node', () => {
     let logsSub: undefined | Rx.Subscription;
     try {
       await es.start();
+      const isFipsEnabled = getFips();
 
       proc = ChildProcess.spawn(
         process.execPath,
@@ -41,7 +44,7 @@ describe('migrator-only node', () => {
           '--no-optimizer',
           '--no-base-path',
           '--no-watch',
-          '--oss',
+          isFipsEnabled ? '--xpack.security.fipsMode.enabled=true' : '--oss',
         ],
         { stdio: ['pipe', 'pipe', 'pipe'] }
       );

@@ -73,10 +73,12 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
             ML_EMBEDDABLE_TYPES.ANOMALY_CHARTS
           );
         });
-
         it('can select jobs', async () => {
-          await ml.dashboardJobSelectionTable.setRowCheckboxState(testData.jobConfig.job_id, true);
-          await ml.dashboardJobSelectionTable.applyJobSelection();
+          await ml.alerting.selectJobs([testData.jobConfig.job_id]);
+          await ml.alerting.assertJobSelection([testData.jobConfig.job_id]);
+        });
+
+        it('populates with default default info', async () => {
           await ml.dashboardEmbeddables.assertAnomalyChartsEmbeddableInitializerExists();
           await ml.dashboardEmbeddables.assertSelectMaxSeriesToPlotValue(6);
         });

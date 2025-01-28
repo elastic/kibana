@@ -5,10 +5,12 @@
  * 2.0.
  */
 
-import { services as commonServices } from '../../common/services';
 import { services as apiIntegrationServices } from '../../api_integration/services';
+import { services as commonServices } from '../../common/services';
+import { RoleScopedSupertestProvider } from '../deployment_agnostic/services/role_scoped_supertest';
 
 export const services = {
   ...commonServices,
-  supertestWithoutAuth: apiIntegrationServices.supertestWithoutAuth,
+  usageAPI: apiIntegrationServices.usageAPI,
+  roleScopedSupertest: RoleScopedSupertestProvider,
 };

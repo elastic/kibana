@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { parse as parseCookie } from 'tough-cookie';
@@ -48,6 +49,7 @@ const configService = createConfigService({
       allowFromAnyIp: true,
       ipAllowlist: [],
     },
+    restrictInternalApis: false,
   } as any,
 });
 const contextSetup = contextServiceMock.createSetupContract();
@@ -128,13 +130,14 @@ describe('Cookie based SessionStorage', () => {
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
         innerServer,
-        cookieOptions
+        cookieOptions,
+        true
       );
       await server.start();
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).toBeDefined();
       expect(cookies).toHaveLength(1);
 
@@ -166,13 +169,14 @@ describe('Cookie based SessionStorage', () => {
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
         innerServer,
-        cookieOptions
+        cookieOptions,
+        true
       );
       await server.start();
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).toBeDefined();
       expect(cookies).toHaveLength(1);
 
@@ -198,13 +202,14 @@ describe('Cookie based SessionStorage', () => {
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
         innerServer,
-        cookieOptions
+        cookieOptions,
+        true
       );
       await server.start();
 
       const response = await supertest(innerServer.listener).get('/').expect(200, { value: null });
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).not.toBeDefined();
     });
 
@@ -229,7 +234,8 @@ describe('Cookie based SessionStorage', () => {
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
         innerServer,
-        cookieOptions
+        cookieOptions,
+        true
       );
       await server.start();
 
@@ -237,7 +243,7 @@ describe('Cookie based SessionStorage', () => {
         .get('/')
         .expect(200, { value: userData });
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).toBeDefined();
 
       await delay(sessionDurationMs);
@@ -275,7 +281,8 @@ describe('Cookie based SessionStorage', () => {
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
         innerServer,
-        cookieOptions
+        cookieOptions,
+        true
       );
       await server.start();
 
@@ -283,7 +290,7 @@ describe('Cookie based SessionStorage', () => {
         .get('/')
         .expect(200, { value: userData });
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       expect(cookies).toBeDefined();
 
       const sessionCookie = retrieveSessionCookie(cookies[0]);
@@ -313,7 +320,8 @@ describe('Cookie based SessionStorage', () => {
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
-        cookieOptions
+        cookieOptions,
+        true
       );
 
       expect(mockServer.register).toBeCalledTimes(1);
@@ -347,7 +355,8 @@ describe('Cookie based SessionStorage', () => {
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
-        cookieOptions
+        cookieOptions,
+        true
       );
 
       expect(mockServer.register).toBeCalledTimes(1);
@@ -379,7 +388,8 @@ describe('Cookie based SessionStorage', () => {
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
         mockServer as any,
-        cookieOptions
+        cookieOptions,
+        true
       );
 
       expect(mockServer.register).toBeCalledTimes(1);
@@ -412,13 +422,14 @@ describe('Cookie based SessionStorage', () => {
       const factory = await createCookieSessionStorageFactory(
         logger.get(),
         innerServer,
-        cookieOptions
+        cookieOptions,
+        true
       );
       await server.start();
 
       const response = await supertest(innerServer.listener).get('/').expect(200);
 
-      const cookies = response.get('set-cookie');
+      const cookies = response.get('set-cookie')!;
       const sessionCookie = retrieveSessionCookie(cookies[0]);
 
       const response2 = await supertest(innerServer.listener)
@@ -439,11 +450,16 @@ describe('Cookie based SessionStorage', () => {
         await server.preboot(prebootDeps);
         const { server: innerServer } = await server.setup(setupDeps);
 
-        expect(
-          createCookieSessionStorageFactory(logger.get(), innerServer, {
-            ...cookieOptions,
-            sameSite: 'None',
-          })
+        await expect(
+          createCookieSessionStorageFactory(
+            logger.get(),
+            innerServer,
+            {
+              ...cookieOptions,
+              sameSite: 'None',
+            },
+            true
+          )
         ).rejects.toThrowErrorMatchingInlineSnapshot(
           `"\\"SameSite: None\\" requires Secure connection"`
         );
@@ -465,17 +481,22 @@ describe('Cookie based SessionStorage', () => {
             return res.ok({ body: { value: sessionValue.value } });
           });
 
-          const factory = await createCookieSessionStorageFactory(logger.get(), innerServer, {
-            ...cookieOptions,
-            isSecure: true,
-            name: `sid-${sameSite}`,
-            sameSite,
-          });
+          const factory = await createCookieSessionStorageFactory(
+            logger.get(),
+            innerServer,
+            {
+              ...cookieOptions,
+              isSecure: true,
+              name: `sid-${sameSite}`,
+              sameSite,
+            },
+            true
+          );
           await server.start();
 
           const response = await supertest(innerServer.listener).get('/').expect(200);
 
-          const cookies = response.get('set-cookie');
+          const cookies = response.get('set-cookie')!;
           expect(cookies).toBeDefined();
           expect(cookies).toHaveLength(1);
 

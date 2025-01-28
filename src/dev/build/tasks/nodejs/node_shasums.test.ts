@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const mockResponse = `155ae63f0bb47050e0c31b4f8c17dadc79dcfa8e8f4ec9e3974fd7592afa9a4f  node-v8.9.4-aix-ppc64.tar.gz
@@ -61,7 +62,11 @@ import { getNodeShasums } from './node_shasums';
 
 describe('src/dev/build/tasks/nodejs/node_shasums', () => {
   it('resolves to an object with shasums for node downloads for version', async () => {
-    const shasums = await getNodeShasums(new ToolingLog(), '8.9.4');
+    const shasums = await getNodeShasums(new ToolingLog(), '8.9.4', {
+      getTarget() {
+        return null;
+      },
+    } as any);
     expect(shasums).toEqual(
       expect.objectContaining({
         'node-v8.9.4.tar.gz': '729b44b32b2f82ecd5befac4f7518de0c4e3add34e8fe878f745740a66cbbc01',

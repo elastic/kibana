@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 /**
@@ -91,7 +92,7 @@ export interface DictionaryOf {
 }
 
 /**
- * A user defined value. To be used when bubbling a generic parameter up to the top-level interface is
+ * A user defined value. To be used when bubbling a generic parameter up to the top-level class is
  * inconvenient or impossible (e.g. for lists of user-defined values of possibly different types).
  *
  * Clients will allow providing a serializer/deserializer when reading/writing properties of this type,
@@ -138,7 +139,7 @@ export interface Property {
   codegenName?: string;
   /** An optional set of aliases for `name` */
   aliases?: string[];
-  /** If the enclosing interface is a variants container, is this a property of the container and not a variant? */
+  /** If the enclosing class is a variants container, is this a property of the container and not a variant? */
   containerProperty?: boolean;
   /** If this property has a quirk that needs special attention, give a short explanation about it */
   esQuirk?: string;
@@ -180,7 +181,7 @@ export interface BaseType {
   specLocation: string;
 }
 
-export type Variants = ExternalTag | InternalTag | Container;
+export type Variants = ExternalTag | InternalTag | Container | Untagged;
 
 export interface VariantBase {
   /**
@@ -207,12 +208,23 @@ export interface Container extends VariantBase {
   kind: 'container';
 }
 
+export interface Untagged extends VariantBase {
+  kind: 'untagged';
+  untypedVariant: TypeName;
+}
+
 /**
  * Inherits clause (aka extends or implements) for an interface or request
  */
 export interface Inherits {
   type: TypeName;
   generics?: ValueOf[];
+}
+
+export interface Behavior {
+  type: TypeName;
+  generics?: ValueOf[];
+  meta?: Record<string, string>;
 }
 
 /**
@@ -231,7 +243,7 @@ export interface Interface extends BaseType {
   /**
    * Behaviors directly implemented by this interface
    */
-  behaviors?: Inherits[];
+  behaviors?: Behavior[];
 
   /**
    * Behaviors attached to this interface, coming from the interface itself (see `behaviors`)
@@ -270,12 +282,12 @@ export interface Request extends BaseType {
   // We can also pull path parameter descriptions on body properties they replace
 
   /**
-   * Body type. Most often a list of properties (that can extend those of the inherited interface, see above), except for a
+   * Body type. Most often a list of properties (that can extend those of the inherited class, see above), except for a
    * few specific cases that use other types such as bulk (array) or create (generic parameter). Or NoBody for requests
    * that don't have a body.
    */
   body: Body;
-  behaviors?: Inherits[];
+  behaviors?: Behavior[];
   attachedBehaviors?: string[];
 }
 
@@ -286,7 +298,7 @@ export interface Response extends BaseType {
   kind: 'response';
   generics?: TypeName[];
   body: Body;
-  behaviors?: Inherits[];
+  behaviors?: Behavior[];
   attachedBehaviors?: string[];
   exceptions?: ResponseException[];
 }
@@ -334,6 +346,7 @@ export interface EnumMember {
   description?: string;
   deprecation?: Deprecation;
   since?: string;
+  availability?: Availabilities;
 }
 
 /**
@@ -357,8 +370,11 @@ export interface TypeAlias extends BaseType {
   type: ValueOf;
   /** generic parameters: either concrete types or open parameters from the enclosing type */
   generics?: TypeName[];
-  /** Only applicable to `union_of` aliases: identify typed_key unions (external) and variant inventories (internal) */
-  variants?: InternalTag | ExternalTag;
+  /**
+   * Only applicable to `union_of` aliases: identify typed_key unions (external), variant inventories (internal)
+   * and untagged variants
+   */
+  variants?: InternalTag | ExternalTag | Untagged;
 }
 
 // ------------------------------------------------------------------------------------------------
@@ -437,6 +453,14 @@ export interface UrlTemplate {
 }
 
 export interface Model {
+  _info?: {
+    title: string;
+    license: {
+      name: string;
+      url: string;
+    };
+  };
+
   types: TypeDefinition[];
   endpoints: Endpoint[];
 }

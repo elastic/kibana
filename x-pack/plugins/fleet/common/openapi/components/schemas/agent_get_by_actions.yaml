@@ -1,6 +1,0 @@
-title: Agents get by action ids
-type: array
-items:
-  type: array
-  items:
-    type: string

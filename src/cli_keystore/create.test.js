@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 const mockKeystoreData =
@@ -30,7 +31,7 @@ import sinon from 'sinon';
 import { Keystore } from '../cli/keystore';
 import { create } from './create';
 import { Logger } from '../cli/logger';
-import * as prompt from './utils/prompt';
+import * as prompt from '../cli/keystore/utils/prompt';
 
 describe('Kibana keystore', () => {
   describe('create', () => {
@@ -46,7 +47,7 @@ describe('Kibana keystore', () => {
     });
 
     it('creates keystore file', async () => {
-      const keystore = new Keystore('/data/foo.keystore');
+      const keystore = await Keystore.initialize('/data/foo.keystore');
       sandbox.stub(keystore, 'save');
 
       await create(keystore);
@@ -56,7 +57,7 @@ describe('Kibana keystore', () => {
 
     it('logs successful keystore creating', async () => {
       const path = '/data/foo.keystore';
-      const keystore = new Keystore(path);
+      const keystore = await Keystore.initialize(path);
 
       await create(keystore);
 
@@ -67,7 +68,7 @@ describe('Kibana keystore', () => {
     it('prompts for overwrite', async () => {
       sandbox.stub(prompt, 'confirm').returns(Promise.resolve(true));
 
-      const keystore = new Keystore('/data/test.keystore');
+      const keystore = await Keystore.initialize('/data/test.keystore');
       await create(keystore);
 
       sinon.assert.calledOnce(prompt.confirm);
@@ -79,7 +80,7 @@ describe('Kibana keystore', () => {
     it('aborts if overwrite is denied', async () => {
       sandbox.stub(prompt, 'confirm').returns(Promise.resolve(false));
 
-      const keystore = new Keystore('/data/test.keystore');
+      const keystore = await Keystore.initialize('/data/test.keystore');
       sandbox.stub(keystore, 'save');
 
       await create(keystore);

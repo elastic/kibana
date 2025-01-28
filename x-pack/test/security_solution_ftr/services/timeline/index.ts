@@ -8,8 +8,11 @@
 import { Response } from 'superagent';
 import { EndpointError } from '@kbn/security-solution-plugin/common/endpoint/errors';
 import { TIMELINE_DRAFT_URL, TIMELINE_URL } from '@kbn/security-solution-plugin/common/constants';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
-import { TimelineInput } from '@kbn/security-solution-plugin/common/search_strategy';
+import {
+  GetDraftTimelinesResponse,
+  PatchTimelineResponse,
+  SavedTimeline,
+} from '@kbn/security-solution-plugin/common/api/timeline';
 import moment from 'moment';
 import { fromKueryExpression, toElasticsearchQuery } from '@kbn/es-query';
 import { FtrService } from '../../../functional/ftr_provider_context';
@@ -52,17 +55,15 @@ export class TimelineTestService extends FtrService {
    * for display (not sure why). TO get around this, just select a date range from the user date
    * picker and that seems to trigger the events to be fetched.
    */
-  async createTimeline(title: string): Promise<TimelineResponse> {
+  async createTimeline(title: string): Promise<PatchTimelineResponse> {
     // Create a new timeline draft
-    const createdTimeline = (
-      await this.supertest
-        .post(TIMELINE_DRAFT_URL)
-        .set('kbn-xsrf', 'true')
-        .set('elastic-api-version', '2023-10-31')
-        .send({ timelineType: 'default' })
-        .then(this.getHttpResponseFailureHandler())
-        .then((response) => response.body as TimelineResponse)
-    ).data.persistTimeline.timeline;
+    const createdTimeline = await this.supertest
+      .post(TIMELINE_DRAFT_URL)
+      .set('kbn-xsrf', 'true')
+      .set('elastic-api-version', '2023-10-31')
+      .send({ timelineType: 'default' })
+      .then(this.getHttpResponseFailureHandler())
+      .then((response) => response.body as GetDraftTimelinesResponse);
 
     this.log.info('Draft timeline:');
     this.log.indent(4, () => {
@@ -71,7 +72,7 @@ export class TimelineTestService extends FtrService {
 
     const { savedObjectId: timelineId, version } = createdTimeline;
 
-    const timelineUpdate: TimelineInput = {
+    const timelineUpdate: SavedTimeline = {
       title,
       // Set date range to the last 1 year
       dateRange: {
@@ -79,7 +80,7 @@ export class TimelineTestService extends FtrService {
         end: moment().toISOString(),
         // Not sure why `start`/`end` are defined as numbers in the type, but looking at the
         // UI's use of it, I can see they are being set to strings, so I'm forcing a cast here
-      } as unknown as TimelineInput['dateRange'],
+      } as unknown as SavedTimeline['dateRange'],
 
       // Not sure why, but the following fields are not in the created timeline, which causes
       // the timeline to not be able to pull in the event for display
@@ -107,9 +108,9 @@ export class TimelineTestService extends FtrService {
 
   async updateTimeline(
     timelineId: string,
-    updates: TimelineInput,
+    updates: SavedTimeline,
     version: string
-  ): Promise<TimelineResponse> {
+  ): Promise<PatchTimelineResponse> {
     return await this.supertest
       .patch(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
@@ -120,11 +121,11 @@ export class TimelineTestService extends FtrService {
         timeline: updates,
       })
       .then(this.getHttpResponseFailureHandler())
-      .then((response) => response.body as TimelineResponse);
+      .then((response) => response.body as PatchTimelineResponse);
   }
 
   /** Deletes a timeline using it timeline id */
-  async deleteTimeline(id: string | string[]): Promise<void> {
+  async deleteTimeline(id: string | string[]) {
     await this.supertest
       .delete(TIMELINE_URL)
       .set('kbn-xsrf', 'true')
@@ -133,7 +134,7 @@ export class TimelineTestService extends FtrService {
         savedObjectIds: Array.isArray(id) ? id : [id],
       })
       .then(this.getHttpResponseFailureHandler())
-      .then((response) => response.body as TimelineResponse);
+      .then((response) => response.body);
   }
 
   /**
@@ -173,13 +174,13 @@ export class TimelineTestService extends FtrService {
       /** If defined, then only alerts from the specific `agent.id` will be displayed */
       endpointAgentId: string;
     }>
-  ): Promise<TimelineResponse> {
+  ): Promise<PatchTimelineResponse> {
     const newTimeline = await this.createTimeline(title);
 
     const { expression, esQuery } = this.getEndpointAlertsKqlQuery(endpointAgentId);
 
     const updatedTimeline = await this.updateTimeline(
-      newTimeline.data.persistTimeline.timeline.savedObjectId,
+      newTimeline.savedObjectId,
       {
         title,
         kqlQuery: {
@@ -193,7 +194,7 @@ export class TimelineTestService extends FtrService {
         },
         savedSearchId: null,
       },
-      newTimeline.data.persistTimeline.timeline.version
+      newTimeline.version
     );
 
     return updatedTimeline;

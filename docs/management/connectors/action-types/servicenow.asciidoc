@@ -64,12 +64,28 @@ The username for HTTP basic authentication.
 When you create or edit a connector, use the *Test* tab to test its actions:
 
 [role="screenshot"]
-image::management/connectors/images/servicenow-params-test.png[ServiceNow params test]
+image::management/connectors/images/servicenow-params-test.png[ServiceNow params test, width=75%]
 
 {sn-itsm} actions have the following configuration properties.
 
 Additional comments::
 Additional information for the client, such as how to troubleshoot the issue.
+Additional fields::
+An object that contains custom field identifiers and their values.
++
+--
+These fields must exist in the Elastic ServiceNow application and must be specified in JSON format.
+For example:
+[source,sh]
+----
+{
+    "u_cmdb_ci": "host-a",
+    "u_company": "My company",
+    "u_assignment_group": "Testing"
+}
+----
+Note that the default source field names in the Elastic ServiceNow application are prefixed with "u_".
+--
 Category::
 The category of the incident.
 Correlation display::
@@ -86,6 +102,9 @@ NOTE: Using the default configuration of `{{ruleID}}:{{alert ID}}` ensures that 
 
 Description::
 The details about the incident.
+Event action::
+The type of action to test: resolve or trigger.
+When you test a resolve action, you must provide a correlation identifier.
 Impact::
 The effect an incident has on business.
 It can be measured by the number of affected users or by how critical it is to the business in question.
@@ -94,7 +113,7 @@ The severity of the incident.
 Short description::
 A short description for the incident, used for searching the contents of the knowledge base.
 Subcategory::
-The category of the incident.
+The subcategory of the incident.
 Urgency::
 The extent to which the incident resolution can delay.
 
@@ -220,15 +239,22 @@ This step is required to use OAuth for authentication between Elastic and {sn}.
 // tag::servicenow-rsa-key[]
 *Create an RSA keypair:*
 
-. Use https://www.openssl.org/docs/man1.0.2/man1/genrsa.html[OpenSSL] to generate an RSA private key:
+. Use https://www.openssl.org/docs/man1.0.2/man1/genrsa.html[OpenSSL] to generate an RSA private key.
+** To create a private key with a password, use the `passout` option. For example:
++
+--
+[source,sh]
+----
+openssl genrsa -passout pass:foobar -out example-private-key-with-password.pem 3072
+----
+--
+** To create a private key without a password, omit the `passout` option. For example:
 +
 --
 [source,sh]
 ----
 openssl genrsa -out example-private-key.pem 3072
-openssl genrsa -passout pass:foobar -out example-private-key-with-password.pem 3072 <1>
 ----
-<1> Use the `passout` option to set a password on your private key. This is optional but remember your password if you set one.
 --
 
 . Use https://www.openssl.org/docs/man1.0.2/man1/req.html[OpenSSL] to generate the matching public key:
@@ -319,7 +345,8 @@ IMPORTANT: Deprecated connectors will continue to function with the rules they w
 
 To update a deprecated connector:
 
-. Open the main menu and go to *{stack-manage-app} > {connectors-ui}*.
+. Go to the *{connectors-ui}* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 . Select the deprecated connector to open the *Edit connector* flyout.
 . In the warning message, click *Update this connector*.
 . Complete the guided steps in the *Edit connector* flyout.

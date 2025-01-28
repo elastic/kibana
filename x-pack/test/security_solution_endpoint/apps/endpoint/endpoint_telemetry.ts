@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { FtrProviderContext } from '../../ftr_provider_context';
+import { FtrProviderContext } from '../../configs/ftr_provider_context';
 import { targetTags } from '../../target_tags';
 
 export default function ({ getService }: FtrProviderContext) {

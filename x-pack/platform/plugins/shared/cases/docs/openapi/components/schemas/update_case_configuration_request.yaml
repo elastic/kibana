@@ -1,0 +1,39 @@
+title: Update case configuration request
+description: >
+  You can update settings such as the closure type, custom fields, templates, and the default connector for cases.
+type: object
+required:
+  - version
+properties:
+  closure_type:
+    $ref: 'closure_types.yaml'
+  connector:
+    description: An object that contains the connector configuration.
+    type: object
+    properties:
+      $ref: 'case_configure_connector_properties.yaml'
+    required:
+      - fields
+      - id
+      - name
+      - type
+  customFields:
+    type: array
+    description: Custom fields case configuration.
+    items:
+      type: object
+      required:
+        - key
+        - label
+        - required
+        - type
+      properties:
+        $ref: 'case_configure_customfields.yaml'
+  templates:
+    $ref: 'templates.yaml'
+  version:
+    description: >
+      The version of the connector.
+      To retrieve the version value, use the get configuration API.
+    type: string
+    example: WzIwMiwxXQ==

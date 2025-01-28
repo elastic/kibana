@@ -1,0 +1,194 @@
+openapi: 3.0.0
+info:
+  title: Response Actions Schema
+  version: 'not applicable'
+paths: { }
+components:
+  x-codegen-enabled: true
+  schemas:
+    ResponseActionTypes:
+      type: string
+      enum:
+        - .osquery
+        - .endpoint
+
+    EcsMapping:
+      type: object
+      additionalProperties:
+        type: object
+        properties:
+          field:
+            type: string
+          value:
+            oneOf:
+              - type: string
+              - type: array
+                items:
+                  type: string
+
+    OsqueryQuery:
+      type: object
+      properties:
+        id:
+          type: string
+          description: Query ID
+        query:
+          type: string
+          description: Query to run
+        ecs_mapping:
+          $ref: '#/components/schemas/EcsMapping'
+        version:
+          type: string
+          description: Query version
+        platform:
+          type: string
+        removed:
+          type: boolean
+        snapshot:
+          type: boolean
+      required:
+        - id
+        - query
+
+    OsqueryParams:
+      type: object
+      properties:
+        query:
+          type: string
+        ecs_mapping:
+          $ref: '#/components/schemas/EcsMapping'
+        queries:
+          type: array
+          items:
+            $ref: '#/components/schemas/OsqueryQuery'
+        pack_id:
+          type: string
+        saved_query_id:
+          type: string
+        timeout:
+          type: number
+
+    OsqueryParamsCamelCase:
+      type: object
+      properties:
+        query:
+          type: string
+        ecsMapping:
+          $ref: '#/components/schemas/EcsMapping'
+        queries:
+          type: array
+          items:
+            $ref: '#/components/schemas/OsqueryQuery'
+        packId:
+          type: string
+        savedQueryId:
+          type: string
+        timeout:
+          type: number
+
+    OsqueryResponseAction:
+      type: object
+      properties:
+        action_type_id:
+          type: string
+          enum:
+            - .osquery
+        params:
+          $ref: '#/components/schemas/OsqueryParams'
+      required:
+        - action_type_id
+        - params
+
+    # Camel cased versions of OsqueryResponseAction
+    RuleResponseOsqueryAction:
+      type: object
+      properties:
+        actionTypeId:
+          type: string
+          enum:
+            - .osquery
+        params:
+          $ref: '#/components/schemas/OsqueryParamsCamelCase'
+      required:
+        - actionTypeId
+        - params
+
+    DefaultParams:
+      type: object
+      properties:
+        command:
+          type: string
+          enum:
+            - isolate
+        comment:
+          type: string
+      required:
+        - command
+
+    ProcessesParams:
+      type: object
+      properties:
+        command:
+          type: string
+          enum:
+            - kill-process
+            - suspend-process
+        comment:
+          type: string
+        config:
+          required:
+            - field
+          type: object
+          properties:
+            field:
+              type: string
+              description: Field to use instead of process.pid
+            overwrite:
+              type: boolean
+              description: Whether to overwrite field with process.pid
+              default: true
+      required:
+        - command
+        - config
+
+    EndpointResponseAction:
+      type: object
+      properties:
+        action_type_id:
+          type: string
+          enum:
+            - .endpoint
+        params:
+          oneOf:
+            - $ref: '#/components/schemas/DefaultParams'
+            - $ref: '#/components/schemas/ProcessesParams'
+      required:
+        - action_type_id
+        - params
+
+    # Camel cased versions of EndpointResponseAction
+    RuleResponseEndpointAction:
+      type: object
+      properties:
+        actionTypeId:
+          type: string
+          enum:
+            - .endpoint
+        params:
+          oneOf:
+            - $ref: '#/components/schemas/DefaultParams'
+            - $ref: '#/components/schemas/ProcessesParams'
+      required:
+        - actionTypeId
+        - params
+
+    ResponseAction:
+      oneOf:
+        - $ref: '#/components/schemas/OsqueryResponseAction'
+        - $ref: '#/components/schemas/EndpointResponseAction'
+
+    # Camel Cased versions of ResponseAction
+    RuleResponseAction:
+      oneOf:
+        - $ref: '#/components/schemas/RuleResponseOsqueryAction'
+        - $ref: '#/components/schemas/RuleResponseEndpointAction'

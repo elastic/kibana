@@ -8,12 +8,14 @@
     ]
   },
   "include": [
-    "**/*.ts"
+    "**/*.ts",
+    "**/*.tsx"
   ],
   "kbn_references": [
     "@kbn/utility-types",
     "@kbn/core-i18n-browser",
-    "@kbn/core-i18n-browser-internal"
+    "@kbn/core-i18n-browser-internal",
+    "@kbn/i18n-react",
   ],
   "exclude": [
     "target/**/*",

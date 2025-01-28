@@ -1,0 +1,32 @@
+{
+  "type": "plugin",
+  "id": "@kbn/ingest-pipelines-plugin",
+  "owner": "@elastic/kibana-management",
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "ingestPipelines",
+    "server": true,
+    "browser": true,
+    "configPath": [
+      "xpack",
+      "ingest_pipelines"
+    ],
+    "requiredPlugins": [
+      "licensing",
+      "management",
+      "features",
+      "share",
+      "fileUpload"
+    ],
+    "optionalPlugins": [
+      "security",
+      "usageCollection",
+      "console"
+    ],
+    "requiredBundles": [
+      "esUiShared",
+      "kibanaReact"
+    ]
+  }
+}

@@ -9,7 +9,7 @@ You must index data into {es} before you can create a graph.
 [[exploring-connections]]
 === Graph a data connection
 
-. Open the main menu, then click *Graph*.
+. Go to *Graph*.
 +
 If this is your first graph, follow the prompts to create it.
 For subsequent graphs, click *New*.

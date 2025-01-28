@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -21,6 +22,7 @@ import type {
 } from '@kbn/event-annotation-plugin/common';
 import { CONTENT_ID } from '@kbn/event-annotation-plugin/common';
 import { EVENT_ANNOTATION_GROUP_TYPE } from '@kbn/event-annotation-common';
+import { X_ELASTIC_INTERNAL_ORIGIN_REQUEST } from '@kbn/core-http-common';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 const CONTENT_ENDPOINT = '/api/content_management/rpc';
@@ -93,6 +95,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`${CONTENT_ENDPOINT}/get`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send(payload)
           .expect(200);
 
@@ -137,6 +140,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`${CONTENT_ENDPOINT}/get`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send(payload)
           .expect(404);
 
@@ -150,7 +154,11 @@ export default function ({ getService }: FtrProviderContext) {
 
     describe('search', () => {
       const performSearch = (payload: EventAnnotationGroupSearchIn) =>
-        supertest.post(`${CONTENT_ENDPOINT}/search`).set('kbn-xsrf', 'kibana').send(payload);
+        supertest
+          .post(`${CONTENT_ENDPOINT}/search`)
+          .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send(payload);
 
       it(`should retrieve existing groups`, async () => {
         const payload: EventAnnotationGroupSearchIn = {
@@ -276,6 +284,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`${CONTENT_ENDPOINT}/create`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send(payload)
           .expect(200);
 
@@ -324,6 +333,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resp = await supertest
             .post(`${CONTENT_ENDPOINT}/create`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(payload)
             .expect(400);
 
@@ -344,6 +354,7 @@ export default function ({ getService }: FtrProviderContext) {
           return supertest
             .post(`${CONTENT_ENDPOINT}/create`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(payload);
         };
 
@@ -379,6 +390,7 @@ export default function ({ getService }: FtrProviderContext) {
         const resp = await supertest
           .post(`${CONTENT_ENDPOINT}/update`)
           .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
           .send(payload)
           .expect(200);
 
@@ -430,6 +442,7 @@ export default function ({ getService }: FtrProviderContext) {
           const resp = await supertest
             .post(`${CONTENT_ENDPOINT}/update`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(payload)
             .expect(400);
 
@@ -452,6 +465,7 @@ export default function ({ getService }: FtrProviderContext) {
           return supertest
             .post(`${CONTENT_ENDPOINT}/update`)
             .set('kbn-xsrf', 'kibana')
+            .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
             .send(payload);
         };
         const errorResp = await updateWithDataViewSpec(undefined).expect(400);
@@ -476,7 +490,11 @@ export default function ({ getService }: FtrProviderContext) {
           version: API_VERSION,
         };
 
-        return supertest.post(`${CONTENT_ENDPOINT}/delete`).set('kbn-xsrf', 'kibana').send(payload);
+        return supertest
+          .post(`${CONTENT_ENDPOINT}/delete`)
+          .set('kbn-xsrf', 'kibana')
+          .set(X_ELASTIC_INTERNAL_ORIGIN_REQUEST, 'kibana')
+          .send(payload);
       };
 
       it(`should delete a group`, async () => {

@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -11,31 +12,24 @@ import { LinksLayoutType } from '@kbn/links-plugin/common/content_management';
 import { FtrService } from '../ftr_provider_context';
 
 export class DashboardPageLinks extends FtrService {
+  private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
   private readonly browser = this.ctx.getService('browser');
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly comboBox = this.ctx.getService('comboBox');
-
-  private readonly header = this.ctx.getPageObject('header');
-  private readonly settings = this.ctx.getPageObject('settings');
-
-  public async toggleLinksLab(value?: boolean) {
-    await this.header.clickStackManagement();
-    await this.settings.clickKibanaSettings();
-
-    await this.settings.toggleAdvancedSettingCheckbox('labs:dashboard:linksPanel', value);
-  }
 
   /* -----------------------------------------------------------
     Links panel
     ----------------------------------------------------------- */
 
   public async getAllLinksInPanel() {
+    this.log.debug('get all link elements from the panel');
     const listGroup = await this.testSubjects.find('links--component--listGroup');
     return await listGroup.findAllByCssSelector('li');
   }
 
   public async getNumberOfLinksInPanel() {
+    this.log.debug('get the number of links in the panel');
     const links = await this.getAllLinksInPanel();
     return links.length;
   }
@@ -44,28 +38,45 @@ export class DashboardPageLinks extends FtrService {
     Links flyout
     ----------------------------------------------------------- */
 
-  public async expectFlyoutIsOpen() {
-    await this.testSubjects.exists('links--panelEditor--flyout');
+  public async expectPanelEditorFlyoutIsOpen() {
+    await this.retry.waitFor(
+      'links panel editor flyout to exist',
+      async () => await this.testSubjects.exists('links--panelEditor--flyout')
+    );
+  }
+
+  public async expectLinkEditorFlyoutIsOpen() {
+    await this.retry.waitFor(
+      'link editor flyout to exist',
+      async () => await this.testSubjects.exists('links--linkEditor--flyout')
+    );
   }
 
   public async clickPanelEditorSaveButton() {
-    await this.expectFlyoutIsOpen();
+    this.log.debug('click links panel editor save button');
+    await this.expectPanelEditorFlyoutIsOpen();
     await this.testSubjects.clickWhenNotDisabled('links--panelEditor--saveBtn');
   }
 
   public async clickLinkEditorCloseButton() {
+    this.log.debug('click link editor close button');
     await this.testSubjects.click('links--linkEditor--closeBtn');
+    await this.testSubjects.waitForDeleted('links--linkEditor--flyout');
   }
 
   public async clickPanelEditorCloseButton() {
+    this.log.debug('click links panel editor close button');
     await this.testSubjects.click('links--panelEditor--closeBtn');
   }
 
   public async clickLinksEditorSaveButton() {
+    this.log.debug('click link editor save button');
     await this.testSubjects.clickWhenNotDisabled('links--linkEditor--saveBtn');
+    await this.testSubjects.waitForDeleted('links--linkEditor--flyout');
   }
 
   public async findDraggableLinkByIndex(index: number) {
+    this.log.debug(`find the draggable link element at index ${index}`);
     await this.testSubjects.exists('links--panelEditor--flyout');
     const linksFormRow = await this.testSubjects.find('links--panelEditor--linksAreaDroppable');
     return await linksFormRow.findByCssSelector(
@@ -80,9 +91,17 @@ export class DashboardPageLinks extends FtrService {
     openInNewTab: boolean = false,
     linkLabel?: string
   ) {
-    await this.expectFlyoutIsOpen();
-    await this.testSubjects.click('links--panelEditor--addLinkBtn');
-    await this.testSubjects.exists('links--linkEditor--flyout');
+    this.log.debug(
+      `add a dashboard link to "${destination}" ${
+        linkLabel ? `with custom label "${linkLabel}"` : ''
+      }`
+    );
+
+    await this.expectPanelEditorFlyoutIsOpen();
+    await this.retry.try(async () => {
+      await this.testSubjects.click('links--panelEditor--addLinkBtn');
+      await this.expectLinkEditorFlyoutIsOpen();
+    });
     const radioOption = await this.testSubjects.find('links--linkEditor--dashboardLink--radioBtn');
     const label = await radioOption.findByCssSelector('label[for="dashboardLink"]');
     await label.click();
@@ -114,6 +133,11 @@ export class DashboardPageLinks extends FtrService {
     encodeUrl: boolean = true,
     linkLabel?: string
   ) {
+    this.log.debug(
+      `add an external link to "${destination}" ${
+        linkLabel ? `with custom label "${linkLabel}"` : ''
+      }`
+    );
     await this.setExternalUrlInput(destination);
     if (linkLabel) {
       await this.testSubjects.setValue('links--linkEditor--linkLabel--input', linkLabel);
@@ -128,6 +152,7 @@ export class DashboardPageLinks extends FtrService {
   }
 
   public async deleteLinkByIndex(index: number) {
+    this.log.debug(`delete the link at ${index}`);
     const linkToDelete = await this.findDraggableLinkByIndex(index);
     await this.retry.try(async () => {
       await linkToDelete.moveMouseTo();
@@ -138,6 +163,7 @@ export class DashboardPageLinks extends FtrService {
   }
 
   public async editLinkByIndex(index: number) {
+    this.log.debug(`edit the link at ${index}`);
     const linkToEdit = await this.findDraggableLinkByIndex(index);
     await this.retry.try(async () => {
       await linkToEdit.moveMouseTo();
@@ -148,6 +174,11 @@ export class DashboardPageLinks extends FtrService {
   }
 
   public async reorderLinks(linkLabel: string, startIndex: number, steps: number, reverse = false) {
+    this.log.debug(
+      `move the ${linkLabel} link from ${startIndex} to ${
+        reverse ? startIndex - steps : startIndex + steps
+      }`
+    );
     const linkToMove = await this.findDraggableLinkByIndex(startIndex);
     const draggableButton = await linkToMove.findByTestSubject(`panelEditorLink--dragHandle`);
     expect(await draggableButton.getAttribute('data-rfd-drag-handle-draggable-id')).to.equal(
@@ -166,15 +197,19 @@ export class DashboardPageLinks extends FtrService {
   }
 
   public async setLayout(layout: LinksLayoutType) {
-    await this.expectFlyoutIsOpen();
+    this.log.debug(`set the link panel layout to ${layout}`);
+    await this.expectPanelEditorFlyoutIsOpen();
     const testSubj = `links--panelEditor--${layout}LayoutBtn`;
     await this.testSubjects.click(testSubj);
   }
 
   public async setExternalUrlInput(destination: string) {
-    await this.expectFlyoutIsOpen();
-    await this.testSubjects.click('links--panelEditor--addLinkBtn');
-    await this.testSubjects.exists('links--linkEditor--flyout');
+    this.log.debug(`set the external URL input to ${destination}`);
+    await this.expectPanelEditorFlyoutIsOpen();
+    await this.retry.try(async () => {
+      await this.testSubjects.click('links--panelEditor--addLinkBtn');
+      await this.expectLinkEditorFlyoutIsOpen();
+    });
     const option = await this.testSubjects.find('links--linkEditor--externalLink--radioBtn');
     const label = await option.findByCssSelector('label[for="externalLink"]');
     await label.click();
@@ -182,7 +217,8 @@ export class DashboardPageLinks extends FtrService {
   }
 
   public async toggleSaveByReference(checked: boolean) {
-    await this.expectFlyoutIsOpen();
+    this.log.debug(`toggle save by reference for link panel to ${checked}`);
+    await this.expectPanelEditorFlyoutIsOpen();
     await this.testSubjects.setEuiSwitch(
       'links--panelEditor--saveByReferenceSwitch',
       checked ? 'check' : 'uncheck'

@@ -9,7 +9,7 @@ import { EsArchiver } from '@kbn/es-archiver';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects, loadTestFile }: FtrProviderContext) {
-  const PageObjects = getPageObjects(['timePicker']);
+  const { timePicker } = getPageObjects(['timePicker']);
   const browser = getService('browser');
   const config = getService('config');
   const log = getService('log');
@@ -54,7 +54,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
       await esNode.load(esArchive);
       // changing the timepicker default here saves us from having to set it in Discover (~8s)
-      await PageObjects.timePicker.setDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.setDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.uiSettings.update({
         defaultIndex: indexPatternString,
         'dateFormat:tz': 'UTC',
@@ -65,7 +65,7 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
 
     after(async () => {
       await esArchiver.unload(esArchive);
-      await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
+      await timePicker.resetDefaultAbsoluteRangeViaUiSettings();
       await kibanaServer.importExport.unload(fixtureDirs.lensBasic);
       await kibanaServer.importExport.unload(fixtureDirs.lensDefault);
       await kibanaServer.savedObjects.cleanStandardList();

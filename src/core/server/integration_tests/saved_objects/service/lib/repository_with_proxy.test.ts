@@ -1,15 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Hapi from '@hapi/hapi';
 import h2o2 from '@hapi/h2o2';
 import { URL } from 'url';
-import { SavedObject, ALL_SAVED_OBJECT_INDICES } from '@kbn/core-saved-objects-server';
+import type { SavedObject } from '@kbn/core-saved-objects-server';
 import type { ISavedObjectsRepository } from '@kbn/core-saved-objects-api-server';
 import type { InternalCoreSetup, InternalCoreStart } from '@kbn/core-lifecycle-server-internal';
 import { Root } from '@kbn/core-root-server-internal';
@@ -18,7 +19,6 @@ import {
   createTestServers,
   type TestElasticsearchUtils,
 } from '@kbn/core-test-helpers-kbn-server';
-import { kibanaPackageJson as pkg } from '@kbn/repo-info';
 import {
   declareGetRoute,
   declareDeleteRoute,
@@ -32,7 +32,8 @@ import {
   declarePassthroughRoute,
   declareIndexRoute,
   setProxyInterrupt,
-  allCombinationsPermutations,
+  getVersionedKibanaIndex,
+  getIndicesWithNamespaceAwareTypes,
 } from './repository_with_proxy_utils';
 
 let esServer: TestElasticsearchUtils;
@@ -93,37 +94,6 @@ describe('404s from proxies', () => {
       ? parseInt(process.env.TEST_PROXY_SERVER_PORT, 10)
       : 5698;
 
-    // Setup custom hapi hapiServer with h2o2 plugin for proxying
-    hapiServer = Hapi.server({
-      port: proxyPort,
-    });
-
-    await hapiServer.register(h2o2);
-    // register specific routes to modify the response and a catch-all to relay the request/response as-is
-
-    allCombinationsPermutations(
-      ALL_SAVED_OBJECT_INDICES.map((indexPattern) => `${indexPattern}_${pkg.version}`)
-    )
-      .map((indices) => indices.join(','))
-      .forEach((kbnIndexPath) => {
-        declareGetRoute(hapiServer, esHostname, esPort, kbnIndexPath);
-        declareDeleteRoute(hapiServer, esHostname, esPort, kbnIndexPath);
-        declarePostUpdateRoute(hapiServer, esHostname, esPort, kbnIndexPath);
-
-        declareGetSearchRoute(hapiServer, esHostname, esPort, kbnIndexPath);
-        declarePostSearchRoute(hapiServer, esHostname, esPort, kbnIndexPath);
-        declarePostPitRoute(hapiServer, esHostname, esPort, kbnIndexPath);
-        declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort, kbnIndexPath);
-        declareIndexRoute(hapiServer, esHostname, esPort, kbnIndexPath);
-      });
-
-    // register index-agnostic routes
-    declarePostBulkRoute(hapiServer, esHostname, esPort);
-    declarePostMgetRoute(hapiServer, esHostname, esPort);
-    declarePassthroughRoute(hapiServer, esHostname, esPort);
-
-    await hapiServer.start();
-
     // Setup kibana configured to use proxy as ES backend
     root = createRootWithCorePlugins({
       elasticsearch: {
@@ -136,6 +106,35 @@ describe('404s from proxies', () => {
     await root.preboot();
     const setup = await root.setup();
     registerSOTypes(setup);
+
+    // Setup custom hapi hapiServer with h2o2 plugin for proxying
+    hapiServer = Hapi.server({
+      port: proxyPort,
+    });
+
+    const mainIndex = getVersionedKibanaIndex();
+    await hapiServer.register(h2o2);
+    // register specific routes to modify the response and a catch-all to relay the request/response as-is
+    declareGetRoute(hapiServer, esHostname, esPort, mainIndex);
+    declareDeleteRoute(hapiServer, esHostname, esPort, mainIndex);
+    declarePostUpdateRoute(hapiServer, esHostname, esPort, mainIndex);
+
+    declareGetSearchRoute(hapiServer, esHostname, esPort, mainIndex);
+    declarePostSearchRoute(hapiServer, esHostname, esPort, mainIndex);
+    declarePostPitRoute(hapiServer, esHostname, esPort, mainIndex);
+    declareIndexRoute(hapiServer, esHostname, esPort, mainIndex);
+
+    // the deleteByNamespace performs an updateByQuery under the hood.
+    // It targets all SO indices that have namespace-aware types
+    const nsIndices = getIndicesWithNamespaceAwareTypes(setup.savedObjects.getTypeRegistry());
+    declarePostUpdateByQueryRoute(hapiServer, esHostname, esPort, nsIndices);
+
+    // register index-agnostic routes
+    declarePostBulkRoute(hapiServer, esHostname, esPort);
+    declarePostMgetRoute(hapiServer, esHostname, esPort);
+    declarePassthroughRoute(hapiServer, esHostname, esPort);
+
+    await hapiServer.start();
 
     start = await root.start();
   });

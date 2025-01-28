@@ -6,7 +6,7 @@
  */
 
 import expect from '@kbn/expect';
-import { SuperTest } from 'supertest';
+import { Agent as SuperTestAgent } from 'supertest';
 import type { Client } from '@elastic/elasticsearch';
 import type { SavedObjectReference, SavedObjectsImportRetry } from '@kbn/core/server';
 import { SAVED_OBJECT_TEST_CASES as CASES } from '../lib/saved_object_test_cases';
@@ -197,7 +197,7 @@ export const resolveImportErrorsTestCaseFailures = {
 export function resolveImportErrorsTestSuiteFactory(
   es: Client,
   esArchiver: any,
-  supertest: SuperTest<any>
+  supertest: SuperTestAgent
 ) {
   const expectSavedObjectForbidden = (action: string, typeOrTypes: string | string[]) =>
     expectResponses.forbiddenTypes(action)(typeOrTypes);
@@ -373,7 +373,7 @@ export function resolveImportErrorsTestSuiteFactory(
             const query = test.createNewCopies ? '?createNewCopies=true' : '';
             await supertest
               .post(`${getUrlPrefix(spaceId)}/api/saved_objects/_resolve_import_errors${query}`)
-              .auth(user?.username, user?.password)
+              .auth(user?.username!, user?.password!)
               .field('retries', JSON.stringify(test.request.retries))
               .attach('file', Buffer.from(requestBody, 'utf8'), 'export.ndjson')
               .expect(test.responseStatusCode)

@@ -7,6 +7,7 @@
 
 import httpProxy from 'http-proxy';
 import expect from '@kbn/expect';
+import { IValidatedEvent } from '@kbn/event-log-plugin/generated/schemas';
 
 import { getHttpProxyServer } from '@kbn/alerting-api-integration-helpers';
 import {
@@ -14,13 +15,16 @@ import {
   ExternalServiceSimulator,
 } from '@kbn/actions-simulators-plugin/server/plugin';
 import { TaskErrorSource } from '@kbn/task-manager-plugin/common';
+import { MAX_OTHER_FIELDS_LENGTH } from '@kbn/stack-connectors-plugin/common/jira/constants';
 import { FtrProviderContext } from '../../../../../common/ftr_provider_context';
+import { getEventLog } from '../../../../../common/lib';
 
 // eslint-disable-next-line import/no-default-export
 export default function jiraTest({ getService }: FtrProviderContext) {
   const supertest = getService('supertest');
   const kibanaServer = getService('kibanaServer');
   const configService = getService('config');
+  const retry = getService('retry');
 
   const mockJira = {
     config: {
@@ -232,12 +236,12 @@ export default function jiraTest({ getService }: FtrProviderContext) {
               params: {},
             })
             .then((resp: any) => {
-              expect(Object.keys(resp.body)).to.eql([
-                'status',
+              expect(Object.keys(resp.body).sort()).to.eql([
+                'connector_id',
+                'errorSource',
                 'message',
                 'retry',
-                'errorSource',
-                'connector_id',
+                'status',
               ]);
               expect(resp.body.connector_id).to.eql(simulatedActionId);
               expect(resp.body.status).to.eql('error');
@@ -258,7 +262,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subAction]: expected value to equal [pushToService]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -277,7 +281,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -304,7 +308,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.summary]: expected value of type [string] but got [undefined]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -333,7 +337,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.commentId]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -361,7 +365,7 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.comments]: types that failed validation:\n - [subActionParams.comments.0.0.comment]: expected value of type [string] but got [undefined]\n - [subActionParams.comments.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
             });
         });
@@ -390,8 +394,98 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                 retry: false,
                 message:
                   'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.labels]: types that failed validation:\n - [subActionParams.incident.labels.0.0]: The label label with spaces cannot contain spaces\n - [subActionParams.incident.labels.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
-                errorSource: TaskErrorSource.FRAMEWORK,
+                errorSource: TaskErrorSource.USER,
               });
+            });
+        });
+
+        it('throws when trying to create an incident with too many "otherFields"', async () => {
+          const otherFields = new Array(MAX_OTHER_FIELDS_LENGTH + 1)
+            .fill('foobar')
+            .reduce((acc, curr, idx) => {
+              acc[idx] = curr;
+              return acc;
+            }, {});
+
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockJira.params,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    otherFields,
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.otherFields]: types that failed validation:\n - [subActionParams.incident.otherFields.0]: A maximum of 20 fields in otherFields can be defined at a time.\n - [subActionParams.incident.otherFields.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                errorSource: TaskErrorSource.USER,
+              });
+            });
+        });
+
+        it('throws when trying to create an incident with "otherFields" keys that are not allowed', async () => {
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockJira.params,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    otherFields: {
+                      summary: 'foo',
+                    },
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.body).to.eql({
+                connector_id: simulatedActionId,
+                status: 'error',
+                retry: false,
+                message:
+                  'error validating action params: types that failed validation:\n- [0.subAction]: expected value to equal [getFields]\n- [1.subAction]: expected value to equal [getIncident]\n- [2.subAction]: expected value to equal [handshake]\n- [3.subActionParams.incident.otherFields]: types that failed validation:\n - [subActionParams.incident.otherFields.0.key("summary")]: The following properties cannot be defined inside otherFields: summary.\n - [subActionParams.incident.otherFields.1]: expected value to equal [null]\n- [4.subAction]: expected value to equal [issueTypes]\n- [5.subAction]: expected value to equal [fieldsByIssueType]\n- [6.subAction]: expected value to equal [issues]\n- [7.subAction]: expected value to equal [issue]',
+                errorSource: TaskErrorSource.USER,
+              });
+            });
+        });
+
+        it('does not throw when "otherFields" is a valid JSON object send as string', async () => {
+          await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockJira.params,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    otherFields: '{ "foo": "bar" }',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .then((resp: any) => {
+              expect(resp.status).to.equal(200);
+              expect(resp.body.status).to.eql('ok');
             });
         });
       });
@@ -408,6 +502,57 @@ export default function jiraTest({ getService }: FtrProviderContext) {
                   incident: {
                     ...mockJira.params.subActionParams.incident,
                     issueType: '10006',
+                  },
+                  comments: [],
+                },
+              },
+            })
+            .expect(200);
+
+          expect(proxyHaveBeenCalled).to.equal(true);
+          expect(body).to.eql({
+            status: 'ok',
+            connector_id: simulatedActionId,
+            data: {
+              id: '123',
+              title: 'CK-1',
+              pushedDate: '2020-04-27T14:17:45.490Z',
+              url: `${jiraSimulatorURL}/browse/CK-1`,
+            },
+          });
+
+          const events: IValidatedEvent[] = await retry.try(async () => {
+            return await getEventLog({
+              getService,
+              spaceId: 'default',
+              type: 'action',
+              id: simulatedActionId,
+              provider: 'actions',
+              actions: new Map([
+                ['execute-start', { gte: 2 }],
+                ['execute', { gte: 1 }],
+              ]),
+            });
+          });
+
+          const executeEvent = events[1];
+          expect(executeEvent?.kibana?.action?.execution?.usage?.request_body_bytes).to.be(124);
+        });
+
+        it('should handle creating an incident with other fields', async () => {
+          const { body } = await supertest
+            .post(`/api/actions/connector/${simulatedActionId}/_execute`)
+            .set('kbn-xsrf', 'foo')
+            .send({
+              params: {
+                ...mockJira.params,
+                subActionParams: {
+                  ...mockJira.params.subActionParams,
+                  incident: {
+                    ...mockJira.params.subActionParams.incident,
+                    otherFields: {
+                      foo: 'bar',
+                    },
                   },
                   comments: [],
                 },

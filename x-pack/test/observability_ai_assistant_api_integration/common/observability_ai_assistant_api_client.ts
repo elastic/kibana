@@ -12,10 +12,24 @@ import type {
 } from '@kbn/observability-ai-assistant-plugin/public';
 import { formatRequest } from '@kbn/server-route-repository';
 import supertest from 'supertest';
-import { format } from 'url';
 import { Subtract } from 'utility-types';
+import { format, UrlObject } from 'url';
+import { kbnTestConfig } from '@kbn/test';
 
-export function createObservabilityAIAssistantApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function getScopedApiClient(kibanaServer: UrlObject, username: string) {
+  const { password } = kbnTestConfig.getUrlParts();
+  const baseUrlWithAuth = format({
+    ...kibanaServer,
+    auth: `${username}:${password}`,
+  });
+
+  return createObservabilityAIAssistantApiClient(supertest(baseUrlWithAuth));
+}
+
+export type ObservabilityAIAssistantApiClient = ReturnType<
+  typeof createObservabilityAIAssistantApiClient
+>;
+export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
   return <TEndpoint extends ObservabilityAIAssistantAPIEndpoint>(
     options: {
       type?: 'form-data';
@@ -45,7 +59,7 @@ export function createObservabilityAIAssistantApiClient(st: supertest.SuperTest<
         .set('Content-type', 'multipart/form-data');
 
       for (const field of fields) {
-        formDataRequest.field(field[0], field[1]);
+        void formDataRequest.field(field[0], field[1]);
       }
 
       res = formDataRequest;
@@ -70,17 +84,62 @@ type WithoutPromise<T extends Promise<any>> = Subtract<T, Promise<any>>;
 //  end(one:string)
 //  end(one:string, two:string)
 // }
-// would lose the first signature. This keeps up to four signatures.
+// would lose the first signature. This keeps up to eight signatures.
 type OverloadedParameters<T> = T extends {
   (...args: infer A1): any;
   (...args: infer A2): any;
   (...args: infer A3): any;
   (...args: infer A4): any;
+  (...args: infer A5): any;
+  (...args: infer A6): any;
+  (...args: infer A7): any;
+  (...args: infer A8): any;
 }
+  ? A1 | A2 | A3 | A4 | A5 | A6 | A7 | A8
+  : T extends {
+      (...args: infer A1): any;
+      (...args: infer A2): any;
+      (...args: infer A3): any;
+      (...args: infer A4): any;
+      (...args: infer A5): any;
+      (...args: infer A6): any;
+      (...args: infer A7): any;
+    }
+  ? A1 | A2 | A3 | A4 | A5 | A6 | A7
+  : T extends {
+      (...args: infer A1): any;
+      (...args: infer A2): any;
+      (...args: infer A3): any;
+      (...args: infer A4): any;
+      (...args: infer A5): any;
+      (...args: infer A6): any;
+    }
+  ? A1 | A2 | A3 | A4 | A5 | A6
+  : T extends {
+      (...args: infer A1): any;
+      (...args: infer A2): any;
+      (...args: infer A3): any;
+      (...args: infer A4): any;
+      (...args: infer A5): any;
+    }
+  ? A1 | A2 | A3 | A4 | A5
+  : T extends {
+      (...args: infer A1): any;
+      (...args: infer A2): any;
+      (...args: infer A3): any;
+      (...args: infer A4): any;
+    }
   ? A1 | A2 | A3 | A4
-  : T extends { (...args: infer A1): any; (...args: infer A2): any; (...args: infer A3): any }
+  : T extends {
+      (...args: infer A1): any;
+      (...args: infer A2): any;
+      (...args: infer A3): any;
+    }
   ? A1 | A2 | A3
-  : T extends { (...args: infer A1): any; (...args: infer A2): any }
+  : T extends {
+      (...args: infer A1): any;
+      (...args: infer A2): any;
+    }
   ? A1 | A2
   : T extends (...args: infer A) => any
   ? A

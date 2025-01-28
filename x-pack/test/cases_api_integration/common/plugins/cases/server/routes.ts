@@ -14,10 +14,12 @@ import type {
   PersistableStateAttachmentTypeSetup,
 } from '@kbn/cases-plugin/server/attachment_framework/types';
 import { BulkCreateCasesRequest, CasesPatchRequest } from '@kbn/cases-plugin/common/types/api';
+import { ActionExecutionSourceType } from '@kbn/actions-plugin/server/types';
+import { CASES_TELEMETRY_TASK_NAME } from '@kbn/cases-plugin/common/constants';
 import type { FixtureStartDeps } from './plugin';
 
 const hashParts = (parts: string[]): string => {
-  const hash = createHash('sha1');
+  const hash = createHash('sha1'); // eslint-disable-line @kbn/eslint/no_unsafe_hash
   const hashFeed = parts.join('-');
   return hash.update(hashFeed).digest('hex');
 };
@@ -49,7 +51,7 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
         const client = await cases.getCasesClientWithRequest(request);
 
         return response.ok({
-          body: await client.cases.update(request.body as CasesPatchRequest),
+          body: await client.cases.bulkUpdate(request.body as CasesPatchRequest),
         });
       } catch (error) {
         logger.error(`CasesClientUser failure: ${error}`);
@@ -108,6 +110,39 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
     }
   );
 
+  /**
+   * This is a fake route to handle deprecated getAllComments method which returns all comments
+   * where as findComments returns only comments of type 'user'
+   * we should improve findComments method to return all comments https://github.com/elastic/kibana/issues/208188
+   */
+  router.get(
+    {
+      path: '/api/cases_fixture/cases/{id}/comments',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+      },
+    },
+    async (context, request, response) => {
+      try {
+        const [_, { cases }] = await core.getStartServices();
+        const client = await cases.getCasesClientWithRequest(request);
+
+        return response.ok({
+          body: await client.attachments.getAll({ caseID: request.params.id }),
+        });
+      } catch (error) {
+        if (error.isBoom && error.output.statusCode === 403) {
+          return response.forbidden({ body: error });
+        }
+
+        logger.error(`Error : ${error}`);
+        throw error;
+      }
+    }
+  );
+
   router.post(
     {
       path: '/api/cases_fixture/cases:bulkCreate',
@@ -135,6 +170,73 @@ export const registerRoutes = (core: CoreSetup<FixtureStartDeps>, logger: Logger
           headers: boom.output.headers as { [key: string]: string },
           statusCode: boom.output.statusCode,
         });
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/cases_fixture/{id}/connectors:execute',
+      validate: {
+        params: schema.object({
+          id: schema.string(),
+        }),
+        body: schema.object({
+          params: schema.recordOf(schema.string(), schema.any()),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const [_, { actions }] = await core.getStartServices();
+
+      const actionsClient = await actions.getActionsClientWithRequest(req);
+
+      try {
+        return res.ok({
+          body: await actionsClient.execute({
+            actionId: req.params.id,
+            params: req.body.params,
+            source: {
+              type: ActionExecutionSourceType.HTTP_REQUEST,
+              source: req,
+            },
+            relatedSavedObjects: [],
+          }),
+        });
+      } catch (err) {
+        if (err.isBoom && err.output.statusCode === 403) {
+          return res.forbidden({ body: err });
+        }
+
+        throw err;
+      }
+    }
+  );
+
+  router.post(
+    {
+      path: '/api/cases_fixture/telemetry/run_soon',
+      validate: {
+        body: schema.object({
+          taskId: schema.string({
+            validate: (telemetryTaskId: string) => {
+              if (CASES_TELEMETRY_TASK_NAME === telemetryTaskId) {
+                return;
+              }
+
+              return 'invalid telemetry task id';
+            },
+          }),
+        }),
+      },
+    },
+    async (context, req, res) => {
+      const { taskId } = req.body;
+      try {
+        const [_, { taskManager }] = await core.getStartServices();
+        return res.ok({ body: await taskManager.runSoon(taskId) });
+      } catch (err) {
+        return res.ok({ body: { id: taskId, error: `${err}` } });
       }
     }
   );

@@ -24,7 +24,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const kibanaServer = getService('kibanaServer');
 
   describe('observability security feature controls', function () {
-    this.tags(['skipFirefox']);
+    this.tags(['skipFirefox', 'skipFIPS']);
     before(async () => {
       await esArchiver.load('x-pack/test/functional/es_archives/cases/default');
     });
@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            observabilityCases: ['all'],
+            observabilityCasesV2: ['all'],
             logs: ['all'],
           })
         );
@@ -90,12 +90,13 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('observability cases read-only privileges', () => {
+    describe('observability cases read-only privileges', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await esArchiver.load('x-pack/test/functional/es_archives/infra/metrics_and_logs');
         await observability.users.setTestUserRole(
           observability.users.defineBasicObservabilityRole({
-            observabilityCases: ['read'],
+            observabilityCasesV2: ['read'],
             logs: ['all'],
           })
         );
@@ -143,7 +144,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('no observability privileges', () => {
+    describe('no observability privileges', function () {
+      this.tags('skipFIPS');
       before(async () => {
         await observability.users.setTestUserRole({
           elasticsearch: { cluster: [], indices: [], run_as: [] },

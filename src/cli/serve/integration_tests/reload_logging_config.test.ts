@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Child from 'child_process';
@@ -13,8 +14,8 @@ import Os from 'os';
 import Del from 'del';
 
 import * as Rx from 'rxjs';
-import { map, filter, take } from 'rxjs/operators';
-import { safeDump } from 'js-yaml';
+import { map, filter, take } from 'rxjs';
+import { dump } from 'js-yaml';
 import { getConfigFromFiles } from '@kbn/config';
 
 const configFileLogConsole = follow(
@@ -64,7 +65,7 @@ function createConfigManager(configPath: string) {
   return {
     modify(fn: (input: Record<string, any>) => Record<string, any>) {
       const oldContent = getConfigFromFiles([configPath]);
-      const yaml = safeDump(fn(oldContent));
+      const yaml = dump(fn(oldContent));
       Fs.writeFileSync(configPath, yaml);
     },
   };

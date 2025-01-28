@@ -75,7 +75,8 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
     });
 
-    describe('creating', () => {
+    // FLAKY: https://github.com/elastic/kibana/issues/160583
+    describe.skip('creating', () => {
       beforeEach(async () => {
         await PageObjects.common.navigateToApp('dashboard');
         await PageObjects.dashboard.gotoDashboardLandingPage();
@@ -85,6 +86,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         await PageObjects.dashboard.clickNewDashboard();
 
         await PageObjects.dashboard.saveDashboard('my-new-dashboard', {
+          saveAsNew: true,
           waitDialogIsClosed: true,
           tags: ['tag-1', 'tag-3'],
         });
@@ -102,7 +104,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.dashboard.clickNewDashboard();
 
-        await testSubjects.click('dashboardSaveMenuItem');
+        await testSubjects.click('dashboardInteractiveSaveMenuItem');
         await testSubjects.setValue('savedObjectTitle', 'dashboard-with-new-tag');
 
         await testSubjects.click('savedObjectTagSelector');
@@ -148,6 +150,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
 
         await PageObjects.dashboard.switchToEditMode();
         await PageObjects.dashboard.saveDashboard('dashboard 4 with real data (tag-1)', {
+          saveAsNew: false,
           waitDialogIsClosed: true,
           tags: ['tag-3'],
         });

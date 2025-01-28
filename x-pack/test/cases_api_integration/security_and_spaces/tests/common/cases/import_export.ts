@@ -38,7 +38,7 @@ import {
   createCase,
   createComment,
   findCases,
-  getCaseUserActions,
+  findCaseUserActions,
   findAttachments,
 } from '../../../../common/lib/api';
 import { getPostCaseRequest, postCommentUserReq } from '../../../../common/lib/mock';
@@ -113,7 +113,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const comment = commentsResponse.comments[0] as unknown as UserCommentAttachmentAttributes;
       expect(comment.comment).to.eql('A comment for my case');
 
-      const userActions = await getCaseUserActions({
+      const { userActions } = await findCaseUserActions({
         supertest: supertestService,
         caseID: findResponse.cases[0].id,
       });
@@ -144,11 +144,11 @@ export default ({ getService }: FtrProviderContext): void => {
         .set('kbn-xsrf', 'true')
         .expect(200);
 
-      actionsRemover.add('default', '51a4cbe0-5cea-11ec-a615-15461784e410', 'action', 'actions');
+      actionsRemover.add('default', '51a4cbe0-5cea-11ec-a615-15461784e410', 'connector', 'actions');
 
       await expectImportToHaveOneCase(supertestService);
 
-      const userActions = await getCaseUserActions({
+      const { userActions } = await findCaseUserActions({
         supertest: supertestService,
         caseID: 'afeefae0-5cea-11ec-a615-15461784e410',
       });
@@ -161,7 +161,7 @@ export default ({ getService }: FtrProviderContext): void => {
   });
 };
 
-const expectImportToHaveOneCase = async (supertestService: supertest.SuperTest<supertest.Test>) => {
+const expectImportToHaveOneCase = async (supertestService: supertest.Agent) => {
   const findResponse = await findCases({ supertest: supertestService, query: {} });
   expect(findResponse.total).to.eql(1);
   expect(findResponse.cases[0].title).to.eql('A case with a connector');

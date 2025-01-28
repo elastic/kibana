@@ -1,0 +1,874 @@
+{
+  "@timestamp": "2024-02-23T08:47:03.036Z",
+  "cluster_uuid": "PanARIslSNC5x-B-ttgunw",
+  "cluster_name": "es-test-cluster",
+  "license_id": "b15da743-9adb-45fa-9258-dcecad41d1e4",
+  "endpoint_id": "123",
+  "endpoint_version": "8.6.2",
+  "endpoint_package_version": null,
+  "endpoint_metrics": {
+    "cpu": {
+      "histogram": {
+        "counts": [3934326, 520, 140, 110, 212, 78, 41, 18, 12, 25, 9, 5, 5, 2, 0, 0, 0, 0, 0, 0],
+        "values": [5, 10, 15, 20, 25, 30, 35, 40, 45, 50, 55, 60, 65, 70, 75, 80, 85, 90, 95, 100]
+      },
+      "mean": 0.2697424700222798,
+      "latest": 0.1
+    },
+    "memory": {
+      "mean": 373780821,
+      "latest": 411860992
+    },
+    "uptime": {
+      "endpoint": 26882599,
+      "system": 26883343
+    },
+    "documentsVolume": {
+      "file_events": {
+        "suppressed_count": 1651293,
+        "suppressed_bytes": 0,
+        "sent_count": 0,
+        "sent_bytes": 0
+      },
+      "process_events": {
+        "suppressed_count": 0,
+        "suppressed_bytes": 0,
+        "sent_count": 11026887,
+        "sent_bytes": 23412176619
+      },
+      "network_events": {
+        "suppressed_count": 3270009,
+        "suppressed_bytes": 0,
+        "sent_count": 0,
+        "sent_bytes": 0
+      },
+      "overall": {
+        "suppressed_count": 4921302,
+        "suppressed_bytes": 0,
+        "sent_count": 11026887,
+        "sent_bytes": 23412176619
+      }
+    },
+    "maliciousBehaviorRules": [
+      {
+        "id": "123",
+        "endpoint_uptime_percent": 0
+      }
+    ],
+    "systemImpact": [
+      {
+        "process": {
+          "executable": "/usr/sbin/sshd"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 304
+        },
+        "process_events": {
+          "week_idle_ms": 31791,
+          "week_ms": 110821
+        },
+        "network_events": {
+          "week_idle_ms": 2030,
+          "week_ms": 53
+        },
+        "overall": {
+          "week_idle_ms": 33821,
+          "week_ms": 111178
+        }
+      },
+      {
+        "process": {
+          "executable": "unknown"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 4552
+        },
+        "overall": {
+          "week_idle_ms": 0,
+          "week_ms": 4552
+        }
+      },
+      {
+        "file_events": {
+          "week_idle_ms": 130,
+          "week_ms": 7
+        },
+        "process": {
+          "executable": "/lib/systemd/systemd"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 1920
+        },
+        "process_events": {
+          "week_idle_ms": 1273,
+          "week_ms": 1750
+        },
+        "overall": {
+          "week_idle_ms": 1403,
+          "week_ms": 3677
+        }
+      },
+      {
+        "file_events": {
+          "week_idle_ms": 7,
+          "week_ms": 0
+        },
+        "process": {
+          "executable": "/bin/systemctl"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 3055
+        },
+        "process_events": {
+          "week_idle_ms": 0,
+          "week_ms": 9
+        },
+        "overall": {
+          "week_idle_ms": 7,
+          "week_ms": 3064
+        }
+      },
+      {
+        "file_events": {
+          "week_idle_ms": 3104,
+          "week_ms": 1
+        },
+        "process": {
+          "executable": "/usr/bin/apt-key"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 61
+        },
+        "process_events": {
+          "week_idle_ms": 178857,
+          "week_ms": 2062
+        },
+        "overall": {
+          "week_idle_ms": 181961,
+          "week_ms": 2124
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/bin/gce_workload_cert_refresh"
+        },
+        "process_events": {
+          "week_idle_ms": 230,
+          "week_ms": 1405
+        },
+        "network_events": {
+          "week_idle_ms": 135,
+          "week_ms": 21
+        },
+        "overall": {
+          "week_idle_ms": 365,
+          "week_ms": 1426
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/bin/apt-config"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 65
+        },
+        "process_events": {
+          "week_idle_ms": 18708,
+          "week_ms": 840
+        },
+        "overall": {
+          "week_idle_ms": 18708,
+          "week_ms": 905
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/lib/apt/apt.systemd.daily"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 273
+        },
+        "process_events": {
+          "week_idle_ms": 1064,
+          "week_ms": 352
+        },
+        "overall": {
+          "week_idle_ms": 1064,
+          "week_ms": 625
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/bin/dpkg"
+        },
+        "process_events": {
+          "week_idle_ms": 11479,
+          "week_ms": 558
+        },
+        "overall": {
+          "week_idle_ms": 11479,
+          "week_ms": 558
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/sbin/cron"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 80
+        },
+        "process_events": {
+          "week_idle_ms": 270,
+          "week_ms": 451
+        },
+        "overall": {
+          "week_idle_ms": 270,
+          "week_ms": 531
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/bin/cmp"
+        },
+        "process_events": {
+          "week_idle_ms": 39452,
+          "week_ms": 513
+        },
+        "overall": {
+          "week_idle_ms": 39452,
+          "week_ms": 513
+        }
+      },
+      {
+        "file_events": {
+          "week_idle_ms": 144,
+          "week_ms": 0
+        },
+        "process": {
+          "executable": "/sbin/dhclient-script"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 251
+        },
+        "process_events": {
+          "week_idle_ms": 2412,
+          "week_ms": 186
+        },
+        "overall": {
+          "week_idle_ms": 2556,
+          "week_ms": 437
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/bin/env"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 413
+        },
+        "process_events": {
+          "week_idle_ms": 45,
+          "week_ms": 4
+        },
+        "overall": {
+          "week_idle_ms": 45,
+          "week_ms": 417
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/bin/cat"
+        },
+        "process_events": {
+          "week_idle_ms": 39679,
+          "week_ms": 359
+        },
+        "overall": {
+          "week_idle_ms": 39679,
+          "week_ms": 359
+        }
+      },
+      {
+        "process": {
+          "executable": "/bin/sh"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 35
+        },
+        "process_events": {
+          "week_idle_ms": 444,
+          "week_ms": 197
+        },
+        "overall": {
+          "week_idle_ms": 444,
+          "week_ms": 232
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/lib/apt/apt-helper"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 100
+        },
+        "process_events": {
+          "week_idle_ms": 8,
+          "week_ms": 62
+        },
+        "overall": {
+          "week_idle_ms": 8,
+          "week_ms": 162
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/bin/date"
+        },
+        "process_events": {
+          "week_idle_ms": 1024,
+          "week_ms": 143
+        },
+        "overall": {
+          "week_idle_ms": 1024,
+          "week_ms": 143
+        }
+      },
+      {
+        "file_events": {
+          "week_idle_ms": 5315,
+          "week_ms": 2
+        },
+        "process": {
+          "executable": "/usr/bin/apt-get"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 53
+        },
+        "process_events": {
+          "week_idle_ms": 576,
+          "week_ms": 76
+        },
+        "overall": {
+          "week_idle_ms": 5891,
+          "week_ms": 131
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/bin/unattended-upgrade"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 27
+        },
+        "process_events": {
+          "week_idle_ms": 139,
+          "week_ms": 95
+        },
+        "overall": {
+          "week_idle_ms": 139,
+          "week_ms": 122
+        }
+      },
+      {
+        "process": {
+          "executable": "/usr/bin/gpgconf"
+        },
+        "malware": {
+          "week_idle_ms": 0,
+          "week_ms": 26
+        },
+        "process_events": {
+          "week_idle_ms": 12075,
+          "week_ms": 93
+        },
+        "overall": {
+          "week_idle_ms": 12075,
+          "week_ms": 119
+        }
+      }
+    ],
+    "threads": [
+      {
+        "name": "Cron",
+        "cpu": {
+          "mean": 0.005330585583239717
+        }
+      },
+      {
+        "name": "FileLogThread",
+        "cpu": {
+          "mean": 0.01387886588350829
+        }
+      },
+      {
+        "name": "LoggingLimitThread",
+        "cpu": {
+          "mean": 0.0003385089239880071
+        }
+      },
+      {
+        "name": "DocumentLoggingThread",
+        "cpu": {
+          "mean": 0.002019893909071295
+        }
+      },
+      {
+        "name": "DocumentLoggingMaintenance",
+        "cpu": {
+          "mean": 0.0001711144011367948
+        }
+      },
+      {
+        "name": "BulkConsumerThread",
+        "cpu": {
+          "mean": 0.01437360969549076
+        }
+      },
+      {
+        "name": "DocumentLoggingConsumerThread",
+        "cpu": {
+          "mean": 0.1566068758230231
+        }
+      },
+      {
+        "name": "DocumentLoggingLimitThread",
+        "cpu": {
+          "mean": 0.000383147463414997
+        }
+      },
+      {
+        "name": "ArtifactManifestDownload",
+        "cpu": {
+          "mean": 0.00202733366564246
+        }
+      },
+      {
+        "name": "PolicyReloadThread",
+        "cpu": {
+          "mean": 0.00001487951314232998
+        }
+      },
+      {
+        "name": "PerformanceMonitorWorkerThread",
+        "cpu": {
+          "mean": 0.005423582540379278
+        }
+      },
+      {
+        "name": "MetadataThread",
+        "cpu": {
+          "mean": 0.00001115963485674749
+        }
+      },
+      {
+        "name": "EventsQueueThread",
+        "cpu": {
+          "mean": 0.05409447002894065
+        }
+      },
+      {
+        "name": "DelayedAlertEnrichment",
+        "cpu": {
+          "mean": 0
+        }
+      },
+      {
+        "name": "MaintainProcessMap",
+        "cpu": {
+          "mean": 0.002905224941039929
+        }
+      },
+      {
+        "name": "FileScoreThread",
+        "cpu": {
+          "mean": 0.003567363275873613
+        }
+      },
+      {
+        "name": "DiagnosticMalwareThread",
+        "cpu": {
+          "mean": 0
+        }
+      },
+      {
+        "name": "QuarantineManagerWorkerThread",
+        "cpu": {
+          "mean": 0.002083131839926198
+        }
+      },
+      {
+        "name": "EventProcessingThread",
+        "cpu": {
+          "mean": 0.01754294664738331
+        }
+      },
+      {
+        "name": "HostIsolationMonitorThread",
+        "cpu": {
+          "mean": 0.0008481322806622976
+        }
+      },
+      {
+        "name": "MountMonitor",
+        "cpu": {
+          "mean": 0.003463206812704382
+        }
+      },
+      {
+        "name": "responseActionsUploadThread",
+        "cpu": {
+          "mean": 0.00270807149264102
+        }
+      },
+      {
+        "name": "responseActionsProcessThread",
+        "cpu": {
+          "mean": 0.002689472100521233
+        }
+      },
+      {
+        "name": "serviceCommsThread",
+        "cpu": {
+          "mean": 0
+        }
+      },
+      {
+        "name": "grpcConnectionManagerThread",
+        "cpu": {
+          "mean": 0.0110926774602411
+        }
+      },
+      {
+        "name": "checkinAPIThread",
+        "cpu": {
+          "mean": 0.0003124700433295513
+        }
+      },
+      {
+        "name": "actionsAPIThread",
+        "cpu": {
+          "mean": 0.0004910243538035807
+        }
+      },
+      {
+        "name": "stateReportThread",
+        "cpu": {
+          "mean": 0.00539010824743476
+        }
+      },
+      {
+        "name": "EventsLoopThread",
+        "cpu": {
+          "mean": 0.003266057265515501
+        }
+      },
+      {
+        "name": "FanotifyWatchdog",
+        "cpu": {
+          "mean": 0.0002231929794201937
+        }
+      },
+      {
+        "name": "FanotifySyncConsumer",
+        "cpu": {
+          "mean": 0.001885980676100637
+        }
+      },
+      {
+        "name": "FanotifyAsyncConsumer",
+        "cpu": {
+          "mean": 0.0002492321603525497
+        }
+      },
+      {
+        "name": "FanotifyConsumer",
+        "cpu": {
+          "mean": 0.03793164685246193
+        }
+      },
+      {
+        "name": "RulesEngineThread",
+        "cpu": {
+          "mean": 0.02721466395730229
+        }
+      }
+    ],
+    "eventFilter": {
+      "active_global_count": 0,
+      "active_user_count": 0
+    }
+  },
+  "endpoint_meta": {
+    "os": {
+      "Ext": {
+        "variant": "Debian"
+      },
+      "kernel": "5.10.0-21-cloud-amd64 #1 SMP Debian 5.10.162-1 (2023-01-21)",
+      "name": "Linux",
+      "family": "debian",
+      "type": "linux",
+      "version": "11.8",
+      "platform": "debian",
+      "full": "Debian 11.8"
+    },
+    "capabilities": [
+      "kill_process",
+      "suspend_process",
+      "running_processes",
+      "isolation",
+      "ebpf(auto)"
+    ]
+  },
+  "policy_config": {
+    "value": {
+      "linux": {
+        "advanced": {
+          "agent": {
+            "connection_delay": 60
+          },
+          "alerts": {
+            "require_user_artifacts": null
+          },
+          "artifacts": {
+            "global": {
+              "base_url": null,
+              "manifest_relative_url": null,
+              "public_key": null,
+              "interval": null,
+              "ca_cert": null
+            },
+            "user": {
+              "public_key": null,
+              "ca_cert": null,
+              "base_url": null,
+              "interval": null
+            }
+          },
+          "elasticsearch": {
+            "delay": null,
+            "tls": {
+              "verify_peer": null,
+              "verify_hostname": null,
+              "ca_cert": null
+            }
+          },
+          "fanotify": {
+            "ignore_unknown_filesystems": null,
+            "monitored_filesystems": null,
+            "ignored_filesystems": null
+          },
+          "logging": {
+            "file": null,
+            "stdout": null,
+            "stderr": null,
+            "syslog": null
+          },
+          "diagnostic": {
+            "enabled": null
+          },
+          "malware": {
+            "quarantine": null
+          },
+          "memory_protection": {
+            "memory_scan_collect_sample": null,
+            "memory_scan": null
+          },
+          "kernel": {
+            "capture_mode": null
+          },
+          "event_filter": {
+            "default": null
+          },
+          "utilization_limits": {
+            "cpu": null
+          },
+          "logstash": {
+            "delay": null
+          }
+        }
+      },
+      "mac": {
+        "advanced": {
+          "agent": {
+            "connection_delay": null
+          },
+          "artifacts": {
+            "global": {
+              "base_url": null,
+              "manifest_relative_url": null,
+              "public_key": null,
+              "interval": null,
+              "ca_cert": null
+            },
+            "user": {
+              "public_key": null,
+              "ca_cert": null,
+              "base_url": null,
+              "interval": null
+            }
+          },
+          "elasticsearch": {
+            "delay": null,
+            "tls": {
+              "verify_peer": null,
+              "verify_hostname": null,
+              "ca_cert": null
+            }
+          },
+          "logging": {
+            "file": null,
+            "stdout": null,
+            "stderr": null,
+            "syslog": null
+          },
+          "logstash": {
+            "delay": null
+          },
+          "malware": {
+            "quarantine": null,
+            "threshold": null
+          },
+          "kernel": {
+            "connect": null,
+            "harden": null,
+            "process": null,
+            "filewrite": null,
+            "network": null,
+            "network_extension": {
+              "enable_content_filtering": null,
+              "enable_packet_filtering": null
+            }
+          },
+          "harden": {
+            "self_protect": null
+          },
+          "diagnostic": {
+            "enabled": null
+          },
+          "alerts": {
+            "cloud_lookup": null,
+            "cloud_lookup_url": null
+          },
+          "memory_protection": {
+            "memory_scan_collect_sample": false,
+            "memory_scan": null
+          },
+          "event_filter": {
+            "default": null
+          }
+        }
+      },
+      "windows": {
+        "advanced": {
+          "agent": {
+            "connection_delay": null
+          },
+          "artifacts": {
+            "global": {
+              "base_url": null,
+              "manifest_relative_url": null,
+              "public_key": null,
+              "interval": null,
+              "ca_cert": null
+            },
+            "user": {
+              "public_key": null,
+              "ca_cert": null,
+              "base_url": null,
+              "interval": null
+            }
+          },
+          "elasticsearch": {
+            "delay": null,
+            "tls": {
+              "verify_peer": null,
+              "verify_hostname": null,
+              "ca_cert": null
+            }
+          },
+          "logging": {
+            "file": null,
+            "stdout": null,
+            "stderr": null,
+            "syslog": null
+          },
+          "malware": {
+            "quarantine": null,
+            "threshold": null
+          },
+          "kernel": {
+            "connect": null,
+            "harden": null,
+            "process": null,
+            "filewrite": null,
+            "network": null,
+            "fileopen": null,
+            "asyncimageload": null,
+            "syncimageload": null,
+            "registry": null,
+            "fileaccess": null,
+            "registryaccess": null,
+            "process_handle": null
+          },
+          "diagnostic": {
+            "enabled": null,
+            "rollback_telemetry_enabled": null
+          },
+          "alerts": {
+            "cloud_lookup": null,
+            "cloud_lookup_url": null,
+            "require_user_artifacts": null
+          },
+          "ransomware": {
+            "mbr": null,
+            "canary": null
+          },
+          "memory_protection": {
+            "context_manipulation_detection": null,
+            "shellcode": null,
+            "memory_scan": null,
+            "shellcode_collect_sample": null,
+            "memory_scan_collect_sample": null,
+            "shellcode_enhanced_pe_parsing": null,
+            "shellcode_trampoline_detection": null
+          },
+          "event_filter": {
+            "default": null
+          },
+          "utilization_limits": {
+            "cpu": null
+          }
+        }
+      }
+    }
+  },
+  "policy_response": {
+    "agent_policy_status": "verified",
+    "manifest_version": "1.0.874",
+    "status": "success",
+    "actions": [],
+    "configuration": {
+      "isolation": false
+    },
+    "state": {
+      "isolation": false
+    }
+  },
+  "telemetry_meta": {
+    "metrics_timestamp": "2024-02-23T08:46:59.303Z"
+  }
+}

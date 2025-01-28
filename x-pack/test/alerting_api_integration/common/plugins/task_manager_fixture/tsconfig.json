@@ -1,0 +1,20 @@
+{
+  "extends": "../../../../../../tsconfig.base.json",
+  "compilerOptions": {
+    "outDir": "target/types",
+    "isolatedModules": true
+  },
+  "include": [
+    "public/**/**/*",
+    "server/**/**/*",
+    "common/**/*",
+  ],
+  "kbn_references": [
+    "@kbn/core",
+    "@kbn/config-schema",
+    "@kbn/task-manager-plugin",
+  ],
+  "exclude": [
+    "target/**/*",
+  ]
+}

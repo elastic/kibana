@@ -1,0 +1,51 @@
+openapi: 3.0.0
+info:
+  title: Elastic Security - Timeline - Pinned Event API
+  version: '2023-10-31'
+externalDocs:
+  url: https://www.elastic.co/guide/en/security/current/_pin_an_event_to_an_existing_timeline.html
+  description: Documentation
+paths:
+  /api/pinned_event:
+    patch:
+      x-labels: [serverless, ess]
+      x-codegen-enabled: true
+      operationId: PersistPinnedEventRoute
+      summary: Pin an event
+      description: Pin an event to an existing Timeline.
+      tags:
+        - access:securitySolution
+      requestBody:
+        description: The pinned event to add or update, along with additional metadata.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [eventId, timelineId]
+              properties:
+                eventId:
+                  type: string
+                pinnedEventId:
+                  type: string
+                  nullable: true
+                timelineId:
+                  type: string
+      responses:
+        '200':
+          description: Indicates the event was successfully pinned to the Timeline.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PersistPinnedEventResponse'
+
+components:
+  schemas:
+    PersistPinnedEventResponse:
+      oneOf:
+        - $ref: '../model/components.schema.yaml#/components/schemas/PinnedEvent'
+        - type: object
+          required: [unpinned]
+          properties:
+            unpinned:
+              type: boolean

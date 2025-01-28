@@ -10,7 +10,7 @@ import request from 'superagent';
 import supertest from 'supertest';
 import { format } from 'url';
 
-export function createProfilingApiClient(st: supertest.SuperTest<supertest.Test>) {
+export function createProfilingApiClient(st: supertest.Agent) {
   return async (options: {
     endpoint: string;
     params?: {

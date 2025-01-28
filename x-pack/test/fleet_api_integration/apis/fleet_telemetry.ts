@@ -13,7 +13,6 @@ import expect from '@kbn/expect';
 import type { GetAgentsResponse } from '@kbn/fleet-plugin/common';
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 import { skipIfNoDockerRegistry, generateAgent } from '../helpers';
-import { setupFleetAndAgents } from './agents/services';
 
 const AGENT_COUNT_WAIT_ATTEMPTS = 3;
 
@@ -22,6 +21,7 @@ export default function (providerContext: FtrProviderContext) {
   const supertest = getService('supertest');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
+  const fleetAndAgents = getService('fleetAndAgents');
 
   let agentCount = 0;
   let pkgVersion: string;
@@ -30,9 +30,8 @@ export default function (providerContext: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await esArchiver.load('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
+      await fleetAndAgents.setup();
     });
-
-    setupFleetAndAgents(providerContext);
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
@@ -42,6 +41,7 @@ export default function (providerContext: FtrProviderContext) {
       }
     });
 
+    // eslint-disable-next-line mocha/no-sibling-hooks
     before(async () => {
       // we must first force install the fleet_server package to override package verification error on policy create
       // https://github.com/elastic/kibana/issues/137450
@@ -137,14 +137,14 @@ export default function (providerContext: FtrProviderContext) {
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
 
-      if (apiResponse.list.length === expectedAgentCount) {
+      if (apiResponse.items.length === expectedAgentCount) {
         return apiResponse;
       }
 
       if (_attemptsMade >= attempts) {
         throw new Error(
           `Agents not loaded correctly, failing test. All agents: \n: ${JSON.stringify(
-            apiResponse.list,
+            apiResponse.items,
             null,
             2
           )}`
@@ -191,6 +191,8 @@ export default function (providerContext: FtrProviderContext) {
         unhealthy: 1,
         offline: 0,
         updating: 0,
+        unenrolled: 0,
+        inactive: 0,
         num_host_urls: 2,
       });
     });

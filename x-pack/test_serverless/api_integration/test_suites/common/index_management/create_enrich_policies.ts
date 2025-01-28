@@ -6,12 +6,15 @@
  */
 
 import expect from 'expect';
+import { SupertestWithRoleScopeType } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const INTERNAL_API_BASE_PATH = '/internal/index_management';
 
 export default function ({ getService }: FtrProviderContext) {
-  const supertest = getService('supertest');
+  const svlCommonApi = getService('svlCommonApi');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestAdminWithCookieCredentials: SupertestWithRoleScopeType;
   const es = getService('es');
   const log = getService('log');
 
@@ -21,6 +24,14 @@ export default function ({ getService }: FtrProviderContext) {
     const POLICY_NAME = `policy-${Math.random()}`;
 
     before(async () => {
+      supertestAdminWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+        'admin',
+        {
+          useCookieHeader: true,
+          withInternalHeaders: true,
+        }
+      );
+
       try {
         await es.indices.create({
           index: INDEX_A_NAME,
@@ -69,10 +80,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Allows to create an enrich policy', async () => {
-      const { body } = await supertest
+      const { body } = await supertestAdminWithCookieCredentials
         .post(`${INTERNAL_API_BASE_PATH}/enrich_policies`)
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
         .send({
           policy: {
             name: POLICY_NAME,
@@ -88,10 +97,8 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Can retrieve fields from indices', async () => {
-      const { body } = await supertest
+      const { body } = await supertestAdminWithCookieCredentials
         .post(`${INTERNAL_API_BASE_PATH}/enrich_policies/get_fields_from_indices`)
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
         .send({ indices: [INDEX_A_NAME, INDEX_B_NAME] })
         .expect(200);
 
@@ -117,12 +124,10 @@ export default function ({ getService }: FtrProviderContext) {
     });
 
     it('Can retrieve matching indices', async () => {
-      const { body } = await supertest
+      const { body, status } = await supertestAdminWithCookieCredentials
         .post(`${INTERNAL_API_BASE_PATH}/enrich_policies/get_matching_indices`)
-        .set('kbn-xsrf', 'xxx')
-        .set('x-elastic-internal-origin', 'xxx')
-        .send({ pattern: 'index-' })
-        .expect(200);
+        .send({ pattern: 'index-' });
+      svlCommonApi.assertResponseStatusCode(200, status, body);
 
       expect(
         body.indices.every((value: string) => [INDEX_A_NAME, INDEX_B_NAME].includes(value))

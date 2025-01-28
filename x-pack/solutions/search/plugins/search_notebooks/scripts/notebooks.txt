@@ -1,0 +1,5 @@
+https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/notebooks/search/00-quick-start.ipynb
+https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/notebooks/search/01-keyword-querying-filtering.ipynb
+https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/notebooks/search/02-hybrid-search.ipynb
+https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/notebooks/search/03-ELSER.ipynb
+https://raw.githubusercontent.com/elastic/elasticsearch-labs/main/notebooks/search/04-multilingual.ipynb

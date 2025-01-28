@@ -1,10 +1,12 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import { FtrService } from '../../ftr_provider_context';
 
 export class DashboardAddPanelService extends FtrService {
@@ -52,16 +54,19 @@ export class DashboardAddPanelService extends FtrService {
   async clickEditorMenuButton() {
     this.log.debug('DashboardAddPanel.clickEditorMenuButton');
     await this.testSubjects.click('dashboardEditorMenuButton');
-    await this.testSubjects.existOrFail('dashboardEditorContextMenu');
+    await this.testSubjects.existOrFail('dashboardPanelSelectionFlyout');
+    await this.retry.try(async () => {
+      return await this.testSubjects.exists('dashboardPanelSelectionList');
+    });
   }
 
   async expectEditorMenuClosed() {
-    await this.testSubjects.missingOrFail('dashboardEditorContextMenu');
+    await this.testSubjects.missingOrFail('dashboardPanelSelectionFlyout');
   }
 
   async clickAggBasedVisualizations() {
     this.log.debug('DashboardAddPanel.clickEditorMenuAggBasedMenuItem');
-    await this.testSubjects.click('dashboardEditorAggBasedMenuItem');
+    await this.clickAddNewPanelFromUIActionLink('Aggregation based');
   }
 
   async clickVisType(visType: string) {
@@ -69,9 +74,14 @@ export class DashboardAddPanelService extends FtrService {
     await this.testSubjects.click(`visType-${visType}`);
   }
 
-  async clickEmbeddableFactoryGroupButton(groupId: string) {
-    this.log.debug('DashboardAddPanel.clickEmbeddableFactoryGroupButton');
-    await this.testSubjects.click(`dashboardEditorMenu-${groupId}Group`);
+  async verifyEmbeddableFactoryGroupExists(groupId: string, expectExist: boolean = true) {
+    this.log.debug('DashboardAddPanel.verifyEmbeddableFactoryGroupExists');
+    const testSubject = `dashboardEditorMenu-${groupId}Group`;
+    if (expectExist) {
+      await this.testSubjects.existOrFail(testSubject);
+    } else {
+      await this.testSubjects.missingOrFail(testSubject);
+    }
   }
 
   async clickAddNewEmbeddableLink(type: string) {
@@ -196,7 +206,7 @@ export class DashboardAddPanelService extends FtrService {
     if (filter) {
       await this.filterEmbeddableNames(filter.replace('-', ' '));
     }
-    await this.savedObjectsFinder.waitForFilter('Saved search', 'visualization');
+    await this.savedObjectsFinder.waitForFilter('Saved search', 'Visualization');
     let morePages = true;
     while (morePages) {
       searchList.push(await this.addEveryEmbeddableOnCurrentPage());

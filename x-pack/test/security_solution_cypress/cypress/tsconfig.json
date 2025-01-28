@@ -14,14 +14,13 @@
     // in a way that can't be auto-matically deteceted at this time
     // so we have to force the inclusion of this reference
     {
-      "path": "../../../plugins/security_solution/tsconfig.json",
+      "path": "../../../solutions/security/plugins/security_solution/tsconfig.json",
       "force": true
     },
     "@kbn/rison",
     "@kbn/datemath",
     "@kbn/guided-onboarding-plugin",
     "@kbn/alerting-plugin",
-    "@kbn/securitysolution-data-table",
     "@kbn/cases-plugin",
     "@kbn/data-plugin",
     "@kbn/core-http-common",
@@ -34,12 +33,19 @@
     "@kbn/security-solution-plugin",
     "@kbn/dev-utils",
     "@kbn/config-schema",
-    "@kbn/lists-plugin",
     "@kbn/securitysolution-list-constants",
     "@kbn/security-plugin",
     "@kbn/management-settings-ids",
     "@kbn/es-query",
     "@kbn/ml-plugin",
     "@kbn/license-management-plugin",
+    "@kbn/actions-plugin",
+    "@kbn/alerts-ui-shared",
+    "@kbn/securitysolution-endpoint-exceptions-common",
+    "@kbn/repo-info",
+    "@kbn/elastic-assistant-common",
+    "@kbn/cloud-security-posture-common",
+    "@kbn/security-plugin-types-common",
+    "@kbn/securitysolution-utils"
   ]
 }

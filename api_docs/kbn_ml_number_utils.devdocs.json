@@ -31,7 +31,7 @@
         "signature": [
           "(num: number | undefined, dp: number) => string | number"
         ],
-        "path": "x-pack/packages/ml/number_utils/src/round_to_decimal_place.ts",
+        "path": "x-pack/platform/packages/private/ml/number_utils/src/round_to_decimal_place.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -47,7 +47,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/packages/ml/number_utils/src/round_to_decimal_place.ts",
+            "path": "x-pack/platform/packages/private/ml/number_utils/src/round_to_decimal_place.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -64,7 +64,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/packages/ml/number_utils/src/round_to_decimal_place.ts",
+            "path": "x-pack/platform/packages/private/ml/number_utils/src/round_to_decimal_place.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

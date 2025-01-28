@@ -11,18 +11,10 @@
   "server": {
     "classes": [],
     "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
     "interfaces": [
       {
         "parentPluginId": "@kbn/core-plugins-contracts-server",
-        "id": "def-common.FoundPluginContractResolverResponseItem",
+        "id": "def-server.FoundPluginContractResolverResponseItem",
         "type": "Interface",
         "tags": [
           "see"
@@ -32,22 +24,16 @@
           "\nContract resolver response for found plugins.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-plugins-contracts-server",
-            "scope": "common",
-            "docId": "kibKbnCorePluginsContractsServerPluginApi",
-            "section": "def-common.FoundPluginContractResolverResponseItem",
-            "text": "FoundPluginContractResolverResponseItem"
-          },
+          "FoundPluginContractResolverResponseItem",
           "<ContractType>"
         ],
-        "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+        "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-server",
-            "id": "def-common.FoundPluginContractResolverResponseItem.found",
+            "id": "def-server.FoundPluginContractResolverResponseItem.found",
             "type": "boolean",
             "tags": [],
             "label": "found",
@@ -55,13 +41,13 @@
             "signature": [
               "true"
             ],
-            "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+            "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           },
           {
             "parentPluginId": "@kbn/core-plugins-contracts-server",
-            "id": "def-common.FoundPluginContractResolverResponseItem.contract",
+            "id": "def-server.FoundPluginContractResolverResponseItem.contract",
             "type": "Uncategorized",
             "tags": [],
             "label": "contract",
@@ -69,7 +55,7 @@
             "signature": [
               "ContractType"
             ],
-            "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+            "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -78,7 +64,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-server",
-        "id": "def-common.NotFoundPluginContractResolverResponseItem",
+        "id": "def-server.NotFoundPluginContractResolverResponseItem",
         "type": "Interface",
         "tags": [
           "see"
@@ -87,13 +73,13 @@
         "description": [
           "\nContract resolver response for not found plugins.\n"
         ],
-        "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+        "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-server",
-            "id": "def-common.NotFoundPluginContractResolverResponseItem.found",
+            "id": "def-server.NotFoundPluginContractResolverResponseItem.found",
             "type": "boolean",
             "tags": [],
             "label": "found",
@@ -101,7 +87,7 @@
             "signature": [
               "false"
             ],
-            "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+            "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -110,20 +96,20 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-server",
-        "id": "def-common.PluginsServiceSetup",
+        "id": "def-server.PluginsServiceSetup",
         "type": "Interface",
         "tags": [],
         "label": "PluginsServiceSetup",
         "description": [
           "\nSetup contract of Core's `plugins` service.\n"
         ],
-        "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+        "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-server",
-            "id": "def-common.PluginsServiceSetup.onSetup",
+            "id": "def-server.PluginsServiceSetup.onSetup",
             "type": "Function",
             "tags": [
               "experimental"
@@ -134,31 +120,19 @@
             ],
             "signature": [
               "<T extends ",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginContractMap",
-                "text": "PluginContractMap"
-              },
+              "PluginContractMap",
               ">(...pluginNames: (keyof T)[]) => Promise<",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginContractResolverResponse",
-                "text": "PluginContractResolverResponse"
-              },
+              "PluginContractResolverResponse",
               "<T>>"
             ],
-            "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+            "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-contracts-server",
-                "id": "def-common.PluginsServiceSetup.onSetup.$1",
+                "id": "def-server.PluginsServiceSetup.onSetup.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "pluginNames",
@@ -166,7 +140,7 @@
                 "signature": [
                   "(keyof T)[]"
                 ],
-                "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+                "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -174,7 +148,7 @@
           },
           {
             "parentPluginId": "@kbn/core-plugins-contracts-server",
-            "id": "def-common.PluginsServiceSetup.onStart",
+            "id": "def-server.PluginsServiceSetup.onStart",
             "type": "Function",
             "tags": [
               "experimental"
@@ -185,31 +159,19 @@
             ],
             "signature": [
               "<T extends ",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginContractMap",
-                "text": "PluginContractMap"
-              },
+              "PluginContractMap",
               ">(...pluginNames: (keyof T)[]) => Promise<",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginContractResolverResponse",
-                "text": "PluginContractResolverResponse"
-              },
+              "PluginContractResolverResponse",
               "<T>>"
             ],
-            "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+            "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-contracts-server",
-                "id": "def-common.PluginsServiceSetup.onStart.$1",
+                "id": "def-server.PluginsServiceSetup.onStart.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "pluginNames",
@@ -217,7 +179,7 @@
                 "signature": [
                   "(keyof T)[]"
                 ],
-                "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+                "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -228,20 +190,20 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-server",
-        "id": "def-common.PluginsServiceStart",
+        "id": "def-server.PluginsServiceStart",
         "type": "Interface",
         "tags": [],
         "label": "PluginsServiceStart",
         "description": [
           "\nStart contract of Core's `plugins` service.\n"
         ],
-        "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+        "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-server",
-            "id": "def-common.PluginsServiceStart.onStart",
+            "id": "def-server.PluginsServiceStart.onStart",
             "type": "Function",
             "tags": [
               "experimental"
@@ -252,31 +214,19 @@
             ],
             "signature": [
               "<T extends ",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginContractMap",
-                "text": "PluginContractMap"
-              },
+              "PluginContractMap",
               ">(...pluginNames: (keyof T)[]) => Promise<",
-              {
-                "pluginId": "@kbn/core-plugins-contracts-server",
-                "scope": "common",
-                "docId": "kibKbnCorePluginsContractsServerPluginApi",
-                "section": "def-common.PluginContractResolverResponse",
-                "text": "PluginContractResolverResponse"
-              },
+              "PluginContractResolverResponse",
               "<T>>"
             ],
-            "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+            "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false,
             "returnComment": [],
             "children": [
               {
                 "parentPluginId": "@kbn/core-plugins-contracts-server",
-                "id": "def-common.PluginsServiceStart.onStart.$1",
+                "id": "def-server.PluginsServiceStart.onStart.$1",
                 "type": "Array",
                 "tags": [],
                 "label": "pluginNames",
@@ -284,7 +234,7 @@
                 "signature": [
                   "(keyof T)[]"
                 ],
-                "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+                "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }
@@ -298,7 +248,7 @@
     "misc": [
       {
         "parentPluginId": "@kbn/core-plugins-contracts-server",
-        "id": "def-common.PluginContractMap",
+        "id": "def-server.PluginContractMap",
         "type": "Type",
         "tags": [
           "see"
@@ -310,14 +260,14 @@
         "signature": [
           "{ [x: string]: unknown; }"
         ],
-        "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+        "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-server",
-        "id": "def-common.PluginContractResolver",
+        "id": "def-server.PluginContractResolver",
         "type": "Type",
         "tags": [],
         "label": "PluginContractResolver",
@@ -326,31 +276,19 @@
         ],
         "signature": [
           "<T extends ",
-          {
-            "pluginId": "@kbn/core-plugins-contracts-server",
-            "scope": "common",
-            "docId": "kibKbnCorePluginsContractsServerPluginApi",
-            "section": "def-common.PluginContractMap",
-            "text": "PluginContractMap"
-          },
+          "PluginContractMap",
           ">(...pluginNames: (keyof T)[]) => Promise<",
-          {
-            "pluginId": "@kbn/core-plugins-contracts-server",
-            "scope": "common",
-            "docId": "kibKbnCorePluginsContractsServerPluginApi",
-            "section": "def-common.PluginContractResolverResponse",
-            "text": "PluginContractResolverResponse"
-          },
+          "PluginContractResolverResponse",
           "<T>>"
         ],
-        "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+        "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "returnComment": [],
         "children": [
           {
             "parentPluginId": "@kbn/core-plugins-contracts-server",
-            "id": "def-common.PluginContractResolver.$1",
+            "id": "def-server.PluginContractResolver.$1",
             "type": "Array",
             "tags": [],
             "label": "pluginNames",
@@ -358,7 +296,7 @@
             "signature": [
               "(keyof T)[]"
             ],
-            "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+            "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -367,7 +305,7 @@
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-server",
-        "id": "def-common.PluginContractResolverResponse",
+        "id": "def-server.PluginContractResolverResponse",
         "type": "Type",
         "tags": [
           "see"
@@ -378,23 +316,17 @@
         ],
         "signature": [
           "{ [Key in keyof ContractMap]: ",
-          {
-            "pluginId": "@kbn/core-plugins-contracts-server",
-            "scope": "common",
-            "docId": "kibKbnCorePluginsContractsServerPluginApi",
-            "section": "def-common.PluginContractResolverResponseItem",
-            "text": "PluginContractResolverResponseItem"
-          },
+          "PluginContractResolverResponseItem",
           "<ContractMap[Key]>; }"
         ],
-        "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+        "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       },
       {
         "parentPluginId": "@kbn/core-plugins-contracts-server",
-        "id": "def-common.PluginContractResolverResponseItem",
+        "id": "def-server.PluginContractResolverResponseItem",
         "type": "Type",
         "tags": [
           "see"
@@ -404,29 +336,25 @@
           "\nContract resolver response.\n"
         ],
         "signature": [
-          {
-            "pluginId": "@kbn/core-plugins-contracts-server",
-            "scope": "common",
-            "docId": "kibKbnCorePluginsContractsServerPluginApi",
-            "section": "def-common.NotFoundPluginContractResolverResponseItem",
-            "text": "NotFoundPluginContractResolverResponseItem"
-          },
+          "NotFoundPluginContractResolverResponseItem",
           " | ",
-          {
-            "pluginId": "@kbn/core-plugins-contracts-server",
-            "scope": "common",
-            "docId": "kibKbnCorePluginsContractsServerPluginApi",
-            "section": "def-common.FoundPluginContractResolverResponseItem",
-            "text": "FoundPluginContractResolverResponseItem"
-          },
+          "FoundPluginContractResolverResponseItem",
           "<ContractType>"
         ],
-        "path": "packages/core/plugins/core-plugins-contracts-server/src/contracts.ts",
+        "path": "src/core/packages/plugins/contracts-server/src/contracts.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
       }
     ],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
     "objects": []
   }
 }

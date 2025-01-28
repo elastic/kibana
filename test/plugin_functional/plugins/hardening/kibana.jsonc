@@ -1,0 +1,13 @@
+{
+  "type": "plugin",
+  "id": "@kbn/hardening-plugin",
+  "owner": "@elastic/kibana-security",
+  "plugin": {
+    "id": "hardeningPlugin",
+    "server": true,
+    "browser": false,
+    "configPath": [
+      "hardening_plugin"
+    ]
+  }
+}

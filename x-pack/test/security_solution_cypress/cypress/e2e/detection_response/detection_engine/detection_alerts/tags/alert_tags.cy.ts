@@ -32,8 +32,8 @@ describe('Alert tagging', { tags: ['@ess', '@serverless'] }, () => {
   });
 
   after(() => {
-    cy.task('esArchiverUnload', 'endpoint');
-    cy.task('esArchiverUnload', 'auditbeat_multiple');
+    cy.task('esArchiverUnload', { archiveName: 'endpoint' });
+    cy.task('esArchiverUnload', { archiveName: 'auditbeat_multiple' });
   });
 
   beforeEach(() => {

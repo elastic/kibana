@@ -1,0 +1,60 @@
+{
+  "id": "security_host",
+  "title": "Security: Host",
+  "description": "Detect anomalous activity in your ECS-compatible host-based logs.",
+  "type": "Host data",
+  "logoFile": "logo.json",
+  "defaultIndexPattern": "auditbeat-*,logs-*,filebeat-*,winlogbeat-*",
+  "query": {
+    "bool": {
+      "filter": [
+        {
+          "exists": {
+            "field": "event.category"
+          }
+        },
+        {
+          "exists": {
+            "field": "host.name"
+          }
+        },
+        {
+          "exists": {
+            "field": "event.dataset"
+          }
+        },
+        {
+          "term": {
+            "event.outcome": "success"
+          }
+        }
+      ],
+      "must_not": { "terms": { "_tier": ["data_frozen", "data_cold"] } }
+    }
+  },
+  "jobs": [
+    {
+      "id": "high_count_events_for_a_host_name",
+      "file": "high_count_events_for_a_host_name.json"
+    },
+    {
+      "id": "low_count_events_for_a_host_name",
+      "file": "low_count_events_for_a_host_name.json"
+    }
+  ],
+  "datafeeds": [
+    {
+      "id": "datafeed-high_count_events_for_a_host_name",
+      "file": "datafeed_high_count_events_for_a_host_name.json",
+      "job_id": "high_count_events_for_a_host_name"
+    },
+    {
+      "id": "datafeed-low_count_events_for_a_host_name",
+      "file": "datafeed_low_count_events_for_a_host_name.json",
+      "job_id": "low_count_events_for_a_host_name"
+    }
+  ],
+  "tags": [
+    "security"
+  ]
+}

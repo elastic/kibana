@@ -32,7 +32,7 @@
         "signature": [
           "\"/api/rollup\""
         ],
-        "path": "x-pack/plugins/rollup/common/index.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -47,7 +47,7 @@
         "signature": [
           "\"rollups:enableIndexPatterns\""
         ],
-        "path": "x-pack/plugins/rollup/common/index.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -62,7 +62,7 @@
         "signature": [
           "\"8.0.0\""
         ],
-        "path": "x-pack/plugins/rollup/common/index.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -77,7 +77,7 @@
         "signature": [
           "\"app_load\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -92,7 +92,7 @@
         "signature": [
           "\"rollup_jobs\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -107,7 +107,7 @@
         "signature": [
           "\"detail_panel_histogram_tab_click\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -122,7 +122,7 @@
         "signature": [
           "\"detail_panel_json_tab_click\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -137,7 +137,7 @@
         "signature": [
           "\"detail_panel_metrics_tab_click\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -152,7 +152,7 @@
         "signature": [
           "\"detail_panel_summary_tab_click\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -167,7 +167,7 @@
         "signature": [
           "\"detail_panel_terms_tab_click\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -182,7 +182,7 @@
         "signature": [
           "\"job_create\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -197,7 +197,7 @@
         "signature": [
           "\"job_delete\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -212,7 +212,7 @@
         "signature": [
           "\"job_delete_many\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -227,7 +227,7 @@
         "signature": [
           "\"job_start\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -242,7 +242,7 @@
         "signature": [
           "\"job_start_many\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -257,7 +257,7 @@
         "signature": [
           "\"job_stop\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -272,7 +272,7 @@
         "signature": [
           "\"job_stop_many\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -287,7 +287,7 @@
         "signature": [
           "\"show_details_click\""
         ],
-        "path": "x-pack/plugins/rollup/common/ui_metric.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/ui_metric.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -301,7 +301,7 @@
         "tags": [],
         "label": "PLUGIN",
         "description": [],
-        "path": "x-pack/plugins/rollup/common/index.ts",
+        "path": "x-pack/platform/plugins/private/rollup/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -312,7 +312,7 @@
             "tags": [],
             "label": "ID",
             "description": [],
-            "path": "x-pack/plugins/rollup/common/index.ts",
+            "path": "x-pack/platform/plugins/private/rollup/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -326,7 +326,7 @@
             "signature": [
               "\"basic\""
             ],
-            "path": "x-pack/plugins/rollup/common/index.ts",
+            "path": "x-pack/platform/plugins/private/rollup/common/index.ts",
             "deprecated": false,
             "trackAdoption": false
           }

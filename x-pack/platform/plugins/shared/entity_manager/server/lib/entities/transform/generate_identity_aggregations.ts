@@ -1,0 +1,34 @@
+/*
+ * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
+ * or more contributor license agreements. Licensed under the Elastic License
+ * 2.0; you may not use this file except in compliance with the Elastic License
+ * 2.0.
+ */
+
+import { EntityDefinition } from '@kbn/entities-schema';
+
+export function generateIdentityAggregations(definition: EntityDefinition) {
+  return definition.identityFields.reduce(
+    (aggs, identityField) => ({
+      ...aggs,
+      [`entity.identity.${identityField.field}`]: {
+        filter: {
+          exists: {
+            field: identityField.field,
+          },
+        },
+        aggs: {
+          top_metric: {
+            top_metrics: {
+              metrics: {
+                field: identityField.field,
+              },
+              sort: '_score',
+            },
+          },
+        },
+      },
+    }),
+    {}
+  );
+}

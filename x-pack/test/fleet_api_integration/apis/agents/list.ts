@@ -9,11 +9,9 @@ import expect from '@kbn/expect';
 import { type Agent, FLEET_ELASTIC_AGENT_PACKAGE, AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { testUsers } from '../test_users';
 
 export default function ({ getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
-  const supertestWithoutAuth = getService('supertestWithoutAuth');
   const supertest = getService('supertest');
   const es = getService('es');
   let elasticAgentpkgVersion: string;
@@ -46,43 +44,23 @@ export default function ({ getService }: FtrProviderContext) {
       });
     });
 
-    it.skip('should return a 200 if a user with the fleet all try to access the list', async () => {
-      await supertest
-        .get(`/api/fleet/agents`)
-        .auth(testUsers.fleet_all_only.username, testUsers.fleet_all_only.password)
-        .expect(200);
-    });
-
-    it('should not return the list of agents when requesting as a user without fleet permissions', async () => {
-      await supertestWithoutAuth
-        .get(`/api/fleet/agents`)
-        .auth(testUsers.fleet_no_access.username, testUsers.fleet_no_access.password)
-        .expect(403);
-    });
-
     it('should return the list of agents when requesting as admin', async () => {
       const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
 
-      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
-      expect(apiResponse.total).to.eql(4);
-    });
-
-    it('should return the list of agents when requesting as a user with fleet read permissions', async () => {
-      const { body: apiResponse } = await supertest.get(`/api/fleet/agents`).expect(200);
-      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
+      expect(apiResponse).to.have.keys('page', 'total', 'items');
       expect(apiResponse.total).to.eql(4);
     });
 
     it('should return 200 if the passed kuery is valid', async () => {
       await supertest
-        .get(`/api/fleet/agent_status?kuery=fleet-agents.local_metadata.host.hostname:test`)
+        .get(`/api/fleet/agents?kuery=fleet-agents.local_metadata.host.hostname:test`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
 
     it('should return 200 also if the passed kuery does not have prefix fleet-agents', async () => {
       await supertest
-        .get(`/api/fleet/agent_status?kuery=local_metadata.host.hostname:test`)
+        .get(`/api/fleet/agents?kuery=local_metadata.host.hostname:test`)
         .set('kbn-xsrf', 'xxxx')
         .expect(200);
     });
@@ -203,7 +181,7 @@ export default function ({ getService }: FtrProviderContext) {
         .get(`/api/fleet/agents?withMetrics=true`)
         .expect(200);
 
-      expect(apiResponse).to.have.keys('page', 'total', 'items', 'list');
+      expect(apiResponse).to.have.keys('page', 'total', 'items');
       expect(apiResponse.total).to.eql(4);
 
       const agent1: Agent = apiResponse.items.find((agent: any) => agent.id === 'agent1');
@@ -231,9 +209,11 @@ export default function ({ getService }: FtrProviderContext) {
         inactive: 0,
         offline: 4,
         online: 0,
+        orphaned: 0,
         unenrolled: 0,
         unenrolling: 0,
         updating: 0,
+        uninstalled: 0,
       });
     });
 
@@ -279,9 +259,11 @@ export default function ({ getService }: FtrProviderContext) {
         inactive: 0,
         offline: 0,
         online: 2,
+        orphaned: 0,
         unenrolled: 0,
         unenrolling: 0,
         updating: 0,
+        uninstalled: 0,
       });
     });
   });

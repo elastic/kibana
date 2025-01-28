@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { buildkite } from './shared';
@@ -20,7 +21,7 @@ async function main() {
 
 function uploadTriggerStep(commitSha: string) {
   const triggerStep: BuildkiteTriggerStep = {
-    label: ':releasethekaken: Trigger GPCTL / Release Kibana',
+    label: ':ship: Trigger GPCTL / Release Kibana',
     trigger: 'gpctl-promote',
     async: true,
     build: {
@@ -28,15 +29,12 @@ function uploadTriggerStep(commitSha: string) {
       env: {
         SERVICE_COMMIT_HASH: commitSha.slice(0, 12),
         REMOTE_SERVICE_CONFIG,
+        ...(IS_DRY_RUN ? { DRY_RUN: 'true' } : {}),
       },
     },
   };
 
-  if (IS_DRY_RUN) {
-    console.log('Dry run: skipping upload of GPCTL trigger step. Step definition:', triggerStep);
-  } else {
-    buildkite.uploadSteps([triggerStep]);
-  }
+  buildkite.uploadSteps([triggerStep]);
 }
 
 main()

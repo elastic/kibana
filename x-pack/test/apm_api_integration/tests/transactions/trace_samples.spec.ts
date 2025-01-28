@@ -17,33 +17,6 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const { start, end } = archives[archiveName];
 
   registry.when(
-    'Transaction trace samples response structure when data is not loaded',
-    { config: 'basic', archives: [] },
-    () => {
-      it('handles empty state', async () => {
-        const response = await apmApiClient.readUser({
-          endpoint: 'GET /internal/apm/services/{serviceName}/transactions/traces/samples',
-          params: {
-            path: { serviceName: 'opbeans-java' },
-            query: {
-              start,
-              end,
-              transactionType: 'request',
-              environment: 'ENVIRONMENT_ALL',
-              transactionName: 'APIRestController#stats',
-              kuery: '',
-            },
-          },
-        });
-
-        expect(response.status).to.be(200);
-
-        expect(response.body.traceSamples.length).to.be(0);
-      });
-    }
-  );
-
-  registry.when(
     'Transaction trace samples response structure when data is loaded',
     { config: 'basic', archives: [archiveName] },
     () => {

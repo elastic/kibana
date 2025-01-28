@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Fields } from '../entity';
@@ -125,7 +126,7 @@ export type ApmFields = Fields<{
     'error.id': string;
     'error.type': string;
     'error.culprit': string;
-    'event.ingested': number;
+    'event.ingested': string;
     'event.name': string;
     'event.action': string;
     'event.outcome': string;
@@ -211,6 +212,8 @@ export type ApmFields = Fields<{
       span: { id: string };
     }>;
     'url.original': string;
+    'url.domain': string;
+    'url.full': string;
   }> &
   ApmApplicationMetricFields &
   ExperimentalFields;

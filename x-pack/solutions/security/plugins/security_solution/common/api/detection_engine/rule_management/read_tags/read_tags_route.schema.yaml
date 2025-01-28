@@ -1,0 +1,21 @@
+openapi: 3.0.0
+info:
+  title: Tags API endpoint
+  version: '2023-10-31'
+paths:
+  /api/detection_engine/tags:
+    get:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ReadTags
+      summary: List all detection rule tags
+      description: List all unique tags from all detection rules.
+      tags:
+        - Tags API
+      responses:
+        200:
+          description: Indicates a successful call
+          content:
+            application/json:
+              schema:
+                $ref: '../../model/rule_schema/common_attributes.schema.yaml#/components/schemas/RuleTagArray'

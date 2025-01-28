@@ -1,0 +1,14 @@
+summary: Feature privileges in a space
+description: Grant full access to all features in the default space.
+value:
+  metadata:
+    version: 1
+  elasticsearch:
+    cluster: []
+    indices: []
+  kibana:
+    - base:
+        - all
+      feature: { }
+      spaces:
+        - default

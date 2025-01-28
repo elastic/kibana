@@ -7,8 +7,26 @@
 
 import axios from 'axios';
 import { last } from 'lodash';
+import { ToolingLog } from '@kbn/tooling-log';
+import { retryForSuccess } from '@kbn/ftr-common-functional-services';
+
+const DEFAULT_VERSION = '8.15.0-SNAPSHOT';
+const name = 'Artifact Manager - getLatestVersion';
 
 export async function getLatestVersion(): Promise<string> {
-  const response: any = await axios('https://artifacts-api.elastic.co/v1/versions');
-  return last(response.data.versions as string[]) || '8.1.0-SNAPSHOT';
+  return retryForSuccess(
+    new ToolingLog({ level: 'debug', writeTo: process.stdout }, { context: name }),
+    {
+      timeout: 60_000,
+      methodName: name,
+      retryCount: 20,
+      block: () => axios('https://artifacts-api.elastic.co/v1/versions'),
+    }
+  )
+    .then(
+      (response) =>
+        last((response.data.versions as string[]).filter((v) => v.includes('-SNAPSHOT'))) ||
+        DEFAULT_VERSION
+    )
+    .catch(() => DEFAULT_VERSION);
 }

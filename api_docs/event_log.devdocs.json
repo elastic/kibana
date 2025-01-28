@@ -27,7 +27,7 @@
           },
           "<TDoc>"
         ],
-        "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -41,7 +41,7 @@
             "signature": [
               "any"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -55,7 +55,7 @@
                 "signature": [
                   "ConstructorOpts"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -73,7 +73,7 @@
             "signature": [
               "() => Promise<void>"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -89,7 +89,7 @@
             "signature": [
               "(doc: TDoc) => void"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -103,7 +103,7 @@
                 "signature": [
                   "TDoc"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -121,7 +121,7 @@
             "signature": [
               "(docs: TDoc[]) => Promise<void>"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -135,7 +135,7 @@
                 "signature": [
                   "TDoc[]"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -153,7 +153,7 @@
             "signature": [
               "(name: string) => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -167,7 +167,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -185,7 +185,7 @@
             "signature": [
               "(name: string, template: Record<string, unknown>) => Promise<void>"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -199,7 +199,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -214,7 +214,54 @@
                 "signature": [
                   "Record<string, unknown>"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.updateIndexTemplate",
+            "type": "Function",
+            "tags": [],
+            "label": "updateIndexTemplate",
+            "description": [],
+            "signature": [
+              "(name: string, template: Record<string, unknown>) => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.updateIndexTemplate.$1",
+                "type": "string",
+                "tags": [],
+                "label": "name",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "eventLog",
+                "id": "def-server.ClusterClientAdapter.updateIndexTemplate.$2",
+                "type": "Object",
+                "tags": [],
+                "label": "template",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -234,7 +281,7 @@
               "IndicesGetTemplateResponse",
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -248,7 +295,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -268,7 +315,7 @@
               "IndicesTemplateMapping",
               ") => Promise<void>"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -282,7 +329,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -297,7 +344,7 @@
                 "signature": [
                   "IndicesTemplateMapping"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -317,7 +364,7 @@
               "IndicesGetSettingsResponse",
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -331,7 +378,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -349,7 +396,7 @@
             "signature": [
               "(indexName: string) => Promise<void>"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -363,7 +410,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -383,7 +430,7 @@
               "IndicesGetAliasResponse",
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -397,7 +444,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -417,7 +464,7 @@
               "ParsedIndexAlias",
               "[]) => Promise<void>"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -431,7 +478,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -447,7 +494,7 @@
                   "ParsedIndexAlias",
                   "[]"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -465,7 +512,7 @@
             "signature": [
               "(name: string) => Promise<boolean>"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -479,7 +526,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -495,9 +542,9 @@
             "label": "createDataStream",
             "description": [],
             "signature": [
-              "(name: string, body?: Record<string, unknown>) => Promise<void>"
+              "(name: string) => Promise<void>"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -511,22 +558,39 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
-              },
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "eventLog",
+            "id": "def-server.ClusterClientAdapter.updateConcreteIndices",
+            "type": "Function",
+            "tags": [],
+            "label": "updateConcreteIndices",
+            "description": [],
+            "signature": [
+              "(name: string) => Promise<void>"
+            ],
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
               {
                 "parentPluginId": "eventLog",
-                "id": "def-server.ClusterClientAdapter.createDataStream.$2",
-                "type": "Object",
+                "id": "def-server.ClusterClientAdapter.updateConcreteIndices.$1",
+                "type": "string",
                 "tags": [],
-                "label": "body",
+                "label": "name",
                 "description": [],
                 "signature": [
-                  "Record<string, unknown>"
+                  "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -554,7 +618,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -568,7 +632,7 @@
                 "signature": [
                   "FindEventsOptionsBySavedObjectFilter"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -596,7 +660,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -610,7 +674,7 @@
                 "signature": [
                   "FindEventsOptionsWithAuthFilter"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -638,7 +702,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -652,7 +716,7 @@
                 "signature": [
                   "AggregateEventsOptionsBySavedObjectFilter"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -680,7 +744,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -694,7 +758,7 @@
                 "signature": [
                   "AggregateEventsWithAuthFilter"
                 ],
-                "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -719,7 +783,7 @@
           "ReadySignal",
           "<T>"
         ],
-        "path": "x-pack/plugins/event_log/server/lib/ready_signal.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/server/lib/ready_signal.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [],
@@ -736,7 +800,7 @@
         "signature": [
           "(millis: number) => string"
         ],
-        "path": "x-pack/plugins/event_log/common/lib/millis_to_nanos.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/common/lib/millis_to_nanos.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -750,7 +814,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/plugins/event_log/common/lib/millis_to_nanos.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/common/lib/millis_to_nanos.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -769,7 +833,7 @@
         "signature": [
           "(nanos: string | number) => number"
         ],
-        "path": "x-pack/plugins/event_log/common/lib/nanos_to_millis.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/common/lib/nanos_to_millis.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -783,7 +847,7 @@
             "signature": [
               "string | number"
             ],
-            "path": "x-pack/plugins/event_log/common/lib/nanos_to_millis.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/common/lib/nanos_to_millis.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -801,7 +865,7 @@
         "tags": [],
         "label": "AggregateEventsBySavedObjectResult",
         "description": [],
-        "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -816,7 +880,7 @@
               "SearchHitsMetadata",
               "<unknown> | undefined"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -832,7 +896,7 @@
               "AggregationsAggregate",
               "> | undefined"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -846,7 +910,7 @@
         "tags": [],
         "label": "IEventLogClient",
         "description": [],
-        "path": "x-pack/plugins/event_log/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -870,7 +934,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -884,7 +948,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -899,7 +963,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -916,7 +980,7 @@
                   "FindOptionsType",
                   "> | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -931,7 +995,7 @@
                 "signature": [
                   "string[] | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -967,7 +1031,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -981,7 +1045,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -996,7 +1060,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1017,7 +1081,7 @@
                     "text": "KueryNode"
                   }
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1032,7 +1096,7 @@
                 "signature": [
                   "string | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1049,7 +1113,7 @@
                   "FindOptionsType",
                   "> | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1077,7 +1141,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1091,7 +1155,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1106,7 +1170,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1123,7 +1187,7 @@
                   "AggregateOptionsType",
                   "> | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1138,7 +1202,7 @@
                 "signature": [
                   "string[] | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1174,7 +1238,7 @@
               },
               ">"
             ],
-            "path": "x-pack/plugins/event_log/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1188,7 +1252,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1209,7 +1273,7 @@
                     "text": "KueryNode"
                   }
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -1226,7 +1290,7 @@
                   "AggregateOptionsType",
                   "> | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1241,7 +1305,7 @@
                 "signature": [
                   "(string | undefined)[] | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1256,7 +1320,7 @@
                 "signature": [
                   "boolean | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1274,7 +1338,7 @@
         "tags": [],
         "label": "IEventLogger",
         "description": [],
-        "path": "x-pack/plugins/event_log/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1290,7 +1354,7 @@
               "IEvent",
               ") => void"
             ],
-            "path": "x-pack/plugins/event_log/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1304,7 +1368,7 @@
                 "signature": [
                   "IEvent"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1324,7 +1388,7 @@
               "IEvent",
               ", startTime?: Date | undefined) => void"
             ],
-            "path": "x-pack/plugins/event_log/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1338,7 +1402,7 @@
                 "signature": [
                   "IEvent"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1353,7 +1417,7 @@
                 "signature": [
                   "Date | undefined"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1373,7 +1437,7 @@
               "IEvent",
               ") => void"
             ],
-            "path": "x-pack/plugins/event_log/server/types.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -1387,7 +1451,7 @@
                 "signature": [
                   "IEvent"
                 ],
-                "path": "x-pack/plugins/event_log/server/types.ts",
+                "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": false
@@ -1405,7 +1469,7 @@
         "tags": [],
         "label": "QueryEventsBySavedObjectResult",
         "description": [],
-        "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1416,7 +1480,7 @@
             "tags": [],
             "label": "page",
             "description": [],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1427,7 +1491,7 @@
             "tags": [],
             "label": "per_page",
             "description": [],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1438,7 +1502,7 @@
             "tags": [],
             "label": "total",
             "description": [],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -1450,9 +1514,9 @@
             "label": "data",
             "description": [],
             "signature": [
-              "(Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; uuid?: string | undefined; version?: string | undefined; category?: string | undefined; description?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; uuid?: string | undefined; flapping?: boolean | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; version?: string | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; space_ids?: string[] | undefined; } & {}> | undefined; event?: Readonly<{ type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; id?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; category?: string[] | undefined; duration?: string | number | undefined; timezone?: string | undefined; risk_score?: number | undefined; severity?: string | number | undefined; code?: string | undefined; url?: string | undefined; created?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; provider?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined)[]"
+              "(Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined)[]"
             ],
-            "path": "x-pack/plugins/event_log/server/es/cluster_client_adapter.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/server/es/cluster_client_adapter.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -1470,9 +1534,9 @@
         "label": "IEvent",
         "description": [],
         "signature": [
-          "DeepPartial<DeepWriteable<Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; uuid?: string | undefined; version?: string | undefined; category?: string | undefined; description?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; uuid?: string | undefined; flapping?: boolean | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; version?: string | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; space_ids?: string[] | undefined; } & {}> | undefined; event?: Readonly<{ type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; id?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; category?: string[] | undefined; duration?: string | number | undefined; timezone?: string | undefined; risk_score?: number | undefined; severity?: string | number | undefined; code?: string | undefined; url?: string | undefined; created?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; provider?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
+          "DeepPartial<DeepWriteable<Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}>>> | undefined"
         ],
-        "path": "x-pack/plugins/event_log/generated/schemas.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/generated/schemas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1485,9 +1549,9 @@
         "label": "IValidatedEvent",
         "description": [],
         "signature": [
-          "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ type?: string | undefined; id?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; name?: string | undefined; license?: string | undefined; uuid?: string | undefined; version?: string | undefined; category?: string | undefined; description?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ action?: Readonly<{ id?: string | undefined; name?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; uuid?: string | undefined; flapping?: boolean | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; version?: string | undefined; server_uuid?: string | undefined; task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; saved_objects?: Readonly<{ type?: string | undefined; id?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; space_ids?: string[] | undefined; } & {}> | undefined; event?: Readonly<{ type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; id?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; category?: string[] | undefined; duration?: string | number | undefined; timezone?: string | undefined; risk_score?: number | undefined; severity?: string | number | undefined; code?: string | undefined; url?: string | undefined; created?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; provider?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined"
+          "Readonly<{ log?: Readonly<{ logger?: string | undefined; level?: string | undefined; } & {}> | undefined; error?: Readonly<{ id?: string | undefined; type?: string | undefined; message?: string | undefined; code?: string | undefined; stack_trace?: string | undefined; } & {}> | undefined; '@timestamp'?: string | undefined; message?: string | undefined; tags?: string[] | undefined; rule?: Readonly<{ id?: string | undefined; version?: string | undefined; name?: string | undefined; license?: string | undefined; description?: string | undefined; uuid?: string | undefined; category?: string | undefined; reference?: string | undefined; author?: string[] | undefined; ruleset?: string | undefined; } & {}> | undefined; kibana?: Readonly<{ task?: Readonly<{ id?: string | undefined; schedule_delay?: string | number | undefined; scheduled?: string | undefined; } & {}> | undefined; action?: Readonly<{ id?: string | undefined; name?: string | undefined; type_id?: string | undefined; execution?: Readonly<{ source?: string | undefined; uuid?: string | undefined; gen_ai?: Readonly<{ usage?: Readonly<{ prompt_tokens?: string | number | undefined; completion_tokens?: string | number | undefined; total_tokens?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; usage?: Readonly<{ request_body_bytes?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; } & {}> | undefined; version?: string | undefined; alerting?: Readonly<{ outcome?: string | undefined; summary?: Readonly<{ recovered?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; new?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; ongoing?: Readonly<{ count?: string | number | undefined; } & {}> | undefined; } & {}> | undefined; status?: string | undefined; instance_id?: string | undefined; action_group_id?: string | undefined; action_subgroup?: string | undefined; } & {}> | undefined; alert?: Readonly<{ rule?: Readonly<{ consumer?: string | undefined; revision?: string | number | undefined; gap?: Readonly<{ status?: string | undefined; range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; filled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; unfilled_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; in_progress_intervals?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}>[] | undefined; total_gap_duration_ms?: string | number | undefined; filled_duration_ms?: string | number | undefined; unfilled_duration_ms?: string | number | undefined; in_progress_duration_ms?: string | number | undefined; } & {}> | undefined; execution?: Readonly<{ uuid?: string | undefined; status?: string | undefined; metrics?: Readonly<{ total_search_duration_ms?: string | number | undefined; total_indexing_duration_ms?: string | number | undefined; gap_range?: Readonly<{ gte?: string | undefined; lte?: string | undefined; } & {}> | undefined; number_of_triggered_actions?: string | number | undefined; number_of_generated_actions?: string | number | undefined; alert_counts?: Readonly<{ recovered?: string | number | undefined; active?: string | number | undefined; new?: string | number | undefined; } & {}> | undefined; number_of_delayed_alerts?: string | number | undefined; number_of_searches?: string | number | undefined; es_search_duration_ms?: string | number | undefined; execution_gap_duration_s?: string | number | undefined; rule_type_run_duration_ms?: string | number | undefined; process_alerts_duration_ms?: string | number | undefined; trigger_actions_duration_ms?: string | number | undefined; process_rule_duration_ms?: string | number | undefined; claim_to_start_duration_ms?: string | number | undefined; persist_alerts_duration_ms?: string | number | undefined; prepare_rule_duration_ms?: string | number | undefined; total_run_duration_ms?: string | number | undefined; total_enrichment_duration_ms?: string | number | undefined; } & {}> | undefined; status_order?: string | number | undefined; backfill?: Readonly<{ id?: string | undefined; start?: string | undefined; interval?: string | undefined; } & {}> | undefined; } & {}> | undefined; rule_type_id?: string | undefined; } & {}> | undefined; flapping?: boolean | undefined; uuid?: string | undefined; maintenance_window_ids?: string[] | undefined; } & {}> | undefined; space_ids?: string[] | undefined; server_uuid?: string | undefined; saved_objects?: Readonly<{ id?: string | undefined; type?: string | undefined; namespace?: string | undefined; rel?: string | undefined; type_id?: string | undefined; space_agnostic?: boolean | undefined; } & {}>[] | undefined; user_api_key?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined; event?: Readonly<{ id?: string | undefined; type?: string[] | undefined; reason?: string | undefined; action?: string | undefined; start?: string | undefined; end?: string | undefined; outcome?: string | undefined; duration?: string | number | undefined; timezone?: string | undefined; code?: string | undefined; severity?: string | number | undefined; category?: string[] | undefined; risk_score?: number | undefined; url?: string | undefined; created?: string | undefined; provider?: string | undefined; dataset?: string | undefined; hash?: string | undefined; ingested?: string | undefined; kind?: string | undefined; module?: string | undefined; original?: string | undefined; reference?: string | undefined; risk_score_norm?: number | undefined; sequence?: string | number | undefined; } & {}> | undefined; ecs?: Readonly<{ version?: string | undefined; } & {}> | undefined; user?: Readonly<{ id?: string | undefined; name?: string | undefined; } & {}> | undefined; } & {}> | undefined"
         ],
-        "path": "x-pack/plugins/event_log/generated/schemas.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/generated/schemas.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1502,7 +1566,7 @@
         "signature": [
           "\"primary\""
         ],
-        "path": "x-pack/plugins/event_log/server/types.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -1516,7 +1580,7 @@
       "tags": [],
       "label": "IEventLogService",
       "description": [],
-      "path": "x-pack/plugins/event_log/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1530,7 +1594,7 @@
           "signature": [
             "() => boolean"
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1546,7 +1610,7 @@
           "signature": [
             "() => boolean"
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1562,7 +1626,7 @@
           "signature": [
             "(provider: string, actions: string[]) => void"
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1576,7 +1640,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/event_log/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1591,7 +1655,7 @@
               "signature": [
                 "string[]"
               ],
-              "path": "x-pack/plugins/event_log/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1609,7 +1673,7 @@
           "signature": [
             "(provider: string, action: string) => boolean"
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1623,7 +1687,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/event_log/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1638,7 +1702,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/event_log/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1656,7 +1720,7 @@
           "signature": [
             "() => Map<string, Set<string>>"
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1674,7 +1738,7 @@
             "SavedObjectProvider",
             ") => void"
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1688,7 +1752,7 @@
               "signature": [
                 "string"
               ],
-              "path": "x-pack/plugins/event_log/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1703,7 +1767,7 @@
               "signature": [
                 "SavedObjectProvider"
               ],
-              "path": "x-pack/plugins/event_log/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1730,7 +1794,7 @@
               "text": "IEventLogger"
             }
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1744,7 +1808,7 @@
               "signature": [
                 "IEvent"
               ],
-              "path": "x-pack/plugins/event_log/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": false
@@ -1762,7 +1826,7 @@
           "signature": [
             "() => string"
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1778,7 +1842,7 @@
           "signature": [
             "() => Promise<boolean>"
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [],
@@ -1795,7 +1859,7 @@
       "tags": [],
       "label": "IEventLogClientService",
       "description": [],
-      "path": "x-pack/plugins/event_log/server/types.ts",
+      "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -1808,13 +1872,7 @@
           "description": [],
           "signature": [
             "(request: ",
-            {
-              "pluginId": "@kbn/core-http-server",
-              "scope": "common",
-              "docId": "kibKbnCoreHttpServerPluginApi",
-              "section": "def-common.KibanaRequest",
-              "text": "KibanaRequest"
-            },
+            "KibanaRequest",
             "<unknown, unknown, unknown, any>) => ",
             {
               "pluginId": "eventLog",
@@ -1824,7 +1882,7 @@
               "text": "IEventLogClient"
             }
           ],
-          "path": "x-pack/plugins/event_log/server/types.ts",
+          "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
           "deprecated": false,
           "trackAdoption": false,
           "children": [
@@ -1836,16 +1894,10 @@
               "label": "request",
               "description": [],
               "signature": [
-                {
-                  "pluginId": "@kbn/core-http-server",
-                  "scope": "common",
-                  "docId": "kibKbnCoreHttpServerPluginApi",
-                  "section": "def-common.KibanaRequest",
-                  "text": "KibanaRequest"
-                },
+                "KibanaRequest",
                 "<unknown, unknown, unknown, any>"
               ],
-              "path": "x-pack/plugins/event_log/server/types.ts",
+              "path": "x-pack/platform/plugins/shared/event_log/server/types.ts",
               "deprecated": false,
               "trackAdoption": false,
               "isRequired": true
@@ -1871,7 +1923,7 @@
         "signature": [
           "(millis: number) => string"
         ],
-        "path": "x-pack/plugins/event_log/common/lib/millis_to_nanos.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/common/lib/millis_to_nanos.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1885,7 +1937,7 @@
             "signature": [
               "number"
             ],
-            "path": "x-pack/plugins/event_log/common/lib/millis_to_nanos.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/common/lib/millis_to_nanos.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1904,7 +1956,7 @@
         "signature": [
           "(nanos: string | number) => number"
         ],
-        "path": "x-pack/plugins/event_log/common/lib/nanos_to_millis.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/common/lib/nanos_to_millis.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -1918,7 +1970,7 @@
             "signature": [
               "string | number"
             ],
-            "path": "x-pack/plugins/event_log/common/lib/nanos_to_millis.ts",
+            "path": "x-pack/platform/plugins/shared/event_log/common/lib/nanos_to_millis.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -1941,7 +1993,7 @@
         "signature": [
           "\"/internal/event_log\""
         ],
-        "path": "x-pack/plugins/event_log/common/index.ts",
+        "path": "x-pack/platform/plugins/shared/event_log/common/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

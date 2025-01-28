@@ -52,8 +52,8 @@ Let’s work through an example together. Consider a marketing analyst who wants
 
 Create a Marketing space for your marketing analysts to use.
 
-. Open the main menu, and select **Stack Management**.
-. Under **{kib}**, select **Spaces**.
+. Go to the *Spaces* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 . Click **Create a space**.
 . Give this space a unique name. For example: `Marketing`.
 . Click **Create space**.
@@ -75,8 +75,8 @@ In this example, a marketing analyst will need:
 
 To create the role:
 
-. Open the main menu, and select **Stack Management**.
-. Under **Security**, select **Roles**.
+. Go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 . Click **Create role**.
 . Give this role a unique name. For example: `marketing_dashboards_role`.
 . For this example, you want to store all marketing data in the `acme-marketing-*` set of indices. To grant this access, locate the **Index privileges** section and enter:

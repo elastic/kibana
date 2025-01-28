@@ -1,0 +1,32 @@
+openapi: 3.0.0
+info:
+  title: Error Schema
+  version: 'not applicable'
+paths: {}
+components:
+  x-codegen-enabled: true
+  schemas:
+    PlatformErrorResponse:
+      type: object
+      properties:
+        statusCode:
+          type: integer
+        error:
+          type: string
+        message:
+          type: string
+      required:
+        - statusCode
+        - error
+        - message
+
+    SiemErrorResponse:
+      type: object
+      properties:
+        status_code:
+          type: integer
+        message:
+          type: string
+      required:
+        - status_code
+        - message

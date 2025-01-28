@@ -10,6 +10,15 @@ import expect from '@kbn/expect';
 import { syntheticsMonitorType } from '@kbn/synthetics-plugin/common/types/saved_objects';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
+export const LOCAL_LOCATION = {
+  id: 'dev',
+  label: 'Dev Service',
+  geo: {
+    lat: 0,
+    lon: 0,
+  },
+  isServiceManaged: true,
+};
 export default function ({ getService }: FtrProviderContext) {
   describe('getMonitorFilters', function () {
     this.tags('skipCloud');
@@ -43,18 +52,7 @@ export default function ({ getService }: FtrProviderContext) {
         type: 'http',
         urls: 'https://elastic.co',
         tags: ['apm', 'synthetics'],
-        locations: [
-          {
-            id: 'eu-west-01',
-            label: 'Europe West',
-            geo: {
-              lat: 33.2343132435,
-              lon: 73.2342343434,
-            },
-            url: 'https://example-url.com',
-            isServiceManaged: true,
-          },
-        ],
+        locations: [LOCAL_LOCATION],
       };
 
       await supertest
@@ -71,7 +69,7 @@ export default function ({ getService }: FtrProviderContext) {
           { label: 'apm', count: 1 },
           { label: 'synthetics', count: 1 },
         ],
-        locations: [{ label: 'eu-west-01', count: 1 }],
+        locations: [{ label: 'dev', count: 1 }],
         projects: [],
         schedules: [{ label: '3', count: 1 }],
       });

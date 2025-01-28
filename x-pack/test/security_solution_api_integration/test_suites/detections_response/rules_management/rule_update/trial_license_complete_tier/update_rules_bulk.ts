@@ -10,8 +10,6 @@ import { RuleResponse } from '@kbn/security-solution-plugin/common/api/detection
 import { Rule } from '@kbn/alerting-plugin/common';
 import { BaseRuleParams } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_schema';
 import {
-  DETECTION_ENGINE_RULES_URL,
-  DETECTION_ENGINE_RULES_BULK_UPDATE,
   NOTIFICATION_THROTTLE_NO_ACTIONS,
   NOTIFICATION_THROTTLE_RULE,
   NOTIFICATION_DEFAULT_FREQUENCY,
@@ -48,14 +46,18 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext) => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
+  let username: string;
 
-  // See https://github.com/elastic/kibana/issues/130963 for discussion on deprecation
-  describe('@ess @brokenInServerless @skipInQA update_rules_bulk', () => {
+  // TODO: https://github.com/elastic/kibana/issues/193184 Delete this file and clean up the code
+  describe.skip('@ess update_rules_bulk', () => {
+    before(async () => {
+      username = await utils.getUsername();
+    });
+
     describe('deprecations', () => {
       afterEach(async () => {
         await deleteAllRules(supertest, log);
@@ -65,11 +67,8 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
         const updatedRule = getSimpleRuleUpdate('rule-1');
 
-        const { header } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule])
+        const { header } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule] })
           .expect(200);
 
         expect(header.warning).to.be(
@@ -95,14 +94,11 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule.name = 'some other name';
 
         // update a simple rule's name
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), username);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -113,12 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // create a second simple rule
-        await supertest
-          .post(DETECTION_ENGINE_RULES_URL)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send(getSimpleRuleUpdate('rule-2'))
-          .expect(200);
+        await securitySolutionApi.createRule({ body: getSimpleRuleUpdate('rule-2') }).expect(200);
 
         const updatedRule1 = getSimpleRuleUpdate('rule-1');
         updatedRule1.name = 'some other name';
@@ -127,18 +118,15 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
 
         // update both rule names
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1, updatedRule2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
-        const outputRule1 = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule1 = updateUsername(getSimpleRuleOutput(), username);
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
 
-        const outputRule2 = updateUsername(getSimpleRuleOutput('rule-2'), ELASTICSEARCH_USERNAME);
+        const outputRule2 = updateUsername(getSimpleRuleOutput('rule-2'), username);
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
 
@@ -192,11 +180,8 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.actions = [action1];
 
         // update both rule names
-        const { body }: { body: RuleResponse[] } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1, updatedRule2])
+        const { body }: { body: RuleResponse[] } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
         // legacy sidecar action should be gone
@@ -205,10 +190,7 @@ export default ({ getService }: FtrProviderContext) => {
 
         body.forEach((response) => {
           const bodyToCompare = removeServerGeneratedProperties(response);
-          const outputRule = updateUsername(
-            getSimpleRuleOutput(response.rule_id),
-            ELASTICSEARCH_USERNAME
-          );
+          const outputRule = updateUsername(getSimpleRuleOutput(response.rule_id), username);
           outputRule.name = 'some other name';
           outputRule.revision = 1;
           outputRule.actions = [
@@ -263,18 +245,12 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
 
         // update both rule names
-        const { body }: { body: RuleResponse[] } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1, updatedRule2])
+        const { body }: { body: RuleResponse[] } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
         body.forEach((response) => {
-          const outputRule = updateUsername(
-            getSimpleRuleOutput(response.rule_id),
-            ELASTICSEARCH_USERNAME
-          );
+          const outputRule = updateUsername(getSimpleRuleOutput(response.rule_id), username);
           outputRule.name = 'some other name';
           outputRule.revision = 1;
           outputRule.actions = [];
@@ -292,14 +268,11 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), username);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -321,18 +294,15 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule2.name = 'some other name';
         delete updatedRule2.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1, updatedRule2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1, updatedRule2] })
           .expect(200);
 
-        const outputRule1 = updateUsername(getSimpleRuleOutput('rule-1'), ELASTICSEARCH_USERNAME);
+        const outputRule1 = updateUsername(getSimpleRuleOutput('rule-1'), username);
         outputRule1.name = 'some other name';
         outputRule1.revision = 1;
 
-        const outputRule2 = updateUsername(getSimpleRuleOutput('rule-2'), ELASTICSEARCH_USERNAME);
+        const outputRule2 = updateUsername(getSimpleRuleOutput('rule-2'), username);
         outputRule2.name = 'some other name';
         outputRule2.revision = 1;
 
@@ -351,14 +321,11 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.name = 'some other name';
         delete updatedRule1.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), username);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
         const bodyToCompare = removeServerGeneratedProperties(body[0]);
@@ -373,14 +340,11 @@ export default ({ getService }: FtrProviderContext) => {
         updatedRule1.severity = 'low';
         updatedRule1.enabled = false;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([updatedRule1])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [updatedRule1] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), username);
         outputRule.enabled = false;
         outputRule.severity = 'low';
         outputRule.revision = 1;
@@ -397,25 +361,17 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.timeline_title = 'some title';
         ruleUpdate.timeline_id = 'some id';
 
-        await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate])
-          .expect(200);
+        await securitySolutionApi.bulkUpdateRules({ body: [ruleUpdate] }).expect(200);
 
         // update a simple rule's name
         const ruleUpdate2 = getSimpleRuleUpdate('rule-1');
         ruleUpdate2.name = 'some other name';
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate2] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), username);
         outputRule.name = 'some other name';
         outputRule.revision = 2;
 
@@ -428,11 +384,8 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.id = '1fd52120-d3a9-4e7a-b23c-96c0e1a74ae5';
         delete ruleUpdate.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate] })
           .expect(200);
 
         expect(body).to.eql([
@@ -451,11 +404,8 @@ export default ({ getService }: FtrProviderContext) => {
         ruleUpdate.rule_id = 'fake_id';
         delete ruleUpdate.id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate] })
           .expect(200);
 
         expect(body).to.eql([
@@ -478,14 +428,11 @@ export default ({ getService }: FtrProviderContext) => {
         delete ruleUpdate.id;
 
         // update one rule name and give a fake id for the second
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleUpdate, ruleUpdate2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleUpdate, ruleUpdate2] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), username);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
 
@@ -516,14 +463,11 @@ export default ({ getService }: FtrProviderContext) => {
         rule2.id = 'b3aa019a-656c-4311-b13b-4d9852e24347';
         rule2.name = 'some other name';
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([rule1, rule2])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [rule1, rule2] })
           .expect(200);
 
-        const outputRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const outputRule = updateUsername(getSimpleRuleOutput(), username);
         outputRule.name = 'some other name';
         outputRule.revision = 1;
 
@@ -557,23 +501,22 @@ export default ({ getService }: FtrProviderContext) => {
         const rule1 = getSimpleRuleUpdate('rule-1');
         rule1.name = 'some other name';
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([
-            {
-              ...rule1,
-              exceptions_list: [
-                {
-                  id: '2',
-                  list_id: '123',
-                  namespace_type: 'single',
-                  type: ExceptionListTypeEnum.RULE_DEFAULT,
-                },
-              ],
-            },
-          ])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({
+            body: [
+              {
+                ...rule1,
+                exceptions_list: [
+                  {
+                    id: '2',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+            ],
+          })
           .expect(200);
 
         expect(body).to.eql([
@@ -597,34 +540,33 @@ export default ({ getService }: FtrProviderContext) => {
         const rule2 = getSimpleRuleUpdate('rule-2');
         rule2.name = 'some other name';
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([
-            {
-              ...rule1,
-              exceptions_list: [
-                {
-                  id: '2',
-                  list_id: '123',
-                  namespace_type: 'single',
-                  type: ExceptionListTypeEnum.RULE_DEFAULT,
-                },
-              ],
-            },
-            {
-              ...rule2,
-              exceptions_list: [
-                {
-                  id: '2',
-                  list_id: '123',
-                  namespace_type: 'single',
-                  type: ExceptionListTypeEnum.RULE_DEFAULT,
-                },
-              ],
-            },
-          ])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({
+            body: [
+              {
+                ...rule1,
+                exceptions_list: [
+                  {
+                    id: '2',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+              {
+                ...rule2,
+                exceptions_list: [
+                  {
+                    id: '2',
+                    list_id: '123',
+                    namespace_type: 'single',
+                    type: ExceptionListTypeEnum.RULE_DEFAULT,
+                  },
+                ],
+              },
+            ],
+          })
           .expect(200);
 
         expect(body).to.eql([
@@ -659,11 +601,8 @@ export default ({ getService }: FtrProviderContext) => {
         ruleToUpdate.id = ruleId;
         delete ruleToUpdate.rule_id;
 
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([ruleToUpdate])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({ body: [ruleToUpdate] })
           .expect(200);
 
         const updatedRule = body[0];
@@ -687,10 +626,7 @@ export default ({ getService }: FtrProviderContext) => {
                 actionsWithoutFrequencies
               );
 
-              const expectedRule = updateUsername(
-                getSimpleRuleOutputWithoutRuleId(),
-                ELASTICSEARCH_USERNAME
-              );
+              const expectedRule = updateUsername(getSimpleRuleOutputWithoutRuleId(), username);
               expectedRule.revision = 1;
               expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
                 ...action,
@@ -718,10 +654,7 @@ export default ({ getService }: FtrProviderContext) => {
               actionsWithoutFrequencies
             );
 
-            const expectedRule = updateUsername(
-              getSimpleRuleOutputWithoutRuleId(),
-              ELASTICSEARCH_USERNAME
-            );
+            const expectedRule = updateUsername(getSimpleRuleOutputWithoutRuleId(), username);
             expectedRule.revision = 1;
             expectedRule.actions = actionsWithoutFrequencies.map((action) => ({
               ...action,
@@ -756,10 +689,7 @@ export default ({ getService }: FtrProviderContext) => {
               actionsWithFrequencies
             );
 
-            const expectedRule = updateUsername(
-              getSimpleRuleOutputWithoutRuleId(),
-              ELASTICSEARCH_USERNAME
-            );
+            const expectedRule = updateUsername(getSimpleRuleOutputWithoutRuleId(), username);
             expectedRule.revision = 1;
             expectedRule.actions = actionsWithFrequencies;
 
@@ -784,10 +714,7 @@ export default ({ getService }: FtrProviderContext) => {
                 someActionsWithFrequencies
               );
 
-              const expectedRule = updateUsername(
-                getSimpleRuleOutputWithoutRuleId(),
-                ELASTICSEARCH_USERNAME
-              );
+              const expectedRule = updateUsername(getSimpleRuleOutputWithoutRuleId(), username);
               expectedRule.revision = 1;
               expectedRule.actions = someActionsWithFrequencies.map((action) => ({
                 ...action,
@@ -814,10 +741,7 @@ export default ({ getService }: FtrProviderContext) => {
               someActionsWithFrequencies
             );
 
-            const expectedRule = updateUsername(
-              getSimpleRuleOutputWithoutRuleId(),
-              ELASTICSEARCH_USERNAME
-            );
+            const expectedRule = updateUsername(getSimpleRuleOutputWithoutRuleId(), username);
             expectedRule.revision = 1;
             expectedRule.actions = someActionsWithFrequencies.map((action) => ({
               ...action,
@@ -864,18 +788,18 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('errors if trying to update investigation fields using legacy format', async () => {
         // update rule
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([
-            {
-              ...getSimpleRule(),
-              name: 'New name',
-              rule_id: ruleWithLegacyInvestigationField.params.ruleId,
-              investigation_fields: ['client.foo'],
-            },
-          ])
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({
+            body: [
+              {
+                ...getSimpleRule(),
+                name: 'New name',
+                rule_id: ruleWithLegacyInvestigationField.params.ruleId,
+                // @ts-expect-error testing invalid payload here
+                investigation_fields: ['client.foo'],
+              },
+            ],
+          })
           .expect(400);
 
         expect(body.message).to.eql(
@@ -885,33 +809,32 @@ export default ({ getService }: FtrProviderContext) => {
 
       it('updates a rule with legacy investigation fields and transforms field in response', async () => {
         // update rule
-        const { body } = await supertest
-          .put(DETECTION_ENGINE_RULES_BULK_UPDATE)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
-          .send([
-            {
-              ...getSimpleRule(),
-              name: 'New name - used to have legacy investigation fields',
-              rule_id: ruleWithLegacyInvestigationField.params.ruleId,
-            },
-            {
-              ...getSimpleRule(),
-              name: 'New name - used to have legacy investigation fields, empty array',
-              rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId,
-              investigation_fields: {
-                field_names: ['foo'],
+        const { body } = await securitySolutionApi
+          .bulkUpdateRules({
+            body: [
+              {
+                ...getSimpleRule(),
+                name: 'New name - used to have legacy investigation fields',
+                rule_id: ruleWithLegacyInvestigationField.params.ruleId,
               },
-            },
-            {
-              ...getSimpleRule(),
-              name: 'New name - never had legacy investigation fields',
-              rule_id: 'rule-with-investigation-field',
-              investigation_fields: {
-                field_names: ['bar'],
+              {
+                ...getSimpleRule(),
+                name: 'New name - used to have legacy investigation fields, empty array',
+                rule_id: ruleWithLegacyInvestigationFieldEmptyArray.params.ruleId,
+                investigation_fields: {
+                  field_names: ['foo'],
+                },
               },
-            },
-          ])
+              {
+                ...getSimpleRule(),
+                name: 'New name - never had legacy investigation fields',
+                rule_id: 'rule-with-investigation-field',
+                investigation_fields: {
+                  field_names: ['bar'],
+                },
+              },
+            ],
+          })
           .expect(200);
 
         expect(body[0].investigation_fields).to.eql(undefined);

@@ -1,6 +1,11 @@
 {
   "type": "shared-common",
   "id": "@kbn/apm-synthtrace-client",
-  "devOnly": true,
-  "owner": ["@elastic/obs-ux-infra_services-team", "@elastic/obs-ux-logs-team"]
+  "owner": [
+    "@elastic/obs-ux-infra_services-team",
+    "@elastic/obs-ux-logs-team"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "devOnly": true
 }

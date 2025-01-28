@@ -22,7 +22,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const es = getService('es');
   const logger = getService('log');
-  const synthtraceEsClient = getService('synthtraceEsClient');
+  const apmSynthtraceEsClient = getService('apmSynthtraceEsClient');
 
   const start = moment().subtract(2, 'days');
   const end = moment();
@@ -72,17 +72,20 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   registry.when(
     'fetching service anomalies with a basic license',
     { config: 'basic', archives: [] },
-    () => {
-      it('returns a 501', async () => {
-        const status = await statusOf(
-          getAnomalyCharts({
-            serviceName: 'a',
-            transactionType: 'request',
-            environment: 'ENVIRONMENT_ALL',
-          })
-        );
+    function () {
+      describe('should return a 501', function () {
+        this.tags('skipFIPS');
+        it('returns a 501', async function () {
+          const status = await statusOf(
+            getAnomalyCharts({
+              serviceName: 'a',
+              transactionType: 'request',
+              environment: 'ENVIRONMENT_ALL',
+            })
+          );
 
-        expect(status).to.eql(501);
+          expect(status).to.eql(501);
+        });
       });
     }
   );
@@ -128,7 +131,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
             ];
           });
 
-        await synthtraceEsClient.index(events);
+        await apmSynthtraceEsClient.index(events);
       });
 
       afterEach(async () => {
@@ -136,7 +139,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
       });
 
       async function cleanup() {
-        await synthtraceEsClient.clean();
+        await apmSynthtraceEsClient.clean();
         await ml.cleanMlIndices();
       }
 

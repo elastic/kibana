@@ -1,0 +1,6 @@
+summary: Preview swapping references from data view ID "abcd-efg" to "xyz-123".
+value:
+  {
+    "fromId" : "abcd-efg",
+    "toId" : "xyz-123"
+  }

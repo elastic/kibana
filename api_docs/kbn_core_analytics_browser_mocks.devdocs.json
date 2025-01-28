@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-analytics-browser-mocks",
-        "id": "def-common.analyticsServiceMock",
+        "id": "def-public.analyticsServiceMock",
         "type": "Object",
         "tags": [],
         "label": "analyticsServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-analytics-browser-mocks",
-            "id": "def-common.analyticsServiceMock.create",
+            "id": "def-public.analyticsServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -52,20 +36,14 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-browser-mocks",
-            "id": "def-common.analyticsServiceMock.createAnalyticsServiceSetup",
+            "id": "def-public.analyticsServiceMock.createAnalyticsServiceSetup",
             "type": "Function",
             "tags": [],
             "label": "createAnalyticsServiceSetup",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceSetup",
-                "text": "AnalyticsServiceSetup"
-              },
+              "AnalyticsServiceSetup",
               ">"
             ],
             "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
@@ -76,20 +54,14 @@
           },
           {
             "parentPluginId": "@kbn/core-analytics-browser-mocks",
-            "id": "def-common.analyticsServiceMock.createAnalyticsServiceStart",
+            "id": "def-public.analyticsServiceMock.createAnalyticsServiceStart",
             "type": "Function",
             "tags": [],
             "label": "createAnalyticsServiceStart",
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-analytics-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreAnalyticsBrowserPluginApi",
-                "section": "def-common.AnalyticsServiceStart",
-                "text": "AnalyticsServiceStart"
-              },
+              "AnalyticsServiceStart",
               ">"
             ],
             "path": "packages/core/analytics/core-analytics-browser-mocks/src/analytics_service.mock.ts",
@@ -102,5 +74,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

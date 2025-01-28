@@ -8,6 +8,7 @@ fi
 .buildkite/scripts/bootstrap.sh
 
 source .buildkite/scripts/steps/artifacts/env.sh
+source .buildkite/scripts/common/util.sh
 
 GIT_ABBREV_COMMIT=${BUILDKITE_COMMIT:0:12}
 KIBANA_IMAGE_TAG="sec-sol-qg-$GIT_ABBREV_COMMIT"
@@ -17,16 +18,13 @@ KIBANA_BASE_IMAGE="docker.elastic.co/kibana-ci/kibana-serverless"
 export KIBANA_IMAGE="$KIBANA_BASE_IMAGE:$KIBANA_IMAGE_TAG"
 
 echo "--- Verify manifest does not already exist"
-echo "$KIBANA_DOCKER_PASSWORD" | docker login -u "$KIBANA_DOCKER_USERNAME" --password-stdin docker.elastic.co
-trap 'docker logout docker.elastic.co' EXIT
-
 echo "Checking manifest for $KIBANA_IMAGE"
 if docker manifest inspect $KIBANA_IMAGE &> /dev/null; then
   echo "Manifest already exists, exiting"
   exit 0
 fi
 
-docker pull $KIBANA_BASE_IMAGE:latest
+docker_with_retry pull $KIBANA_BASE_IMAGE:latest
 
 echo "--- Build images"
 node scripts/build \
@@ -37,6 +35,7 @@ node scripts/build \
   --docker-namespace="kibana-ci" \
   --docker-tag="$KIBANA_IMAGE_TAG" \
   --skip-docker-ubuntu \
+  --skip-docker-wolfi \
   --skip-docker-ubi \
   --skip-docker-cloud \
   --skip-docker-contexts \
@@ -52,8 +51,8 @@ docker load < "target/kibana-serverless-$BASE_VERSION-docker-image-aarch64.tar.g
 docker tag "$KIBANA_IMAGE" "$KIBANA_IMAGE-arm64"
 
 echo "--- Push images"
-docker image push "$KIBANA_IMAGE-arm64"
-docker image push "$KIBANA_IMAGE-amd64"
+docker_with_retry push "$KIBANA_IMAGE-arm64"
+docker_with_retry push "$KIBANA_IMAGE-amd64"
 
 echo "--- Create and push manifests"
 docker manifest create \
@@ -69,8 +68,6 @@ if [[ "$BUILDKITE_BRANCH" == "$KIBANA_BASE_BRANCH" ]] && [[ "${BUILDKITE_PULL_RE
     --amend "$KIBANA_IMAGE-amd64"
   docker manifest push "$KIBANA_BASE_IMAGE:latest"
 fi
-
-docker logout docker.elastic.co
 
 cat << EOF | buildkite-agent annotate --style "info" --context image
   ### Serverless Images

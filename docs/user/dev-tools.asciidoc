@@ -10,30 +10,26 @@ with your data.
 [cols="2"]
 |===
 
-a| <<console-kibana, Console>>
-
+| <<console-kibana, Console>>
 | Interact with the REST APIs of {es} and {kib}, including sending requests
 and viewing API documentation.
 
-a| <<xpack-profiler, {searchprofiler}>>
-
+| <<xpack-profiler, {searchprofiler}>>
 | Inspect and analyze your search queries.
 
-a| <<xpack-grokdebugger, Grok&nbsp;Debugger&nbsp;&nbsp;&nbsp;>>
-
+| <<xpack-grokdebugger, Grok&nbsp;Debugger&nbsp;&nbsp;&nbsp;>>
 | Build and debug grok patterns before you use them in your data processing pipelines.
 
-a| <<painlesslab, Painless&nbsp;Lab>>
-
+| <<painlesslab, Painless&nbsp;Lab>>
 | beta:[] Test and debug Painless scripts in real-time.
 |===
 
 --
 
-include::{kib-repo-dir}/dev-tools/console/console.asciidoc[]
+include::{kibana-root}/docs/dev-tools/console/console.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools/searchprofiler/index.asciidoc[]
+include::{kibana-root}/docs/dev-tools/searchprofiler/index.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools/grokdebugger/index.asciidoc[]
+include::{kibana-root}/docs/dev-tools/grokdebugger/index.asciidoc[]
 
-include::{kib-repo-dir}/dev-tools/painlesslab/index.asciidoc[]
+include::{kibana-root}/docs/dev-tools/painlesslab/index.asciidoc[]

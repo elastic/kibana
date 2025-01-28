@@ -17,3 +17,14 @@ if [[ "$BUILDKITE_BRANCH" == "main" ]]; then
   echo "--- Trigger agent packer cache pipeline"
   ts-node .buildkite/scripts/steps/trigger_pipeline.ts kibana-agent-packer-cache main
 fi
+
+cat << EOF | buildkite-agent pipeline upload
+steps:
+  - label: "Update cache for ES $BUILDKITE_BRANCH snapshot"
+    trigger: kibana-vm-images
+    async: true
+    build:
+      env:
+        IMAGES_CONFIG: "kibana/images.yml"
+        RETRY: "1"
+EOF

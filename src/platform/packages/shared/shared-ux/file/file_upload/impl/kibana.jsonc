@@ -1,0 +1,9 @@
+{
+  "type": "shared-browser",
+  "id": "@kbn/shared-ux-file-upload",
+  "owner": [
+    "@elastic/appex-sharedux"
+  ],
+  "group": "platform",
+  "visibility": "shared"
+}

@@ -6,26 +6,10 @@
     "interfaces": [],
     "enums": [],
     "misc": [],
-    "objects": []
-  },
-  "server": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
-    "objects": []
-  },
-  "common": {
-    "classes": [],
-    "functions": [],
-    "interfaces": [],
-    "enums": [],
-    "misc": [],
     "objects": [
       {
         "parentPluginId": "@kbn/core-overlays-browser-mocks",
-        "id": "def-common.overlayServiceMock",
+        "id": "def-public.overlayServiceMock",
         "type": "Object",
         "tags": [],
         "label": "overlayServiceMock",
@@ -36,7 +20,7 @@
         "children": [
           {
             "parentPluginId": "@kbn/core-overlays-browser-mocks",
-            "id": "def-common.overlayServiceMock.create",
+            "id": "def-public.overlayServiceMock.create",
             "type": "Function",
             "tags": [],
             "label": "create",
@@ -62,7 +46,7 @@
           },
           {
             "parentPluginId": "@kbn/core-overlays-browser-mocks",
-            "id": "def-common.overlayServiceMock.createStartContract",
+            "id": "def-public.overlayServiceMock.createStartContract",
             "type": "Function",
             "tags": [],
             "label": "createStartContract",
@@ -77,13 +61,7 @@
                 "text": "DeeplyMockedKeys"
               },
               "<",
-              {
-                "pluginId": "@kbn/core-overlays-browser",
-                "scope": "common",
-                "docId": "kibKbnCoreOverlaysBrowserPluginApi",
-                "section": "def-common.OverlayStart",
-                "text": "OverlayStart"
-              },
+              "OverlayStart",
               ">"
             ],
             "path": "packages/core/overlays/core-overlays-browser-mocks/src/overlay_service.mock.ts",
@@ -96,5 +74,21 @@
         "initialIsOpen": false
       }
     ]
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
   }
 }

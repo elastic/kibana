@@ -1,0 +1,42 @@
+# yaml-language-server: $schema=https://gist.githubusercontent.com/elasticmachine/988b80dae436cafea07d9a4a460a011d/raw/rre.schema.json
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: bk-kibana-fips-daily
+  description: Run Kibana test suite with FIPS agents
+  links:
+    - title: Pipeline link
+      url: https://buildkite.com/elastic/kibana-fips
+spec:
+  type: buildkite-pipeline
+  owner: group:kibana-operations
+  system: buildkite
+  implementation:
+    apiVersion: buildkite.elastic.dev/v1
+    kind: Pipeline
+    metadata:
+      name: kibana / fips
+      description: Run Kibana test suite with FIPS agents
+    spec:
+      env:
+        SLACK_NOTIFICATIONS_CHANNEL: '#kibana-fips'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'true'
+      repository: elastic/kibana
+      branch_configuration: main
+      default_branch: main
+      pipeline_file: '.buildkite/pipelines/fips.yml'
+      provider_settings:
+        trigger_mode: none
+      schedules:
+        daily:
+          branch: main
+          cronline: 0 5 * * * America/New_York
+      teams:
+        kibana-operations:
+          access_level: MANAGE_BUILD_AND_READ
+        kibana-security:
+          access_level: MANAGE_BUILD_AND_READ
+        everyone:
+          access_level: READ_ONLY
+      tags:
+        - kibana

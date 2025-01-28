@@ -1,0 +1,165 @@
+{
+  "id": "@kbn/core-security-browser-internal",
+  "client": {
+    "classes": [
+      {
+        "parentPluginId": "@kbn/core-security-browser-internal",
+        "id": "def-public.SecurityService",
+        "type": "Class",
+        "tags": [],
+        "label": "SecurityService",
+        "description": [],
+        "signature": [
+          "SecurityService",
+          " implements ",
+          "CoreService",
+          "<",
+          "SecurityServiceSetup",
+          ", ",
+          "SecurityServiceStart",
+          ">"
+        ],
+        "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/core-security-browser-internal",
+            "id": "def-public.SecurityService.Unnamed",
+            "type": "Function",
+            "tags": [],
+            "label": "Constructor",
+            "description": [],
+            "signature": [
+              "any"
+            ],
+            "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "@kbn/core-security-browser-internal",
+                "id": "def-public.SecurityService.Unnamed.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "coreContext",
+                "description": [],
+                "signature": [
+                  "CoreContext"
+                ],
+                "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-browser-internal",
+            "id": "def-public.SecurityService.setup",
+            "type": "Function",
+            "tags": [],
+            "label": "setup",
+            "description": [],
+            "signature": [
+              "() => ",
+              "SecurityServiceSetup"
+            ],
+            "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-browser-internal",
+            "id": "def-public.SecurityService.start",
+            "type": "Function",
+            "tags": [],
+            "label": "start",
+            "description": [],
+            "signature": [
+              "() => ",
+              "SecurityServiceStart"
+            ],
+            "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "@kbn/core-security-browser-internal",
+            "id": "def-public.SecurityService.stop",
+            "type": "Function",
+            "tags": [],
+            "label": "stop",
+            "description": [],
+            "signature": [
+              "() => void"
+            ],
+            "path": "src/core/packages/security/browser-internal/src/security_service.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          }
+        ],
+        "initialIsOpen": false
+      }
+    ],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-security-browser-internal",
+        "id": "def-public.InternalSecurityServiceSetup",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalSecurityServiceSetup",
+        "description": [],
+        "signature": [
+          "SecurityServiceSetup"
+        ],
+        "path": "src/core/packages/security/browser-internal/src/internal_contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/core-security-browser-internal",
+        "id": "def-public.InternalSecurityServiceStart",
+        "type": "Type",
+        "tags": [],
+        "label": "InternalSecurityServiceStart",
+        "description": [],
+        "signature": [
+          "SecurityServiceStart"
+        ],
+        "path": "src/core/packages/security/browser-internal/src/internal_contracts.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
+    "objects": []
+  },
+  "server": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  },
+  "common": {
+    "classes": [],
+    "functions": [],
+    "interfaces": [],
+    "enums": [],
+    "misc": [],
+    "objects": []
+  }
+}

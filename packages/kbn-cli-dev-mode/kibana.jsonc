@@ -1,5 +1,5 @@
 {
-  "type": "shared-common",
+  "type": "shared-server",
   "id": "@kbn/cli-dev-mode",
   "devOnly": true,
   "owner": "@elastic/kibana-operations"

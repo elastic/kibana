@@ -8,6 +8,10 @@
 import { ProvidedType } from '@kbn/test';
 
 import { Client } from '@elastic/elasticsearch';
+import {
+  TOTAL_INDEX_PRIVILEGE_SET_EDITOR,
+  TOTAL_INDEX_PRIVILEGE_SET_VIEWER,
+} from '@kbn/slo-plugin/server/services/get_diagnosis';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
 export type TransformSecurityCommon = ProvidedType<typeof TransformSecurityCommonProvider>;
@@ -33,14 +37,18 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
     {
       name: 'transform_dest',
       elasticsearch: {
-        indices: [{ names: ['.slo-*'], privileges: ['read', 'index', 'manage', 'delete'] }],
+        indices: [
+          { names: ['.slo-observability.*'], privileges: TOTAL_INDEX_PRIVILEGE_SET_EDITOR },
+        ],
       },
       kibana: [],
     },
     {
       name: 'transform_dest_readonly',
       elasticsearch: {
-        indices: [{ names: ['.slo-*'], privileges: ['read'] }],
+        indices: [
+          { names: ['.slo-observability.*'], privileges: TOTAL_INDEX_PRIVILEGE_SET_VIEWER },
+        ],
       },
       kibana: [],
     },
@@ -139,7 +147,7 @@ export function TransformSecurityCommonProvider({ getService }: FtrProviderConte
       if (existingKeys.count > 0) {
         await Promise.all(
           existingKeys.api_keys.map(async (key) => {
-            esClient.security.invalidateApiKey({ ids: [key.id] });
+            await esClient.security.invalidateApiKey({ ids: [key.id] });
           })
         );
       }

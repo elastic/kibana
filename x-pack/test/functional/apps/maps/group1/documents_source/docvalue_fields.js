@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 
 export default function ({ getPageObjects, getService }) {
-  const PageObjects = getPageObjects(['maps']);
+  const { maps } = getPageObjects(['maps']);
   const security = getService('security');
 
   describe('docvalue_fields', () => {
@@ -23,16 +23,16 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should only fetch geo_point field and time field and nothing else when source does not have data driven styling', async () => {
-      await PageObjects.maps.loadSavedMap('document example');
-      const { rawResponse: response } = await PageObjects.maps.getResponse();
+      await maps.loadSavedMap('document example');
+      const { rawResponse: response } = await maps.getResponse();
       const firstHit = response.hits.hits[0];
       expect(firstHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
       expect(firstHit.fields).to.only.have.keys(['@timestamp', 'geo.coordinates']);
     });
 
     it('should only fetch geo_point field and data driven styling fields', async () => {
-      await PageObjects.maps.loadSavedMap('document example with data driven styles');
-      const { rawResponse: response } = await PageObjects.maps.getResponse();
+      await maps.loadSavedMap('document example with data driven styles');
+      const { rawResponse: response } = await maps.getResponse();
       const firstHit = response.hits.hits[0];
       expect(firstHit).to.only.have.keys(['_id', '_index', '_score', 'fields']);
       expect(firstHit.fields).to.only.have.keys([
@@ -44,8 +44,8 @@ export default function ({ getPageObjects, getService }) {
     });
 
     it('should format date fields as epoch_millis when data driven styling is applied to a date field', async () => {
-      await PageObjects.maps.loadSavedMap('document example with data driven styles on date field');
-      const { rawResponse: response } = await PageObjects.maps.getResponse();
+      await maps.loadSavedMap('document example with data driven styles on date field');
+      const { rawResponse: response } = await maps.getResponse();
       const targetHit = response.hits.hits.find((hit) => {
         return hit._id === 'AU_x3_g4GFA8no6QjkSR';
       });

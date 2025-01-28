@@ -1,0 +1,59 @@
+openapi: 3.0.0
+info:
+  version: '2023-10-31'
+  title: Risk Scoring API
+  description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
+paths:
+  /api/risk_score/engine/dangerously_delete_data:
+    delete:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: CleanUpRiskEngine
+      summary: Cleanup the Risk Engine
+      description: Cleaning up the the Risk Engine by removing the indices, mapping and transforms
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  cleanup_successful:
+                    type: boolean
+        '400':
+          description: Task manager is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/CleanUpRiskEngineErrorResponse'
+
+components:
+  schemas:
+    CleanUpRiskEngineErrorResponse:
+      type: object
+      required:
+        - cleanup_successful
+        - errors
+      properties:
+        cleanup_successful:
+          type: boolean
+          example: false
+        errors:
+          type: array
+          items:
+            type: object
+            required:
+              - seq
+              - error
+            properties:
+              seq:
+                type: integer
+              error:
+                type: string

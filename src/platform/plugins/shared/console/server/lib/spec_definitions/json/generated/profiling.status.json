@@ -1,0 +1,15 @@
+{
+  "profiling.status": {
+    "methods": [
+      "GET"
+    ],
+    "patterns": [
+      "_profiling/status"
+    ],
+    "documentation": "https://www.elastic.co/guide/en/observability/current/universal-profiling.html",
+    "availability": {
+      "stack": false,
+      "serverless": false
+    }
+  }
+}

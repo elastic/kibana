@@ -1,0 +1,30 @@
+title: Data view reference swap request
+type: object
+required:
+  - fromId
+  - toId
+properties:
+  delete:
+    type: boolean
+    description: Deletes referenced saved object if all references are removed.
+  forId:
+    oneOf:
+      - type: string
+      - type: array
+        items:
+          type: string
+    description: Limit the affected saved objects to one or more by identifier.
+  forType:
+    type: string
+    description: Limit the affected saved objects by type.
+  fromId:
+    type: string
+    description: The saved object reference to change.
+  fromType:
+    type: string
+    description: >
+      Specify the type of the saved object reference to alter.
+      The default value is `index-pattern` for data views.
+  toId:
+    type: string
+    description: New saved object reference value to replace the old value.

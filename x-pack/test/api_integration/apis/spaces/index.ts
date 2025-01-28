@@ -12,5 +12,7 @@ export default function ({ loadTestFile }: FtrProviderContext) {
     loadTestFile(require.resolve('./get_active_space'));
     loadTestFile(require.resolve('./saved_objects'));
     loadTestFile(require.resolve('./space_attributes'));
+    loadTestFile(require.resolve('./get_content_summary'));
+    loadTestFile(require.resolve('./set_solution_space'));
   });
 }

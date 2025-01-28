@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import expect from '@kbn/expect';
@@ -22,7 +23,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('index pattern wizard ccs', () => {
-      describe('remote cluster only', async () => {
+      describe('remote cluster only', () => {
         beforeEach(async function () {
           await kibanaServer.uiSettings.replace({});
           await PageObjects.settings.navigateTo();
@@ -47,7 +48,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           await kibanaServer.savedObjects.cleanStandardList();
         });
       });
-      describe('remote and local clusters', async () => {
+      describe('remote and local clusters', () => {
         before(async () => {
           await es.transport.request({
             path: '/blogs/_doc',

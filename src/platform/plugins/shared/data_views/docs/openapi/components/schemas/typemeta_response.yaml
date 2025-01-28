@@ -1,0 +1,10 @@
+type: object
+description: When you use rollup indices, contains the field list for the rollup data view API endpoints.
+nullable: true
+properties:
+  aggs:
+    type: object
+    description: A map of rollup restrictions by aggregation type and field name.
+  params:
+    type: object
+    description: Properties for retrieving rollup fields.

@@ -92,7 +92,8 @@ export default function activeMaintenanceWindowTests({ getService }: FtrProvider
               expect(response.statusCode).to.eql(403);
               expect(response.body).to.eql({
                 error: 'Forbidden',
-                message: 'Forbidden',
+                message:
+                  'API [GET /internal/alerting/rules/maintenance_window/_active] is unauthorized for user, this action is granted by the Kibana privileges [read-maintenance-window]',
                 statusCode: 403,
               });
               break;

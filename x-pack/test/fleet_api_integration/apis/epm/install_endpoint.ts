@@ -7,8 +7,7 @@
 
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../api_integration/ftr_provider_context';
-import { skipIfNoDockerRegistry } from '../../helpers';
-import { setupFleetAndAgents } from '../agents/services';
+import { skipIfNoDockerRegistry, isDockerRegistryEnabledOrSkipped } from '../../helpers';
 import { bundlePackage, removeBundledPackages } from './install_bundled';
 
 export default function (providerContext: FtrProviderContext) {
@@ -19,13 +18,11 @@ export default function (providerContext: FtrProviderContext) {
   describe('Install endpoint package', () => {
     const { getService } = providerContext;
     skipIfNoDockerRegistry(providerContext);
-    setupFleetAndAgents(providerContext);
 
     const supertest = getService('supertest');
-    const dockerServers = getService('dockerServers');
-    const server = dockerServers.get('registry');
     const es = getService('es');
     const log = getService('log');
+    const fleetAndAgents = getService('fleetAndAgents');
     const pkgName = 'endpoint';
     const pkgVersion = '8.6.1';
 
@@ -48,7 +45,8 @@ export default function (providerContext: FtrProviderContext) {
     };
 
     before(async () => {
-      if (!server.enabled) return;
+      await fleetAndAgents.setup();
+      if (!isDockerRegistryEnabledOrSkipped(providerContext)) return;
       await bundlePackage('endpoint-8.6.1');
       await installPackage('endpoint', '8.6.1');
     });

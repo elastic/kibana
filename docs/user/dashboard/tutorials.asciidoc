@@ -1,0 +1,10 @@
+= Tutorials
+
+Learn more about building dashboards and creating visualizations with the following tutorials.
+
+These tutorials use <<gs-get-data-into-kibana,sample data>> available in {kib} as a way to get started more easily, but you can apply and adapt these instructions to your own data as well.
+
+
+include::tutorial-create-a-dashboard-of-lens-panels.asciidoc[]
+
+include::lens-advanced.asciidoc[]

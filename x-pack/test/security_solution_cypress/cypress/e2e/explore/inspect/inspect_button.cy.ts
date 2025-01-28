@@ -21,23 +21,22 @@ import { visitWithTimeRange } from '../../../tasks/navigation';
 import { waitForWelcomePanelToBeLoaded } from '../../../tasks/common';
 import { selectDataView } from '../../../tasks/sourcerer';
 import { postDataView } from '../../../tasks/api_calls/common';
+import { mockRiskEngineEnabled } from '../../../tasks/entity_analytics';
 
 const DATA_VIEW = 'auditbeat-*';
 
-describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServerless'] }, () => {
-  before(() => {
+describe('Inspect Explore pages', { tags: ['@ess', '@serverless'] }, () => {
+  beforeEach(() => {
     // illegal_argument_exception: unknown setting [index.lifecycle.name]
-    cy.task('esArchiverLoad', { archiveName: 'risk_users' });
-    cy.task('esArchiverLoad', { archiveName: 'risk_hosts' });
-
+    cy.task('esArchiverLoad', { archiveName: 'risk_scores_new' });
     login();
+    mockRiskEngineEnabled();
     // Create and select data view
     postDataView(DATA_VIEW);
   });
 
-  after(() => {
-    cy.task('esArchiverUnload', 'risk_users');
-    cy.task('esArchiverUnload', 'risk_hosts');
+  afterEach(() => {
+    cy.task('esArchiverUnload', { archiveName: 'risk_scores_new' });
   });
 
   INSPECT_BUTTONS_IN_SECURITY.forEach(({ pageName, url, lensVisualizations, tables }) => {
@@ -45,8 +44,6 @@ describe('Inspect Explore pages', { tags: ['@ess', '@serverless', '@brokenInServ
      * Group all tests of a page into one "it" call to improve speed
      */
     it(`inspect ${pageName} page`, () => {
-      login();
-
       visitWithTimeRange(url, {
         visitOptions: {
           onLoad: () => {

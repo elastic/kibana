@@ -15,6 +15,7 @@ import { getRandomString } from './lib/random';
 
 export default function ({ getService }: FtrProviderContext) {
   const log = getService('log');
+  const es = getService('es');
   const { catTemplate, getTemplatePayload, getSerializedTemplate } = templatesHelpers(getService);
   const {
     getAllTemplates,
@@ -24,6 +25,7 @@ export default function ({ getService }: FtrProviderContext) {
     updateTemplate,
     cleanUpTemplates,
     simulateTemplate,
+    simulateTemplateByName,
   } = templatesApi(getService);
 
   describe('index templates', () => {
@@ -91,6 +93,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'hasSettings',
           'hasAliases',
           'hasMappings',
@@ -99,6 +102,7 @@ export default function ({ getService }: FtrProviderContext) {
           'ignoreMissingComponentTemplates',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
 
         expect(Object.keys(indexTemplateFound).sort()).to.eql(expectedKeys);
@@ -113,12 +117,14 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedLegacyKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'hasSettings',
           'hasAliases',
           'hasMappings',
           'order',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
           'composedOf',
           'ignoreMissingComponentTemplates',
         ].sort();
@@ -135,6 +141,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedWithDSLKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'lifecycle',
           'hasSettings',
           'hasAliases',
@@ -145,6 +152,7 @@ export default function ({ getService }: FtrProviderContext) {
           'dataStream',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
 
         expect(Object.keys(templateWithDSL).sort()).to.eql(expectedWithDSLKeys);
@@ -159,6 +167,7 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedWithILMKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'ilmPolicy',
           'hasSettings',
           'hasAliases',
@@ -168,6 +177,7 @@ export default function ({ getService }: FtrProviderContext) {
           'ignoreMissingComponentTemplates',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
 
         expect(Object.keys(templateWithILM).sort()).to.eql(expectedWithILMKeys);
@@ -185,12 +195,14 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'template',
           'composedOf',
           'ignoreMissingComponentTemplates',
           'priority',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
         ].sort();
         const expectedTemplateKeys = ['aliases', 'mappings', 'settings'].sort();
 
@@ -207,10 +219,12 @@ export default function ({ getService }: FtrProviderContext) {
         const expectedKeys = [
           'name',
           'indexPatterns',
+          'indexMode',
           'template',
           'order',
           'version',
           '_kbnMeta',
+          'allowAutoCreate',
           'composedOf',
           'ignoreMissingComponentTemplates',
         ].sort();
@@ -219,6 +233,43 @@ export default function ({ getService }: FtrProviderContext) {
         expect(body.name).to.equal(templateName);
         expect(Object.keys(body).sort()).to.eql(expectedKeys);
         expect(Object.keys(body.template).sort()).to.eql(expectedTemplateKeys);
+      });
+
+      describe('with logs-*-* index pattern', () => {
+        const logsdbTemplateName = 'test-logsdb-template';
+        before(async () => {
+          const template = getTemplatePayload(logsdbTemplateName, ['logs-*-*']);
+          await createTemplate(template).expect(200);
+        });
+
+        after(async () => {
+          await deleteTemplates([{ name: logsdbTemplateName }]);
+        });
+
+        const logsdbSettings: Array<{ enabled: boolean | null; indexMode: string }> = [
+          { enabled: true, indexMode: 'logsdb' },
+          { enabled: false, indexMode: 'standard' },
+          { enabled: null, indexMode: 'standard' }, // In stateful Kibana, the cluster.logsdb.enabled setting is false by default, so standard index mode
+        ];
+
+        logsdbSettings.forEach(({ enabled, indexMode }) => {
+          it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
+            await es.cluster.putSettings({
+              body: {
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled,
+                    },
+                  },
+                },
+              },
+            });
+
+            const { body } = await getOneTemplate(logsdbTemplateName).expect(200);
+            expect(body.indexMode).to.equal(indexMode);
+          });
+        });
       });
     });
 
@@ -361,6 +412,23 @@ export default function ({ getService }: FtrProviderContext) {
         // one of the item of the cause array should point to our script
         expect(body.attributes.causes.join(',')).contain('"hello with error');
       });
+
+      it('should update a deprecated index template', async () => {
+        const templateName = `deprecated_template-${getRandomString()}`;
+        const indexTemplate: TemplateDeserialized = {
+          _kbnMeta: { hasDatastream: false, type: 'default' },
+          name: templateName,
+          indexPatterns: [getRandomString()],
+          indexMode: 'standard',
+          template: {},
+          deprecated: true,
+          allowAutoCreate: 'TRUE',
+        };
+
+        await createTemplate(indexTemplate).expect(200);
+
+        await updateTemplate({ ...indexTemplate }, templateName).expect(200);
+      });
     });
 
     describe('delete', () => {
@@ -429,6 +497,18 @@ export default function ({ getService }: FtrProviderContext) {
 
         const { body } = await simulateTemplate(payload).expect(200);
         expect(body.template).to.be.ok();
+      });
+
+      it('should simulate an index template by name', async () => {
+        const templateName = `template-${getRandomString()}`;
+        const payload = getTemplatePayload(templateName, [getRandomString()]);
+
+        await createTemplate(payload).expect(200);
+
+        await simulateTemplateByName(templateName).expect(200);
+
+        // cleanup
+        await deleteTemplates([{ name: templateName }]);
       });
     });
   });

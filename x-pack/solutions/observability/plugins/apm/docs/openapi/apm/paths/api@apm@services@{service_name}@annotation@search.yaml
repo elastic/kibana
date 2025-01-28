@@ -1,0 +1,57 @@
+get:
+  summary: Search for annotations
+  description: Search for annotations related to a specific service.
+  operationId: getAnnotation
+  tags:
+    - APM annotations
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - name: serviceName
+      in: path
+      required: true
+      description: The name of the service
+      schema:
+        type: string
+    - name: environment
+      in: query
+      required: false
+      description: The environment to filter annotations by
+      schema:
+        type: string
+    - name: start
+      in: query
+      required: false
+      description: The start date for the search
+      schema:
+        type: string
+    - name: end
+      in: query
+      required: false
+      description: The end date for the search
+      schema:
+        type: string
+  responses:
+    "200":
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/annotation_search_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '500':
+      description: Internal Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/500_response.yaml'

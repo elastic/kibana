@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { ADD_FILTER, SERVER_SIDE_EVENT_COUNT } from '../../../screens/timeline';
+import { ADD_FILTER, QUERY_EVENT_COUNT } from '../../../screens/timeline';
 import { LOADING_INDICATOR } from '../../../screens/security_header';
 
 import { login } from '../../../tasks/login';
@@ -20,7 +20,7 @@ import {
   selectKqlSearchMode,
 } from '../../../tasks/timeline';
 import { waitForTimelinesPanelToBeLoaded } from '../../../tasks/timelines';
-import { deleteTimelines } from '../../../tasks/api_calls/common';
+import { deleteTimelines } from '../../../tasks/api_calls/timelines';
 
 import { hostsUrl, TIMELINES_URL } from '../../../urls/navigation';
 
@@ -37,7 +37,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       openTimelineUsingToggle();
       executeTimelineKQL(hostExistsQuery);
 
-      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
+      cy.get(QUERY_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
     });
 
     it('should execute a Lucene query', () => {
@@ -46,7 +46,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       changeTimelineQueryLanguage('lucene');
       executeTimelineSearch(messageProcessQuery);
 
-      cy.get(SERVER_SIDE_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
+      cy.get(QUERY_EVENT_COUNT).should(($count) => expect(+$count.text()).to.be.gt(0));
     });
   });
 
@@ -66,7 +66,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
-        cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'filter');
+        cy.wrap(response?.body.kqlMode).should('eql', 'filter');
         cy.get(ADD_FILTER).should('exist');
       });
     });
@@ -76,7 +76,7 @@ describe('Timeline search and filters', { tags: ['@ess', '@serverless'] }, () =>
       addNameToTimelineAndSave('Test');
       cy.wait('@update').then(({ response }) => {
         cy.wrap(response?.statusCode).should('eql', 200);
-        cy.wrap(response?.body.data.persistTimeline.timeline.kqlMode).should('eql', 'search');
+        cy.wrap(response?.body.kqlMode).should('eql', 'search');
         cy.get(ADD_FILTER).should('not.exist');
       });
     });

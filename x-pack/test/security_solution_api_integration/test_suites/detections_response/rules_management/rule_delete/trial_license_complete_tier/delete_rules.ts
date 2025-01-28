@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-import { DETECTION_ENGINE_RULES_URL } from '@kbn/security-solution-plugin/common/constants';
 import {
   getSimpleRule,
   getSimpleRuleOutput,
@@ -27,13 +26,12 @@ import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
 export default ({ getService }: FtrProviderContext): void => {
   const supertest = getService('supertest');
+  const securitySolutionApi = getService('securitySolutionApi');
   const log = getService('log');
   const es = getService('es');
-  // TODO: add a new service for pulling kibana username, similar to getService('es')
-  const config = getService('config');
-  const ELASTICSEARCH_USERNAME = config.get('servers.kibana.username');
+  const utils = getService('securitySolutionUtils');
 
-  describe('@ess @serverless delete_rules', () => {
+  describe('@ess @serverless @skipInServerlessMKI delete_rules', () => {
     describe('deleting rules', () => {
       beforeEach(async () => {
         await createAlertsIndex(supertest, log);
@@ -48,14 +46,12 @@ export default ({ getService }: FtrProviderContext): void => {
         await createRule(supertest, log, getSimpleRule('rule-1'));
 
         // delete the rule by its rule_id
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=rule-1`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { rule_id: 'rule-1' } })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedProperties(body);
-        const expectedRule = updateUsername(getSimpleRuleOutput(), ELASTICSEARCH_USERNAME);
+        const expectedRule = updateUsername(getSimpleRuleOutput(), await utils.getUsername());
 
         expect(bodyToCompare).to.eql(expectedRule);
       });
@@ -64,16 +60,14 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRuleWithoutRuleId());
 
         // delete that rule by its auto-generated rule_id
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=${bodyWithCreatedRule.rule_id}`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { rule_id: bodyWithCreatedRule.rule_id } })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).to.eql(expectedRule);
@@ -83,26 +77,22 @@ export default ({ getService }: FtrProviderContext): void => {
         const bodyWithCreatedRule = await createRule(supertest, log, getSimpleRule());
 
         // delete that rule by its auto-generated id
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?id=${bodyWithCreatedRule.id}`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { id: bodyWithCreatedRule.id } })
           .expect(200);
 
         const bodyToCompare = removeServerGeneratedPropertiesIncludingRuleId(body);
         const expectedRule = updateUsername(
           getSimpleRuleOutputWithoutRuleId(),
-          ELASTICSEARCH_USERNAME
+          await utils.getUsername()
         );
 
         expect(bodyToCompare).to.eql(expectedRule);
       });
 
       it('should return an error if the id does not exist when trying to delete it', async () => {
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?id=c1e1b359-7ac1-4e96-bc81-c683c092436f`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { id: 'c1e1b359-7ac1-4e96-bc81-c683c092436f' } })
           .expect(404);
 
         expect(body).to.eql({
@@ -112,10 +102,8 @@ export default ({ getService }: FtrProviderContext): void => {
       });
 
       it('should return an error if the rule_id does not exist when trying to delete it', async () => {
-        const { body } = await supertest
-          .delete(`${DETECTION_ENGINE_RULES_URL}?rule_id=fake_id`)
-          .set('kbn-xsrf', 'true')
-          .set('elastic-api-version', '2023-10-31')
+        const { body } = await securitySolutionApi
+          .deleteRule({ query: { rule_id: 'fake_id' } })
           .expect(404);
 
         expect(body).to.eql({

@@ -19,7 +19,7 @@ import { countDownTest } from '../count_down_test';
  * @param supertest The supertest agent.
  */
 export const deleteAllRules = async (
-  supertest: SuperTest.SuperTest<SuperTest.Test>,
+  supertest: SuperTest.Agent,
   log: ToolingLog
 ): Promise<void> => {
   await countDownTest(

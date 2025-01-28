@@ -1,0 +1,101 @@
+get:
+  summary: Get source maps
+  description: Returns an array of Fleet artifacts, including source map uploads.
+  operationId: getSourceMaps
+  tags:
+    - APM sourcemaps
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - name: page
+      in: query
+      description: Page number
+      schema:
+        type: number
+    - name: perPage
+      in: query
+      description: Number of records per page
+      schema:
+        type: number
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/source_maps_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '500':
+      description: Internal Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/500_response.yaml'
+    '501':
+      description: Not Implemented response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/501_response.yaml'
+post:
+  summary: Upload source map
+  description: Upload a source map for a specific service and version.
+  operationId: uploadSourceMap
+  tags:
+    - APM sourcemaps
+  parameters:
+    - $ref: '../components/headers/elastic_api_version.yaml'
+    - $ref: '../components/headers/kbn_xsrf.yaml'
+  requestBody:
+    required: true
+    content:
+      multipart/form-data:
+        schema:
+          $ref: '../components/schemas/upload_source_map_object.yaml'
+  responses:
+    '200':
+      description: Successful response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/upload_source_maps_response.yaml'
+    '400':
+      description: Bad Request response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/400_response.yaml'
+    '401':
+      description: Unauthorized response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/401_response.yaml'
+    '403':
+      description: Forbidden response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/403_response.yaml'
+    '500':
+      description: Internal Server Error response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/500_response.yaml'
+    '501':
+      description: Not Implemented response
+      content:
+        application/json:
+          schema:
+            $ref: '../components/schemas/501_response.yaml'

@@ -1,22 +1,28 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
+
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const dashboardAddPanel = getService('dashboardAddPanel');
   const dashboardPanelActions = getService('dashboardPanelActions');
-  const testSubjects = getService('testSubjects');
   const filterBar = getService('filterBar');
   const find = getService('find');
   const esArchiver = getService('esArchiver');
   const kibanaServer = getService('kibanaServer');
-  const PageObjects = getPageObjects(['common', 'dashboard', 'header', 'timePicker', 'discover']);
+  const { common, dashboard, header, discover } = getPageObjects([
+    'common',
+    'dashboard',
+    'header',
+    'discover',
+  ]);
   const from = 'Sep 22, 2015 @ 00:00:00.000';
   const to = 'Sep 23, 2015 @ 00:00:00.000';
 
@@ -31,22 +37,23 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await kibanaServer.uiSettings.replace({
         defaultIndex: '0bf35f60-3dc9-11e8-8660-4d65aa086b3c',
       });
-      await PageObjects.common.setTime({ from, to });
-      await PageObjects.dashboard.navigateToApp();
+      await common.setTime({ from, to });
+      await dashboard.navigateToApp();
       await filterBar.ensureFieldEditorModalIsClosed();
-      await PageObjects.dashboard.gotoDashboardLandingPage();
-      await PageObjects.dashboard.clickNewDashboard();
+      await dashboard.gotoDashboardLandingPage();
+      await dashboard.clickNewDashboard();
     });
 
     after(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
+      await common.unsetTime();
     });
 
     it('highlighting on filtering works', async function () {
       await dashboardAddPanel.addSavedSearch('Rendering-Test:-saved-search');
       await filterBar.addFilter({ field: 'agent', operation: 'is', value: 'Mozilla' });
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       const dataTable = await find.byCssSelector(`[data-test-subj="embeddedSavedSearchDocTable"]`);
       const $ = await dataTable.parseDomContent();
       const marks = $('mark')
@@ -57,8 +64,8 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('removing a filter removes highlights', async function () {
       await filterBar.removeAllFilters();
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
       const dataTable = await find.byCssSelector(`[data-test-subj="embeddedSavedSearchDocTable"]`);
       const $ = await dataTable.parseDomContent();
       const marks = $('mark')
@@ -69,34 +76,20 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('view action leads to a saved search', async function () {
       await filterBar.removeAllFilters();
-      await PageObjects.dashboard.saveDashboard('Dashboard With Saved Search');
-      await PageObjects.dashboard.clickCancelOutOfEditMode(false);
-      const inViewMode = await PageObjects.dashboard.getIsInViewMode();
+      await dashboard.saveDashboard('Dashboard With Saved Search');
+      await dashboard.clickCancelOutOfEditMode(false);
+      const inViewMode = await dashboard.getIsInViewMode();
       expect(inViewMode).to.equal(true);
 
-      await PageObjects.header.waitUntilLoadingHasFinished();
-      await PageObjects.dashboard.waitForRenderComplete();
+      await header.waitUntilLoadingHasFinished();
+      await dashboard.waitForRenderComplete();
 
-      await dashboardPanelActions.openContextMenu();
-      const actionExists = await testSubjects.exists(
+      await dashboardPanelActions.clickPanelAction(
         'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
       );
-      if (!actionExists) {
-        await dashboardPanelActions.clickContextMenuMoreItem();
-      }
-      const actionElement = await testSubjects.find(
-        'embeddablePanelAction-ACTION_VIEW_SAVED_SEARCH'
-      );
-      await actionElement.click();
 
-      await PageObjects.discover.waitForDiscoverAppOnScreen();
-      expect(await PageObjects.discover.getSavedSearchTitle()).to.equal(
-        'Rendering Test: saved search'
-      );
-    });
-
-    after(async () => {
-      await PageObjects.common.unsetTime();
+      await discover.waitForDiscoverAppOnScreen();
+      expect(await discover.getSavedSearchTitle()).to.equal('Rendering Test: saved search');
     });
   });
 }

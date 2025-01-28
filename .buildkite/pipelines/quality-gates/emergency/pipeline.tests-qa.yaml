@@ -1,0 +1,14 @@
+# These pipeline steps constitute the quality gate for your service within the QA environment.
+# Incorporate any necessary additional logic to validate the service's integrity.
+# A failure in this pipeline build will prevent further progression to the subsequent stage.
+
+steps:
+  - label: ":rocket: Run serverless synthetics check"
+    trigger: "serverless-quality-gates"
+    build:
+      message: "${BUILDKITE_MESSAGE} (triggered by pipeline.tests-qa.yaml)"
+      env:
+        TARGET_ENV: qa
+        SERVICE: kibana
+        CHECK_SYNTHETICS: true
+        CHECK_SYNTHETICS_TAG: serverless-platform-core-validation

@@ -31,7 +31,7 @@
           "\nRenders a Monaco code editor with EUI color theme.\n"
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/code-editor",
             "scope": "common",
@@ -39,31 +39,29 @@
             "section": "def-common.CodeEditorProps",
             "text": "CodeEditorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/code_editor/impl/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditor.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/code-editor",
                 "scope": "common",
                 "docId": "kibKbnCodeEditorPluginApi",
                 "section": "def-common.CodeEditorProps",
                 "text": "CodeEditorProps"
-              },
-              ">"
+              }
             ],
-            "path": "packages/shared-ux/code_editor/impl/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -82,7 +80,7 @@
           "\nRenders a Monaco code editor in the same style as other EUI form fields."
         ],
         "signature": [
-          "(props: React.PropsWithChildren<",
+          "(props: ",
           {
             "pluginId": "@kbn/code-editor",
             "scope": "common",
@@ -90,31 +88,29 @@
             "section": "def-common.CodeEditorProps",
             "text": "CodeEditorProps"
           },
-          ">) => JSX.Element"
+          ") => React.JSX.Element"
         ],
-        "path": "packages/shared-ux/code_editor/impl/index.tsx",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/code-editor",
             "id": "def-common.CodeEditorField.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "props",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<",
               {
                 "pluginId": "@kbn/code-editor",
                 "scope": "common",
                 "docId": "kibKbnCodeEditorPluginApi",
                 "section": "def-common.CodeEditorProps",
                 "text": "CodeEditorProps"
-              },
-              ">"
+              }
             ],
-            "path": "packages/shared-ux/code_editor/impl/index.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/index.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -132,7 +128,7 @@
         "tags": [],
         "label": "CodeEditorProps",
         "description": [],
-        "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -148,7 +144,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -164,7 +160,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -177,7 +173,7 @@
             "description": [
               "ID of the editor language"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,7 +186,7 @@
             "description": [
               "Value of the editor"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -208,7 +204,7 @@
               "editor",
               ".IModelContentChangedEvent) => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -222,7 +218,7 @@
                 "signature": [
                   "string"
                 ],
-                "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+                "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -238,7 +234,7 @@
                   "editor",
                   ".IModelContentChangedEvent"
                 ],
-                "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+                "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -259,7 +255,7 @@
               "editor",
               ".IStandaloneEditorConstructionOptions | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -276,7 +272,7 @@
               "languages",
               ".CompletionItemProvider | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -293,7 +289,7 @@
               "languages",
               ".SignatureHelpProvider | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -310,7 +306,7 @@
               "languages",
               ".HoverProvider | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -327,7 +323,7 @@
               "languages",
               ".LanguageConfiguration | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -344,7 +340,7 @@
               "languages",
               ".CodeActionProvider | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -360,7 +356,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -378,7 +374,7 @@
             "signature": [
               "(() => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [],
@@ -398,7 +394,7 @@
               "editor",
               ".IStandaloneCodeEditor) => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "children": [
@@ -413,7 +409,7 @@
                   "editor",
                   ".IStandaloneCodeEditor"
                 ],
-                "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+                "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
                 "deprecated": false,
                 "trackAdoption": false,
                 "isRequired": true
@@ -423,19 +419,19 @@
           },
           {
             "parentPluginId": "@kbn/code-editor",
-            "id": "def-common.CodeEditorProps.useDarkTheme",
-            "type": "CompoundType",
+            "id": "def-common.CodeEditorProps.editorWillUnmount",
+            "type": "Function",
             "tags": [],
-            "label": "useDarkTheme",
-            "description": [
-              "\nShould the editor use the dark theme"
-            ],
+            "label": "editorWillUnmount",
+            "description": [],
             "signature": [
-              "boolean | undefined"
+              "(() => void) | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
-            "trackAdoption": false
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
           },
           {
             "parentPluginId": "@kbn/code-editor",
@@ -449,7 +445,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -465,7 +461,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -479,7 +475,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -495,7 +491,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -509,7 +505,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -523,7 +519,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -539,7 +535,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -555,7 +551,78 @@
             "signature": [
               "{ minLines?: number | undefined; maxLines?: number | undefined; } | undefined"
             ],
-            "path": "packages/shared-ux/code_editor/impl/code_editor.tsx",
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.accessibilityOverlayEnabled",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "accessibilityOverlayEnabled",
+            "description": [
+              "\nEnables the editor to get disabled when pressing ESC to resolve focus trapping for accessibility."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.enableFindAction",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "enableFindAction",
+            "description": [
+              "\nEnables the Search bar functionality in the editor. Disabled by default."
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.dataTestSubj",
+            "type": "string",
+            "tags": [],
+            "label": "dataTestSubj",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.classNameCss",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "classNameCss",
+            "description": [
+              "\nCustom CSS class to apply to the container"
+            ],
+            "signature": [
+              "InterpolationPrimitive",
+              " | ",
+              "ArrayInterpolation",
+              "<",
+              "Theme",
+              "> | ",
+              "FunctionInterpolation",
+              "<",
+              "Theme",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -575,7 +642,7 @@
         "signature": [
           "\"css\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/css/constants.ts",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/languages/css/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -590,7 +657,7 @@
         "signature": [
           "\"markdown\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/markdown/constants.ts",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/languages/markdown/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -605,7 +672,7 @@
         "signature": [
           "\"yaml\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/yaml/constants.ts",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/languages/yaml/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -620,7 +687,7 @@
         "signature": [
           "\"handlebars\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/handlebars/constants.ts",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/languages/handlebars/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -635,7 +702,7 @@
         "signature": [
           "\"hjson\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/hjson/constants.ts",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/languages/hjson/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -650,7 +717,7 @@
         "signature": [
           "\"grok\""
         ],
-        "path": "packages/shared-ux/code_editor/impl/languages/grok/constants.ts",
+        "path": "src/platform/packages/shared/shared-ux/code_editor/impl/languages/grok/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

@@ -1,6 +1,7 @@
 post:
-  summary: Update the attributes for multiple Kibana saved objects.
+  summary: Update saved objects
   operationId: bulkUpdateSavedObjects
+  description: Update the attributes for multiple Kibana saved objects.
   deprecated: true
   tags:
     - saved objects
