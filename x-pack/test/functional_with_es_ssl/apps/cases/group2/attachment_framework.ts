@@ -19,8 +19,8 @@ import { AttachmentRequest } from '@kbn/cases-plugin/common/types/api';
 import {
   deleteAllCaseItems,
   findAttachments,
+  findCaseUserActions,
   findCases,
-  getAllUserActions,
 } from '../../../../cases_api_integration/common/lib/api';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
@@ -183,12 +183,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
       });
 
       it('renders multiple attachment types correctly', async () => {
-        const response = await getAllUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseId: originalCase.id,
         });
 
-        const comments = response.filter((userAction) => userAction.type === 'comment');
+        const comments = userActions.filter((userAction) => userAction.type === 'comment');
+
         const externalRefAttachmentId = comments[0].comment_id;
         const persistableStateAttachmentId = comments[1].comment_id;
         await validateAttachment(AttachmentType.externalReference, externalRefAttachmentId);

@@ -25,9 +25,14 @@ import {
   INTERNAL_CASE_METRICS_URL,
   INTERNAL_GET_CASE_CATEGORIES_URL,
   INTERNAL_CASE_SIMILAR_CASES_URL,
+  CASE_FIND_USER_ACTIONS_URL,
 } from '@kbn/cases-plugin/common/constants';
 import { CaseMetricsFeature } from '@kbn/cases-plugin/common';
-import type { SingleCaseMetricsResponse, CasesMetricsResponse } from '@kbn/cases-plugin/common';
+import type {
+  SingleCaseMetricsResponse,
+  CasesMetricsResponse,
+  UserActionFindResponse,
+} from '@kbn/cases-plugin/common';
 import { SignalHit } from '@kbn/security-solution-plugin/server/lib/detection_engine/rule_types/types';
 import { CasePersistedAttributes } from '@kbn/cases-plugin/server/common/types/case';
 import type { SavedObjectsRawDocSource } from '@kbn/core/server';
@@ -962,6 +967,30 @@ export const findInternalCaseUserActions = async ({
 }): Promise<UserActionInternalFindResponse> => {
   const { body: userActions } = await supertest
     .get(`${getSpaceUrlPrefix(auth.space)}${getCaseFindUserActionsUrl(caseID)}`)
+    .query(options)
+    .auth(auth.user.username, auth.user.password)
+    .expect(expectedHttpCode);
+
+  return userActions;
+};
+
+export const findCaseUserActions = async ({
+  supertest,
+  caseId,
+  options = {},
+  expectedHttpCode = 200,
+  auth = { user: superUser, space: null },
+}: {
+  supertest: SuperTest.Agent;
+  caseId: string;
+  options?: UserActionFindRequest;
+  expectedHttpCode?: number;
+  auth?: { user: User; space: string | null };
+}): Promise<UserActionFindResponse> => {
+  const { body: userActions } = await supertest
+    .get(
+      `${getSpaceUrlPrefix(auth.space)}${CASE_FIND_USER_ACTIONS_URL.replace('{case_id}', caseId)}`
+    )
     .query(options)
     .auth(auth.user.username, auth.user.password)
     .expect(expectedHttpCode);
