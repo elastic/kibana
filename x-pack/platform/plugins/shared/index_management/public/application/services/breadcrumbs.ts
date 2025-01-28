@@ -46,7 +46,7 @@ export enum IndexManagementBreadcrumb {
   enrichPoliciesCreate = 'enrichPoliciesCreate',
 
   content = 'content',
-  indexList ='indexList'
+  indicesList ='indicesList'
 
 }
 
@@ -205,12 +205,12 @@ class BreadcrumbService {
         href: `/enrich_policies/create`,
       },
     ];
-    this.breadcrumbs.indexList = [
+    this.breadcrumbs.indicesList = [
       ...this.breadcrumbs.content,
       ...this.breadcrumbs.home,
       {
-        text: i18n.translate('xpack.idxMgmt.breadcrumb.indicesLabel', {
-          defaultMessage: 'Indices List',
+        text: i18n.translate('xpack.idxMgmt.breadcrumb.indicesListLabel', {
+          defaultMessage: 'Indices',
         }),
         href: `/indices`,
       },
@@ -224,13 +224,13 @@ class BreadcrumbService {
     if (!this.setBreadcrumbsHandler) {
       throw new Error(`BreadcrumbService#setup() must be called first!`);
     }
-    console.log("type", type)
+
     const newBreadcrumbs = this.breadcrumbs[type]
       ? [...this.breadcrumbs[type]!]
       : [...this.breadcrumbs.home!];
 
     if (additionalBreadcrumb) {
-      newBreadcrumbs.push(additionalBreadcrumb);
+      newBreadcrumbs.push(additionalBreadcrumb)
     }
 
     // Pop off last breadcrumb

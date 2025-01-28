@@ -29,7 +29,7 @@ export const IndexList: React.FunctionComponent<RouteComponentProps> = ({ histor
     if (!extensionsService.indexDetailsPageRoute) {
       breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indices);
     } else {
-      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indexList);
+      breadcrumbService.setBreadcrumbs(IndexManagementBreadcrumb.indicesList);
     }
   }, []);
 
