@@ -5671,7 +5671,6 @@ paths:
       operationId: getCaseDefaultSpace
       parameters:
         - $ref: '#/components/parameters/Cases_case_id'
-        - $ref: '#/components/parameters/Cases_includeComments'
       responses:
         '200':
           content:
@@ -46586,14 +46585,6 @@ components:
           minItems: 1
           type: string
         type: array
-    Cases_includeComments:
-      deprecated: true
-      description: Deprecated in 8.1.0. This parameter is deprecated and will be removed in a future release. It determines whether case comments are returned.
-      in: query
-      name: includeComments
-      schema:
-        default: true
-        type: boolean
     Cases_kbn_xsrf:
       description: Cross-site request forgery protection
       in: header
