@@ -38,5 +38,6 @@
     "@kbn/core-chrome-browser",
     "@kbn/ai-assistant-icon",
     "@kbn/product-doc-base-plugin",
+    "@kbn/spaces-plugin",
   ]
 }
