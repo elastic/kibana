@@ -922,7 +922,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      safeLoad
     );
 
     expect(validationResults).toEqual(
@@ -976,7 +976,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      safeLoad
     );
 
     expect(validationResults).toEqual(
@@ -1030,7 +1030,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      safeLoad
     );
 
     expect(validationResults).toEqual(
@@ -1084,7 +1084,7 @@ describe('Fleet - validateConditionalRequiredVars()', () => {
     const validationResults = validatePackagePolicy(
       invalidPackagePolicyWithRequiredVars,
       mockPackageInfoRequireVars,
-      load
+      safeLoad
     );
 
     expect(validationResults).toEqual(
