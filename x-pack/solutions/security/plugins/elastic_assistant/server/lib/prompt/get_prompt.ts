@@ -120,7 +120,7 @@ export const getPrompt = async ({
 
   const prompts = await savedObjectsClient.find<Prompt>({
     type: promptSavedObjectType,
-    filter: `${promptSavedObjectType}.attributes.promptId: ${promptId} AND ${promptSavedObjectType}.attributes.promptGroupId: ${promptGroupId}`,
+    filter: `${promptSavedObjectType}.attributes.promptId: "${promptId}" AND ${promptSavedObjectType}.attributes.promptGroupId: "${promptGroupId}"`,
     fields: ['provider', 'model', 'prompt'],
   });
 

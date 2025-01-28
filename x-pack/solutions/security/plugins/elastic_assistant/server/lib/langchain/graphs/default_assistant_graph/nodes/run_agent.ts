@@ -46,17 +46,17 @@ export async function runAgent({
   logger.debug(() => `${NodeType.AGENT}: Node state:\n${JSON.stringify(state, null, 2)}`);
 
   const knowledgeHistory = await kbDataClient?.getRequiredKnowledgeBaseDocumentEntries();
-  let userPrompt = '';
-  if (state.llmType === 'gemini') {
-    userPrompt = await getPrompt({
-      actionsClient,
-      connectorId: state.connectorId,
-      promptId: promptDictionary.userPrompt,
-      promptGroupId: promptGroupId.aiAssistant,
-      provider: 'gemini',
-      savedObjectsClient,
-    });
-  }
+  const userPrompt =
+    state.llmType === 'gemini'
+      ? await getPrompt({
+          actionsClient,
+          connectorId: state.connectorId,
+          promptId: promptDictionary.userPrompt,
+          promptGroupId: promptGroupId.aiAssistant,
+          provider: 'gemini',
+          savedObjectsClient,
+        })
+      : '';
   const agentOutcome = await agentRunnable
     .withConfig({ tags: [AGENT_NODE_TAG], signal: config?.signal })
     .invoke(
