@@ -7,11 +7,19 @@
 
 import React, { useCallback, useMemo, useRef, useState } from 'react';
 import { isPlainObject } from 'lodash';
-import { EuiFilePicker, EuiFlexGroup, EuiFlexItem, EuiFormRow, EuiText } from '@elastic/eui';
+import {
+  EuiCode,
+  EuiFilePicker,
+  EuiFlexGroup,
+  EuiFlexItem,
+  EuiFormRow,
+  EuiText,
+} from '@elastic/eui';
 import type {
   EuiFilePickerClass,
   EuiFilePickerProps,
 } from '@elastic/eui/src/components/form/file_picker/file_picker';
+import { FormattedMessage } from '@kbn/i18n-react';
 import type { CreateRuleMigrationRequestBody } from '../../../../../../../../../common/siem_migrations/model/api/rules/rule_migration.gen';
 import type { OriginalRule } from '../../../../../../../../../common/siem_migrations/model/rule_migration.gen';
 import type { CreateMigration } from '../../../../../../service/hooks/use_create_migration';
@@ -70,12 +78,17 @@ export const RulesFileUpload = React.memo<RulesFileUploadProps>(
         <EuiFlexItem>
           <EuiFormRow
             helpText={
-              <EuiText color="danger" size="xs">
-                {error}
+              <EuiText color="subdued" size="xs">
+                <FormattedMessage
+                  id="xpack.securitySolution.siemMigrations.rulesFileUpload.disclaimer"
+                  defaultMessage="Note: To avoid exceeding your LLM's context window when translating a large number of queries, export rules in batches, for example by adding {command} to the query above"
+                  values={{ command: <EuiCode>{'| head'}</EuiCode> }}
+                />
               </EuiText>
             }
             isInvalid={error != null}
             fullWidth
+            error={error}
           >
             <EuiFilePicker
               id="rulesFilePicker"
