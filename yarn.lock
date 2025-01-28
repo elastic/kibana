@@ -4828,7 +4828,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-notifications-browser-mocks@link:packages/core/notifications/core-notifications-browser-mocks":
+"@kbn/core-notifications-browser-mocks@link:src/core/packages/notifications/browser-mocks":
   version "0.0.0"
   uid ""
 
