@@ -127,7 +127,6 @@ export const RulesWithGapsOverviewPanel = () => {
               {i18n.RULE_GAPS_OVERVIEW_PANEL_SHOW_ALL_RULES_LABEL}
             </EuiFilterButton>
             <EuiFilterButton
-              disabled={data?.total === 0}
               hasActiveFilters={showRulesWithGaps}
               onClick={() => handleShowRulesWithGapsFilterButtonClick(true)}
             >

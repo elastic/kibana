@@ -61,6 +61,15 @@ export const findRulesRoute = (router: SecuritySolutionPluginRouter, logger: Log
               statuses: [gapStatus.UNFILLED, gapStatus.PARTIALLY_FILLED],
             });
             ruleIds = ruleIdsWithGaps.ruleIds;
+            if (ruleIds.length === 0) {
+              const emptyRules = transformFindAlerts({
+                data: [],
+                page: query.page,
+                perPage: query.per_page,
+                total: 0,
+              });
+              return response.ok({ body: emptyRules });
+            }
           }
 
           const rules = await findRules({
