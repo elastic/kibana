@@ -104,9 +104,7 @@ export function validateStreamLifecycle(definition: StreamDefinition, isServerle
     throw new MalformedStreamError('ILM lifecycle is not supported in serverless environments');
   }
 
-  if (isUnwiredStreamDefinition(definition)) {
-    if (isIlmLifecycle(lifecycle)) {
-      throw new MalformedStreamError('ILM lifecycle is not supported for unwired streams');
-    }
+  if (isUnwiredStreamDefinition(definition) && isIlmLifecycle(lifecycle)) {
+    throw new MalformedStreamError('ILM lifecycle is not supported for unwired streams');
   }
 }

@@ -70,6 +70,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 routing: [],
                 processing: [
                   {
@@ -187,6 +188,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
             dashboards: [],
             stream: {
               ingest: {
+                lifecycle: { inherit: {} },
                 processing: [],
                 routing: [],
                 unwired: {},

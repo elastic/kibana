@@ -214,6 +214,8 @@ export class StreamsClient {
         dataStream: await this.getDataStream(definition.name),
       });
 
+      // inherit lifecycle is a noop for unwired streams, it keeps the
+      // data stream configuration as-is
       if (isDslLifecycle(definition.ingest.lifecycle)) {
         await this.updateStreamLifecycle(definition, definition.ingest.lifecycle);
       }
