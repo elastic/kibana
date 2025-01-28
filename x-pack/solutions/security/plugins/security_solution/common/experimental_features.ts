@@ -122,7 +122,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables content references (citations) in the AI Assistant
    */
-  contentReferencesEnabled: true,
+  contentReferencesEnabled: false,
 
   /**
    * Enables the Managed User section inside the new user details flyout.
