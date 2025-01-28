@@ -2304,10 +2304,10 @@
     "@elastic/transport" "^8.3.1"
     tslib "^2.4.0"
 
-"@elastic/elasticsearch@^8.16.0":
-  version "8.16.0"
-  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.16.0.tgz#35c6729e15684154b8b3c391cfad34877d771cf0"
-  integrity sha512-uiPC6AePESl/jakx+ZLarLsLdxDHiCSrpAkkXJ5Q8A78vadEQsTGXRUVFwWWkS8gfGthnT3O+QK6BHXuszd0KQ==
+"@elastic/elasticsearch@^8.17.0":
+  version "8.17.0"
+  resolved "https://registry.yarnpkg.com/@elastic/elasticsearch/-/elasticsearch-8.17.0.tgz#0214265bc04a3fe0d23a410b8d08b28217aac540"
+  integrity sha512-FZ+gQUrPsMpQ2RRIXwTmCoUeFCEausMhp4eQOyxT9j1cwGXHJrhelR6jffM1SC95kQUkB7+TcTq7oQ+bG2BQ9g==
   dependencies:
     "@elastic/transport" "^8.9.1"
     apache-arrow "^18.0.0"
@@ -5605,6 +5605,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/esql-variables-types@link:src/platform/packages/shared/kbn-esql-variables-types":
+  version "0.0.0"
+  uid ""
+
 "@kbn/esql@link:src/platform/plugins/shared/esql":
   version "0.0.0"
   uid ""
@@ -6505,7 +6509,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant":
+"@kbn/observability-ai-assistant-plugin@link:x-pack/platform/plugins/shared/observability_ai_assistant":
   version "0.0.0"
   uid ""
 
@@ -7061,7 +7065,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/search/shared_ui":
+"@kbn/search-shared-ui@link:x-pack/solutions/search/packages/shared_ui":
   version "0.0.0"
   uid ""
 

@@ -46,6 +46,7 @@ export default function ({ getService }: FtrProviderContext) {
     let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
+    let loc: any;
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
         ...request,
@@ -85,8 +86,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      const loc = await testPrivateLocations.addPrivateLocation();
-      testPolicyId = loc.id;
+      loc = await testPrivateLocations.addPrivateLocation();
+      testPolicyId = loc.agentPolicyId;
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')
@@ -644,7 +645,7 @@ export default function ({ getService }: FtrProviderContext) {
                   lat: 0,
                   lon: 0,
                 },
-                id: testPolicyId,
+                id: loc.id,
                 agentPolicyId: testPolicyId,
                 isServiceManaged: false,
                 label: 'Test private location 0',
@@ -1443,7 +1444,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${loc.id}`
         );
         expect(packagePolicy.name).eql(
           `${projectMonitors.monitors[0].id}-${project}-default-Test private location 0`
@@ -1511,7 +1512,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${loc.id}`
         );
         expect(packagePolicy.name).eql(
           `${httpProjectMonitors.monitors[1].id}-${project}-default-Test private location 0`
@@ -1530,7 +1531,7 @@ export default function ({ getService }: FtrProviderContext) {
             configId,
             projectId: project,
             locationName: 'Test private location 0',
-            locationId: testPolicyId,
+            locationId: loc.id,
           })
         );
       } finally {
@@ -1575,7 +1576,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${loc.id}`
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1597,7 +1598,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${loc.id}`
         );
 
         expect(packagePolicy2).eql(undefined);
@@ -1637,7 +1638,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${testPolicyId}`
+            `${monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID]}-${loc.id}`
         );
 
         expect(packagePolicy.policy_id).eql(testPolicyId);
@@ -1721,7 +1722,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const configId = monitorsResponse.body.monitors[0].id;
         const id = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
-        const policyId = `${id}-${testPolicyId}`;
+        const policyId = `${id}-${loc.id}`;
 
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId
@@ -1737,7 +1738,7 @@ export default function ({ getService }: FtrProviderContext) {
             id,
             configId,
             projectId: project,
-            locationId: testPolicyId,
+            locationId: loc.id,
             locationName: 'Test private location 0',
           })
         );
@@ -1764,7 +1765,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const configId2 = monitorsResponse.body.monitors[0].id;
         const id2 = monitorsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID];
-        const policyId2 = `${id}-${testPolicyId}`;
+        const policyId2 = `${id}-${loc.id}`;
 
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) => pkgPolicy.id === policyId2
@@ -1778,7 +1779,7 @@ export default function ({ getService }: FtrProviderContext) {
             id: id2,
             configId: configId2,
             projectId: project,
-            locationId: testPolicyId,
+            locationId: loc.id,
             locationName: 'Test private location 0',
             namespace: 'custom_namespace',
           })
@@ -1832,7 +1833,7 @@ export default function ({ getService }: FtrProviderContext) {
               label: 'Test private location 0',
               isServiceManaged: false,
               agentPolicyId: testPolicyId,
-              id: testPolicyId,
+              id: loc.id,
               geo: {
                 lat: 0,
                 lon: 0,

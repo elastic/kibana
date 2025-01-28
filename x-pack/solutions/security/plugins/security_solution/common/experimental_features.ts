@@ -234,7 +234,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Service Entity Store. The Entity Store feature will install the service engine by default.
    */
-  serviceEntityStoreEnabled: false,
+  serviceEntityStoreEnabled: true,
 
   /**
    * Enables the siem migrations feature
@@ -273,6 +273,11 @@ export const allowedExperimentalValues = Object.freeze({
    * Release: 8.18/9.0
    */
   responseActionsMSDefenderEndpointEnabled: true,
+
+  /**
+   * Enables banner for informing users about changes in data collection.
+   */
+  eventCollectionDataReductionBannerEnabled: false,
 });
 
 type ExperimentalConfigKeys = Array<keyof ExperimentalFeatures>;
