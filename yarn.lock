@@ -4580,7 +4580,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-fatal-errors-browser-mocks@link:packages/core/fatal-errors/core-fatal-errors-browser-mocks":
+"@kbn/core-fatal-errors-browser-mocks@link:src/core/packages/fatal-errors/browser-mocks":
   version "0.0.0"
   uid ""
 
