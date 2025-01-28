@@ -4908,7 +4908,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-plugins-browser-mocks@link:packages/core/plugins/core-plugins-browser-mocks":
+"@kbn/core-plugins-browser-mocks@link:src/core/packages/plugins/browser-mocks":
   version "0.0.0"
   uid ""
 
