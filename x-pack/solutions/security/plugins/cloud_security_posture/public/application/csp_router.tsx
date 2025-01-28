@@ -23,6 +23,7 @@ const queryClient = new QueryClient({
 export interface CspRouterProps {
   securitySolutionContext?: CspSecuritySolutionContext;
   getFindingsExpandableFlyout: GetFindingsExpandableFlyout;
+  useExpandableFlyoutApi: any;
 }
 
 export interface FindingsExpandableFlyoutProps {
@@ -36,12 +37,16 @@ export type GetFindingsExpandableFlyout = (props: FindingsExpandableFlyoutProps)
 export const CspRouter = ({
   securitySolutionContext,
   getFindingsExpandableFlyout,
+  useExpandableFlyoutApi,
 }: CspRouterProps) => {
   const routerElement = (
     <QueryClientProvider client={queryClient}>
       <Routes>
         <CspRoute {...cloudPosturePages.findings}>
-          <Pages.Findings getFindingsExpandableFlyout={getFindingsExpandableFlyout} />
+          <Pages.Findings
+            getFindingsExpandableFlyout={getFindingsExpandableFlyout}
+            useExpandableFlyoutApi={useExpandableFlyoutApi}
+          />
         </CspRoute>
         <CspRoute {...cloudPosturePages.dashboard} component={Pages.ComplianceDashboard} />
         <CspRoute
