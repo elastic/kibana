@@ -15,7 +15,7 @@ import type {
   SignalSearchResponse,
   SignalSource,
   OverrideBodyQuery,
-  LoggedRequestsEnabled,
+  LoggedRequestsConfig,
 } from '../types';
 import { buildEventsSearchQuery } from './build_events_query';
 import { createErrorsFromShard, makeFloatString } from './utils';
@@ -42,7 +42,7 @@ export interface SingleSearchAfterParams {
   runtimeMappings: estypes.MappingRuntimeFields | undefined;
   additionalFilters?: estypes.QueryDslQueryContainer[];
   overrideBody?: OverrideBodyQuery;
-  loggedRequestsEnabled?: LoggedRequestsEnabled;
+  loggedRequestsConfig?: LoggedRequestsConfig;
 }
 
 // utilize search_after for paging results into bulk.
@@ -65,7 +65,7 @@ export const singleSearchAfter = async <
   trackTotalHits,
   additionalFilters,
   overrideBody,
-  loggedRequestsEnabled,
+  loggedRequestsConfig,
 }: SingleSearchAfterParams): Promise<{
   searchResult: SignalSearchResponse<TAggregations>;
   searchDuration: string;
@@ -110,13 +110,13 @@ export const singleSearchAfter = async <
         errors: nextSearchAfterResult._shards.failures ?? [],
       });
 
-      if (loggedRequestsEnabled) {
+      if (loggedRequestsConfig) {
         loggedRequests.push({
-          request: loggedRequestsEnabled.skipRequestQuery
+          request: loggedRequestsConfig.skipRequestQuery
             ? undefined
             : logSearchRequest(searchAfterQuery),
-          description: loggedRequestsEnabled.description,
-          request_type: loggedRequestsEnabled.type,
+          description: loggedRequestsConfig.description,
+          request_type: loggedRequestsConfig.type,
           duration: Math.round(end - start),
         });
       }

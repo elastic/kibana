@@ -198,7 +198,7 @@ export const createNewTermsAlertType = (
           primaryTimestamp,
           secondaryTimestamp,
           runtimeMappings,
-          loggedRequestsEnabled: isLoggedRequestsEnabled
+          loggedRequestsConfig: isLoggedRequestsEnabled
             ? {
                 type: 'findAllTerms',
                 description: i18n.FIND_ALL_NEW_TERMS_FIELDS_DESCRIPTION(
@@ -376,7 +376,7 @@ export const createNewTermsAlertType = (
             pageSize: 0,
             primaryTimestamp,
             secondaryTimestamp,
-            loggedRequestsEnabled: isLoggedRequestsEnabled
+            loggedRequestsConfig: isLoggedRequestsEnabled
               ? {
                   type: 'findNewTerms',
                   description: i18n.FIND_NEW_TERMS_VALUES_DESCRIPTION(stringifyAfterKey(afterKey)),
@@ -427,7 +427,7 @@ export const createNewTermsAlertType = (
               pageSize: 0,
               primaryTimestamp,
               secondaryTimestamp,
-              loggedRequestsEnabled: isLoggedRequestsEnabled
+              loggedRequestsConfig: isLoggedRequestsEnabled
                 ? {
                     type: 'findDocuments',
                     description: i18n.FIND_NEW_TERMS_EVENTS_DESCRIPTION(

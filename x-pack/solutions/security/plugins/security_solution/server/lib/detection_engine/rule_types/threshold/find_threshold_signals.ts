@@ -117,7 +117,7 @@ export const findThresholdSignals = async ({
         runtimeMappings,
         primaryTimestamp,
         secondaryTimestamp,
-        loggedRequestsEnabled: isLoggedRequestsEnabled
+        loggedRequestsConfig: isLoggedRequestsEnabled
           ? {
               type: 'findThresholdBuckets',
               description: i18n.FIND_THRESHOLD_BUCKETS_DESCRIPTION(stringifyAfterKey(sortKeys)),
@@ -168,7 +168,7 @@ export const findThresholdSignals = async ({
       runtimeMappings,
       primaryTimestamp,
       secondaryTimestamp,
-      loggedRequestsEnabled: isLoggedRequestsEnabled
+      loggedRequestsConfig: isLoggedRequestsEnabled
         ? {
             type: 'findThresholdBuckets',
             description: i18n.FIND_THRESHOLD_BUCKETS_DESCRIPTION(),
