@@ -67,7 +67,7 @@ describe('DeprecationsService', () => {
     });
 
     describe('logging.configure tests', () => {
-      it('calls logging.configure without allow_http_debug_logs', async () => {
+      it('calls logging.configure without enable_http_debug_logs', async () => {
         const deprecationsService = new DeprecationsService(coreContext);
         await deprecationsService.setup(deprecationsCoreSetupDeps);
         expect(loggingMock.configure).toBeCalledTimes(1);
@@ -77,9 +77,9 @@ describe('DeprecationsService', () => {
         });
       });
 
-      it('calls logging.configure with allow_http_debug_logs set to true', async () => {
+      it('calls logging.configure with enable_http_debug_logs set to true', async () => {
         const configService = configServiceMock.create({
-          atPath: { allow_http_debug_logs: true },
+          atPath: { enable_http_debug_logs: true },
         });
         coreContext = mockCoreContext.create({ configService });
         const deprecationsService = new DeprecationsService(coreContext);

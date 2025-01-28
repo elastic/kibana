@@ -56,11 +56,10 @@ export function createRouteDeprecationsHandler({
       // no await we just fire it off.
       void client.incrementDeprecatedApi(counterName, { resolved: false });
 
-      const { message, meta } = getEcsResponseLog(ensureRawRequest(req), logger);
-      if (logger.isLogLevelEnabled('debug') {
-          const { message, meta } = getEcsResponseLog(ensureRawRequest(req), logger);
-          logger.debug(message, meta);
-       }
+      if (logger.isLevelEnabled('debug')) {
+        const { message, meta } = getEcsResponseLog(ensureRawRequest(req), logger);
+        logger.debug(message, meta);
+      }
     }
   };
 }

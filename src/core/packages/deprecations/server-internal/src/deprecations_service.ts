@@ -89,7 +89,7 @@ export class DeprecationsService
       ['deprecations-service'],
       config$.pipe(
         map((cfg) => {
-          const logLevel = cfg.allow_http_debug_logs ? 'debug' : 'off';
+          const logLevel = cfg.enable_http_debug_logs ? 'debug' : 'off';
           return { loggers: [{ name: 'http', level: logLevel, appenders: [] }] };
         })
       )
