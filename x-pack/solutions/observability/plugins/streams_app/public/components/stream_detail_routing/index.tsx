@@ -524,6 +524,7 @@ function PreviewPanel({
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [definition, routingAppState.debouncedChildUnderEdit, streamsRepositoryClient, start, end],
     {
       disableToastOnError: true,
