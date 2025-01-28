@@ -13,6 +13,19 @@ import type { ContentReferenceNode } from '../content_reference_parser';
 
 const testContentReferenceNode = { contentReferenceId: '1' } as ContentReferenceNode;
 
+jest.mock('../../../../common/lib/kibana', () => ({
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      discover: {
+        locator: jest.fn(),
+      },
+      application: {
+        navigateToApp: jest.fn(),
+      },
+    }
+  }),
+}));
+
 describe('contentReferenceComponentFactory', () => {
   it.each([
     [
