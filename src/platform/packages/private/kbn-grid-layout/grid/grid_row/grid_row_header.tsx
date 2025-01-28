@@ -24,7 +24,7 @@ export const GridRowHeader = ({
       <EuiSpacer size="s" />
       <EuiFlexGroup gutterSize="s">
         <EuiButtonIcon
-          color="text"
+          color="textParagraph"
           aria-label={i18n.translate('kbnGridLayout.row.toggleCollapse', {
             defaultMessage: 'Toggle collapse',
           })}

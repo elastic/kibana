@@ -142,11 +142,11 @@ export const DashboardPanelSelectionListFlyout: React.FC<
               position: 'sticky',
               top: euiTheme.size[paddingSize],
               zIndex: 1,
-              boxShadow: `0 -${euiTheme.size[paddingSize]} 0 4px ${euiTheme.colors.emptyShade}`,
+              boxShadow: `0 -${euiTheme.size[paddingSize]} 0 4px ${euiTheme.colors.backgroundBasePlain}`,
             }}
           >
             <EuiForm component="form" fullWidth>
-              <EuiFormRow css={{ backgroundColor: euiTheme.colors.emptyShade }}>
+              <EuiFormRow css={{ backgroundColor: euiTheme.colors.backgroundBasePlain }}>
                 <EuiFieldSearch
                   compressed
                   autoFocus
