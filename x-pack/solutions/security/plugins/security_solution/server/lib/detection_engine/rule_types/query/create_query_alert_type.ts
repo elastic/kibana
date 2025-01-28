@@ -81,6 +81,7 @@ export const createQueryAlertType = (
         bucketHistory: state.suppressionGroupHistory,
         licensing,
         scheduleNotificationResponseActionsService,
+        isLoggedRequestsEnabled: Boolean(state?.isLoggedRequestsEnabled),
       });
     },
   };
