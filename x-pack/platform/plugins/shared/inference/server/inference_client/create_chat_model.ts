@@ -17,7 +17,7 @@ export interface CreateChatModelOptions {
   connectorId: string;
   actions: ActionsPluginStart;
   logger: Logger;
-  chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete'>;
+  chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
 }
 
 export const createChatModel = async ({

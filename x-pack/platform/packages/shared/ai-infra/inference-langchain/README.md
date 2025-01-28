@@ -32,6 +32,7 @@ import { connectorToInference } from '@kbn/inference-common';
 const chatModel = new InferenceChatModel({
   chatComplete: inference.chatComplete,
   connector: connectorToInference(someInferenceConnector),
+  logger: myPluginLogger,
 });
 
 // just use it as another langchain chatModel

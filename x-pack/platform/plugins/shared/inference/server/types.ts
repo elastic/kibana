@@ -104,6 +104,9 @@ export interface InferenceServerStart {
    * const chatModel = await myStartDeps.inference.getChatModel({
    *   request,
    *   connectorId: 'my-connector-id',
+   *   chatModelOptions: {
+   *    temperature: 0.3,
+   *   }
    * });
    */
   getChatModel: (options: CreateChatModelOptions) => Promise<InferenceChatModel>;
@@ -124,5 +127,5 @@ export interface CreateChatModelOptions {
   /**
    * Additional parameters to be passed down to the model constructor.
    */
-  chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete'>;
+  chatModelOptions: Omit<InferenceChatModelParams, 'connector' | 'chatComplete' | 'logger'>;
 }
