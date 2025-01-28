@@ -164,6 +164,7 @@ describe('convertMonitoringFromRawAndVerify', () => {
       debug: mockLoggerDebug,
     };
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const result = convertMonitoringFromRawAndVerify(mockLogger as any, '123', monitoring);
     expect(mockLoggerDebug).toHaveBeenCalledWith(
       'invalid monitoring last_run.timestamp "invalid" in raw rule 123'
