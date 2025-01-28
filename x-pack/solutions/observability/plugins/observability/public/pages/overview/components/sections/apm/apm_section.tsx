@@ -73,6 +73,7 @@ export function APMSection({ bucketSize }: Props) {
     },
     // `forceUpdate` and `lastUpdated` should trigger a reload
 
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [bucketSize, relativeStart, relativeEnd, absoluteStart, absoluteEnd, forceUpdate, lastUpdated]
   );
 
