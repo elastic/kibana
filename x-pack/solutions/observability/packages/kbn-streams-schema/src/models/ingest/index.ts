@@ -12,3 +12,4 @@ export * from './processors';
 export * from './conditions';
 export * from './routing';
 export * from './common';
+export * from './lifecycle';

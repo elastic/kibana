@@ -57,7 +57,8 @@ enum TabId {
   Status = 'status',
 }
 
-const isSwitchDisabled = (status?: StoreStatus) => status === 'error' || status === 'installing';
+const isSwitchLoading = (status?: StoreStatus) => status === 'installing';
+const isSwitchDisabled = (status?: StoreStatus) => status === 'error' || isSwitchLoading(status);
 const isEntityStoreEnabled = (status?: StoreStatus) => status === 'running';
 const canDeleteEntityEngine = (status?: StoreStatus) =>
   !['not_installed', 'installing'].includes(status || '');
@@ -96,7 +97,7 @@ export const EntityStoreManagementPage = () => {
     if (isEntityStoreEnabled(entityStoreStatus.data?.status)) {
       stopEntityEngineMutation.mutate();
     } else {
-      enableStoreMutation.mutate();
+      enableStoreMutation.mutate({});
     }
   }, [entityStoreStatus.data?.status, stopEntityEngineMutation, enableStoreMutation]);
 
@@ -164,7 +165,7 @@ export const EntityStoreManagementPage = () => {
           !isEntityStoreFeatureFlagDisabled && privileges?.has_all_required
             ? [
                 <EnablementButton
-                  isLoading={isMutationLoading}
+                  isLoading={isMutationLoading || isSwitchLoading(entityStoreStatus.data?.status)}
                   isDisabled={isSwitchDisabled(entityStoreStatus.data?.status)}
                   onSwitch={onSwitchClick}
                   status={entityStoreStatus.data?.status}
