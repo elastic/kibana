@@ -1368,7 +1368,7 @@
     "@kbn/code-owners": "link:packages/kbn-code-owners",
     "@kbn/core-analytics-browser-mocks": "link:src/core/packages/analytics/browser-mocks",
     "@kbn/core-analytics-server-mocks": "link:src/core/packages/analytics/server-mocks",
-    "@kbn/core-application-browser-mocks": "link:packages/core/application/core-application-browser-mocks",
+    "@kbn/core-application-browser-mocks": "link:src/core/packages/application/browser-mocks",
     "@kbn/core-apps-browser-mocks": "link:packages/core/apps/core-apps-browser-mocks",
     "@kbn/core-base-browser-mocks": "link:packages/core/base/core-base-browser-mocks",
     "@kbn/core-base-server-mocks": "link:packages/core/base/core-base-server-mocks",
