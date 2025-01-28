@@ -243,7 +243,7 @@ export class SiemRulesMigrationsService {
 
         if (result.status === SiemMigrationTaskStatus.STOPPED) {
           const connectorId = this.connectorIdStorage.get();
-          if (connectorId) {
+          if (connectorId && !this.hasMissingCapabilities('all')) {
             // automatically resume stopped migrations when connector is available
             await startRuleMigration({ migrationId: result.id, connectorId });
             pendingMigrationIds.push(result.id);
