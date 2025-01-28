@@ -231,7 +231,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
         contentReferencesVisible,
         onChangeContentReferencesVisible,
         showAnonymizedValues,
-        onChangeContentReferencesVisible,
+        onChangeShowAnonymizedValues,
         euiTheme.colors.textDanger,
         handleNavigateToAnonymization,
         handleNavigateToKnowledgeBase,
