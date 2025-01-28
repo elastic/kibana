@@ -7,6 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
+import React from 'react';
 import type { TopNavMenuBadgeProps } from '@kbn/navigation-plugin/public';
 import { getTopNavUnsavedChangesBadge } from '@kbn/unsaved-changes-badge';
 import { getManagedContentBadge } from '@kbn/managed-content-badge';
@@ -16,6 +17,7 @@ import { DiscoverStateContainer } from '../../state_management/discover_state';
 import type { TopNavCustomization } from '../../../../customizations';
 import { onSaveSearch } from './on_save_search';
 import { DiscoverServices } from '../../../../build_services';
+import { SolutionsViewBadge } from './solutions_view_badge';
 
 /**
  * Helper function to build the top nav badges
@@ -43,6 +45,15 @@ export const getTopNavBadges = ({
   const entries: TopNavMenuBadgeProps[] = [];
 
   const isManaged = stateContainer.savedSearchState.getState().managed;
+
+  if (services.spaces) {
+    entries.push({
+      badgeText: i18n.translate('discover.topNav.solutionViewTitle', {
+        defaultMessage: 'Check out context-aware Discover',
+      }),
+      renderCustomBadge: ({ badgeText }) => <SolutionsViewBadge badgeText={badgeText} />,
+    });
+  }
 
   if (hasUnsavedChanges && !defaultBadges?.unsavedChangesBadge?.disabled) {
     entries.push(
