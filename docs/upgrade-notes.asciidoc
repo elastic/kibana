@@ -2052,6 +2052,3 @@ To monitor endpoints, pages, and user journeys, go to **{observability}** -> **S
 ==== Elastic Security solution
 
 NOTE: For the complete Elastic Security solution release information, refer to {security-guide}/release-notes.html[_Elastic Security Solution Release Notes_].
-
-
-
