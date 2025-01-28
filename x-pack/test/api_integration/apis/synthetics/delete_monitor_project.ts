@@ -27,6 +27,7 @@ export default function ({ getService }: FtrProviderContext) {
     let projectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
+    let loc: any;
     const testPrivateLocations = new PrivateLocationTestService(getService);
 
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
@@ -39,8 +40,8 @@ export default function ({ getService }: FtrProviderContext) {
     before(async () => {
       await kibanaServer.savedObjects.cleanStandardList();
       await testPrivateLocations.installSyntheticsPackage();
-      const loc = await testPrivateLocations.addPrivateLocation();
-      testPolicyId = loc.id;
+      loc = await testPrivateLocations.addPrivateLocation();
+      testPolicyId = loc.agentPolicyId;
     });
 
     beforeEach(() => {
@@ -404,9 +405,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy = apiResponsePolicy.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] + '-' + loc.id
         );
         expect(packagePolicy.policy_id).to.be(testPolicyId);
 
@@ -438,9 +437,7 @@ export default function ({ getService }: FtrProviderContext) {
         const packagePolicy2 = apiResponsePolicy2.body.items.find(
           (pkgPolicy: PackagePolicy) =>
             pkgPolicy.id ===
-            savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] +
-              '-' +
-              testPolicyId
+            savedObjectsResponse.body.monitors[0][ConfigKey.CUSTOM_HEARTBEAT_ID] + '-' + loc.id
         );
         expect(packagePolicy2).to.be(undefined);
       } finally {
