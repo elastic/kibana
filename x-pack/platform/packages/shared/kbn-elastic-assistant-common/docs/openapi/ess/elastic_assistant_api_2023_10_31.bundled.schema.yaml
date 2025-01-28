@@ -1290,28 +1290,6 @@ components:
           type: string
       required:
         - id
-<<<<<<< HEAD
-    EsqlContentReference:
-      allOf:
-        - $ref: '#/components/schemas/BaseContentReference'
-        - type: object
-          properties:
-            label:
-              description: Label of the query
-              type: string
-            query:
-              description: An ESQL query
-              type: string
-            type:
-              enum:
-                - EsqlQuery
-              type: string
-          required:
-            - type
-            - query
-            - label
-      description: References an ESQL query
-=======
     DeleteResponseFields:
       type: object
       properties:
@@ -1421,7 +1399,26 @@ components:
           required:
             - id
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
->>>>>>> 8ba217909651c2539c0e0d46ef411b4e0992be8b
+    EsqlContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            label:
+              description: Label of the query
+              type: string
+            query:
+              description: An ESQL query
+              type: string
+            type:
+              enum:
+                - EsqlQuery
+              type: string
+          required:
+            - type
+            - query
+            - label
+      description: References an ESQL query
     FindAnonymizationFieldsSortField:
       enum:
         - created_at
@@ -1451,28 +1448,6 @@ components:
         - name
         - updated_at
       type: string
-<<<<<<< HEAD
-    KnowledgeBaseEntryContentReference:
-      allOf:
-        - $ref: '#/components/schemas/BaseContentReference'
-        - type: object
-          properties:
-            knowledgeBaseEntryId:
-              description: Id of the Knowledge Base Entry
-              type: string
-            knowledgeBaseEntryName:
-              description: Name of the knowledge base entry
-              type: string
-            type:
-              enum:
-                - KnowledgeBaseEntry
-              type: string
-          required:
-            - type
-            - knowledgeBaseEntryId
-            - knowledgeBaseEntryName
-      description: References a knowledge base entry
-=======
     IndexEntry:
       allOf:
         - type: object
@@ -1689,6 +1664,26 @@ components:
         - skipped
         - succeeded
         - total
+    KnowledgeBaseEntryContentReference:
+      allOf:
+        - $ref: '#/components/schemas/BaseContentReference'
+        - type: object
+          properties:
+            knowledgeBaseEntryId:
+              description: Id of the Knowledge Base Entry
+              type: string
+            knowledgeBaseEntryName:
+              description: Name of the knowledge base entry
+              type: string
+            type:
+              enum:
+                - KnowledgeBaseEntry
+              type: string
+          required:
+            - type
+            - knowledgeBaseEntryId
+            - knowledgeBaseEntryName
+      description: References a knowledge base entry
     KnowledgeBaseEntryCreateProps:
       anyOf:
         - $ref: '#/components/schemas/DocumentEntryCreateFields'
@@ -1737,7 +1732,6 @@ components:
         success:
           description: Identify the success of the method execution.
           type: boolean
->>>>>>> 8ba217909651c2539c0e0d46ef411b4e0992be8b
     Message:
       description: AI assistant conversation message.
       type: object
@@ -2048,7 +2042,29 @@ components:
         type: string
       description: Replacements object used to anonymize/deanomymize messsages
       type: object
-<<<<<<< HEAD
+    ResponseFields:
+      type: object
+      properties:
+        createdAt:
+          description: Time the Knowledge Base Entry was created
+          type: string
+        createdBy:
+          description: User who created the Knowledge Base Entry
+          type: string
+        id:
+          $ref: '#/components/schemas/NonEmptyString'
+        updatedAt:
+          description: Time the Knowledge Base Entry was last updated
+          type: string
+        updatedBy:
+          description: User who last updated the Knowledge Base Entry
+          type: string
+      required:
+        - id
+        - createdAt
+        - createdBy
+        - updatedAt
+        - updatedBy
     SecurityAlertContentReference:
       allOf:
         - $ref: '#/components/schemas/BaseContentReference'
@@ -2077,31 +2093,6 @@ components:
           required:
             - type
       description: References the security alerts page
-=======
-    ResponseFields:
-      type: object
-      properties:
-        createdAt:
-          description: Time the Knowledge Base Entry was created
-          type: string
-        createdBy:
-          description: User who created the Knowledge Base Entry
-          type: string
-        id:
-          $ref: '#/components/schemas/NonEmptyString'
-        updatedAt:
-          description: Time the Knowledge Base Entry was last updated
-          type: string
-        updatedBy:
-          description: User who last updated the Knowledge Base Entry
-          type: string
-      required:
-        - id
-        - createdAt
-        - createdBy
-        - updatedAt
-        - updatedBy
->>>>>>> 8ba217909651c2539c0e0d46ef411b4e0992be8b
     SortOrder:
       enum:
         - asc
