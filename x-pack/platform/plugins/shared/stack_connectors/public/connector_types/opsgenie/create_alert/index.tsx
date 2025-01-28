@@ -87,23 +87,15 @@ const FormView: React.FC<FormViewProps> = ({
       </EuiFlexGroup>
       <EuiSpacer size={'m'} />
 
-      <EuiFormRow
-        fullWidth
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editOptionalSubAction}
+        messageVariables={messageVariables}
+        paramsProperty={'description'}
         label={i18n.DESCRIPTION_FIELD_LABEL}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18n.OPTIONAL_LABEL}
-          </EuiText>
-        }
-      >
-        <TextAreaWithMessageVariables
-          index={index}
-          editAction={editOptionalSubAction}
-          messageVariables={messageVariables}
-          paramsProperty={'description'}
-          inputTargetValue={subActionParams?.description}
-        />
-      </EuiFormRow>
+        inputTargetValue={subActionParams?.description}
+        optionalField={true}
+      />
       <EuiSpacer size={'m'} />
       <EuiFormRow
         data-test-subj="opsgenie-alias-row"

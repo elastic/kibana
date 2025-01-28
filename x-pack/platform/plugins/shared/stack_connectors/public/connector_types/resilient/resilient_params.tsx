@@ -247,55 +247,30 @@ const ResilientParamsFields: React.FunctionComponent<ActionParamsProps<Resilient
           errors={(errors['subActionParams.incident.name'] ?? []) as string[]}
         />
       </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editSubActionProperty}
+        messageVariables={messageVariables}
+        paramsProperty={'description'}
         label={i18n.translate(
           'xpack.stackConnectors.components.resilient.descriptionTextAreaFieldLabel',
           { defaultMessage: 'Description' }
         )}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18n.translate('xpack.stackConnectors.components.resilient.descriptionOptionalField', {
-              defaultMessage: 'Optional',
-            })}
-          </EuiText>
-        }
-      >
-        <TextAreaWithMessageVariables
-          index={index}
-          editAction={editSubActionProperty}
-          messageVariables={messageVariables}
-          paramsProperty={'description'}
-          inputTargetValue={incident.description ?? undefined}
-        />
-      </EuiFormRow>
-      <EuiSpacer size="m" />
-      <EuiFormRow
-        fullWidth
+        inputTargetValue={incident.description ?? undefined}
+        optionalField={true}
+      />
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editComment}
+        messageVariables={messageVariables}
+        paramsProperty={'comments'}
         label={i18n.translate(
           'xpack.stackConnectors.components.resilient.commentsTextAreaFieldLabel',
           { defaultMessage: 'Additional comments' }
         )}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {i18n.translate(
-              'xpack.stackConnectors.components.resilient.additionalCommentsOptionalField',
-              {
-                defaultMessage: 'Optional',
-              }
-            )}
-          </EuiText>
-        }
-      >
-        <TextAreaWithMessageVariables
-          index={index}
-          editAction={editComment}
-          messageVariables={messageVariables}
-          paramsProperty={'comments'}
-          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
-        />
-      </EuiFormRow>
+        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+        optionalField={true}
+      />
     </>
   );
 };

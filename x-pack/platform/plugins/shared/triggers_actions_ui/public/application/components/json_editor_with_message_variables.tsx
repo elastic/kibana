@@ -6,7 +6,14 @@
  */
 
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { EuiFormRow, EuiCallOut, EuiSpacer } from '@elastic/eui';
+import {
+  EuiFormRow,
+  EuiCallOut,
+  EuiSpacer,
+  EuiText,
+  EuiFlexGroup,
+  EuiFlexItem,
+} from '@elastic/eui';
 
 import { i18n } from '@kbn/i18n';
 import { monaco, XJsonLang } from '@kbn/monaco';
@@ -46,6 +53,7 @@ interface Props {
   showButtonTitle?: boolean;
   dataTestSubj?: string;
   euiCodeEditorProps?: { [key: string]: any };
+  optionalField?: boolean;
 }
 
 const { useXJsonMode } = XJson;
@@ -69,6 +77,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
   showButtonTitle,
   dataTestSubj,
   euiCodeEditorProps = {},
+  optionalField = false,
 }) => {
   const editorRef = useRef<monaco.editor.IStandaloneCodeEditor>();
   const editorDisposables = useRef<monaco.IDisposable[]>([]);
@@ -161,15 +170,57 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
       error={errors}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
-      labelAppend={
-        <AddMessageVariables
-          buttonTitle={buttonTitle}
-          messageVariables={messageVariables}
-          onSelectEventHandler={onSelectMessageVariable}
-          paramsProperty={paramsProperty}
-          showButtonTitle={showButtonTitle}
-        />
-      }
+      labelAppend={(() => {
+        if (optionalField && (messageVariables?.length ?? 0) === 0) {
+          return (
+            <EuiText size="xs" color="subdued">
+              {i18n.translate(
+                'xpack.triggerActionsUI.components.jsonEditorWithMessageVariable.optionalFieldLabel',
+                {
+                  defaultMessage: 'Optional',
+                }
+              )}
+            </EuiText>
+          );
+        }
+        if (optionalField && (messageVariables?.length ?? 0) > 0) {
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <AddMessageVariables
+                  buttonTitle={buttonTitle}
+                  messageVariables={messageVariables}
+                  onSelectEventHandler={onSelectMessageVariable}
+                  paramsProperty={paramsProperty}
+                  showButtonTitle={showButtonTitle}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate(
+                    'xpack.triggerActionsUI.components.jsonEditorWithMessageVariable.optionalFieldLabel',
+                    {
+                      defaultMessage: 'Optional',
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+        if (!optionalField && (messageVariables?.length ?? 0) > 0) {
+          return (
+            <AddMessageVariables
+              buttonTitle={buttonTitle}
+              messageVariables={messageVariables}
+              onSelectEventHandler={onSelectMessageVariable}
+              paramsProperty={paramsProperty}
+              showButtonTitle={showButtonTitle}
+            />
+          );
+        }
+        return null;
+      })()}
       helpText={helpText}
     >
       <>

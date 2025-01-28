@@ -6,7 +6,8 @@
  */
 
 import React, { useState } from 'react';
-import { EuiTextArea, EuiFormRow } from '@elastic/eui';
+import { i18n } from '@kbn/i18n';
+import { EuiTextArea, EuiFormRow, EuiText, EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
 import { ActionVariable } from '@kbn/alerting-plugin/common';
 import { AddMessageVariables } from '@kbn/alerts-ui-shared';
 import { getIsExperimentalFeatureEnabled } from '../../common/get_experimental_features';
@@ -23,6 +24,7 @@ interface Props {
   label: string;
   helpText?: string;
   errors?: string[];
+  optionalField?: boolean;
 }
 
 const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
@@ -35,6 +37,7 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
   label,
   errors,
   helpText,
+  optionalField = false,
 }) => {
   const [currentTextElement, setCurrentTextElement] = useState<HTMLTextAreaElement | null>(null);
 
@@ -60,13 +63,53 @@ const TextAreaWithMessageVariablesLegacy: React.FunctionComponent<Props> = ({
       isDisabled={isDisabled}
       isInvalid={errors && errors.length > 0 && inputTargetValue !== undefined}
       label={label}
-      labelAppend={
-        <AddMessageVariables
-          messageVariables={messageVariables}
-          onSelectEventHandler={onSelectMessageVariable}
-          paramsProperty={paramsProperty}
-        />
-      }
+      labelAppend={(() => {
+        if (optionalField && (messageVariables?.length ?? 0) === 0) {
+          return (
+            <EuiText size="xs" color="subdued">
+              {i18n.translate(
+                'xpack.triggerActionsUI.components.textAreaWithMessageVariables.optionalFieldLabel',
+                {
+                  defaultMessage: 'Optional',
+                }
+              )}
+            </EuiText>
+          );
+        }
+        if (optionalField && (messageVariables?.length ?? 0) > 0) {
+          return (
+            <EuiFlexGroup alignItems="center" gutterSize="s" justifyContent="flexEnd">
+              <EuiFlexItem grow={false}>
+                <AddMessageVariables
+                  messageVariables={messageVariables}
+                  onSelectEventHandler={onSelectMessageVariable}
+                  paramsProperty={paramsProperty}
+                />
+              </EuiFlexItem>
+              <EuiFlexItem grow={false}>
+                <EuiText size="xs" color="subdued">
+                  {i18n.translate(
+                    'xpack.triggerActionsUI.components.textAreaWithMessageVariables.optionalFieldLabel',
+                    {
+                      defaultMessage: 'Optional',
+                    }
+                  )}
+                </EuiText>
+              </EuiFlexItem>
+            </EuiFlexGroup>
+          );
+        }
+        if (!optionalField && (messageVariables?.length ?? 0) > 0) {
+          return (
+            <AddMessageVariables
+              messageVariables={messageVariables}
+              onSelectEventHandler={onSelectMessageVariable}
+              paramsProperty={paramsProperty}
+            />
+          );
+        }
+        return null;
+      })()}
       helpText={helpText}
     >
       <EuiTextArea

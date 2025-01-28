@@ -131,6 +131,7 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
           }}
         />
       </EuiFormRow>
+
       <EuiFormRow
         fullWidth
         label={translations.TAGS_LABEL}
@@ -150,23 +151,15 @@ export const TheHiveParamsCaseFields: React.FC<ActionParamsProps<ExecutorParams>
         />
       </EuiFormRow>
 
-      <EuiFormRow
-        fullWidth
+      <TextAreaWithMessageVariables
+        index={index}
+        editAction={editComment}
+        messageVariables={messageVariables}
+        paramsProperty={'comments'}
         label={translations.COMMENTS_LABEL}
-        labelAppend={
-          <EuiText size="xs" color="subdued">
-            {translations.OPTIONAL_LABEL}
-          </EuiText>
-        }
-      >
-        <TextAreaWithMessageVariables
-          index={index}
-          editAction={editComment}
-          messageVariables={messageVariables}
-          paramsProperty={'comments'}
-          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
-        />
-      </EuiFormRow>
+        inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+        optionalField={true}
+      />
     </>
   );
 };

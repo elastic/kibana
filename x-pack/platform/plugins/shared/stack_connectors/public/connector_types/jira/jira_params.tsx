@@ -370,34 +370,20 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             )}
           />
         )}
-        <EuiFormRow
-          fullWidth
+        <TextAreaWithMessageVariables
+          index={index}
+          editAction={editComment}
           label={i18n.translate(
             'xpack.stackConnectors.components.jira.commentsTextAreaFieldLabel',
             {
               defaultMessage: 'Additional comments',
             }
           )}
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'xpack.stackConnectors.components.jira.additionalCommentsOptionalFieldLabel',
-                {
-                  defaultMessage: 'Optional',
-                }
-              )}
-            </EuiText>
-          }
-        >
-          <TextAreaWithMessageVariables
-            index={index}
-            editAction={editComment}
-            messageVariables={messageVariables}
-            paramsProperty={'comments'}
-            inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
-          />
-        </EuiFormRow>
-        <EuiSpacer size="m" />
+          messageVariables={messageVariables}
+          paramsProperty={'comments'}
+          inputTargetValue={comments && comments.length > 0 ? comments[0].comment : undefined}
+          optionalField={true}
+        />
         <EuiFormRow
           fullWidth
           error={errors['subActionParams.incident.otherFields'] as string}
@@ -405,52 +391,43 @@ const JiraParamsFields: React.FunctionComponent<ActionParamsProps<JiraActionPara
             errors['subActionParams.incident.otherFields'] !== undefined &&
             Number(errors['subActionParams.incident.otherFields'].length) > 0
           }
-          label={
-            <>
-              {i18n.translate('xpack.stackConnectors.components.jira.otherFieldsFieldLabel', {
-                defaultMessage: 'Additional fields',
-              })}
-              <EuiIconTip
-                size="s"
-                color="subdued"
-                type="questionInCircle"
-                className="eui-alignTop"
-                data-test-subj="otherFieldsHelpTooltip"
-                aria-label={i18n.translate(
-                  'xpack.stackConnectors.components.jira.otherFieldsHelpTooltip',
-                  {
-                    defaultMessage: 'Additional fields help',
-                  }
-                )}
-                content={i18n.translate(
-                  'xpack.stackConnectors.components.jira.otherFieldsHelpText',
-                  {
-                    defaultMessage:
-                      'Additional fields are not validated by the connector. To avoid failed actions, ensure compliance with your Jira policies.',
-                  }
-                )}
-              />
-            </>
-          }
-          labelAppend={
-            <EuiText size="xs" color="subdued">
-              {i18n.translate(
-                'xpack.stackConnectors.components.jira.additionalFieldsOptionalFieldLabel',
-                {
-                  defaultMessage: 'Optional',
-                }
-              )}
-            </EuiText>
-          }
         >
           <JsonEditorWithMessageVariables
             messageVariables={messageVariables}
             paramsProperty={'otherFields'}
             inputTargetValue={actionParams.subActionParams?.incident?.otherFields}
             errors={errors.otherFields as string[]}
+            label={
+              <>
+                {i18n.translate('xpack.stackConnectors.components.jira.otherFieldsFieldLabel', {
+                  defaultMessage: 'Additional fields',
+                })}
+                <EuiIconTip
+                  size="s"
+                  color="subdued"
+                  type="questionInCircle"
+                  className="eui-alignTop"
+                  data-test-subj="otherFieldsHelpTooltip"
+                  aria-label={i18n.translate(
+                    'xpack.stackConnectors.components.jira.otherFieldsHelpTooltip',
+                    {
+                      defaultMessage: 'Additional fields help',
+                    }
+                  )}
+                  content={i18n.translate(
+                    'xpack.stackConnectors.components.jira.otherFieldsHelpText',
+                    {
+                      defaultMessage:
+                        'Additional fields are not validated by the connector. To avoid failed actions, ensure compliance with your Jira policies.',
+                    }
+                  )}
+                />
+              </>
+            }
             onDocumentsChange={(json: string) => {
               editSubActionProperty('otherFields', json === '' ? null : json);
             }}
+            optionalField={true}
           />
         </EuiFormRow>
       </>
