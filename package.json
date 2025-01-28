@@ -1402,7 +1402,7 @@
     "@kbn/core-logging-server-mocks": "link:src/core/packages/logging/server-mocks",
     "@kbn/core-metrics-collectors-server-mocks": "link:src/core/packages/metrics/collectors-server-mocks",
     "@kbn/core-metrics-server-mocks": "link:src/core/packages/metrics/server-mocks",
-    "@kbn/core-node-server-mocks": "link:packages/core/node/core-node-server-mocks",
+    "@kbn/core-node-server-mocks": "link:src/core/packages/node/server-mocks",
     "@kbn/core-notifications-browser-mocks": "link:packages/core/notifications/core-notifications-browser-mocks",
     "@kbn/core-overlays-browser-mocks": "link:packages/core/overlays/core-overlays-browser-mocks",
     "@kbn/core-plugins-browser-mocks": "link:packages/core/plugins/core-plugins-browser-mocks",

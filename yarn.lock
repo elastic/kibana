@@ -4816,7 +4816,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-node-server-mocks@link:packages/core/node/core-node-server-mocks":
+"@kbn/core-node-server-mocks@link:src/core/packages/node/server-mocks":
   version "0.0.0"
   uid ""
 
