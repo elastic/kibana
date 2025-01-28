@@ -4404,7 +4404,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-capabilities-browser-mocks@link:packages/core/capabilities/core-capabilities-browser-mocks":
+"@kbn/core-capabilities-browser-mocks@link:src/core/packages/capabilities/browser-mocks":
   version "0.0.0"
   uid ""
 

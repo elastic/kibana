@@ -41,7 +41,6 @@ examples/unified_doc_viewer @elastic/kibana-core
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
-packages/core/capabilities/core-capabilities-browser-mocks @elastic/kibana-core
 packages/core/capabilities/core-capabilities-server-mocks @elastic/kibana-core
 packages/core/chrome/core-chrome-browser-mocks @elastic/appex-sharedux
 packages/core/deprecations/core-deprecations-browser-mocks @elastic/kibana-core
@@ -211,6 +210,7 @@ src/core/packages/base/common-internal @elastic/kibana-core
 src/core/packages/base/server-internal @elastic/kibana-core
 src/core/packages/base/server-mocks @elastic/kibana-core
 src/core/packages/capabilities/browser-internal @elastic/kibana-core
+src/core/packages/capabilities/browser-mocks @elastic/kibana-core
 src/core/packages/capabilities/common @elastic/kibana-core
 src/core/packages/capabilities/server @elastic/kibana-core
 src/core/packages/capabilities/server-internal @elastic/kibana-core
