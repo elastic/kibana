@@ -167,6 +167,28 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
     updateStatus();
   }, [api, indexName, updateStatus]);
 
+  const pauseReindex = useCallback(async () => {
+    setReindexState((prevValue: ReindexState) => {
+      return {
+        ...prevValue,
+        status: ReindexStatus.paused,
+      };
+    });
+    const { error } = await api.pauseDataStreamReindexTask(indexName);
+
+    if (error) {
+      setReindexState((prevValue: ReindexState) => {
+        return {
+          ...prevValue,
+          loadingState: LoadingState.Error,
+          errorMessage: error.message.toString(),
+          status: ReindexStatus.failed,
+        };
+      });
+      return;
+    }
+  }, [api, indexName]);
+
   const cancelReindex = useCallback(async () => {
     setReindexState((prevValue: ReindexState) => {
       return {
@@ -207,6 +229,7 @@ export const useReindexStatus = ({ indexName, api }: { indexName: string; api: A
     reindexState,
     startReindex,
     cancelReindex,
+    pauseReindex,
     updateStatus,
   };
 };

@@ -23,6 +23,7 @@ export const UIM_REINDEX_STOP_CLICK = 'reindex_stop_click';
 export const UIM_DATA_STREAM_REINDEX_OPEN_FLYOUT_CLICK = 'data_stream_reindex_open_flyout_click';
 export const UIM_DATA_STREAM_REINDEX_CLOSE_FLYOUT_CLICK = 'data_stream_reindex_close_flyout_click';
 export const UIM_DATA_STREAM_REINDEX_START_CLICK = 'data_stream_reindex_start_click';
+export const UIM_DATA_STREAM_REINDEX_PAUSE_CLICK = 'data_stream_reindex_pause_click';
 export const UIM_DATA_STREAM_REINDEX_STOP_CLICK = 'data_stream_reindex_stop_click';
 
 export const UIM_BACKUP_DATA_CLOUD_CLICK = 'backup_data_cloud_click';

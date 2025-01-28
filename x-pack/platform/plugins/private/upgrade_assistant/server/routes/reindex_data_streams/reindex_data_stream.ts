@@ -196,4 +196,50 @@ export function registerReindexDataStreamRoutes(
       }
     })
   );
+
+  router.post(
+    {
+      path: `${BASE_PATH}/{indexName}/pause`,
+      options: {
+        access: 'public',
+        summary: `Pause data stream reindexing`,
+      },
+      validate: {
+        params: schema.object({
+          indexName: schema.string(),
+        }),
+      },
+    },
+    versionCheckHandlerWrapper(async ({ core }, request, response) => {
+      const {
+        savedObjects,
+        elasticsearch: { client: esClient },
+      } = await core;
+      const { indexName } = request.params;
+      const { getClient } = savedObjects;
+      const callAsCurrentUser = esClient.asCurrentUser;
+      const reindexActions = dataStreamReindexActionsFactory(
+        getClient({ includedHiddenTypes: [DATA_STREAM_REINDEX_OP_TYPE] }),
+        callAsCurrentUser
+      );
+      const reindexService = dataStreamReindexServiceFactory(
+        callAsCurrentUser,
+        reindexActions,
+        log,
+        licensing
+      );
+
+      try {
+        await reindexService.pauseReindexing(indexName);
+
+        return response.ok({ body: { acknowledged: true } });
+      } catch (error) {
+        if (error instanceof errors.ResponseError) {
+          return handleEsError({ error, response });
+        }
+
+        return mapAnyErrorToKibanaHttpResponse(error);
+      }
+    })
+  );
 }

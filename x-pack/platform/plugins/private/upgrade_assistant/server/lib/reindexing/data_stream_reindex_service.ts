@@ -73,17 +73,19 @@ export interface DataStreamReindexService {
   processNextStep(reindexOp: DataStreamReindexSavedObject): Promise<DataStreamReindexSavedObject>;
 
   /**
-   * Pauses the in-progress reindex operation for a given index.
-   * @param indexName
-   */
-  pauseReindexOperation(indexName: string): Promise<DataStreamReindexSavedObject>;
-
-  /**
    * Resumes the paused reindex operation for a given index.
    * @param indexName
    * @param opts As with {@link createReindexOperation} we support this setting.
    */
   resumeReindexOperation(indexName: string): Promise<DataStreamReindexSavedObject>;
+
+  /**
+   * put the reindex operation in queue for a given index.
+   * Used when non of the nodes have credentials for the reindex operation
+   * @param indexName
+   * @param opts As with {@link createReindexOperation} we support this setting.
+   */
+  queueReindexOperation(indexName: string): Promise<DataStreamReindexSavedObject>;
 
   /**
    * Update the update_at field on the reindex operation
@@ -95,6 +97,12 @@ export interface DataStreamReindexService {
    * @param indexName
    */
   startQueuedReindexOperation(indexName: string): Promise<DataStreamReindexSavedObject>;
+
+  /**
+   * Pauses the in-progress reindex operation for a given index.
+   * @param indexName
+   */
+  pauseReindexing(indexName: string): Promise<DataStreamReindexSavedObject>;
 
   /**
    * Cancel an in-progress reindex operation for a given index. Only allowed when the
@@ -169,22 +177,21 @@ export const dataStreamReindexServiceFactory = (
 
     console.log('taskId::', taskId);
     try {
-      const taskResponse: DataStreamReindexTaskStatusResponse = {
-        complete: false,
-        successes: 1,
-        total_indices_in_data_stream: 6,
-        errors: [{ index: 'mock_index1', message: 'error in mock_index1'}],
-        start_time_millis: 1,
-        total_indices_requiring_upgrade: 5,
-        in_progress: [{ index: 'mock_index1', total_doc_count: 1, reindexed_doc_count: 1 }],
-        pending: 3,
-      };
+      // const taskResponse: DataStreamReindexTaskStatusResponse = {
+      //   complete: true,
+      //   successes: 1,
+      //   total_indices_in_data_stream: 6,
+      //   errors: [{ index: 'mock_index1', message: 'error in mock_index1'}],
+      //   start_time_millis: 1,
+      //   total_indices_requiring_upgrade: 5,
+      //   in_progress: [{ index: 'mock_index1', total_doc_count: 1, reindexed_doc_count: 1 }],
+      //   pending: 3,
+      // };
 
-      // const taskResponse = await esClient.transport.request<DataStreamReindexTaskStatusResponse>({
-      //   method: 'GET',
-      //   path: `/_migration/reindex/${taskId}/_status`,
-      // });
-
+      const taskResponse = await esClient.transport.request<DataStreamReindexTaskStatusResponse>({
+        method: 'GET',
+        path: `/_migration/reindex/${taskId}/_status`,
+      });
 
       console.log('taskResponse:', taskResponse);
 
@@ -244,7 +251,7 @@ export const dataStreamReindexServiceFactory = (
         // There is no way to differentiate between cancelled tasks and never started tasks.
         // if we get 404 not found then it is cancelled by the user or never started
         // since we are already in the inProgress step this means that the task has been started
-        // leaving us with the cencelled status
+        // leaving us with the cancelled status
         reindexOp = await actions.updateReindexOp(reindexOp, {
           status: ReindexStatus.cancelled,
           taskStatus: undefined,
@@ -296,9 +303,7 @@ export const dataStreamReindexServiceFactory = (
       return resp.has_all_requested;
     },
 
-    async detectReindexWarnings(
-      indexName: string
-    ): Promise<DataStreamReindexWarning[] | undefined> {
+    async detectReindexWarnings(): Promise<DataStreamReindexWarning[]> {
       return [
         {
           warningType: 'incompatibleDataStream',
@@ -366,12 +371,19 @@ export const dataStreamReindexServiceFactory = (
     findAllByStatus: actions.findAllByStatus,
 
     async processNextStep(reindexOp: DataStreamReindexSavedObject) {
+      console.log('processNextStep::', reindexOp);
       return actions.runWhileLocked(reindexOp, async (lockedReindexOp) => {
         try {
           switch (lockedReindexOp.attributes.lastCompletedStep) {
             case DataStreamReindexStep.created: {
               console.log('starting created reindexing status');
               lockedReindexOp = await startReindexing(lockedReindexOp);
+              break;
+            }
+
+            case DataStreamReindexStep.reindexStarted: {
+              console.log('updating status');
+              lockedReindexOp = await updateReindexStatus(lockedReindexOp);
               break;
             }
 
@@ -387,11 +399,6 @@ export const dataStreamReindexServiceFactory = (
                 'Data streams UNKNOWN last Completed step STATE: ',
                 lockedReindexOp.attributes.lastCompletedStep
               );
-            }
-            case DataStreamReindexStep.reindexStarted: {
-              console.log('updating status');
-              lockedReindexOp = await updateReindexStatus(lockedReindexOp);
-              break;
             }
           }
         } catch (e) {
@@ -412,7 +419,9 @@ export const dataStreamReindexServiceFactory = (
       });
     },
 
-    async pauseReindexOperation(indexName: string) {
+    async pauseReindexing(indexName: string) {
+      console.log('attempting to pause reindexing', indexName);
+
       const reindexOp = await this.findReindexOperation(indexName);
 
       if (!reindexOp) {
@@ -425,6 +434,17 @@ export const dataStreamReindexServiceFactory = (
           return reindexOp;
         } else if (op.attributes.status !== ReindexStatus.inProgress) {
           throw new Error(`Reindex operation must be inProgress in order to be paused.`);
+        }
+
+        // Cancel the reindex task in ES is equivalent to pausing it.
+        // Once started again it will resume from where it left off.
+        const resp = await esClient.transport.request<{ acknowledged: boolean }>({
+          method: 'POST',
+          path: `/_migration/reindex/${reindexOp.attributes.reindexTaskId}/_cancel`,
+        });
+
+        if (!resp.acknowledged) {
+          throw error.reindexCannotBeCancelled(`Could not cancel reindex.`);
         }
 
         return actions.updateReindexOp(op, { status: ReindexStatus.paused });
@@ -448,26 +468,51 @@ export const dataStreamReindexServiceFactory = (
 
         return actions.updateReindexOp(op, {
           status: ReindexStatus.inProgress,
+          reindexOptions: { queueSettings: { queuedAt: Date.now() } },
+        });
+      });
+    },
+
+    async queueReindexOperation(indexName: string) {
+      const reindexOp = await this.findReindexOperation(indexName);
+
+      if (!reindexOp) {
+        throw new Error(`No reindex operation found for index ${indexName}`);
+      }
+
+      return actions.runWhileLocked(reindexOp, async (op) => {
+        if (op.attributes.status === ReindexStatus.completed) {
+          // Already completed, don't do anything
+          return reindexOp;
+        }
+
+        return actions.updateReindexOp(op, {
+          status: ReindexStatus.inProgress,
+          // set queuedAt to now to indicate that it is in the queue
+          // dont set startedAt to restart the operation
+          reindexOptions: { queueSettings: { queuedAt: Date.now() } },
         });
       });
     },
 
     async startQueuedReindexOperation(indexName: string) {
+      console.log('startQueuedReindexOperation::', indexName);
       const reindexOp = await this.findReindexOperation(indexName);
+      console.log('reindexOp::', reindexOp);
 
       if (!reindexOp) {
         throw error.indexNotFound(`No reindex operation found for index ${indexName}`);
       }
 
       console.log('reindexOp.attributes:', reindexOp.attributes);
-      if (!reindexOp.attributes.reindexOptions?.queueSettings) {
+      if (!reindexOp.attributes.reindexOptions.queueSettings) {
         console.log('reindexOp.attributes.reindexOptions::', reindexOp.attributes.reindexOptions);
         throw error.reindexIsNotInQueue(`Reindex operation ${indexName} is not in the queue.`);
       }
 
       return actions.runWhileLocked(reindexOp, async (lockedReindexOp) => {
         const { reindexOptions } = lockedReindexOp.attributes;
-        reindexOptions!.queueSettings!.startedAt = Date.now();
+        reindexOptions.queueSettings!.startedAt = Date.now();
         return actions.updateReindexOp(lockedReindexOp, {
           reindexOptions,
         });
@@ -489,12 +534,11 @@ export const dataStreamReindexServiceFactory = (
       }
 
       console.log('attempting to cancel!!!');
-      
+
       const resp = await esClient.transport.request<{ acknowledged: boolean }>({
         method: 'POST',
         path: `/_migration/reindex/${reindexOp.attributes.reindexTaskId}/_cancel`,
       });
-
 
       if (!resp.acknowledged) {
         throw error.reindexCannotBeCancelled(`Could not cancel reindex.`);

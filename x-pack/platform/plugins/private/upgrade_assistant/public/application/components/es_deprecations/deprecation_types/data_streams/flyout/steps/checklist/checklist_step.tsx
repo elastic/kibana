@@ -23,9 +23,8 @@ import { FormattedMessage } from '@kbn/i18n-react';
 import { ReindexStatus } from '../../../../../../../../../common/types';
 import { LoadingState } from '../../../../../../types';
 import type { ReindexState } from '../../../use_reindex_state';
-import { ReindexProgress } from '../../progress';
+import { ReindexProgress } from './progress';
 import { useAppContext } from '../../../../../../../app_context';
-
 
 const buttonLabel = (status?: ReindexStatus) => {
   switch (status) {
@@ -74,8 +73,9 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
+  pauseReindex: () => void;
   cancelReindex: () => void;
-}> = ({ closeFlyout, reindexState, startReindex, cancelReindex }) => {
+}> = ({ closeFlyout, reindexState, startReindex, cancelReindex, pauseReindex }) => {
   const {
     services: {
       api,
@@ -92,7 +92,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
   const showButtons = !hasFetchFailed && !isCompleted && hasRequiredPrivileges;
-  const shouldShowPauseButton = showButtons && (status === ReindexStatus.inProgress);
+  const shouldShowPauseButton = showButtons && status === ReindexStatus.inProgress;
 
   return (
     <Fragment>
@@ -189,7 +189,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
           </p>
         </EuiText>
         <EuiSpacer />
-        <ReindexProgress reindexState={reindexState} cancelReindex={cancelReindex} />
+        <ReindexProgress reindexState={reindexState} />
       </EuiFlyoutBody>
       <EuiFlyoutFooter>
         <EuiFlexGroup justifyContent="spaceBetween">
@@ -201,7 +201,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
               />
             </EuiButtonEmpty>
           </EuiFlexItem>
-          
+
           <EuiFlexItem grow={false}>
             <EuiFlexGroup gutterSize="s">
               {shouldShowPauseButton && (
@@ -210,7 +210,7 @@ export const ChecklistFlyoutStep: React.FunctionComponent<{
                     fill
                     color={'primary'}
                     iconType={'pause'}
-                    onClick={cancelReindex}
+                    onClick={pauseReindex}
                     disabled={!hasRequiredPrivileges}
                     data-test-subj="pauseReindexingButton"
                   >

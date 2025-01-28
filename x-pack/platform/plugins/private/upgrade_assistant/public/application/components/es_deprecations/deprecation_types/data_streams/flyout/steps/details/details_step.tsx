@@ -75,17 +75,9 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   closeFlyout: () => void;
   reindexState: ReindexState;
   startReindex: () => void;
-  cancelReindex: () => void;
   lastIndexCreationDateFormatted: string;
   meta: DataStreamMetadata;
-}> = ({
-  closeFlyout,
-  reindexState,
-  startReindex,
-  cancelReindex,
-  lastIndexCreationDateFormatted,
-  meta,
-}) => {
+}> = ({ closeFlyout, reindexState, startReindex, lastIndexCreationDateFormatted, meta }) => {
   const {
     services: {
       api,
@@ -94,7 +86,7 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
   } = useAppContext();
 
   const { loadingState, status, hasRequiredPrivileges } = reindexState;
-  console.log('reindexState::', reindexState)
+  console.log('reindexState::', reindexState);
   const loading = loadingState === LoadingState.Loading || status === ReindexStatus.inProgress;
   const isCompleted = status === ReindexStatus.completed;
   const hasFetchFailed = status === ReindexStatus.fetchFailed;
@@ -102,7 +94,6 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
 
   const { data: nodes } = api.useLoadNodeDiskSpace();
 
-  meta;
   return (
     <Fragment>
       <EuiFlyoutBody>
@@ -255,21 +246,6 @@ export const DataStreamDetailsFlyoutStep: React.FunctionComponent<{
                     data-test-subj="startReindexingButton"
                   >
                     {buttonLabel(status)}
-                  </EuiButton>
-                </EuiFlexItem>
-              )}
-              {!hasFetchFailed && !isCompleted && hasRequiredPrivileges && (
-                <EuiFlexItem grow={false}>
-                  <EuiButton
-                    fill
-                    color={status === ReindexStatus.paused ? 'warning' : 'primary'}
-                    iconType={status === ReindexStatus.paused ? 'play' : undefined}
-                    onClick={() => {}}
-                    isLoading={loading}
-                    disabled={loading || !hasRequiredPrivileges}
-                    data-test-subj="startReindexingButton"
-                  >
-                    Make all read only
                   </EuiButton>
                 </EuiFlexItem>
               )}

@@ -26,6 +26,7 @@ import { DeprecationBadge } from '../../../../shared';
 import {
   UIM_DATA_STREAM_REINDEX_START_CLICK,
   UIM_DATA_STREAM_REINDEX_STOP_CLICK,
+  UIM_DATA_STREAM_REINDEX_PAUSE_CLICK,
   uiMetricService,
 } from '../../../../../lib/ui_metric';
 
@@ -92,6 +93,12 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
     cancelReindex();
   }, [cancelReindex]);
 
+  const onPauseReindex = useCallback(() => {
+    uiMetricService.trackUiMetric(METRIC_TYPE.CLICK, UIM_DATA_STREAM_REINDEX_PAUSE_CLICK);
+    setFlyoutStep('notStarted');
+    cancelReindex();
+  }, [cancelReindex]);
+
   const { docsSizeFormatted, lastIndexCreationDateFormatted } = useMemo(() => {
     return {
       docsSizeFormatted: meta.dataStreamDocSize
@@ -117,7 +124,6 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
               setFlyoutStep('confirm');
             }}
             reindexState={reindexState}
-            cancelReindex={onStopReindex}
           />
         );
       case 'confirm':
@@ -141,6 +147,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
               setFlyoutStep('confirm');
             }}
             reindexState={reindexState}
+            pauseReindex={onPauseReindex}
             cancelReindex={onStopReindex}
           />
         );
@@ -148,7 +155,7 @@ export const DataStreamReindexFlyout: React.FunctionComponent<Props> = ({
       case 'completed':
         return <ReindexingCompletedFlyoutStep meta={meta} />;
     }
-  }, [flyoutStep, reindexState]);
+  }, [flyoutStep, reindexState, closeFlyout, onStartReindex, onPauseReindex, onStopReindex, lastIndexCreationDateFormatted, reindexWarnings]);
 
   return (
     <>

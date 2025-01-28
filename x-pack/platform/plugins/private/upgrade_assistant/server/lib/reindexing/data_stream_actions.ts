@@ -126,6 +126,8 @@ export const dataStreamReindexActionsFactory = (
         reindexTaskId: null,
         reindexTaskPercComplete: null,
         errorMessage: null,
+        // Queue the reindex operation
+        reindexOptions: { queueSettings: { queuedAt: +new Date() } },
       });
     },
 

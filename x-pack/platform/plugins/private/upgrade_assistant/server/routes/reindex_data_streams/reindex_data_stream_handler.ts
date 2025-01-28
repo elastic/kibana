@@ -16,11 +16,7 @@ import {
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 
-import {
-  DataStreamReindexOperation,
-  DataStreamReindexSavedObject,
-  ReindexStatus,
-} from '../../../common/types';
+import { DataStreamReindexOperation, ReindexStatus } from '../../../common/types';
 
 import { CredentialStore } from '../../lib/reindexing/credential_store';
 import { error } from '../../lib/reindexing/error';
@@ -34,10 +30,7 @@ interface ReindexHandlerArgs {
   log: Logger;
   licensing: LicensingPluginSetup;
   request: KibanaRequest;
-  credentialStore: CredentialStore<DataStreamReindexSavedObject>;
-  reindexOptions?: {
-    enqueue?: boolean;
-  };
+  credentialStore: CredentialStore;
   security?: SecurityPluginStart;
 }
 

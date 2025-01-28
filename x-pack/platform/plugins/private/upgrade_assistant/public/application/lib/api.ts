@@ -231,6 +231,13 @@ export class ApiService {
     });
   }
 
+  public async pauseDataStreamReindexTask(dataStreamName: string) {
+    return await this.sendRequest({
+      path: `${API_BASE_PATH}/data_streams_reindex/${dataStreamName}/pause`,
+      method: 'post',
+    });
+  }
+
   public async getReindexStatus(indexName: string) {
     return await this.sendRequest<ReindexStatusResponse>({
       path: `${API_BASE_PATH}/reindex/${indexName}`,

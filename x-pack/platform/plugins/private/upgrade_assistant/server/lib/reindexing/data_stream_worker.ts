@@ -7,9 +7,9 @@
 
 import { IClusterClient, Logger, SavedObjectsClientContract, FakeRequest } from '@kbn/core/server';
 import { exhaustMap, Subject, takeUntil, timer } from 'rxjs';
-import moment from 'moment';
 import { SecurityPluginStart } from '@kbn/security-plugin/server';
 import { LicensingPluginSetup } from '@kbn/licensing-plugin/server';
+import moment from 'moment';
 import { DataStreamReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
 import { dataStreamReindexActionsFactory } from './data_stream_actions';
@@ -17,12 +17,17 @@ import {
   DataStreamReindexService,
   dataStreamReindexServiceFactory,
 } from './data_stream_reindex_service';
-import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
+import {
+  sortAndOrderReindexOperations,
+  queuedOpHasStarted,
+  swallowExceptions,
+  isQueuedOp,
+} from './op_utils';
 
 const POLL_INTERVAL = 30000;
-// If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
-const PAUSE_WINDOW = POLL_INTERVAL * 4;
 
+// If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
+const RESTART_WINDOW = POLL_INTERVAL * 4;
 /**
  * To avoid running the worker loop very tightly and causing a CPU bottleneck we use this
  * padding to simulate an asynchronous sleep. See the description of the tight loop below.
@@ -84,7 +89,7 @@ export class DataStreamReindexWorker {
     private licensing: LicensingPluginSetup,
     security: SecurityPluginStart
   ) {
-    this.log = log.get('reindex_worker');
+    this.log = log.get('data_stream_reindex_worker');
     this.security = security;
 
     const callAsInternalUser = this.clusterClient.asInternalUser;
@@ -127,13 +132,6 @@ export class DataStreamReindexWorker {
     this.refresh().catch((error) => {
       this.log.warn(`Failed to force refresh the reindex operations: ${error}`);
     });
-  };
-
-  /**
-   * Returns whether or not the given ReindexOperation is in the worker's queue.
-   */
-  public includes = (reindexOp: DataStreamReindexSavedObject) => {
-    return this.inProgressOps.map((o) => o.id).includes(reindexOp.id);
   };
 
   /**
@@ -188,10 +186,12 @@ export class DataStreamReindexWorker {
       const { parallel, queue } = sortAndOrderReindexOperations(inProgressOps);
 
       let [firstOpInQueue] = queue;
-      console.log('parallel::', parallel)
-      console.log('firstOpInQueue::', firstOpInQueue)
+      console.log('parallel::', parallel);
+      console.log('firstOpInQueue::', firstOpInQueue.attributes.reindexOptions?.queueSettings);
+      console.log('!queuedOpHasStarted(firstOpInQueue)::', !queuedOpHasStarted(firstOpInQueue));
 
       if (firstOpInQueue && !queuedOpHasStarted(firstOpInQueue)) {
+        console.log('starting queued reindex operation, ', firstOpInQueue);
         this.log.debug(
           `Queue detected; current length ${queue.length}, current item ReindexOperation(id: ${firstOpInQueue.id}, indexName: ${firstOpInQueue.attributes.indexName})`
         );
@@ -211,6 +211,7 @@ export class DataStreamReindexWorker {
       }
 
       this.inProgressOps = parallel.concat(firstOpInQueue ? [firstOpInQueue] : []);
+      console.log('this.inProgressOps::', this.inProgressOps);
     } catch (e) {
       this.log.debug(`Could not fetch reindex operations from Elasticsearch, ${e.message}`);
       this.inProgressOps = [];
@@ -225,13 +226,34 @@ export class DataStreamReindexWorker {
     }
   };
 
+  private lastCheckedQueuedOpId: string | undefined;
   private processNextStep = async (reindexOp: DataStreamReindexSavedObject): Promise<void> => {
     const credential = this.credentialStore.get(reindexOp);
-
+    console.log('processNextStep worker::', reindexOp);
+    console.log('credential worker::', credential);
     if (!credential) {
+      // If this is a queued reindex op, and we know there can only ever be one in progress at a
+      // given time, there is a small chance it may have just reached the front of the queue so
+      // we give it a chance to be updated by another worker with credentials by making this a
+      // noop once. If it has not been updated by the next loop we will attempt to start it again if it
+      // falls outside of RESTART_WINDOW.
+      if (isQueuedOp(reindexOp)) {
+        if (this.lastCheckedQueuedOpId !== reindexOp.id) {
+          this.lastCheckedQueuedOpId = reindexOp.id;
+          return;
+        }
+      }
+      // This indicates that no Kibana nodes currently have credentials to update this job.
+      const now = moment();
+      const updatedAt = moment(reindexOp.updated_at);
+      if (updatedAt < now.subtract(RESTART_WINDOW)) {
+        await this.reindexService.queueReindexOperation(reindexOp.attributes.indexName);
+        return;
+      } else {
         // If it has been updated recently, we assume another node has the necessary credentials,
         // and this becomes a noop.
         return;
+      }
     }
 
     const service = this.getCredentialScopedReindexService(credential);
@@ -241,23 +263,3 @@ export class DataStreamReindexWorker {
     await this.credentialStore.update({ reindexOp, security: this.security, credential });
   };
 }
-
-/**
- * Swallows any exceptions that may occur during the reindex process. This prevents any errors from
- * stopping the worker from continuing to process more jobs.
- */
-const swallowExceptions =
-  (func: (reindexOp: DataStreamReindexSavedObject) => Promise<DataStreamReindexSavedObject>, log: Logger) =>
-  async (reindexOp: DataStreamReindexSavedObject) => {
-    try {
-      return await func(reindexOp);
-    } catch (e) {
-      if (reindexOp.attributes.locked) {
-        log.debug(`Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
-      } else {
-        log.warn(`Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`);
-      }
-
-      return reindexOp;
-    }
-  };

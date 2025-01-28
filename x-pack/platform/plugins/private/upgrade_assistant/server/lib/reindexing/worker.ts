@@ -14,7 +14,12 @@ import { ReindexSavedObject, ReindexStatus } from '../../../common/types';
 import { Credential, CredentialStore } from './credential_store';
 import { reindexActionsFactory } from './reindex_actions';
 import { ReindexService, reindexServiceFactory } from './reindex_service';
-import { sortAndOrderReindexOperations, queuedOpHasStarted, isQueuedOp } from './op_utils';
+import {
+  sortAndOrderReindexOperations,
+  queuedOpHasStarted,
+  isQueuedOp,
+  swallowExceptions,
+} from './op_utils';
 
 const POLL_INTERVAL = 30000;
 // If no nodes have been able to update this index in 2 minutes (due to missing credentials), set to paused.
@@ -254,23 +259,3 @@ export class ReindexWorker {
     await this.credentialStore.update({ reindexOp, security: this.security, credential });
   };
 }
-
-/**
- * Swallows any exceptions that may occur during the reindex process. This prevents any errors from
- * stopping the worker from continuing to process more jobs.
- */
-const swallowExceptions =
-  (func: (reindexOp: ReindexSavedObject) => Promise<ReindexSavedObject>, log: Logger) =>
-  async (reindexOp: ReindexSavedObject) => {
-    try {
-      return await func(reindexOp);
-    } catch (e) {
-      if (reindexOp.attributes.locked) {
-        log.debug(`Skipping reindexOp with unexpired lock: ${reindexOp.id}`);
-      } else {
-        log.warn(`Error when trying to process reindexOp (${reindexOp.id}): ${e.toString()}`);
-      }
-
-      return reindexOp;
-    }
-  };

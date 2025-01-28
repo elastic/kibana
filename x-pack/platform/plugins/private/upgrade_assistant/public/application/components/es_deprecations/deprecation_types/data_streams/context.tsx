@@ -13,6 +13,7 @@ import { useReindexStatus, ReindexState } from './use_reindex_state';
 export interface ReindexStateContext {
   reindexState: ReindexState;
   startReindex: () => Promise<void>;
+  pauseReindex: () => Promise<void>;
   cancelReindex: () => Promise<void>;
 }
 
@@ -32,12 +33,12 @@ interface Props {
   indexName: string;
 }
 
-export const ReindexStatusProvider: React.FunctionComponent<Props> = ({
+export const DataStreamReindexStatusProvider: React.FunctionComponent<Props> = ({
   api,
   indexName,
   children,
 }) => {
-  const { reindexState, startReindex, cancelReindex } = useReindexStatus({
+  const { reindexState, startReindex, pauseReindex, cancelReindex } = useReindexStatus({
     indexName,
     api,
   });
@@ -48,6 +49,7 @@ export const ReindexStatusProvider: React.FunctionComponent<Props> = ({
         reindexState,
         startReindex,
         cancelReindex,
+        pauseReindex,
       }}
     >
       {children}

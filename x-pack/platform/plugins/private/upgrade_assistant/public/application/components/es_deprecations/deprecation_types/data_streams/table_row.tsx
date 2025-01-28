@@ -20,7 +20,7 @@ import { DeprecationTableColumns } from '../../../types';
 import { EsDeprecationsTableCells } from '../../es_deprecations_table_cells';
 import { ReindexResolutionCell } from './resolution_table_cell';
 import { DataStreamReindexFlyout } from './flyout';
-import { ReindexStatusProvider, useDataStreamReindexContext } from './context';
+import { DataStreamReindexStatusProvider, useDataStreamReindexContext } from './context';
 
 const { useGlobalFlyout } = GlobalFlyout;
 
@@ -99,8 +99,8 @@ export const DataStreamTableRow: React.FunctionComponent<TableRowProps> = (props
   } = useAppContext();
 
   return (
-    <ReindexStatusProvider indexName={props.deprecation.index!} api={api}>
+    <DataStreamReindexStatusProvider indexName={props.deprecation.index!} api={api}>
       <DataStreamTableRowCells {...props} />
-    </ReindexStatusProvider>
+    </DataStreamReindexStatusProvider>
   );
 };
