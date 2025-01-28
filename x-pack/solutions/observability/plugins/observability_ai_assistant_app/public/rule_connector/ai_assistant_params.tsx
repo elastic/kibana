@@ -35,9 +35,11 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
     useGenAIConnectorsWithoutContext(service);
 
   useEffect(() => {
-    editAction('connector', selectedConnector, index);
+    if (selectedConnector !== actionParams.connector) {
+      editAction('connector', selectedConnector, index);
+    }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [selectedConnector, index]);
+  }, [actionParams, selectedConnector, index]);
 
   useEffect(() => {
     // Ensure backwards compatibility by using the message field as a prompt if prompts are missing
@@ -110,7 +112,7 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
             selectConnector(event.target.value);
             editAction('connector', event.target.value, index);
           }}
-          value={selectedConnector}
+          value={actionParams.connector}
         />
       </EuiFormRow>
 

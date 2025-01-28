@@ -36,35 +36,26 @@ export function getConnectorType(
     validateParams: async (
       actionParams: ObsAIAssistantActionParams
     ): Promise<GenericValidationResult<ObsAIAssistantActionParams>> => {
-      const validationResult = {
-        errors: {
-          connector: new Array<string>(),
-          message: new Array<string>(),
-          prompts: new Array<string[]>(),
-        },
+      const validatePrompt = (prompt: { message: string; statuses: string[] }): string[] => {
+        const errors: string[] = [];
+
+        if (!prompt.message) {
+          errors.push(MESSAGE_REQUIRED);
+        }
+        if (!prompt.statuses || prompt.statuses.length === 0) {
+          errors.push(STATUS_REQUIRED);
+        }
+
+        return errors;
       };
 
-      if (!actionParams.connector) {
-        validationResult.errors.connector.push(CONNECTOR_REQUIRED);
-      }
-
-      if (!actionParams.message && !actionParams.prompts) {
-        validationResult.errors.message.push(MESSAGE_REQUIRED);
-      }
-
-      if (actionParams.prompts) {
-        actionParams.prompts.forEach((prompt, index) => {
-          validationResult.errors.prompts[index] = [];
-          if (!prompt.message) {
-            validationResult.errors.prompts[index].push(MESSAGE_REQUIRED);
-          }
-          if (!prompt.statuses.length) {
-            validationResult.errors.prompts[index].push(STATUS_REQUIRED);
-          }
-        });
-      }
-
-      return validationResult;
+      return {
+        errors: {
+          connector: actionParams.connector ? [] : [CONNECTOR_REQUIRED],
+          message: actionParams.message && !actionParams.prompts ? [MESSAGE_REQUIRED] : [],
+          prompts: actionParams.prompts?.map(validatePrompt) || [],
+        },
+      };
     },
     actionParamsFields: lazy(() =>
       import('./ai_assistant_params').then(({ default: ActionParamsFields }) => ({
