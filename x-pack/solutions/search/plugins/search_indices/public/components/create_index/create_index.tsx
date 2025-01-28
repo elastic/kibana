@@ -18,7 +18,7 @@ import { CreateIndexFormState } from '../../types';
 import { generateRandomIndexName } from '../../utils/indices';
 import { getDefaultCodingLanguage } from '../../utils/language';
 
-import { CreateIndexPanel } from '../shared/create_index_panel';
+import { CreateIndexPanel } from '../shared/create_index_panel/create_index_panel';
 
 import { CreateIndexCodeView } from './create_index_code_view';
 import { CreateIndexUIView } from './create_index_ui_view';
@@ -112,8 +112,8 @@ export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
           changeWorkflowId={(workflowId: WorkflowId) => {
             setSelectedWorkflowId(workflowId);
             usageTracker.click([
-              AnalyticsEvents.startCreateIndexWorkflowSelect,
-              `${AnalyticsEvents.startCreateIndexWorkflowSelect}_${workflowId}`,
+              AnalyticsEvents.createIndexWorkflowSelect,
+              `${AnalyticsEvents.createIndexWorkflowSelect}_${workflowId}`,
             ]);
           }}
           selectedWorkflow={workflow}

@@ -163,4 +163,14 @@ describe('ESQLEditor', () => {
     findTestSubject(component, 'ESQLEditor-run-query-button').simulate('click');
     expect(onTextLangQuerySubmit).toHaveBeenCalled();
   });
+
+  it('should not render the run query button if the hideRunQueryButton prop is set to true and editorIsInline prop is set to true', async () => {
+    const newProps = {
+      ...props,
+      hideRunQueryButton: true,
+      editorIsInline: true,
+    };
+    const component = mount(renderESQLEditorComponent({ ...newProps }));
+    expect(component.find('[data-test-subj="ESQLEditor-run-query-button"]').length).toBe(0);
+  });
 });

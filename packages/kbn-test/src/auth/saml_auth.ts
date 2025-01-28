@@ -58,7 +58,9 @@ const cleanException = (url: string, ex: any) => {
 const getCookieFromResponseHeaders = (response: AxiosResponse, errorMessage: string) => {
   const setCookieHeader = response?.headers['set-cookie'];
   if (!setCookieHeader) {
-    throw new Error(`Failed to parse 'set-cookie' header`);
+    throw new Error(
+      `${errorMessage}: no 'set-cookie' header, response.data: ${JSON.stringify(response?.data)}`
+    );
   }
 
   const cookie = parseCookie(setCookieHeader![0]);
@@ -289,7 +291,7 @@ export const finishSAMLHandshake = async ({
 
   return getCookieFromResponseHeaders(
     authResponse,
-    'Failed to get cookie from SAML callback response headers'
+    'Failed to get cookie from SAML callback response'
   );
 };
 
