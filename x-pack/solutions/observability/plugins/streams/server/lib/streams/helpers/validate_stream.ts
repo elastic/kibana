@@ -97,14 +97,16 @@ export function validateStreamChildrenChanges(
   }
 }
 
-export function validateStreamLifecycle(definition: WiredStreamDefinition, isServerless: boolean) {
+export function validateStreamLifecycle(definition: StreamDefinition, isServerless: boolean) {
   const lifecycle = definition.ingest.lifecycle;
 
   if (isServerless && isIlmLifecycle(lifecycle)) {
     throw new MalformedStreamError('ILM lifecycle is not supported in serverless environments');
   }
 
-  if (isDisabledLifecycle(lifecycle)) {
-    throw new MalformedStreamError('Lifecycle cannot be disabled for wired streams');
+  if (isUnwiredStreamDefinition(definition)) {
+    if (isIlmLifecycle(lifecycle)) {
+      throw new MalformedStreamError('ILM lifecycle is not supported for unwired streams');
+    }
   }
 }

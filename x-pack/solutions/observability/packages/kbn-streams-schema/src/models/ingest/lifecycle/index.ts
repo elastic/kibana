@@ -32,6 +32,13 @@ export interface IngestStreamLifecycleDisabled {
 export type IngestStreamLifecycle =
   | IngestStreamLifecycleDSL
   | IngestStreamLifecycleILM
+  | IngestStreamLifecycleInherit;
+
+export type WiredIngestStreamEffectiveLifecycle = IngestStreamLifecycle & { from: string };
+
+export type UnwiredIngestStreamEffectiveLifecycle =
+  | IngestStreamLifecycleDSL
+  | IngestStreamLifecycleILM
   | IngestStreamLifecycleInherit
   | IngestStreamLifecycleDisabled;
 
@@ -46,12 +53,17 @@ export const ingestStreamLifecycleSchema: z.Schema<IngestStreamLifecycle> = z.un
   dslLifecycleSchema,
   ilmLifecycleSchema,
   inheritLifecycleSchema,
-  disabledLifecycleSchema,
 ]);
 
-export type InheritedIngestStreamLifecycle = IngestStreamLifecycle & { from: string };
+export const unwiredIngestStreamEffectiveLifecycleSchema: z.Schema<UnwiredIngestStreamEffectiveLifecycle> =
+  z.union([
+    dslLifecycleSchema,
+    ilmLifecycleSchema,
+    inheritLifecycleSchema,
+    disabledLifecycleSchema,
+  ]);
 
-export const inheritedIngestStreamLifecycleSchema: z.Schema<InheritedIngestStreamLifecycle> =
+export const wiredIngestStreamEffectiveLifecycleSchema: z.Schema<WiredIngestStreamEffectiveLifecycle> =
   ingestStreamLifecycleSchema.and(z.object({ from: NonEmptyString }));
 
 export const isDslLifecycle = createIsNarrowSchema(ingestStreamLifecycleSchema, dslLifecycleSchema);
