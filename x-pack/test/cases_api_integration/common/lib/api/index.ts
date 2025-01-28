@@ -973,27 +973,3 @@ export const findInternalCaseUserActions = async ({
 
   return userActions;
 };
-
-export const findCaseUserActions = async ({
-  supertest,
-  caseID,
-  options = {},
-  expectedHttpCode = 200,
-  auth = { user: superUser, space: null },
-}: {
-  supertest: SuperTest.Agent;
-  caseID: string;
-  options?: UserActionFindRequest;
-  expectedHttpCode?: number;
-  auth?: { user: User; space: string | null };
-}): Promise<UserActionFindResponse> => {
-  const { body: userActions } = await supertest
-    .get(
-      `${getSpaceUrlPrefix(auth.space)}${CASE_FIND_USER_ACTIONS_URL.replace('{case_id}', caseID)}`
-    )
-    .query(options)
-    .auth(auth.user.username, auth.user.password)
-    .expect(expectedHttpCode);
-
-  return userActions;
-};
