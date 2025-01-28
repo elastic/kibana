@@ -155,7 +155,7 @@ export function StreamDetailEnrichmentContent({
                 initialSize={75}
                 minSize="300px"
                 tabIndex={0}
-                paddingSize="none"
+                paddingSize="s"
                 css={css`
                   display: flex;
                   flex-direction: column;

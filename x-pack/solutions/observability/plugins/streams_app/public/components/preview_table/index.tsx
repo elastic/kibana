@@ -6,7 +6,7 @@
  */
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo } from 'react';
 
 export function PreviewTable({
   documents,
@@ -15,15 +15,6 @@ export function PreviewTable({
   documents: unknown[];
   displayColumns?: string[];
 }) {
-  const [height, setHeight] = useState('100px');
-  useEffect(() => {
-    // set height to 100% after a short delay otherwise it doesn't calculate correctly
-    // TODO: figure out a better way to do this
-    setTimeout(() => {
-      setHeight(`100%`);
-    }, 50);
-  }, []);
-
   const columns = useMemo(() => {
     if (displayColumns) return displayColumns;
 
@@ -59,7 +50,6 @@ export function PreviewTable({
       }}
       toolbarVisibility={false}
       rowCount={documents.length}
-      // height={height}
       renderCellValue={({ rowIndex, columnId }) => {
         const doc = documents[rowIndex];
         if (!doc || typeof doc !== 'object') {

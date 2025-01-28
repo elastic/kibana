@@ -7,7 +7,7 @@
 
 import React, { useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { EuiFlexItem, EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
 import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { css } from '@emotion/react';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
@@ -66,44 +66,34 @@ export const SimulationPlayground = (props: SimulationPlaygroundProps) => {
 
   return (
     <>
-      <EuiPanel paddingSize="s" hasShadow={false} borderRadius="none" grow={false}>
+      <EuiFlexItem grow={false}>
         <EuiTabs bottomBorder={false}>{tabEntries}</EuiTabs>
-      </EuiPanel>
-      <EuiPanel
-        paddingSize="s"
-        hasShadow={false}
-        borderRadius="none"
-        css={css`
-          overflow: auto;
-        `}
-      >
-        {renderedTabsSet.current.has('dataPreview') && (
-          <div
-            hidden={selectedTabId !== 'dataPreview'}
-            css={css`
-              display: flex;
-              flex-direction: column;
-            `}
-          >
-            <ProcessorOutcomePreview
-              definition={definition}
-              columns={columns}
-              isLoading={isLoading}
-              simulation={simulation}
-              samples={samples}
-              onRefreshSamples={onRefreshSamples}
-              simulationError={simulationError}
-            />
-          </div>
-        )}
-        {renderedTabsSet.current.has('detectedFields') && (
-          <div hidden={selectedTabId !== 'detectedFields'}>
-            {i18n.translate('xpack.streams.simulationPlayground.div.detectedFieldsLabel', {
-              defaultMessage: 'WIP',
-            })}
-          </div>
-        )}
-      </EuiPanel>
+      </EuiFlexItem>
+      <EuiSpacer size="m" />
+      {renderedTabsSet.current.has('dataPreview') && (
+        <EuiFlexItem
+          css={css`
+            display: ${selectedTabId !== 'dataPreview' ? 'none' : 'flex'};
+          `}
+        >
+          <ProcessorOutcomePreview
+            definition={definition}
+            columns={columns}
+            isLoading={isLoading}
+            simulation={simulation}
+            samples={samples}
+            onRefreshSamples={onRefreshSamples}
+            simulationError={simulationError}
+          />
+        </EuiFlexItem>
+      )}
+      {renderedTabsSet.current.has('detectedFields') && (
+        <div hidden={selectedTabId !== 'detectedFields'}>
+          {i18n.translate('xpack.streams.simulationPlayground.div.detectedFieldsLabel', {
+            defaultMessage: 'WIP',
+          })}
+        </div>
+      )}
     </>
   );
 };

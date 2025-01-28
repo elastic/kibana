@@ -8,7 +8,6 @@
 import React, { useMemo, useState } from 'react';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import {
-  EuiPanel,
   EuiFlexGroup,
   EuiFilterButton,
   EuiFilterGroup,
@@ -22,7 +21,6 @@ import { TimeRange } from '@kbn/es-query';
 import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { flattenObject } from '@kbn/object-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
-import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
@@ -89,28 +87,8 @@ export const ProcessorOutcomePreview = ({
   }, [columns, selectedDocsFilter]);
 
   return (
-    // <EuiFlexGroup direction="column" gutterSize="m">
-    //   <OutcomeControls
-    //     docsFilter={selectedDocsFilter}
-    //     onDocsFilterChange={setSelectedDocsFilter}
-    //     timeRange={timeRange}
-    //     onTimeRangeChange={setTimeRange}
-    //     onTimeRangeRefresh={onRefreshSamples}
-    //     simulationFailureRate={simulation?.failure_rate}
-    //     simulationSuccessRate={simulation?.success_rate}
-    //   />
-    //   <EuiFlexItem>
-    //     <OutcomePreviewTable
-    //       documents={simulationDocuments}
-    //       columns={tableColumns}
-    //       error={simulationError}
-    //       isLoading={isLoading}
-    //     />
-    //   </EuiFlexItem>
-    // </EuiFlexGroup>
-
     <>
-      <EuiPanel paddingSize="none" hasShadow={false} borderRadius="none" grow={false}>
+      <EuiFlexItem grow={false}>
         <OutcomeControls
           docsFilter={selectedDocsFilter}
           onDocsFilterChange={setSelectedDocsFilter}
@@ -120,23 +98,16 @@ export const ProcessorOutcomePreview = ({
           simulationFailureRate={simulation?.failure_rate}
           simulationSuccessRate={simulation?.success_rate}
         />
-      </EuiPanel>
+      </EuiFlexItem>
       <EuiSpacer size="m" />
-      <EuiPanel
-        paddingSize="none"
-        hasShadow={false}
-        borderRadius="none"
-        css={css`
-          overflow: auto;
-        `}
-      >
+      <EuiFlexItem>
         <OutcomePreviewTable
           documents={simulationDocuments}
           columns={tableColumns}
           error={simulationError}
           isLoading={isLoading}
         />
-      </EuiPanel>
+      </EuiFlexItem>
     </>
   );
 };
