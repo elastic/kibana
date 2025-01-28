@@ -32,6 +32,7 @@ export default function ({ getService }: FtrProviderContext) {
     let icmpProjectMonitors: ProjectMonitorsRequest;
 
     let testPolicyId = '';
+    let loc: any;
     const setUniqueIds = (request: ProjectMonitorsRequest) => {
       return {
         ...request,
@@ -71,8 +72,8 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
       await testPrivateLocations.installSyntheticsPackage();
 
-      const loc = await testPrivateLocations.addPrivateLocation();
-      testPolicyId = loc.id;
+      loc = await testPrivateLocations.addPrivateLocation();
+      testPolicyId = loc.agentPolicyId;
       await supertest
         .post(SYNTHETICS_API_URLS.PARAMS)
         .set('kbn-xsrf', 'true')

@@ -19,7 +19,8 @@
       "unifiedSearch",
       "data",
       "ruleRegistry",
-      "share"
+      "share",
+      "discover"
     ],
     "requiredBundles": ["kibanaReact"],
     "optionalPlugins": ["spaces", "cloud"],

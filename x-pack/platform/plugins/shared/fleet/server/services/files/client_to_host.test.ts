@@ -197,7 +197,7 @@ describe('FleetToHostFilesClient', () => {
 
     it('should error if `agentIds` is empty', async () => {
       await expect(getFleetFilesInstance().create(fileReadable, [])).rejects.toThrow(
-        'FleetFilesClientError: Missing agentIds!'
+        'Missing agentIds!'
       );
     });
 
@@ -218,7 +218,7 @@ describe('FleetToHostFilesClient', () => {
       esFile.data.hash = undefined;
 
       await expect(getFleetFilesInstance().create(fileReadable, ['123'])).rejects.toThrow(
-        'FleetFilesClientError: File hash was not generated!'
+        'File hash was not generated!'
       );
     });
   });

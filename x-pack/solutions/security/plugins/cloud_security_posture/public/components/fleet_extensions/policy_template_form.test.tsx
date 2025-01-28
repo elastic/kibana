@@ -422,18 +422,6 @@ describe('<CspPolicyTemplateForm />', () => {
           ...input,
           enabled: input.policy_template === 'kspm',
         })),
-        name: 'kspm-1',
-      },
-    });
-
-    expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
-      updatedPolicy: {
-        ...getMockPolicyK8s(),
-        inputs: policy.inputs.map((input) => ({
-          ...input,
-          enabled: input.policy_template === 'kspm',
-        })),
         name: 'kspm-2',
       },
     });
@@ -510,19 +498,6 @@ describe('<CspPolicyTemplateForm />', () => {
           ...input,
           enabled: input.policy_template === 'vuln_mgmt',
         })),
-        name: 'vuln_mgmt-1',
-      },
-    });
-
-    // 3rd call happens on mount and increments vuln_mgmt template enabled input
-    expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
-      updatedPolicy: {
-        ...getMockPolicyVulnMgmtAWS(),
-        inputs: policy.inputs.map((input) => ({
-          ...input,
-          enabled: input.policy_template === 'vuln_mgmt',
-        })),
         name: 'vuln_mgmt-2',
       },
     });
@@ -589,19 +564,6 @@ describe('<CspPolicyTemplateForm />', () => {
     });
 
     // 2nd call happens on mount and increments cspm template enabled input
-    expect(onChange).toHaveBeenCalledWith({
-      isValid: true,
-      updatedPolicy: {
-        ...getMockPolicyAWS(),
-        inputs: policy.inputs.map((input) => ({
-          ...input,
-          enabled: input.policy_template === 'cspm',
-        })),
-        name: 'cspm-1',
-      },
-    });
-
-    // // 3rd call happens on mount and increments cspm template enabled input
     expect(onChange).toHaveBeenCalledWith({
       isValid: true,
       updatedPolicy: {

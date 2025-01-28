@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { Logger } from '@kbn/core/server';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { getEsErrorMessage } from '@kbn/alerting-plugin/server';
@@ -64,6 +64,7 @@ export async function timeSeriesQuery(
   // core query
   // Constructing a typesafe ES query in JS is problematic, use any escapehatch for now
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const esQuery: any = {
     index,
     body: {

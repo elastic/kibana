@@ -80,7 +80,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
     });
 
     after(async () => {
-      await kibanaServer.savedObjects.cleanStandardList();
+      // await kibanaServer.savedObjects.cleanStandardList();
     });
     let monitorId = 'test-id';
 
@@ -264,7 +264,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...updates,
           revision: 3,
           url: 'https://www.google.com',
-          locations: [privateLocation1, privateLocation2],
+          locations: [omit(privateLocation1, 'spaces'), omit(privateLocation2, 'spaces')],
         })
       );
     });
@@ -282,7 +282,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           ...updates,
           revision: 4,
           url: 'https://www.google.com',
-          locations: [privateLocation2],
+          locations: [omit(privateLocation2, 'spaces')],
         })
       );
     });

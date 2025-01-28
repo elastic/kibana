@@ -67,7 +67,7 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('add a test private location', async () => {
       pvtLoc = await testPrivateLocations.addPrivateLocation();
-      testFleetPolicyID = pvtLoc.id;
+      testFleetPolicyID = pvtLoc.agentPolicyId;
 
       const apiResponse = await supertestAPI.get(SYNTHETICS_API_URLS.SERVICE_LOCATIONS);
 
@@ -87,7 +87,7 @@ export default function ({ getService }: FtrProviderContext) {
         ...httpMonitorJson,
         name: `Test monitor ${uuidv4()}`,
         [ConfigKey.NAMESPACE]: 'default',
-        locations: [pvtLoc],
+        locations: [omit(pvtLoc, ['spaces'])],
       };
 
       try {
@@ -116,7 +116,7 @@ export default function ({ getService }: FtrProviderContext) {
 
         const packagePolicy = policyResponse.body.items.find(
           (pkgPolicy: PackagePolicy) =>
-            pkgPolicy.id === monitorId + '-' + testFleetPolicyID + `-${SPACE_ID}`
+            pkgPolicy.id === monitorId + '-' + pvtLoc.id + `-${SPACE_ID}`
         );
 
         expect(packagePolicy.policy_id).eql(testFleetPolicyID);
@@ -126,7 +126,7 @@ export default function ({ getService }: FtrProviderContext) {
           getTestSyntheticsPolicy({
             name: monitor.name,
             id: monitorId,
-            location: { id: testFleetPolicyID },
+            location: { id: pvtLoc.id },
             namespace: formatKibanaNamespace(SPACE_ID),
             spaceId: SPACE_ID,
           })

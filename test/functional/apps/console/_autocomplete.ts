@@ -52,7 +52,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
     it('should provide basic auto-complete functionality', async () => {
       await PageObjects.console.enterText(`GET _search\n`);
-      await PageObjects.console.pressEnter();
       await PageObjects.console.enterText(`{\n\t"query": {`);
       await PageObjects.console.pressEnter();
       await PageObjects.console.sleepForDebouncePeriod();
@@ -145,6 +144,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('JSON autocompletion with placeholder fields', async () => {
         await PageObjects.console.enterText('GET _search\n');
         await PageObjects.console.enterText('{');
+        await PageObjects.console.sleepForDebouncePeriod();
         await PageObjects.console.pressEnter();
 
         for (const char of '"ag') {
