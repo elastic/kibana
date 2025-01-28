@@ -13,17 +13,7 @@
           "\nGets the cloud_defend link properties of a Cloud Defend page for navigation in the security solution."
         ],
         "signature": [
-          "<TId extends string = ",
-          {
-            "pluginId": "cloudDefend",
-            "scope": "public",
-            "docId": "kibCloudDefendPluginApi",
-            "section": "def-public.CloudDefendPageId",
-            "text": "CloudDefendPageId"
-          },
-          ">(cloudDefendPage: ",
-          "CloudDefendPage",
-          ") => CloudDefendLinkItem<TId>"
+          "<TId extends string = \"cloud_defend-policies\">(cloudDefendPage: \"policies\") => CloudDefendLinkItem<TId>"
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
         "deprecated": false,
@@ -32,14 +22,14 @@
           {
             "parentPluginId": "cloudDefend",
             "id": "def-public.getSecuritySolutionLink.$1",
-            "type": "CompoundType",
+            "type": "string",
             "tags": [],
             "label": "cloudDefendPage",
             "description": [
               "the name of the cloud defend page."
             ],
             "signature": [
-              "CloudDefendPage"
+              "\"policies\""
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/security_solution_links.ts",
             "deprecated": false,
@@ -91,15 +81,7 @@
               "Gets the `SpyRoute` component for navigation highlighting and breadcrumbs."
             ],
             "signature": [
-              "() => React.ComponentType<{ pageName: ",
-              {
-                "pluginId": "cloudDefend",
-                "scope": "public",
-                "docId": "kibCloudDefendPluginApi",
-                "section": "def-public.CloudDefendPageId",
-                "text": "CloudDefendPageId"
-              },
-              "; state?: Record<string, string | undefined> | undefined; }>"
+              "() => React.ComponentType<{ pageName: \"cloud_defend-policies\"; state?: Record<string, string | undefined> | undefined; }>"
             ],
             "path": "x-pack/solutions/security/plugins/cloud_defend/public/types.ts",
             "deprecated": false,
@@ -140,7 +122,7 @@
           "\nAll the IDs for the cloud defend pages.\nThis needs to match the cloud defend page entries in `SecurityPageName` in `x-pack/solutions/security/plugins/security_solution/common/constants.ts`."
         ],
         "signature": [
-          "\"cloud_defend-policies\" | \"kubernetes_security-dashboard\""
+          "\"cloud_defend-policies\""
         ],
         "path": "x-pack/solutions/security/plugins/cloud_defend/public/common/navigation/types.ts",
         "deprecated": false,
