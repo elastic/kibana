@@ -4776,7 +4776,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-logging-server-mocks@link:packages/core/logging/core-logging-server-mocks":
+"@kbn/core-logging-server-mocks@link:src/core/packages/logging/server-mocks":
   version "0.0.0"
   uid ""
 
