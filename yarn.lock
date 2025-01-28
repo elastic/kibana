@@ -4336,7 +4336,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-analytics-server-mocks@link:packages/core/analytics/core-analytics-server-mocks":
+"@kbn/core-analytics-server-mocks@link:src/core/packages/analytics/server-mocks":
   version "0.0.0"
   uid ""
 
