@@ -7050,6 +7050,20 @@
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-public.DatatableColumn.variable",
+            "type": "string",
+            "tags": [],
+            "label": "variable",
+            "description": [],
+            "signature": [
+              "string | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
@@ -18440,6 +18454,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-server.DatatableColumn.variable",
+            "type": "string",
+            "tags": [],
+            "label": "variable",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -30293,6 +30321,20 @@
             "description": [],
             "signature": [
               "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "expressions",
+            "id": "def-common.DatatableColumn.variable",
+            "type": "string",
+            "tags": [],
+            "label": "variable",
+            "description": [],
+            "signature": [
+              "string | undefined"
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
