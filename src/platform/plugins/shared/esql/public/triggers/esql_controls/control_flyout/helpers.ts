@@ -7,7 +7,11 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 import { monaco } from '@kbn/monaco';
-import { inKnownTimeInterval } from '@kbn/esql-validation-autocomplete';
+import { timeUnits } from '@kbn/esql-validation-autocomplete';
+
+function inKnownTimeInterval(timeIntervalUnit: string): boolean {
+  return timeUnits.some((unit) => unit === timeIntervalUnit.toLowerCase());
+}
 
 export const updateQueryStringWithVariable = (
   queryString: string,
