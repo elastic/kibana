@@ -18,7 +18,7 @@ import type {
   VisualizeEmbeddableDeps,
 } from './visualize_embeddable';
 import { getHttp, getTimeFilter, getCapabilities } from '../../services';
-import { urlFor } from '../../utils/saved_visualize_utils';
+import { urlFor } from '../..';
 import { createVisualizeEmbeddableAsync } from './visualize_embeddable_async';
 import { AttributeService } from './attribute_service';
 import { ErrorEmbeddable } from './error_embeddable';

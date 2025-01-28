@@ -54,6 +54,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         dashboards: [],
         stream: {
           ingest: {
+            lifecycle: { inherit: {} },
             processing: [
               {
                 grok: {
