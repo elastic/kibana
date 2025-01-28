@@ -52,9 +52,10 @@ export const DocumentStatsTable: FC<FieldDataRowProps> = ({ config }) => {
 
   const valueCount =
     count ?? (isIndexBasedFieldVisConfig(config) && config.existsInDocs === true ? undefined : 0);
+  const totalCount = config.stats?.totalDocuments ?? sampleCount;
   const docsPercent =
-    valueCount !== undefined && sampleCount !== undefined
-      ? roundToDecimalPlace((valueCount / sampleCount) * 100)
+    valueCount !== undefined && totalCount !== undefined
+      ? roundToDecimalPlace((valueCount / totalCount) * 100)
       : undefined;
   const metaTableItems = [
     {
