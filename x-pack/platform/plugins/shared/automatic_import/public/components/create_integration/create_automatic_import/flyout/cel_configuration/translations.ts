@@ -17,13 +17,13 @@ export const OPEN_API_SPEC_TITLE = i18n.translate(
   }
 );
 export const UPLOAD_SPEC_TITLE = i18n.translate(
-  'xpack.integrationAssistant.celFlyout.createCel.uploadSpecTitle',
+  'xpack.automaticImport.celFlyout.createCel.uploadSpecTitle',
   {
     defaultMessage: 'Upload OpenAPI Specification',
   }
 );
 export const CONFIRM_SETTINGS_TITLE = i18n.translate(
-  'xpack.integrationAssistant.celFlyout.createCel.confirmSettingsTitle',
+  'xpack.automaticImport.celFlyout.createCel.confirmSettingsTitle',
   {
     defaultMessage: 'Choose API endpoint and Authentication method',
   }
@@ -33,22 +33,22 @@ export const CONFIRM_SETTINGS_TITLE = i18n.translate(
  * footer
  */
 export const SAVE_CONFIG = i18n.translate(
-  'xpack.integrationAssistant.celFlyout.footer.saveAndContinue',
+  'xpack.automaticImport.celFlyout.footer.saveAndContinue',
   {
     defaultMessage: 'Save Configuration',
   }
 );
-export const CANCEL = i18n.translate('xpack.integrationAssistant.celFlyout.footer.cancel', {
+export const CANCEL = i18n.translate('xpack.automaticImport.celFlyout.footer.cancel', {
   defaultMessage: 'Cancel',
 });
 export const ANALYZE_BUTTON_HINT = i18n.translate(
-  'xpack.integrationAssistant.celFlyout.footer.analyzeHint',
+  'xpack.automaticImport.celFlyout.footer.analyzeHint',
   {
     defaultMessage: 'Analyze your OpenAPI spec file before saving',
   }
 );
 export const GENERATE_BUTTON_HINT = i18n.translate(
-  'xpack.integrationAssistant.celFlyout.footer.generateHint',
+  'xpack.automaticImport.celFlyout.footer.generateHint',
   {
     defaultMessage: 'Generate your CEL input configuration before saving',
   }
@@ -57,6 +57,6 @@ export const GENERATE_BUTTON_HINT = i18n.translate(
 /**
  * generation error
  */
-export const RETRY = i18n.translate('xpack.integrationAssistant.celFlyout.retry', {
+export const RETRY = i18n.translate('xpack.automaticImport.celFlyout.retry', {
   defaultMessage: 'Retry',
 });
