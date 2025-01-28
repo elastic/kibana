@@ -4,12 +4,13 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import { useAbortableAsync } from '@kbn/observability-ai-assistant-plugin/public';
 import { EuiButton, EuiButtonEmpty, EuiLoadingSpinner, EuiToolTip } from '@elastic/eui';
 import { css } from '@emotion/react';
 import { v4 } from 'uuid';
 import useObservable from 'react-use/lib/useObservable';
+import { debounceTime } from 'rxjs';
 import { i18n } from '@kbn/i18n';
 import { CoreStart } from '@kbn/core-lifecycle-browser';
 import {
@@ -83,6 +84,15 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   const [hasBeenOpened, setHasBeenOpened] = useState(isOpen);
   const keyRef = useRef(v4());
 
+  const openFlyout = useCallback(() => {
+    if (!isOpen) {
+      keyRef.current = v4();
+      setHasBeenOpened(true);
+      setFlyoutSettings((prev) => ({ ...prev, isOpen: true }));
+      setIsOpen(true);
+    }
+  }, [isOpen, setFlyoutSettings]);
+
   const chatService = useAbortableAsync(
     ({ signal }) => {
       return hasBeenOpened
@@ -107,17 +117,16 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
   );
 
   useEffect(() => {
-    const conversationSubscription = service.conversations.predefinedConversation$.subscribe(() => {
-      keyRef.current = v4();
-      setHasBeenOpened(true);
-      setFlyoutSettings((prev) => ({ ...prev, isOpen: true }));
-      setIsOpen(true);
-    });
+    const conversationSubscription = service.conversations.predefinedConversation$
+      .pipe(debounceTime(300))
+      .subscribe(() => {
+        openFlyout();
+      });
 
     return () => {
       conversationSubscription.unsubscribe();
     };
-  }, [service.conversations.predefinedConversation$, setFlyoutSettings]);
+  }, [service.conversations.predefinedConversation$, openFlyout]);
 
   const { messages, title, hideConversationList } = useObservable(
     service.conversations.predefinedConversation$
@@ -163,11 +172,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
             css={css`
               padding: 0px 8px;
             `}
-            onClick={() => {
-              service.conversations.openNewConversation({
-                messages: [],
-              });
-            }}
+            onClick={openFlyout}
             color="primary"
             size="s"
           >
@@ -178,11 +183,7 @@ export function NavControl({ isServerless }: { isServerless?: boolean }) {
             aria-label={buttonLabel}
             data-test-subj="observabilityAiAssistantAppNavControlButton"
             css={buttonCss}
-            onClick={() => {
-              service.conversations.openNewConversation({
-                messages: [],
-              });
-            }}
+            onClick={openFlyout}
             color="primary"
             size="s"
             fullWidth={false}
