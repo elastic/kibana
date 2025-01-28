@@ -367,6 +367,18 @@ describe('single line query', () => {
 
           expect(text).toBe('FROM a | WHERE (1 + 1 + 2) * ((3 - 4) / (5 + 6 + 7) + 1)');
         });
+
+        test('formats WHERE binary-expression', () => {
+          const { text } = reprint('FROM a | STATS a WHERE b');
+
+          expect(text).toBe('FROM a | STATS a WHERE b');
+        });
+
+        test('formats complex WHERE binary-expression', () => {
+          const { text } = reprint('FROM a | STATS a = agg(123) WHERE b == test(c, 123)');
+
+          expect(text).toBe('FROM a | STATS a = AGG(123) WHERE b == TEST(c, 123)');
+        });
       });
     });
 

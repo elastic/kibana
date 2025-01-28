@@ -134,3 +134,18 @@ export const GET_PROVIDERS_FAILED = i18n.translate(
     defaultMessage: 'Unable to find providers',
   }
 );
+
+export const ENDPOINT_TITLE = i18n.translate(
+  'xpack.inferenceEndpointUICommon.components.EndpointTitle',
+  {
+    defaultMessage: 'Inference Endpoint',
+  }
+);
+
+export const CANCEL = i18n.translate('xpack.inferenceEndpointUICommon.components.cancelBtnLabel', {
+  defaultMessage: 'Cancel',
+});
+
+export const SAVE = i18n.translate('xpack.inferenceEndpointUICommon.components.saveBtnLabel', {
+  defaultMessage: 'Save',
+});

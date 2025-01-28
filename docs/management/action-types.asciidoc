@@ -5,124 +5,33 @@
 Connectors provide a central place to store connection information for services and integrations with Elastic or third party systems.
 Actions are instantiations of a connector that are linked to rules and run as background tasks on the {kib} server when rule conditions are met. {kib} provides the following types of connectors:
 
-[cols="2"]
-|===
-
-// ifeval::["featureAIConnector"=="true"]
-// a| <<inference-action-type,{infer}>>
-
-// | Send a request to {infer}.
-// endif::[]
-
-a| <<bedrock-action-type,{bedrock}>>
-
-| Send a request to {bedrock}.
-
-a| <<cases-action-type,Cases>>
-
-| Add alerts to cases.
-
-a| <<crowdstrike-action-type,CrowdStrike>>
-
-| Send a request to CrowdStrike.
-
-a| <<d3security-action-type,D3 Security>>
-
-| Send a request to D3 Security.
-
-a| <<gemini-action-type,{gemini}>>
-
-| Send a request to {gemini}.
-
-a| <<email-action-type,Email>>
-
-| Send email from your server.
-
-a| <<resilient-action-type,{ibm-r}>>
-
-| Create an incident in {ibm-r}.
-
-a| <<index-action-type,Index>>
-
-| Index data into Elasticsearch.
-
-a| <<jira-action-type,Jira>>
-
-| Create an incident in Jira.
-
-a| <<teams-action-type,Microsoft Teams>>
-
-| Send a message to a Microsoft Teams channel.
-
-a| <<obs-ai-assistant-action-type,Observability AI Assistant>>
-
-| Add AI-driven insights and custom actions to your workflow.
-
-a| <<openai-action-type,OpenAI>>
-
-| Send a request to OpenAI.
-
-a| <<opsgenie-action-type,{opsgenie}>>
-
-| Create or close an alert in {opsgenie}.
-
-a| <<pagerduty-action-type,PagerDuty>>
-
-| Send an event in PagerDuty.
-
-a| <<sentinelone-action-type,SentinelOne>>
-
-| Send a request to SentinelOne.
-
-a| <<server-log-action-type,ServerLog>>
-
-| Add a message to a Kibana log.
-
-a| <<servicenow-action-type,{sn-itsm}>>
-
-| Create an incident in {sn}.
-
-a| <<servicenow-sir-action-type,{sn-sir}>>
-
-| Create a security incident in {sn}.
-
-a| <<servicenow-itom-action-type,{sn-itom}>>
-
-| Create an event in {sn}.
-
-a| <<slack-action-type,Slack>>
-
-| Send a message to a Slack channel or user.
-
-a| <<swimlane-action-type,{swimlane}>>
-
-| Create an incident in {swimlane}.
-
-a| <<thehive-action-type,{hive}>>
-
-| Create cases and alerts in {hive}.
-
-a| <<tines-action-type,Tines>>
-
-| Send events to a Tines Story.
-
-a| <<torq-action-type,Torq>>
-
-| Trigger a Torq workflow.
-
-a| <<webhook-action-type, {webhook}>>
-
-| Send a request to a web service.
-
-a| <<cases-webhook-action-type,{webhook-cm}>>
-
-| Send a request to a Case Management web service.
-
-a| <<xmatters-action-type,xMatters>>
-
-| Send actionable alerts to on-call xMatters resources.
-
-|===
+* <<bedrock-action-type,{bedrock}>>: Send a request to {bedrock}.
+* <<cases-action-type,Cases>>: Add alerts to cases.
+* <<crowdstrike-action-type,CrowdStrike>>: Send a request to CrowdStrike.
+* <<d3security-action-type,D3 Security>>: Send a request to D3 Security.
+* <<gemini-action-type,{gemini}>>: Send a request to {gemini}.
+* <<email-action-type,Email>>: Send email from your server.
+* <<resilient-action-type,{ibm-r}>>: Create an incident in {ibm-r}.
+* <<index-action-type,Index>>: Index data into Elasticsearch.
+* <<jira-action-type,Jira>>: Create an incident in Jira.
+* <<teams-action-type,Microsoft Teams>>: Send a message to a Microsoft Teams channel.
+* <<obs-ai-assistant-action-type,Observability AI Assistant>>: Add AI-driven insights and custom actions to your workflow.
+* <<openai-action-type,OpenAI>>: Send a request to OpenAI.
+* <<opsgenie-action-type,{opsgenie}>>: Create or close an alert in {opsgenie}.
+* <<pagerduty-action-type,PagerDuty>>: Send an event in PagerDuty.
+* <<sentinelone-action-type,SentinelOne>>: Send a request to SentinelOne.
+* <<server-log-action-type,ServerLog>>: Add a message to a Kibana log.
+* <<servicenow-action-type,{sn-itsm}>>: Create an incident in {sn}.
+* <<servicenow-sir-action-type,{sn-sir}>>: Create a security incident in {sn}.
+* <<servicenow-itom-action-type,{sn-itom}>>: Create an event in {sn}.
+* <<slack-action-type,Slack>>: Send a message to a Slack channel or user.
+* <<swimlane-action-type,{swimlane}>>: Create an incident in {swimlane}.
+* <<thehive-action-type,{hive}>>: Create cases and alerts in {hive}.
+* <<tines-action-type,Tines>>: Send events to a Tines Story.
+* <<torq-action-type,Torq>>: Trigger a Torq workflow.
+* <<webhook-action-type, {webhook}>>: Send a request to a web service.
+* <<cases-webhook-action-type,{webhook-cm}>>: Send a request to a Case Management web service.
+* <<xmatters-action-type,xMatters>>: Send actionable alerts to on-call xMatters resources.
 
 [NOTE]
 ==============================================
