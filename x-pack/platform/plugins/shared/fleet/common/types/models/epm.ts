@@ -195,12 +195,19 @@ export interface RegistryImage extends PackageSpecIcon {
 
 export interface DeploymentsModesDefault {
   enabled: boolean;
+  is_default?: boolean;
 }
 
 export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
   organization?: string;
   division?: string;
   team?: string;
+  resources?: {
+    requests: {
+      cpu: string;
+      memory: string;
+    };
+  };
 }
 export interface DeploymentsModes {
   agentless: DeploymentsModesAgentless;
@@ -223,6 +230,7 @@ export enum RegistryPolicyTemplateKeys {
   readme = 'readme',
   multiple = 'multiple',
   type = 'type',
+  required_vars = 'required_vars',
   vars = 'vars',
   input = 'input',
   template_path = 'template_path',
@@ -255,6 +263,7 @@ export interface RegistryPolicyInputOnlyTemplate extends BaseTemplate {
   [RegistryPolicyTemplateKeys.type]: string;
   [RegistryPolicyTemplateKeys.input]: string;
   [RegistryPolicyTemplateKeys.template_path]: string;
+  [RegistryPolicyTemplateKeys.required_vars]?: RegistryRequiredVars;
   [RegistryPolicyTemplateKeys.vars]?: RegistryVarsEntry[];
 }
 
@@ -269,6 +278,7 @@ export enum RegistryInputKeys {
   template_path = 'template_path',
   condition = 'condition',
   input_group = 'input_group',
+  required_vars = 'required_vars',
   vars = 'vars',
 }
 
@@ -281,6 +291,7 @@ export interface RegistryInput {
   [RegistryInputKeys.template_path]?: string;
   [RegistryInputKeys.condition]?: string;
   [RegistryInputKeys.input_group]?: RegistryInputGroup;
+  [RegistryInputKeys.required_vars]?: RegistryRequiredVars;
   [RegistryInputKeys.vars]?: RegistryVarsEntry[];
 }
 
@@ -289,6 +300,7 @@ export enum RegistryStreamKeys {
   title = 'title',
   description = 'description',
   enabled = 'enabled',
+  required_vars = 'required_vars',
   vars = 'vars',
   template_path = 'template_path',
 }
@@ -298,6 +310,7 @@ export interface RegistryStream {
   [RegistryStreamKeys.title]: string;
   [RegistryStreamKeys.description]?: string;
   [RegistryStreamKeys.enabled]?: boolean;
+  [RegistryStreamKeys.required_vars]?: RegistryRequiredVars;
   [RegistryStreamKeys.vars]?: RegistryVarsEntry[];
   [RegistryStreamKeys.template_path]: string;
 }
@@ -444,6 +457,15 @@ export interface RegistryDataStreamRoutingRules {
 
 export interface RegistryDataStreamLifecycle {
   data_retention: string;
+}
+
+export interface RegistryRequireVarConstraint {
+  name: string;
+  value?: string;
+}
+
+export interface RegistryRequiredVars {
+  [key: string]: RegistryRequireVarConstraint[];
 }
 
 export type RegistryVarType =

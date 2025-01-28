@@ -13,23 +13,22 @@ import {
   SiemMigrationTaskStatus,
 } from '../../../../../common/siem_migrations/constants';
 import type { RuleMigrationTaskStats } from '../../../../../common/siem_migrations/model/rule_migration.gen';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
 import type { RuleMigrationsDataClient } from '../data/rule_migrations_data_client';
-import type {
-  RuleMigrationDataStats,
-  RuleMigrationFilters,
-} from '../data/rule_migrations_data_rules_client';
+import type { RuleMigrationDataStats } from '../data/rule_migrations_data_rules_client';
 import type { SiemRuleMigrationsClientDependencies } from '../types';
 import { getRuleMigrationAgent } from './agent';
 import type { MigrateRuleState } from './agent/types';
 import { RuleMigrationsRetriever } from './retrievers';
 import type {
   MigrationAgent,
-  RuleMigrationTaskStartParams,
   RuleMigrationTaskCreateAgentParams,
+  RuleMigrationTaskStartParams,
   RuleMigrationTaskStartResult,
   RuleMigrationTaskStopResult,
 } from './types';
 import { ActionsClientChat } from './util/actions_client_chat';
+import { generateAssistantComment } from './util/comments';
 
 const ITERATION_BATCH_SIZE = 15 as const;
 const ITERATION_SLEEP_SECONDS = 10 as const;
@@ -148,7 +147,7 @@ export class RuleMigrationsTaskClient {
               );
               await this.data.rules.saveError({
                 ...ruleMigration,
-                comments: [`Error migrating rule: ${error.message}`],
+                comments: [generateAssistantComment(`Error migrating rule: ${error.message}`)],
               });
             }
           })
@@ -171,7 +170,7 @@ export class RuleMigrationsTaskClient {
         this.logger.info(`Abort signal received, stopping migration ID:${migrationId}`);
         return;
       } else {
-        this.logger.error(`Error processing migration ID:${migrationId}`, error);
+        this.logger.error(`Error processing migration ID:${migrationId} ${error}`);
       }
     } finally {
       this.migrationsRunning.delete(migrationId);

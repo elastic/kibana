@@ -9,7 +9,13 @@ import { i18n } from '@kbn/i18n';
 import React from 'react';
 import { css } from '@emotion/css';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
-import { ReadStreamDefinition, StreamLifecycle, isIngestStream } from '@kbn/streams-schema';
+import {
+  IngestStreamLifecycle,
+  ReadStreamDefinition,
+  isDslLifecycle,
+  isIlmLifecycle,
+  isUnwiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { useStreamsAppBreadcrumbs } from '../../hooks/use_streams_app_breadcrumbs';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
 import { EntityOverviewTabList } from '../entity_overview_tab_list';
@@ -103,7 +109,7 @@ export function EntityDetailViewWithoutParams({
               title={
                 <EuiFlexGroup gutterSize="s" alignItems="center">
                   {entity.displayName}
-                  {definition && isIngestStream(definition) ? (
+                  {definition && isUnwiredStreamDefinition(definition.stream) ? (
                     <>
                       {' '}
                       <EuiBadge>
@@ -114,7 +120,7 @@ export function EntityDetailViewWithoutParams({
                       </EuiBadge>
                     </>
                   ) : null}
-                  {definition && <LifecycleBadge lifecycle={definition.lifecycle} />}
+                  {definition && <LifecycleBadge lifecycle={definition.effective_lifecycle} />}
                 </EuiFlexGroup>
               }
             />
@@ -137,34 +143,49 @@ export function EntityDetailViewWithoutParams({
   );
 }
 
-function LifecycleBadge({ lifecycle }: { lifecycle: StreamLifecycle }) {
+function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamLifecycle }) {
   const {
     dependencies: {
       start: { share },
     },
   } = useKibana();
   const ilmLocator = share.url.locators.get<IlmLocatorParams>(ILM_LOCATOR_ID);
-  if (lifecycle.type === 'ilm') {
+
+  if (isIlmLifecycle(lifecycle)) {
     return (
       <EuiBadge color="hollow">
         <EuiLink
+          data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           color="text"
-          href={ilmLocator?.getRedirectUrl({ page: 'policy_edit', policyName: lifecycle.policy })}
+          href={ilmLocator?.getRedirectUrl({
+            page: 'policy_edit',
+            policyName: lifecycle.ilm.policy,
+          })}
         >
           {i18n.translate('xpack.streams.entityDetailViewWithoutParams.ilmBadgeLabel', {
             defaultMessage: 'ILM Policy: {name}',
-            values: { name: lifecycle.policy },
+            values: { name: lifecycle.ilm.policy },
           })}
         </EuiLink>
       </EuiBadge>
     );
   }
 
+  if (isDslLifecycle(lifecycle)) {
+    return (
+      <EuiBadge color="hollow">
+        {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dslBadgeLabel', {
+          defaultMessage: 'Retention: {retention}',
+          values: { retention: lifecycle.dsl.data_retention || '∞' },
+        })}
+      </EuiBadge>
+    );
+  }
+
   return (
     <EuiBadge color="hollow">
-      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.dlmBadgeLabel', {
-        defaultMessage: 'Retention: {retention}',
-        values: { retention: lifecycle.data_retention || '∞' },
+      {i18n.translate('xpack.streams.entityDetailViewWithoutParams.disabledLifecycleBadgeLabel', {
+        defaultMessage: 'Retention: Disabled',
       })}
     </EuiBadge>
   );
