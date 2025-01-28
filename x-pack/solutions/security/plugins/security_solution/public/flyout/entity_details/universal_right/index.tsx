@@ -11,28 +11,24 @@ import { UniversalEntityFlyoutHeader } from './header';
 import { UniversalEntityFlyoutContent } from './content';
 import { FlyoutNavigation } from '../../shared/components/flyout_navigation';
 
-export interface UniversalEntityPanelProps extends Record<string, unknown> {
-  contextID: string;
-  scopeId: string;
-  serviceName: string;
-  isDraggable?: boolean;
+export interface UniversalEntityPanelProps {
+  // TODO: Asset Inventory - use EntityEcs type definition for entity
+  entity: {
+    id: string;
+    timestamp: string;
+    type: string;
+  };
+  contextID?: string;
+  scopeId?: string;
+  /** this is because FlyoutPanelProps defined params as Record<string, unknown> {@link FlyoutPanelProps#params} */
+  [key: string]: unknown;
 }
 
 export interface UniversalEntityPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'universal-entity-panel';
   params: UniversalEntityPanelProps;
 }
 
-export const SERVICE_PANEL_RISK_SCORE_QUERY_ID = 'servicePanelRiskScoreQuery';
-
-const FIRST_RECORD_PAGINATION = {
-  cursorStart: 0,
-  querySize: 1,
-};
-
-export const UniversalEntityPanel = (props: UniversalEntityPanelProps) => {
-  console.log(props);
-
+export const UniversalEntityPanel = (props: UniversalEntityPanelExpandableFlyoutProps) => {
   const entity = props.params.entity;
   // const serviceNameFilterQuery = useMemo(
   //   () => (serviceName ? buildEntityNameFilter(EntityType.service, [serviceName]) : undefined),

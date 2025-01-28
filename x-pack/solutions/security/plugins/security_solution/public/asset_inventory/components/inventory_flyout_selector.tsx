@@ -16,9 +16,10 @@ import {
 import { useOnExpandableFlyoutClose } from '../../flyout/shared/hooks/use_on_expandable_flyout_close';
 
 interface InventoryFlyoutSelectorProps {
-  // TODO: Asset Inventory - use ECS type definition for universal entity
+  // TODO: Asset Inventory - use EntityEcs type definition for universal entity
   entity: {
     id: string;
+    name: string;
     // TODO: Asset Inventory - use dedicated type for entity.type
     type: 'universal' | 'user' | 'host' | 'service';
     timestamp: string;
@@ -28,12 +29,39 @@ interface InventoryFlyoutSelectorProps {
   contextId?: string;
 }
 
-const panelMap = {
+type SecuritySolutionFlyoutPanelId =
+  | typeof UniversalEntityPanelKey
+  | typeof UserPanelKey
+  | typeof HostPanelKey
+  | typeof ServicePanelKey;
+
+const entityPanelMap: Record<
+  // TODO: Asset Inventory - replace with EntityEcs.type definition
+  InventoryFlyoutSelectorProps['entity']['type'],
+  SecuritySolutionFlyoutPanelId
+> = {
   universal: UniversalEntityPanelKey,
   user: UserPanelKey,
   host: HostPanelKey,
   service: ServicePanelKey,
-} as const;
+};
+
+interface SecurityFlyoutPanelsCommonParams {
+  scopeId?: string;
+  contextId?: string;
+}
+
+type FlyoutParams =
+  | {
+      id: typeof UniversalEntityPanelKey;
+      params: { entity: InventoryFlyoutSelectorProps['entity'] };
+    }
+  | { id: typeof UserPanelKey; params: { userName: string } & SecurityFlyoutPanelsCommonParams }
+  | { id: typeof HostPanelKey; params: { hostName: string } & SecurityFlyoutPanelsCommonParams }
+  | {
+      id: typeof ServicePanelKey;
+      params: { serviceName: string } & SecurityFlyoutPanelsCommonParams;
+    };
 
 export const InventoryFlyoutSelector = ({
   entity,
@@ -44,20 +72,23 @@ export const InventoryFlyoutSelector = ({
   const { openFlyout } = useExpandableFlyoutApi();
   useOnExpandableFlyoutClose({ callback: onFlyoutClose });
 
-  const panelId = panelMap[entity.type] || panelMap.universal;
+  const securitySolutionFlyoutPanelId = entityPanelMap[entity.type] || entityPanelMap.universal;
 
   useEffect(() => {
+    const flyoutParams: Record<InventoryFlyoutSelectorProps['entity']['type'], FlyoutParams> = {
+      universal: { id: UniversalEntityPanelKey, params: { entity } },
+      user: { id: UserPanelKey, params: { userName: entity.name, scopeId, contextId } },
+      host: { id: HostPanelKey, params: { hostName: entity.name, scopeId, contextId } },
+      service: { id: ServicePanelKey, params: { serviceName: entity.name, scopeId, contextId } },
+    };
+
     openFlyout({
       right: {
-        id: panelId,
-        params: {
-          entity,
-          scopeId,
-          contextId,
-        },
+        id: flyoutParams[entity.type].id,
+        params: flyoutParams[entity.type].params,
       },
     });
-  }, [contextId, entity, openFlyout, panelId, scopeId]);
+  }, [contextId, entity, openFlyout, securitySolutionFlyoutPanelId, scopeId]);
 
   // This component is responsible for opening the flyout using useExpandableFlyoutApi
   // we return an empty fragment because we don't want to render anything else

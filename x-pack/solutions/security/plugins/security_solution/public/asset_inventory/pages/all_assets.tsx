@@ -36,6 +36,7 @@ import { generateFilters } from '@kbn/data-plugin/public';
 import { type DocViewFilterFn } from '@kbn/unified-doc-viewer/types';
 import useLocalStorage from 'react-use/lib/useLocalStorage';
 
+import type { HostEcs, ServiceEcs, UserEcs } from '@kbn/securitysolution-ecs';
 import { InventoryFlyoutSelector } from '../components/inventory_flyout_selector';
 import { type CriticalityLevelWithUnassigned } from '../../../common/entity_analytics/asset_criticality/types';
 import { useKibana } from '../../common/lib/kibana';
@@ -134,19 +135,22 @@ export interface AllAssetsProps {
    * This function will be used in the control column to create a rule for a specific finding.
    */
   createFn?: (rowIndex: number) => ((http: HttpSetup) => Promise<unknown>) | undefined;
-  /**
-   * This is the component that will be rendered in the flyout when a row is expanded.
-   * This component will receive the row data and a function to close the flyout.
-   */
-  flyoutComponent: (hit: DataTableRecord, onCloseFlyout: () => void) => JSX.Element;
   'data-test-subj'?: string;
 }
 
-const getEntity = (row: DataTableRecord) => {
+interface UniversalEntity {
+  id: string;
+  timestamp: string;
+  type: string;
+}
+
+// TODO: Asset Inventory - adjust with real entity data
+// TODO: Asset Inventory - add and use EntityEcs type
+const getEntity = (row: DataTableRecord): UniversalEntity | ServiceEcs | UserEcs | HostEcs => {
   return {
     id: row.flattened['asset.name'],
     timestamp: row.flattened['@timestamp'],
-    type: 'user',
+    type: 'universal',
   };
 };
 
@@ -158,7 +162,6 @@ const AllAssets = ({
   height,
   hasDistributionBar = true,
   createFn,
-  flyoutComponent,
   ...rest
 }: AllAssetsProps) => {
   const assetInventoryDataTable = useAssetInventoryDataTable({
@@ -173,6 +176,7 @@ const AllAssets = ({
   const renderDocumentView = useCallback((hit: DataTableRecord) => {
     return (
       <InventoryFlyoutSelector
+        // @ts-ignore
         entity={getEntity(hit)}
         onFlyoutClose={() => setExpandedDoc(undefined)}
       />

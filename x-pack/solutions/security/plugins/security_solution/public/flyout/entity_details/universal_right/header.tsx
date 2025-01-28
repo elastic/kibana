@@ -28,12 +28,12 @@ export const UniversalEntityFlyoutHeader = ({ entity }: UniversalEntityFlyoutHea
       <EuiFlexGroup gutterSize="s" responsive={false} direction="column">
         <EuiFlexItem grow={false}>
           <EuiText size="xs" data-test-subj={'service-panel-header-lastSeen'}>
-            <PreferenceFormattedDate value={entity.timestamp} />
+            <PreferenceFormattedDate value={entity?.timestamp} />
             <EuiSpacer size="xs" />
           </EuiText>
         </EuiFlexItem>
         <EuiFlexItem grow={false}>
-          <FlyoutTitle title={entity.id} iconType={EntityIconByType[entity.type]} />
+          <FlyoutTitle title={entity?.id} iconType={EntityIconByType[entity?.type]} />
         </EuiFlexItem>
       </EuiFlexGroup>
     </FlyoutHeader>

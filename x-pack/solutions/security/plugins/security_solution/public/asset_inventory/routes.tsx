@@ -5,12 +5,10 @@
  * 2.0.
  */
 
-import React, { lazy, Suspense, useEffect } from 'react';
+import React, { lazy, Suspense } from 'react';
 import { EuiLoadingSpinner } from '@elastic/eui';
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
 import { useDataView } from '@kbn/cloud-security-posture/src/hooks/use_data_view';
-import { useExpandableFlyoutApi } from '@kbn/expandable-flyout';
-import { useOnExpandableFlyoutClose } from '../flyout/shared/hooks/use_on_expandable_flyout_close';
 import type { SecuritySubPluginRoutes } from '../app/types';
 import { SecurityPageName } from '../app/types';
 import { ASSET_INVENTORY_PATH } from '../../common/constants';
@@ -43,29 +41,6 @@ const queryClient = new QueryClient({
   },
 });
 
-const FlyoutComponent = (props) => {
-  console.log('flyout', props);
-  const { openFlyout } = useExpandableFlyoutApi();
-  useOnExpandableFlyoutClose({ callback: props.onFlyoutClose });
-
-  useEffect(() => {
-    openFlyout({
-      right: {
-        id: 'universal-entity-panel',
-        params: {
-          entity: {
-            id: props.flattened['asset.name'],
-            timestamp: props.flattened['@timestamp'],
-            type: 'user',
-          },
-        },
-      },
-    });
-  }, [props.flattened, openFlyout]);
-
-  return <></>;
-};
-
 export const AssetInventoryRoutes = () => {
   const dataViewQuery = useDataView('asset-inventory-logs');
 
@@ -83,14 +58,7 @@ export const AssetInventoryRoutes = () => {
           <DataViewContext.Provider value={dataViewContextValue}>
             <SecuritySolutionPageWrapper noPadding>
               <Suspense fallback={<EuiLoadingSpinner />}>
-                <AllAssetsLazy
-                  rows={rows}
-                  isLoading={false}
-                  loadMore={() => {}}
-                  flyoutComponent={(props, onCloseFlyout) => (
-                    <FlyoutComponent {...props} onCloseFlyout={onCloseFlyout} />
-                  )}
-                />
+                <AllAssetsLazy rows={rows} isLoading={false} loadMore={() => {}} />
               </Suspense>
             </SecuritySolutionPageWrapper>
           </DataViewContext.Provider>
