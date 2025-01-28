@@ -76,7 +76,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       it('should return focus to the alerts button when dismissing the alerts popover', () =>
         expectButtonToLoseAndRegainFocusWhenOverlayIsOpenedAndClosed('discoverAlertsButton'));
 
-      it.skip('should return focus to the alerts button when dismissing the create rule flyout', async () => {
+      it('should return focus to the alerts button when dismissing the create rule flyout', async () => {
         await focusAndPressButton('discoverAlertsButton');
         expect(await hasFocus('discoverAlertsButton')).to.be(false);
         await focusAndPressButton('discoverCreateAlertButton');
