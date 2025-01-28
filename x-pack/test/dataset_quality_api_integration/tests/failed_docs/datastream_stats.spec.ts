@@ -157,7 +157,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
         });
 
         expect(resp.body.count).to.be(0);
-        expect(resp.body.lastOcurrence).to.be(0);
+        expect(resp.body.lastOccurrence).to.be(0);
         expect(resp.body.timeSeries.length).to.be(0);
       });
     });

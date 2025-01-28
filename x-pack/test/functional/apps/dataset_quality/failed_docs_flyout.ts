@@ -24,9 +24,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   ]);
   const testSubjects = getService('testSubjects');
   const synthtrace = getService('logSynthtraceEsClient');
-  const esClient = getService('es');
-  const retry = getService('retry');
-  const to = new Date().toISOString();
   const type = 'logs';
 
   const failedDatasetName = datasetNames[1];
@@ -73,6 +70,10 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
         );
+        await PageObjects.datasetQuality.doesTextExist(
+          'datasetQualityDetailsFailedDocsFieldFlyoutFieldValue-cause',
+          'Error messages'
+        );
 
         await PageObjects.datasetQuality.closeFlyout();
 
@@ -92,6 +93,11 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
 
         await testSubjects.existOrFail(
           PageObjects.datasetQuality.testSubjectSelectors.datasetQualityDetailsDegradedFieldFlyout
+        );
+
+        await PageObjects.datasetQuality.doesTextExist(
+          'datasetQualityDetailsFailedDocsFieldFlyoutFieldValue-cause',
+          'Error messages'
         );
 
         await PageObjects.datasetQuality.closeFlyout();
