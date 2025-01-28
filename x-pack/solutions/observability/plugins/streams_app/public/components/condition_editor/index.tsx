@@ -84,6 +84,7 @@ export function ConditionForm(props: {
           })}
         >
           <EuiButton
+            data-test-subj="streamsAppConditionFormDisableRoutingButton"
             size={'xs' as 's'} // TODO: remove this cast when EUI is updated - EuiButton takes xs, but the type is wrong
             onClick={() => props.onConditionChange({ never: {} })}
             disabled={props.condition === undefined}
