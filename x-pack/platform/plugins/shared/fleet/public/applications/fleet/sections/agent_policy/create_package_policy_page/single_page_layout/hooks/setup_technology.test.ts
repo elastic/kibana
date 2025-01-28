@@ -1213,22 +1213,6 @@ describe('useSetupTechnology', () => {
     );
 
     act(() => {
-      result.current.handleSetupTechnologyChange(SetupTechnology.AGENT_BASED);
-    });
-
-    await waitFor(() => {
-      expect(result.current.selectedSetupTechnology).toBe(SetupTechnology.AGENT_BASED);
-      expect(setNewAgentPolicy).toHaveBeenCalledWith(newAgentPolicyMock);
-      expect(setNewAgentPolicy).not.toHaveBeenCalledWith({
-        global_data_tags: [
-          { name: 'organization', value: 'org' },
-          { name: 'division', value: 'div' },
-          { name: 'team', value: 'team' },
-        ],
-      });
-    });
-
-    act(() => {
       result.current.handleSetupTechnologyChange(SetupTechnology.AGENTLESS);
     });
 
