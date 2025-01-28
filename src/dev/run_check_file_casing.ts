@@ -30,6 +30,7 @@ run(async ({ log }) => {
       // during relocation packages and plugins
       // in the context of Sustainable Kibana Architecture
       'src/core/**',
+      'src/dev/packages/**',
       'src/platform/**',
       'x-pack/platform/**',
       'x-pack/solutions/**',
