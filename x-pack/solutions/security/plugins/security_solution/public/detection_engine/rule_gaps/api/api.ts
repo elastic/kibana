@@ -130,6 +130,7 @@ export const getRuleIdsWithGaps = async ({
         end,
         statuses,
       }),
+      signal,
     }
   );
 
@@ -153,6 +154,7 @@ export const getGapsSummaryByRuleIds = async ({
   KibanaServices.get().http.fetch<GetGapsSummaryByRuleIdsResponseBody>(
     INTERNAL_ALERTING_GAPS_GET_SUMMARY_BY_RULE_IDS_API_PATH,
     {
+      signal,
       method: 'POST',
       body: JSON.stringify({
         start,
