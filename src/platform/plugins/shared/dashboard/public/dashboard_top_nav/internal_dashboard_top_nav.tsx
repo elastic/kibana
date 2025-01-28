@@ -26,6 +26,13 @@ import { getManagedContentBadge } from '@kbn/managed-content-badge';
 import { TopNavMenuBadgeProps, TopNavMenuProps } from '@kbn/navigation-plugin/public';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
 import { LazyLabsFlyout, withSuspense } from '@kbn/presentation-util-plugin/public';
+import {
+  FavoriteButton,
+  FavoritesClient,
+  FavoritesContextProvider,
+} from '@kbn/content-management-favorites-public';
+import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
+import { css } from '@emotion/react';
 
 import { UI_SETTINGS } from '../../common';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -39,7 +46,7 @@ import { useDashboardMountContext } from '../dashboard_app/hooks/dashboard_mount
 import { DashboardEditingToolbar } from '../dashboard_app/top_nav/dashboard_editing_toolbar';
 import { useDashboardMenuItems } from '../dashboard_app/top_nav/use_dashboard_menu_items';
 import { DashboardEmbedSettings } from '../dashboard_app/types';
-import { LEGACY_DASHBOARD_APP_ID } from '../plugin_constants';
+import { LEGACY_DASHBOARD_APP_ID, DASHBOARD_APP_ID } from '../plugin_constants';
 import { openSettingsFlyout } from '../dashboard_container/embeddable/api';
 import { DashboardRedirect } from '../dashboard_container/types';
 import { SaveDashboardReturn } from '../services/dashboard_content_management_service/types';
@@ -49,10 +56,12 @@ import {
   dataService,
   navigationService,
   serverlessService,
+  usageCollectionService,
 } from '../services/kibana_services';
 import { getDashboardCapabilities } from '../utils/get_dashboard_capabilities';
 import './_dashboard_top_nav.scss';
 import { getFullEditPath } from '../utils/urls';
+import { DASHBOARD_CONTENT_ID } from '../utils/telemetry_constants';
 
 export interface InternalDashboardTopNavProps {
   customLeadingBreadCrumbs?: EuiBreadcrumb[];
@@ -63,6 +72,39 @@ export interface InternalDashboardTopNavProps {
   showBorderBottom?: boolean;
   showResetChange?: boolean;
 }
+
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      retry: false,
+    },
+  },
+});
+
+const DashboardFavoriteButton = ({ dashboardId }: { dashboardId: string }) => {
+  const dashboardFavoritesClient = useMemo(() => {
+    return new FavoritesClient(DASHBOARD_APP_ID, DASHBOARD_CONTENT_ID, {
+      http: coreServices.http,
+      userProfile: coreServices.userProfile,
+      usageCollection: usageCollectionService,
+    });
+  }, []);
+
+  return (
+    <QueryClientProvider client={queryClient}>
+      <FavoritesContextProvider favoritesClient={dashboardFavoritesClient}>
+        <FavoriteButton
+          id={dashboardId}
+          css={css`
+            // aligns the favorite button with the breadcrumb height (both classic and solution nav)
+            margin-top: -6px;
+            margin-bottom: -4px;
+          `}
+        />
+      </FavoritesContextProvider>
+    </QueryClientProvider>
+  );
+};
 
 const LabsFlyout = withSuspense(LazyLabsFlyout, null);
 
@@ -157,9 +199,13 @@ export function InternalDashboardTopNav({
                 className="dshTitleBreadcrumbs__updateIcon"
                 onClick={() => openSettingsFlyout(dashboardApi)}
               />
+              {lastSavedId && <DashboardFavoriteButton dashboardId={lastSavedId} />}
             </>
           ) : (
-            dashboardTitle
+            <>
+              {dashboardTitle}
+              {lastSavedId && <DashboardFavoriteButton dashboardId={lastSavedId} />}
+            </>
           ),
       },
     ];
