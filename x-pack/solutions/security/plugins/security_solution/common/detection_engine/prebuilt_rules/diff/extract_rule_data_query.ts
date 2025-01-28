@@ -88,14 +88,16 @@ export const extractRuleEsqlQuery = (
  * Relevant issue: https://github.com/elastic/kibana/issues/202966
  */
 const normalizeFilterArray = (filters: RuleFilterArray | undefined): RuleFilterArray => {
-  if (filters && filters.length > 0) {
-    return (filters as Filter[]).map((filter) => {
-      if (filter.meta && filter.meta.alias == null) {
-        return { ...filter, meta: { ...filter.meta, alias: undefined } };
-      }
-      return filter;
-    });
-  } else {
+  if (!filters?.length) {
     return [];
   }
+  return (filters as Filter[]).map((filter) => ({
+    ...filter,
+    meta: filter.meta
+      ? {
+          ...filter.meta,
+          alias: filter.meta.alias ?? undefined,
+        }
+      : undefined,
+  }));
 };
