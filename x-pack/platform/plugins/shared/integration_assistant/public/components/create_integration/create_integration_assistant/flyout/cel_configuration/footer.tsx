@@ -5,87 +5,42 @@
  * 2.0.
  */
 
-import {
-  EuiButton,
-  EuiButtonEmpty,
-  EuiFlexGroup,
-  EuiFlexItem,
-  EuiLoadingSpinner,
-} from '@elastic/eui';
-import React, { useMemo } from 'react';
+import { EuiButton, EuiButtonEmpty, EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import React from 'react';
 import { type State } from '../../state';
 import * as i18n from './translations';
-import type { CelFlyoutStepName } from './create_cel_config';
-
-const AnalyzeApiButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
-  if (!isGenerating) {
-    return <>{i18n.ANALYZE}</>;
-  }
-  return (
-    <>
-      <EuiLoadingSpinner size="s" data-test-subj="generatingLoader" />
-      {i18n.LOADING}
-    </>
-  );
-});
-AnalyzeApiButtonText.displayName = 'AnalyzeApiButtonText';
-
-const AnalyzeCelButtonText = React.memo<{ isGenerating: boolean }>(({ isGenerating }) => {
-  if (!isGenerating) {
-    return <>{i18n.SAVE_AND_CONTINUE}</>;
-  }
-  return (
-    <>
-      <EuiLoadingSpinner size="s" data-test-subj="generatingLoader" />
-      {i18n.LOADING}
-    </>
-  );
-});
-AnalyzeCelButtonText.displayName = 'AnalyzeCelButtonText';
 
 interface FooterProps {
-  isFlyoutGenerating?: State['isFlyoutGenerating'];
-  celStep: CelFlyoutStepName;
-  isNextStepEnabled?: boolean;
-  onNext?: () => void;
-  onClose?: () => void;
+  isFlyoutGenerating: State['isFlyoutGenerating'];
+  isValid: boolean;
+  isGenerationComplete: boolean;
+  showHint: boolean;
+  hint: string;
+  onCancel: () => void;
+  onSave: () => void;
 }
 
 export const Footer = React.memo<FooterProps>(
-  ({
-    isFlyoutGenerating = false,
-    celStep,
-    isNextStepEnabled = false,
-    onNext = () => {},
-    onClose = () => {},
-  }) => {
-    const nextButtonText = useMemo(() => {
-      if (celStep === 'upload_spec') {
-        return <AnalyzeApiButtonText isGenerating={isFlyoutGenerating} />;
-      }
-      if (celStep === 'confirm_details') {
-        return <AnalyzeCelButtonText isGenerating={isFlyoutGenerating} />;
-      }
-    }, [celStep, isFlyoutGenerating]);
-
+  ({ isFlyoutGenerating, isValid, isGenerationComplete, showHint, hint, onSave, onCancel }) => {
     return (
-      <EuiFlexGroup justifyContent="spaceBetween">
+      <EuiFlexGroup justifyContent="spaceBetween" alignItems="center">
         <EuiFlexItem grow={false}>
-          <EuiButtonEmpty onClick={onClose} flush="left" data-test-subj="buttonsFooter-nextButton">
-            {i18n.CLOSE}
+          <EuiButtonEmpty onClick={onCancel} flush="left" data-test-subj="footer-cancelButton">
+            {i18n.CANCEL}
           </EuiButtonEmpty>
         </EuiFlexItem>
-        <EuiFlexItem grow={false}>
+        <EuiFlexGroup justifyContent="flexEnd" alignItems="center">
+          {showHint && <EuiText size="s">{hint}</EuiText>}
           <EuiButton
-            fill
+            fill={isGenerationComplete}
             color="primary"
-            onClick={onNext}
-            isDisabled={!isNextStepEnabled}
-            data-test-subj="buttonsFooter-nextButton"
+            onClick={onSave}
+            isDisabled={isFlyoutGenerating || !isValid}
+            data-test-subj="footer-saveButton"
           >
-            {nextButtonText}
+            {i18n.SAVE_CONFIG}
           </EuiButton>
-        </EuiFlexItem>
+        </EuiFlexGroup>
       </EuiFlexGroup>
     );
   }
