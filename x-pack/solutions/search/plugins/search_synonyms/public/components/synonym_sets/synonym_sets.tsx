@@ -6,17 +6,24 @@
  */
 
 import { SynonymsGetSynonymsSetsSynonymsSetItem } from '@elastic/elasticsearch/lib/api/types';
-import { EuiBasicTable, EuiBasicTableColumn } from '@elastic/eui';
+import { EuiBasicTable, EuiBasicTableColumn, EuiLink } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React, { useState } from 'react';
+import { useKibana } from '@kbn/kibana-react-plugin/public';
+import { PLUGIN_ROUTE_ROOT } from '../../../common/api_routes';
 import { DEFAULT_PAGE_VALUE, paginationToPage } from '../../../common/pagination';
 import { useFetchSynonymsSets } from '../../hooks/use_fetch_synonyms_sets';
+import { DeleteSynonymsSetModal } from './delete_synonyms_set_modal';
 
 export const SynonymSets = () => {
+  const {
+    services: { application },
+  } = useKibana();
   const [pageIndex, setPageIndex] = useState(0);
   const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
   const { data: synonyms } = useFetchSynonymsSets({ from, size: pageSize });
+  const [synonymsSetToDelete, setSynonymsSetToDelete] = React.useState<string | null>(null);
 
   if (!synonyms) {
     return null;
@@ -35,7 +42,13 @@ export const SynonymSets = () => {
       name: i18n.translate('xpack.searchSynonyms.synonymsSetTable.nameColumn', {
         defaultMessage: 'Synonyms Set',
       }),
-      render: (name: string) => <div data-test-subj="synonyms-set-item-name">{name}</div>,
+      render: (name: string) => (
+        <div data-test-subj="synonyms-set-item-name">
+          <EuiLink onClick={() => application?.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/sets/${name}`)}>
+            {name}
+          </EuiLink>
+        </div>
+      ),
     },
     {
       field: 'count',
@@ -46,9 +59,50 @@ export const SynonymSets = () => {
         <div data-test-subj="synonyms-set-item-rule-count">{ruleCount}</div>
       ),
     },
+    {
+      actions: [
+        {
+          name: i18n.translate('xpack.searchSynonyms.synonymsSetTable.actions.delete', {
+            defaultMessage: 'Delete',
+          }),
+          description: (synonymsSet: SynonymsGetSynonymsSetsSynonymsSetItem) =>
+            i18n.translate('xpack.searchSynonyms.synonymsSetTable.actions.deleteDescription', {
+              defaultMessage: 'Delete synonyms set with {name}',
+              values: { name: synonymsSet.synonyms_set },
+            }),
+          icon: 'trash',
+          color: 'danger',
+          type: 'icon',
+          onClick: (synonymsSet: SynonymsGetSynonymsSetsSynonymsSetItem) => {
+            setSynonymsSetToDelete(synonymsSet.synonyms_set);
+          },
+        },
+        {
+          name: i18n.translate('xpack.searchSynonyms.synonymsSetTable.actions.edit', {
+            defaultMessage: 'Edit',
+          }),
+          description: (synonymsSet: SynonymsGetSynonymsSetsSynonymsSetItem) =>
+            i18n.translate('xpack.searchSynonyms.synonymsSetTable.actions.editDescription', {
+              defaultMessage: 'Edit synonyms set {name}',
+              values: { name: synonymsSet.synonyms_set },
+            }),
+          icon: 'pencil',
+          color: 'text',
+          type: 'icon',
+          onClick: (synonymsSet: SynonymsGetSynonymsSetsSynonymsSetItem) =>
+            application?.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/sets/${synonymsSet.synonyms_set}`),
+        },
+      ],
+    },
   ];
   return (
     <div>
+      {synonymsSetToDelete && (
+        <DeleteSynonymsSetModal
+          synonymsSetId={synonymsSetToDelete}
+          closeDeleteModal={() => setSynonymsSetToDelete(null)}
+        />
+      )}
       <EuiBasicTable
         data-test-subj="synonyms-set-table"
         items={synonyms.data}

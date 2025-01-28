@@ -28,6 +28,7 @@ import type {
   RuleMigrationTaskStopResult,
 } from './types';
 import { ActionsClientChat } from './util/actions_client_chat';
+import { generateAssistantComment } from './util/comments';
 
 const ITERATION_BATCH_SIZE = 15 as const;
 const ITERATION_SLEEP_SECONDS = 10 as const;
@@ -146,7 +147,7 @@ export class RuleMigrationsTaskClient {
               );
               await this.data.rules.saveError({
                 ...ruleMigration,
-                comments: [`Error migrating rule: ${error.message}`],
+                comments: [generateAssistantComment(`Error migrating rule: ${error.message}`)],
               });
             }
           })

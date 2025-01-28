@@ -9,7 +9,7 @@
 
 import { css } from '@emotion/react';
 import React, { PropsWithChildren, useEffect, useRef } from 'react';
-import { combineLatest, distinctUntilChanged, map } from 'rxjs';
+import { combineLatest } from 'rxjs';
 import { GridLayoutStateManager } from './types';
 
 export const GridHeightSmoother = ({
@@ -32,35 +32,19 @@ export const GridHeightSmoother = ({
       if (!smoothHeightRef.current || gridLayoutStateManager.expandedPanelId$.getValue()) return;
 
       if (!interactionEvent) {
-        smoothHeightRef.current.style.height = `${dimensions.height}px`;
+        smoothHeightRef.current.style.minHeight = `${dimensions.height}px`;
         smoothHeightRef.current.style.userSelect = 'auto';
         return;
       }
 
-      smoothHeightRef.current.style.height = `${Math.max(
-        dimensions.height ?? 0,
+      smoothHeightRef.current.style.minHeight = `${
         smoothHeightRef.current.getBoundingClientRect().height
-      )}px`;
+      }px`;
       smoothHeightRef.current.style.userSelect = 'none';
     });
 
-    /**
-     * This subscription sets global CSS variables that can be used by all components contained within
-     * this wrapper; note that this is **currently** only used for the gutter size, but things like column
-     * count could be added here once we add the ability to change these values
-     */
-    const globalCssVariableSubscription = gridLayoutStateManager.runtimeSettings$
-      .pipe(
-        map(({ gutterSize }) => gutterSize),
-        distinctUntilChanged()
-      )
-      .subscribe((gutterSize) => {
-        smoothHeightRef.current?.style.setProperty('--kbnGridGutterSize', `${gutterSize}`);
-      });
-
     return () => {
       interactionStyleSubscription.unsubscribe();
-      globalCssVariableSubscription.unsubscribe();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
@@ -70,17 +54,15 @@ export const GridHeightSmoother = ({
       ref={smoothHeightRef}
       className={'kbnGridWrapper'}
       css={css`
-        margin: calc(var(--kbnGridGutterSize) * 1px);
+        height: 100%;
         overflow-anchor: none;
-        transition: height 500ms linear;
+        transition: min-height 500ms linear;
 
         &:has(.kbnGridPanel--expanded) {
-          height: 100% !important;
+          min-height: 100% !important;
+          max-height: 100vh; // fallback in case if the parent doesn't set the height correctly
           position: relative;
           transition: none;
-          // switch to padding so that the panel does not extend the height of the parent
-          margin: 0px;
-          padding: calc(var(--kbnGridGutterSize) * 1px);
         }
       `}
     >
