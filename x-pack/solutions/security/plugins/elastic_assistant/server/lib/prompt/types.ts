@@ -7,6 +7,7 @@
 
 export interface Prompt {
   promptId: string;
+  promptGroupId: string;
   prompt: {
     default: string;
   };

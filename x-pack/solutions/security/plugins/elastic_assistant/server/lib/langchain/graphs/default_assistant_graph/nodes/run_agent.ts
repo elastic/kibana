@@ -7,6 +7,7 @@
 
 import { RunnableConfig } from '@langchain/core/runnables';
 import { AgentRunnableSequence } from 'langchain/dist/agents/agent';
+import { promptGroupId } from '../../../../prompt/local_prompt_object';
 import { getPrompt, promptDictionary } from '../../../../prompt';
 import { AgentState, NodeParamsBase } from '../types';
 import { NodeType } from '../constants';
@@ -51,6 +52,7 @@ export async function runAgent({
       actionsClient,
       connectorId: state.connectorId,
       promptId: promptDictionary.userPrompt,
+      promptGroupId: promptGroupId.aiAssistant,
       provider: 'gemini',
       savedObjectsClient,
     });

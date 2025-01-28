@@ -14,6 +14,7 @@ import {
 } from 'langchain/agents';
 import { APMTracer } from '@kbn/langchain/server/tracers/apm';
 import { TelemetryTracer } from '@kbn/langchain/server/tracers/telemetry';
+import { promptGroupId } from '../../../prompt/local_prompt_object';
 import { getModelOrOss } from '../../../prompt/helpers';
 import { getPrompt, promptDictionary } from '../../../prompt';
 import { getLlmClass } from '../../../../routes/utils';
@@ -138,6 +139,7 @@ export const callAssistantGraph: AgentExecutor<true | false> = async ({
     connectorId,
     model: getModelOrOss(llmType, isOssModel, request.body.model),
     promptId: promptDictionary.systemPrompt,
+    promptGroupId: promptGroupId.aiAssistant,
     provider: llmType,
     savedObjectsClient,
   });

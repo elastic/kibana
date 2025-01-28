@@ -30,6 +30,7 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { promptGroupId } from '../../lib/prompt/local_prompt_object';
 import { getModelOrOss } from '../../lib/prompt/helpers';
 import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
 import {
@@ -315,6 +316,7 @@ export const postEvaluateRoute = (
                 connector,
                 connectorId: connector.id,
                 model: getModelOrOss(llmType, isOssModel),
+                promptGroupId: promptGroupId.aiAssistant,
                 promptId: promptDictionary.systemPrompt,
                 provider: llmType,
                 savedObjectsClient,

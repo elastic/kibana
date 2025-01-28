@@ -38,6 +38,7 @@ describe('get_prompt', () => {
             id: '977b39b8-5bb9-4530-9a39-7aa7084fb5c0',
             attributes: {
               promptId: promptDictionary.systemPrompt,
+              promptGroupId: promptGroupId.aiAssistant,
               provider: 'openai',
               model: 'gpt-4o',
               description: 'Default prompt for AI Assistant system prompt.',
@@ -60,6 +61,7 @@ describe('get_prompt', () => {
             id: 'd6dacb9b-1029-4c4c-85e1-e4f97b31c7f4',
             attributes: {
               promptId: promptDictionary.systemPrompt,
+              promptGroupId: promptGroupId.aiAssistant,
               provider: 'openai',
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
@@ -81,6 +83,7 @@ describe('get_prompt', () => {
             id: 'd6dacb9b-1029-4c4c-85e1-e4f97b31c7f4',
             attributes: {
               promptId: promptDictionary.systemPrompt,
+              promptGroupId: promptGroupId.aiAssistant,
               provider: 'bedrock',
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
@@ -102,6 +105,7 @@ describe('get_prompt', () => {
             id: 'd6dacb9b-1029-4c4c-85e1-e4f97b31c7f4',
             attributes: {
               promptId: promptDictionary.systemPrompt,
+              promptGroupId: promptGroupId.aiAssistant,
               provider: 'bedrock',
               model: 'us.anthropic.claude-3-5-sonnet-20240620-v1:0',
               description: 'Default prompt for AI Assistant system prompt.',
@@ -124,6 +128,7 @@ describe('get_prompt', () => {
             id: 'da530fad-87ce-49c3-a088-08073e5034d6',
             attributes: {
               promptId: promptDictionary.systemPrompt,
+              promptGroupId: promptGroupId.aiAssistant,
               description: 'Default prompt for AI Assistant system prompt.',
               prompt: {
                 default: 'Hello world this is a system prompt no model, no provider',
@@ -157,6 +162,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
         model: 'gpt-4o',
         actionsClient,
@@ -171,6 +177,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
         model: 'gpt-4o-mini',
         actionsClient,
@@ -185,6 +192,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'openai',
         actionsClient,
         connectorId: 'connector-123',
@@ -198,6 +206,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'badone',
         actionsClient,
         connectorId: 'connector-123',
@@ -212,6 +221,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
         model: 'gpt-4o',
         actionsClient,
@@ -233,6 +243,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
         actionsClient,
         connectorId: 'connector-123',
@@ -253,6 +264,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
         actionsClient,
         connectorId: 'connector-123',
@@ -272,6 +284,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         actionsClient,
         provider: 'bedrock',
         connectorId: 'connector-123',
@@ -291,6 +304,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         actionsClient,
         connectorId: 'connector-123',
       });
@@ -309,6 +323,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: 'nonexistent-prompt',
+        promptGroupId: 'nonexistent-prompt',
         actionsClient,
         connectorId: 'connector-123',
       });
@@ -324,6 +339,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'inference',
         actionsClient,
         connectorId: 'connector-123',
@@ -343,6 +359,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         actionsClient,
         connectorId: 'connector-123',
       });
@@ -362,6 +379,7 @@ describe('get_prompt', () => {
       const result = await getPrompt({
         savedObjectsClient,
         promptId: promptDictionary.systemPrompt,
+        promptGroupId: promptGroupId.aiAssistant,
         provider: 'bedrock',
         actionsClient,
         connectorId: 'connector-123',

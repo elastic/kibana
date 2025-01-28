@@ -15,8 +15,12 @@ export const promptSavedObjectMappings: SavedObjectsType['mappings'] = {
       type: 'text',
     },
     promptId: {
-      // text mapping in order to search by ${promptGroupId-*}
-      type: 'text',
+      // represent unique prompt
+      type: 'keyword',
+    },
+    promptGroupId: {
+      // represents unique groups of prompts
+      type: 'keyword',
     },
     provider: {
       type: 'keyword',

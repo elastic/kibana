@@ -28,24 +28,24 @@ export const promptGroupId = {
   aiAssistant: 'aiAssistant',
 };
 
-// preface all prompts with 'promptGroupId.id' to allow searching by promptGroupId
 export const promptDictionary = {
-  systemPrompt: `${promptGroupId.aiAssistant}-systemPrompt`,
-  userPrompt: `${promptGroupId.aiAssistant}-userPrompt`,
-  attackDiscoveryDefault: `${promptGroupId.attackDiscovery}-default`,
-  attackDiscoveryRefine: `${promptGroupId.attackDiscovery}-refine`,
-  attackDiscoveryContinue: `${promptGroupId.attackDiscovery}-continue`,
-  attackDiscoveryDetailsMarkdown: `${promptGroupId.attackDiscovery}-detailsMarkdown`,
-  attackDiscoveryEntitySummaryMarkdown: `${promptGroupId.attackDiscovery}-entitySummaryMarkdown`,
-  attackDiscoveryMitreAttackTactics: `${promptGroupId.attackDiscovery}-mitreAttackTactics`,
-  attackDiscoverySummaryMarkdown: `${promptGroupId.attackDiscovery}-summaryMarkdown`,
-  attackDiscoveryGenerationTitle: `${promptGroupId.attackDiscovery}-generationTitle`,
-  attackDiscoveryGenerationInsights: `${promptGroupId.attackDiscovery}-generationInsights`,
+  systemPrompt: `systemPrompt`,
+  userPrompt: `userPrompt`,
+  attackDiscoveryDefault: `default`,
+  attackDiscoveryRefine: `refine`,
+  attackDiscoveryContinue: `continue`,
+  attackDiscoveryDetailsMarkdown: `detailsMarkdown`,
+  attackDiscoveryEntitySummaryMarkdown: `entitySummaryMarkdown`,
+  attackDiscoveryMitreAttackTactics: `mitreAttackTactics`,
+  attackDiscoverySummaryMarkdown: `summaryMarkdown`,
+  attackDiscoveryGenerationTitle: `generationTitle`,
+  attackDiscoveryGenerationInsights: `generationInsights`,
 };
 
 export const localPrompts: Prompt[] = [
   {
     promptId: promptDictionary.systemPrompt,
+    promptGroupId: promptGroupId.aiAssistant,
     provider: 'openai',
     prompt: {
       default: DEFAULT_SYSTEM_PROMPT,
@@ -53,12 +53,14 @@ export const localPrompts: Prompt[] = [
   },
   {
     promptId: promptDictionary.systemPrompt,
+    promptGroupId: promptGroupId.aiAssistant,
     prompt: {
       default: DEFAULT_SYSTEM_PROMPT,
     },
   },
   {
     promptId: promptDictionary.systemPrompt,
+    promptGroupId: promptGroupId.aiAssistant,
     provider: 'bedrock',
     prompt: {
       default: BEDROCK_SYSTEM_PROMPT,
@@ -66,6 +68,7 @@ export const localPrompts: Prompt[] = [
   },
   {
     promptId: promptDictionary.systemPrompt,
+    promptGroupId: promptGroupId.aiAssistant,
     provider: 'gemini',
     prompt: {
       default: GEMINI_SYSTEM_PROMPT,
@@ -73,6 +76,7 @@ export const localPrompts: Prompt[] = [
   },
   {
     promptId: promptDictionary.systemPrompt,
+    promptGroupId: promptGroupId.aiAssistant,
     provider: 'openai',
     model: 'oss',
     prompt: {
@@ -81,6 +85,7 @@ export const localPrompts: Prompt[] = [
   },
   {
     promptId: promptDictionary.userPrompt,
+    promptGroupId: promptGroupId.aiAssistant,
     provider: 'gemini',
     prompt: {
       default: GEMINI_USER_PROMPT,
@@ -88,54 +93,63 @@ export const localPrompts: Prompt[] = [
   },
   {
     promptId: promptDictionary.attackDiscoveryDefault,
+    promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_DEFAULT,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryRefine,
+    promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_REFINE,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryContinue,
+    promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_CONTINUE,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryDetailsMarkdown,
+    promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_GENERATION_DETAILS_MARKDOWN,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryEntitySummaryMarkdown,
+    promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_GENERATION_ENTITY_SUMMARY_MARKDOWN,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryMitreAttackTactics,
+    promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_GENERATION_MITRE_ATTACK_TACTICS,
     },
   },
   {
     promptId: promptDictionary.attackDiscoverySummaryMarkdown,
+    promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_GENERATION_SUMMARY_MARKDOWN,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryGenerationTitle,
+    promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_GENERATION_TITLE,
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryGenerationInsights,
+    promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
       default: ATTACK_DISCOVERY_GENERATION_INSIGHTS,
     },

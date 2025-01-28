@@ -20,6 +20,7 @@ interface GetPromptArgs {
   connectorId: string;
   model?: string;
   promptId: string;
+  promptGroupId: string;
   provider?: string;
   savedObjectsClient: SavedObjectsClientContract;
 }
@@ -30,7 +31,7 @@ interface GetPromptsByGroupIdArgs extends Omit<GetPromptArgs, 'promptId'> {
 
 type PromptArray = Array<{ promptId: string; prompt: string }>;
 /**
- * Get prompts by feature
+ * Get prompts by feature (promptGroupId)
  * provide either model + provider or connector to avoid additional calls to get connector
  * @param actionsClient - actions client
  * @param connector - connector, provide if available. No need to provide model and provider in this case
@@ -51,30 +52,31 @@ export const getPromptsByGroupId = async ({
   provider: providedProvider,
   savedObjectsClient,
 }: GetPromptsByGroupIdArgs): Promise<PromptArray> => {
-  const { provider, model } = await resolveProviderAndModel(
+  const { provider, model } = await resolveProviderAndModel({
     providedProvider,
     providedModel,
     connectorId,
     actionsClient,
-    connector
-  );
+    providedConnector: connector,
+  });
 
   const prompts = await savedObjectsClient.find<Prompt>({
     type: promptSavedObjectType,
-    searchFields: ['promptId'],
-    search: `${promptGroupId}-*`,
+    searchFields: ['promptGroupId'],
+    search: promptGroupId,
   });
   const promptsOnly = prompts?.saved_objects.map((p) => p.attributes) || [];
 
   return promptIds.map((promptId) => ({
     promptId,
     prompt:
-      findPromptEntry(
-        promptsOnly.filter((p) => p.promptId === promptId) || [],
+      findPromptEntry({
+        prompts: promptsOnly.filter((p) => p.promptId === promptId) || [],
         promptId,
+        promptGroupId,
         provider,
-        model
-      ) || '',
+        model,
+      }) || '',
   }));
 };
 
@@ -86,6 +88,7 @@ export const getPromptsByGroupId = async ({
  * @param connectorId - connector id
  * @param model - model. No need to provide if connector provided
  * @param promptId - prompt id
+ * @param promptGroupId - feature id, should be common across promptIds
  * @param provider  - provider. No need to provide if connector provided
  * @param savedObjectsClient - saved objects client
  */
@@ -94,46 +97,53 @@ export const getPrompt = async ({
   connector,
   connectorId,
   model: providedModel,
+  promptGroupId,
   promptId,
   provider: providedProvider,
   savedObjectsClient,
 }: GetPromptArgs): Promise<string> => {
-  const { provider, model } = await resolveProviderAndModel(
+  const { provider, model } = await resolveProviderAndModel({
     providedProvider,
     providedModel,
     connectorId,
     actionsClient,
-    connector
-  );
+    providedConnector: connector,
+  });
 
   const prompts = await savedObjectsClient.find<Prompt>({
     type: promptSavedObjectType,
-    searchFields: ['promptId'],
-    search: promptId,
+    filter: `${promptSavedObjectType}.attributes.promptId: ${promptId} AND ${promptSavedObjectType}.attributes.promptGroupId: ${promptGroupId}`,
     fields: ['provider', 'model', 'prompt'],
   });
 
   return (
-    findPromptEntry(
-      prompts?.saved_objects.map((p) => p.attributes) || [],
+    findPromptEntry({
+      prompts: prompts?.saved_objects.map((p) => p.attributes) || [],
       promptId,
+      promptGroupId,
       provider,
-      model
-    ) || ''
+      model,
+    }) || ''
   );
 };
 
-const resolveProviderAndModel = async (
-  providedProvider: string | undefined,
-  providedModel: string | undefined,
-  connectorId: string,
-  actionsClient: PublicMethodsOf<ActionsClient>,
-  providedConnector?: Connector
-): Promise<{ provider?: string; model?: string }> => {
+const resolveProviderAndModel = async ({
+  providedProvider,
+  providedModel,
+  connectorId,
+  actionsClient,
+  providedConnector,
+}: {
+  providedProvider: string | undefined;
+  providedModel: string | undefined;
+  connectorId: string;
+  actionsClient: PublicMethodsOf<ActionsClient>;
+  providedConnector?: Connector;
+}): Promise<{ provider?: string; model?: string }> => {
   let model = providedModel;
   let provider = providedProvider;
   if (!provider || !model || provider === 'inference') {
-    const connector = providedConnector || (await actionsClient.get({ id: connectorId }));
+    const connector = providedConnector ?? (await actionsClient.get({ id: connectorId }));
 
     if (provider === 'inference' && connector.config) {
       provider = connector.config.provider || provider;
@@ -152,23 +162,33 @@ const resolveProviderAndModel = async (
   return { provider: provider === 'inference' ? 'bedrock' : provider, model };
 };
 
-const findPrompt = (
-  list: Array<{ provider?: string; model?: string; prompt: { default: string } }>,
-  conditions: Array<(prompt: { provider?: string; model?: string }) => boolean>
-): string | undefined => {
+const findPrompt = ({
+  prompts,
+  conditions,
+}: {
+  prompts: Array<{ provider?: string; model?: string; prompt: { default: string } }>;
+  conditions: Array<(prompt: { provider?: string; model?: string }) => boolean>;
+}): string | undefined => {
   for (const condition of conditions) {
-    const match = list.find(condition);
+    const match = prompts.find(condition);
     if (match) return match.prompt.default;
   }
   return undefined;
 };
 
-const findPromptEntry = (
-  prompts: Prompt[],
-  promptId: string,
-  provider?: string,
-  model?: string
-): string | undefined => {
+const findPromptEntry = ({
+  prompts,
+  promptId,
+  promptGroupId,
+  provider,
+  model,
+}: {
+  prompts: Prompt[];
+  promptId: string;
+  promptGroupId: string;
+  provider?: string;
+  model?: string;
+}): string | undefined => {
   const conditions = [
     (prompt: { provider?: string; model?: string }) =>
       prompt.provider === provider && prompt.model === model,
@@ -178,10 +198,12 @@ const findPromptEntry = (
   ];
 
   return (
-    findPrompt(prompts, conditions) ??
-    findPrompt(
-      localPrompts.filter((p) => p.promptId === promptId),
-      conditions
-    )
+    findPrompt({ prompts, conditions }) ??
+    findPrompt({
+      prompts: localPrompts.filter(
+        (p) => p.promptId === promptId && p.promptGroupId === promptGroupId
+      ),
+      conditions,
+    })
   );
 };
