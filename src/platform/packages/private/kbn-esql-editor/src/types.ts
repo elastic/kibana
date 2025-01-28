@@ -46,6 +46,8 @@ export interface ESQLEditorProps {
   dataTestSubj?: string;
   /** Hide the Run query information which appears on the footer*/
   hideRunQueryText?: boolean;
+  /** Hide the Run query button which appears when editor is inlined*/
+  hideRunQueryButton?: boolean;
   /** This is used for applications (such as the inline editing flyout in dashboards)
    * which want to add the editor without being part of the Unified search component
    * It renders a submit query button inside the editor

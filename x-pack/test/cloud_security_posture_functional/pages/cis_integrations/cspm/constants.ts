@@ -4,6 +4,3 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-
-export { SetupGuideLayout } from './setup_guide';
-export { SETUP_GUIDE_TITLE } from './constants';
