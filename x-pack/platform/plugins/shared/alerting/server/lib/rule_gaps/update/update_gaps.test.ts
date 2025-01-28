@@ -7,7 +7,7 @@
 
 import { updateGaps } from './update_gaps';
 import { findGaps } from '../find_gaps';
-import { findGapsById } from '../find_gaps_by_id';
+import { mgetGaps } from '../mget_gaps';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { backfillClientMock } from '../../../backfill_client/backfill_client.mock';
@@ -21,7 +21,7 @@ import { adHocRunStatus } from '../../../../common/constants';
 import { actionsClientMock } from '@kbn/actions-plugin/server/mocks';
 
 jest.mock('../find_gaps');
-jest.mock('../find_gaps_by_id');
+jest.mock('../mget_gaps');
 jest.mock('./update_gap_from_schedule');
 jest.mock('./calculate_gaps_state');
 
@@ -50,7 +50,7 @@ describe('updateGaps', () => {
   beforeEach(() => {
     jest.resetAllMocks();
     (findGaps as jest.Mock).mockResolvedValue({ data: [], total: 0 });
-    (findGapsById as jest.Mock).mockResolvedValue([]);
+    (mgetGaps as jest.Mock).mockResolvedValue([]);
   });
 
   describe('updateGaps', () => {
@@ -164,7 +164,7 @@ describe('updateGaps', () => {
       const testGap = createTestGap();
       const updatedGap = createTestGap();
       (findGaps as jest.Mock).mockResolvedValue({ data: [testGap], total: 1 });
-      (findGapsById as jest.Mock).mockResolvedValue([updatedGap]);
+      (mgetGaps as jest.Mock).mockResolvedValue([updatedGap]);
 
       if (!testGap.internalFields?._id) {
         throw new Error('Test gap should have internalFields._id');
@@ -192,14 +192,16 @@ describe('updateGaps', () => {
         actionsClient: mockActionsClient,
       });
 
-      expect(findGapsById).toHaveBeenCalledWith({
+      expect(mgetGaps).toHaveBeenCalledWith({
         eventLogClient: mockEventLogClient,
         logger: mockLogger,
         params: {
-          gapIds: [testGap.internalFields._id],
-          ruleId: 'test-rule-id',
-          page: 1,
-          perPage: 500,
+          docs: [
+            {
+              _id: testGap.internalFields._id,
+              _index: 'event-index',
+            },
+          ],
         },
       });
       expect(mockEventLogger.updateEvents).toHaveBeenCalledTimes(2);
@@ -209,7 +211,7 @@ describe('updateGaps', () => {
       const testGap = createTestGap();
       const updatedGap = createTestGap();
       (findGaps as jest.Mock).mockResolvedValue({ data: [testGap], total: 1 });
-      (findGapsById as jest.Mock).mockResolvedValue([updatedGap]);
+      (mgetGaps as jest.Mock).mockResolvedValue([updatedGap]);
 
       if (!testGap.internalFields?._id) {
         throw new Error('Test gap should have internalFields._id');
@@ -236,7 +238,7 @@ describe('updateGaps', () => {
         actionsClient: mockActionsClient,
       });
 
-      expect(findGapsById).toHaveBeenCalledTimes(3);
+      expect(mgetGaps).toHaveBeenCalledTimes(3);
       expect(mockLogger.error).toHaveBeenCalledWith(
         expect.stringContaining('Failed to update 1 gaps after 3 retries due to conflicts')
       );
