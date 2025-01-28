@@ -31,11 +31,14 @@ import { CustomPaletteState, EmptyPlaceholder } from '@kbn/charts-plugin/public'
 import { ClickTriggerEvent } from '@kbn/charts-plugin/public';
 import { IconChartDatatable } from '@kbn/chart-icons';
 import useObservable from 'react-use/lib/useObservable';
-import { getColorCategoriesFn } from '@kbn/chart-expressions-common';
-import { getOriginalId, isTransposeId } from '@kbn/transpose-utils';
+import { getOriginalId } from '@kbn/transpose-utils';
 import { CoreTheme } from '@kbn/core/public';
 import { getKbnPalettes } from '@kbn/palettes';
 import type { IFieldFormat } from '@kbn/field-formats-plugin/common';
+import {
+  getColorCategories,
+  getLegacyColorCategories,
+} from '@kbn/chart-expressions-common/color_categories';
 import type { LensTableRowContextMenuEvent } from '../../../types';
 import { RowHeightMode } from '../../../../common/types';
 import { LensGridDirection } from '../../../../common/expressions';
@@ -400,7 +403,6 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
         return cellColorFnMap.get(originalId)!;
       }
 
-      const getColorCategories = getColorCategoriesFn(!colorMapping);
       const colInfo = getDatatableColumn(firstLocalTable, originalId);
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(colInfo?.meta.type, isBucketed);
@@ -408,12 +410,9 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
-            categories: getColorCategories(
-              firstLocalTable.rows,
-              originalId,
-              isTransposeId(columnId),
-              [null]
-            ),
+            categories: colorMapping
+              ? getColorCategories(untransposedDataRef.current?.rows, originalId, [null])
+              : getLegacyColorCategories(untransposedDataRef.current?.rows, originalId, [null]),
           }
         : {
             type: 'ranges',

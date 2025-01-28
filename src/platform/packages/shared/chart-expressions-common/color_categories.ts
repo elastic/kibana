@@ -11,76 +11,40 @@ import { DatatableRow } from '@kbn/expressions-plugin/common';
 import { RawValue, SerializedValue, serializeField } from '@kbn/data-plugin/common';
 
 /**
- * Returns function to get all categories of the dataset for color matching.
- *
- * Used toggle between `colorMapping` and legacy `palette` usage.
- */
-export const getColorCategoriesFn =
-  (legacy = false) =>
-  (rows: DatatableRow[], accessor?: string, isTransposed?: boolean, exclude?: any[]) =>
-    legacy
-      ? getColorLegacyCategories(rows, accessor, isTransposed)
-      : getColorCategories(rows, accessor, isTransposed, exclude);
-
-/**
  * Returns all serialized categories of the dataset for color matching.
  * All non-serializable fields will be as a plain unformatted string.
  */
 export function getColorCategories(
-  rows: DatatableRow[],
+  rows: DatatableRow[] = [],
   accessor?: string,
-  isTransposed?: boolean,
-  exclude?: any[]
+  exclude?: RawValue[],
+  legacyMode: boolean = false // stringifies raw values
 ): SerializedValue[] {
-  const ids = isTransposed
-    ? Object.keys(rows[0]).filter((key) => accessor && key.endsWith(accessor))
-    : accessor
-    ? [accessor]
-    : [];
+  if (!accessor) return [];
 
   const seen = new Set<unknown>();
   return rows.reduce<SerializedValue[]>((acc, row) => {
-    ids.forEach((id) => {
-      const hasValue = Object.hasOwn(row, id);
-      const rawValue: RawValue = row[id];
-      const value = hasValue && serializeField(rawValue);
-      const key = String(rawValue);
-      if (hasValue && !exclude?.includes(rawValue) && !seen.has(key)) {
-        const value = serializeField(rawValue);
-        seen.add(key);
-        acc.push(value);
-      }
-    });
+    const hasValue = Object.hasOwn(row, accessor);
+    const rawValue: RawValue = row[accessor];
+    const key = String(rawValue);
+    if (hasValue && !exclude?.includes(rawValue) && !seen.has(key)) {
+      const value = serializeField(rawValue);
+      seen.add(key);
+      acc.push(legacyMode ? key : value);
+    }
     return acc;
   }, []);
 }
 
 /**
- * Returns all stringified categories of the dataset for color matching.
+ * Returns all *stringified* categories of the dataset for color matching.
  *
  * Should **only** be used with legacy `palettes`
  */
-export function getColorLegacyCategories(
-  rows: DatatableRow[],
+export function getLegacyColorCategories(
+  rows?: DatatableRow[],
   accessor?: string,
-  isTransposed?: boolean
-): SerializedValue[] {
-  const ids = isTransposed
-    ? Object.keys(rows[0]).filter((key) => accessor && key.endsWith(accessor))
-    : accessor
-    ? [accessor]
-    : [];
-
-  const seen = new Set<unknown>();
-  return rows.reduce<SerializedValue[]>((acc, row) => {
-    ids.forEach((id) => {
-      const hasValue = Object.hasOwn(row, id);
-      const key = String(row[id]);
-      if (hasValue && !seen.has(key)) {
-        seen.add(key);
-        acc.push(key);
-      }
-    });
-    return acc;
-  }, []);
+  exclude?: RawValue[]
+): string[] {
+  return getColorCategories(rows, accessor, exclude, true).map(String);
 }

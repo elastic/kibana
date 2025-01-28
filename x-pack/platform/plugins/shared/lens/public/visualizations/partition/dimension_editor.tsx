@@ -197,7 +197,7 @@ export function DimensionEditor(props: DimensionEditorProps) {
                       palettes={props.palettes}
                       data={{
                         type: 'categories',
-                        categories: getColorCategories(currentData?.rows ?? [], props.accessor),
+                        categories: getColorCategories(currentData?.rows, props.accessor),
                       }}
                       specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                       formatter={formatter}

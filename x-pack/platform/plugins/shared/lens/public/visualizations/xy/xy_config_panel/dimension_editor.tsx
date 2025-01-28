@@ -133,9 +133,9 @@ export function DataDimensionEditor(
   }, [props.frame, props.paletteService, state.layers, accessor, props.formatFactory, layer]);
 
   if (props.groupId === 'breakdown') {
-    const table = props.frame.activeData?.[layer.layerId];
-    const splitCategories = getColorCategories(table?.rows ?? [], layer.splitAccessor);
-    const columnMeta = table?.columns?.find(({ id }) => id === layer.splitAccessor)?.meta;
+    const currentData = props.frame.activeData?.[layer.layerId];
+    const splitCategories = getColorCategories(currentData?.rows, layer.splitAccessor);
+    const columnMeta = currentData?.columns?.find(({ id }) => id === layer.splitAccessor)?.meta;
     const allowCustomMatch = canCreateCustomMatch(columnMeta);
     const formatter = props.formatFactory(columnMeta?.params);
 

@@ -154,7 +154,7 @@ export function TagsDimensionEditor({
                   palettes={palettes}
                   data={{
                     type: 'categories',
-                    categories: getColorCategories(currentData?.rows ?? [], state.tagAccessor),
+                    categories: getColorCategories(currentData?.rows, state.tagAccessor),
                   }}
                   specialTokens={SPECIAL_TOKENS_STRING_CONVERSION}
                   formatter={formatter}
