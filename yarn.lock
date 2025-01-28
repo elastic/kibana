@@ -4544,7 +4544,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-environment-server-mocks@link:packages/core/environment/core-environment-server-mocks":
+"@kbn/core-environment-server-mocks@link:src/core/packages/environment/server-mocks":
   version "0.0.0"
   uid ""
 
