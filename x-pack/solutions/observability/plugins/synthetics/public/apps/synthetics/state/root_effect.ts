@@ -28,7 +28,7 @@ import {
   setDynamicSettingsEffect,
 } from './settings/effects';
 import { syncGlobalParamsEffect } from './settings';
-import { fetchAgentPoliciesEffect, fetchPrivateLocationsEffect } from './private_locations';
+import { privateLocationsEffects } from './private_locations/effects';
 import { fetchNetworkEventsEffect } from './network_events/effects';
 import { fetchSyntheticsMonitorEffect } from './monitor_details';
 import { fetchSyntheticsEnablementEffect } from './synthetics_enablement';
@@ -44,6 +44,7 @@ import { browserJourneyEffects, fetchJourneyStepsEffect } from './browser_journe
 import { fetchOverviewStatusEffect } from './overview_status';
 import { fetchMonitorStatusHeatmap, quietFetchMonitorStatusHeatmap } from './status_heatmap';
 import { fetchOverviewTrendStats, refreshOverviewTrendStats } from './overview/effects';
+import { fetchAgentPoliciesEffect } from './agent_policies';
 
 export const rootEffect = function* root(): Generator {
   yield all([
@@ -57,7 +58,6 @@ export const rootEffect = function* root(): Generator {
     fork(fetchOverviewStatusEffect),
     fork(fetchNetworkEventsEffect),
     fork(fetchAgentPoliciesEffect),
-    fork(fetchPrivateLocationsEffect),
     fork(fetchDynamicSettingsEffect),
     fork(fetchLocationMonitorsEffect),
     fork(setDynamicSettingsEffect),
@@ -80,5 +80,6 @@ export const rootEffect = function* root(): Generator {
     fork(quietFetchMonitorStatusHeatmap),
     fork(fetchOverviewTrendStats),
     fork(refreshOverviewTrendStats),
+    ...privateLocationsEffects.map((effect) => fork(effect)),
   ]);
 };
