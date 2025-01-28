@@ -159,7 +159,6 @@ export const OptionsListPopoverSuggestions = ({
 
   const renderOption = useCallback(
     (option: EuiSelectableOption, searchStringValue: string) => {
-      console.log('RENDER', option);
       if (!allowExpensiveQueries || searchTechnique === 'exact') return option.label;
 
       return (
