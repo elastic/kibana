@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { expect, tags, test, ANNOTATIONS } from '@kbn/scout';
+import { expect, tags, test } from '@kbn/scout';
 import {
   VISIBLE_CHROME,
   HIDDEN_CHROME,
@@ -17,12 +17,11 @@ test.describe(
   'Maps',
   {
     tag: tags.DEPLOYMENT_AGNOSTIC,
-    annotation: { type: ANNOTATIONS.WARNING, description: 'Contains deprecated goto().' },
   },
   () => {
     test.beforeEach(async ({ browserAuth, pageObjects }) => {
       await browserAuth.loginAsViewer();
-      await pageObjects.maps.goto();
+      await pageObjects.maps.gotoNewMap();
       await pageObjects.renderable.waitForRenderPoll();
     });
 

@@ -12,10 +12,7 @@ import { ScoutPage } from '..';
 export class MapsPage {
   constructor(private readonly page: ScoutPage) {}
 
-  /**
-   * @deprecated see: https://github.com/elastic/kibana/pull/204607#discussion_r1930723011
-   */
-  async goto() {
+  async gotoNewMap() {
     await this.page.gotoApp('maps');
   }
 }

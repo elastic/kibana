@@ -16,7 +16,6 @@ export {
   createPlaywrightConfig,
   createLazyPageObject,
   ingestTestDataHook,
-  ANNOTATIONS,
 } from './src/playwright';
 export type {
   ScoutPlaywrightOptions,
