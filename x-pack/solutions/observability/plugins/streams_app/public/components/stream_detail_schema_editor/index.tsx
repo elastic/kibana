@@ -123,7 +123,11 @@ const Content = ({
               />
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButton iconType="refresh" onClick={refreshData}>
+              <EuiButton
+                data-test-subj="streamsAppContentRefreshButton"
+                iconType="refresh"
+                onClick={refreshData}
+              >
                 {i18n.translate('xpack.streams.schemaEditor.refreshDataButtonLabel', {
                   defaultMessage: 'Refresh',
                 })}
