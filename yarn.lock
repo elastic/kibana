@@ -4988,7 +4988,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/core-saved-objects-api-server-mocks@link:packages/core/saved-objects/core-saved-objects-api-server-mocks":
+"@kbn/core-saved-objects-api-server-mocks@link:src/core/packages/saved-objects/api-server-mocks":
   version "0.0.0"
   uid ""
 

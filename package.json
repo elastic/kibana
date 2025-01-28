@@ -1410,7 +1410,7 @@
     "@kbn/core-preboot-server-mocks": "link:src/core/packages/preboot/server-mocks",
     "@kbn/core-rendering-browser-mocks": "link:src/core/packages/rendering/browser-mocks",
     "@kbn/core-rendering-server-mocks": "link:src/core/packages/rendering/server-mocks",
-    "@kbn/core-saved-objects-api-server-mocks": "link:packages/core/saved-objects/core-saved-objects-api-server-mocks",
+    "@kbn/core-saved-objects-api-server-mocks": "link:src/core/packages/saved-objects/api-server-mocks",
     "@kbn/core-saved-objects-base-server-mocks": "link:packages/core/saved-objects/core-saved-objects-base-server-mocks",
     "@kbn/core-saved-objects-browser-mocks": "link:packages/core/saved-objects/core-saved-objects-browser-mocks",
     "@kbn/core-saved-objects-import-export-server-mocks": "link:packages/core/saved-objects/core-saved-objects-import-export-server-mocks",
