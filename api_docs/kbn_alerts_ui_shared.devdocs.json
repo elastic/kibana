@@ -5360,6 +5360,14 @@
           },
           " & ",
           {
+            "pluginId": "@kbn/esql-variables-types",
+            "scope": "public",
+            "docId": "kibKbnEsqlVariablesTypesPluginApi",
+            "section": "def-public.PublishesESQLVariables",
+            "text": "PublishesESQLVariables"
+          },
+          " & ",
+          {
             "pluginId": "@kbn/presentation-containers",
             "scope": "public",
             "docId": "kibKbnPresentationContainersPluginApi",

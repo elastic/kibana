@@ -29,7 +29,9 @@ export interface ExternalServiceCredentials {
 }
 
 export interface ExternalServiceValidation {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   config: (configObject: any, validatorServices: ValidatorServices) => void;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   secrets: (secrets: any, validatorServices: ValidatorServices) => void;
 }
 

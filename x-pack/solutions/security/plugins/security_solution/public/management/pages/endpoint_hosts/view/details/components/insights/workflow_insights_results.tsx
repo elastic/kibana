@@ -17,6 +17,7 @@ import {
   EuiSpacer,
   EuiText,
   EuiToolTip,
+  EuiHorizontalRule,
 } from '@elastic/eui';
 import { ENDPOINT_ARTIFACT_LISTS } from '@kbn/securitysolution-list-constants';
 import { useUserPrivileges } from '../../../../../../../common/components/user_privileges';
@@ -169,17 +170,20 @@ export const WorkflowInsightsResults = ({
     return null;
   }, [canWriteTrustedApplications, openArtifactCreationPage, results, showEmptyResultsCallout]);
 
+  const showInsights = !!(showEmptyResultsCallout || results?.length);
+
   return (
     <>
-      {showEmptyResultsCallout || results?.length ? (
+      {showInsights && (
         <>
           <EuiText size={'s'}>
             <h4>{WORKFLOW_INSIGHTS.issues.title}</h4>
           </EuiText>
           <EuiSpacer size={'s'} />
         </>
-      ) : null}
+      )}
       <ScrollableContainer hasBorder>{insights}</ScrollableContainer>
+      {showInsights && <EuiHorizontalRule />}
     </>
   );
 };
