@@ -758,6 +758,8 @@
       "@kbn/default-nav-management/*": ["src/platform/packages/private/default-nav/management/*"],
       "@kbn/default-nav-ml": ["src/platform/packages/private/default-nav/ml"],
       "@kbn/default-nav-ml/*": ["src/platform/packages/private/default-nav/ml/*"],
+      "@kbn/delete-managed-asset-callout": ["src/platform/packages/shared/kbn-management/delete_managed_assets_callout"],
+      "@kbn/delete-managed-asset-callout/*": ["src/platform/packages/shared/kbn-management/delete_managed_assets_callout/*"],
       "@kbn/dependency-ownership": ["packages/kbn-dependency-ownership"],
       "@kbn/dependency-ownership/*": ["packages/kbn-dependency-ownership/*"],
       "@kbn/dependency-usage": ["packages/kbn-dependency-usage"],
