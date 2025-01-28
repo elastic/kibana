@@ -59,7 +59,7 @@ const getSearchSource = async (inputSearchSource: ISearchSource, savedSearchId?:
 type PartialVisState = Assign<SerializedVis, { data: Partial<SerializedVisData> }>;
 
 export class Vis<TVisParams extends VisParams = VisParams> {
-  public readonly type: BaseVisType<TVisParams>;
+  public type: BaseVisType<TVisParams>;
   public readonly id?: string;
   public title: string = '';
   public description: string = '';
@@ -68,25 +68,11 @@ export class Vis<TVisParams extends VisParams = VisParams> {
 
   public readonly uiState: PersistedState;
 
-  constructor(visType: string, visState: SerializedVis<TVisParams> = {} as any) {
-    this.type = this.getType(visType);
+  constructor(visType: BaseVisType<TVisParams>, visState: SerializedVis<TVisParams> = {} as any) {
+    this.type = visType;
     this.params = this.getParams(visState.params);
     this.uiState = new PersistedState(visState.uiState);
     this.id = visState.id;
-  }
-
-  private getType(visType: string) {
-    const type = getTypes().get<TVisParams>(visType);
-    if (!type) {
-      const errorMessage = i18n.translate('visualizations.visualizationTypeInvalidMessage', {
-        defaultMessage: 'Invalid visualization type "{visType}"',
-        values: {
-          visType,
-        },
-      });
-      throw new Error(errorMessage);
-    }
-    return type;
   }
 
   private getParams(params: VisParams) {
@@ -108,8 +94,16 @@ export class Vis<TVisParams extends VisParams = VisParams> {
 
     let typeChanged = false;
     if (state.type && this.type.name !== state.type) {
-      // @ts-ignore
-      this.type = this.getType(state.type);
+      const newType = await getTypes().get<TVisParams>(state.type);
+      if (!newType) {
+        throw new Error(i18n.translate('visualizations.visualizationTypeInvalidMessage', {
+          defaultMessage: 'Invalid visualization type "{visType}"',
+          values: {
+            visType: state.type,
+          },
+        }));
+      }
+      this.type = newType;
       typeChanged = true;
     }
     if (state.title !== undefined) {
@@ -173,7 +167,7 @@ export class Vis<TVisParams extends VisParams = VisParams> {
 
   clone(): Vis<TVisParams> {
     const { data, ...restOfSerialized } = this.serialize();
-    const vis = new Vis<TVisParams>(this.type.name, restOfSerialized as any);
+    const vis = new Vis<TVisParams>(this.type, restOfSerialized as any);
     vis.setState({ ...restOfSerialized, data: {} });
     const aggs = this.data.indexPattern
       ? getAggs().createAggConfigs(this.data.indexPattern, data.aggs)

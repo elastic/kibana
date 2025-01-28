@@ -9,9 +9,11 @@
 
 import type { SerializedVis } from './vis';
 import type { VisParams } from '../common';
+import { getTypes } from './services';
+import { i18n } from '@kbn/i18n';
 
 export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
-  visType: string,
+  visTypeName: string,
   visState: SerializedVis<TVisParams> = {} as any
 ) => {
   // Build optimization. Move app styles from main bundle
@@ -19,6 +21,15 @@ export const createVisAsync = async <TVisParams extends VisParams = VisParams>(
   await import('./vis.scss');
 
   const { Vis } = await import('./vis');
+  const visType = await getTypes().get<TVisParams>(visTypeName);
+  if (!visType) {
+    throw new Error(i18n.translate('visualizations.visualizationTypeInvalidMessage', {
+      defaultMessage: 'Invalid visualization type "{visType}"',
+      values: {
+        visType: visTypeName,
+      },
+    }));
+  }
   const vis = new Vis(visType, visState);
 
   await vis.setState(visState);
