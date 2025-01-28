@@ -72,30 +72,21 @@ export const GENERATION_ERROR = i18n.translate(
     defaultMessage: 'An error occurred during API analysis',
   }
 );
-export const ANALYZE = i18n.translate(
-  'xpack.automaticImport.celFlyout.step.uploadSpec.analyze',
-  {
-    defaultMessage: 'Analyze',
-  }
-);
+export const ANALYZE = i18n.translate('xpack.automaticImport.celFlyout.step.uploadSpec.analyze', {
+  defaultMessage: 'Analyze',
+});
 export const ANALYZING = i18n.translate(
   'xpack.automaticImport.celFlyout.step.uploadSpec.analyzing',
   {
     defaultMessage: 'Analyzing',
   }
 );
-export const CANCEL = i18n.translate(
-  'xpack.automaticImport.celFlyout.step.uploadSpec.cancel',
-  {
-    defaultMessage: 'Cancel',
-  }
-);
-export const SUCCESS = i18n.translate(
-  'xpack.automaticImport.celFlyout.step.uploadSpec.success',
-  {
-    defaultMessage: 'Success',
-  }
-);
+export const CANCEL = i18n.translate('xpack.automaticImport.celFlyout.step.uploadSpec.cancel', {
+  defaultMessage: 'Cancel',
+});
+export const SUCCESS = i18n.translate('xpack.automaticImport.celFlyout.step.uploadSpec.success', {
+  defaultMessage: 'Success',
+});
 export const DATASTREAM_TITLE_REQUIRED = i18n.translate(
   'xpack.automaticImport.celFlyout.step.uploadSpec.dataStreamRequired',
   {
