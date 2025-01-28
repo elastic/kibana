@@ -92,14 +92,13 @@ const failedDocsDetailsRoute = createDatasetQualityServerRoute({
         esClient,
         dataStream,
         ...params.query,
-        logger,
       });
     } catch (e) {
       logger.error(`Failed to get ${dataStream} failed docs: ${e}`);
 
       return {
         count: 0,
-        lastOcurrence: 0,
+        lastOccurrence: 0,
         timeSeries: [],
       };
     }
