@@ -63,7 +63,7 @@ export function getEcsResponseLog(request: Request, log: Logger) {
 
   // borrowed from the hapi/good implementation
   const responseTime = (request.info.completed || request.info.responded) - request.info.received;
-  const responseTimeMsg = !isNaN(responseTime) && responseTime >= 0 ? ` ${responseTime}ms` : '';
+  const responseTimeMsg = responseTime >= 0 ? ` ${responseTime}ms` : '';
 
   const bytes = response ? getResponsePayloadBytes(response, log) : undefined;
   const bytesMsg = bytes ? ` - ${numeral(bytes).format('0.0b')}` : '';
