@@ -6,21 +6,15 @@
  */
 
 import React, { memo, useMemo } from 'react';
-import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, useEuiTheme } from '@elastic/eui';
 import type { ExceptionListItemSchema } from '@kbn/securitysolution-io-ts-list-types';
 
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import * as i18n from '../translations';
 import type { Rule } from '../../types';
 import { MetaInfoDetails } from './details_info';
 import { HeaderMenu } from '../../header_menu';
 import { generateLinkedRulesMenuItems } from '../../generate_linked_rules_menu_item';
-
-const itemCss = css`
-  border-right: 1px solid #d3dae6;
-  padding: ${euiThemeVars.euiSizeS} ${euiThemeVars.euiSizeM} ${euiThemeVars.euiSizeS} 0;
-`;
 
 export interface ExceptionItemCardMetaInfoProps {
   item: ExceptionListItemSchema;
@@ -32,6 +26,11 @@ export interface ExceptionItemCardMetaInfoProps {
 
 export const ExceptionItemCardMetaInfo = memo<ExceptionItemCardMetaInfoProps>(
   ({ item, rules, dataTestSubj, securityLinkAnchorComponent, formattedDateComponent }) => {
+    const { euiTheme } = useEuiTheme();
+    const itemCss = css`
+      border-right: ${euiTheme.border.thin};
+      padding: ${euiTheme.size.s} ${euiTheme.size.m} ${euiTheme.size.s} 0;
+    `;
     const FormattedDateComponent = formattedDateComponent;
 
     const referencedLinks = useMemo(

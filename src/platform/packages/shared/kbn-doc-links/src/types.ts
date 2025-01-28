@@ -315,6 +315,7 @@ export interface DocLinks {
     readonly detectionEngineOverview: string;
     readonly signalsMigrationApi: string;
     readonly legacyEndpointManagementApiDeprecations: string;
+    readonly legacyBulkApiDeprecations: string;
   };
   readonly query: {
     readonly eql: string;
@@ -389,6 +390,7 @@ export interface DocLinks {
     syntheticsCommandReference: string;
     syntheticsProjectMonitors: string;
     syntheticsMigrateFromIntegration: string;
+    slo: string;
     sloBurnRateRule: string;
     aiAssistant: string;
   }>;

@@ -44,13 +44,7 @@ const discoverContainerWrapperCss = css`
   }
 `;
 
-const customizationContext: DiscoverCustomizationContext = {
-  displayMode: 'embedded',
-  inlineTopNav: {
-    enabled: false,
-    showLogsExplorerTabs: false,
-  },
-};
+const customizationContext: DiscoverCustomizationContext = { displayMode: 'embedded' };
 
 export const DiscoverContainerInternal = ({
   overrideServices,

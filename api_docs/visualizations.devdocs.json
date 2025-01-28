@@ -2048,7 +2048,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+        "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2062,7 +2062,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+            "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -2213,7 +2213,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -2293,55 +2293,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.updateOldState",
-        "type": "Function",
-        "tags": [],
-        "label": "updateOldState",
-        "description": [],
-        "signature": [
-          "(oldState: unknown) => ",
-          {
-            "pluginId": "visualizations",
-            "scope": "common",
-            "docId": "kibVisualizationsPluginApi",
-            "section": "def-common.SavedVisState",
-            "text": "SavedVisState"
-          },
-          "<",
-          {
-            "pluginId": "@kbn/utility-types",
-            "scope": "common",
-            "docId": "kibKbnUtilityTypesPluginApi",
-            "section": "def-common.SerializableRecord",
-            "text": "SerializableRecord"
-          },
-          ">"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/legacy/vis_update_state.d.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "children": [
-          {
-            "parentPluginId": "visualizations",
-            "id": "def-public.updateOldState.$1",
-            "type": "Unknown",
-            "tags": [],
-            "label": "oldState",
-            "description": [],
-            "signature": [
-              "unknown"
-            ],
-            "path": "src/platform/plugins/shared/visualizations/public/legacy/vis_update_state.d.ts",
-            "deprecated": false,
-            "trackAdoption": false,
-            "isRequired": true
-          }
-        ],
-        "returnComment": [],
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.urlFor",
         "type": "Function",
         "tags": [],
@@ -2350,7 +2301,7 @@
         "signature": [
           "(id: string) => string"
         ],
-        "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+        "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -2364,7 +2315,7 @@
             "signature": [
               "string"
             ],
-            "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualize_utils.ts",
+            "path": "src/platform/plugins/shared/visualizations/public/utils/url_utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -8501,7 +8452,7 @@
         "label": "isCollapseFunction",
         "description": [],
         "signature": [
-          "(candidate: string | undefined) => candidate is \"min\" | \"sum\" | \"avg\" | \"max\""
+          "(candidate: string | undefined) => candidate is \"min\" | \"max\" | \"sum\" | \"avg\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/utils.ts",
         "deprecated": false,
@@ -8718,7 +8669,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -9411,7 +9362,7 @@
             "label": "summaryRow",
             "description": [],
             "signature": [
-              "\"min\" | \"none\" | \"sum\" | \"avg\" | \"max\" | \"count\" | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | \"none\" | \"count\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -9439,7 +9390,7 @@
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "\"min\" | \"sum\" | \"avg\" | \"max\" | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11103,7 +11054,7 @@
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "\"min\" | \"sum\" | \"avg\" | \"max\" | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -11574,7 +11525,7 @@
             "label": "collapseFns",
             "description": [],
             "signature": [
-              "Record<string, \"min\" | \"sum\" | \"avg\" | \"max\"> | undefined"
+              "Record<string, \"min\" | \"max\" | \"sum\" | \"avg\"> | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13741,7 +13692,7 @@
             "label": "collapseFn",
             "description": [],
             "signature": [
-              "\"min\" | \"sum\" | \"avg\" | \"max\" | undefined"
+              "\"min\" | \"max\" | \"sum\" | \"avg\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -14404,7 +14355,7 @@
         "label": "CollapseFunction",
         "description": [],
         "signature": [
-          "\"min\" | \"sum\" | \"avg\" | \"max\""
+          "\"min\" | \"max\" | \"sum\" | \"avg\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
         "deprecated": false,
@@ -15439,7 +15390,7 @@
         "label": "Operation",
         "description": [],
         "signature": [
-          "\"min\" | \"sum\" | \"max\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"cumulative_sum\" | \"moving_average\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\" | \"counter_rate\" | \"differences\" | \"formula\" | \"static_value\" | \"normalize_by_unit\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
@@ -15469,7 +15420,7 @@
         "label": "OperationWithSourceField",
         "description": [],
         "signature": [
-          "\"min\" | \"sum\" | \"max\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
+          "\"min\" | \"max\" | \"sum\" | \"median\" | \"count\" | \"filters\" | \"terms\" | \"range\" | \"average\" | \"date_histogram\" | \"percentile\" | \"last_value\" | \"unique_count\" | \"standard_deviation\" | \"percentile_rank\""
         ],
         "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/operations.ts",
         "deprecated": false,
