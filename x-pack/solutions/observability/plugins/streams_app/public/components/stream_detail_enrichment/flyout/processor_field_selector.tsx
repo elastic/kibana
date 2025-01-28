@@ -8,11 +8,22 @@
 import { EuiFormRow, EuiFieldText } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
-import { useFormContext } from 'react-hook-form';
+import { useController } from 'react-hook-form';
+import { ProcessorFormState } from '../types';
 
 export const ProcessorFieldSelector = () => {
-  const { register } = useFormContext();
-  const { ref, ...inputProps } = register(`field`);
+  const { field, fieldState } = useController<ProcessorFormState, 'field'>({
+    name: 'field',
+    rules: {
+      required: i18n.translate(
+        'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorRequiredError',
+        { defaultMessage: 'A field value is required.' }
+      ),
+    },
+  });
+
+  const { ref, ...inputProps } = field;
+  const { invalid, error } = fieldState;
 
   return (
     <EuiFormRow
@@ -24,8 +35,15 @@ export const ProcessorFieldSelector = () => {
         'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.fieldSelectorHelpText',
         { defaultMessage: 'Field to search for matches.' }
       )}
+      isInvalid={invalid}
+      error={error?.message}
     >
-      <EuiFieldText {...inputProps} inputRef={ref} />
+      <EuiFieldText
+        data-test-subj="streamsAppProcessorFieldSelectorFieldText"
+        {...inputProps}
+        inputRef={ref}
+        isInvalid={invalid}
+      />
     </EuiFormRow>
   );
 };

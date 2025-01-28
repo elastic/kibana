@@ -147,7 +147,7 @@ export class HttpService
           this.log,
           prebootServerRequestHandlerContext.createHandler.bind(null, this.coreContext.coreId),
           {
-            isDev: this.env.mode.dev,
+            env: this.env,
             versionedRouterOptions: getVersionedRouterOptions(config),
           }
         );
@@ -185,6 +185,7 @@ export class HttpService
 
     this.internalSetup = {
       ...serverContract,
+      rateLimiter: config.rateLimiter,
       registerOnPostValidation: (cb) => {
         Router.on('onPostValidate', cb);
       },
@@ -196,7 +197,7 @@ export class HttpService
       ) => {
         const enhanceHandler = this.requestHandlerContext!.createHandler.bind(null, pluginId);
         const router = new Router<Context>(path, this.log, enhanceHandler, {
-          isDev: this.env.mode.dev,
+          env: this.env,
           versionedRouterOptions: getVersionedRouterOptions(config),
           pluginId,
         });

@@ -186,6 +186,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildName (string?)',
         'telemetry.labels.performancePhase (string?)',
         'telemetry.labels.serverless (string?|never)', // Can only be set on Serverless.
+        'telemetry.localShipper (boolean?|false?)',
         'telemetry.hidePrivacyStatement (boolean?)',
         'telemetry.optIn (boolean?)',
         'telemetry.sendUsageFrom (server?|browser?)',
@@ -275,7 +276,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'xpack.infra.sources.default.fields.message (array?)',
         'xpack.index_management.enableTogglingDataRetention (boolean?|never)',
         'xpack.index_management.enableProjectLevelRetentionChecks (boolean?|never)',
-        'xpack.integration_assistant.enableExperimental (array?)',
+        'xpack.automatic_import.enableExperimental (array?)',
         /**
          * Feature flags bellow are conditional based on traditional/serverless offering
          */
@@ -441,6 +442,7 @@ export default function ({ getService }: PluginFunctionalProviderContext) {
         'telemetry.labels.ciBuildName (string?)',
         'telemetry.labels.performancePhase (string?)',
         'telemetry.labels.serverless (string?|never)', // Can only be set on Serverless.
+        'telemetry.localShipper (boolean?|false?)',
         'telemetry.hidePrivacyStatement (boolean?)',
         'telemetry.optIn (boolean?)',
         'telemetry.sendUsageFrom (server?|browser?)',

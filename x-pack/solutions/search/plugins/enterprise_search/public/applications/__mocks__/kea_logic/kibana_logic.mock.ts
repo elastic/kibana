@@ -60,10 +60,6 @@ export const mockKibanaValues = {
   } as unknown as LensPublicStart,
   ml: mlPluginMock.createStartContract(),
   navigateToUrl: jest.fn(),
-  productAccess: {
-    hasAppSearchAccess: true,
-    hasWorkplaceSearchAccess: true,
-  },
   productFeatures: {
     hasDocumentLevelSecurityEnabled: true,
     hasIncrementalSyncEnabled: true,

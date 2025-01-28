@@ -13,7 +13,7 @@ export const OVERVIEW = i18n.translate('xpack.securitySolution.endpointDetails.o
 
 export const WORKFLOW_INSIGHTS = {
   title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.sectionTitle', {
-    defaultMessage: 'Issues',
+    defaultMessage: 'Endpoint Insights',
   }),
   titleRight: i18n.translate(
     'xpack.securitySolution.endpointDetails.workflowInsights.extraAction',
@@ -23,7 +23,7 @@ export const WORKFLOW_INSIGHTS = {
   ),
   scan: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.title', {
-      defaultMessage: 'AI-Powered issue scan',
+      defaultMessage: 'Endpoint Insights scan',
     }),
     button: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.scan.button', {
       defaultMessage: 'Scan',
@@ -43,7 +43,7 @@ export const WORKFLOW_INSIGHTS = {
   },
   issues: {
     title: i18n.translate('xpack.securitySolution.endpointDetails.workflowInsights.issues.title', {
-      defaultMessage: 'Issues',
+      defaultMessage: 'Insights',
     }),
     emptyResults: i18n.translate(
       'xpack.securitySolution.endpointDetails.workflowInsights.issues.emptyResults',
@@ -65,7 +65,7 @@ export const WORKFLOW_INSIGHTS = {
         }
       ),
       tooltipNoPermissions: i18n.translate(
-        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insighRemediationButtonTooltipNoPermissions',
+        'xpack.securitySolution.endpointDetails.workflowInsights.issues.insightRemediationButtonTooltipNoPermissions',
         {
           defaultMessage: 'You do not have the privileges required to perform this operation.',
         }

@@ -42,25 +42,22 @@ describe('Mobile transactions page', () => {
     describe('when click on tab shows correct table', () => {
       it('shows version tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.get('[data-test-subj="apmAppVersionTab"]', { timeout: 120000 })
-          .click()
-          .should('have.attr', 'aria-selected', 'true');
+        cy.getByTestSubj('apmAppVersionTab').click();
+        cy.getByTestSubj('apmAppVersionTab').should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=app_version_tab');
       });
 
       it('shows OS version tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.get('[data-test-subj="apmOsVersionTab"]', { timeout: 120000 })
-          .click()
-          .should('have.attr', 'aria-selected', 'true');
+        cy.getByTestSubj('apmOsVersionTab').click();
+        cy.getByTestSubj('apmOsVersionTab').should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=os_version_tab');
       });
 
       it('shows devices tab', () => {
         cy.visitKibana(mobileTransactionsPageHref);
-        cy.get('[data-test-subj="apmDevicesTab"]', { timeout: 120000 })
-          .click()
-          .should('have.attr', 'aria-selected', 'true');
+        cy.getByTestSubj('apmDevicesTab').click();
+        cy.getByTestSubj('apmDevicesTab').should('have.attr', 'aria-selected', 'true');
         cy.url().should('include', 'mobileSelectedTab=devices_tab');
       });
     });
