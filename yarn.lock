@@ -5369,6 +5369,10 @@
   version "0.0.0"
   uid ""
 
+"@kbn/delete-managed-asset-callout@link:src/platform/packages/shared/kbn-management/delete_managed_assets_callout":
+  version "0.0.0"
+  uid ""
+
 "@kbn/dependency-usage@link:packages/kbn-dependency-usage":
   version "0.0.0"
   uid ""

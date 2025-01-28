@@ -601,6 +601,7 @@ src/platform/packages/shared/kbn-management/cards_navigation @elastic/kibana-man
 src/platform/plugins/shared/management @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/application @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/components/field_category @elastic/kibana-management
+src/platform/packages/shared/kbn-management/delete_managed_assets_callout @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/field_input @elastic/kibana-management
 src/platform/packages/shared/kbn-management/settings/components/field_row @elastic/kibana-management
 src/platform/packages/private/kbn-management/settings/components/form @elastic/kibana-management

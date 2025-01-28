@@ -168,6 +168,7 @@ export function IndexManagementPageProvider({ getService }: FtrProviderContext) 
     async clickNextButton() {
       await testSubjects.click('nextButton');
     },
+
     indexDetailsPage: {
       async openIndexDetailsPage(indexOfRow: number) {
         const indexList = await testSubjects.findAll('indexTableIndexNameLink');
