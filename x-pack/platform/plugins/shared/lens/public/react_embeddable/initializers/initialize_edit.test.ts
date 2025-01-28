@@ -46,7 +46,7 @@ function createEditApi(
 }
 
 describe('edit features', () => {
-  describe('can edit', () => {
+  describe('isEditingEnabled()', () => {
     it('should be editable if visualize library privileges allow it', () => {
       const editApi = createEditApi();
       expect(editApi.api.isEditingEnabled()).toBe(true);
@@ -75,7 +75,8 @@ describe('edit features', () => {
       expect(editApi.api.isReadOnlyEnabled()).toBe(false);
     });
   });
-  describe('can show config', () => {
+
+  describe('isReadOnlyEnabled()', () => {
     it('should should be read only enabled if edit capabilities are off', () => {
       const editApi = createEditApi(
         {
