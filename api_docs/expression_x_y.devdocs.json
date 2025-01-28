@@ -2961,7 +2961,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"left\" | \"auto\" | \"above\" | \"below\""
+          "\"right\" | \"auto\" | \"above\" | \"below\" | \"left\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,

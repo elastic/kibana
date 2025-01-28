@@ -658,6 +658,7 @@ describe('UnifiedDataTable', () => {
             "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
+          "showKeyboardShortcuts": true,
           "showSortSelector": true,
         }
       `);
@@ -696,6 +697,7 @@ describe('UnifiedDataTable', () => {
             "allowRowHeight": false,
           },
           "showFullScreenSelector": true,
+          "showKeyboardShortcuts": true,
           "showSortSelector": true,
         }
       `);
@@ -719,6 +721,7 @@ describe('UnifiedDataTable', () => {
           "showColumnSelector": false,
           "showDisplaySelector": undefined,
           "showFullScreenSelector": true,
+          "showKeyboardShortcuts": true,
           "showSortSelector": true,
         }
       `);

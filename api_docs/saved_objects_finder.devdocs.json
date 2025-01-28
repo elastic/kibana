@@ -548,7 +548,7 @@
         "signature": [
           "\"savedObjects:listingLimit\""
         ],
-        "path": "packages/kbn-saved-objects-settings/index.ts",
+        "path": "src/platform/packages/private/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -563,7 +563,7 @@
         "signature": [
           "\"savedObjects:perPage\""
         ],
-        "path": "packages/kbn-saved-objects-settings/index.ts",
+        "path": "src/platform/packages/private/kbn-saved-objects-settings/index.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

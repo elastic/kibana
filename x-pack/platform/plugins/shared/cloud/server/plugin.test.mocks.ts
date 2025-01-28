@@ -20,3 +20,11 @@ jest.doMock('../common/decode_cloud_id', () => {
     decodeCloudId: decodeCloudIdMock,
   };
 });
+
+export const persistTokenCloudDataMock = jest.fn();
+
+jest.doMock('./cloud_data', () => {
+  return {
+    persistTokenCloudData: persistTokenCloudDataMock,
+  };
+});

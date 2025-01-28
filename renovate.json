@@ -67,7 +67,8 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "*"
+        "main",
+        "/^[8-9].*/"
       ],
       "labels": [
         "Team:Operations",
@@ -94,7 +95,7 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "*"
+        "/.*/"
       ],
       "labels": [
         "Team:Operations",
@@ -779,12 +780,28 @@
     {
       "groupName": "@elastic/kibana-management dependencies",
       "matchDepNames": [
-        "@mapbox/vector-tile",
         "csstype",
         "cronstrue",
+        "immer"
+      ],
+      "reviewers": [
+        "team:kibana-management"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Kibana Management",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "enabled": true,
+      "minimumReleaseAge": "7 days"
+    },
+    {
+      "groupName": "@elastic/kibana-management - file-saver",
+      "matchDepNames": [
         "file-saver",
-        "immer",
-        "@types/mapbox__vector-tile",
         "@types/file-saver"
       ],
       "reviewers": [
@@ -868,13 +885,13 @@
       "minimumReleaseAge": "7 days"
     },
     {
-      "groupName": "@elastic/kibana-visualizations test dependencies",
+      "groupName": "@elastic/kibana-visualizations Test dependencies",
       "matchDepNames": [
         "@types/faker",
         "faker"
       ],
       "reviewers": [
-        "team:visualizations"
+        "team:kibana-visualizations"
       ],
       "matchBaseBranches": [
         "main"
@@ -893,7 +910,7 @@
         "@elastic/charts"
       ],
       "reviewers": [
-        "team:visualizations",
+        "team:kibana-visualizations",
         "markov00",
         "nickofthyme"
       ],
@@ -901,9 +918,9 @@
         "main"
       ],
       "labels": [
+        "Team:Visualizations",
         "release_note:skip",
-        "backport:prev-minor",
-        "Team:Visualizations"
+        "backport:prev-minor"
       ],
       "enabled": true
     },
@@ -1848,13 +1865,14 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "backport:all-open"
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
     },
     {
-      "groupName": "kibana-visualization color related modules",
+      "groupName": "@elastic/kibana-visualizations Color related modules",
       "matchDepNames": [
         "chroma-js",
         "color",
@@ -1873,7 +1891,8 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "backport:all-open"
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1899,7 +1918,8 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "backport:all-open"
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -1935,7 +1955,8 @@
       "labels": [
         "Feature:Vega",
         "Team:Visualizations",
-        "backport:all-open"
+        "release_note:skip",
+        "backport:prev-minor"
       ],
       "minimumReleaseAge": "7 days",
       "enabled": true
@@ -2337,28 +2358,11 @@
         "@mapbox/mapbox-gl-draw",
         "@mapbox/mapbox-gl-rtl-text",
         "@mapbox/mapbox-gl-supported",
+        "@mapbox/vector-tile",
         "mapbox-gl-draw-rectangle-mode",
         "maplibre-gl",
-        "@types/geojson"
-      ],
-      "reviewers": [
-        "team:kibana-presentation"
-      ],
-      "matchBaseBranches": [
-        "main"
-      ],
-      "labels": [
-        "Team:Presentation",
-        "backport:all-open",
-        "release_note:skip"
-      ],
-      "minimumReleaseAge": "7 days",
-      "enabled": true
-    },
-    {
-      "groupName": "react-resizable",
-      "matchDepNames": [
-        "react-resizable"
+        "@types/geojson",
+        "@types/mapbox__vector-tile"
       ],
       "reviewers": [
         "team:kibana-presentation"
@@ -2400,11 +2404,9 @@
       "groupName": "kibana-presentation react dependencies",
       "matchDepNames": [
         "react-dropzone",
-        "react-grid-layout",
         "react-recompose",
         "react-shortcuts",
         "redux-thunks",
-        "@types/react-grid-layout",
         "@types/react-recompose"
       ],
       "reviewers": [
@@ -3213,7 +3215,7 @@
         "team:kibana-operations"
       ],
       "matchBaseBranches": [
-        "*"
+        "/.*/"
       ],
       "labels": [
         "Team:Operations",
@@ -3841,6 +3843,25 @@
       "enabled": true
     },
     {
+      "groupName": "oas",
+      "matchDepNames": [
+        "oas"
+      ],
+      "reviewers": [
+        "team:security-scalability"
+      ],
+      "matchBaseBranches": [
+        "main"
+      ],
+      "labels": [
+        "Team:Security-Scalability",
+        "release_note:skip",
+        "backport:all-open"
+      ],
+      "minimumReleaseAge": "7 days",
+      "enabled": true
+    },
+    {
       "groupName": "seedrandom",
       "matchDepNames": [
         "seedrandom",
@@ -4175,15 +4196,15 @@
         "@types/react-is"
       ],
       "reviewers": [
-        "team:visualizations"
+        "team:kibana-visualizations"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
+        "Team:Visualizations",
         "release_note:skip",
-        "backport:all-open",
-        "Team:Visualizations"
+        "backport:prev-minor"
       ],
       "enabled": true
     },
@@ -4193,16 +4214,16 @@
         "re2js"
       ],
       "reviewers": [
-        "team:visualizations",
+        "team:kibana-visualizations",
         "dej611"
       ],
       "matchBaseBranches": [
         "main"
       ],
       "labels": [
+        "Team:Visualizations",
         "release_note:skip",
-        "backport:all-open",
-        "Team:Visualizations"
+        "backport:prev-minor"
       ],
       "enabled": true
     },

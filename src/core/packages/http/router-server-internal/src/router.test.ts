@@ -14,6 +14,7 @@ import { createRequestMock } from '@kbn/hapi-mocks/src/request';
 import { createFooValidation } from './router.test.util';
 import { Router, type RouterOptions } from './router';
 import type { RouteValidatorRequestAndResponses } from '@kbn/core-http-server';
+import { getEnvOptions, createTestEnv } from '@kbn/config-mocks';
 
 const mockResponse = {
   code: jest.fn().mockImplementation(() => mockResponse),
@@ -26,9 +27,12 @@ const mockResponseToolkit = {
 
 const logger = loggingSystemMock.create().get();
 const enhanceWithContext = (fn: (...args: any[]) => any) => fn.bind(null, {});
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 const routerOptions: RouterOptions = {
-  isDev: false,
+  env,
   versionedRouterOptions: {
     defaultHandlerResolutionStrategy: 'oldest',
     useVersionResolutionStrategyForInternalPaths: [],
@@ -95,14 +99,12 @@ describe('Router', () => {
     it('can exclude versioned routes', () => {
       const router = new Router('', logger, enhanceWithContext, routerOptions);
       const validation = schema.object({ foo: schema.string() });
-      router.post(
-        {
+      router.versioned
+        .post({
           path: '/versioned',
-          validate: { body: validation, query: validation, params: validation },
-        },
-        (context, req, res) => res.ok(),
-        { isVersioned: true, events: false }
-      );
+          access: 'internal',
+        })
+        .addVersion({ version: '999', validate: false }, async (ctx, req, res) => res.ok());
       router.get(
         {
           path: '/unversioned',
@@ -275,7 +277,7 @@ describe('Router', () => {
 
   it('registers pluginId if provided', () => {
     const pluginId = Symbol('test');
-    const router = new Router('', logger, enhanceWithContext, { pluginId });
+    const router = new Router('', logger, enhanceWithContext, { pluginId, env });
     expect(router.pluginId).toBe(pluginId);
   });
 

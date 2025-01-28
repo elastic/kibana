@@ -10,7 +10,7 @@ import { isEmpty } from 'lodash/fp';
 import { useState, useEffect } from 'react';
 import type { CheckPipelineRequestBody, Pipeline } from '../../../../../../common';
 import { useActions, type State } from '../../state';
-import { runCheckPipelineResults } from '../../../../../common/lib/api';
+import { runCheckPipelineResults } from '../../../../../common';
 
 interface CheckPipelineProps {
   integrationSettings: State['integrationSettings'];

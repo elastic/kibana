@@ -9,7 +9,7 @@
 
 import { Capabilities } from '@kbn/core/public';
 import { convertPanelMapToPanelsArray, DashboardContainerInput } from '../../../../common';
-import { DashboardLocatorParams } from '../../../dashboard_container';
+import { DashboardLocatorParams } from '../../../dashboard_container/types';
 
 import { shareService } from '../../../services/kibana_services';
 import { showPublicUrlSwitch, ShowShareModal, ShowShareModalProps } from './show_share_modal';

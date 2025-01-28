@@ -9,16 +9,22 @@ import React, { useMemo } from 'react';
 import { FormProvider, SubmitHandler, useForm } from 'react-hook-form';
 import { EuiCallOut, EuiForm, EuiButton, EuiSpacer, EuiHorizontalRule } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProcessingDefinition, ReadStreamDefinition, getProcessorType } from '@kbn/streams-schema';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
 import { dynamic } from '@kbn/shared-ux-utility';
 import { ProcessorTypeSelector } from './processor_type_selector';
 import { ProcessorFlyoutTemplate } from './processor_flyout_template';
-import { DetectedField, ProcessorDefinition, ProcessorFormState } from '../types';
+import {
+  DetectedField,
+  EnrichmentUIProcessorDefinition,
+  ProcessingDefinition,
+  ProcessorFormState,
+} from '../types';
 import { DangerZone } from './danger_zone';
 import { DissectProcessorForm } from './dissect';
 import { GrokProcessorForm } from './grok';
 import { convertFormStateToProcessing, getDefaultFormState } from '../utils';
+import { useProcessingSimulator } from '../hooks/use_processing_simulator';
 
 const ProcessorOutcomePreview = dynamic(() =>
   import(/* webpackChunkName: "management_processor_outcome" */ './processor_outcome_preview').then(
@@ -29,17 +35,17 @@ const ProcessorOutcomePreview = dynamic(() =>
 );
 
 export interface ProcessorFlyoutProps {
+  definition: ReadStreamDefinition;
   onClose: () => void;
 }
 
 export interface AddProcessorFlyoutProps extends ProcessorFlyoutProps {
-  definition: ReadStreamDefinition;
   onAddProcessor: (newProcessing: ProcessingDefinition, newFields?: DetectedField[]) => void;
 }
 export interface EditProcessorFlyoutProps extends ProcessorFlyoutProps {
-  processor: ProcessorDefinition;
+  processor: EnrichmentUIProcessorDefinition;
   onDeleteProcessor: (id: string) => void;
-  onUpdateProcessor: (id: string, processor: ProcessorDefinition) => void;
+  onUpdateProcessor: (id: string, processor: EnrichmentUIProcessorDefinition) => void;
 }
 
 export function AddProcessorFlyout({
@@ -49,7 +55,7 @@ export function AddProcessorFlyout({
 }: AddProcessorFlyoutProps) {
   const defaultValues = useMemo(() => getDefaultFormState('grok'), []);
 
-  const methods = useForm<ProcessorFormState>({ defaultValues });
+  const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
   const formFields = methods.watch();
 
@@ -58,11 +64,21 @@ export function AddProcessorFlyout({
     [defaultValues, formFields]
   );
 
-  const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
+  const { error, isLoading, refreshSamples, simulation, samples, simulate } =
+    useProcessingSimulator({
+      definition,
+      condition: { field: formFields.field, operator: 'exists' },
+    });
+
+  const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessing(data);
 
-    onAddProcessor(processingDefinition, data.detected_fields);
-    onClose();
+    simulate(processingDefinition, data.detected_fields).then((responseBody) => {
+      if (responseBody instanceof Error) return;
+
+      onAddProcessor(processingDefinition, data.detected_fields);
+      onClose();
+    });
   };
 
   return (
@@ -74,7 +90,11 @@ export function AddProcessorFlyout({
         { defaultMessage: 'Add processor' }
       )}
       confirmButton={
-        <EuiButton onClick={methods.handleSubmit(handleSubmit)}>
+        <EuiButton
+          data-test-subj="streamsAppAddProcessorFlyoutAddProcessorButton"
+          onClick={methods.handleSubmit(handleSubmit)}
+          disabled={!methods.formState.isValid && methods.formState.isSubmitted}
+        >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmAddProcessor',
             { defaultMessage: 'Add processor' }
@@ -90,7 +110,16 @@ export function AddProcessorFlyout({
           {formFields.type === 'dissect' && <DissectProcessorForm />}
         </EuiForm>
         <EuiHorizontalRule />
-        <ProcessorOutcomePreview definition={definition} formFields={formFields} />
+        <ProcessorOutcomePreview
+          definition={definition}
+          formFields={formFields}
+          simulation={simulation}
+          samples={samples}
+          onSimulate={simulate}
+          onRefreshSamples={refreshSamples}
+          simulationError={error}
+          isLoading={isLoading}
+        />
       </FormProvider>
     </ProcessorFlyoutTemplate>
   );
@@ -102,12 +131,14 @@ export function EditProcessorFlyout({
   onUpdateProcessor,
   processor,
 }: EditProcessorFlyoutProps) {
+  const processorType = 'grok' in processor.config ? 'grok' : 'dissect';
+
   const defaultValues = useMemo(
-    () => getDefaultFormState(getProcessorType(processor), processor),
-    [processor]
+    () => getDefaultFormState(processorType, processor),
+    [processor, processorType]
   );
 
-  const methods = useForm<ProcessorFormState>({ defaultValues });
+  const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
   const formFields = methods.watch();
 
@@ -146,7 +177,11 @@ export function EditProcessorFlyout({
         />
       }
       confirmButton={
-        <EuiButton onClick={methods.handleSubmit(handleSubmit)} disabled={!hasChanges}>
+        <EuiButton
+          data-test-subj="streamsAppEditProcessorFlyoutUpdateProcessorButton"
+          onClick={methods.handleSubmit(handleSubmit)}
+          disabled={!methods.formState.isValid}
+        >
           {i18n.translate(
             'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.confirmEditProcessor',
             { defaultMessage: 'Update processor' }

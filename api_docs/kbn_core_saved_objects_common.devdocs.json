@@ -1240,48 +1240,12 @@
             "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/types.ts"
           },
           {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
             "plugin": "upgradeAssistant",
             "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
           },
           {
             "plugin": "upgradeAssistant",
             "path": "x-pack/platform/plugins/private/upgrade_assistant/common/types.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/host_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "securitySolution",
-            "path": "x-pack/solutions/security/plugins/security_solution/server/lib/risk_score/prebuilt_saved_objects/saved_object/user_risk_score_dashboards.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -1503,35 +1467,35 @@
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           },
           {
             "plugin": "@kbn/response-ops-rule-form",
-            "path": "packages/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
+            "path": "src/platform/packages/shared/response-ops/rule_form/src/rule_actions/rule_actions_system_actions_item.tsx"
           }
         ],
         "initialIsOpen": false
@@ -2131,6 +2095,46 @@
             "path": "src/platform/plugins/shared/expressions/common/executor/executor.ts"
           },
           {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
+          },
+          {
+            "plugin": "data",
+            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
+            "plugin": "savedObjectsTaggingOss",
+            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
+          },
+          {
             "plugin": "embeddable",
             "path": "src/platform/plugins/shared/embeddable/common/lib/migrate_base_input.ts"
           },
@@ -2149,46 +2153,6 @@
           {
             "plugin": "embeddable",
             "path": "src/platform/plugins/shared/embeddable/common/lib/inject.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/filters/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
-          },
-          {
-            "plugin": "data",
-            "path": "src/platform/plugins/shared/data/common/query/persistable_state.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
-          },
-          {
-            "plugin": "savedObjectsTaggingOss",
-            "path": "src/platform/plugins/shared/saved_objects_tagging_oss/public/api.ts"
           },
           {
             "plugin": "uiActionsEnhanced",
@@ -2241,50 +2205,6 @@
           {
             "plugin": "visualizations",
             "path": "src/platform/plugins/shared/visualizations/public/utils/saved_visualization_references/timeseries_references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.ts"
           },
           {
             "plugin": "savedObjectsTagging",
@@ -2395,6 +2315,18 @@
             "path": "src/platform/plugins/shared/controls/server/time_slider/time_slider_persistable_state.ts"
           },
           {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
+          },
+          {
+            "plugin": "controls",
+            "path": "src/platform/plugins/shared/controls/server/esql_control/esql_control_persistable_state.ts"
+          },
+          {
             "plugin": "canvas",
             "path": "x-pack/platform/plugins/private/canvas/canvas_plugin_src/functions/external/saved_lens.ts"
           },
@@ -2457,26 +2389,6 @@
           {
             "plugin": "uiActionsEnhanced",
             "path": "src/platform/plugins/shared/ui_actions_enhanced/server/dynamic_action_enhancement.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/common/references.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
-          },
-          {
-            "plugin": "savedObjectsTagging",
-            "path": "x-pack/platform/plugins/shared/saved_objects_tagging/public/utils.test.ts"
           },
           {
             "plugin": "savedObjectsTagging",

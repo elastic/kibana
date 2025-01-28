@@ -45,7 +45,6 @@ components:
         - risk_engine_enabled
         - risk_engine_resources_installed
         - risk_engine_configuration_created
-        - legacy_risk_engine_disabled
         - errors
       properties:
         risk_engine_enabled:
@@ -53,8 +52,6 @@ components:
         risk_engine_resources_installed:
           type: boolean
         risk_engine_configuration_created:
-          type: boolean
-        legacy_risk_engine_disabled:
           type: boolean
         errors:
           type: array

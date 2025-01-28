@@ -15,15 +15,16 @@ import {
   EuiNotificationBadge,
   EuiPopover,
   EuiButtonIcon,
+  useEuiTheme,
 } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { euiThemeVars } from '@kbn/ui-theme';
 import { KnowledgeBaseTour } from '../../../tour/knowledge_base';
 import { AnonymizationSettingsManagement } from '../../../data_anonymization/settings/anonymization_settings_management';
 import { useAssistantContext } from '../../../..';
 import * as i18n from '../../assistant_header/translations';
 import { AlertsSettingsModal } from '../alerts_settings/alerts_settings_modal';
 import { KNOWLEDGE_BASE_TAB } from '../const';
+import { AI_ASSISTANT_MENU } from './translations';
 
 interface Params {
   isDisabled?: boolean;
@@ -32,6 +33,7 @@ interface Params {
 
 export const SettingsContextMenu: React.FC<Params> = React.memo(
   ({ isDisabled = false, onChatCleared }: Params) => {
+    const { euiTheme } = useEuiTheme();
     const { navigateToApp, knowledgeBase } = useAssistantContext();
 
     const [isPopoverOpen, setPopover] = useState(false);
@@ -139,7 +141,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           icon={'refresh'}
           data-test-subj={'clear-chat'}
           css={css`
-            color: ${euiThemeVars.euiColorDanger};
+            color: ${euiTheme.colors.textDanger};
           `}
         >
           {i18n.RESET_CONVERSATION}
@@ -147,6 +149,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
       ],
 
       [
+        euiTheme.colors.textDanger,
         handleNavigateToAnonymization,
         handleNavigateToKnowledgeBase,
         handleNavigateToSettings,
@@ -168,7 +171,7 @@ export const SettingsContextMenu: React.FC<Params> = React.memo(
           button={
             <KnowledgeBaseTour>
               <EuiButtonIcon
-                aria-label="test"
+                aria-label={AI_ASSISTANT_MENU}
                 isDisabled={isDisabled}
                 iconType="boxesVertical"
                 onClick={onButtonClick}

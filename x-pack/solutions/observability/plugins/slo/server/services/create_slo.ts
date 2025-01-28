@@ -13,14 +13,14 @@ import { merge } from 'lodash';
 import { v4 as uuidv4 } from 'uuid';
 import {
   SLO_MODEL_VERSION,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
+  SUMMARY_TEMP_INDEX_NAME,
   getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
-import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
-import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
+import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
+import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
 import { Duration, DurationUnit, SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SLOIdConflict, SecurityException } from '../errors';
@@ -40,7 +40,8 @@ export class CreateSLO {
     private summaryTransformManager: TransformManager,
     private logger: Logger,
     private spaceId: string,
-    private basePath: IBasePath
+    private basePath: IBasePath,
+    private username: string
   ) {}
 
   public async execute(params: CreateSLOParams): Promise<CreateSLOResponse> {
@@ -59,14 +60,14 @@ export class CreateSLO {
     const rollupTransformId = getSLOTransformId(slo.id, slo.revision);
     const summaryTransformId = getSLOSummaryTransformId(slo.id, slo.revision);
     try {
-      const sloPipelinePromise = this.createPipeline(getSLOPipelineTemplate(slo));
+      const sloPipelinePromise = this.createPipeline(getSLIPipelineTemplate(slo));
       rollbackOperations.push(() => this.deletePipeline(getSLOPipelineId(slo.id, slo.revision)));
 
       const rollupTransformPromise = this.transformManager.install(slo);
       rollbackOperations.push(() => this.transformManager.uninstall(rollupTransformId));
 
       const summaryPipelinePromise = this.createPipeline(
-        getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
+        getSummaryPipelineTemplate(slo, this.spaceId, this.basePath)
       );
 
       rollbackOperations.push(() =>
@@ -131,7 +132,7 @@ export class CreateSLO {
     return await retryTransientEsErrors(
       () =>
         this.esClient.index({
-          index: SLO_SUMMARY_TEMP_INDEX_NAME,
+          index: SUMMARY_TEMP_INDEX_NAME,
           id: `slo-${slo.id}`,
           document: createTempSummaryDocument(slo, this.spaceId, this.basePath),
           refresh: true,
@@ -144,7 +145,7 @@ export class CreateSLO {
     return await retryTransientEsErrors(
       () =>
         this.esClient.delete({
-          index: SLO_SUMMARY_TEMP_INDEX_NAME,
+          index: SUMMARY_TEMP_INDEX_NAME,
           id: `slo-${slo.id}`,
           refresh: true,
         }),
@@ -180,8 +181,8 @@ export class CreateSLO {
     validateSLO(slo);
 
     const rollUpTransform = await this.transformManager.inspect(slo);
-    const rollUpPipeline = getSLOPipelineTemplate(slo);
-    const summaryPipeline = getSLOSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
+    const rollUpPipeline = getSLIPipelineTemplate(slo);
+    const summaryPipeline = getSummaryPipelineTemplate(slo, this.spaceId, this.basePath);
     const summaryTransform = await this.summaryTransformManager.inspect(slo);
     const temporaryDoc = createTempSummaryDocument(slo, this.spaceId, this.basePath);
 
@@ -217,6 +218,8 @@ export class CreateSLO {
       tags: params.tags ?? [],
       createdAt: now,
       updatedAt: now,
+      createdBy: this.username,
+      updatedBy: this.username,
       groupBy: !!params.groupBy ? params.groupBy : ALL_VALUE,
       version: SLO_MODEL_VERSION,
     };

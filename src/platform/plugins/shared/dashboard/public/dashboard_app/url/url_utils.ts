@@ -24,7 +24,7 @@ import {
 import type { DashboardPanel } from '../../../server/content_management';
 import type { SavedDashboardPanel } from '../../../server/dashboard_saved_object';
 import { DashboardApi } from '../../dashboard_api/types';
-import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../dashboard_constants';
+import { DASHBOARD_STATE_STORAGE_KEY, createDashboardEditUrl } from '../../utils/urls';
 import { migrateLegacyQuery } from '../../services/dashboard_content_management_service/lib/load_dashboard_state';
 import { coreServices } from '../../services/kibana_services';
 import { getPanelTooOldErrorString } from '../_dashboard_app_strings';
@@ -112,13 +112,13 @@ export const startSyncingExpandedPanelState = ({
   dashboardApi: DashboardApi;
   history: History;
 }) => {
-  const expandedPanelSubscription = dashboardApi?.expandedPanelId
+  const expandedPanelSubscription = dashboardApi?.expandedPanelId$
     // skip the first value because we don't want to trigger a history.replace on initial load
     .pipe(skip(1))
     .subscribe((expandedPanelId) => {
       history.replace({
         ...history.location,
-        pathname: `${createDashboardEditUrl(dashboardApi.savedObjectId.value)}${
+        pathname: `${createDashboardEditUrl(dashboardApi.savedObjectId$.value)}${
           Boolean(expandedPanelId) ? `/${expandedPanelId}` : ''
         }`,
       });

@@ -7,20 +7,7 @@
 
 import type { FlyoutPanelProps } from '@kbn/expandable-flyout';
 import { TableId } from '@kbn/securitysolution-data-table';
-
-const UserPanelKey: UserPanelExpandableFlyoutProps['key'] = 'user-panel';
-
-interface UserPanelProps extends Record<string, unknown> {
-  contextID: string;
-  scopeId: string;
-  userName: string;
-  isDraggable?: boolean;
-}
-
-interface UserPanelExpandableFlyoutProps extends FlyoutPanelProps {
-  key: 'user-panel';
-  params: UserPanelProps;
-}
+import { UserPanelKey } from '../../../../../flyout/entity_details/shared/constants';
 
 export const isUserName = (fieldName: string) => fieldName === 'user.name';
 
