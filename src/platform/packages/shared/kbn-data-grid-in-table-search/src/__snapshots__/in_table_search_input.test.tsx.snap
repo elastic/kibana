@@ -25,7 +25,7 @@ exports[`InTableSearchInput renders input 1`] = `
       <input
         class="euiFieldSearch dataGridInTableSearch__input emotion-euiFieldSearch-compressed-inGroup"
         data-test-subj="inTableSearchInput"
-        placeholder="Search in the table"
+        placeholder="Find in table"
         type="search"
         value=""
       />
@@ -112,7 +112,7 @@ exports[`InTableSearchInput renders input when loading 1`] = `
       <input
         class="euiFieldSearch euiFieldSearch-isLoading dataGridInTableSearch__input emotion-euiFieldSearch-compressed-inGroup"
         data-test-subj="inTableSearchInput"
-        placeholder="Search in the table"
+        placeholder="Find in table"
         type="search"
         value=""
       />
