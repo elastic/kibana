@@ -10,6 +10,7 @@ import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import type { PrivilegedUserDoc } from '../../../../common/api/entity_analytics/privmon';
 import { HeaderSection } from '../../../common/components/header_section';
+import { PrivilegedUserName } from './privileged_user_name';
 
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
@@ -28,7 +29,7 @@ export const NewPrivilegedUsers = React.memo(({ data, isLoading }: NewPrivileged
         showInspectButton={false}
       />
 
-      <EuiBasicTable items={data} columns={getTableColumns()} loading={isLoading} />
+      <EuiBasicTable items={data.slice(0, 5)} columns={getTableColumns()} loading={isLoading} />
       <EuiSpacer size="m" />
     </EuiPanel>
   );
@@ -40,6 +41,9 @@ const getTableColumns = () => [
   {
     field: 'user.name',
     name: 'User',
+    render: (name: string, data: PrivilegedUserDoc) => (
+      <PrivilegedUserName userName={name} objects={[data]} />
+    ),
   },
   {
     field: 'user.id',

@@ -22,11 +22,13 @@ import { REQUEST_NAMES, useFetch } from '../../common/hooks/use_fetch';
 import { KibanaServices } from '../../common/lib/kibana';
 import { RiskyUsersWithPrivilege } from '../components/privileged_users/risky_users_with_privilege';
 import { SuccessfulPrivilegedAccess } from '../components/privileged_users/successful_privileged_access';
+import { UnusualAccessPatterns } from '../components/privileged_users/unusual_access_patterns';
 
 interface PrivilegedUserResponse {
   successfulPrivilegedAccess: PrivmonLoginDoc[];
   newPrivilegedUsers: PrivilegedUserDoc[];
   riskPrivilegedUsers: Array<EntityRiskScore<EntityType.user>>;
+  unusualAccessPatterns: Event[];
 }
 
 const fetchPrivilegedUsersData = (): Promise<PrivilegedUserResponse> =>
@@ -39,7 +41,12 @@ const fetchPrivilegedUsersData = (): Promise<PrivilegedUserResponse> =>
 const EntityAnalyticsPrivilegedUserComponent = () => {
   const { loading: isSourcererLoading } = useSourcererDataView();
   const {
-    data = { newPrivilegedUsers: [], riskPrivilegedUsers: [], successfulPrivilegedAccess: [] },
+    data = {
+      newPrivilegedUsers: [],
+      riskPrivilegedUsers: [],
+      successfulPrivilegedAccess: [],
+      unusualAccessPatterns: [],
+    },
     isLoading,
   } = useFetch<{}, PrivilegedUserResponse, undefined>(
     REQUEST_NAMES.PRIVILEGED_USER_DATA,
@@ -60,13 +67,18 @@ const EntityAnalyticsPrivilegedUserComponent = () => {
         ) : (
           <EuiFlexGroup direction="row" wrap>
             <EuiFlexItem style={{ minWidth: 600 }}>
-              <RiskyUsersWithPrivilege isLoading={isLoading} data={data.riskPrivilegedUsers} />
+              <RiskyUsersWithPrivilege
+                isLoading={isLoading}
+                data={data.riskPrivilegedUsers}
+                privilegedUsers={data.newPrivilegedUsers}
+              />
             </EuiFlexItem>
 
             <EuiFlexItem style={{ minWidth: 600 }}>
               <SuccessfulPrivilegedAccess
                 isLoading={isLoading}
                 data={data.successfulPrivilegedAccess}
+                privilegedUsers={data.newPrivilegedUsers}
               />
             </EuiFlexItem>
 
@@ -74,7 +86,11 @@ const EntityAnalyticsPrivilegedUserComponent = () => {
               <NewPrivilegedUsers isLoading={isLoading} data={data.newPrivilegedUsers} />
             </EuiFlexItem>
             <EuiFlexItem style={{ minWidth: 600 }}>
-              {'TODO: Recent actions by privileged users'}
+              <UnusualAccessPatterns
+                isLoading={isLoading}
+                data={data.unusualAccessPatterns}
+                privilegedUsers={data.newPrivilegedUsers}
+              />
             </EuiFlexItem>
           </EuiFlexGroup>
         )}

@@ -7,19 +7,24 @@
 
 import React from 'react';
 import { EuiBasicTable, EuiPanel, EuiSpacer } from '@elastic/eui';
-import type { PrivmonLoginDoc } from '../../../../common/api/entity_analytics/privmon';
+import type {
+  PrivilegedUserDoc,
+  PrivmonLoginDoc,
+} from '../../../../common/api/entity_analytics/privmon';
 import { FormattedRelativePreferenceDate } from '../../../common/components/formatted_date';
 import { HeaderSection } from '../../../common/components/header_section';
+import { PrivilegedUserName } from './privileged_user_name';
 
 const DETECTION_RESPONSE_HOST_SEVERITY_QUERY_ID = 'vulnerableHostsBySeverityQuery';
 
 interface SuccessfulPrivilegedAccessProps {
   data: PrivmonLoginDoc[];
+  privilegedUsers: PrivilegedUserDoc[];
   isLoading: boolean;
 }
 
 export const SuccessfulPrivilegedAccess = React.memo(
-  ({ data, isLoading }: SuccessfulPrivilegedAccessProps) => {
+  ({ data, privilegedUsers, isLoading }: SuccessfulPrivilegedAccessProps) => {
     return (
       <EuiPanel hasBorder>
         <HeaderSection
@@ -28,7 +33,11 @@ export const SuccessfulPrivilegedAccess = React.memo(
           titleSize="s"
           showInspectButton={false}
         />
-        <EuiBasicTable items={data} columns={getTableColumns()} loading={isLoading} />
+        <EuiBasicTable
+          items={data.slice(0, 5)}
+          columns={getTableColumns(privilegedUsers)}
+          loading={isLoading}
+        />
         <EuiSpacer size="m" />
       </EuiPanel>
     );
@@ -37,10 +46,16 @@ export const SuccessfulPrivilegedAccess = React.memo(
 
 SuccessfulPrivilegedAccess.displayName = 'SuccessfulPrivilegedAccess';
 
-const getTableColumns = () => [
+const getTableColumns = (privilegedUsers: PrivilegedUserDoc[]) => [
   {
     field: 'user.name',
     name: 'User',
+    render: (name: string, data: PrivmonLoginDoc) => (
+      <PrivilegedUserName
+        userName={name}
+        objects={[privilegedUsers.find(({ user }) => user.name === name) || {}, data]}
+      />
+    ),
   },
   {
     field: 'host.hostname',
