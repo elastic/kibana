@@ -15,6 +15,7 @@ describe('WelcomeMessageKnowledgeBase', () => {
   afterEach(() => {
     jest.clearAllMocks();
   });
+
   function createMockKnowledgeBase(
     partial: Partial<UseKnowledgeBaseResult> = {}
   ): UseKnowledgeBaseResult {

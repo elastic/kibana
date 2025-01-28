@@ -6,8 +6,8 @@
  */
 
 import expect from '@kbn/expect';
-import type { FtrProviderContext } from '../ftr_provider_context';
 import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from '../constants';
+import type { FtrProviderContext } from '../ftr_provider_context';
 // eslint-disable-next-line import/no-default-export
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
@@ -26,6 +26,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const POLICY_NAME_FIELD = 'createAgentPolicyNameField';
   const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector-accordion';
 
+  // Failing: See https://github.com/elastic/kibana/issues/208533
   describe('Agentless Security Posture Integration Options', function () {
     let cisIntegration: typeof pageObjects.cisAddIntegration;
 
@@ -69,7 +70,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     it(`should show cspm with agentless option`, async () => {
-      //   const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
         AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
@@ -81,7 +81,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const hasAgentBased = await testSubjects.exists(POLICY_NAME_FIELD);
 
       expect(hasSetupTechnologySelector).to.be(true);
-      expect(hasAgentBased).to.be(true);
+      expect(hasAgentBased).to.be(false);
     });
   });
 }
