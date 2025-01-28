@@ -135,11 +135,11 @@ export default function ({ getService }: FtrProviderContext) {
         });
       });
 
-      it('returns a successful response when upgrading to the next minor', async () => {
+      it('returns a successful response when upgrading to another minor', async () => {
         const { body } = await supertest
           .get('/api/upgrade_assistant/status')
           .query({
-            targetVersion: '9.1.0',
+            targetVersion: '8.25.0',
           })
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -156,7 +156,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get('/api/upgrade_assistant/status')
           .query({
-            targetVersion: '10.0.0',
+            targetVersion: '9.0.0',
           })
           .set('kbn-xsrf', 'xxx')
           .expect(200);
@@ -173,7 +173,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get('/api/upgrade_assistant/status')
           .query({
-            targetVersion: '11.0.0',
+            targetVersion: '10.0.0',
           })
           .set('kbn-xsrf', 'xxx')
           .expect(403);
@@ -184,7 +184,7 @@ export default function ({ getService }: FtrProviderContext) {
         const { body } = await supertest
           .get('/api/upgrade_assistant/status')
           .query({
-            targetVersion: '8.0.0',
+            targetVersion: '7.0.0',
           })
           .set('kbn-xsrf', 'xxx')
           .expect(403);
