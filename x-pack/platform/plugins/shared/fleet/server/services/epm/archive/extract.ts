@@ -26,7 +26,7 @@ export async function untarBuffer(
     if (!filter({ path })) return;
 
     if (shouldReadBuffer && !shouldReadBuffer(path)) {
-      return { path };
+      return onEntry({ path });
     }
 
     streamToBuffer(entry as unknown as NodeJS.ReadableStream)
