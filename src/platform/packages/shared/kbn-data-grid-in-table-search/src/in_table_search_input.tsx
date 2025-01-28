@@ -138,7 +138,7 @@ export const InTableSearchInput: React.FC<InTableSearchInputProps> = React.memo(
           </EuiFlexGroup>
         }
         placeholder={i18n.translate('dataGridInTableSearch.inputPlaceholder', {
-          defaultMessage: 'Search in the table',
+          defaultMessage: 'Find in table',
         })}
         value={inputValue}
         onChange={onInputChange}
