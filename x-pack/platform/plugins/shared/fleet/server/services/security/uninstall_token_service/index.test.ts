@@ -217,7 +217,7 @@ describe('UninstallTokenService', () => {
     agentPolicyService.deployPolicies = jest.fn();
 
     getAgentPoliciesByIDsMock = jest.fn().mockResolvedValue([]);
-    agentPolicyService.getByIDs = getAgentPoliciesByIDsMock;
+    agentPolicyService.getByIds = getAgentPoliciesByIDsMock;
 
     if (scoppedInSpace) {
       soClientMock.getCurrentNamespace.mockReturnValue(scoppedInSpace);
@@ -767,31 +767,6 @@ describe('UninstallTokenService', () => {
               },
             },
           ]);
-        });
-      });
-
-      describe('agentTamperProtectionEnabled false', () => {
-        beforeAll(() => {
-          // @ts-ignore
-          mockContext.experimentalFeatures.agentTamperProtectionEnabled = false;
-        });
-
-        it('generateTokensForPolicyIds should not generate token if agentTamperProtectionEnabled: false', async () => {
-          const so = getDefaultSO();
-          await uninstallTokenService.generateTokensForPolicyIds([so.attributes.policy_id]);
-          expect(soClientMock.bulkCreate).not.toBeCalled();
-        });
-
-        it('generateTokensForAllPolicies should not generate token if agentTamperProtectionEnabled: false', async () => {
-          mockAgentPolicyFetchAllAgentPolicyIds(canEncrypt);
-          await uninstallTokenService.generateTokensForAllPolicies();
-          expect(soClientMock.bulkCreate).not.toBeCalled();
-        });
-
-        it('generateTokenForPolicyId should not generate token if agentTamperProtectionEnabled: false', async () => {
-          const so = getDefaultSO();
-          await uninstallTokenService.generateTokenForPolicyId(so.attributes.policy_id);
-          expect(soClientMock.bulkCreate).not.toBeCalled();
         });
       });
     });

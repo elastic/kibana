@@ -192,7 +192,8 @@ const createMonitorJourney = ({
           monitorType
         );
         expect(hasFailure).toBeFalsy();
-        await page.click('text=Update monitor');
+        await page.waitForTimeout(1000);
+        await page.getByTestId('syntheticsMonitorConfigSubmitButton').click();
         await page.waitForSelector('text=Monitor updated successfully.');
       });
 

@@ -8,10 +8,15 @@
  */
 
 import type { UiSettingsParams } from '@kbn/core-ui-settings-common';
-import { getThemeSettings } from './theme';
+import { getThemeSettings, type GetThemeSettingsOptions } from './theme';
+
+const defaultOptions: GetThemeSettingsOptions = {
+  isDist: true,
+  isThemeSwitcherEnabled: undefined,
+};
 
 describe('theme settings', () => {
-  const themeSettings = getThemeSettings();
+  const themeSettings = getThemeSettings(defaultOptions);
 
   const getValidationFn = (setting: UiSettingsParams) => (value: any) =>
     setting.schema.validate(value);
@@ -31,28 +36,76 @@ describe('theme settings', () => {
       expect(() => validate(12)).toThrowError();
     });
   });
+
+  describe('theme:name', () => {
+    const validate = getValidationFn(themeSettings['theme:name']);
+
+    it('should only accept expected values', () => {
+      // TODO: Remove amsterdam theme
+      // https://github.com/elastic/eui-private/issues/170
+      expect(() => validate('amsterdam')).not.toThrow();
+      expect(() => validate('borealis')).not.toThrow();
+
+      expect(() => validate(true)).toThrow();
+      expect(() => validate(12)).toThrow();
+    });
+
+    describe('readonly', () => {
+      it('should not be editable when `isThemeSwitcherEnabled` is falsy', () => {
+        expect(getThemeSettings(defaultOptions)['theme:name'].readonly).toBe(true);
+        expect(
+          getThemeSettings({
+            ...defaultOptions,
+            isThemeSwitcherEnabled: false,
+          })['theme:name'].readonly
+        ).toBe(true);
+      });
+
+      it('should be editable when `isThemeSwitcherEnabled = true`', () => {
+        expect(
+          getThemeSettings({ ...defaultOptions, isThemeSwitcherEnabled: true })['theme:name']
+            .readonly
+        ).toBe(false);
+        expect(
+          getThemeSettings({
+            ...defaultOptions,
+            isThemeSwitcherEnabled: true,
+          })['theme:name'].readonly
+        ).toBe(false);
+      });
+    });
+
+    describe('value', () => {
+      it('should default to `borealis`', () => {
+        expect(getThemeSettings(defaultOptions)['theme:name'].value).toBe('borealis');
+      });
+
+      it('should use the `defaultTheme` value when defined', () => {
+        expect(
+          getThemeSettings({
+            ...defaultOptions,
+            defaultTheme: 'amsterdam',
+          })['theme:name'].value
+        ).toBe('amsterdam');
+      });
+    });
+  });
 });
 
 describe('process.env.KBN_OPTIMIZER_THEMES handling', () => {
   it('defaults to properties of first tag', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'v8dark,v8light';
-    let settings = getThemeSettings({ isDist: false });
+    let settings = getThemeSettings({ ...defaultOptions, isDist: false });
     expect(settings['theme:darkMode'].value).toBe('enabled');
 
     process.env.KBN_OPTIMIZER_THEMES = 'v8light,v8dark';
-    settings = getThemeSettings({ isDist: false });
-    expect(settings['theme:darkMode'].value).toBe('disabled');
-  });
-
-  it('ignores the value when isDist is undefined', () => {
-    process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
-    const settings = getThemeSettings({ isDist: undefined });
+    settings = getThemeSettings({ ...defaultOptions, isDist: false });
     expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 
   it('ignores the value when isDist is true', () => {
     process.env.KBN_OPTIMIZER_THEMES = 'v8dark';
-    const settings = getThemeSettings({ isDist: true });
+    const settings = getThemeSettings({ ...defaultOptions, isDist: true });
     expect(settings['theme:darkMode'].value).toBe('disabled');
   });
 });

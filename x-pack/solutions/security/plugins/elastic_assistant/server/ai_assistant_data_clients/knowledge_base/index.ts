@@ -9,6 +9,7 @@ import {
   MlTrainedModelDeploymentNodesStats,
   MlTrainedModelStats,
   SearchTotalHits,
+  QueryDslQueryContainer,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { MlPluginSetup } from '@kbn/ml-plugin/server';
 import type { KibanaRequest } from '@kbn/core-http-server';
@@ -23,7 +24,6 @@ import {
   Metadata,
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
-import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { StructuredTool } from '@langchain/core/tools';
 import { AnalyticsServiceSetup, AuditLogger, ElasticsearchClient } from '@kbn/core/server';
 import { IndexPatternsFetcher } from '@kbn/data-views-plugin/server';
@@ -652,7 +652,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
     }
 
     try {
-      const elserId = ASSISTANT_ELSER_INFERENCE_ID;
       const userFilter = getKBUserFilter(user);
       const results = await this.findDocuments<EsIndexEntry>({
         // Note: This is a magic number to set some upward bound as to not blow the context with too
@@ -682,7 +681,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
                 indexEntry,
                 esClient,
                 logger: this.options.logger,
-                elserId,
               });
             })
         );

@@ -10,7 +10,11 @@ import expect from '@kbn/expect';
 import { LIST_INDEX } from '@kbn/securitysolution-list-constants';
 import { getTemplateExists, getIndexTemplateExists } from '@kbn/securitysolution-es-utils';
 
-import { createLegacyListsIndices, deleteListsIndex } from '../../../utils';
+import {
+  createLegacyListsIndices,
+  deleteListsIndex,
+  createReindexedListsIndices,
+} from '../../../utils';
 
 import { FtrProviderContext } from '../../../../../ftr_provider_context';
 
@@ -63,6 +67,23 @@ export default ({ getService }: FtrProviderContext) => {
       expect(legacyItemsTemplateExistsPostMigration).to.equal(false);
       expect(newListsTemplateExists).to.equal(true);
       expect(newItemsTemplateExists).to.equal(true);
+
+      expect(body).to.eql({ list_index: true, list_item_index: true });
+    });
+
+    it('should migrate reindexed from v7 to v8 lists indices to data streams', async () => {
+      await createReindexedListsIndices(es);
+      await supertest
+        .get(LIST_INDEX)
+        .set('kbn-xsrf', 'true')
+        // data stream does not exist
+        .expect(404);
+
+      // migrates indices to data streams
+      await supertest.post(LIST_INDEX).set('kbn-xsrf', 'true').expect(200);
+
+      // check if migration successful
+      const { body } = await supertest.get(LIST_INDEX).set('kbn-xsrf', 'true').expect(200);
 
       expect(body).to.eql({ list_index: true, list_item_index: true });
     });

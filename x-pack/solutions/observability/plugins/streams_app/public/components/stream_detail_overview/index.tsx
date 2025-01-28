@@ -8,7 +8,6 @@ import {
   EuiButton,
   EuiFlexGroup,
   EuiFlexItem,
-  EuiImage,
   EuiLoadingSpinner,
   EuiPanel,
   EuiTab,
@@ -20,9 +19,13 @@ import { i18n } from '@kbn/i18n';
 import moment from 'moment';
 import React, { useMemo } from 'react';
 import { css } from '@emotion/css';
-import { ReadStreamDefinition, isWiredReadStream, isWiredStream } from '@kbn/streams-schema';
+import {
+  ReadStreamDefinition,
+  isWiredReadStream,
+  isWiredStreamDefinition,
+} from '@kbn/streams-schema';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
-import illustration from '../assets/illustration.png';
+import type { SanitizedDashboardAsset } from '@kbn/streams-plugin/server/routes/dashboards/route';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
 import { ControlledEsqlChart } from '../esql_chart/controlled_esql_chart';
@@ -30,6 +33,9 @@ import { StreamsAppSearchBar } from '../streams_app_search_bar';
 import { getIndexPatterns } from '../../util/hierarchy_helpers';
 import { StreamsList } from '../streams_list';
 import { useStreamsAppRouter } from '../../hooks/use_streams_app_router';
+import { useDashboardsFetch } from '../../hooks/use_dashboards_fetch';
+import { DashboardsTable } from '../stream_detail_dashboards_view/dashboard_table';
+import { AssetImage } from '../asset_image';
 
 const formatNumber = (val: number) => {
   return Number(val).toLocaleString('en', {
@@ -56,7 +62,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
   } = useDateRange({ data });
 
   const indexPatterns = useMemo(() => {
-    return getIndexPatterns(definition);
+    return getIndexPatterns(definition?.stream);
   }, [definition]);
 
   const discoverLocator = useMemo(
@@ -140,6 +146,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [definition, dataViews, streamsRepositoryClient, start, end]
   );
 
@@ -162,7 +169,7 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
       name: i18n.translate('xpack.streams.entityDetailOverview.tabs.quicklinks', {
         defaultMessage: 'Quick Links',
       }),
-      content: <>TODO</>,
+      content: <QuickLinks stream={definition} />,
     },
   ];
 
@@ -264,6 +271,19 @@ export function StreamDetailOverview({ definition }: { definition?: ReadStreamDe
   );
 }
 
+const EMPTY_DASHBOARD_LIST: SanitizedDashboardAsset[] = [];
+
+function QuickLinks({ stream }: { stream?: ReadStreamDefinition }) {
+  const dashboardsFetch = useDashboardsFetch(stream?.name);
+
+  return (
+    <DashboardsTable
+      dashboards={dashboardsFetch.value?.dashboards ?? EMPTY_DASHBOARD_LIST}
+      loading={dashboardsFetch.loading}
+    />
+  );
+}
+
 function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
   const {
     dependencies: {
@@ -288,7 +308,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
       return [];
     }
     return streamsListFetch.value?.streams.filter(
-      (d) => isWiredStream(d) && d.name.startsWith(stream.name as string)
+      (d) => isWiredStreamDefinition(d) && d.name.startsWith(stream.name as string)
     );
   }, [stream, streamsListFetch.value?.streams]);
 
@@ -303,13 +323,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
             `}
           >
             <EuiFlexGroup direction="column" gutterSize="s">
-              <EuiImage
-                src={illustration}
-                alt="Illustration"
-                className={css`
-                  width: 250px;
-                `}
-              />
+              <AssetImage type="welcome" />
               <EuiText size="m" textAlign="center">
                 {i18n.translate('xpack.streams.entityDetailOverview.noChildStreams', {
                   defaultMessage: 'Create streams for your logs',
@@ -323,6 +337,7 @@ function ChildStreamList({ stream }: { stream?: ReadStreamDefinition }) {
               </EuiText>
               <EuiFlexGroup justifyContent="center">
                 <EuiButton
+                  data-test-subj="streamsAppChildStreamListCreateChildStreamButton"
                   iconType="plusInCircle"
                   href={router.link('/{key}/management/{subtab}', {
                     path: {

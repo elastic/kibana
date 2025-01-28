@@ -166,7 +166,7 @@
         "label": "AssistantProvider",
         "description": [],
         "signature": [
-          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, baseConversations, navigateToApp, nameSpace, title, toasts, currentAppId, userProfileService, }: ",
+          "({ actionTypeRegistry, alertsIndexPattern, assistantAvailability, assistantTelemetry, augmentMessageCodeBlocks, docLinks, basePath, basePromptContexts, children, getComments, http, inferenceEnabled, baseConversations, navigateToApp, nameSpace, productDocBase, title, toasts, currentAppId, userProfileService, chrome, }: ",
           "AssistantProviderProps",
           ") => React.JSX.Element"
         ],
@@ -179,7 +179,7 @@
             "id": "def-public.AssistantProvider.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  baseConversations,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n}",
+            "label": "{\n  actionTypeRegistry,\n  alertsIndexPattern,\n  assistantAvailability,\n  assistantTelemetry,\n  augmentMessageCodeBlocks,\n  docLinks,\n  basePath,\n  basePromptContexts = [],\n  children,\n  getComments,\n  http,\n  inferenceEnabled = false,\n  baseConversations,\n  navigateToApp,\n  nameSpace = DEFAULT_ASSISTANT_NAMESPACE,\n  productDocBase,\n  title = DEFAULT_ASSISTANT_TITLE,\n  toasts,\n  currentAppId,\n  userProfileService,\n  chrome,\n}",
             "description": [],
             "signature": [
               "AssistantProviderProps"
@@ -1007,7 +1007,7 @@
         "label": "useLoadConnectors",
         "description": [],
         "signature": [
-          "({ http, toasts, }: ",
+          "({ http, toasts, inferenceEnabled, }: ",
           "Props",
           ") => ",
           "UseQueryResult",
@@ -1026,7 +1026,7 @@
             "id": "def-public.useLoadConnectors.$1",
             "type": "Object",
             "tags": [],
-            "label": "{\n  http,\n  toasts,\n}",
+            "label": "{\n  http,\n  toasts,\n  inferenceEnabled = false,\n}",
             "description": [],
             "signature": [
               "Props"

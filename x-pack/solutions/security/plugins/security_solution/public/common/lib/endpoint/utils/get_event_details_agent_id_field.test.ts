@@ -13,11 +13,7 @@ import {
 import { getEventDetailsAgentIdField, parseEcsFieldPath } from '..';
 
 describe('getEventDetailsAgentIdField()', () => {
-  it.each(
-    RESPONSE_ACTION_AGENT_TYPE
-      // FIXME:PT temporary change. Tests for MS defender will be in PR https://github.com/elastic/kibana/pull/205012
-      .filter((agentType) => agentType !== 'microsoft_defender_endpoint')
-  )(`should return agent id info for %s`, (agentType) => {
+  it.each(RESPONSE_ACTION_AGENT_TYPE)(`should return agent id info for %s`, (agentType) => {
     const field = RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS[agentType][0];
     const eventDetails = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType);
 
@@ -29,24 +25,26 @@ describe('getEventDetailsAgentIdField()', () => {
     });
   });
 
-  it.each(
-    RESPONSE_ACTION_AGENT_TYPE
-      // FIXME:PT temporary change. Tests for MS defender will be in PR https://github.com/elastic/kibana/pull/205012
-      .filter((agentType) => agentType !== 'microsoft_defender_endpoint')
-  )('should include a field when agent id is not found: %s', (agentType) => {
-    const field = RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS[agentType][0];
-    const eventDetails = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(agentType, {
-      'event.dataset': { values: ['foo'], originalValue: ['foo'] },
-      [field]: undefined,
-    });
+  it.each(RESPONSE_ACTION_AGENT_TYPE)(
+    'should include a field when agent id is not found: %s',
+    (agentType) => {
+      const field = RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS[agentType][0];
+      const eventDetails = endpointAlertDataMock.generateAlertDetailsItemDataForAgentType(
+        agentType,
+        {
+          'event.dataset': { values: ['foo'], originalValue: ['foo'] },
+          [field]: undefined,
+        }
+      );
 
-    expect(getEventDetailsAgentIdField(agentType, eventDetails)).toEqual({
-      found: false,
-      category: parseEcsFieldPath(field).category,
-      field,
-      agentId: '',
-    });
-  });
+      expect(getEventDetailsAgentIdField(agentType, eventDetails)).toEqual({
+        found: false,
+        category: parseEcsFieldPath(field).category,
+        field,
+        agentId: '',
+      });
+    }
+  );
 
   it.each(RESPONSE_ACTIONS_ALERT_AGENT_ID_FIELDS.sentinel_one)(
     'should return field [%s] for sentinelone when agent is not found and event.dataset matches',

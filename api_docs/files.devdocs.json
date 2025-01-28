@@ -554,14 +554,6 @@
           "trackAdoption": true,
           "references": [
             {
-              "plugin": "imageEmbeddable",
-              "path": "src/platform/plugins/private/image_embeddable/public/components/image_editor/open_image_editor.tsx"
-            },
-            {
-              "plugin": "imageEmbeddable",
-              "path": "src/platform/plugins/private/image_embeddable/public/image_embeddable/get_image_embeddable_factory.tsx"
-            },
-            {
               "plugin": "cases",
               "path": "x-pack/platform/plugins/shared/cases/public/application.tsx"
             },
@@ -592,6 +584,14 @@
             {
               "plugin": "cases",
               "path": "x-pack/platform/plugins/shared/cases/public/plugin.test.ts"
+            },
+            {
+              "plugin": "imageEmbeddable",
+              "path": "src/platform/plugins/private/image_embeddable/public/components/image_editor/open_image_editor.tsx"
+            },
+            {
+              "plugin": "imageEmbeddable",
+              "path": "src/platform/plugins/private/image_embeddable/public/image_embeddable/get_image_embeddable_factory.tsx"
             },
             {
               "plugin": "filesManagement",

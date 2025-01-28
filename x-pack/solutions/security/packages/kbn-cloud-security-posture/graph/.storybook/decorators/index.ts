@@ -7,3 +7,4 @@
 
 export { KibanaReactStorybookDecorator } from './kibana_react_decorator';
 export { ReactQueryStorybookDecorator } from './react_query_decorator';
+export { GlobalStylesStorybookDecorator } from './global_styles_decorator';

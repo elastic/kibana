@@ -1025,10 +1025,10 @@
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
             "docId": "kibKbnPresentationPublishingPluginApi",
-            "section": "def-public.PublishesPanelTitle",
-            "text": "PublishesPanelTitle"
+            "section": "def-public.PublishesTitle",
+            "text": "PublishesTitle"
           },
-          " & { setPanelTitle: (newTitle: string | undefined) => void; setHidePanelTitle: (hide: boolean | undefined) => void; } & ",
+          " & { setTitle: (newTitle: string | undefined) => void; setHideTitle: (hide: boolean | undefined) => void; } & ",
           {
             "pluginId": "@kbn/presentation-publishing",
             "scope": "public",
@@ -1410,7 +1410,13 @@
         "<",
         "PartitionFieldsDefinition",
         ">; anomalySearch(query: ",
-        "SearchRequest",
+        {
+          "pluginId": "@kbn/es-types",
+          "scope": "common",
+          "docId": "kibKbnEsTypesPluginApi",
+          "section": "def-common.ESSearchRequest",
+          "text": "ESSearchRequest"
+        },
         ", jobIds: string[]): Promise<",
         {
           "pluginId": "@kbn/es-types",
@@ -1428,9 +1434,21 @@
           "text": "MlAnomalyRecordDoc"
         },
         ", ",
-        "SearchRequest",
+        {
+          "pluginId": "@kbn/es-types",
+          "scope": "common",
+          "docId": "kibKbnEsTypesPluginApi",
+          "section": "def-common.ESSearchRequest",
+          "text": "ESSearchRequest"
+        },
         ", { restTotalHitsAsInt: false; }>>; anomalySearch$(query: ",
-        "SearchRequest",
+        {
+          "pluginId": "@kbn/es-types",
+          "scope": "common",
+          "docId": "kibKbnEsTypesPluginApi",
+          "section": "def-common.ESSearchRequest",
+          "text": "ESSearchRequest"
+        },
         ", jobIds: string[]): ",
         "Observable",
         "<",
@@ -1450,7 +1468,13 @@
           "text": "MlAnomalyRecordDoc"
         },
         ", ",
-        "SearchRequest",
+        {
+          "pluginId": "@kbn/es-types",
+          "scope": "common",
+          "docId": "kibKbnEsTypesPluginApi",
+          "section": "def-common.ESSearchRequest",
+          "text": "ESSearchRequest"
+        },
         ", { restTotalHitsAsInt: false; }>>; getCategoryStoppedPartitions(jobIds: string[], fieldToBucket?: \"job_id\" | \"partition_field_value\" | undefined): Promise<",
         "GetStoppedPartitionResult",
         ">; getDatafeedResultChartData(jobId: string, start: number, end: number): Promise<",

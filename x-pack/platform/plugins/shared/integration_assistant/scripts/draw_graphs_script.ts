@@ -22,6 +22,7 @@ import { getRelatedGraph } from '../server/graphs/related/graph';
 import { getKVGraph } from '../server/graphs/kv/graph';
 import { getUnstructuredGraph } from '../server/graphs/unstructured';
 import { getCelGraph } from '../server/graphs/cel/graph';
+import { getApiAnalysisGraph } from '../server/graphs/api_analysis';
 
 // Some mock elements just to get the graph to compile
 const model = new FakeLLM({
@@ -56,6 +57,7 @@ const GRAPH_LIST = {
   ecs_subgraph: getEcsSubGraph,
   unstructured_graph: getUnstructuredGraph,
   cel_graph: getCelGraph,
+  analyze_api_graph: getApiAnalysisGraph,
 };
 
 export async function drawGraphs() {

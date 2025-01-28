@@ -39,13 +39,9 @@ export interface CrossClusterApiKey extends BaseApiKey {
 /**
  * Fixing up `estypes.SecurityApiKey` type since some fields are marked as optional even though they are guaranteed to be returned.
  *
- * TODO: Remove this type when `@elastic/elasticsearch` has been updated.
+ * TODO: Remove this type when `@elastic/elasticsearch` has been updated to make `role_descriptors` required.
  */
 export interface BaseApiKey extends estypes.SecurityApiKey {
-  username: Required<estypes.SecurityApiKey>['username'];
-  realm: Required<estypes.SecurityApiKey>['realm'];
-  creation: Required<estypes.SecurityApiKey>['creation'];
-  metadata: Required<estypes.SecurityApiKey>['metadata'];
   role_descriptors: Required<estypes.SecurityApiKey>['role_descriptors'];
 }
 
@@ -119,8 +115,8 @@ interface BaseQueryApiKeyResult {
 /**
  * Interface representing a REST API key that is managed by Kibana.
  */
-export interface ManagedApiKey extends BaseApiKey {
-  type: 'managed';
+export interface ManagedApiKey extends Omit<BaseApiKey, 'type'> {
+  type: estypes.SecurityApiKeyType | 'managed';
 }
 
 /**
