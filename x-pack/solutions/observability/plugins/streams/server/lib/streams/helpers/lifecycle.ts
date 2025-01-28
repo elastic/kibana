@@ -6,7 +6,7 @@
  */
 
 import {
-  InheritedIngestStreamLifecycle,
+  WiredIngestStreamEffectiveLifecycle,
   WiredStreamDefinition,
   getSegments,
   isChildOf,
@@ -18,7 +18,7 @@ import { orderBy } from 'lodash';
 export function findInheritedLifecycle(
   definition: WiredStreamDefinition,
   ancestors: WiredStreamDefinition[]
-): InheritedIngestStreamLifecycle {
+): WiredIngestStreamEffectiveLifecycle {
   const originDefinition = orderBy(
     [...ancestors, definition],
     (parent) => getSegments(parent.name).length,
