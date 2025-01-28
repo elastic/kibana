@@ -36,6 +36,7 @@ export const privilegedUsersRoute = (
 
       async (context, _, response): Promise<IKibanaResponse<object>> => {
         const siemResponse = buildSiemResponse(response);
+        const { getAppClient } = await context.securitySolution;
 
         try {
           const esClient = (await context.core).elasticsearch.client.asCurrentUser;
@@ -133,11 +134,48 @@ export const privilegedUsersRoute = (
             (hit) => hit._source
           );
 
+          const unusualAccessPatternsResponse = await esClient.search({
+            body: {
+              sort: [
+                {
+                  '@timestamp': {
+                    order: 'desc',
+                  },
+                },
+              ],
+              query: {
+                bool: {
+                  filter: [
+                    privilegedUsersToUserQuery(privilegedUsers, logger),
+                    {
+                      bool: {
+                        must: [
+                          {
+                            match: {
+                              'kibana.alert.rule.tags': 'Privileged User Monitoring',
+                            },
+                          },
+                        ],
+                      },
+                    },
+                  ],
+                },
+              },
+            },
+            size: 10,
+            index: getAppClient().getAlertsIndex(),
+          });
+
+          const unusualAccessPatterns = unusualAccessPatternsResponse.hits.hits.map(
+            (hit) => hit._source
+          );
+
           return response.ok({
             body: {
               newPrivilegedUsers: privilegedUsers,
               riskPrivilegedUsers,
               successfulPrivilegedAccess,
+              unusualAccessPatterns,
             },
           });
         } catch (e) {
