@@ -223,7 +223,10 @@ export interface HealthIndicatorAction {
 }
 
 export interface EnrichedDeprecationInfo
-  extends Omit<estypes.MigrationDeprecationsDeprecation, 'level'> {
+  extends Omit<
+    estypes.MigrationDeprecationsDeprecation,
+    'level' | 'resolve_during_rolling_upgrade'
+  > {
   type: keyof estypes.MigrationDeprecationsResponse | 'health_indicator' | 'data_streams';
   isCritical: boolean;
   status?: estypes.HealthReportIndicatorHealthStatus;
