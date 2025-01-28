@@ -27,7 +27,7 @@ const validateIntervals = (intervals: PotentialInterval[] | undefined): StringIn
  * Transforms event log results into Gap objects
  * Filters out invalid gaps/gaps intervals
  */
-export const transformToGap = (events: QueryEventsBySavedObjectResult): Gap[] => {
+export const transformToGap = (events: Pick<QueryEventsBySavedObjectResult, 'data'>): Gap[] => {
   return events?.data
     ?.map((doc) => {
       const gap = doc?.kibana?.alert?.rule?.gap;

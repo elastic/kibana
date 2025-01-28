@@ -11,13 +11,13 @@ import { ActionsClient } from '@kbn/actions-plugin/server';
 import { BackfillClient } from '../../../backfill_client/backfill_client';
 import { AlertingEventLogger } from '../../alerting_event_logger/alerting_event_logger';
 import { findGaps } from '../find_gaps';
-import { findGapsById } from '../find_gaps_by_id';
 import { Gap } from '../gap';
 import { gapStatus } from '../../../../common/constants';
 import { BackfillSchedule } from '../../../application/backfill/result/types';
 import { adHocRunStatus } from '../../../../common/constants';
 import { calculateGapStateFromAllBackfills } from './calculate_gaps_state';
 import { updateGapFromSchedule } from './update_gap_from_schedule';
+import { mgetGaps } from '../mget_gaps';
 
 interface UpdateGapsParams {
   ruleId: string;
@@ -156,21 +156,20 @@ const updateGapBatch = async (
 
       const retryDelaySec: number = Math.min(Math.pow(3, retryCount + 1), 30);
       await delay(retryDelaySec * 1000 * Math.random());
-      const failedUpdatesIds =
-        bulkResponse?.items
-          .filter((item) => item.update?.status === CONFLICT_STATUS_CODE)
-          .map((item) => item.update?._id)
-          .filter((id): id is string => id !== undefined && id !== null) ?? [];
+      const failedUpdatesDocs = bulkResponse?.items
+        .filter((item) => item.update?.status === CONFLICT_STATUS_CODE)
+        .map((item) => ({ _id: item.update?._id, _index: item.update?._index }))
+        .filter(
+          (doc): doc is { _id: string; _index: string } =>
+            doc._id !== undefined && doc._index !== undefined
+        );
 
       // Fetch latest versions of failed gaps
-      const gapsToRetry = await findGapsById({
+      const gapsToRetry = await mgetGaps({
         eventLogClient,
         logger,
         params: {
-          gapIds: failedUpdatesIds,
-          ruleId,
-          page: 1,
-          perPage: PAGE_SIZE,
+          docs: failedUpdatesDocs,
         },
       });
 

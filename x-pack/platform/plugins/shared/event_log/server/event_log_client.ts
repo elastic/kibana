@@ -139,6 +139,14 @@ export class EventLogClient implements IEventLogClient {
     });
   }
 
+  public async findEventsByDocumentIds(
+    docs: Array<{ _id: string; _index: string }>
+  ): Promise<Pick<QueryEventsBySavedObjectResult, 'data'>> {
+    const response = await this.esContext.esAdapter.queryEventsByDocumentIds(docs);
+
+    return response;
+  }
+
   public async aggregateEventsBySavedObjectIds(
     type: string,
     ids: string[],

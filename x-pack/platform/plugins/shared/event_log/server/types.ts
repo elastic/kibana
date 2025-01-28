@@ -81,6 +81,9 @@ export interface IEventLogClient {
     namespaces?: Array<string | undefined>,
     includeSpaceAgnostic?: boolean
   ): Promise<AggregateEventsBySavedObjectResult>;
+  findEventsByDocumentIds(
+    docs: Array<{ _id: string; _index: string }>
+  ): Promise<Pick<QueryEventsBySavedObjectResult, 'data'>>;
 }
 
 export interface IEventLogger {

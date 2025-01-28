@@ -2352,7 +2352,6 @@ describe('updateDocuments', () => {
         },
         { doc: doc.body },
       ],
-      refresh: 'wait_for',
     });
   });
 

@@ -181,7 +181,6 @@ export class ClusterClientAdapter<
 
       const response = await esClient.bulk({
         body: bulkBody,
-        refresh: true,
       });
 
       return response;
@@ -491,6 +490,44 @@ export class ClusterClientAdapter<
       throw new Error(
         `querying for Event Log by for type "${type}" and ids "${ids}" failed with: ${err.message}`
       );
+    }
+  }
+
+  public async queryEventsByDocumentIds(
+    docs: Array<{ _id: string; _index: string }>
+  ): Promise<Pick<QueryEventsBySavedObjectResult, 'data'>> {
+    const esClient = await this.elasticsearchClientPromise;
+
+    try {
+      const response = await esClient.mget<IValidatedEventInternalDocInfo>({
+        docs,
+      });
+
+      const data = [];
+
+      for (const hit of response.docs) {
+        if ('error' in hit) {
+          this.logger.error(`Event not found: ${hit._id}, with error: ${hit.error.reason}`);
+          continue;
+        }
+        if (!('found' in hit) || !hit.found) {
+          this.logger.error(`Event not found: ${hit._id}`);
+          continue;
+        }
+        data.push({
+          ...hit._source,
+          _id: hit._id!,
+          _index: hit._index,
+          _seq_no: hit._seq_no!,
+          _primary_term: hit._primary_term!,
+        });
+      }
+
+      return {
+        data,
+      };
+    } catch (err) {
+      throw new Error(`error querying events by document ids: ${err.message}`);
     }
   }
 
