@@ -509,10 +509,15 @@ export class SessionIndex {
           };
         }
         error = new Error(
-          'Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed 10 times.'
+          `Failed to clean up sessions: Shards for session index are missing. Cleanup routine has failed ${shardMissingCounter} times.`
         );
         logger.error(error.message);
-        throw error;
+        return {
+          error,
+          state: {
+            shardMissingCounter: 0,
+          },
+        };
       } else {
         logger.error(`Failed to clean up sessions: ${err.message}`);
         error = err;

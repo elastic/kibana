@@ -324,4 +324,18 @@ export function initRoutes(
       return response.ok();
     }
   );
+
+  router.get(
+    {
+      path: '/cleanup_task_status',
+      validate: false,
+      options: { authRequired: false },
+    },
+    async (context, request, response) => {
+      const [, { taskManager }] = await core.getStartServices();
+      console.log('taskManager', taskManager);
+      const { attempts, state, status } = await taskManager.get(SESSION_INDEX_CLEANUP_TASK_NAME);
+      return response.ok({ body: { attempts, state, status } });
+    }
+  );
 }

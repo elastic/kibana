@@ -297,7 +297,7 @@ export default function ({ getService }: FtrProviderContext) {
         .expect(200);
     });
 
-    it('fails if shards are unavailable more than 10 times', async function () {
+    it.only('fails if shards are unavailable more than 10 times', async function () {
       this.timeout(100000);
 
       await supertest
@@ -305,7 +305,6 @@ export default function ({ getService }: FtrProviderContext) {
         .send({ simulateOpenPointInTime: true })
         .expect(200);
 
-      log.debug(`Log in as ${basicUsername} using ${basicPassword} password.`);
       await supertest
         .post('/internal/security/login')
         .set('kbn-xsrf', 'xxx')
@@ -317,21 +316,36 @@ export default function ({ getService }: FtrProviderContext) {
         })
         .expect(200);
 
-      // run cleanup tasks 10 times in a loop and expect failure
-      const cleanupTaskRunPromises = Array.from(
-        { length: 10 },
-        async () => await runCleanupTaskSoon()
-      );
-
-      await Promise.all(cleanupTaskRunPromises);
-
       log.debug('Waiting for cleanup job to run...');
 
-      await setTimeoutAsync(40000);
-      await retry.tryForTime(20000, async () => {
-        // Session does not clean up but the cleanup task has not failed either
-        expect(await getNumberOfSessionDocuments()).to.be(1);
-      });
+      let shardMissingCounter = 0;
+      while (shardMissingCounter < 10) {
+        log.debug(`Running cleanup task (attempt ${shardMissingCounter + 1})...`);
+
+        this.runCleanupTaskSoon();
+        await setTimeoutAsync(40000);
+
+        log.debug('Attempting to get task status');
+        let response = await supertest.get('/cleanup_task_status').expect(200);
+        let { attempts, state, status } = response.body;
+        shardMissingCounter = state.shardMissingCounter ?? 0;
+
+        console.log(`Task status after attempt ${attempts}:`, response.body);
+
+        if (shardMissingCounter < 9) {
+          this.runCleanupTaskSoon();
+          await setTimeoutAsync(40000);
+          response = await supertest.get('/cleanup_task_status').expect(200);
+          attempts = response.body.attempts;
+          state = response.body.state;
+          status = response.body.status;
+          shardMissingCounter = state.shardMissingCounter ?? 0;
+        } else {
+          // On the 10th attempt, it should reset or succeed
+          expect(state).to.not.have.property('error');
+          expect(state).to.have.property('attempts', 0);
+        }
+      }
 
       await supertest
         .post('/simulate_point_in_time')
