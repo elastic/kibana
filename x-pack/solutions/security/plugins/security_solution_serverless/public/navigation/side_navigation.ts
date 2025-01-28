@@ -55,15 +55,22 @@ export const initSideNavigation = async (services: Services) => {
 // Stack Management static node definition
 const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>> = [
   {
-    title: 'Data',
+    title: i18n.translate('xpack.securitySolutionServerless.navLinks.projectSettings.mngt.data', {
+      defaultMessage: 'Data',
+    }),
     children: [{ link: 'management:data_quality' }],
   },
   {
-    title: 'Access',
+    title: i18n.translate('xpack.securitySolutionServerless.navLinks.projectSettings.mngt.access', {
+      defaultMessage: 'Access',
+    }),
     children: [{ cloudLink: 'userAndRoles' }],
   },
   {
-    title: 'Alerts and Insights',
+    title: i18n.translate(
+      'xpack.securitySolutionServerless.navLinks.projectSettings.mngt.alertsAndInsights',
+      { defaultMessage: 'Alerts and Insights' }
+    ),
     children: [
       { link: 'management:triggersActions' },
       { link: 'management:triggersActionsConnectors' },
@@ -72,11 +79,16 @@ const stackManagementLinks: Array<NodeDefinition<AppDeepLinkId, string, string>>
     ],
   },
   {
-    title: 'Content',
+    title: i18n.translate(
+      'xpack.securitySolutionServerless.navLinks.projectSettings.mngt.content',
+      { defaultMessage: 'Content' }
+    ),
     children: [{ link: 'maps' }, { link: 'visualize' }],
   },
   {
-    title: 'Other',
+    title: i18n.translate('xpack.securitySolutionServerless.navLinks.projectSettings.mngt.other', {
+      defaultMessage: 'Other',
+    }),
     children: [{ link: 'management:securityAiAssistantManagement' }],
   },
 ];

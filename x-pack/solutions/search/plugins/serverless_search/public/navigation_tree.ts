@@ -175,22 +175,30 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
             renderAs: 'panelOpener',
             children: [
               {
-                title: 'Data',
+                title: i18n.translate('xpack.serverlessSearch.nav.mngt.data', {
+                  defaultMessage: 'Data',
+                }),
                 children: [{ link: 'management:dataViews' }, { link: 'management:data_quality' }],
               },
               {
-                title: 'Access',
+                title: i18n.translate('xpack.serverlessSearch.nav.mngt.access', {
+                  defaultMessage: 'Access',
+                }),
                 children: [{ link: 'management:api_keys' }, { cloudLink: 'userAndRoles' }],
               },
               {
-                title: 'Alerts and insights',
+                title: i18n.translate('xpack.serverlessSearch.nav.mngt.alertsAndInsights', {
+                  defaultMessage: 'Alerts and insights',
+                }),
                 children: [
                   { link: 'management:triggersActions' },
                   { link: 'management:triggersActionsConnectors' },
                 ],
               },
               {
-                title: 'Content',
+                title: i18n.translate('xpack.serverlessSearch.nav.mngt.content', {
+                  defaultMessage: 'Content',
+                }),
                 children: [
                   { link: 'management:objects' },
                   { link: 'management:filesManagement' },
@@ -198,7 +206,9 @@ export const navigationTree = ({ isAppRegistered }: ApplicationStart): Navigatio
                 ],
               },
               {
-                title: 'Other',
+                title: i18n.translate('xpack.serverlessSearch.nav.mngt.other', {
+                  defaultMessage: 'Other',
+                }),
                 children: [
                   { link: 'management:settings' },
                   { link: 'management:securityAiAssistantManagement' },

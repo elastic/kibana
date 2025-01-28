@@ -363,18 +363,24 @@ export const createNavigationTree = ({
             renderAs: 'panelOpener',
             children: [
               {
-                title: 'Data',
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.data', {
+                  defaultMessage: 'Data',
+                }),
                 children: [{ link: 'management:dataViews' }, { link: 'management:data_quality' }],
               },
               {
-                title: 'Alerts and insights',
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.alertsAndInsights', {
+                  defaultMessage: 'Alerts and insights',
+                }),
                 children: [
                   { link: 'management:triggersActionsConnectors' },
                   { link: 'management:maintenanceWindows' },
                 ],
               },
               {
-                title: 'Content',
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.content', {
+                  defaultMessage: 'Content',
+                }),
                 children: [
                   { link: 'management:objects' },
                   { link: 'management:filesManagement' },
@@ -382,7 +388,9 @@ export const createNavigationTree = ({
                 ],
               },
               {
-                title: 'Other',
+                title: i18n.translate('xpack.serverlessObservability.nav.mngt.other', {
+                  defaultMessage: 'Other',
+                }),
                 children: [
                   { link: 'management:settings' },
                   { link: 'management:securityAiAssistantManagement' },
