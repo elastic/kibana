@@ -5,12 +5,18 @@
  * 2.0.
  */
 
-import { SLO_RESOURCES_VERSION } from '../../../common/constants';
+import {
+  SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME,
+  SLI_COMPONENT_TEMPLATE_SETTINGS_NAME,
+  SLI_INDEX_TEMPLATE_NAME,
+  SLI_INDEX_TEMPLATE_PATTERN,
+  SLO_RESOURCES_VERSION,
+} from '../../../common/constants';
 
-export const getSLOIndexTemplate = (name: string, indexPattern: string, composedOf: string[]) => ({
-  name,
-  index_patterns: [indexPattern],
-  composed_of: composedOf,
+export const SLI_INDEX_TEMPLATE = {
+  name: SLI_INDEX_TEMPLATE_NAME,
+  index_patterns: [SLI_INDEX_TEMPLATE_PATTERN],
+  composed_of: [SLI_COMPONENT_TEMPLATE_MAPPINGS_NAME, SLI_COMPONENT_TEMPLATE_SETTINGS_NAME],
   priority: 500,
   _meta: {
     description: 'Template for SLO rollup data',
@@ -18,4 +24,4 @@ export const getSLOIndexTemplate = (name: string, indexPattern: string, composed
     managed: true,
     managed_by: 'observability',
   },
-});
+};
