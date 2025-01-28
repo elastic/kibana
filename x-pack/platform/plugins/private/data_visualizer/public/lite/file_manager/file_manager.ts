@@ -45,6 +45,7 @@ export enum STATUS {
 }
 
 export interface UploadStatus {
+  analysisOk: boolean;
   overallImportStatus: STATUS;
   indexCreated: STATUS;
   pipelineCreated: STATUS;
@@ -68,7 +69,6 @@ export class FileManager {
         : combineLatest(files.map((file) => file.fileStatus$));
     })
   );
-  public readonly analysisOk$ = new BehaviorSubject<boolean>(false); // can this be removed in favour of uploadStatus?!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   private mappingsCheckSubscription: Subscription;
   private settings;
   private mappings: MappingTypeMapping | null = null;
@@ -79,6 +79,7 @@ export class FileManager {
   private commonFileFormat: string | null = null;
 
   public readonly uploadStatus$ = new BehaviorSubject<UploadStatus>({
+    analysisOk: false,
     overallImportStatus: STATUS.NOT_STARTED,
     indexCreated: STATUS.NOT_STARTED,
     pipelineCreated: STATUS.NOT_STARTED,
@@ -138,7 +139,9 @@ export class FileManager {
             fileClashes: getMappingClashInfo(mappingClashes, statuses),
           });
         }
-        this.analysisOk$.next(mappingsOk && formatsOk);
+        this.setStatus({
+          analysisOk: mappingsOk && formatsOk,
+        });
       }
     });
   }
@@ -155,7 +158,9 @@ export class FileManager {
   }
 
   async addFiles(fileList: FileList) {
-    this.analysisOk$.next(false);
+    this.setStatus({
+      analysisOk: false,
+    });
     const promises = Array.from(fileList).map((file) => this.addFile(file));
     await Promise.all(promises);
   }

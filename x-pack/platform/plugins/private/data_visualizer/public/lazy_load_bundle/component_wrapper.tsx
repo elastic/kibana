@@ -33,7 +33,6 @@ export const FileDataVisualizerWrapper: FC<{
   );
 };
 
-// move FileUploadResults!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
 export function getFileDataVisualizerWrapper(
   resultLinks?: ResultLinks,
   setUploadResults?: (results: FileUploadResults) => void

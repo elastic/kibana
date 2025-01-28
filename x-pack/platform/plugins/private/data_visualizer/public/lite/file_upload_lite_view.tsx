@@ -79,7 +79,6 @@ export const FileUploadLiteView: FC<Props> = ({
   const deleteFile = useCallback((i: number) => fm.removeFile(i), [fm]);
 
   const filesStatus = useObservable(fm.analysisStatus$, []);
-  const filesOk = useObservable(fm.analysisOk$, false);
   const uploadStatus = useObservable(fm.uploadStatus$, fm.uploadStatus$.getValue());
   const fileClashes = useMemo(
     () => uploadStatus.fileClashes.some((f) => f.clash),
@@ -163,7 +162,7 @@ export const FileUploadLiteView: FC<Props> = ({
 
             {uploadStatus.overallImportStatus === STATUS.NOT_STARTED &&
             filesStatus.length > 0 &&
-            filesOk ? (
+            uploadStatus.analysisOk ? (
               <>
                 <IndexInput
                   setIndexName={setIndexName}
