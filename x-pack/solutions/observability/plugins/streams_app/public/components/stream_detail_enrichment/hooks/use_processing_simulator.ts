@@ -85,6 +85,7 @@ export const useProcessingSimulator = ({
         },
       });
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
     [definition, streamsRepositoryClient, start, end, serializedCondition],
     { disableToastOnError: true }
   );
