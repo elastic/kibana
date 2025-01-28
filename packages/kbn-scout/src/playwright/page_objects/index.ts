@@ -7,7 +7,6 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { ToolingLog } from '@kbn/tooling-log';
 import { ScoutPage } from '..';
 import { DashboardApp } from './dashboard_app';
 import { DatePicker } from './date_picker';
