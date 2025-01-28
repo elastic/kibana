@@ -65,11 +65,11 @@ export const getPromptsByGroupId = async ({
     searchFields: ['promptGroupId'],
     search: promptGroupId,
   });
-  const promptsOnly = prompts?.saved_objects.map((p) => p.attributes) || [];
+  const promptsOnly = prompts?.saved_objects.map((p) => p.attributes) ?? [];
 
   return promptIds.map((promptId) => {
     const prompt = findPromptEntry({
-      prompts: promptsOnly.filter((p) => p.promptId === promptId) || [],
+      prompts: promptsOnly.filter((p) => p.promptId === promptId) ?? [],
       promptId,
       promptGroupId,
       provider,
@@ -125,7 +125,7 @@ export const getPrompt = async ({
   });
 
   const prompt = findPromptEntry({
-    prompts: prompts?.saved_objects.map((p) => p.attributes) || [],
+    prompts: prompts?.saved_objects.map((p) => p.attributes) ?? [],
     promptId,
     promptGroupId,
     provider,
