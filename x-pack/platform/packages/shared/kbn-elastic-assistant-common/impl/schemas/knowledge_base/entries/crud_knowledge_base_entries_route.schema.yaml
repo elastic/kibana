@@ -112,11 +112,11 @@ paths:
             $ref: '../../common_attributes.schema.yaml#/components/schemas/NonEmptyString'
       responses:
         200:
-          description: Successful request returning the deleted Knowledge Base Entry
+          description: Successful request returning the deleted Knowledge Base Entry's ID
           content:
             application/json:
               schema:
-                $ref: './common_attributes.schema.yaml#/components/schemas/KnowledgeBaseEntryResponse'
+                $ref: './common_attributes.schema.yaml#/components/schemas/DeleteResponseFields'
         400:
           description: Generic Error
           content:

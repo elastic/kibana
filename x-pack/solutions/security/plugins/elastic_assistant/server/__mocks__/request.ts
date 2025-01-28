@@ -14,9 +14,9 @@ import {
 import type {
   DefendInsightsGetRequestQuery,
   DefendInsightsPostRequestBody,
-  KnowledgeBaseEntryDeleteRequestParams,
+  DeleteKnowledgeBaseEntryRequestParams,
   KnowledgeBaseEntryUpdateProps,
-  KnowledgeBaseEntryUpdateRequestParams,
+  UpdateKnowledgeBaseEntryRequestParams,
 } from '@kbn/elastic-assistant-common';
 import {
   AttackDiscoveryPostRequestBody,
@@ -102,7 +102,7 @@ export const getUpdateKnowledgeBaseEntryRequest = ({
   params,
   body,
 }: {
-  params: KnowledgeBaseEntryUpdateRequestParams;
+  params: UpdateKnowledgeBaseEntryRequestParams;
   body: KnowledgeBaseEntryUpdateProps;
 }) =>
   requestMock.create({
@@ -112,7 +112,7 @@ export const getUpdateKnowledgeBaseEntryRequest = ({
     body,
   });
 
-export const getDeleteKnowledgeBaseEntryRequest = (params: KnowledgeBaseEntryDeleteRequestParams) =>
+export const getDeleteKnowledgeBaseEntryRequest = (params: DeleteKnowledgeBaseEntryRequestParams) =>
   requestMock.create({
     method: 'delete',
     path: ELASTIC_AI_ASSISTANT_KNOWLEDGE_BASE_ENTRIES_URL_BY_ID,

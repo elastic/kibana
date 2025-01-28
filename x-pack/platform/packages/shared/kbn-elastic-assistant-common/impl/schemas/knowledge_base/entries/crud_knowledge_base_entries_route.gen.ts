@@ -20,6 +20,7 @@ import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   KnowledgeBaseEntryUpdateProps,
+  DeleteResponseFields,
 } from './common_attributes.gen';
 import { NonEmptyString } from '../../common_attributes.gen';
 
@@ -48,7 +49,7 @@ export type DeleteKnowledgeBaseEntryRequestParamsInput = z.input<
 >;
 
 export type DeleteKnowledgeBaseEntryResponse = z.infer<typeof DeleteKnowledgeBaseEntryResponse>;
-export const DeleteKnowledgeBaseEntryResponse = KnowledgeBaseEntryResponse;
+export const DeleteKnowledgeBaseEntryResponse = DeleteResponseFields;
 
 export type ReadKnowledgeBaseEntryRequestParams = z.infer<
   typeof ReadKnowledgeBaseEntryRequestParams

@@ -13,9 +13,9 @@ import {
 } from '@kbn/elastic-assistant-common';
 import { buildRouteValidationWithZod } from '@kbn/elastic-assistant-common/impl/schemas/common';
 import {
-  KnowledgeBaseEntryDeleteRequestParams,
-  KnowledgeBaseEntryDeleteResponse,
-} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/common_attributes.gen';
+  DeleteKnowledgeBaseEntryRequestParams,
+  DeleteKnowledgeBaseEntryResponse,
+} from '@kbn/elastic-assistant-common/impl/schemas/knowledge_base/entries/crud_knowledge_base_entries_route.gen';
 import { ElasticAssistantPluginRouter } from '../../../types';
 import { buildResponse } from '../../utils';
 import { performChecks } from '../../helpers';
@@ -37,7 +37,7 @@ export const deleteKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
         version: API_VERSIONS.public.v1,
         validate: {
           request: {
-            params: buildRouteValidationWithZod(KnowledgeBaseEntryDeleteRequestParams),
+            params: buildRouteValidationWithZod(DeleteKnowledgeBaseEntryRequestParams),
           },
         },
       },
@@ -45,7 +45,7 @@ export const deleteKnowledgeBaseEntryRoute = (router: ElasticAssistantPluginRout
         context,
         request,
         response
-      ): Promise<IKibanaResponse<KnowledgeBaseEntryDeleteResponse>> => {
+      ): Promise<IKibanaResponse<DeleteKnowledgeBaseEntryResponse>> => {
         const assistantResponse = buildResponse(response);
         try {
           const ctx = await context.resolve(['core', 'elasticAssistant', 'licensing']);
