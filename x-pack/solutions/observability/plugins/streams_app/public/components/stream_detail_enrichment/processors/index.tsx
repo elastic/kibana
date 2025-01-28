@@ -21,9 +21,9 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
+import { ProcessorType, ReadStreamDefinition } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo } from 'react';
 import { useForm, SubmitHandler, FormProvider } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
@@ -42,6 +42,7 @@ import { UseDefinitionReturn } from '../hooks/use_definition';
 
 export interface ProcessorPanelProps {
   definition: ReadStreamDefinition;
+  onWatchProcessor: (processor: ProcessorDefinitionWithUIAttributes) => void;
 }
 
 export interface AddProcessorPanelProps extends ProcessorPanelProps {
@@ -55,7 +56,7 @@ export interface EditProcessorPanelProps extends ProcessorPanelProps {
   onUpdateProcessor: UseDefinitionReturn['updateProcessor'];
 }
 
-export function AddProcessorPanel({ onAddProcessor }: AddProcessorPanelProps) {
+export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
   const [isOpen, { on: openPanel, off: closePanel }] = useBoolean(false);
   const defaultValues = useMemo(() => getDefaultFormState('grok'), []);
@@ -63,6 +64,19 @@ export function AddProcessorPanel({ onAddProcessor }: AddProcessorPanelProps) {
   const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
   const formFields = methods.watch();
+
+  useEffect(() => {
+    const { unsubscribe } = methods.watch((value) => {
+      const processingDefinition = convertFormStateToProcessor(value as ProcessorFormState);
+      onWatchProcessor({
+        id: 'draft',
+        status: 'draft',
+        type: value.type as ProcessorType,
+        ...processingDefinition,
+      });
+    });
+    return () => unsubscribe();
+  }, [methods, onWatchProcessor]);
 
   const hasChanges = useMemo(
     () => !isEqual(defaultValues, formFields),
@@ -161,6 +175,7 @@ export function AddProcessorPanel({ onAddProcessor }: AddProcessorPanelProps) {
 export function EditProcessorPanel({
   onDeleteProcessor,
   onUpdateProcessor,
+  onWatchProcessor,
   processor,
 }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
@@ -176,6 +191,19 @@ export function EditProcessorPanel({
   const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
   const formFields = methods.watch();
+
+  useEffect(() => {
+    const { unsubscribe } = methods.watch((value) => {
+      const processingDefinition = convertFormStateToProcessor(value as ProcessorFormState);
+      onWatchProcessor({
+        id: processor.id,
+        status: processor.status,
+        type: value.type as ProcessorType,
+        ...processingDefinition,
+      });
+    });
+    return () => unsubscribe();
+  }, [methods, onWatchProcessor, processor]);
 
   const hasChanges = useMemo(
     () => !isEqual(defaultValues, formFields),

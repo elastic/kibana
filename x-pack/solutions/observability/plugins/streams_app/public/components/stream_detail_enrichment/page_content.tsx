@@ -26,6 +26,7 @@ import {
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
+import { isEmpty } from 'lodash';
 import { useDefinition } from './hooks/use_definition';
 import { useKibana } from '../../hooks/use_kibana';
 import { RootStreamEmptyPrompt } from './root_stream_empty_prompt';
@@ -59,7 +60,7 @@ export function StreamDetailEnrichmentContent({
     isSavingChanges,
   } = useDefinition(definition, refreshDefinition);
 
-  const { error, isLoading, refreshSamples, simulation, samples, tableColumns } =
+  const { error, isLoading, refreshSamples, simulation, samples, tableColumns, watchProcessor } =
     useProcessingSimulator({
       definition,
       processors,
@@ -84,6 +85,8 @@ export function StreamDetailEnrichmentContent({
   if (isRootStreamDefinition(definition.stream)) {
     return <RootStreamEmptyPrompt />;
   }
+
+  const hasProcessors = !isEmpty(processors);
 
   return (
     <EuiSplitPanel.Outer grow hasBorder hasShadow={false}>
@@ -119,30 +122,45 @@ export function StreamDetailEnrichmentContent({
                     overflow: auto;
                   `}
                 >
-                  <SortableList onDragItem={handlerItemDrag}>
-                    {processors.map((processor, idx) => (
-                      <DraggableProcessorListItem
-                        key={processor.id}
-                        idx={idx}
-                        definition={definition}
-                        processor={processor}
-                        onUpdateProcessor={updateProcessor}
-                        onDeleteProcessor={deleteProcessor}
-                      />
-                    ))}
-                  </SortableList>
-                  <EuiSpacer size="s" />
+                  {hasProcessors && (
+                    <>
+                      <SortableList onDragItem={handlerItemDrag}>
+                        {processors.map((processor, idx) => (
+                          <DraggableProcessorListItem
+                            key={processor.id}
+                            idx={idx}
+                            definition={definition}
+                            processor={processor}
+                            onUpdateProcessor={updateProcessor}
+                            onDeleteProcessor={deleteProcessor}
+                            onWatchProcessor={watchProcessor}
+                          />
+                        ))}
+                      </SortableList>
+                      <EuiSpacer size="s" />
+                    </>
+                  )}
                   <AddProcessorPanel
                     key={processors.length} // Used to force reset the inner form state once a new processor is added
                     definition={definition}
                     onAddProcessor={addProcessor}
+                    onWatchProcessor={watchProcessor}
                   />
                 </EuiPanel>
               </EuiResizablePanel>
 
               <EuiResizableButton indicator="border" accountForScrollbars="both" />
 
-              <EuiResizablePanel initialSize={75} minSize="300px" tabIndex={0} paddingSize="none">
+              <EuiResizablePanel
+                initialSize={75}
+                minSize="300px"
+                tabIndex={0}
+                paddingSize="none"
+                css={css`
+                  display: flex;
+                  flex-direction: column;
+                `}
+              >
                 <SimulationPlayground
                   definition={definition}
                   columns={tableColumns}

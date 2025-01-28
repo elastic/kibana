@@ -5,33 +5,27 @@
  * 2.0.
  */
 
-import React, { useEffect, useMemo, useState } from 'react';
+import React, { useMemo, useState } from 'react';
 import { useDateRange } from '@kbn/observability-utils-browser/hooks/use_date_range';
 import {
   EuiPanel,
-  EuiSpacer,
   EuiFlexGroup,
   EuiFilterButton,
   EuiFilterGroup,
   EuiEmptyPrompt,
   EuiLoadingLogo,
-  EuiFormRow,
-  EuiSuperSelectOption,
-  EuiSuperSelect,
-  useEuiTheme,
+  EuiFlexItem,
+  EuiSpacer,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { FieldIcon } from '@kbn/react-field';
-import { FIELD_DEFINITION_TYPES, ReadStreamDefinition } from '@kbn/streams-schema';
-import { UseControllerProps, useController, useFieldArray } from 'react-hook-form';
-import { css } from '@emotion/react';
+import { ReadStreamDefinition } from '@kbn/streams-schema';
 import { flattenObject } from '@kbn/object-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { css } from '@emotion/react';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
-import { DetectedField, ProcessorFormState } from './types';
 import { TableColumn, UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
 
 interface ProcessorOutcomePreviewProps {
@@ -95,24 +89,55 @@ export const ProcessorOutcomePreview = ({
   }, [columns, selectedDocsFilter]);
 
   return (
-    <EuiPanel hasShadow={false} paddingSize="none">
-      <OutcomeControls
-        docsFilter={selectedDocsFilter}
-        onDocsFilterChange={setSelectedDocsFilter}
-        timeRange={timeRange}
-        onTimeRangeChange={setTimeRange}
-        onTimeRangeRefresh={onRefreshSamples}
-        simulationFailureRate={simulation?.failure_rate}
-        simulationSuccessRate={simulation?.success_rate}
-      />
+    // <EuiFlexGroup direction="column" gutterSize="m">
+    //   <OutcomeControls
+    //     docsFilter={selectedDocsFilter}
+    //     onDocsFilterChange={setSelectedDocsFilter}
+    //     timeRange={timeRange}
+    //     onTimeRangeChange={setTimeRange}
+    //     onTimeRangeRefresh={onRefreshSamples}
+    //     simulationFailureRate={simulation?.failure_rate}
+    //     simulationSuccessRate={simulation?.success_rate}
+    //   />
+    //   <EuiFlexItem>
+    //     <OutcomePreviewTable
+    //       documents={simulationDocuments}
+    //       columns={tableColumns}
+    //       error={simulationError}
+    //       isLoading={isLoading}
+    //     />
+    //   </EuiFlexItem>
+    // </EuiFlexGroup>
+
+    <>
+      <EuiPanel paddingSize="none" hasShadow={false} borderRadius="none" grow={false}>
+        <OutcomeControls
+          docsFilter={selectedDocsFilter}
+          onDocsFilterChange={setSelectedDocsFilter}
+          timeRange={timeRange}
+          onTimeRangeChange={setTimeRange}
+          onTimeRangeRefresh={onRefreshSamples}
+          simulationFailureRate={simulation?.failure_rate}
+          simulationSuccessRate={simulation?.success_rate}
+        />
+      </EuiPanel>
       <EuiSpacer size="m" />
-      <OutcomePreviewTable
-        documents={simulationDocuments}
-        columns={tableColumns}
-        error={simulationError}
-        isLoading={isLoading}
-      />
-    </EuiPanel>
+      <EuiPanel
+        paddingSize="none"
+        hasShadow={false}
+        borderRadius="none"
+        css={css`
+          overflow: auto;
+        `}
+      >
+        <OutcomePreviewTable
+          documents={simulationDocuments}
+          columns={tableColumns}
+          error={simulationError}
+          isLoading={isLoading}
+        />
+      </EuiPanel>
+    </>
   );
 };
 
@@ -299,5 +324,5 @@ const OutcomePreviewTable = ({
     );
   }
 
-  return <PreviewTable documents={documents} displayColumns={columns} height={500} />;
+  return <PreviewTable documents={documents} displayColumns={columns} />;
 };

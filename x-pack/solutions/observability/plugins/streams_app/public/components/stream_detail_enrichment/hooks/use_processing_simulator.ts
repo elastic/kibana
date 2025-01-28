@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { useMemo } from 'react';
-import { isEmpty, uniq } from 'lodash';
+import { useCallback, useEffect, useMemo, useState } from 'react';
+import { debounce, isEmpty, uniq, uniqBy } from 'lodash';
 import {
   ReadStreamDefinition,
   FieldDefinition,
@@ -37,6 +37,7 @@ export interface UseProcessingSimulatorReturnType {
   samples: Array<Record<PropertyKey, unknown>>;
   simulation?: Simulation | null;
   tableColumns: TableColumn[];
+  watchProcessor: (processor: ProcessorDefinitionWithUIAttributes) => void;
 }
 
 export const useProcessingSimulator = ({
@@ -61,6 +62,33 @@ export const useProcessingSimulator = ({
   const draftProcessors = useMemo(
     () => processors.filter((processor) => processor.status === 'draft'),
     [processors]
+  );
+
+  const [liveDraftProcessors, setLiveDraftProcessors] = useState(draftProcessors);
+
+  useEffect(() => {
+    setLiveDraftProcessors(draftProcessors);
+  }, [draftProcessors]);
+
+  const watchProcessor = useMemo(
+    () =>
+      debounce((processor: ProcessorDefinitionWithUIAttributes) => {
+        setLiveDraftProcessors((prevLiveDraftProcessors) => {
+          const newLiveDraftProcessors = prevLiveDraftProcessors.slice();
+
+          const existingIndex = prevLiveDraftProcessors.findIndex(
+            (proc) => proc.id === processor.id
+          );
+          if (existingIndex !== -1) {
+            newLiveDraftProcessors[existingIndex] = processor;
+          } else {
+            newLiveDraftProcessors.push(processor);
+          }
+
+          return newLiveDraftProcessors;
+        });
+      }, 500),
+    []
   );
 
   const samplingCondition = useMemo(
@@ -119,19 +147,19 @@ export const useProcessingSimulator = ({
           path: { id: definition.name },
           body: {
             documents: sampleDocs,
-            processing: draftProcessors.map(processorConverter.toAPIDefinition),
+            processing: liveDraftProcessors.map(processorConverter.toAPIDefinition),
             // detected_fields,
           },
         },
       });
     },
-    [definition, sampleDocs, draftProcessors, streamsRepositoryClient],
+    [definition, sampleDocs, liveDraftProcessors, streamsRepositoryClient],
     { disableToastOnError: true }
   );
 
   const tableColumns = useMemo(
-    () => getTableColumns(draftProcessors, simulation?.detected_fields ?? []),
-    [draftProcessors, simulation]
+    () => getTableColumns(liveDraftProcessors, simulation?.detected_fields ?? []),
+    [liveDraftProcessors, simulation]
   );
 
   return {
@@ -141,6 +169,7 @@ export const useProcessingSimulator = ({
     simulation,
     samples: sampleDocs ?? [],
     tableColumns,
+    watchProcessor,
   };
 };
 
@@ -151,7 +180,7 @@ const composeSamplingCondition = (
     return undefined;
   }
 
-  const uniqueFields = getUniqueSourceFields(processors);
+  const uniqueFields = uniq(getSourceFields(processors));
 
   const conditions = uniqueFields.map((field) => ({
     field,
@@ -161,23 +190,23 @@ const composeSamplingCondition = (
   return { or: conditions };
 };
 
-const getUniqueSourceFields = (processors: ProcessorDefinitionWithUIAttributes[]): string[] => {
-  return [...new Set(processors.map((processor) => getProcessorConfig(processor).field))];
+const getSourceFields = (processors: ProcessorDefinitionWithUIAttributes[]): string[] => {
+  return processors.map((processor) => getProcessorConfig(processor).field);
 };
 
 const getTableColumns = (
   processors: ProcessorDefinitionWithUIAttributes[],
   fields: DetectedField[]
 ) => {
-  const uniqueProcessorsFields = uniq(getUniqueSourceFields(processors)).map((name) => ({
+  const uniqueProcessorsFields = getSourceFields(processors).map((name) => ({
     name,
     origin: 'processor',
   }));
 
-  const uniqueDetectedFields = uniq(fields.map((field) => field.name)).map((name) => ({
-    name,
+  const uniqueDetectedFields = fields.map((field) => ({
+    name: field.name,
     origin: 'detected',
   }));
 
-  return [...uniqueProcessorsFields, ...uniqueDetectedFields] as TableColumn[];
+  return uniqBy([...uniqueProcessorsFields, ...uniqueDetectedFields], 'name') as TableColumn[];
 };
