@@ -600,6 +600,31 @@
             "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/code-editor",
+            "id": "def-common.CodeEditorProps.classNameCss",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "classNameCss",
+            "description": [
+              "\nCustom CSS class to apply to the container"
+            ],
+            "signature": [
+              "InterpolationPrimitive",
+              " | ",
+              "ArrayInterpolation",
+              "<",
+              "Theme",
+              "> | ",
+              "FunctionInterpolation",
+              "<",
+              "Theme",
+              ">"
+            ],
+            "path": "src/platform/packages/shared/shared-ux/code_editor/impl/code_editor.tsx",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
