@@ -14,13 +14,13 @@ export class MapsPage {
 
   async gotoNewMap() {
     await this.page.gotoApp('maps');
-    await this.expectListingPage(false);
+    await this.expectMapsListingPage(false);
   }
 
-  async expectListingPage(visible: boolean = true) {
+  async expectMapsListingPage(visible: boolean = true) {
     const listingPage = this.page.getByTestId(`MapsLandingPage`);
 
-    if (visible) await expect(listingPage).toBeVisible();
-    else await expect(listingPage).not.toBeVisible();
+    if (visible) await expect(listingPage, 'Maps Landing page should be displayed').toBeVisible();
+    else await expect(listingPage, 'Maps Landing page should NOT be displayed').not.toBeVisible();
   }
 }
