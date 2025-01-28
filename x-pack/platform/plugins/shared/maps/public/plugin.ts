@@ -51,7 +51,6 @@ import {
   GEOHASH_GRID,
   getGeoHashBucketAgg,
   regionMapRenderer,
-  regionMapVisType,
   createTileMapFn,
   tileMapRenderer,
   tileMapVisType,
@@ -89,6 +88,7 @@ import { PassiveMapLazy, setupLensChoroplethChart } from './lens';
 import { CONTENT_ID, LATEST_VERSION } from '../common/content_management';
 import { setupMapEmbeddable } from './react_embeddable/setup_map_embeddable';
 import { MapRendererLazy } from './react_embeddable/map_renderer/map_renderer_lazy';
+import { REGION_MAP_VIS_TYPE } from './legacy_visualizations/region_map/types';
 
 export interface MapsPluginSetupDependencies {
   cloud?: CloudSetup;
@@ -234,7 +234,10 @@ export class MapsPlugin
     plugins.data.search.aggs.types.registerLegacy(GEOHASH_GRID, getGeoHashBucketAgg);
     plugins.expressions.registerFunction(createRegionMapFn);
     plugins.expressions.registerRenderer(regionMapRenderer);
-    plugins.visualizations.createBaseVisualization(regionMapVisType);
+    plugins.visualizations.createBaseVisualization(REGION_MAP_VIS_TYPE, async () => {
+      const { regionMapVisType } = await import('./legacy_visualizations/region_map/region_map_vis_type');
+      return regionMapVisType;
+    });
     plugins.expressions.registerFunction(createTileMapFn);
     plugins.expressions.registerRenderer(tileMapRenderer);
     plugins.visualizations.createBaseVisualization(tileMapVisType);

@@ -20,9 +20,9 @@ import { UiActionsStart } from '@kbn/ui-actions-plugin/public';
 import { PANEL_BADGE_TRIGGER } from '@kbn/embeddable-plugin/public';
 import { createInputControlVisFn } from './input_control_fn';
 import { getInputControlVisRenderer } from './input_control_vis_renderer';
-import { createInputControlVisTypeDefinition } from './input_control_vis_type';
 import type { InputControlPublicConfig } from '../server/config';
 import { InputControlDeprecationBadge } from './deprecation_badge';
+import { INPUT_CONTROL_VIS_TYPE } from './constants';
 
 type InputControlVisCoreSetup = CoreSetup<InputControlVisPluginStartDependencies, void>;
 
@@ -76,9 +76,10 @@ export class InputControlVisPlugin implements Plugin<void, void> {
     expressions.registerFunction(createInputControlVisFn);
     expressions.registerRenderer(getInputControlVisRenderer(visualizationDependencies));
     const { readOnly } = this.initializerContext.config.get<InputControlPublicConfig>();
-    visualizations.createBaseVisualization(
-      createInputControlVisTypeDefinition(visualizationDependencies, Boolean(readOnly))
-    );
+    visualizations.createBaseVisualization(INPUT_CONTROL_VIS_TYPE, async () => {
+      const { createInputControlVisTypeDefinition } = await import('./input_control_vis_type');
+      return createInputControlVisTypeDefinition(visualizationDependencies, Boolean(readOnly))
+    });
   }
 
   public start(core: CoreStart, deps: InputControlVisPluginStartDependencies) {
