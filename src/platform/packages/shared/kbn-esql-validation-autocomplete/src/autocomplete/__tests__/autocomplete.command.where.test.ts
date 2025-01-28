@@ -8,6 +8,7 @@
  */
 
 import { ESQL_COMMON_NUMERIC_TYPES } from '../../shared/esql_types';
+import { ESQLVariableType } from '../../shared/types';
 import { pipeCompleteItem } from '../complete_items';
 import { getDateLiterals } from '../factories';
 import { log10ParameterTypes, powParameterTypes } from './constants';
@@ -341,6 +342,58 @@ describe('WHERE <expression>', () => {
           },
         })
       );
+    });
+
+    describe('create control suggestion', () => {
+      test('suggests `Create control` option', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM a | WHERE agent.name == /', {
+          callbacks: {
+            canSuggestVariables: () => true,
+            getVariablesByType: () => [],
+            getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
+          },
+        });
+
+        expect(suggestions).toContainEqual({
+          label: 'Create control',
+          text: '',
+          kind: 'Issue',
+          detail: 'Click to create',
+          command: { id: 'esql.control.values.create', title: 'Click to create' },
+          sortText: '11A',
+          rangeToReplace: { start: 31, end: 31 },
+        });
+      });
+
+      test('suggests `?value` option', async () => {
+        const { suggest } = await setup();
+
+        const suggestions = await suggest('FROM a | WHERE agent.name == /', {
+          callbacks: {
+            canSuggestVariables: () => true,
+            getVariablesByType: () => [
+              {
+                key: 'value',
+                value: 'java',
+                type: ESQLVariableType.VALUES,
+              },
+            ],
+            getColumnsFor: () => Promise.resolve([{ name: 'agent.name', type: 'keyword' }]),
+          },
+        });
+
+        expect(suggestions).toContainEqual({
+          label: '?value',
+          text: '?value',
+          kind: 'Constant',
+          detail: 'Named parameter',
+          command: undefined,
+          sortText: '11A',
+          rangeToReplace: { start: 31, end: 31 },
+        });
+      });
     });
   });
 });
