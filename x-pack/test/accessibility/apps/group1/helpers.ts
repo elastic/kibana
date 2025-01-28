@@ -14,7 +14,11 @@ export async function deleteAllPipelines(client: Client, logger: any) {
   await logger.debug(pipelines);
   if (pipeLineIds.length > 0) {
     await asyncForEach(pipeLineIds, async (newId) => {
-      await client.ingest.deletePipeline({ id: newId });
+      try {
+        await client.ingest.deletePipeline({ id: newId });
+      } catch (error) {
+        await logger.debug(`Error deleting pipeline: ${newId}`);
+      }
     });
   }
 }
