@@ -89,6 +89,7 @@ export const ESQLEditor = memo(function ESQLEditor({
   isLoading,
   isDisabled,
   hideRunQueryText,
+  hideRunQueryButton,
   editorIsInline,
   disableSubmitAction,
   dataTestSubj,
@@ -679,7 +680,7 @@ export const ESQLEditor = memo(function ESQLEditor({
 
   const editorPanel = (
     <>
-      {Boolean(editorIsInline) && (
+      {Boolean(editorIsInline) && !hideRunQueryButton && (
         <EuiFlexGroup
           gutterSize="none"
           responsive={false}
