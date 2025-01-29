@@ -23,11 +23,15 @@ import { DetectedField, ProcessorDefinitionWithUIAttributes } from '../types';
 import { processorConverter } from '../utils';
 
 type Simulation = APIReturnType<'POST /api/streams/{id}/processing/_simulate'>;
-// type SimulationRequestBody =
-//   StreamsAPIClientRequestParamsOf<'POST /api/streams/{id}/processing/_simulate'>['params']['body'];
+
 export interface TableColumn {
   name: string;
   origin: 'processor' | 'detected';
+}
+
+export interface UseProcessingSimulatorProps {
+  definition: IngestStreamGetResponse;
+  processors: ProcessorDefinitionWithUIAttributes[];
 }
 
 export interface UseProcessingSimulatorReturnType {
@@ -42,13 +46,8 @@ export interface UseProcessingSimulatorReturnType {
 
 export const useProcessingSimulator = ({
   definition,
-  fields,
   processors,
-}: {
-  definition: IngestStreamGetResponse;
-  fields: FieldDefinition[];
-  processors: ProcessorDefinitionWithUIAttributes[];
-}): UseProcessingSimulatorReturnType => {
+}: UseProcessingSimulatorProps): UseProcessingSimulatorReturnType => {
   const { dependencies } = useKibana();
   const {
     data,

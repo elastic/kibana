@@ -57,11 +57,7 @@ export function StreamDetailEnrichmentContent({
   } = useDefinition(definition, refreshDefinition);
 
   const { error, isLoading, refreshSamples, simulation, samples, tableColumns, watchProcessor } =
-    useProcessingSimulator({
-      definition,
-      processors,
-      fields: [],
-    });
+    useProcessingSimulator({ definition, processors });
 
   const handlerItemDrag: DragDropContextProps['onDragEnd'] = ({ source, destination }) => {
     if (source && destination) {

@@ -12,7 +12,6 @@ import {
   EuiFilterButton,
   EuiFilterGroup,
   EuiEmptyPrompt,
-  EuiLoadingLogo,
   EuiFlexItem,
   EuiSpacer,
   EuiProgress,
@@ -21,7 +20,6 @@ import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
 import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { flattenObject } from '@kbn/object-utils';
-import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
 import { isEmpty } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
@@ -173,6 +171,11 @@ const OutcomeControls = ({
     }
   };
 
+  const getFilterButtonPropsFor = (filterId: DocsFilterOption) => ({
+    hasActiveFilters: docsFilter === filterId,
+    onClick: () => onDocsFilterChange(filterId),
+  });
+
   return (
     <EuiFlexGroup alignItems="center" justifyContent="spaceBetween" wrap>
       <EuiFilterGroup
@@ -181,15 +184,11 @@ const OutcomeControls = ({
           { defaultMessage: 'Filter for all, matching or unmatching previewed documents.' }
         )}
       >
-        <EuiFilterButton
-          hasActiveFilters={docsFilter === docsFilterOptions.outcome_filter_all.id}
-          onClick={() => onDocsFilterChange(docsFilterOptions.outcome_filter_all.id)}
-        >
+        <EuiFilterButton {...getFilterButtonPropsFor(docsFilterOptions.outcome_filter_all.id)}>
           {docsFilterOptions.outcome_filter_all.label}
         </EuiFilterButton>
         <EuiFilterButton
-          hasActiveFilters={docsFilter === docsFilterOptions.outcome_filter_matched.id}
-          onClick={() => onDocsFilterChange(docsFilterOptions.outcome_filter_matched.id)}
+          {...getFilterButtonPropsFor(docsFilterOptions.outcome_filter_matched.id)}
           badgeColor="success"
           numActiveFilters={
             simulationSuccessRate ? parseFloat((simulationSuccessRate * 100).toFixed(2)) : undefined
@@ -198,8 +197,7 @@ const OutcomeControls = ({
           {docsFilterOptions.outcome_filter_matched.label}
         </EuiFilterButton>
         <EuiFilterButton
-          hasActiveFilters={docsFilter === docsFilterOptions.outcome_filter_unmatched.id}
-          onClick={() => onDocsFilterChange(docsFilterOptions.outcome_filter_unmatched.id)}
+          {...getFilterButtonPropsFor(docsFilterOptions.outcome_filter_unmatched.id)}
           badgeColor="accent"
           numActiveFilters={
             simulationFailureRate ? parseFloat((simulationFailureRate * 100).toFixed(2)) : undefined
