@@ -185,7 +185,7 @@ export const EmbeddedMapComponent = ({
         <MapToolTip />
       </InPortal>
       <EmbeddableMapWrapper>
-        <EmbeddableMapRatioHolder maintainRatio={!isIndexError} />
+        <EmbeddableMapRatioHolder className="siemEmbeddable__map" maintainRatio={!isIndexError} />
         {isIndexError ? (
           <IndexPatternsMissingPrompt data-test-subj="missing-prompt" />
         ) : (
