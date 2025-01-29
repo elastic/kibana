@@ -9,6 +9,12 @@
 
 // TODO: https://github.com/elastic/kibana/issues/110893
 
-export * from './constants';
-export * from './types';
-export * from './expression_functions';
+export { PLUGIN_ID, PLUGIN_NAME, CONTEXT, BASE64, URL } from './constants';
+export type {
+  Return,
+  ExpressionRepeatImageFunction,
+  OriginString,
+  RepeatImageRendererConfig,
+  NodeDimensions,
+} from './types';
+export { functions, repeatImageFunction } from './expression_functions';

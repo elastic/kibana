@@ -384,9 +384,16 @@ describe('autocomplete.suggest', () => {
         // skip this fn for the moment as it's quite hard to test
         // Add match in the test when the autocomplete is ready https://github.com/elastic/kibana/issues/196995
         if (
-          !['bucket', 'date_extract', 'date_diff', 'case', 'match', 'qstr', 'date_trunc'].includes(
-            fn.name
-          )
+          ![
+            'bucket',
+            'date_extract',
+            'date_diff',
+            'case',
+            'match',
+            'qstr',
+            'kql',
+            'date_trunc',
+          ].includes(fn.name)
         ) {
           test(`${fn.name}`, async () => {
             const testedCases = new Set<string>();
