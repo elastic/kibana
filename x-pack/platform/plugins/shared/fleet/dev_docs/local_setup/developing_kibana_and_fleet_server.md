@@ -274,9 +274,9 @@ inputs:
     server:
       ssl:
         enabled: true
-        certificate: ../kibana/packages/kbn-dev-utils/certs/fleet_server.crt
-        key: ../kibana/packages/kbn-dev-utils/certs/fleet_server.key
-        key_passphrase: ../kibana/packages/kbn-dev-utils/certs/fleet_server.key
+        certificate: ../kibana/src/dev/packages/dev-utils/certs/fleet_server.crt
+        key: ../kibana/src/dev/packages/dev-utils/certs/fleet_server.key
+        key_passphrase: ../kibana/src/dev/packages/dev-utils/certs/fleet_server.key
 
 logging:
   to_stderr: true # Force the logging output to stderr

@@ -122,7 +122,7 @@ src/dev/packages/dependency-usage @elastic/kibana-security
 src/dev/packages/dev-cli-errors @elastic/kibana-operations
 src/dev/packages/dev-cli-runner @elastic/kibana-operations
 src/dev/packages/dev-proc-runner @elastic/kibana-operations
-packages/kbn-dev-utils @elastic/kibana-operations
+src/dev/packages/dev-utils @elastic/kibana-operations
 packages/kbn-docs-utils @elastic/kibana-operations
 packages/kbn-es @elastic/kibana-operations
 packages/kbn-es-archiver @elastic/kibana-operations @elastic/appex-qa

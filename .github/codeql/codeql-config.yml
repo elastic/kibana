@@ -42,7 +42,7 @@ paths-ignore:
   - src/dev/packages/dev-cli-errors
   - src/dev/packages/dev-cli-runner
   - src/dev/packages/dev-proc-runner
-  - packages/kbn-dev-utils
+  - src/dev/packages/dev-utils
   - packages/kbn-docs-utils
   - packages/kbn-es
   - packages/kbn-es-archiver

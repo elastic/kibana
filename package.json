@@ -1429,7 +1429,7 @@
     "@kbn/dev-cli-errors": "link:src/dev/packages/dev-cli-errors",
     "@kbn/dev-cli-runner": "link:src/dev/packages/dev-cli-runner",
     "@kbn/dev-proc-runner": "link:src/dev/packages/dev-proc-runner",
-    "@kbn/dev-utils": "link:packages/kbn-dev-utils",
+    "@kbn/dev-utils": "link:src/dev/packages/dev-utils",
     "@kbn/docs-utils": "link:packages/kbn-docs-utils",
     "@kbn/es": "link:packages/kbn-es",
     "@kbn/es-archiver": "link:packages/kbn-es-archiver",
