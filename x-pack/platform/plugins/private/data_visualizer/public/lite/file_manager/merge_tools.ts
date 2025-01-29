@@ -32,9 +32,6 @@ export function createMergedMappings(files: FileWrapper[]) {
   // otherwise drill down and extract each field with it's type.
   const mappingsString = mappings.map((m) => JSON.stringify(m));
   if (mappingsString.every((m) => m === mappingsString[0])) {
-    // eslint-disable-next-line no-console
-    console.log('mappings strings are the same');
-
     return { mergedMappings: mappings[0], mappingClashes: [] };
   }
 
@@ -86,11 +83,6 @@ export function createMergedMappings(files: FileWrapper[]) {
   const mergedMappings = {
     properties: Object.fromEntries(mergedMappingsMap),
   };
-
-  // eslint-disable-next-line no-console
-  console.log('mergedMappings', mergedMappings);
-  // eslint-disable-next-line no-console
-  console.log('mappingClashes', mappingClashes);
 
   return { mergedMappings, mappingClashes };
 }

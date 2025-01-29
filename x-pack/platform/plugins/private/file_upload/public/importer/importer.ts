@@ -33,7 +33,6 @@ const STRING_CHUNKS_MB = 100;
 const DEFAULT_TIME_FIELD = '@timestamp';
 
 export abstract class Importer implements IImporter {
-  // constructor should take optional initial state!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!
   protected _docArray: ImportDoc[] = [];
   protected _chunkSize = CHUNK_SIZE;
   private _index: string | undefined;

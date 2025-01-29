@@ -70,16 +70,14 @@ export const FileClashWarning: FC<Props> = ({ uploadStatus, filesStatus, removeC
         };
 
   return (
-    <>
-      <EuiCallOut title={title} color="danger">
-        <p>{description}</p>
-        <EuiButton onClick={() => removeClashingFiles()} color="danger" size="s" fill>
-          <FormattedMessage
-            id="xpack.dataVisualizer.file.fileClashWarning.deleteAllButtonLabel"
-            defaultMessage="Delete all"
-          />
-        </EuiButton>
-      </EuiCallOut>
-    </>
+    <EuiCallOut title={title} color="danger">
+      <p>{description}</p>
+      <EuiButton onClick={() => removeClashingFiles()} color="danger" size="s" fill>
+        <FormattedMessage
+          id="xpack.dataVisualizer.file.fileClashWarning.deleteAllButtonLabel"
+          defaultMessage="Delete all"
+        />
+      </EuiButton>
+    </EuiCallOut>
   );
 };

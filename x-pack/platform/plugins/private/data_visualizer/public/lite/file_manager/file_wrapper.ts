@@ -11,6 +11,7 @@ import type {
   FindFileStructureResponse,
   IngestPipeline,
 } from '@kbn/file-upload-plugin/common/types';
+import { isSupportedFormat } from '../../../common/constants';
 import { isTikaType } from '../../../common/utils/tika_utils';
 import { processResults, readFile } from '../../application/common/components/utils';
 import { analyzeTikaFile } from '../../application/file_data_visualizer/components/file_data_visualizer_view/tika_analyzer';
@@ -96,7 +97,7 @@ export class FileWrapper {
       } else {
         analysisResults = await this.analyzeStandardFile(fileContents, {});
       }
-      const supportedFormat = isSupportedFormat(analysisResults);
+      const supportedFormat = isSupportedFormat(analysisResults.results?.format ?? '');
 
       this.setStatus({
         ...analysisResults,
@@ -208,14 +209,4 @@ export class FileWrapper {
       return;
     }
   }
-}
-
-function isSupportedFormat(analysisResults: AnalysisResults) {
-  const format = analysisResults.results?.format;
-  return (
-    format === 'ndjson' ||
-    format === 'delimited' ||
-    format === 'tika' ||
-    format === 'semi_structured_text'
-  );
 }

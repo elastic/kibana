@@ -10,7 +10,6 @@ import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import type { Subscription } from 'rxjs';
 import { Observable } from 'rxjs';
 import { switchMap, combineLatest, BehaviorSubject } from 'rxjs';
-// import { BehaviorSubject } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
@@ -29,12 +28,7 @@ import {
 } from '../../application/file_data_visualizer/components/import_view/import';
 import { AutoDeploy } from '../../application/file_data_visualizer/components/import_view/auto_deploy';
 import type { FileClash } from './merge_tools';
-import {
-  createMergedMappings,
-  // createMergedPipeline,
-  getFormatClashes,
-  getMappingClashInfo,
-} from './merge_tools';
+import { createMergedMappings, getFormatClashes, getMappingClashInfo } from './merge_tools';
 
 export enum STATUS {
   NA,
@@ -228,7 +222,7 @@ export class FileManager {
     return createMergedMappings(files);
   }
 
-  private getPipelines() {
+  private getPipelines(): IngestPipeline[] {
     const files = this.getFiles();
     return files.map((file) => file.getPipeline());
   }
@@ -260,7 +254,6 @@ export class FileManager {
         modelDeployed: STATUS.STARTED,
       });
       await this.autoDeploy();
-      // wrap in try catch
       this.setStatus({
         modelDeployed: STATUS.COMPLETED,
       });
@@ -355,14 +348,12 @@ export class FileManager {
         this.setStatus({
           pipelinesDeleted: STATUS.STARTED,
         });
-        const deletePipelinesResp = await this.importer.deletePipelines(
+        await this.importer.deletePipelines(
           this.pipelines.map((p, i) => `${indexName}-${i}-pipeline`)
         );
         this.setStatus({
           pipelinesDeleted: STATUS.COMPLETED,
         });
-        // eslint-disable-next-line no-console
-        console.log('deletePipelinesResp', deletePipelinesResp);
       } catch (error) {
         this.setStatus({
           pipelinesDeleted: STATUS.FAILED,
