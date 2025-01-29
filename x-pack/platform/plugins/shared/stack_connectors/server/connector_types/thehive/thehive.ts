@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { i18n } from '@kbn/i18n';
 import { ServiceParams, CaseConnector } from '@kbn/actions-plugin/server';
 import type { AxiosError } from 'axios';
 import { Type } from '@kbn/config-schema';
@@ -153,14 +154,30 @@ export class TheHiveConnector extends CaseConnector<
     return res.data;
   }
 
+  private formatAlertBody(alert: ExecutorSubActionCreateAlertParams) {
+    try {
+      const { body, template, ...restOfAlert } = alert;
+      const bodyJson = JSON.parse(body ?? '{}');
+      const mergedAlertBody = { ...restOfAlert, ...bodyJson };
+
+      return mergedAlertBody;
+    } catch (err) {
+      throw new Error(
+        i18n.translate('xpack.stackConnectors.thehive.alertBodyParsingError', {
+          defaultMessage: 'Error parsing alert body for thehive: {err}',
+          values: {
+            err: err.toString(),
+          },
+        })
+      );
+    }
+  }
+
   public async createAlert(
     alert: ExecutorSubActionCreateAlertParams,
     connectorUsageCollector: ConnectorUsageCollector
   ) {
-    const { body, template, ...restOfAlert } = alert;
-    const bodyJson = JSON.parse(body ?? '{}');
-    const mergedAlertBody = { ...restOfAlert, ...bodyJson };
-
+    const mergedAlertBody = this.formatAlertBody(alert);
     await this.request(
       {
         method: 'post',

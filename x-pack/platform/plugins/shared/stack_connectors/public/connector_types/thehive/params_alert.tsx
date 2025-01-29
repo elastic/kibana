@@ -14,12 +14,13 @@ import {
   ActionConnectorMode,
 } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect, EuiComboBox, EuiIconTip } from '@elastic/eui';
+import { TheHiveTemplate } from '../../../common/thehive/constants';
 import { ExecutorParams, ExecutorSubActionCreateAlertParams } from '../../../common/thehive/types';
 import {
-  bodyOptions,
+  bodyOption,
+  testBodyOption,
   severityOptions,
   templateOptions,
-  testBodyOptions,
   tlpOptions,
 } from './constants';
 import * as translations from './translations';
@@ -39,12 +40,12 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         tlp: 2,
         severity: 2,
         tags: [],
-        template: 0,
+        template: TheHiveTemplate.BUILD_YOUR_OWN,
         body: '{}',
       } as unknown as ExecutorSubActionCreateAlertParams),
     [actionParams.subActionParams]
   );
-  const isTest = useMemo(() => executionMode === ActionConnectorMode.Test, [executionMode]);
+  const isTest = executionMode === ActionConnectorMode.Test;
 
   const [severity, setSeverity] = useState(alert.severity ?? severityOptions[1].value);
   const [tlp, setTlp] = useState(alert.tlp ?? tlpOptions[2].value);
@@ -203,7 +204,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
         <EuiSelect
           fullWidth
           data-test-subj="templateSelectInput"
-          value={alert.template}
+          value={alert.template ?? TheHiveTemplate.BUILD_YOUR_OWN}
           options={templateOptions}
           onChange={(e) => {
             editAction(
@@ -211,9 +212,9 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
               {
                 ...alert,
                 body: isTest
-                  ? testBodyOptions[parseInt(e.target.value, 10)]
-                  : bodyOptions[parseInt(e.target.value, 10)],
-                template: parseInt(e.target.value, 10),
+                  ? testBodyOption[e.target.value]
+                  : bodyOption[e.target.value],
+                template: e.target.value,
               },
               index
             );

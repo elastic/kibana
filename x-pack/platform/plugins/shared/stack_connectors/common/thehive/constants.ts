@@ -32,3 +32,9 @@ export enum TheHiveTLP {
   AMBER_STRICT = 3,
   RED = 4,
 }
+export enum TheHiveTemplate {
+  BUILD_YOUR_OWN = 'Build Your Own',
+  COMPROMISED_USER_ACCOUNT_INVESTIGATION = 'Compromised User Account Investigation',
+  MALICIOUS_FILE_ANALYSIS = 'Malicious File Analysis',
+  SUSPICIOUS_NETWORK_ACTIVITY = 'Suspicious Network Activity',
+}

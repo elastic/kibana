@@ -9,7 +9,7 @@ import React, { useState, useEffect, useRef, useMemo } from 'react';
 import { ActionParamsProps, ActionConnectorMode } from '@kbn/triggers-actions-ui-plugin/public';
 import { EuiFormRow, EuiSelect } from '@elastic/eui';
 import { eventActionOptions } from './constants';
-import { SUB_ACTION } from '../../../common/thehive/constants';
+import { SUB_ACTION, TheHiveTemplate } from '../../../common/thehive/constants';
 import { ExecutorParams } from '../../../common/thehive/types';
 import { TheHiveParamsAlertFields } from './params_alert';
 import { TheHiveParamsCaseFields } from './params_case';
@@ -79,21 +79,21 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
     const subActionParams =
       eventActionType === SUB_ACTION.CREATE_ALERT
         ? {
+          tlp: 2,
+          severity: 2,
+          tags: [],
+          sourceRef: isTest ? undefined : '{{alert.uuid}}',
+          template: TheHiveTemplate.BUILD_YOUR_OWN,
+          body: '{}',
+        }
+        : {
+          incident: {
             tlp: 2,
             severity: 2,
             tags: [],
-            sourceRef: isTest ? undefined : '{{alert.uuid}}',
-            template: 0,
-            body: '{}',
-          }
-        : {
-            incident: {
-              tlp: 2,
-              severity: 2,
-              tags: [],
-            },
-            comments: [],
-          };
+          },
+          comments: [],
+        };
 
     setEventAction(eventActionType);
     editAction('subActionParams', subActionParams, index);
