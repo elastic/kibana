@@ -11,7 +11,7 @@ import type {
   InitEntityEngineRequestBody,
   StoreStatus,
 } from '../../../../common/api/entity_analytics';
-import { DEFAULT_INTERVAL } from './task/constants';
+import { DEFAULT_INTERVAL } from './tasks/field_retention_enrichment/constants';
 
 export const DEFAULT_LOOKBACK_PERIOD = '24h';
 export const DEFAULT_FIELD_HISTORY_LENGTH = 10;
