@@ -20,7 +20,7 @@ SRCS = glob(
 )
 
 BUNDLER_DEPS = [
-  "//src/dev/packages/peggy",
+  "//src/dev/packages/peggy:kbn-peggy",
   "@npm//peggy",
   "@npm//webpack",
 ]
