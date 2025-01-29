@@ -5,6 +5,7 @@
  * 2.0.
  */
 
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { EuiThemeProvider as ThemeProvider } from '@elastic/eui';
 import { MAINTENANCE_WINDOW_FEATURE_ID } from '@kbn/alerting-plugin/common/maintenance_window';
 import { fetchActiveMaintenanceWindows } from '@kbn/alerts-ui-shared/src/maintenance_window_callout/api';
@@ -21,6 +22,7 @@ import { useLocation } from 'react-router-dom';
 import * as dataContext from '../../hooks/use_has_data';
 import * as pluginContext from '../../hooks/use_plugin_context';
 import { ObservabilityPublicPluginsStart } from '../../plugin';
+import { useGetAvailableRulesWithDescriptions } from '../../hooks/use_get_available_rules_with_descriptions';
 import { createObservabilityRuleTypeRegistryMock } from '../../rules/observability_rule_type_registry_mock';
 import { kibanaStartMock } from '../../utils/kibana_react.mock';
 import { AlertsPage } from './alerts';
@@ -53,6 +55,11 @@ jest.mock('../../utils/kibana_react', () => ({
 }));
 
 const useLocationMock = useLocation as jest.Mock;
+
+jest.mock('@kbn/ebt-tools');
+
+const usePerformanceContextMock = usePerformanceContext as jest.Mock;
+usePerformanceContextMock.mockReturnValue({ onPageReady: jest.fn() });
 
 jest.mock('@kbn/kibana-react-plugin/public', () => ({
   __esModule: true,
@@ -109,6 +116,18 @@ jest.mock('../../hooks/use_has_data', () => ({
 
 const { useTimeBuckets } = jest.requireMock('../../hooks/use_time_buckets');
 const { useHasData } = jest.requireMock('../../hooks/use_has_data');
+
+jest.mock('../../hooks/use_get_available_rules_with_descriptions');
+
+const ruleDescriptions = [
+  {
+    id: 'observability.rules.custom_threshold',
+    name: 'Custom threshold',
+    description: 'Alert when any Observability data type reaches or exceeds a given value.',
+  },
+];
+const useGetAvailableRulesWithDescriptionsMock = useGetAvailableRulesWithDescriptions as jest.Mock;
+useGetAvailableRulesWithDescriptionsMock.mockReturnValue(ruleDescriptions);
 
 const queryClient = new QueryClient({
   defaultOptions: {

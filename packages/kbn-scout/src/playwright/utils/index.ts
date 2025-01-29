@@ -8,3 +8,4 @@
  */
 
 export { serviceLoadedMsg, isValidUTCDate, formatTime, getPlaywrightGrepTag } from './runner_utils';
+export { measurePerformance } from './performance';

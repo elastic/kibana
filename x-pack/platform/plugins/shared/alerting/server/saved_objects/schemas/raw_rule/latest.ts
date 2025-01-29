@@ -11,9 +11,9 @@ import {
   rawRuleActionSchema,
   rawRuleAlertsFilterSchema,
   rawRuleLastRunSchema,
-  rawRuleMonitoringSchema,
-  rawRuleSchema,
 } from './v3';
+
+import { rawRuleMonitoringSchema, rawRuleSchema } from './v4';
 
 type Mutable<T> = { -readonly [P in keyof T]: T[P] extends object ? Mutable<T[P]> : T[P] };
 

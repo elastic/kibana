@@ -78,14 +78,14 @@ const registerCustomThresholdRuleAction = (
   { dataView }: AppMenuExtensionParams
 ) => {
   registry.registerCustomActionUnderSubmenu(AppMenuActionId.alerts, {
-    id: AppMenuActionId.createRule,
+    id: 'custom-threshold-rule',
     type: AppMenuActionType.custom,
     order: 101,
     controlProps: {
       label: i18n.translate('discover.observabilitySolution.appMenu.customThresholdRule', {
         defaultMessage: 'Create custom threshold rule',
       }),
-      iconType: 'visGauge',
+      iconType: 'bell',
       testId: 'discoverAppMenuCustomThresholdRule',
       onClick: ({ onFinishAction }) => {
         const index = dataView?.toMinimalSpec();
@@ -127,7 +127,7 @@ const registerCreateSLOAction = (
         label: i18n.translate('discover.observabilitySolution.appMenu.slo', {
           defaultMessage: 'Create SLO',
         }),
-        iconType: 'bell',
+        iconType: 'visGauge',
         testId: 'discoverAppMenuCreateSlo',
         onClick: ({ onFinishAction }) => {
           const index = dataView?.getIndexPattern();

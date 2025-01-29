@@ -38,7 +38,12 @@ export const ProcessorFieldSelector = () => {
       isInvalid={invalid}
       error={error?.message}
     >
-      <EuiFieldText {...inputProps} inputRef={ref} isInvalid={invalid} />
+      <EuiFieldText
+        data-test-subj="streamsAppProcessorFieldSelectorFieldText"
+        {...inputProps}
+        inputRef={ref}
+        isInvalid={invalid}
+      />
     </EuiFormRow>
   );
 };

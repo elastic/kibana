@@ -18,7 +18,9 @@ export interface ScoutTestOptions extends PlaywrightTestOptions {
   [VALID_CONFIG_MARKER]: boolean;
 }
 
-export interface ScoutPlaywrightOptions extends Pick<PlaywrightTestConfig, 'testDir' | 'workers'> {
+export interface ScoutPlaywrightOptions
+  extends Pick<PlaywrightTestConfig, 'testDir' | 'workers' | 'globalSetup'> {
   testDir: string;
-  workers?: 1 | 2;
+  workers?: 1 | 2 | 3; // to keep performance consistent within test suites
+  globalSetup?: string;
 }
