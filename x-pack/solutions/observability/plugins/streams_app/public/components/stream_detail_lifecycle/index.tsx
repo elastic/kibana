@@ -6,7 +6,10 @@
  */
 import {
   EuiButton,
+  EuiButtonIcon,
+  EuiCallOut,
   EuiContextMenu,
+  EuiFieldNumber,
   EuiFlexGroup,
   EuiFlexItem,
   EuiHorizontalRule,
@@ -18,8 +21,12 @@ import {
   EuiPanel,
   EuiPopover,
   EuiSpacer,
+  EuiSwitch,
   EuiText,
   useEuiTheme,
+  EuiButtonEmpty,
+  EuiContextMenuPanel,
+  EuiContextMenuItem,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
 import React, { ReactNode, useState } from 'react';
@@ -70,24 +77,9 @@ export function StreamDetailLifecycle({
 
   return (
     <>
-      {openEditModal != LifecycleEditAction.None && (
-        <EuiModal onClose={() => setOpenEditModal(LifecycleEditAction.None)}>
-          <EuiModalHeader>
-            <EuiModalHeaderTitle>Modal title</EuiModalHeaderTitle>
-          </EuiModalHeader>
-
-          <EuiModalBody>
-            This modal has the following setup:
-            <EuiSpacer />
-          </EuiModalBody>
-
-          <EuiModalFooter>
-            <EuiButton onClick={() => setOpenEditModal(LifecycleEditAction.None)} fill>
-              Close
-            </EuiButton>
-          </EuiModalFooter>
-        </EuiModal>
-      )}
+      {openEditModal == LifecycleEditAction.None ? null : LifecycleEditAction.Dsl ? (
+        <DslModal closeModal={() => setOpenEditModal(LifecycleEditAction.None)} />
+      ) : null}
 
       <EuiFlexItem
         className={css`
@@ -294,5 +286,104 @@ function RetentionMetadata({
       <EuiHorizontalRule margin="m" />
       <Row metadata="Source" value={lifecycle.from} />
     </EuiPanel>
+  );
+}
+
+function DslModal({ closeModal }: { closeModal: () => void }) {
+  const timeUnits = [
+    { name: 'Days', value: 'd' },
+    { name: 'Hours', value: 'h' },
+    { name: 'Minutes', value: 'm' },
+    { name: 'Seconds', value: 's' },
+  ];
+
+  const [selectedUnit, setSelectedUnit] = useState(timeUnits[0]);
+  const [retentionValue, setRetentionValue] = useState(1);
+  const [noRetention, setNoRetention] = useState(false);
+  const [showUnitMenu, setShowUnitMenu] = useState(false);
+
+  return (
+    <EuiModal onClose={closeModal}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>Edit data retention for stream</EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        Specify a custom data retention period for this stream, ranging from 1 day to unlimited.
+        <EuiSpacer />
+        <EuiFieldNumber
+          value={retentionValue}
+          onChange={(e) => setRetentionValue(Number(e.target.value))}
+          disabled={noRetention}
+          fullWidth
+          append={
+            <EuiPopover
+              isOpen={showUnitMenu}
+              closePopover={() => setShowUnitMenu(false)}
+              button={
+                <EuiButton
+                  disabled={noRetention}
+                  iconType="arrowDown"
+                  iconSide="right"
+                  color="text"
+                  onClick={() => setShowUnitMenu(true)}
+                >
+                  {selectedUnit.name}
+                </EuiButton>
+              }
+            >
+              <EuiFlexGroup>
+                <EuiContextMenuPanel
+                  size="s"
+                  items={timeUnits.map((unit) => (
+                    <EuiFlexItem grow>
+                      <EuiContextMenuItem
+                        key={unit.value}
+                        icon={selectedUnit.value === unit.value ? 'check' : ''}
+                        onClick={() => {
+                          setShowUnitMenu(false);
+                          setSelectedUnit(unit);
+                        }}
+                      >
+                        {unit.name}
+                      </EuiContextMenuItem>
+                    </EuiFlexItem>
+                  ))}
+                />
+              </EuiFlexGroup>
+            </EuiPopover>
+          }
+        />
+        <EuiSpacer />
+        <EuiSwitch
+          label="Keep data indefinitely"
+          checked={noRetention}
+          onChange={() => setNoRetention(!noRetention)}
+        />
+        <EuiSpacer />
+        <RetentionChanges />
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty color="primary" onClick={() => closeModal()}>
+          Cancel
+        </EuiButtonEmpty>
+        <EuiButton onClick={() => closeModal()} fill>
+          Save
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  );
+}
+
+function RetentionChanges() {
+  return (
+    <EuiCallOut title="Retention changes for dependent streams" iconType="logstashFilter">
+      <p>
+        Data retention changes will apply to dependant streams unless they already have custom
+        retention settings in place.
+      </p>
+      <p>The following streams will inherit the new retention: foo, bar</p>
+    </EuiCallOut>
   );
 }
