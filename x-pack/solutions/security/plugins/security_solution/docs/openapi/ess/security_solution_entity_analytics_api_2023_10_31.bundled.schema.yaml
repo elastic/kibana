@@ -346,6 +346,10 @@ paths:
                   description: The timeout for initializing the aggregating transform.
                   pattern: '[smdh]$'
                   type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp.
+                  type: string
         description: Schema for the entity store initialization
         required: true
       responses:
@@ -484,6 +488,10 @@ paths:
                   description: The timeout for initializing the aggregating transform.
                   pattern: '[smdh]$'
                   type: string
+                timestampField:
+                  default: '@timestamp'
+                  description: The field to use as the timestamp for the entity type.
+                  type: string
         description: Schema for the engine initialization
         required: true
       responses:
@@ -500,7 +508,7 @@ paths:
     post:
       operationId: StartEntityEngine
       parameters:
-        - description: The entity type of the engine (either 'user' or 'host').
+        - description: The entity type of the engine
           in: path
           name: entityType
           required: true
@@ -1007,6 +1015,8 @@ components:
           default: 180s
           pattern: '[smdh]$'
           type: string
+        timestampField:
+          type: string
         type:
           $ref: '#/components/schemas/EntityType'
       required:
@@ -1146,6 +1156,12 @@ components:
           required:
             - name
             - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         host:
           type: object
           properties:
@@ -1184,7 +1200,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - host
         - entity
     IdField:
@@ -1293,6 +1308,12 @@ components:
           required:
             - name
             - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         service:
           type: object
           properties:
@@ -1303,7 +1324,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - service
         - entity
     StoreStatus:
@@ -1349,6 +1369,12 @@ components:
           required:
             - name
             - source
+        event:
+          type: object
+          properties:
+            ingested:
+              format: date-time
+              type: string
         user:
           type: object
           properties:
@@ -1383,7 +1409,6 @@ components:
           required:
             - name
       required:
-        - '@timestamp'
         - user
         - entity
   securitySchemes:

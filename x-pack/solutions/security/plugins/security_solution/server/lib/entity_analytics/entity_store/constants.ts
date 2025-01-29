@@ -21,6 +21,7 @@ export const DEFAULT_FREQUENCY = '1m';
 export const DEFAULT_DOCS_PER_SECOND = undefined;
 export const DEFAULT_INDEX_PATTERNS = '';
 export const DEFAULT_KQL_FILTER = '';
+export const DEFAULT_TIMESTAMP_FIELD = '@timestamp';
 
 export const defaultOptions: Expand<
   Required<Omit<InitEntityEngineRequestBody, 'docsPerSecond'>> & {
@@ -36,6 +37,7 @@ export const defaultOptions: Expand<
   indexPattern: DEFAULT_INDEX_PATTERNS,
   filter: DEFAULT_KQL_FILTER,
   enrichPolicyExecutionInterval: DEFAULT_INTERVAL,
+  timestampField: DEFAULT_TIMESTAMP_FIELD,
 };
 
 export const ENGINE_STATUS: Record<Uppercase<EngineStatus>, EngineStatus> = {
