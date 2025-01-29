@@ -5,7 +5,7 @@
  * 2.0.
  */
 import { i18n } from '@kbn/i18n';
-import { isUnWiredStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
+import { isUnwiredStreamGetResponse, isWiredStreamGetResponse } from '@kbn/streams-schema';
 import React from 'react';
 import { useKibana } from '../../hooks/use_kibana';
 import { useStreamsAppFetch } from '../../hooks/use_streams_app_fetch';
@@ -61,7 +61,7 @@ export function StreamDetailView() {
             };
           }
 
-          if (isUnWiredStreamGetResponse(response)) {
+          if (isUnwiredStreamGetResponse(response)) {
             return {
               dashboards: response.dashboards,
               elasticsearch_assets: response.elasticsearch_assets,

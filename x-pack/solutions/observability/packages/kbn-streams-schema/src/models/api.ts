@@ -37,7 +37,7 @@ export const isWiredStreamGetResponse = createIsNarrowSchema(
   wiredStreamGetResponseSchema
 );
 
-export const isUnWiredStreamGetResponse = createIsNarrowSchema(
+export const isUnwiredStreamGetResponse = createIsNarrowSchema(
   streamGetResponseSchema,
   unwiredStreamGetResponseSchema
 );
