@@ -14,7 +14,7 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import type { ChangeEventHandler } from 'react';
-import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as i18n from './translations';
@@ -127,8 +127,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
   const isDefaultSourcerer = scopeId === SourcererScopeName.default;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
-
-  const autoupdateRef = useRef(false);
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
