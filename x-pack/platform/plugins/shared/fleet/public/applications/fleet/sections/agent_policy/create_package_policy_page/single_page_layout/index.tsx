@@ -145,15 +145,16 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
 
   const [agentCount, setAgentCount] = useState<number>(0);
 
-  const integrationInfo = useMemo(
-    () =>
-      (params as AddToPolicyParams).integration
-        ? packageInfo?.policy_templates?.find(
-            (policyTemplate) => policyTemplate.name === (params as AddToPolicyParams).integration
-          )
-        : undefined,
-    [packageInfo?.policy_templates, params]
+  const [integrationToEnable, setIntegrationToEnable] = useState<string | undefined>(
+    params.integration
   );
+  const integrationInfo = useMemo(() => {
+    return integrationToEnable
+      ? packageInfo?.policy_templates?.find(
+          (policyTemplate) => policyTemplate.name === integrationToEnable
+        )
+      : undefined;
+  }, [integrationToEnable, packageInfo?.policy_templates]);
 
   const showSecretsDisabledCallout =
     !fleetStatus.isSecretsStorageEnabled &&
@@ -187,7 +188,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
     selectedPolicyTab,
     withSysMonitoring,
     queryParamsPolicyId,
-    integrationToEnable: integrationInfo?.name,
+    integrationToEnable,
     hasFleetAddAgentsPrivileges,
     setNewAgentPolicy,
     setSelectedPolicyTab,
@@ -374,6 +375,8 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
             handleSetupTechnologyChange={handleSetupTechnologyChange}
             isAgentlessEnabled={isAgentlessIntegration(packageInfo)}
             defaultSetupTechnology={defaultSetupTechnology}
+            integrationToEnable={integrationToEnable}
+            setIntegrationToEnable={setIntegrationToEnable}
           />
         </ExtensionWrapper>
       )
@@ -414,7 +417,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
           {!extensionView && (
             <StepConfigurePackagePolicy
               packageInfo={packageInfo}
-              showOnlyIntegration={integrationInfo?.name}
+              showOnlyIntegration={integrationToEnable}
               packagePolicy={packagePolicy}
               updatePackagePolicy={updatePackagePolicy}
               validationResults={validationResults}
@@ -449,7 +452,7 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       extensionView,
       isAgentlessIntegration,
       selectedSetupTechnology,
-      integrationInfo?.name,
+      integrationToEnable,
       isAgentlessSelected,
       handleExtensionViewOnChange,
       handleSetupTechnologyChange,
@@ -465,17 +468,18 @@ export const CreatePackagePolicySinglePage: CreatePackagePolicyParams = ({
       children: replaceStepConfigurePackagePolicy || stepConfigurePackagePolicy,
       headingElement: 'h2',
     },
+    ...(selectedSetupTechnology !== SetupTechnology.AGENTLESS
+      ? [
+          {
+            title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
+              defaultMessage: 'Where to add this integration?',
+            }),
+            children: stepSelectAgentPolicy,
+            headingElement: 'h2',
+          },
+        ]
+      : []),
   ];
-
-  if (selectedSetupTechnology !== SetupTechnology.AGENTLESS) {
-    steps.push({
-      title: i18n.translate('xpack.fleet.createPackagePolicy.stepSelectAgentPolicyTitle', {
-        defaultMessage: 'Where to add this integration?',
-      }),
-      children: stepSelectAgentPolicy,
-      headingElement: 'h2',
-    });
-  }
 
   // Display package error if there is one
   if (packageInfoError) {

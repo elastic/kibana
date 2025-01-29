@@ -19,6 +19,7 @@ const initialGraphState: GraphState = {
   anonymizedAlerts: [],
   combinedGenerations: '',
   combinedRefinements: '',
+  continuePrompt: 'continue',
   errors: [],
   generationAttempts: 0,
   generations: [],

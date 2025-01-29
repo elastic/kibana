@@ -22,6 +22,7 @@ import {
   KnowledgeBaseEntryCreateProps,
   KnowledgeBaseEntryResponse,
   Metadata,
+  ContentReferencesStore,
   KnowledgeBaseEntryUpdateProps,
 } from '@kbn/elastic-assistant-common';
 import pRetry from 'p-retry';
@@ -531,11 +532,14 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
 
       const results = result.hits.hits.map((hit) => {
         const metadata = {
+          name: hit?._source?.name,
+          index: hit?._index,
           source: hit?._source?.source,
           required: hit?._source?.required,
           kbResource: hit?._source?.kb_resource,
         };
         return new Document({
+          id: hit?._id,
           pageContent: hit?._source?.text ?? '',
           metadata,
         });
@@ -768,8 +772,10 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    * is scoped to system user.
    */
   public getAssistantTools = async ({
+    contentReferencesStore,
     esClient,
   }: {
+    contentReferencesStore: ContentReferencesStore | false;
     esClient: ElasticsearchClient;
   }): Promise<StructuredTool[]> => {
     const user = this.options.currentUser;
@@ -809,6 +815,7 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
                 indexEntry,
                 esClient,
                 logger: this.options.logger,
+                contentReferencesStore,
               });
             })
         );

@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { CLOUD_CREDENTIALS_PACKAGE_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 import * as http from 'http';
 import expect from '@kbn/expect';
 import { setupMockServer } from './mock_agentless_api';
+import { AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION } from './constants';
 import type { FtrProviderContext } from '../../../../../ftr_provider_context';
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const mockAgentlessApiService = setupMockServer();
@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it(`should create agentless-agent`, async () => {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_CREDENTIALS_PACKAGE_VERSION
+        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
@@ -88,16 +88,16 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       const integrationPolicyName = `cloud_security_posture-${new Date().toISOString()}`;
 
       await cisIntegration.navigateToAddIntegrationCspmWithVersionPage(
-        CLOUD_CREDENTIALS_PACKAGE_VERSION
+        AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
 
       await cisIntegration.clickOptionButton(CIS_AWS_OPTION_TEST_ID);
       await cisIntegration.clickOptionButton(AWS_SINGLE_ACCOUNT_TEST_ID);
 
+      await cisIntegration.inputIntegrationName(integrationPolicyName);
+
       await cisIntegration.selectSetupTechnology('agent-based');
       await pageObjects.header.waitUntilLoadingHasFinished();
-
-      await cisIntegration.inputIntegrationName(integrationPolicyName);
 
       await cisIntegration.clickSaveButton();
       await pageObjects.header.waitUntilLoadingHasFinished();
