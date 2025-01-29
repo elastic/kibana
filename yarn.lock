@@ -6084,7 +6084,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/json-ast@link:packages/kbn-json-ast":
+"@kbn/json-ast@link:src/dev/packages/json-ast":
   version "0.0.0"
   uid ""
 

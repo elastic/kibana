@@ -263,7 +263,7 @@ describe('setCompilerOptions()', () => {
         removeCompilerOption(
           dedent`
             {
-              "extends": "../../tsconfig.base.json",
+              "extends": "../../../../tsconfig.base.json",
               "compilerOptions": {
                 "skipLibCheck": false
               },
@@ -279,7 +279,7 @@ describe('setCompilerOptions()', () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"extends\\": \\"../../tsconfig.base.json\\",
+        \\"extends\\": \\"../../../../tsconfig.base.json\\",
         \\"compilerOptions\\": {
           \\"outDir\\": \\"foo/bar\\"
         },
@@ -295,7 +295,7 @@ describe('setCompilerOptions()', () => {
       setCompilerOption(
         dedent`
           {
-            "extends": "../../tsconfig.base.json",
+            "extends": "../../../../tsconfig.base.json",
             "include": [
               "expect.d.ts"
             ]
@@ -306,7 +306,7 @@ describe('setCompilerOptions()', () => {
       )
     ).toMatchInlineSnapshot(`
       "{
-        \\"extends\\": \\"../../tsconfig.base.json\\",
+        \\"extends\\": \\"../../../../tsconfig.base.json\\",
         \\"compilerOptions\\": {
           \\"outDir\\": \\"foo/bar\\"
         },
@@ -323,7 +323,7 @@ describe('setCompilerOptions()', () => {
             "include": [
               "expect.d.ts"
             ],
-            "extends": "../../tsconfig.base.json"
+            "extends": "../../../../tsconfig.base.json"
           }
         `,
         'outDir',
@@ -334,7 +334,7 @@ describe('setCompilerOptions()', () => {
         \\"include\\": [
           \\"expect.d.ts\\"
         ],
-        \\"extends\\": \\"../../tsconfig.base.json\\",
+        \\"extends\\": \\"../../../../tsconfig.base.json\\",
         \\"compilerOptions\\": {
           \\"outDir\\": \\"foo/bar\\"
         }
