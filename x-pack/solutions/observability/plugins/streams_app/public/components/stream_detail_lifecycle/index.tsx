@@ -6,7 +6,6 @@
  */
 import {
   EuiButton,
-  EuiButtonIcon,
   EuiCallOut,
   EuiContextMenu,
   EuiFieldNumber,
@@ -31,14 +30,20 @@ import {
 import { css } from '@emotion/css';
 import React, { ReactNode, useState } from 'react';
 import {
+  IngestStreamLifecycle,
+  IngestUpsertRequest,
   ReadStreamDefinition,
+  UnwiredReadStreamDefinition,
   WiredReadStreamDefinition,
   isDslLifecycle,
   isIlmLifecycle,
   isInheritLifecycle,
   isRoot,
+  isUnwiredReadStream,
+  isWiredReadStream,
 } from '@kbn/streams-schema';
 import { useKibana } from '../../hooks/use_kibana';
+import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 
 enum LifecycleEditAction {
   None,
@@ -55,7 +60,7 @@ export function StreamDetailLifecycle({
   definition,
   refreshDefinition,
 }: {
-  definition?: WiredReadStreamDefinition;
+  definition?: WiredReadStreamDefinition | UnwiredReadStreamDefinition;
   refreshDefinition: () => void;
 }) {
   const theme = useEuiTheme().euiTheme;
@@ -74,12 +79,37 @@ export function StreamDetailLifecycle({
   if (!definition) {
     return null;
   }
+  const { signal } = useAbortController();
+
+  const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
+    try {
+      const request = {
+        ingest: {
+          ...definition.stream.ingest,
+          lifecycle,
+        },
+      } as IngestUpsertRequest;
+
+      await streamsRepositoryClient.fetch('PUT /api/streams/{id}/_ingest', {
+        params: {
+          path: { id: definition.name },
+          body: request,
+        },
+        signal,
+      });
+
+      refreshDefinition();
+    } catch (err) {}
+  };
 
   return (
     <>
-      {openEditModal == LifecycleEditAction.None ? null : LifecycleEditAction.Dsl ? (
-        <DslModal closeModal={() => setOpenEditModal(LifecycleEditAction.None)} />
-      ) : null}
+      <EditLifecycleModal
+        action={openEditModal}
+        definition={definition}
+        closeModal={() => setOpenEditModal(LifecycleEditAction.None)}
+        updateLifecycle={updateLifecycle}
+      />
 
       <EuiFlexItem
         className={css`
@@ -116,14 +146,16 @@ export function StreamDetailLifecycle({
                   <RetentionSummary definition={definition} />
                 </EuiFlexItem>
 
-                <EuiFlexItem grow={4}>
-                  <RetentionMetadata
-                    definition={definition}
-                    openEditModal={(action) => {
-                      setOpenEditModal(action);
-                    }}
-                  />
-                </EuiFlexItem>
+                {isWiredReadStream(definition) ? (
+                  <EuiFlexItem grow={4}>
+                    <RetentionMetadata
+                      definition={definition}
+                      openEditModal={(action) => {
+                        setOpenEditModal(action);
+                      }}
+                    />
+                  </EuiFlexItem>
+                ) : null}
               </EuiFlexGroup>
             </EuiPanel>
           </EuiFlexItem>
@@ -133,7 +165,9 @@ export function StreamDetailLifecycle({
   );
 }
 
-function RetentionSummary({ definition }: { definition: WiredReadStreamDefinition }) {
+function RetentionSummary({ definition }: { definition: ReadStreamDefinition }) {
+  const isWired = isWiredReadStream(definition);
+
   const summaryText = (() => {
     const lifecycle = definition.stream.ingest.lifecycle;
     if (isInheritLifecycle(lifecycle)) {
@@ -147,9 +181,10 @@ function RetentionSummary({ definition }: { definition: WiredReadStreamDefinitio
     } else if (isDslLifecycle(lifecycle)) {
       return (
         <p>
-          This data stream is using a custom data retention as an override at this level.
+          This data stream is using a custom data retention
+          {isWired && !isRoot(definition.name) ? ' as an override at this level' : ''}.
           <br />
-          {isRoot(definition.name)
+          {!isWired || isRoot(definition.name)
             ? 'You can modify it or use an ILM policy.'
             : 'You can modify it, use an ILM policy or inherit the retention of the nearest parent.'}
         </p>
@@ -157,9 +192,10 @@ function RetentionSummary({ definition }: { definition: WiredReadStreamDefinitio
     } else if (isIlmLifecycle(lifecycle)) {
       return (
         <p>
-          This data stream is using an ILM policy as an override at this level.
+          This data stream is using an ILM policy
+          {isWired && !isRoot(definition.name) ? ' as an override at this level' : ''}.
           <br />
-          {isRoot(definition.name)
+          {!isWired || isRoot(definition.name)
             ? 'You can modify it or use a custom data retention.'
             : 'You can modify it, use a custom data retention or inherit the retention of the nearest parent.'}
         </p>
@@ -217,7 +253,7 @@ function RetentionMetadata({
   }) => {
     return (
       <EuiFlexGroup alignItems="center" gutterSize="xl">
-        <EuiFlexItem grow={3}>
+        <EuiFlexItem grow={1}>
           <EuiText>
             <b>{metadata}</b>
           </EuiText>
@@ -253,16 +289,33 @@ function RetentionMetadata({
             items: [
               {
                 name: 'Set specific retention days',
-                onClick: () => openEditModal(LifecycleEditAction.Dsl),
+                onClick: () => {
+                  setMenuOpen(false);
+                  openEditModal(LifecycleEditAction.Dsl);
+                },
               },
-              {
-                name: 'Use a lifecycle policy',
-                onClick: () => openEditModal(LifecycleEditAction.Ilm),
-              },
-              {
-                name: 'Reset to default',
-                onClick: () => openEditModal(LifecycleEditAction.Inherit),
-              },
+              ...(isUnwiredReadStream(definition)
+                ? []
+                : [
+                    {
+                      name: 'Use a lifecycle policy',
+                      onClick: () => {
+                        setMenuOpen(false);
+                        openEditModal(LifecycleEditAction.Ilm);
+                      },
+                    },
+                  ]),
+              ...(isRoot(definition.name)
+                ? []
+                : [
+                    {
+                      name: 'Reset to default',
+                      onClick: () => {
+                        setMenuOpen(false);
+                        openEditModal(LifecycleEditAction.Inherit);
+                      },
+                    },
+                  ]),
             ],
           },
         ]}
@@ -289,7 +342,32 @@ function RetentionMetadata({
   );
 }
 
-function DslModal({ closeModal }: { closeModal: () => void }) {
+interface ModalOptions {
+  closeModal: () => void;
+  updateLifecycle: (lifecycle: IngestStreamLifecycle) => void;
+  definition: ReadStreamDefinition;
+}
+
+function EditLifecycleModal({
+  action,
+  ...options
+}: { action: LifecycleEditAction } & ModalOptions) {
+  if (action === LifecycleEditAction.None) {
+    return null;
+  }
+
+  if (action === LifecycleEditAction.Dsl) {
+    return <DslModal {...options} />;
+  }
+
+  if (action === LifecycleEditAction.Ilm) {
+    return <IlmModal {...options} />;
+  }
+
+  return <InheritModal {...options} />;
+}
+
+function DslModal({ closeModal, updateLifecycle }: ModalOptions) {
   const timeUnits = [
     { name: 'Days', value: 'd' },
     { name: 'Hours', value: 'h' },
@@ -309,7 +387,7 @@ function DslModal({ closeModal }: { closeModal: () => void }) {
       </EuiModalHeader>
 
       <EuiModalBody>
-        Specify a custom data retention period for this stream, ranging from 1 day to unlimited.
+        Specify a custom data retention period for this stream.
         <EuiSpacer />
         <EuiFieldNumber
           value={retentionValue}
@@ -368,8 +446,94 @@ function DslModal({ closeModal }: { closeModal: () => void }) {
         <EuiButtonEmpty color="primary" onClick={() => closeModal()}>
           Cancel
         </EuiButtonEmpty>
-        <EuiButton onClick={() => closeModal()} fill>
+        <EuiButton
+          onClick={() => {
+            updateLifecycle({
+              dsl: {
+                data_retention: noRetention ? undefined : `${retentionValue}${selectedUnit.value}`,
+              },
+            });
+            closeModal();
+          }}
+          fill
+        >
           Save
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  );
+}
+
+function IlmModal({
+  closeModal,
+  updateLifecycle,
+  definition: {
+    stream: {
+      ingest: { lifecycle: existingLifecycle },
+    },
+  },
+}: ModalOptions) {
+  const [selectedPolicy, setSelectedPolicy] = useState(
+    isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : 'my-policy'
+  );
+
+  return (
+    <EuiModal onClose={closeModal}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>Attach a lifecycle policy to this stream</EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        Select a pre-defined policy or visit Index Lifecycle Policies to create a new one.
+        <EuiSpacer />
+        <div>get the policies list here</div>
+        <RetentionChanges />
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty color="primary" onClick={() => closeModal()}>
+          Cancel
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          onClick={() => {
+            updateLifecycle({ ilm: { policy: selectedPolicy } });
+            closeModal();
+          }}
+        >
+          Attach policy
+        </EuiButton>
+      </EuiModalFooter>
+    </EuiModal>
+  );
+}
+
+function InheritModal({ closeModal, updateLifecycle }: ModalOptions) {
+  return (
+    <EuiModal onClose={closeModal}>
+      <EuiModalHeader>
+        <EuiModalHeaderTitle>Set data retention to default</EuiModalHeaderTitle>
+      </EuiModalHeader>
+
+      <EuiModalBody>
+        All custom retention settings for this stream will be removed, resetting it to inherit data
+        retention from its nearest parent.
+        <EuiSpacer />
+        <RetentionChanges />
+      </EuiModalBody>
+
+      <EuiModalFooter>
+        <EuiButtonEmpty color="primary" onClick={() => closeModal()}>
+          Cancel
+        </EuiButtonEmpty>
+        <EuiButton
+          fill
+          onClick={() => {
+            updateLifecycle({ inherit: {} });
+            closeModal();
+          }}
+        >
+          Set to default
         </EuiButton>
       </EuiModalFooter>
     </EuiModal>
