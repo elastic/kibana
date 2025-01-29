@@ -6792,7 +6792,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-source-classifier@link:packages/kbn-repo-source-classifier":
+"@kbn/repo-source-classifier@link:src/dev/packages/repo-source-classifier":
   version "0.0.0"
   uid ""
 
