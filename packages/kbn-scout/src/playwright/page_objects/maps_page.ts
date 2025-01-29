@@ -10,12 +10,12 @@
 import { ScoutPage } from '..';
 
 export class MapsPage {
-  // see: https://github.com/elastic/kibana/pull/204607/files#r1932558888
   readonly directNavigationOrigin = 'maps/map';
 
   constructor(private readonly page: ScoutPage) {}
 
   async gotoNewMap() {
-    await this.page.gotoApp(this.directNavigationOrigin);
+    // see: https://github.com/elastic/kibana/pull/204607/files#r1932558888
+    await this.page.gotoApp('maps/map');
   }
 }
