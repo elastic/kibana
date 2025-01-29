@@ -69,7 +69,7 @@ paths-ignore:
   - src/dev/packages/relocate
   - src/dev/packages/repo-path
   - src/dev/packages/repo-source-classifier
-  - packages/kbn-repo-source-classifier-cli
+  - src/dev/packages/repo-source-classifier-cli
   - packages/kbn-scout
   - packages/kbn-scout-*
   - packages/kbn-some-dev-log

@@ -6788,7 +6788,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-source-classifier-cli@link:packages/kbn-repo-source-classifier-cli":
+"@kbn/repo-source-classifier-cli@link:src/dev/packages/repo-source-classifier-cli":
   version "0.0.0"
   uid ""
 
