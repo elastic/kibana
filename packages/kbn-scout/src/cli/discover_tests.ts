@@ -27,10 +27,10 @@ export const discoverTests: Command<void> = {
     string: ['searchPaths'],
     default: { searchPaths: DEFAULT_TEST_PATH_PATTERNS },
   },
-  run: async ({ flagsReader, log }) => {
+  run: ({ flagsReader, log }) => {
     const searchPaths = flagsReader.arrayOfStrings('searchPaths')!;
 
-    const plugins = await measurePerformance(log, 'Discovering playwright config files', () => {
+    const plugins = measurePerformance(log, 'Discovering playwright config files', () => {
       return getScoutPlaywrightConfigs(searchPaths, log);
     });
 

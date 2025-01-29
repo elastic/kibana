@@ -14,7 +14,7 @@ import {
   createKbnClient,
   createLogger,
   createScoutConfig,
-  measurePerformance,
+  measurePerformanceAsync,
 } from '../../common';
 import { ScoutTestOptions } from '../types';
 
@@ -26,7 +26,7 @@ export async function ingestTestDataHook(config: FullConfig, archives: string[])
     return;
   }
 
-  return measurePerformance(log, '[scout setup]: ingestTestDataHook', async () => {
+  return measurePerformanceAsync(log, '[scout setup]: ingestTestDataHook', async () => {
     // TODO: This should be configurable local vs cloud
     const configName = 'local';
     const projectUse = config.projects[0].use as ScoutTestOptions;
