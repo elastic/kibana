@@ -33,6 +33,7 @@ import {
 } from '@kbn/content-management-favorites-public';
 import { QueryClientProvider, QueryClient } from '@tanstack/react-query';
 import { css } from '@emotion/react';
+import { toMountPoint } from '@kbn/react-kibana-mount';
 
 import { UI_SETTINGS } from '../../common';
 import { useDashboardApi } from '../dashboard_api/use_dashboard_api';
@@ -97,8 +98,7 @@ const DashboardFavoriteButton = ({ dashboardId }: { dashboardId: string }) => {
           id={dashboardId}
           css={css`
             // aligns the favorite button with the breadcrumb height (both classic and solution nav)
-            margin-top: -6px;
-            margin-bottom: -4px;
+            margin-top: -2px;
           `}
         />
       </FavoritesContextProvider>
@@ -199,13 +199,9 @@ export function InternalDashboardTopNav({
                 className="dshTitleBreadcrumbs__updateIcon"
                 onClick={() => openSettingsFlyout(dashboardApi)}
               />
-              {lastSavedId && <DashboardFavoriteButton dashboardId={lastSavedId} />}
             </>
           ) : (
-            <>
-              {dashboardTitle}
-              {lastSavedId && <DashboardFavoriteButton dashboardId={lastSavedId} />}
-            </>
+            <>{dashboardTitle}</>
           ),
       },
     ];
@@ -237,6 +233,17 @@ export function InternalDashboardTopNav({
       );
     }
   }, [redirectTo, dashboardTitle, dashboardApi, viewMode, customLeadingBreadCrumbs, lastSavedId]);
+
+  useEffect(() => {
+    if (lastSavedId) {
+      coreServices.chrome.setBreadcrumbsAppendExtension({
+        content: toMountPoint(<DashboardFavoriteButton dashboardId={lastSavedId} />, coreServices),
+      });
+      return () => {
+        coreServices.chrome.setBreadcrumbsAppendExtension(undefined);
+      };
+    }
+  }, [lastSavedId]);
 
   /**
    * Build app leave handler whenever hasUnsavedChanges changes
