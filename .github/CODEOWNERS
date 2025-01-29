@@ -41,161 +41,6 @@ examples/unified_doc_viewer @elastic/kibana-core
 examples/unified_field_list_examples @elastic/kibana-data-discovery
 examples/user_profile_examples @elastic/kibana-security
 examples/v8_profiler_examples @elastic/response-ops
-packages/core/analytics/core-analytics-browser-mocks @elastic/kibana-core
-packages/core/analytics/core-analytics-server-mocks @elastic/kibana-core
-packages/core/application/core-application-browser-mocks @elastic/kibana-core
-packages/core/apps/core-apps-browser-mocks @elastic/kibana-core
-packages/core/base/core-base-browser-mocks @elastic/kibana-core
-packages/core/base/core-base-server-mocks @elastic/kibana-core
-packages/core/capabilities/core-capabilities-browser-mocks @elastic/kibana-core
-packages/core/capabilities/core-capabilities-server-mocks @elastic/kibana-core
-packages/core/chrome/core-chrome-browser-mocks @elastic/appex-sharedux
-packages/core/deprecations/core-deprecations-browser-mocks @elastic/kibana-core
-packages/core/deprecations/core-deprecations-server-mocks @elastic/kibana-core
-packages/core/doc-links/core-doc-links-browser-mocks @elastic/kibana-core
-packages/core/doc-links/core-doc-links-server-mocks @elastic/kibana-core
-packages/core/elasticsearch/core-elasticsearch-client-server-mocks @elastic/kibana-core
-packages/core/elasticsearch/core-elasticsearch-server-mocks @elastic/kibana-core
-packages/core/environment/core-environment-server-mocks @elastic/kibana-core
-packages/core/execution-context/core-execution-context-browser-mocks @elastic/kibana-core
-packages/core/execution-context/core-execution-context-server-mocks @elastic/kibana-core
-packages/core/fatal-errors/core-fatal-errors-browser-mocks @elastic/kibana-core
-packages/core/http/core-http-browser-mocks @elastic/kibana-core
-packages/core/http/core-http-context-server-mocks @elastic/kibana-core
-packages/core/http/core-http-resources-server-mocks @elastic/kibana-core
-packages/core/http/core-http-router-server-mocks @elastic/kibana-core
-packages/core/http/core-http-server-mocks @elastic/kibana-core
-packages/core/i18n/core-i18n-browser-mocks @elastic/kibana-core
-packages/core/i18n/core-i18n-server-mocks @elastic/kibana-core
-packages/core/injected-metadata/core-injected-metadata-browser-mocks @elastic/kibana-core
-packages/core/integrations/core-integrations-browser-mocks @elastic/kibana-core
-packages/core/lifecycle/core-lifecycle-browser-mocks @elastic/kibana-core
-packages/core/lifecycle/core-lifecycle-server-mocks @elastic/kibana-core
-packages/core/logging/core-logging-browser-mocks @elastic/kibana-core
-packages/core/logging/core-logging-server-mocks @elastic/kibana-core
-packages/core/metrics/core-metrics-collectors-server-mocks @elastic/kibana-core
-packages/core/metrics/core-metrics-server-mocks @elastic/kibana-core
-packages/core/node/core-node-server-mocks @elastic/kibana-core
-packages/core/notifications/core-notifications-browser-mocks @elastic/kibana-core
-packages/core/overlays/core-overlays-browser-mocks @elastic/kibana-core
-packages/core/plugins/core-plugins-browser-mocks @elastic/kibana-core
-packages/core/plugins/core-plugins-server-mocks @elastic/kibana-core
-packages/core/preboot/core-preboot-server-mocks @elastic/kibana-core
-packages/core/rendering/core-rendering-browser-mocks @elastic/kibana-core
-packages/core/rendering/core-rendering-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-api-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-base-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-browser-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-import-export-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-migration-server-mocks @elastic/kibana-core
-packages/core/saved-objects/core-saved-objects-server-mocks @elastic/kibana-core
-packages/core/status/core-status-server-mocks @elastic/kibana-core
-packages/core/test-helpers/core-test-helpers-kbn-server @elastic/kibana-core
-packages/core/test-helpers/core-test-helpers-model-versions @elastic/kibana-core
-packages/core/theme/core-theme-browser-mocks @elastic/kibana-core
-packages/core/ui-settings/core-ui-settings-browser-mocks @elastic/appex-sharedux
-packages/core/ui-settings/core-ui-settings-server-mocks @elastic/appex-sharedux
-packages/core/usage-data/core-usage-data-server-mocks @elastic/kibana-core
-src/dev/packages/ambient-common-types @elastic/kibana-operations
-src/dev/packages/ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/ambient-storybook-types @elastic/kibana-operations
-src/dev/packages/ambient-ui-types @elastic/kibana-operations
-src/dev/packages/apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-src/dev/packages/apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-src/dev/packages/axe-config @elastic/kibana-qa
-src/dev/packages/babel-preset @elastic/kibana-operations
-src/dev/packages/babel-register @elastic/kibana-operations
-src/dev/packages/babel-transform @elastic/kibana-operations
-src/dev/packages/bazel-runner @elastic/kibana-operations
-src/dev/packages/capture-oas-snapshot-cli @elastic/kibana-core
-src/dev/packages/check-mappings-update-cli @elastic/kibana-core
-src/dev/packages/check-prod-native-modules-cli @elastic/kibana-operations
-src/dev/packages/ci-stats-core @elastic/kibana-operations
-src/dev/packages/ci-stats-performance-metrics @elastic/kibana-operations
-src/dev/packages/ci-stats-reporter @elastic/kibana-operations
-src/dev/packages/ci-stats-shipper-cli @elastic/kibana-operations
-src/dev/packages/cli-dev-mode @elastic/kibana-operations
-src/dev/packages/code-owners @elastic/appex-qa
-src/dev/packages/cypress-config @elastic/kibana-operations
-src/dev/packages/dependency-ownership @elastic/kibana-security
-src/dev/packages/dependency-usage @elastic/kibana-security
-src/dev/packages/dev-cli-errors @elastic/kibana-operations
-src/dev/packages/dev-cli-runner @elastic/kibana-operations
-src/dev/packages/dev-proc-runner @elastic/kibana-operations
-src/dev/packages/dev-utils @elastic/kibana-operations
-src/dev/packages/docs-utils @elastic/kibana-operations
-src/dev/packages/es @elastic/kibana-operations
-src/dev/packages/es-archiver @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/eslint-config @elastic/kibana-operations
-src/dev/packages/eslint-plugin-css @elastic/appex-sharedux
-src/dev/packages/eslint-plugin-disable @elastic/kibana-operations
-src/dev/packages/eslint-plugin-eslint @elastic/kibana-operations
-src/dev/packages/eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
-src/dev/packages/eslint-plugin-imports @elastic/kibana-operations
-src/dev/packages/eslint-plugin-telemetry @elastic/obs-knowledge-team
-src/dev/packages/expect @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/find-used-node-modules @elastic/kibana-operations
-src/dev/packages/ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/ftr-common-functional-ui-services @elastic/appex-qa
-src/dev/packages/ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/gen-ai-functional-testing @elastic/appex-ai-infra
-src/dev/packages/generate @elastic/kibana-operations
-src/dev/packages/generate-console-definitions @elastic/kibana-management
-src/dev/packages/get-repo-files @elastic/kibana-operations
-src/dev/packages/import-locator @elastic/kibana-operations
-src/dev/packages/import-resolver @elastic/kibana-operations
-src/dev/packages/jest-serializers @elastic/kibana-operations
-src/dev/packages/journeys @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/json-ast @elastic/kibana-operations
-src/dev/packages/kibana-manifest-schema @elastic/kibana-operations
-src/dev/packages/lint-packages-cli @elastic/kibana-operations
-src/dev/packages/lint-ts-projects-cli @elastic/kibana-operations
-src/dev/packages/managed-vscode-config @elastic/kibana-operations
-src/dev/packages/managed-vscode-config-cli @elastic/kibana-operations
-src/dev/packages/management-storybook-config @elastic/kibana-management
-src/dev/packages/manifest @elastic/kibana-core
-src/dev/packages/mock-idp-plugin @elastic/kibana-security
-src/dev/packages/mock-idp-utils @elastic/kibana-security
-src/dev/packages/openapi-bundler @elastic/security-detection-rule-management
-src/dev/packages/openapi-generator @elastic/security-detection-rule-management
-src/dev/packages/optimizer @elastic/kibana-operations
-src/dev/packages/optimizer-webpack-helpers @elastic/kibana-operations
-src/dev/packages/peggy @elastic/kibana-operations
-src/dev/packages/peggy-loader @elastic/kibana-operations
-src/dev/packages/performance-testing-dataset-extractor @elastic/kibana-performance-testing
-src/dev/packages/picomatcher @elastic/kibana-operations
-src/dev/packages/plugin-check @elastic/appex-sharedux
-src/dev/packages/plugin-generator @elastic/kibana-operations
-src/dev/packages/plugin-helpers @elastic/kibana-operations
-src/dev/packages/relocate @elastic/kibana-core
-src/dev/packages/repo-file-maps @elastic/kibana-operations
-src/dev/packages/repo-linter @elastic/kibana-operations
-src/dev/packages/repo-path @elastic/kibana-operations
-src/dev/packages/repo-source-classifier @elastic/kibana-operations
-src/dev/packages/repo-source-classifier-cli @elastic/kibana-operations
-src/dev/packages/scout @elastic/appex-qa
-src/dev/packages/scout-info @elastic/appex-qa
-src/dev/packages/scout-reporting @elastic/appex-qa
-src/dev/packages/set-map @elastic/kibana-operations
-src/dev/packages/some-dev-log @elastic/kibana-operations
-src/dev/packages/sort-package-json @elastic/kibana-operations
-src/dev/packages/stdio-dev-helpers @elastic/kibana-operations
-src/dev/packages/storybook @elastic/kibana-operations
-src/dev/packages/styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
-src/dev/packages/telemetry-tools @elastic/kibana-core
-src/dev/packages/test @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/test-eui-helpers @elastic/kibana-visualizations
-src/dev/packages/test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/test-subj-selector @elastic/kibana-operations @elastic/appex-qa
-src/dev/packages/tooling-log @elastic/kibana-operations
-src/dev/packages/ts-projects @elastic/kibana-operations
-src/dev/packages/ts-type-check-cli @elastic/kibana-operations
-src/dev/packages/validate-next-docs-cli @elastic/kibana-operations
-src/dev/packages/web-worker-stub @elastic/kibana-operations
-src/dev/packages/whereis-pkg-cli @elastic/kibana-operations
-src/dev/packages/yarn-lock-validator @elastic/kibana-operations
-src/dev/packages/serverless-storybook-config @elastic/appex-sharedux
 src/core @elastic/kibana-core
 src/core/packages/analytics/browser @elastic/kibana-core
 src/core/packages/analytics/browser-internal @elastic/kibana-core
@@ -403,8 +248,107 @@ src/core/packages/user-settings/server @elastic/kibana-security
 src/core/packages/user-settings/server-internal @elastic/kibana-security
 src/core/packages/user-settings/server-mocks @elastic/kibana-security
 src/dev/packages/ambient-common-types @elastic/kibana-operations
+src/dev/packages/ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/ambient-storybook-types @elastic/kibana-operations
+src/dev/packages/ambient-ui-types @elastic/kibana-operations
+src/dev/packages/apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+src/dev/packages/apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+src/dev/packages/axe-config @elastic/kibana-qa
+src/dev/packages/babel-preset @elastic/kibana-operations
+src/dev/packages/babel-register @elastic/kibana-operations
+src/dev/packages/babel-transform @elastic/kibana-operations
+src/dev/packages/bazel-runner @elastic/kibana-operations
+src/dev/packages/capture-oas-snapshot-cli @elastic/kibana-core
+src/dev/packages/check-mappings-update-cli @elastic/kibana-core
+src/dev/packages/check-prod-native-modules-cli @elastic/kibana-operations
+src/dev/packages/ci-stats-core @elastic/kibana-operations
+src/dev/packages/ci-stats-performance-metrics @elastic/kibana-operations
+src/dev/packages/ci-stats-reporter @elastic/kibana-operations
+src/dev/packages/ci-stats-shipper-cli @elastic/kibana-operations
+src/dev/packages/cli-dev-mode @elastic/kibana-operations
+src/dev/packages/code-owners @elastic/appex-qa
 src/dev/packages/core-test-helpers-kbn-server @elastic/kibana-core
 src/dev/packages/core-test-helpers-model-versions @elastic/kibana-core
+src/dev/packages/cypress-config @elastic/kibana-operations
+src/dev/packages/dependency-ownership @elastic/kibana-security
+src/dev/packages/dependency-usage @elastic/kibana-security
+src/dev/packages/dev-cli-errors @elastic/kibana-operations
+src/dev/packages/dev-cli-runner @elastic/kibana-operations
+src/dev/packages/dev-proc-runner @elastic/kibana-operations
+src/dev/packages/dev-utils @elastic/kibana-operations
+src/dev/packages/docs-utils @elastic/kibana-operations
+src/dev/packages/es @elastic/kibana-operations
+src/dev/packages/es-archiver @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/eslint-config @elastic/kibana-operations
+src/dev/packages/eslint-plugin-css @elastic/appex-sharedux
+src/dev/packages/eslint-plugin-disable @elastic/kibana-operations
+src/dev/packages/eslint-plugin-eslint @elastic/kibana-operations
+src/dev/packages/eslint-plugin-i18n @elastic/obs-knowledge-team @elastic/kibana-operations
+src/dev/packages/eslint-plugin-imports @elastic/kibana-operations
+src/dev/packages/eslint-plugin-telemetry @elastic/obs-knowledge-team
+src/dev/packages/expect @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/failed-test-reporter-cli @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/find-used-node-modules @elastic/kibana-operations
+src/dev/packages/ftr-common-functional-services @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/ftr-common-functional-ui-services @elastic/appex-qa
+src/dev/packages/ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/gen-ai-functional-testing @elastic/appex-ai-infra
+src/dev/packages/generate @elastic/kibana-operations
+src/dev/packages/generate-console-definitions @elastic/kibana-management
+src/dev/packages/get-repo-files @elastic/kibana-operations
+src/dev/packages/import-locator @elastic/kibana-operations
+src/dev/packages/import-resolver @elastic/kibana-operations
+src/dev/packages/jest-serializers @elastic/kibana-operations
+src/dev/packages/journeys @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/json-ast @elastic/kibana-operations
+src/dev/packages/kibana-manifest-schema @elastic/kibana-operations
+src/dev/packages/lint-packages-cli @elastic/kibana-operations
+src/dev/packages/lint-ts-projects-cli @elastic/kibana-operations
+src/dev/packages/managed-vscode-config @elastic/kibana-operations
+src/dev/packages/managed-vscode-config-cli @elastic/kibana-operations
+src/dev/packages/management-storybook-config @elastic/kibana-management
+src/dev/packages/manifest @elastic/kibana-core
+src/dev/packages/mock-idp-plugin @elastic/kibana-security
+src/dev/packages/mock-idp-utils @elastic/kibana-security
+src/dev/packages/openapi-bundler @elastic/security-detection-rule-management
+src/dev/packages/openapi-generator @elastic/security-detection-rule-management
+src/dev/packages/optimizer @elastic/kibana-operations
+src/dev/packages/optimizer-webpack-helpers @elastic/kibana-operations
+src/dev/packages/peggy @elastic/kibana-operations
+src/dev/packages/peggy-loader @elastic/kibana-operations
+src/dev/packages/performance-testing-dataset-extractor @elastic/kibana-performance-testing
+src/dev/packages/picomatcher @elastic/kibana-operations
+src/dev/packages/plugin-check @elastic/appex-sharedux
+src/dev/packages/plugin-generator @elastic/kibana-operations
+src/dev/packages/plugin-helpers @elastic/kibana-operations
+src/dev/packages/relocate @elastic/kibana-core
+src/dev/packages/repo-file-maps @elastic/kibana-operations
+src/dev/packages/repo-linter @elastic/kibana-operations
+src/dev/packages/repo-path @elastic/kibana-operations
+src/dev/packages/repo-source-classifier @elastic/kibana-operations
+src/dev/packages/repo-source-classifier-cli @elastic/kibana-operations
+src/dev/packages/scout @elastic/appex-qa
+src/dev/packages/scout-info @elastic/appex-qa
+src/dev/packages/scout-reporting @elastic/appex-qa
+src/dev/packages/serverless-storybook-config @elastic/appex-sharedux
+src/dev/packages/set-map @elastic/kibana-operations
+src/dev/packages/some-dev-log @elastic/kibana-operations
+src/dev/packages/sort-package-json @elastic/kibana-operations
+src/dev/packages/stdio-dev-helpers @elastic/kibana-operations
+src/dev/packages/storybook @elastic/kibana-operations
+src/dev/packages/styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
+src/dev/packages/telemetry-tools @elastic/kibana-core
+src/dev/packages/test @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/test-eui-helpers @elastic/kibana-visualizations
+src/dev/packages/test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/test-subj-selector @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/tooling-log @elastic/kibana-operations
+src/dev/packages/ts-projects @elastic/kibana-operations
+src/dev/packages/ts-type-check-cli @elastic/kibana-operations
+src/dev/packages/validate-next-docs-cli @elastic/kibana-operations
+src/dev/packages/web-worker-stub @elastic/kibana-operations
+src/dev/packages/whereis-pkg-cli @elastic/kibana-operations
+src/dev/packages/yarn-lock-validator @elastic/kibana-operations
 src/platform/packages/private/analytics/utils/analytics_collection_utils @elastic/kibana-core
 src/platform/packages/private/default-nav/analytics @elastic/kibana-data-discovery @elastic/kibana-presentation @elastic/kibana-visualizations
 src/platform/packages/private/default-nav/devtools @elastic/kibana-management
