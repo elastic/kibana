@@ -224,12 +224,7 @@ export async function getResultsForJobId(
   let resp: ESSearchResponse<MLAnomalyDoc> | null = null;
 
   try {
-    resp = await mlResultsService.anomalySearch(
-      {
-        body,
-      },
-      [jobId]
-    );
+    resp = await mlResultsService.anomalySearch(body, [jobId]);
   } catch (error) {
     // search may fail if the job doesn't already exist
     // ignore this error as the outer function call will raise a toast

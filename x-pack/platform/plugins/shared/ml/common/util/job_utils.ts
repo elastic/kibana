@@ -629,7 +629,9 @@ export function basicJobValidation(
     if (skipMmlChecks === false) {
       // model memory limit
       const mml = job.analysis_limits && job.analysis_limits.model_memory_limit;
-      const { messages: mmlUnitMessages, valid: mmlUnitValid } = validateModelMemoryLimitUnits(mml);
+      const { messages: mmlUnitMessages, valid: mmlUnitValid } = validateModelMemoryLimitUnits(
+        mml as string | undefined
+      );
 
       messages.push(...mmlUnitMessages);
       valid = valid && mmlUnitValid;
@@ -714,7 +716,7 @@ export function validateModelMemoryLimit(job: Job, limits: MlServerLimits): Vali
   ) {
     if (typeof limits === 'object' && typeof limits.max_model_memory_limit !== 'undefined') {
       const max = limits.max_model_memory_limit.toUpperCase();
-      const mml = job.analysis_limits.model_memory_limit.toUpperCase();
+      const mml = (job.analysis_limits.model_memory_limit as string | undefined)?.toUpperCase();
 
       // @ts-ignore
       const mmlBytes = numeral(mml).value();

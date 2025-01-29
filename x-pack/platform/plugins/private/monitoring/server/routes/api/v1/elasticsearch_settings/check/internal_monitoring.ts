@@ -50,8 +50,8 @@ const checkLatestMonitoringIsLegacy = async (context: RequestHandlerContext, ind
   const client = (await context.core).elasticsearch.client.asCurrentUser;
   const result = await client.search<estypes.SearchResponse<unknown>>({
     index,
-    body: queryBody,
-  } as estypes.SearchRequest);
+    ...queryBody,
+  });
 
   const { aggregations } = result;
   const counts = {

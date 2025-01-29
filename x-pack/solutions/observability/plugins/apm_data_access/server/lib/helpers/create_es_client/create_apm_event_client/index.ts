@@ -175,15 +175,13 @@ export class APMEventClient {
     const searchParams = {
       ...omit(params, 'apm', 'body'),
       index,
-      body: {
-        ...params.body,
-        query: {
-          bool: {
-            filter: filters,
-            must: compact([params.body.query]),
-          },
+      query: {
+        bool: {
+          filter: filters,
+          must: compact([params.query]),
         },
       },
+      body: params.body,
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
       ignore_unavailable: true,
       preference: 'any',
@@ -214,13 +212,11 @@ export class APMEventClient {
     const searchParams = {
       ...omit(params, 'body'),
       index,
-      body: {
-        ...params.body,
-        query: {
-          bool: {
-            filter,
-            must: compact([params.body.query]),
-          },
+      body: params.body,
+      query: {
+        bool: {
+          filter,
+          must: compact([params.query]),
         },
       },
       ...(this.includeFrozen ? { ignore_throttled: false } : {}),
@@ -265,10 +261,10 @@ export class APMEventClient {
           },
           {
             ...omit(params, 'apm', 'body'),
-            ...params.body,
+            body: params.body,
             query: {
               bool: {
-                filter: compact([params.body.query, ...filters]),
+                filter: compact([params.query, ...filters]),
               },
             },
           },

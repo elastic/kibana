@@ -36,7 +36,7 @@ export async function getDegradedFieldValues({
     ],
   });
 
-  const values = extractAndDeduplicateValues(response.hits.hits, degradedField);
+  const values = extractAndDeduplicateValues(response.hits.hits as SearchHit[], degradedField);
 
   return {
     field: degradedField,

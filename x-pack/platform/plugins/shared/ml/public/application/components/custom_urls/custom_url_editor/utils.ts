@@ -454,12 +454,7 @@ async function getAnomalyDetectionJobTestUrl(
 
   let resp;
   try {
-    resp = await mlApi.results.anomalySearch(
-      {
-        body,
-      },
-      [job.job_id]
-    );
+    resp = await mlApi.results.anomalySearch(body, [job.job_id]);
   } catch (error) {
     // search may fail if the job doesn't already exist
     // ignore this error as the outer function call will raise a toast

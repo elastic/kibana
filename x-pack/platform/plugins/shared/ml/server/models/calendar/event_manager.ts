@@ -35,11 +35,9 @@ export class EventManager {
   }
 
   async addEvents(calendarId: string, events: ScheduledEvent[]) {
-    const body = { events };
-
     return await this._mlClient.postCalendarEvents({
       calendar_id: calendarId,
-      body,
+      events,
     });
   }
 

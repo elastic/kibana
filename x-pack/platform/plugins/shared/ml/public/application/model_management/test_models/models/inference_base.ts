@@ -325,7 +325,7 @@ export abstract class InferenceBase<TInferResponse> {
   }
 
   protected async runPipelineSimulate(
-    processResponse: (d: estypes.IngestSimulateDocumentSimulation) => TInferResponse
+    processResponse: (d: estypes.IngestDocumentSimulation) => TInferResponse
   ): Promise<TInferResponse[]> {
     try {
       this.setRunning();
@@ -376,11 +376,10 @@ export abstract class InferenceBase<TInferResponse> {
     };
   }
 
-  protected getDocFromResponse({ doc, error }: estypes.IngestSimulatePipelineSimulation) {
+  protected getDocFromResponse({ doc, error }: estypes.IngestSimulateDocumentResult) {
     if (doc === undefined) {
       if (error) {
-        // @ts-expect-error Error is now typed in estypes. However, I doubt that it doesn't get the HTTP wrapper expected.
-        this.setFinishedWithErrors(error);
+        this.setFinishedWithErrors(error as unknown as MLHttpFetchError);
         throw Error(error.reason);
       }
 

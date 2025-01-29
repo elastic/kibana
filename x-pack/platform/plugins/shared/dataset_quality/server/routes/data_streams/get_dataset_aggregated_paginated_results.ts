@@ -5,7 +5,10 @@
  * 2.0.
  */
 
-import { QueryDslBoolQuery } from '@elastic/elasticsearch/lib/api/types';
+import type {
+  AggregationsCompositeAggregation,
+  QueryDslBoolQuery,
+} from '@elastic/elasticsearch/lib/api/types';
 import type { ElasticsearchClient } from '@kbn/core/server';
 import { DataStreamDocsStat } from '../../../common/api_types';
 import { createDatasetQualityESClient } from '../../utils';
@@ -32,7 +35,9 @@ export async function getAggregatedDatasetPaginatedResults(options: {
 
   const datasetQualityESClient = createDatasetQualityESClient(esClient);
 
-  const aggs = (afterKey?: Dataset) => ({
+  const aggs = (
+    afterKey?: Dataset
+  ): { datasets: { composite: AggregationsCompositeAggregation } } => ({
     datasets: {
       composite: {
         ...(afterKey ? { after: afterKey } : {}),
@@ -64,10 +69,13 @@ export async function getAggregatedDatasetPaginatedResults(options: {
   });
 
   const currResults =
-    response.aggregations?.datasets.buckets.map((bucket) => ({
-      dataset: `${bucket.key.type}-${bucket.key.dataset}-${bucket.key.namespace}`,
-      count: bucket.doc_count,
-    })) ?? [];
+    response.aggregations?.datasets.buckets.map((bucket) => {
+      const key = bucket.key as Dataset;
+      return {
+        dataset: `${key.type}-${key.dataset}-${key.namespace}`,
+        count: bucket.doc_count,
+      };
+    }) ?? [];
 
   const results = [...prevResults, ...currResults];
 

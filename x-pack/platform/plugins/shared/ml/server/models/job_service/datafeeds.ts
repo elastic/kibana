@@ -106,10 +106,8 @@ export function datafeedsProvider(client: IScopedClusterClient, mlClient: MlClie
   async function startDatafeed(datafeedId: string, start?: number, end?: number) {
     return mlClient.startDatafeed({
       datafeed_id: datafeedId,
-      body: {
-        start: start !== undefined ? String(start) : undefined,
-        end: end !== undefined ? String(end) : undefined,
-      },
+      start: start !== undefined ? String(start) : undefined,
+      end: end !== undefined ? String(end) : undefined,
     });
   }
 

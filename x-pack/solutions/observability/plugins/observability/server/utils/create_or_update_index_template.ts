@@ -29,7 +29,7 @@ export async function createOrUpdateIndexTemplate({
     return await pRetry(
       async () => {
         logger.debug(
-          `Create index template: "${indexTemplate.name}" for index pattern "${indexTemplate.body?.index_patterns}"`
+          `Create index template: "${indexTemplate.name}" for index pattern "${indexTemplate.index_patterns}"`
         );
 
         const result = await client.indices.putIndexTemplate(indexTemplate);

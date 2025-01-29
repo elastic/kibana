@@ -228,33 +228,31 @@ export function jobAuditMessagesProvider(
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         size: 0,
-        body: {
-          query,
-          aggs: {
-            levelsPerJob: {
-              terms: {
-                field: 'job_id',
-                size: levelsPerJobAggSize,
-              },
-              aggs: {
-                levels: {
-                  terms: {
-                    field: 'level',
-                  },
-                  aggs: {
-                    latestMessage: {
-                      terms: {
-                        field: 'message.raw',
-                        size: 1,
-                        order: {
-                          latestMessage: 'desc',
-                        },
+        query,
+        aggs: {
+          levelsPerJob: {
+            terms: {
+              field: 'job_id',
+              size: levelsPerJobAggSize,
+            },
+            aggs: {
+              levels: {
+                terms: {
+                  field: 'level',
+                },
+                aggs: {
+                  latestMessage: {
+                    terms: {
+                      field: 'message.raw',
+                      size: 1,
+                      order: {
+                        latestMessage: 'desc',
                       },
-                      aggs: {
-                        latestMessage: {
-                          max: {
-                            field: 'timestamp',
-                          },
+                    },
+                    aggs: {
+                      latestMessage: {
+                        max: {
+                          field: 'timestamp',
                         },
                       },
                     },
@@ -399,12 +397,10 @@ export function jobAuditMessagesProvider(
           ignore_unavailable: true,
           refresh: false,
           conflicts: 'proceed',
-          body: {
-            query,
-            script: {
-              source: 'ctx._source.cleared = true',
-              lang: 'painless',
-            },
+          query,
+          script: {
+            source: 'ctx._source.cleared = true',
+            lang: 'painless',
           },
         },
         { maxRetries: 0 }
@@ -443,36 +439,34 @@ export function jobAuditMessagesProvider(
         index: ML_NOTIFICATION_INDEX_PATTERN,
         ignore_unavailable: true,
         size: 0,
-        body: {
-          query: {
-            bool: {
-              filter: [
-                ...(earliestMs ? [{ range: { timestamp: { gte: earliestMs } } }] : []),
-                { terms: { job_id: jobIds } },
-                {
-                  term: { level: { value: MESSAGE_LEVEL.ERROR } },
-                },
-              ],
-            },
-          },
-          aggs: {
-            by_job: {
-              terms: {
-                field: 'job_id',
-                size: jobIds.length,
+        query: {
+          bool: {
+            filter: [
+              ...(earliestMs ? [{ range: { timestamp: { gte: earliestMs } } }] : []),
+              { terms: { job_id: jobIds } },
+              {
+                term: { level: { value: MESSAGE_LEVEL.ERROR } },
               },
-              aggs: {
-                latest_errors: {
-                  top_hits: {
-                    size: 10,
-                    sort: [
-                      {
-                        timestamp: {
-                          order: 'desc',
-                        },
+            ],
+          },
+        },
+        aggs: {
+          by_job: {
+            terms: {
+              field: 'job_id',
+              size: jobIds.length,
+            },
+            aggs: {
+              latest_errors: {
+                top_hits: {
+                  size: 10,
+                  sort: [
+                    {
+                      timestamp: {
+                        order: 'desc',
                       },
-                    ],
-                  },
+                    },
+                  ],
                 },
               },
             },
