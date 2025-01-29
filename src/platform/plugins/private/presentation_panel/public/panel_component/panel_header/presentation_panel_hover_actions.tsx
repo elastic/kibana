@@ -439,6 +439,7 @@ export const PresentationPanelHoverActions = ({
       {api && hasHoverActions && (
         <div className={classNames('embPanel__hoverActions', className)} css={hoverActionStyles}>
           {dragHandle}
+          {/* Wrapping all "right actions" in a span so that flex space-between works as expected */}
           <span>
             {showNotifications && notificationElements}
             {showDescription && (
