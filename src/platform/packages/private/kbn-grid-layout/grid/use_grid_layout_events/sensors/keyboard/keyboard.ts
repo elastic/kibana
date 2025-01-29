@@ -21,7 +21,12 @@ const keyboardCodes: KeyboardCodes = {
   move: [KeyboardCode.Right, KeyboardCode.Left, KeyboardCode.Down, KeyboardCode.Up],
 };
 
-export const onKeyDown = ({
+const isStartKey = (e: UserKeyboardEvent) => keyboardCodes.start.includes(e.code);
+const isEndKey = (e: UserKeyboardEvent) => keyboardCodes.end.includes(e.code);
+const isCancelKey = (e: UserKeyboardEvent) => keyboardCodes.cancel.includes(e.code);
+const isMoveKey = (e: UserKeyboardEvent) => keyboardCodes.move.includes(e.code);
+
+export const startKeyboardInteraction = ({
   e,
   gridLayoutStateManager,
   onStart,
@@ -38,7 +43,7 @@ export const onKeyDown = ({
   onCancel: () => void;
   onBlur: () => void;
 }) => {
-  const pressedKey = e.code;
+  console.log('startKeyboardInteraction', e.code);
   const {
     interactionEvent$: { value: interactionEvent },
   } = gridLayoutStateManager;
@@ -46,61 +51,72 @@ export const onKeyDown = ({
   if (keyboardCodes.move.includes(e.code)) {
     e.preventDefault();
   }
-  
-  const handleActiveEvent = (event: UserKeyboardEvent) => {
-    console.log('keydown', event);
-    if (!isKeyboardEvent(event)) {
-      document.removeEventListener('keydown', handleActiveEvent);
+
+  function handleActiveEvent(event: UserKeyboardEvent) {
+    console.log('handleActiveEvent', event.code);
+
+    if (!gridLayoutStateManager.interactionEvent$.value) {
       return;
     }
+    console.log('keydown', event);
+
     // if the user pressed a move key, move the interaction event
-    if (keyboardCodes.move.includes(event.code)) {
-      // avoiding scroll
-      // handleScrollToView(interactionEvent.panelDiv, gridLayoutStateManager.runtimeSettings$.value);
-      // todo: scroll to the visible area if handle outside of the viewport
+    if (isMoveKey(event)) {
+      event.stopPropagation();
+      event.preventDefault();
+      handleScrollToView(e.target, interactionEvent?.panelDiv, gridLayoutStateManager.runtimeSettings$.value);
       return onMove(event);
     }
 
-    if (keyboardCodes.end.includes(pressedKey)) {
+    if (isEndKey(event)) {
+      event.preventDefault();
       // document.removeEventListener('scroll', () => onMove(e, gridLayoutStateManager));
-      document.removeEventListener('keydown', handleActiveEvent);
+      removeEventListener();
       return onEnd();
     }
 
-    if (keyboardCodes.cancel.includes(pressedKey)) {
-      document.removeEventListener('keydown', handleActiveEvent);
+    if (isCancelKey(event)) {
+      removeEventListener();
       return onCancel();
     }
+  }
+
+  const removeEventListener = () => {
+    console.log('removeEventListener');
+    document.removeEventListener('keydown', handleActiveEvent);
   };
 
   if (!interactionEvent) {
-    if (keyboardCodes.start.includes(pressedKey)) {
-     
-
-
-      document.addEventListener('keydown', handleActiveEvent, {
-        capture: true, // this disables arrow key scrolling in modern Chrome
-        passive: true,
-      });
-      // e.target!.addEventListener('blur', onBlur, { once: true });
-
+    if (isStartKey(e)) {
+      e.stopPropagation();
+      e.preventDefault();
       //   document.addEventListener('scroll', () => onMove(e, gridLayoutStateManager));
       onStart();
+      document.addEventListener('keydown', handleActiveEvent);
+      e.target!.addEventListener(
+        'blur',
+        () => {
+          onBlur();
+        },
+        { once: true }
+      );
     }
     // if user pressed anything else, ignore the event
     return;
   } else {
-    document.removeEventListener('keydown', handleActiveEvent);
   }
 };
 
-// export const handleScrollToView = (
-//   panelDivRect: HTMLDivElement,
-//   { gutterSize, rowHeight }: RuntimeGridSettings
-// ) => {
-//   panelDivRect.scrollIntoView({
-//     behavior: 'smooth',
-//     block: 'end',
-//     inline: 'end',
-//   });
-// };
+export const handleScrollToView = (
+  target: UserKeyboardEvent['target'],
+  { gutterSize, rowHeight }: RuntimeGridSettings
+) => {
+  const keyboardDif = gutterSize + rowHeight;
+  // get window height
+  const windowHeight = window.innerHeight;
+  if (target.getBoundingClientRect().top < 0.2 *  interactionEvent?.panelDiv) {
+    scrollBy(0, -keyboardDif);
+  } else if (target.getBoundingClientRect().bottom >  interactionEvent?.panelDiv) {
+    scrollBy(0, keyboardDif);
+  }
+};

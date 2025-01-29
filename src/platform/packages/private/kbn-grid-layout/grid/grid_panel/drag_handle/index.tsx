@@ -42,7 +42,7 @@ export const DragHandle = React.forwardRef<
         if (handle === null) return;
         handle.addEventListener('mousedown', startInteraction, { passive: true });
         handle.addEventListener('touchstart', startInteraction, { passive: true });
-        handle.addEventListener('keydown', startInteraction, { passive: true });
+        handle.addEventListener('keydown', startInteraction);
         handle.style.touchAction = 'none';
       }
       removeEventListenersRef.current = () => {

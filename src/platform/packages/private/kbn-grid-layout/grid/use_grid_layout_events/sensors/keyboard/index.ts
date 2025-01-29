@@ -7,4 +7,5 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export { onKeyDown } from './keyboard';
+export { startKeyboardInteraction } from './keyboard';
+export { isKeyboardEvent } from './keyboard';

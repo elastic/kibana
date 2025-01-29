@@ -18,7 +18,7 @@ import {
 } from './sensors';
 import { cancelAction, commitAction, moveAction, startAction } from './state_manager_actions';
 import { UserInteractionEvent } from './types';
-import { isKeyboardEvent, onKeyDown } from './sensors/keyboard/keyboard';
+import { isKeyboardEvent, startKeyboardInteraction } from './sensors/keyboard/keyboard';
 
 /*
  * This hook sets up and manages drag/resize interaction logic for grid panels.
@@ -64,7 +64,7 @@ export const useGridLayoutEvents = ({
         } = gridLayoutStateManager;
         // make sure the user hasn't started another interaction in the meantime
         if (id === panelId && rowIndex === targetRowIndex && type === interactionType) {
-          commitAction(gridLayoutStateManager);
+          cancelAction(gridLayoutStateManager);
         }
       };
 
@@ -86,7 +86,7 @@ export const useGridLayoutEvents = ({
           onEnd,
         });
       } else if (isKeyboardEvent(e)) {
-        onKeyDown({
+        startKeyboardInteraction({
           e,
           gridLayoutStateManager,
           onStart,

@@ -10,9 +10,11 @@
 import { UserInteractionEvent } from '../types';
 import { isMouseEvent } from './mouse';
 import { isTouchEvent } from './touch';
+import { isKeyboardEvent } from './keyboard';
 
 export { isMouseEvent, startMouseInteraction } from './mouse';
 export { isTouchEvent, startTouchInteraction } from './touch';
+export { isKeyboardEvent, startKeyboardInteraction } from './keyboard';
 
 export function getPointerPosition(e: UserInteractionEvent) {
   if (!isMouseEvent(e) && !isTouchEvent(e)) {
@@ -21,3 +23,10 @@ export function getPointerPosition(e: UserInteractionEvent) {
   }
   return isTouchEvent(e) ? e.touches[0] : e;
 }
+
+export const getSensorType = (e: UserInteractionEvent) => {
+  if (isMouseEvent(e)) return 'mouse';
+  if (isTouchEvent(e)) return 'touch';
+  if (isKeyboardEvent(e)) return 'keyboard';
+  return 'unknown';
+};

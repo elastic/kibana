@@ -7,26 +7,31 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { RuntimeGridSettings, PanelInteractionEvent } from '../../../types';
+import { RuntimeGridSettings, PanelInteractionEvent, ActivePanel } from '../../../types';
 import { KeyboardCode, UserKeyboardEvent } from './types';
 
 export const getKeyboardDragPreviewRect = ({
   e,
   interactionEvent,
-  runtimeSettings: { columnPixelWidth, gutterSize, rowHeight },
+  runtimeSettings,
+  activePanel,
 }: {
   e: UserKeyboardEvent;
   interactionEvent: PanelInteractionEvent;
   runtimeSettings: RuntimeGridSettings;
+  activePanel: ActivePanel | undefined;
 }) => {
-  const { top, bottom, left, right } = interactionEvent.panelDiv.getBoundingClientRect();
+  const { top, bottom, left, right } = activePanel?.position || interactionEvent.sensorOffsets;
   const currentCoordinates = { top, bottom, left, right };
+  const { columnPixelWidth, gutterSize, rowHeight } = runtimeSettings;
   switch (e.code) {
     case KeyboardCode.Right:
+      const newLeft = left + columnPixelWidth + gutterSize;
+      const newRight = right + columnPixelWidth + gutterSize;
       return {
         ...currentCoordinates,
-        left: left + columnPixelWidth + gutterSize,
-        right: right + columnPixelWidth + gutterSize,
+        left: newLeft,
+        right: newRight,
       };
     case KeyboardCode.Left:
       return {
@@ -54,10 +59,12 @@ export const getKeyboardResizePreviewRect = ({
   e,
   interactionEvent,
   runtimeSettings: { columnPixelWidth, gutterSize, rowHeight },
+  activePanel,
 }: {
   e: UserKeyboardEvent;
   interactionEvent: PanelInteractionEvent;
   runtimeSettings: RuntimeGridSettings;
+  activePanel: ActivePanel | undefined;
 }) => {
   const { top, bottom, left, right } = interactionEvent.panelDiv.getBoundingClientRect();
   const currentCoordinates = { top, bottom, left, right };

@@ -11,11 +11,11 @@ import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
 import { GridLayoutStateManager, GridPanelData } from '../types';
-import { getDragPreviewRect, getPointerOffsets, getResizePreviewRect } from './pointer_event_utils';
+import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './pointer_event_utils';
 import { resolveGridRow } from '../utils/resolve_grid_row';
 import { isGridDataEqual } from '../utils/equality_checks';
 import { UserInteractionEvent } from './types';
-import { isKeyboardEvent } from './sensors/keyboard/keyboard';
+import { getSensorType, isKeyboardEvent } from './sensors';
 import { getKeyboardDragPreviewRect, getKeyboardResizePreviewRect } from './sensors/keyboard/utils';
 
 export const startAction = (
@@ -25,6 +25,7 @@ export const startAction = (
   rowIndex: number,
   panelId: string
 ) => {
+  console.log('startAction');
   const panelRef = gridLayoutStateManager.panelRefs.current[rowIndex][panelId];
   if (!panelRef) return;
 
@@ -35,25 +36,13 @@ export const startAction = (
     id: panelId,
     panelDiv: panelRef,
     targetRowIndex: rowIndex,
-    pointerOffsets: getPointerOffsets(e, panelRect),
+    sensorOffsets: getSensorOffsets(e, panelRect),
+    sensor: getSensorType(e),
   });
 
-  gridLayoutStateManager.proposedGridLayout$.next(gridLayoutStateManager.gridLayout$.value);
-};
-
-export const commitAction = ({
-  activePanel$,
-  interactionEvent$,
-  gridLayout$,
-  proposedGridLayout$,
-}: GridLayoutStateManager) => {
-  activePanel$.next(undefined);
-  interactionEvent$.next(undefined);
-  const proposedGridLayoutValue = proposedGridLayout$.getValue();
-  if (proposedGridLayoutValue && !deepEqual(proposedGridLayoutValue, gridLayout$.getValue())) {
-    gridLayout$.next(cloneDeep(proposedGridLayoutValue));
-  }
-  proposedGridLayout$.next(undefined);
+  gridLayoutStateManager.proposedGridLayout$.next(
+    cloneDeep(gridLayoutStateManager.gridLayout$.value)
+  );
 };
 
 export const moveAction = (
@@ -62,6 +51,7 @@ export const moveAction = (
   pointerPixel: { clientX: number; clientY: number },
   lastRequestedPanelPosition: MutableRefObject<GridPanelData | undefined>
 ) => {
+  console.log('moveAction');
   const {
     runtimeSettings$: { value: runtimeSettings },
     interactionEvent$,
@@ -88,10 +78,19 @@ export const moveAction = (
 
   const previewRect = (() => {
     if (isKeyboardEvent(e)) {
-      console.log('runtimeSettings', runtimeSettings)
       return isResize
-        ? getKeyboardResizePreviewRect({ e, interactionEvent, runtimeSettings })
-        : getKeyboardDragPreviewRect({ e, interactionEvent, runtimeSettings });
+        ? getKeyboardResizePreviewRect({
+            e,
+            interactionEvent,
+            runtimeSettings,
+            activePanel: activePanel$.value,
+          })
+        : getKeyboardDragPreviewRect({
+            e,
+            interactionEvent,
+            runtimeSettings,
+            activePanel: activePanel$.value,
+          });
     }
     return isResize
       ? getResizePreviewRect({ interactionEvent, pointerPixel, runtimeSettings })
@@ -191,13 +190,32 @@ export const moveAction = (
   }
 };
 
+export const commitAction = ({
+  activePanel$,
+  interactionEvent$,
+  gridLayout$,
+  proposedGridLayout$,
+}: GridLayoutStateManager) => {
+  console.log('commitAction');
+  activePanel$.next(undefined);
+  interactionEvent$.next(undefined);
+  if (proposedGridLayout$.value && !deepEqual(proposedGridLayout$.value, gridLayout$.getValue())) {
+    gridLayout$.next(cloneDeep(proposedGridLayout$.value));
+  }
+  proposedGridLayout$.next(undefined);
+};
+
 export const cancelAction = ({
   activePanel$,
   interactionEvent$,
   gridLayout$,
   proposedGridLayout$,
 }: GridLayoutStateManager) => {
+  console.log('cancelAction');
   activePanel$.next(undefined);
   interactionEvent$.next(undefined);
+  // if (proposedGridLayout$.value) {
+  //   gridLayout$.next(proposedGridLayout$.value);
+  // }
   proposedGridLayout$.next(undefined);
 };

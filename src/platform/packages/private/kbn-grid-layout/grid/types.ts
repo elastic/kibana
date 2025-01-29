@@ -99,7 +99,7 @@ export interface PanelInteractionEvent {
    * The pixel offsets from where the mouse was at drag start to the
    * edges of the panel
    */
-  pointerOffsets: {
+  sensorOffsets: {
     top: number;
     left: number;
     right: number;

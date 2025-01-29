@@ -8,13 +8,10 @@
  */
 
 import { PanelInteractionEvent, RuntimeGridSettings } from '../types';
-import { getPointerPosition } from './sensors';
+import { getGridWidth } from './math_utils';
+import { getPointerPosition, isMouseEvent, isTouchEvent } from './sensors';
+import { isKeyboardEvent } from './sensors/keyboard/keyboard';
 import { UserInteractionEvent } from './types';
-
-const getGridWidth = (runtimeSettings: RuntimeGridSettings) => {
-  const { columnCount, gutterSize, columnPixelWidth } = runtimeSettings;
-  return (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
-};
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
@@ -30,9 +27,9 @@ export const getResizePreviewRect = ({
   return {
     left: panelRect.left,
     top: panelRect.top,
-    bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
+    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
     right: Math.min(
-      pointerPixel.clientX - interactionEvent.pointerOffsets.right,
+      pointerPixel.clientX - interactionEvent.sensorOffsets.right,
       getGridWidth(runtimeSettings)
     ),
   };
@@ -47,21 +44,26 @@ export const getDragPreviewRect = ({
   interactionEvent: PanelInteractionEvent;
 }) => {
   return {
-    left: pointerPixel.clientX - interactionEvent.pointerOffsets.left,
-    top: pointerPixel.clientY - interactionEvent.pointerOffsets.top,
-    bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
-    right: pointerPixel.clientX - interactionEvent.pointerOffsets.right,
+    left: pointerPixel.clientX - interactionEvent.sensorOffsets.left,
+    top: pointerPixel.clientY - interactionEvent.sensorOffsets.top,
+    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
+    right: pointerPixel.clientX - interactionEvent.sensorOffsets.right,
   };
 };
 
 // Calculates the cursor's offset relative to the active panel's edges (top, left, right, bottom).
 // This ensures the dragged or resized panel maintains its position under the cursor during the interaction.
-export function getPointerOffsets(e: UserInteractionEvent, panelRect: DOMRect) {
-  const { clientX, clientY } = getPointerPosition(e);
-  return {
-    top: clientY - panelRect.top,
-    left: clientX - panelRect.left,
-    right: clientX - panelRect.right,
-    bottom: clientY - panelRect.bottom,
-  };
+export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bottom }: DOMRect) {
+  if (isTouchEvent(e) || isMouseEvent(e)) {
+    const { clientX, clientY } = getPointerPosition(e);
+    return {
+      top: clientY - top,
+      left: clientX - left,
+      right: clientX - right,
+      bottom: clientY - bottom,
+    };
+  } else if (isKeyboardEvent(e)) {
+    return { top, left, right, bottom };
+  }
+  throw new Error('Invalid event type');
 }
