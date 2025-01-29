@@ -254,7 +254,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Defend Insights feature
    */
-  defendInsights: false,
+  defendInsights: true,
 
   /**
    * Enables flyout history and new preview navigation
