@@ -23,7 +23,7 @@ describe('Show config panel action', () => {
     action = new ShowConfigPanelAction();
     context = {
       embeddable: {
-        viewMode: viewModeSubject,
+        viewMode$: viewModeSubject,
         onShowConfig: jest.fn(),
         isReadOnlyEnabled: jest.fn().mockReturnValue(true),
         getTypeDisplayName: jest.fn().mockReturnValue('A very fun panel type'),
@@ -43,7 +43,7 @@ describe('Show config panel action', () => {
   });
 
   it('is incompatible when view mode is edit', async () => {
-    (context.embeddable as PublishesViewMode).viewMode = new BehaviorSubject<ViewMode>('edit');
+    (context.embeddable as PublishesViewMode).viewMode$ = new BehaviorSubject<ViewMode>('edit');
     expect(await action.isCompatible(context)).toBe(false);
   });
 

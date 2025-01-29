@@ -59,6 +59,8 @@ export async function executeEditEmbeddableAction({
   const panelManagementApi = setupPanelManagement(uuid, container, {
     isNewlyCreated$,
     setAsCreated: () => isNewlyCreated$.next(false),
+    isReadOnly: () => false,
+    canEdit: () => true,
   });
   const openInlineEditor = prepareInlineEditPanel(
     { attributes },
