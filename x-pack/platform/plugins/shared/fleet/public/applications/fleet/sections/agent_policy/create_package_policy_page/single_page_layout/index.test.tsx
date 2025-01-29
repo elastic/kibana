@@ -743,8 +743,8 @@ describe('When on the package policy create page', () => {
         await waitFor(() => {
           expect(sendCreateAgentPolicy).toHaveBeenCalledWith(
             expect.objectContaining({
-              monitoring_enabled: ['logs', 'metrics', 'traces'],
-              name: 'Agent policy 2',
+              monitoring_enabled: ['logs', 'metrics'],
+              name: 'Agentless policy for nginx-1',
             }),
             { withSysMonitoring: true }
           );
@@ -775,7 +775,7 @@ describe('When on the package policy create page', () => {
               name: 'Agentless policy for nginx-1',
               supports_agentless: true,
             }),
-            { withSysMonitoring: false }
+            { withSysMonitoring: true }
           );
           expect(sendCreatePackagePolicy).toHaveBeenCalled();
         });

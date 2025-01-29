@@ -197,6 +197,7 @@ export interface RegistryImage extends PackageSpecIcon {
 
 export interface DeploymentsModesDefault {
   enabled: boolean;
+  is_default?: boolean;
 }
 
 export interface DeploymentsModesAgentless extends DeploymentsModesDefault {
