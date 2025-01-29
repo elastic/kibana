@@ -10,11 +10,11 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { AllCellsRenderer } from './all_cells_renderer';
-import { getRenderCellValueMock } from './row_cells_renderer.test';
+import { getRenderCellValueMock, generateMockData } from '../../__mocks__';
 import { wrapRenderCellValueWithInTableSearchSupport } from '../wrap_render_cell_value';
 
 describe('AllCellsRenderer', () => {
-  const testData = Array.from({ length: 100 }, (_, i) => [`cell-a-${i}`, `cell-b-${i}`]);
+  const testData = generateMockData(100, 2);
 
   const originalRenderCellValue = jest.fn(getRenderCellValueMock(testData));
 
@@ -74,21 +74,21 @@ describe('AllCellsRenderer', () => {
       expect(onFinish).toHaveBeenCalledWith({
         matchesList: testData.map((rowData, rowIndex) => ({
           rowIndex,
-          rowMatchesCount: 4,
-          matchesCountPerColumnId: { columnA: 2, columnB: 2 },
+          rowMatchesCount: 10,
+          matchesCountPerColumnId: { columnA: 5, columnB: 5 },
         })),
-        totalMatchesCount: testData.length * 2 * 2, // 2 matches in every cell
+        totalMatchesCount: testData.length * 5 * 2, // 5 matches per cell, 2 cells in a row
       });
     });
   });
 
-  it('counts matches correctly', async () => {
+  it('counts a single match correctly', async () => {
     const onFinish = jest.fn();
     const renderCellValue = jest.fn(
       wrapRenderCellValueWithInTableSearchSupport(originalRenderCellValue)
     );
     const visibleColumns = ['columnA', 'columnB'];
-    const inTableSearchTerm = 'cell-a-1';
+    const inTableSearchTerm = 'cell-in-row-10-col-0';
 
     render(
       <AllCellsRenderer
@@ -115,7 +115,7 @@ describe('AllCellsRenderer', () => {
             };
           })
           .filter(Boolean),
-        totalMatchesCount: 11,
+        totalMatchesCount: 1,
       });
     });
   });

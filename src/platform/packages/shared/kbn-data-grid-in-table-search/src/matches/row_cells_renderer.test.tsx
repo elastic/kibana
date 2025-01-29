@@ -8,22 +8,10 @@
  */
 
 import React from 'react';
-import { EuiDataGridCellValueElementProps } from '@elastic/eui';
 import { render, waitFor } from '@testing-library/react';
 import { RowCellsRenderer } from './row_cells_renderer';
 import { wrapRenderCellValueWithInTableSearchSupport } from '../wrap_render_cell_value';
-
-export function getRenderCellValueMock(testData: string[][]) {
-  return ({ colIndex, rowIndex }: EuiDataGridCellValueElementProps) => {
-    const cellValue = testData[rowIndex][colIndex];
-
-    if (!cellValue) {
-      throw new Error('Testing unexpected errors');
-    }
-
-    return <div>{cellValue}</div>;
-  };
-}
+import { getRenderCellValueMock } from '../../__mocks__/render_cell_value_mock';
 
 describe('RowCellsRenderer', () => {
   const testData = [

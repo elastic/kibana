@@ -61,7 +61,8 @@ If you are using `EuiDataGrid` directly, you can enable in-table search by impor
     </div>
 ```
 
-Examples can be found inside `kbn-unified-data-table` package.
+An example of how to use this package can be found in `kbn-data-grid-in-table-search/__mocks__/data_grid_example.tsx` 
+or in `kbn-unified-data-table` package.
 
 
 

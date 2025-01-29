@@ -18,7 +18,7 @@ export interface UseDataGridInTableSearchProps
   extends Pick<InTableSearchControlProps, 'rows' | 'visibleColumns'> {
   enableInTableSearch?: boolean;
   dataGridWrapper: HTMLElement | null;
-  dataGridRef: React.RefObject<EuiDataGridRefProps>;
+  dataGridRef: React.RefObject<EuiDataGridRefProps | null>;
   cellContext: EuiDataGridProps['cellContext'] | undefined;
   pagination: EuiDataGridProps['pagination'] | undefined;
   renderCellValue: EuiDataGridProps['renderCellValue'];

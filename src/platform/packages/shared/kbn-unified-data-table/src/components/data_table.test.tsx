@@ -10,6 +10,13 @@
 import React, { useCallback, useState } from 'react';
 import { ReactWrapper } from 'enzyme';
 import {
+  BUTTON_NEXT_TEST_SUBJ,
+  BUTTON_TEST_SUBJ,
+  COUNTER_TEST_SUBJ,
+  HIGHLIGHT_CLASS_NAME,
+  INPUT_TEST_SUBJ,
+} from '@kbn/data-grid-in-table-search';
+import {
   EuiButton,
   EuiDataGrid,
   EuiDataGridCellValueElementProps,
@@ -38,7 +45,7 @@ import {
   testTrailingControlColumns,
 } from '../../__mocks__/external_control_columns';
 import { DatatableColumnType } from '@kbn/expressions-plugin/common';
-import { render, screen, waitFor } from '@testing-library/react';
+import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
 import { CELL_CLASS } from '../utils/get_render_cell_value';
 import { defaultTimeColumnWidth } from '../constants';
@@ -1459,5 +1466,57 @@ describe('UnifiedDataTable', () => {
 
       expect(onChangePageMock).toHaveBeenNthCalledWith(1, 0);
     });
+  });
+
+  describe('enableInTableSearch', () => {
+    it(
+      'should render find-button if enableInTableSearch is true',
+      async () => {
+        await renderDataTable({ enableInTableSearch: true, columns: ['bytes'] });
+
+        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
+
+        screen.getByTestId(BUTTON_TEST_SUBJ).click();
+
+        expect(screen.getByTestId(INPUT_TEST_SUBJ)).toBeInTheDocument();
+
+        const searchTerm = '50';
+        const input = screen.getByTestId(INPUT_TEST_SUBJ);
+        fireEvent.change(input, { target: { value: searchTerm } });
+        expect(input).toHaveValue(searchTerm);
+
+        await waitFor(() => {
+          expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
+        });
+
+        await waitFor(() => {
+          const highlights = screen.getAllByText(searchTerm);
+          expect(highlights.length).toBeGreaterThan(0);
+          expect(
+            highlights.every(
+              (highlight) =>
+                highlight.tagName === 'MARK' && highlight.classList.contains(HIGHLIGHT_CLASS_NAME)
+            )
+          ).toBe(true);
+        });
+
+        screen.getByTestId(BUTTON_NEXT_TEST_SUBJ).click();
+
+        await waitFor(() => {
+          expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('2/3');
+        });
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should not render find-button if enableInTableSearch is false',
+      async () => {
+        await renderDataTable({ enableInTableSearch: false, columns: ['bytes'] });
+
+        expect(screen.queryByTestId(BUTTON_TEST_SUBJ)).not.toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
   });
 });
