@@ -6,7 +6,7 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { IScopedClusterClient } from '@kbn/core/server';
 import { EnrichedDeprecationInfo } from '../../../common/types';
 

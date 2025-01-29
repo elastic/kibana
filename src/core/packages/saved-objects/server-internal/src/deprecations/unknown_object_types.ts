@@ -141,8 +141,6 @@ export const deleteUnknownTypeObjects = async ({
   await esClient.asInternalUser.deleteByQuery({
     index: targetIndices,
     wait_for_completion: false,
-    body: {
-      query: nonRegisteredTypesQuery,
-    },
+    query: nonRegisteredTypesQuery,
   });
 };

@@ -8,7 +8,7 @@
 import type { IScopedClusterClient } from '@kbn/core/server';
 import { i18n } from '@kbn/i18n';
 import { each, find, get, keyBy, map, reduce, sortBy } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { extent, max, min } from 'd3';
 import { isPopulatedObject } from '@kbn/ml-is-populated-object';
 import { isDefined } from '@kbn/ml-is-defined';

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { RequestHandlerContext } from '@kbn/core/server';
 import { prefixIndexPatternWithCcs } from '../../../../../../common/ccs_utils';
 import {

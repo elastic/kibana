@@ -56,7 +56,7 @@ export const esSearchStrategyProvider = (
       throw new KbnSearchError(`Unsupported index pattern type ${request.indexType}`, 400);
     }
 
-    const isPit = request.params?.body?.pit != null;
+    const isPit = request.params?.pit != null;
 
     const search = async () => {
       try {

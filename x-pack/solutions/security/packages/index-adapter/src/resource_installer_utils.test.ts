@@ -64,19 +64,19 @@ describe('getIndexTemplate', () => {
   });
 
   it('should create not hidden index template', () => {
-    const { body } = getIndexTemplate({ ...defaultParams, isDataStream: true, hidden: false });
+    const body = getIndexTemplate({ ...defaultParams, isDataStream: true, hidden: false });
     expect(body?.data_stream?.hidden).toEqual(false);
     expect(body?.template?.settings?.hidden).toEqual(false);
   });
 
   it('should create index template with custom namespace', () => {
-    const { body } = getIndexTemplate({ ...defaultParams, namespace: 'custom-namespace' });
+    const body = getIndexTemplate({ ...defaultParams, namespace: 'custom-namespace' });
     expect(body?._meta?.namespace).toEqual('custom-namespace');
     expect(body?.priority).toEqual(16);
   });
 
   it('should create index template with template overrides', () => {
-    const { body } = getIndexTemplate({
+    const body = getIndexTemplate({
       ...defaultParams,
       template: {
         settings: {

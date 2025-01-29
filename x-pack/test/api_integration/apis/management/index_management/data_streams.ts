@@ -202,12 +202,10 @@ export default function ({ getService }: FtrProviderContext) {
           logsdbSettings.forEach(({ enabled, indexMode }) => {
             it(`returns ${indexMode} index mode if logsdb.enabled setting is ${enabled}`, async () => {
               await es.cluster.putSettings({
-                body: {
-                  persistent: {
-                    cluster: {
-                      logsdb: {
-                        enabled,
-                      },
+                persistent: {
+                  cluster: {
+                    logsdb: {
+                      enabled,
                     },
                   },
                 },

@@ -379,7 +379,7 @@ export class SessionIndex {
       const response = await this.options.elasticsearchClient.deleteByQuery({
         index: this.aliasName,
         refresh: false,
-        body: { query: deleteQuery },
+        query: deleteQuery,
       });
       return response.deleted as number;
     } catch (err) {

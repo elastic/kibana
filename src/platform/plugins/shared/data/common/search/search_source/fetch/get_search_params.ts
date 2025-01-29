@@ -41,7 +41,6 @@ export function getSearchParamsFromRequest(
   return {
     index,
     body,
-    // @ts-ignore
     track_total_hits,
     ...(dataView?.getAllowHidden() && { expand_wildcards: 'all' }),
     ...searchParams,

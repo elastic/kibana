@@ -5,10 +5,15 @@
  * 2.0.
  */
 
+import type { Duration } from '@elastic/elasticsearch/lib/api/types';
 import { TIME_UNITS } from '../constants';
 
-export const deserializeTime = (time: string) => {
+export const deserializeTime = (time: Duration) => {
   const timeUnits = Object.values(TIME_UNITS);
+
+  if (typeof time !== 'string') {
+    return {};
+  }
 
   const timeUnit = timeUnits.find((unit) => {
     const unitIndex = time.indexOf(unit);

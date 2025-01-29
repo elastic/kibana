@@ -308,12 +308,10 @@ export function registerRepositoriesRoutes({
       try {
         const response = await clusterClient.asCurrentUser.snapshot.createRepository({
           name,
-          body: {
-            // @ts-expect-error upgrade to @elastic/elasticsearch v8.13.0: can't be string, only valid "source"
-            type,
-            // TODO: Bring {@link RepositorySettings} in line with {@link SnapshotRepositorySettings}
-            settings: serializeRepositorySettings(settings),
-          },
+          // @ts-expect-error upgrade to @elastic/elasticsearch v8.13.0: can't be string, only valid "source"
+          type,
+          // TODO: Bring {@link RepositorySettings} in line with {@link SnapshotRepositorySettings}
+          settings: serializeRepositorySettings(settings),
           verify: false,
         });
 

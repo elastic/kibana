@@ -102,7 +102,7 @@ export const getEqlFn = ({
         query: args.query,
         size: args.size,
         fields: args.field,
-      } as unknown as Required<EqlSearchRequest>['body'];
+      } as EqlSearchRequest;
 
       if (input) {
         const dataview = args.index ? await dataViews.create({ title: args.index }) : undefined;
@@ -150,8 +150,8 @@ export const getEqlFn = ({
           search<EqlSearchStrategyRequest, EqlSearchStrategyResponse>(
             {
               params: {
+                ...dsl,
                 index: args.index,
-                body: dsl,
               },
             },
             { abortSignal, strategy: EQL_SEARCH_STRATEGY }

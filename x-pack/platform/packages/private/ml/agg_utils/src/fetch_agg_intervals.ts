@@ -102,15 +102,12 @@ export const fetchAggIntervals = async (
     {
       index: indexPattern,
       size: 0,
-      body: {
-        query,
-        aggs:
-          randomSamplerProbability === undefined
-            ? buildSamplerAggregation(minMaxAggs, samplerShardSize)
-            : wrap(minMaxAggs),
-        size: 0,
-        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
-      },
+      query,
+      aggs:
+        randomSamplerProbability === undefined
+          ? buildSamplerAggregation(minMaxAggs, samplerShardSize)
+          : wrap(minMaxAggs),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
     { signal: abortSignal, maxRetries: 0 }
   );

@@ -82,7 +82,7 @@ const updateMapping = async ({ logger, esClient, indexName, writeIndexOnly }: Up
       () =>
         esClient.indices.putMapping({
           index: indexName,
-          body: simulatedMapping,
+          ...simulatedMapping,
           write_index_only: writeIndexOnly,
         }),
       { logger }

@@ -519,9 +519,7 @@ export class TaskStore {
       taskVersions = await this.esClientWithoutRetries.mget<never>({
         index: this.index,
         _source: false,
-        body: {
-          ids,
-        },
+        ids,
       });
     } catch (e) {
       this.errors$.next(e);
@@ -619,7 +617,8 @@ export class TaskStore {
       const result = await this.esClientWithoutRetries.search<SavedObjectsRawDoc['_source']>({
         index: this.index,
         ignore_unavailable: true,
-        body: { ...opts, query },
+        ...opts,
+        query,
         ...(limitResponse ? { _source_excludes: ['task.state', 'task.params'] } : {}),
       });
 
@@ -691,7 +690,7 @@ export class TaskStore {
       index: this.index,
       ignore_unavailable: true,
       track_total_hits: true,
-      body: ensureAggregationOnlyReturnsEnabledTaskObjects({
+      ...ensureAggregationOnlyReturnsEnabledTaskObjects({
         query,
         aggs,
         runtime_mappings,
@@ -710,16 +709,15 @@ export class TaskStore {
     try {
       const // eslint-disable-next-line @typescript-eslint/naming-convention
         { total, updated, version_conflicts } = await this.esClientWithoutRetries.updateByQuery(
+          // @ts-expect-error `sort` types don't match usage (although docs are aligned with the types: comma-separated string)
           {
             index: this.index,
             ignore_unavailable: true,
             refresh: true,
             conflicts: 'proceed',
-            body: {
-              ...opts,
-              max_docs,
-              query,
-            },
+            ...opts,
+            max_docs,
+            query,
           },
           { requestTimeout: this.requestTimeouts.update_by_query }
         );

@@ -163,7 +163,7 @@ export const reindexServiceFactory = (
     const { indexName } = reindexOp.attributes;
     const putReadonly = await esClient.indices.putSettings({
       index: indexName,
-      body: { blocks: { write: true } },
+      settings: { blocks: { write: true } },
     });
 
     if (!putReadonly.acknowledged) {

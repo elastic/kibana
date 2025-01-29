@@ -323,6 +323,7 @@ export class ClusterClientAdapter<
         name: indexTemplateName,
         body: {
           ...currentIndexTemplate,
+          // @ts-expect-error https://github.com/elastic/elasticsearch-js/issues/2584
           settings: {
             ...currentIndexTemplate.settings,
             'index.hidden': true,
@@ -354,7 +355,7 @@ export class ClusterClientAdapter<
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.putSettings({
         index: indexName,
-        body: {
+        settings: {
           index: { hidden: true },
         },
       });
@@ -383,25 +384,23 @@ export class ClusterClientAdapter<
     try {
       const esClient = await this.elasticsearchClientPromise;
       await esClient.indices.updateAliases({
-        body: {
-          actions: currentAliasData.map((aliasData) => {
-            const existingAliasOptions = pick(aliasData, [
-              'is_write_index',
-              'filter',
-              'index_routing',
-              'routing',
-              'search_routing',
-            ]);
-            return {
-              add: {
-                ...existingAliasOptions,
-                index: aliasData.indexName,
-                alias: aliasName,
-                is_hidden: true,
-              },
-            };
-          }),
-        },
+        actions: currentAliasData.map((aliasData) => {
+          const existingAliasOptions = pick(aliasData, [
+            'is_write_index',
+            'filter',
+            'index_routing',
+            'routing',
+            'search_routing',
+          ]);
+          return {
+            add: {
+              ...existingAliasOptions,
+              index: aliasData.indexName,
+              alias: aliasName,
+              is_hidden: true,
+            },
+          };
+        }),
       });
     } catch (err) {
       throw new Error(
@@ -444,7 +443,7 @@ export class ClusterClientAdapter<
       const simulatedMapping = get(simulatedIndexMapping, ['template', 'mappings']);
 
       if (simulatedMapping != null) {
-        await esClient.indices.putMapping({ index: name, body: simulatedMapping });
+        await esClient.indices.putMapping({ index: name, ...simulatedMapping });
         this.logger.debug(`Successfully updated concrete index mappings for ${name}`);
       }
     } catch (err) {
@@ -467,7 +466,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.findOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: perPage,
       from: (page - 1) * perPage,
       query,
@@ -482,7 +481,7 @@ export class ClusterClientAdapter<
         index,
         track_total_hits: true,
         seq_no_primary_term: true,
-        body,
+        ...body,
       });
 
       return {
@@ -556,7 +555,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.findOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: perPage,
       from: (page - 1) * perPage,
       query,
@@ -571,7 +570,7 @@ export class ClusterClientAdapter<
       } = await esClient.search<IValidatedEventInternalDocInfo>({
         index,
         track_total_hits: true,
-        body,
+        ...body,
         seq_no_primary_term: true,
       });
       return {
@@ -607,7 +606,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: 0,
       query,
       aggs,
@@ -616,7 +615,7 @@ export class ClusterClientAdapter<
     try {
       const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
-        body,
+        ...body,
       });
       return {
         aggregations,
@@ -643,7 +642,7 @@ export class ClusterClientAdapter<
       pick(queryOptions.aggregateOptions, ['start', 'end', 'filter'])
     );
 
-    const body: estypes.SearchRequest['body'] = {
+    const body: estypes.SearchRequest = {
       size: 0,
       query,
       aggs,
@@ -651,7 +650,7 @@ export class ClusterClientAdapter<
     try {
       const { aggregations, hits } = await esClient.search<IValidatedEvent>({
         index,
-        body,
+        ...body,
       });
       return {
         aggregations,

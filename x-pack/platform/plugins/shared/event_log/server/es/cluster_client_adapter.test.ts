@@ -20,7 +20,7 @@ import {
 import { AggregateOptionsType, queryOptionsSchema } from '../event_log_client';
 import { delay } from '../lib/delay';
 import { pick, times } from 'lodash';
-import type * as estypes from '@elastic/elasticsearch/lib/api/types';
+import type { estypes } from '@elastic/elasticsearch';
 import { fromKueryExpression } from '@kbn/es-query';
 import { getEsNames } from './names';
 
@@ -443,7 +443,7 @@ describe('setIndexToHidden', () => {
     await clusterClientAdapter.setIndexToHidden('foo-bar-000001');
     expect(clusterClient.indices.putSettings).toHaveBeenCalledWith({
       index: 'foo-bar-000001',
-      body: {
+      settings: {
         index: {
           hidden: true,
         },

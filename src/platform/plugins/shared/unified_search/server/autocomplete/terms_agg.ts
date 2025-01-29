@@ -45,7 +45,7 @@ export async function termsAggSuggestions(
   const body = await getBody(autocompleteSearchOptions, field ?? fieldName, query, filters);
 
   const result = await esClient.search(
-    { index, body },
+    { index, ...body },
     {
       signal: abortSignal,
     }

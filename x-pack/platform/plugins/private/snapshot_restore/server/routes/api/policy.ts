@@ -296,11 +296,9 @@ export function registerPolicyRoutes({
 
       try {
         const response = await clusterClient.asCurrentUser.cluster.putSettings({
-          body: {
-            persistent: {
-              slm: {
-                retention_schedule: retentionSchedule,
-              },
+          persistent: {
+            slm: {
+              retention_schedule: retentionSchedule,
             },
           },
         });

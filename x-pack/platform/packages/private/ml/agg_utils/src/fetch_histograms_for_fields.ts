@@ -286,15 +286,12 @@ export const fetchHistogramsForFields = async (params: FetchHistogramsForFieldsP
     {
       index: indexPattern,
       size: 0,
-      body: {
-        query,
-        aggs:
-          randomSamplerProbability === undefined
-            ? buildSamplerAggregation(chartDataAggs, samplerShardSize)
-            : wrap(chartDataAggs),
-        size: 0,
-        ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
-      },
+      query,
+      aggs:
+        randomSamplerProbability === undefined
+          ? buildSamplerAggregation(chartDataAggs, samplerShardSize)
+          : wrap(chartDataAggs),
+      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
     },
     { signal: abortSignal, maxRetries: 0 }
   );

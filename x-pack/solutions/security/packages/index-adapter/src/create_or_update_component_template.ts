@@ -8,7 +8,6 @@
 import type {
   ClusterPutComponentTemplateRequest,
   IndicesGetIndexTemplateIndexTemplateItem,
-  IndicesPutIndexTemplateRequest,
 } from '@elastic/elasticsearch/lib/api/types';
 import type { Logger, ElasticsearchClient } from '@kbn/core/server';
 import { asyncForEach } from '@kbn/std';
@@ -46,6 +45,7 @@ const putIndexTemplateTotalFieldsLimitUsingComponentTemplate = async (
             name: template.name,
             body: {
               ...template.index_template,
+              // @ts-expect-error https://github.com/elastic/elasticsearch-js/issues/2584
               template: {
                 ...template.index_template.template,
                 settings: {
@@ -53,7 +53,7 @@ const putIndexTemplateTotalFieldsLimitUsingComponentTemplate = async (
                   'index.mapping.total_fields.limit': totalFieldsLimit,
                 },
               },
-            } as IndicesPutIndexTemplateRequest['body'],
+            },
           }),
         { logger }
       );

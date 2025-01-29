@@ -45,7 +45,7 @@ const updateTotalFieldLimitSetting = async ({
       () =>
         esClient.indices.putSettings({
           index,
-          body: { 'index.mapping.total_fields.limit': totalFieldsLimit },
+          settings: { 'index.mapping.total_fields.limit': totalFieldsLimit },
         }),
       { logger }
     );

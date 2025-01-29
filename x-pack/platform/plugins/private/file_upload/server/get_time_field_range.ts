@@ -25,22 +25,20 @@ export async function getTimeFieldRange(
   const { aggregations } = await client.asCurrentUser.search({
     index,
     size: 0,
-    body: {
-      ...(query ? { query } : {}),
-      aggs: {
-        earliest: {
-          min: {
-            field: timeFieldName,
-          },
-        },
-        latest: {
-          max: {
-            field: timeFieldName,
-          },
+    ...(query ? { query } : {}),
+    aggs: {
+      earliest: {
+        min: {
+          field: timeFieldName,
         },
       },
-      ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
+      latest: {
+        max: {
+          field: timeFieldName,
+        },
+      },
     },
+    ...(isPopulatedObject(runtimeMappings) ? { runtime_mappings: runtimeMappings } : {}),
   });
 
   if (aggregations && aggregations.earliest && aggregations.latest) {

@@ -117,18 +117,16 @@ export const getResponse = async ({
   size = SIZE,
 }: GetResponseOptions): Promise<estypes.SearchResponse<SearchEsListItemSchema>> => {
   return (await esClient.search<SearchEsListItemSchema>({
-    body: {
-      query: {
-        term: {
-          list_id: listId,
-        },
-      },
-      search_after: searchAfter,
-      sort: [{ tie_breaker_id: 'asc' }],
-    },
     ignore_unavailable: true,
     index: listItemIndex,
+    query: {
+      term: {
+        list_id: listId,
+      },
+    },
+    search_after: searchAfter,
     size,
+    sort: [{ tie_breaker_id: 'asc' }],
   })) as unknown as estypes.SearchResponse<SearchEsListItemSchema>;
 };
 

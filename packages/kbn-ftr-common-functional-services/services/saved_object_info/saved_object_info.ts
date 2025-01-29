@@ -41,7 +41,7 @@ export const types =
           const body = await new Client({ node, Connection: HttpConnection }).search({
             index,
             size: 0,
-            body: query,
+            ...query,
           });
           return body;
         },

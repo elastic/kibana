@@ -72,11 +72,9 @@ export class TokenAuthenticationProvider extends BaseAuthenticationProvider {
         refresh_token: refreshToken,
         authentication: authenticationInfo,
       } = await this.options.client.asInternalUser.security.getToken({
-        body: {
-          grant_type: 'password',
-          username,
-          password,
-        },
+        grant_type: 'password',
+        username,
+        password,
       });
 
       this.logger.debug('Get token API request to Elasticsearch successful');

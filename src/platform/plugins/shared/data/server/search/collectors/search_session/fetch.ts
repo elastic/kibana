@@ -24,13 +24,11 @@ export function fetchProvider(getIndexForType: (type: string) => Promise<string>
       const searchSessionIndex = await getIndexForType(SEARCH_SESSION_TYPE);
       const esResponse = await esClient.search<unknown>({
         index: searchSessionIndex,
-        body: {
-          size: 0,
-          aggs: {
-            persisted: {
-              terms: {
-                field: `${SEARCH_SESSION_TYPE}.persisted`,
-              },
+        size: 0,
+        aggs: {
+          persisted: {
+            terms: {
+              field: `${SEARCH_SESSION_TYPE}.persisted`,
             },
           },
         },

@@ -29,7 +29,7 @@ import { SearchConfigSchema } from '../../../config';
 // now we get `all_columns` and `columns`
 // `columns` contain only columns with data
 // `all_columns` contain everything
-type ESQLQueryRequest = ESQLSearchParams & SqlQueryRequest['body'];
+type ESQLQueryRequest = ESQLSearchParams & SqlQueryRequest;
 
 export const esqlAsyncSearchStrategyProvider = (
   searchConfig: SearchConfigSchema,

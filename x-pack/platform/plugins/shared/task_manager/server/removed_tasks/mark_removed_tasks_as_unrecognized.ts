@@ -90,19 +90,17 @@ async function queryForRemovedTasks(
 ): Promise<Array<SearchHit<ConcreteTaskInstance>>> {
   const result = await esClient.search<ConcreteTaskInstance>({
     index: TASK_MANAGER_INDEX,
-    body: {
-      size: 100,
-      _source: false,
-      query: {
-        bool: {
-          must: [
-            {
-              terms: {
-                'task.taskType': REMOVED_TYPES,
-              },
+    size: 100,
+    _source: false,
+    query: {
+      bool: {
+        must: [
+          {
+            terms: {
+              'task.taskType': REMOVED_TYPES,
             },
-          ],
-        },
+          },
+        ],
       },
     },
   });

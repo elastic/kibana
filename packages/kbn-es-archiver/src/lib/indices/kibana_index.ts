@@ -45,7 +45,7 @@ export async function deleteSavedObjectIndices({
   await client.indices.putSettings(
     {
       index: indexNames,
-      body: { blocks: { read_only: false } },
+      settings: { blocks: { read_only: false } },
     },
     {
       headers: ES_CLIENT_HEADERS,
@@ -123,13 +123,11 @@ export async function cleanSavedObjectIndices({
       {
         index,
         refresh: true,
-        body: {
-          query: {
-            bool: {
-              must_not: {
-                ids: {
-                  values: ['space:default'],
-                },
+        query: {
+          bool: {
+            must_not: {
+              ids: {
+                values: ['space:default'],
               },
             },
           },

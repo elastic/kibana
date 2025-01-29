@@ -162,10 +162,8 @@ export function createCreateIndexStream({
         await client.indices.create(
           {
             index,
-            body: {
-              settings,
-              mappings,
-            },
+            settings,
+            mappings,
           },
           {
             headers: ES_CLIENT_HEADERS,
@@ -184,7 +182,7 @@ export function createCreateIndexStream({
         );
 
         if (actions.length) {
-          await client.indices.updateAliases({ body: { actions } });
+          await client.indices.updateAliases({ actions });
         }
 
         stats.createdIndex(index, { settings });

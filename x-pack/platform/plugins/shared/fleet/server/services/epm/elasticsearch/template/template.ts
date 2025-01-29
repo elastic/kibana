@@ -1218,7 +1218,7 @@ const updateExistingDataStream = async ({
       () =>
         esClient.indices.putSettings({
           index: dataStreamName,
-          body: { default_pipeline: settings!.index!.default_pipeline },
+          settings: { default_pipeline: settings!.index!.default_pipeline },
         }),
       { logger }
     );
