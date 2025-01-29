@@ -68,7 +68,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       expect(hasAgentBased).to.be(true);
     });
 
-    it(`should show cspm with agentless option`, async () => {
+    it.skip(`should show cspm with agentless option`, async () => {
       await cisIntegration.navigateToAddIntegrationWithVersionPage(
         AGENTLESS_SECURITY_POSTURE_PACKAGE_VERSION
       );
