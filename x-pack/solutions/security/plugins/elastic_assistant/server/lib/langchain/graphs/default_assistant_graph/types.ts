@@ -41,6 +41,7 @@ export interface AgentState extends AgentStateBase {
   connectorId: string;
   conversation: ConversationResponse | undefined;
   conversationId: string;
+  contentReferencesEnabled: boolean;
 }
 
 export interface NodeParamsBase {
