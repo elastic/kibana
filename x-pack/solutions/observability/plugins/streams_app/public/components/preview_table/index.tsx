@@ -6,6 +6,7 @@
  */
 import { EuiDataGrid } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
+import { isEmpty } from 'lodash';
 import React, { useMemo } from 'react';
 
 export function PreviewTable({
@@ -16,7 +17,7 @@ export function PreviewTable({
   displayColumns?: string[];
 }) {
   const columns = useMemo(() => {
-    if (displayColumns) return displayColumns;
+    if (displayColumns && !isEmpty(displayColumns)) return displayColumns;
 
     const cols = new Set<string>();
     documents.forEach((doc) => {

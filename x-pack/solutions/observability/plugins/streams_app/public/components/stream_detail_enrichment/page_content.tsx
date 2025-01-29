@@ -19,11 +19,7 @@ import {
   useEuiTheme,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import {
-  ReadStreamDefinition,
-  getProcessorConfig,
-  isRootStreamDefinition,
-} from '@kbn/streams-schema';
+import { IngestStreamGetResponse, isRootStreamDefinition } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { css } from '@emotion/react';
 import { isEmpty } from 'lodash';
@@ -38,7 +34,7 @@ import { SimulationPlayground } from './simulation_playground';
 import { useProcessingSimulator } from './hooks/use_processing_simulator';
 
 interface StreamDetailEnrichmentContentProps {
-  definition: ReadStreamDefinition;
+  definition: IngestStreamGetResponse;
   refreshDefinition: () => void;
 }
 

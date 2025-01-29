@@ -5,10 +5,10 @@
  * 2.0.
  */
 
-import { useCallback, useEffect, useMemo, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { debounce, isEmpty, uniq, uniqBy } from 'lodash';
 import {
-  ReadStreamDefinition,
+  IngestStreamGetResponse,
   FieldDefinition,
   getProcessorConfig,
   UnaryOperator,
@@ -33,10 +33,10 @@ export interface TableColumn {
 export interface UseProcessingSimulatorReturnType {
   error?: IHttpFetchError<ResponseErrorBody>;
   isLoading: boolean;
-  refreshSamples: () => void;
   samples: Array<Record<PropertyKey, unknown>>;
   simulation?: Simulation | null;
   tableColumns: TableColumn[];
+  refreshSamples: () => void;
   watchProcessor: (processor: ProcessorDefinitionWithUIAttributes) => void;
 }
 
@@ -45,7 +45,7 @@ export const useProcessingSimulator = ({
   fields,
   processors,
 }: {
-  definition: ReadStreamDefinition;
+  definition: IngestStreamGetResponse;
   fields: FieldDefinition[];
   processors: ProcessorDefinitionWithUIAttributes[];
 }): UseProcessingSimulatorReturnType => {
@@ -128,18 +128,12 @@ export const useProcessingSimulator = ({
   const {
     loading: isLoadingSimulation,
     value: simulation,
-    error,
+    error: simulationError,
   } = useStreamsAppFetch(
     ({ signal }) => {
-      if (!definition || isEmpty(sampleDocs)) {
+      if (!definition || isEmpty(sampleDocs) || isEmpty(liveDraftProcessors)) {
         return Promise.resolve(null);
       }
-
-      // const detected_fields = detectedFields
-      //   ? (detectedFields.filter(
-      //       (field) => field.type !== 'unmapped'
-      //     ) as SimulationRequestBody['detected_fields'])
-      //   : undefined;
 
       return streamsRepositoryClient.fetch('POST /api/streams/{id}/processing/_simulate', {
         signal,
@@ -148,23 +142,23 @@ export const useProcessingSimulator = ({
           body: {
             documents: sampleDocs,
             processing: liveDraftProcessors.map(processorConverter.toAPIDefinition),
-            // detected_fields,
           },
         },
       });
     },
-    [definition, sampleDocs, liveDraftProcessors, streamsRepositoryClient],
-    { disableToastOnError: true }
+    [definition, sampleDocs, liveDraftProcessors, streamsRepositoryClient]
   );
 
-  const tableColumns = useMemo(
-    () => getTableColumns(liveDraftProcessors, simulation?.detected_fields ?? []),
-    [liveDraftProcessors, simulation]
-  );
+  const tableColumns = useMemo(() => {
+    // If there is an error, we only want the source fields
+    const detectedFields = simulationError ? [] : simulation?.detected_fields ?? [];
+
+    return getTableColumns(liveDraftProcessors, detectedFields);
+  }, [liveDraftProcessors, simulation, simulationError]);
 
   return {
     isLoading: isLoadingSamples || isLoadingSimulation,
-    error: error as IHttpFetchError<ResponseErrorBody> | undefined,
+    error: simulationError as IHttpFetchError<ResponseErrorBody> | undefined,
     refreshSamples,
     simulation,
     samples: sampleDocs ?? [],

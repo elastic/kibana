@@ -7,8 +7,8 @@
 
 import React, { useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { EuiFlexItem, EuiPanel, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
+import { EuiFlexItem, EuiSpacer, EuiTab, EuiTabs } from '@elastic/eui';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { css } from '@emotion/react';
 import { ProcessorOutcomePreview } from './processor_outcome_preview';
 import { TableColumn, UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
@@ -32,7 +32,7 @@ const tabs = [
 ];
 
 interface SimulationPlaygroundProps {
-  definition: ReadStreamDefinition;
+  definition: IngestStreamGetResponse;
   columns: TableColumn[];
   isLoading: UseProcessingSimulatorReturnType['isLoading'];
   simulation: UseProcessingSimulatorReturnType['simulation'];

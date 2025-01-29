@@ -21,10 +21,10 @@ import {
   EuiBadge,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
-import { ProcessorType, ReadStreamDefinition } from '@kbn/streams-schema';
+import { ProcessorType, IngestStreamGetResponse } from '@kbn/streams-schema';
 import { isEqual } from 'lodash';
-import React, { useEffect, useMemo } from 'react';
-import { useForm, SubmitHandler, FormProvider } from 'react-hook-form';
+import React, { useEffect, useMemo, useState } from 'react';
+import { useForm, SubmitHandler, FormProvider, useWatch } from 'react-hook-form';
 import { css } from '@emotion/react';
 import { useBoolean } from '@kbn/react-hooks';
 import { DissectProcessorForm } from './dissect';
@@ -41,7 +41,7 @@ import { useDiscardConfirm } from '../../../hooks/use_discard_confirm';
 import { UseDefinitionReturn } from '../hooks/use_definition';
 
 export interface ProcessorPanelProps {
-  definition: ReadStreamDefinition;
+  definition: IngestStreamGetResponse;
   onWatchProcessor: (processor: ProcessorDefinitionWithUIAttributes) => void;
 }
 
@@ -58,12 +58,15 @@ export interface EditProcessorPanelProps extends ProcessorPanelProps {
 
 export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
+
+  const [hasChanges, setHasChanges] = useState(false);
   const [isOpen, { on: openPanel, off: closePanel }] = useBoolean(false);
+
   const defaultValues = useMemo(() => getDefaultFormState('grok'), []);
 
   const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
-  const formFields = methods.watch();
+  const type = useWatch({ control: methods.control, name: 'type' });
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
@@ -74,14 +77,10 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
         type: value.type as ProcessorType,
         ...processingDefinition,
       });
+      setHasChanges(!isEqual(defaultValues, value));
     });
     return () => unsubscribe();
-  }, [methods, onWatchProcessor]);
-
-  const hasChanges = useMemo(
-    () => !isEqual(defaultValues, formFields),
-    [defaultValues, formFields]
-  );
+  }, [defaultValues, methods, onWatchProcessor]);
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = async (data) => {
     const processingDefinition = convertFormStateToProcessor(data);
@@ -163,8 +162,8 @@ export function AddProcessorPanel({ onAddProcessor, onWatchProcessor }: AddProce
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector />
             <EuiSpacer size="m" />
-            {formFields.type === 'grok' && <GrokProcessorForm />}
-            {formFields.type === 'dissect' && <DissectProcessorForm />}
+            {type === 'grok' && <GrokProcessorForm />}
+            {type === 'dissect' && <DissectProcessorForm />}
           </EuiForm>
         </FormProvider>
       </EuiAccordion>
@@ -179,6 +178,8 @@ export function EditProcessorPanel({
   processor,
 }: EditProcessorPanelProps) {
   const { euiTheme } = useEuiTheme();
+
+  const [hasChanges, setHasChanges] = useState(false);
   const [isOpen, { on: openPanel, off: closePanel }] = useBoolean();
 
   const processorDescription = getProcessorDescription(processor);
@@ -190,7 +191,7 @@ export function EditProcessorPanel({
 
   const methods = useForm<ProcessorFormState>({ defaultValues, mode: 'onChange' });
 
-  const formFields = methods.watch();
+  const type = useWatch({ control: methods.control, name: 'type' });
 
   useEffect(() => {
     const { unsubscribe } = methods.watch((value) => {
@@ -201,14 +202,10 @@ export function EditProcessorPanel({
         type: value.type as ProcessorType,
         ...processingDefinition,
       });
+      setHasChanges(!isEqual(defaultValues, value));
     });
     return () => unsubscribe();
-  }, [methods, onWatchProcessor, processor]);
-
-  const hasChanges = useMemo(
-    () => !isEqual(defaultValues, formFields),
-    [defaultValues, formFields]
-  );
+  }, [defaultValues, methods, onWatchProcessor, processor.id, processor.status]);
 
   const handleSubmit: SubmitHandler<ProcessorFormState> = (data) => {
     const processorDefinition = convertFormStateToProcessor(data);
@@ -330,8 +327,8 @@ export function EditProcessorPanel({
           <EuiForm component="form" fullWidth onSubmit={methods.handleSubmit(handleSubmit)}>
             <ProcessorTypeSelector disabled />
             <EuiSpacer size="m" />
-            {formFields.type === 'grok' && <GrokProcessorForm />}
-            {formFields.type === 'dissect' && <DissectProcessorForm />}
+            {type === 'grok' && <GrokProcessorForm />}
+            {type === 'dissect' && <DissectProcessorForm />}
             <EuiHorizontalRule margin="m" />
             <EuiButton
               data-test-subj="streamsAppEditProcessorPanelButton"

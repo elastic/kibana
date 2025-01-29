@@ -15,19 +15,22 @@ import {
   EuiLoadingLogo,
   EuiFlexItem,
   EuiSpacer,
+  EuiProgress,
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { TimeRange } from '@kbn/es-query';
-import { ReadStreamDefinition } from '@kbn/streams-schema';
+import { IngestStreamGetResponse } from '@kbn/streams-schema';
 import { flattenObject } from '@kbn/object-utils';
 import { IHttpFetchError, ResponseErrorBody } from '@kbn/core/public';
+import { isEmpty } from 'lodash';
 import { useKibana } from '../../hooks/use_kibana';
 import { StreamsAppSearchBar, StreamsAppSearchBarProps } from '../streams_app_search_bar';
 import { PreviewTable } from '../preview_table';
 import { TableColumn, UseProcessingSimulatorReturnType } from './hooks/use_processing_simulator';
+import { AssetImage } from '../asset_image';
 
 interface ProcessorOutcomePreviewProps {
-  definition: ReadStreamDefinition;
+  definition: IngestStreamGetResponse;
   columns: TableColumn[];
   isLoading: UseProcessingSimulatorReturnType['isLoading'];
   simulation: UseProcessingSimulatorReturnType['simulation'];
@@ -101,12 +104,8 @@ export const ProcessorOutcomePreview = ({
       </EuiFlexItem>
       <EuiSpacer size="m" />
       <EuiFlexItem>
-        <OutcomePreviewTable
-          documents={simulationDocuments}
-          columns={tableColumns}
-          error={simulationError}
-          isLoading={isLoading}
-        />
+        {isLoading && <EuiProgress size="xs" color="accent" position="absolute" />}
+        <OutcomePreviewTable documents={simulationDocuments} columns={tableColumns} />
       </EuiFlexItem>
     </>
   );
@@ -220,73 +219,31 @@ const OutcomeControls = ({
 };
 
 interface OutcomePreviewTableProps {
-  documents?: Array<Record<PropertyKey, unknown>>;
+  documents: Array<Record<PropertyKey, unknown>>;
   columns: string[];
-  error?: IHttpFetchError<ResponseErrorBody>;
-  isLoading?: boolean;
 }
 
-const OutcomePreviewTable = ({
-  documents = [],
-  columns,
-  error,
-  isLoading,
-}: OutcomePreviewTableProps) => {
-  if (error) {
+const OutcomePreviewTable = ({ documents, columns }: OutcomePreviewTableProps) => {
+  if (isEmpty(documents)) {
     return (
       <EuiEmptyPrompt
-        iconType="error"
-        color="danger"
+        titleSize="xs"
+        icon={<AssetImage type="noResults" />}
         title={
-          <h3>
+          <h2>
             {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomePreviewTable.errorTitle',
-              { defaultMessage: 'Unable to display the simulation outcome for this processor.' }
+              'xpack.streams.streamDetailView.managementTab.rootStreamEmptyPrompt.noDataTitle',
+              { defaultMessage: 'Unable to generate a preview' }
             )}
-          </h3>
+          </h2>
         }
-        body={
-          <>
-            <p>
-              {i18n.translate(
-                'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomePreviewTable.errorBody',
-                { defaultMessage: 'The processor did not run correctly.' }
-              )}
-            </p>
-            {error.body?.message ? <p>{error.body.message}</p> : null}
-          </>
-        }
-      />
-    );
-  }
-
-  if (isLoading) {
-    return (
-      <EuiEmptyPrompt
-        icon={<EuiLoadingLogo logo="logoLogging" size="l" />}
-        title={
-          <h3>
-            {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomePreviewTable.loadingTitle',
-              { defaultMessage: 'Running processor simulation' }
-            )}
-          </h3>
-        }
-      />
-    );
-  }
-
-  if (documents?.length === 0) {
-    return (
-      <EuiEmptyPrompt
-        iconType="dataVisualizer"
         body={
           <p>
             {i18n.translate(
-              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomePreviewTable.noDataTitle',
+              'xpack.streams.streamDetailView.managementTab.enrichment.processorFlyout.outcomePreviewTable.noDataBody',
               {
                 defaultMessage:
-                  'There are no simulation outcome documents for the current selection.',
+                  'There are no samples document to test the processors. Try updating the time range or ingesting more data.',
               }
             )}
           </p>

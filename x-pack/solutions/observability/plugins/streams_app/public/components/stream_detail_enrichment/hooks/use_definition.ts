@@ -10,10 +10,10 @@ import { i18n } from '@kbn/i18n';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
 import { useBoolean } from '@kbn/react-hooks';
 import {
-  ReadStreamDefinition,
-  isWiredReadStream,
+  IngestStreamGetResponse,
+  isWiredStreamGetResponse,
   FieldDefinition,
-  WiredReadStreamDefinition,
+  WiredStreamGetResponse,
   IngestUpsertRequest,
   ProcessorDefinition,
   getProcessorType,
@@ -40,7 +40,7 @@ export interface UseDefinitionReturn {
 }
 
 export const useDefinition = (
-  definition: ReadStreamDefinition,
+  definition: IngestStreamGetResponse,
   refreshDefinition: () => void
 ): UseDefinitionReturn => {
   const { core, dependencies } = useKibana();
@@ -59,7 +59,7 @@ export const useDefinition = (
   const initialProcessors = useRef(processors);
 
   const [fields, setFields] = useState(() =>
-    isWiredReadStream(definition) ? definition.stream.ingest.wired.fields : {}
+    isWiredStreamGetResponse(definition) ? definition.stream.ingest.wired.fields : {}
   );
 
   const nextProcessorDefinitions = useMemo(
@@ -87,7 +87,7 @@ export const useDefinition = (
       prevProcs.concat(processorConverter.toUIDefinition(newProcessor, { status: 'draft' }))
     );
 
-    if (isWiredReadStream(definition) && newFields) {
+    if (isWiredStreamGetResponse(definition) && newFields) {
       setFields((currentFields) => mergeFields(definition, currentFields, newFields));
     }
   };
@@ -123,7 +123,7 @@ export const useDefinition = (
     const resetProcessors = createProcessorsList(existingProcessorDefinitions);
     setProcessors(resetProcessors);
     initialProcessors.current = resetProcessors;
-    setFields(isWiredReadStream(definition) ? definition.stream.ingest.wired.fields : {});
+    setFields(isWiredStreamGetResponse(definition) ? definition.stream.ingest.wired.fields : {});
   };
 
   const saveChanges = async () => {
@@ -133,13 +133,13 @@ export const useDefinition = (
         signal: abortController.signal,
         params: {
           path: {
-            id: definition.name,
+            id: definition.stream.name,
           },
           body: {
             ingest: {
               ...definition.stream.ingest,
               processing: nextProcessorDefinitions,
-              ...(isWiredReadStream(definition) && { wired: { fields } }),
+              ...(isWiredStreamGetResponse(definition) && { wired: { fields } }),
             },
           } as IngestUpsertRequest,
         },
@@ -151,8 +151,10 @@ export const useDefinition = (
           { defaultMessage: "Stream's processors updated" }
         )
       );
+
+      refreshDefinition();
     } catch (error) {
-      toasts.addError(error, {
+      toasts.addError(new Error(error.body.message), {
         title: i18n.translate(
           'xpack.streams.streamDetailView.managementTab.enrichment.saveChangesError',
           { defaultMessage: "An issue occurred saving processors' changes." }
@@ -160,7 +162,6 @@ export const useDefinition = (
         toastMessage: error.body.message,
       });
     } finally {
-      await refreshDefinition();
       endsSaving();
     }
   };
@@ -194,7 +195,7 @@ const hasOrderChanged = (
 };
 
 const mergeFields = (
-  definition: WiredReadStreamDefinition,
+  definition: WiredStreamGetResponse,
   currentFields: FieldDefinition,
   newFields: DetectedField[]
 ) => {
