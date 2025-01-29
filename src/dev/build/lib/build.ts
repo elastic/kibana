@@ -33,7 +33,7 @@ export class Build {
   }
 
   getPlatformArchivePath(platform: Platform) {
-    const ext = platform.isWindows() ? 'zip' : 'tar.gz';
+    const ext = platform.isWindows() ? 'zip' : this.config.getTarZstd() ? 'tar.zst' : 'tar.gz';
     const variant = platform.getVariant() ? `-${platform.getVariant()}` : '';
     return this.config.resolveFromRepo(
       'target',

@@ -50,6 +50,7 @@ export function readCliArgs(argv: string[]) {
       'with-test-plugins',
       'with-example-plugins',
       'serverless',
+      'tar-zstd',
     ],
     string: ['docker-namespace', 'epr-registry'],
     alias: {
@@ -156,6 +157,7 @@ export function readCliArgs(argv: string[]) {
     buildCanvasShareableRuntime: !Boolean(flags['skip-canvas-shareable-runtime']),
     withExamplePlugins: Boolean(flags['with-example-plugins']),
     withTestPlugins: Boolean(flags['with-test-plugins']),
+    tarZstd: Boolean(flags['tar-zstd']),
   };
 
   return {
