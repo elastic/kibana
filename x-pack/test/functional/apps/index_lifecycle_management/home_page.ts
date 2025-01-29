@@ -18,6 +18,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const esClient = getService('es');
   const security = getService('security');
   const deployment = getService('deployment');
+  const testSubjects = getService('testSubjects');
 
   describe('Home page', function () {
     before(async () => {
@@ -67,6 +68,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         snapshotRepository: repoName,
       });
 
+      await retry.waitFor('policy flyout', async () => {
+        return (await pageObjects.indexLifecycleManagement.flyoutHeaderText()) === policyName;
+      });
+
+      await pageObjects.indexLifecycleManagement.closePolicyFlyout();
+
       await retry.waitFor('navigation back to home page.', async () => {
         return (
           (await pageObjects.indexLifecycleManagement.pageHeaderText()) ===
@@ -79,6 +86,20 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       const createdPolicy = await pageObjects.indexLifecycleManagement.getPolicyRow(policyName);
 
       expect(createdPolicy.length).to.be(1);
+    });
+
+    it('Shows a prompt when trying to navigate away from the creation form when the form is dirty', async () => {
+      await pageObjects.indexLifecycleManagement.clickCreatePolicyButton();
+
+      await pageObjects.indexLifecycleManagement.fillNewPolicyForm({
+        policyName,
+      });
+
+      // Try to navigate to another page
+      await testSubjects.click('logo');
+
+      // Since the form is now dirty it should trigger a confirmation prompt
+      expect(await testSubjects.exists('navigationBlockConfirmModal')).to.be(true);
     });
   });
 };

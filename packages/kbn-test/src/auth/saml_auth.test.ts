@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { ToolingLog } from '@kbn/tooling-log';
@@ -42,8 +43,11 @@ const mockGetOnce = (mockedUrl: string, response: any) => {
 
 describe('saml_auth', () => {
   describe('createCloudSession', () => {
+    afterEach(() => {
+      axiosRequestMock.mockClear();
+    });
     test('returns token value', async () => {
-      mockRequestOnce('/api/v1/saas/auth/_login', { data: { token: 'mocked_token' } });
+      mockRequestOnce('/api/v1/saas/auth/_login', { data: { token: 'mocked_token' }, status: 200 });
 
       const sessionToken = await createCloudSession({
         hostname: 'cloud',
@@ -52,23 +56,154 @@ describe('saml_auth', () => {
         log,
       });
       expect(sessionToken).toBe('mocked_token');
+      expect(axiosRequestMock).toBeCalledTimes(1);
     });
 
-    test('throws error when response has no token', async () => {
-      mockRequestOnce('/api/v1/saas/auth/_login', { data: { message: 'no token' } });
+    test('retries until response has the token value', async () => {
+      let callCount = 0;
+      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
+        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
+          callCount += 1;
+          if (callCount !== 3) {
+            return Promise.resolve({ data: { message: 'no token' }, status: 503 });
+          } else {
+            return Promise.resolve({
+              data: { token: 'mocked_token' },
+              status: 200,
+            });
+          }
+        }
+        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
+      });
 
-      await expect(
-        createCloudSession({
+      const sessionToken = await createCloudSession(
+        {
           hostname: 'cloud',
           email: 'viewer@elastic.co',
           password: 'changeme',
           log,
-        })
-      ).rejects.toThrow('Unable to create Cloud session, token is missing.');
+        },
+        {
+          attemptsCount: 3,
+          attemptDelay: 100,
+        }
+      );
+
+      expect(sessionToken).toBe('mocked_token');
+      expect(axiosRequestMock).toBeCalledTimes(3);
+    });
+
+    test('retries and throws error when response code is not 200', async () => {
+      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
+        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
+          return Promise.resolve({ data: { message: 'no token' }, status: 503 });
+        }
+        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
+      });
+
+      await expect(
+        createCloudSession(
+          {
+            hostname: 'cloud',
+            email: 'viewer@elastic.co',
+            password: 'changeme',
+            log,
+          },
+          {
+            attemptsCount: 2,
+            attemptDelay: 100,
+          }
+        )
+      ).rejects.toThrow(
+        `Failed to create the new cloud session: 'POST https://cloud/api/v1/saas/auth/_login' returned 503`
+      );
+      expect(axiosRequestMock).toBeCalledTimes(2);
+    });
+
+    test('retries and throws error when response has no token value', async () => {
+      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
+        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
+          return Promise.resolve({
+            data: { user_id: 1234, okta_session_id: 5678, authenticated: false },
+            status: 200,
+          });
+        }
+        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
+      });
+
+      await expect(
+        createCloudSession(
+          {
+            hostname: 'cloud',
+            email: 'viewer@elastic.co',
+            password: 'changeme',
+            log,
+          },
+          {
+            attemptsCount: 3,
+            attemptDelay: 100,
+          }
+        )
+      ).rejects.toThrow(
+        `Failed to create the new cloud session: token is missing in response data\n{"user_id":"REDACTED","okta_session_id":"REDACTED","authenticated":false}`
+      );
+      expect(axiosRequestMock).toBeCalledTimes(3);
+    });
+
+    test(`throws error when retry 'attemptsCount' is below 1`, async () => {
+      await expect(
+        createCloudSession(
+          {
+            hostname: 'cloud',
+            email: 'viewer@elastic.co',
+            password: 'changeme',
+            log,
+          },
+          {
+            attemptsCount: 0,
+            attemptDelay: 100,
+          }
+        )
+      ).rejects.toThrow(
+        'Failed to create the new cloud session, check retry arguments: {"attemptsCount":0,"attemptDelay":100}'
+      );
+    });
+
+    test(`should fail without retry when response has 'mfa_required: true'`, async () => {
+      axiosRequestMock.mockImplementation((config: AxiosRequestConfig) => {
+        if (config.url?.endsWith('/api/v1/saas/auth/_login')) {
+          return Promise.resolve({
+            data: { user_id: 12345, authenticated: false, mfa_required: true },
+            status: 200,
+          });
+        }
+        return Promise.reject(new Error(`Unexpected URL: ${config.url}`));
+      });
+
+      await expect(
+        createCloudSession(
+          {
+            hostname: 'cloud',
+            email: 'viewer@elastic.co',
+            password: 'changeme',
+            log,
+          },
+          {
+            attemptsCount: 3,
+            attemptDelay: 100,
+          }
+        )
+      ).rejects.toThrow(
+        'Failed to create the new cloud session: MFA must be disabled for the test account'
+      );
+      expect(axiosRequestMock).toBeCalledTimes(1);
     });
   });
 
   describe('createSAMLRequest', () => {
+    afterEach(() => {
+      axiosRequestMock.mockClear();
+    });
     test('returns { location, sid }', async () => {
       mockRequestOnce('/internal/security/login', {
         data: {
@@ -95,7 +230,7 @@ describe('saml_auth', () => {
       });
 
       expect(createSAMLRequest('https://kbn.test.co', '8.12.0', log)).rejects.toThrow(
-        `Failed to parse 'set-cookie' header`
+        /Failed to parse cookie from SAML response headers: no 'set-cookie' header, response.data:/
       );
     });
 
@@ -130,6 +265,9 @@ describe('saml_auth', () => {
   });
 
   describe('createSAMLResponse', () => {
+    afterEach(() => {
+      axiosGetMock.mockClear();
+    });
     const location = 'https://cloud.test/saml?SAMLRequest=fVLLbtswEPwVgXe9K6%2F';
     const createSAMLResponseParams = {
       location,
@@ -163,6 +301,9 @@ https://kbn.test.co in the same window.`);
   });
 
   describe('finishSAMLHandshake', () => {
+    afterEach(() => {
+      axiosRequestMock.mockClear();
+    });
     const cookieStr = 'mocked_cookie';
     test('returns valid cookie', async () => {
       mockRequestOnce('/api/security/saml/callback', {
@@ -191,7 +332,9 @@ https://kbn.test.co in the same window.`);
           sid: 'Fe26.2**1234567890',
           log,
         })
-      ).rejects.toThrow(`Failed to parse 'set-cookie' header`);
+      ).rejects.toThrow(
+        /Failed to get cookie from SAML callback response: no 'set-cookie' header, response.data:/
+      );
     });
   });
 });

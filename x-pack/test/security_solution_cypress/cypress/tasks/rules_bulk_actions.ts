@@ -10,10 +10,12 @@ import { recurse } from 'cypress-recurse';
 import {
   CONFIRM_DELETE_RULE_BTN,
   CONFIRM_DUPLICATE_RULE,
+  CONFIRM_MANUAL_RULE_RUN_WARNING_BTN,
   DUPLICATE_WITHOUT_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_OPTION,
   DUPLICATE_WITH_EXCEPTIONS_WITHOUT_EXPIRED_OPTION,
   MODAL_CONFIRMATION_BODY,
+  MODAL_CONFIRMATION_BTN,
   MODAL_CONFIRMATION_TITLE,
   RULES_TAGS_FILTER_BTN,
   TOASTER_BODY,
@@ -49,6 +51,8 @@ import {
   RULES_BULK_EDIT_SCHEDULES_WARNING,
   RULES_BULK_EDIT_TAGS,
   RULES_BULK_EDIT_TIMELINE_TEMPLATES_SELECTOR,
+  BULK_MANUAL_RULE_RUN_BTN,
+  BULK_MANUAL_RULE_RUN_WARNING_MODAL,
   TAGS_RULE_BULK_MENU_ITEM,
   UPDATE_SCHEDULE_INTERVAL_INPUT,
   UPDATE_SCHEDULE_LOOKBACK_INPUT,
@@ -269,10 +273,10 @@ export const typeInvestigationFields = (fields: string[]) => {
 
 export const checkOverwriteInvestigationFieldsCheckbox = () => {
   cy.get(RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX)
-    .should('have.text', "Overwrite all selected rules' custom highlighted fields")
+    .should('have.text', 'Overwrite the custom highlighted fields for the selected rules')
     .click();
   cy.get(RULES_BULK_EDIT_OVERWRITE_INVESTIGATION_FIELDS_CHECKBOX)
-    .should('have.text', "Overwrite all selected rules' custom highlighted fields")
+    .should('have.text', 'Overwrite the custom highlighted fields for the selected rules')
     .get('input')
     .should('be.checked');
 };
@@ -413,19 +417,37 @@ export const checkPrebuiltRulesCannotBeModified = (rulesCount: number) => {
 
 export const checkMachineLearningRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
-    `${rulesCount} custom machine learning rule (these rules don't have index patterns)`
+    `${rulesCount} machine learning rule (these rules don't have index patterns)`
   );
 };
 
 export const checkEsqlRulesCannotBeModified = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_BODY).contains(
-    `${rulesCount} custom ES|QL rule (these rules don't have index patterns)`
+    `${rulesCount} ES|QL rule (these rules don't have index patterns)`
   );
 };
 
-export const waitForMixedRulesBulkEditModal = (customRulesCount: number) => {
+export const waitForMixedRulesBulkEditModal = (rulesCount: number) => {
   cy.get(MODAL_CONFIRMATION_TITLE).should(
     'have.text',
-    `This action can only be applied to ${customRulesCount} custom rules`
+    `This action can only be applied to ${rulesCount} rules`
   );
+};
+
+// SCHEDULE MANUAL RULE RUN
+export const scheduleManualRuleRunForSelectedRules = (
+  enabledCount: number,
+  disabledCount: number
+) => {
+  cy.log('Bulk schedule manual rule run for selected rules');
+  cy.get(BULK_ACTIONS_BTN).click();
+  cy.get(BULK_MANUAL_RULE_RUN_BTN).click();
+  if (disabledCount > 0) {
+    cy.get(BULK_MANUAL_RULE_RUN_WARNING_MODAL).should(
+      'have.text',
+      `This action can only be applied to ${enabledCount} rulesThis action can't be applied to the following rules in your selection:${disabledCount} rules (Cannot schedule manual rule run for disabled rules)CancelSchedule ${enabledCount} rules`
+    );
+    cy.get(CONFIRM_MANUAL_RULE_RUN_WARNING_BTN).click();
+  }
+  cy.get(MODAL_CONFIRMATION_BTN).click();
 };

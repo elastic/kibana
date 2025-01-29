@@ -1,0 +1,25 @@
+{
+  "type": "plugin",
+  "id": "@kbn/management-plugin",
+  "owner": [
+    "@elastic/kibana-management"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "management",
+    "browser": true,
+    "server": true,
+    "requiredPlugins": [
+      "share"
+    ],
+    "optionalPlugins": [
+      "home",
+      "serverless"
+    ],
+    "requiredBundles": [
+      "kibanaReact",
+      "kibanaUtils"
+    ]
+  }
+}

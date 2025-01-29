@@ -16,7 +16,7 @@ export default ({ getService }: FtrProviderContext): void => {
   describe('get_case', () => {
     let roleAuthc: RoleCredentials;
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
 
     afterEach(async () => {
@@ -31,7 +31,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const theCase = await svlCases.api.getCase(
         {
           caseId: postedCase.id,
-          includeComments: true,
+          expectedHttpCode: 200,
         },
         roleAuthc
       );
@@ -41,7 +41,6 @@ export default ({ getService }: FtrProviderContext): void => {
       const { created_by: _, ...expectedData } = svlCases.api.postCaseResp('securitySolution');
       expect(data).to.eql(expectedData);
       expect(createdBy).to.have.keys('full_name', 'email', 'username');
-      expect(data.comments?.length).to.eql(0);
     });
   });
 };

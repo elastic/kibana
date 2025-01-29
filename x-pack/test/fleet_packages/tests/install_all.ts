@@ -14,6 +14,11 @@
 
 import { FtrProviderContext } from '../../api_integration/ftr_provider_context';
 
+const DEPRECATED_PACKAGES = [
+  'zscaler', // deprecated: https://github.com/elastic/integrations/issues/4947
+  'symantec',
+];
+
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
   const supertest = getService('supertest');
@@ -69,8 +74,9 @@ export default function (providerContext: FtrProviderContext) {
         .expect(200);
       const allResults = [];
       for (const pkg of packages) {
-        // skip deprecated failing package https://github.com/elastic/integrations/issues/4947
-        if (pkg.name === 'zscaler') continue;
+        // skip deprecated failing packages
+        if (DEPRECATED_PACKAGES.includes(pkg.name)) continue;
+
         const res = await installPackage(pkg.name, pkg.version);
         allResults.push(res);
         if (res.success) {

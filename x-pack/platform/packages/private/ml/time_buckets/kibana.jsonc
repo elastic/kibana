@@ -1,0 +1,9 @@
+{
+  "type": "shared-common",
+  "id": "@kbn/ml-time-buckets",
+  "owner": [
+    "@elastic/ml-ui"
+  ],
+  "group": "platform",
+  "visibility": "private"
+}

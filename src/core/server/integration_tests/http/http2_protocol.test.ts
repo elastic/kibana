@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { Server } from 'http';
@@ -17,12 +18,19 @@ import {
   config as httpConfig,
   cspConfig,
   externalUrlConfig,
+  permissionsPolicyConfig,
 } from '@kbn/core-http-server-internal';
 import { mockCoreContext } from '@kbn/core-base-server-mocks';
 import type { Logger } from '@kbn/logging';
+import { createTestEnv, getEnvOptions } from '@kbn/config-mocks';
+
+const options = getEnvOptions();
+options.cliArgs.dev = false;
+const env = createTestEnv({ envOptions: options });
 
 const CSP_CONFIG = cspConfig.schema.validate({});
 const EXTERNAL_URL_CONFIG = externalUrlConfig.schema.validate({});
+const PERMISSIONS_POLICY_CONFIG = permissionsPolicyConfig.schema.validate({});
 
 describe('Http2 - Smoke tests', () => {
   let server: HttpServer;
@@ -55,8 +63,9 @@ describe('Http2 - Smoke tests', () => {
         redirectHttpFromPort: 10003,
       },
       shutdownTimeout: '5s',
+      restrictInternalApis: false,
     });
-    config = new HttpConfig(rawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG);
+    config = new HttpConfig(rawConfig, CSP_CONFIG, EXTERNAL_URL_CONFIG, PERMISSIONS_POLICY_CONFIG);
     server = new HttpServer(coreContext, 'tests', of(config.shutdownTimeout));
   });
 
@@ -70,7 +79,7 @@ describe('Http2 - Smoke tests', () => {
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
-        isDev: false,
+        env,
         versionedRouterOptions: {
           defaultHandlerResolutionStrategy: 'oldest',
         },
@@ -173,7 +182,7 @@ describe('Http2 - Smoke tests', () => {
       innerServerListener = innerServer.listener;
 
       const router = new Router('', logger, enhanceWithContext, {
-        isDev: false,
+        env,
         versionedRouterOptions: {
           defaultHandlerResolutionStrategy: 'oldest',
         },

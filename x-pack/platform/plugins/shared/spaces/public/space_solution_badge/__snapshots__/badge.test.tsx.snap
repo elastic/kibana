@@ -1,0 +1,247 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`it renders without crashing with solution provided 1`] = `
+<EuiBadge
+  color="hollow"
+  iconType="logoSecurity"
+  intl={
+    Object {
+      "$t": [Function],
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "style": "long",
+          },
+          "hours": Object {
+            "style": "long",
+          },
+          "minutes": Object {
+            "style": "long",
+          },
+          "months": Object {
+            "style": "long",
+          },
+          "seconds": Object {
+            "style": "long",
+          },
+          "years": Object {
+            "style": "long",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "onError": [Function],
+      "onWarn": [Function],
+      "timeZone": undefined,
+    }
+  }
+>
+  <MemoizedFormattedMessage
+    defaultMessage="Security"
+    id="xpack.spaces.spaceSolutionBadge.security"
+  />
+</EuiBadge>
+`;
+
+exports[`it renders without crashing without solution 1`] = `
+<EuiBadge
+  color="hollow"
+  iconType="logoElasticStack"
+  intl={
+    Object {
+      "$t": [Function],
+      "defaultFormats": Object {
+        "date": Object {
+          "full": Object {
+            "day": "numeric",
+            "month": "long",
+            "weekday": "long",
+            "year": "numeric",
+          },
+          "long": Object {
+            "day": "numeric",
+            "month": "long",
+            "year": "numeric",
+          },
+          "medium": Object {
+            "day": "numeric",
+            "month": "short",
+            "year": "numeric",
+          },
+          "short": Object {
+            "day": "numeric",
+            "month": "numeric",
+            "year": "2-digit",
+          },
+        },
+        "number": Object {
+          "currency": Object {
+            "style": "currency",
+          },
+          "percent": Object {
+            "style": "percent",
+          },
+        },
+        "relative": Object {
+          "days": Object {
+            "style": "long",
+          },
+          "hours": Object {
+            "style": "long",
+          },
+          "minutes": Object {
+            "style": "long",
+          },
+          "months": Object {
+            "style": "long",
+          },
+          "seconds": Object {
+            "style": "long",
+          },
+          "years": Object {
+            "style": "long",
+          },
+        },
+        "time": Object {
+          "full": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "long": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+            "timeZoneName": "short",
+          },
+          "medium": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+            "second": "numeric",
+          },
+          "short": Object {
+            "hour": "numeric",
+            "minute": "numeric",
+          },
+        },
+      },
+      "defaultLocale": "en",
+      "fallbackOnEmptyString": true,
+      "formatDate": [Function],
+      "formatDateTimeRange": [Function],
+      "formatDateToParts": [Function],
+      "formatDisplayName": [Function],
+      "formatList": [Function],
+      "formatListToParts": [Function],
+      "formatMessage": [Function],
+      "formatNumber": [Function],
+      "formatNumberToParts": [Function],
+      "formatPlural": [Function],
+      "formatRelativeTime": [Function],
+      "formatTime": [Function],
+      "formatTimeToParts": [Function],
+      "formats": Object {},
+      "formatters": Object {
+        "getDateTimeFormat": [Function],
+        "getDisplayNames": [Function],
+        "getListFormat": [Function],
+        "getMessageFormat": [Function],
+        "getNumberFormat": [Function],
+        "getPluralRules": [Function],
+        "getRelativeTimeFormat": [Function],
+      },
+      "locale": "en",
+      "messages": Object {},
+      "onError": [Function],
+      "onWarn": [Function],
+      "timeZone": undefined,
+    }
+  }
+>
+  <MemoizedFormattedMessage
+    defaultMessage="Classic"
+    id="xpack.spaces.spaceSolutionBadge.classic"
+  />
+</EuiBadge>
+`;

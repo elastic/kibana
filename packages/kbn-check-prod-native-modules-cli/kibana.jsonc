@@ -1,0 +1,6 @@
+{
+  "type": "shared-server",
+  "id": "@kbn/check-prod-native-modules-cli",
+  "owner": "@elastic/kibana-operations",
+  "devOnly": true
+}

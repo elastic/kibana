@@ -26,13 +26,12 @@ export default function (providerContext: FtrProviderContext) {
       .send({ force: true });
   };
 
-  // FLAKY: https://github.com/elastic/kibana/issues/180062
-  describe.skip('Installing custom integrations', async () => {
+  describe('Installing custom integrations', () => {
     afterEach(async () => {
       await uninstallPackage();
     });
 
-    it("Correcty installs a custom integration and all of it's assets", async () => {
+    it('Correctly installs a custom integration and all of its assets', async () => {
       const response = await supertest
         .post(`/api/fleet/epm/custom_integrations`)
         .set('kbn-xsrf', 'xxxx')
@@ -99,9 +98,17 @@ export default function (providerContext: FtrProviderContext) {
       expect(installation.attributes.version).to.be(INTEGRATION_VERSION);
       expect(installation.attributes.install_source).to.be('custom');
       expect(installation.attributes.install_status).to.be('installed');
+
+      for (const indexTemplate of actualIndexTemplates) {
+        const templateResponse = await esClient.indices.getIndexTemplate({ name: indexTemplate });
+
+        expect(templateResponse.index_templates[0].index_template.composed_of).to.contain(
+          'ecs@mappings'
+        );
+      }
     });
 
-    it('Correctly sets up index templates to create an ECS compliant mapping', async () => {
+    it('Includes custom integration metadata', async () => {
       await supertest
         .post(`/api/fleet/epm/custom_integrations`)
         .set('kbn-xsrf', 'xxxx')
@@ -119,393 +126,45 @@ export default function (providerContext: FtrProviderContext) {
       await esClient.index({
         index: indexName,
         document: {
-          'cloud.account.id': 'xyz',
-          'cloud.availability_zone': 'xyz',
-          'cloud.instance.id': 'xyz',
-          'cloud.instance.name': 'xyz',
-          'cloud.machine.type': 'xyz',
-          'cloud.provider': 'xyz',
-          'cloud.region': 'xyz',
-          'cloud.project.id': 'xyz',
-          'cloud.image.id': 'xyz',
-          'container.id': 'xyz',
-          'container.image.name': 'xyz',
-          'container.labels': { foo_id: 'beef42' },
-          'container.name': 'xyz',
-          'host.architecture': 'xyz',
-          'host.domain': 'xyz',
-          'host.hostname': 'xyz',
-          'host.id': 'xyz',
-          'host.ip': '1.1.1.1',
-          'host.mac': 'xyz',
-          'host.name': 'xyz',
-          'host.os.family': 'xyz',
-          'host.os.kernel': 'xyz',
-          'host.os.name': 'xyz',
-          'host.os.platform': 'xyz',
-          'host.os.version': 'xyz',
-          'host.os.type': 'xyz',
-          'host.os.containerized': true,
-          'host.os.build': 'xyz',
-          'host.os.codename': 'xyz',
-          'input.type': 'xyz',
-          'log.offset': 123,
-          'data_stream.type': 'logs',
+          foo: 'bar',
         },
       });
+
       const response = await esClient.indices.getMapping({ index: indexName });
 
-      expect(Object.values(response)[0].mappings).to.eql({
-        subobjects: false,
-        _meta: {
-          managed_by: 'fleet',
-          managed: true,
-          package: {
-            name: 'my_nginx',
-          },
-        },
-        _data_stream_timestamp: {
-          enabled: true,
-        },
-        dynamic_templates: [
-          {
-            ecs_timestamp: {
-              match: '@timestamp',
-              mapping: {
-                ignore_malformed: false,
-                type: 'date',
-              },
-            },
-          },
-          {
-            ecs_message_match_only_text: {
-              path_match: ['message', '*.message'],
-              unmatch_mapping_type: 'object',
-              mapping: {
-                type: 'match_only_text',
-              },
-            },
-          },
-          {
-            ecs_ip: {
-              path_match: ['ip', '*.ip', '*_ip'],
-              match_mapping_type: 'string',
-              mapping: {
-                type: 'ip',
-              },
-            },
-          },
-          {
-            ecs_wildcard: {
-              path_match: ['*.io.text', '*.message_id', '*registry.data.strings', '*url.path'],
-              unmatch_mapping_type: 'object',
-              mapping: {
-                type: 'wildcard',
-              },
-            },
-          },
-          {
-            ecs_path_match_wildcard_and_match_only_text: {
-              path_match: ['*.body.content', '*url.full', '*url.original'],
-              unmatch_mapping_type: 'object',
-              mapping: {
-                fields: {
-                  text: {
-                    type: 'match_only_text',
-                  },
-                },
-                type: 'wildcard',
-              },
-            },
-          },
-          {
-            ecs_match_wildcard_and_match_only_text: {
-              match: ['*command_line', '*stack_trace'],
-              unmatch_mapping_type: 'object',
-              mapping: {
-                fields: {
-                  text: {
-                    type: 'match_only_text',
-                  },
-                },
-                type: 'wildcard',
-              },
-            },
-          },
-          {
-            ecs_path_match_keyword_and_match_only_text: {
-              path_match: [
-                '*.title',
-                '*.executable',
-                '*.name',
-                '*.working_directory',
-                '*.full_name',
-                '*file.path',
-                '*file.target_path',
-                '*os.full',
-                'email.subject',
-                'vulnerability.description',
-                'user_agent.original',
-              ],
-              unmatch_mapping_type: 'object',
-              mapping: {
-                fields: {
-                  text: {
-                    type: 'match_only_text',
-                  },
-                },
-                type: 'keyword',
-              },
-            },
-          },
-          {
-            ecs_date: {
-              path_match: [
-                '*.timestamp',
-                '*_timestamp',
-                '*.not_after',
-                '*.not_before',
-                '*.accessed',
-                'created',
-                '*.created',
-                '*.installed',
-                '*.creation_date',
-                '*.ctime',
-                '*.mtime',
-                'ingested',
-                '*.ingested',
-                '*.start',
-                '*.end',
-              ],
-              unmatch_mapping_type: 'object',
-              mapping: {
-                type: 'date',
-              },
-            },
-          },
-          {
-            ecs_path_match_float: {
-              path_match: ['*.score.*', '*_score*'],
-              path_unmatch: '*.version',
-              unmatch_mapping_type: 'object',
-              mapping: {
-                type: 'float',
-              },
-            },
-          },
-          {
-            ecs_usage_double_scaled_float: {
-              path_match: '*.usage',
-              match_mapping_type: ['double', 'long', 'string'],
-              mapping: {
-                scaling_factor: 1000,
-                type: 'scaled_float',
-              },
-            },
-          },
-          {
-            ecs_geo_point: {
-              path_match: ['location', '*.location'],
-              mapping: {
-                type: 'geo_point',
-              },
-            },
-          },
-          {
-            ecs_flattened: {
-              path_match: ['*structured_data', '*exports', '*imports'],
-              match_mapping_type: 'object',
-              mapping: {
-                type: 'flattened',
-              },
-            },
-          },
-          {
-            all_strings_to_keywords: {
-              match_mapping_type: 'string',
-              mapping: {
-                ignore_above: 1024,
-                type: 'keyword',
-              },
-            },
-          },
-          {
-            strings_as_keyword: {
-              match_mapping_type: 'string',
-              mapping: {
-                ignore_above: 1024,
-                type: 'keyword',
-              },
-            },
-          },
-        ],
-        date_detection: false,
-        properties: {
-          '@timestamp': {
-            type: 'date',
-            ignore_malformed: false,
-          },
-          'cloud.account.id': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'cloud.availability_zone': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'cloud.image.id': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'cloud.instance.id': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'cloud.instance.name': {
-            type: 'keyword',
-            fields: {
-              text: {
-                type: 'match_only_text',
-              },
-            },
-          },
-          'cloud.machine.type': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'cloud.project.id': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'cloud.provider': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'cloud.region': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'container.id': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'container.image.name': {
-            type: 'keyword',
-            fields: {
-              text: {
-                type: 'match_only_text',
-              },
-            },
-          },
-          'container.labels.foo_id': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'container.name': {
-            type: 'keyword',
-            fields: {
-              text: {
-                type: 'match_only_text',
-              },
-            },
-          },
-          'data_stream.dataset': {
-            type: 'constant_keyword',
-          },
-          'data_stream.namespace': {
-            type: 'constant_keyword',
-          },
-          'data_stream.type': {
-            type: 'constant_keyword',
-            value: 'logs',
-          },
-          'event.agent_id_status': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'event.ingested': {
-            type: 'date',
-            format: 'strict_date_time_no_millis||strict_date_optional_time||epoch_millis',
-          },
-          'host.architecture': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.domain': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.hostname': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.id': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.ip': {
-            type: 'ip',
-          },
-          'host.mac': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.name': {
-            type: 'keyword',
-            fields: {
-              text: {
-                type: 'match_only_text',
-              },
-            },
-          },
-          'host.os.build': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.os.codename': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.os.containerized': {
-            type: 'boolean',
-          },
-          'host.os.family': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.os.kernel': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.os.name': {
-            type: 'keyword',
-            fields: {
-              text: {
-                type: 'match_only_text',
-              },
-            },
-          },
-          'host.os.platform': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.os.type': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'host.os.version': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'input.type': {
-            type: 'keyword',
-            ignore_above: 1024,
-          },
-          'log.offset': {
-            type: 'long',
+      expect(Object.values(response)[0].mappings._meta).to.eql({
+        managed_by: 'fleet',
+        managed: true,
+        package: { name: INTEGRATION_NAME },
+      });
+    });
+
+    it('Works correctly when there is an existing datastream with the same name', async () => {
+      const INTEGRATION_NAME_1 = 'myintegration';
+      const DATASET_NAME = 'test';
+      await esClient.transport.request({
+        method: 'POST',
+        path: `logs-${INTEGRATION_NAME_1}.${DATASET_NAME}-default/_doc`,
+        body: {
+          '@timestamp': '2015-01-01',
+          logs_test_name: `${DATASET_NAME}`,
+          data_stream: {
+            dataset: `${INTEGRATION_NAME_1}.${DATASET_NAME}_logs`,
+            namespace: 'default',
+            type: 'logs',
           },
         },
       });
+      await supertest
+        .post(`/api/fleet/epm/custom_integrations`)
+        .set('kbn-xsrf', 'xxxx')
+        .type('application/json')
+        .send({
+          force: true,
+          integrationName: INTEGRATION_NAME_1,
+          datasets: [{ name: `${INTEGRATION_NAME_1}.${DATASET_NAME}`, type: 'logs' }],
+        })
+        .expect(200);
     });
 
     it('Throws an error when there is a naming collision with a current package installation', async () => {

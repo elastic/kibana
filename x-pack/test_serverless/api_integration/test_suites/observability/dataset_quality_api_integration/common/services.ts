@@ -21,13 +21,13 @@ export type DatasetQualityServices = InheritedServices & {
   datasetQualityApiClient: (
     context: InheritedFtrProviderContext
   ) => Promise<DatasetQualityApiClient>;
-  logSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<LogsSynthtraceEsClient>;
+  logsSynthtraceEsClient: (context: InheritedFtrProviderContext) => Promise<LogsSynthtraceEsClient>;
 };
 
 export const services: DatasetQualityServices = {
   ...inheritedServices,
   datasetQualityApiClient: getDatasetQualityApiClientService,
-  logSynthtraceEsClient: async (context: InheritedFtrProviderContext) =>
+  logsSynthtraceEsClient: async (context: InheritedFtrProviderContext) =>
     new LogsSynthtraceEsClient({
       client: context.getService('es'),
       logger: createLogger(LogLevel.info),

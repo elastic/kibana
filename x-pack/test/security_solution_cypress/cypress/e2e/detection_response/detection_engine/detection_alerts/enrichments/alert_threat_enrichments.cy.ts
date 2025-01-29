@@ -13,7 +13,7 @@ import {
   THREAT_DETAILS_VIEW,
   INDICATOR_MATCH_ENRICHMENT_SECTION,
   INVESTIGATION_TIME_ENRICHMENT_SECTION,
-  THREAT_DETAILS_ACCORDION,
+  ENRICHMENT_SECTION_BUTTON_CONTENT,
 } from '../../../../../screens/alerts_details';
 import { TIMELINE_FIELD } from '../../../../../screens/rule_details';
 import { expandFirstAlert, setEnrichmentDates } from '../../../../../tasks/alerts';
@@ -163,36 +163,39 @@ describe('Threat Match Enrichment', { tags: ['@ess', '@serverless', '@skipInServ
     });
 
     it('Displays matched fields from both indicator match rules and investigation time enrichments on Threat Intel tab', () => {
-      const indicatorMatchRuleEnrichment = {
-        field: 'myhash.mysha256',
-        value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
-        feedName: 'AbuseCH malware',
-      };
-      const investigationTimeEnrichment = {
-        field: 'source.ip',
-        value: '192.168.1.1',
-        feedName: 'feed_name',
-      };
-
       expandFirstAlert();
       expandDocumentDetailsExpandableFlyoutLeftSection();
       openInsightsTab();
       openThreatIntelligenceTab();
       setEnrichmentDates('08/05/2018 10:00 AM');
 
-      cy.get(`${INDICATOR_MATCH_ENRICHMENT_SECTION} ${THREAT_DETAILS_ACCORDION}`)
-        .should('exist')
-        .should(
-          'have.text',
-          `${indicatorMatchRuleEnrichment.field} ${indicatorMatchRuleEnrichment.value} from ${indicatorMatchRuleEnrichment.feedName}`
-        );
+      const indicatorMatchRuleEnrichment = {
+        field: 'myhash.mysha256',
+        value: 'a04ac6d98ad989312783d4fe3456c53730b212c79a426fb215708b6c6daa3de3',
+        feedName: 'AbuseCH malware',
+      };
+      cy.get(`${INDICATOR_MATCH_ENRICHMENT_SECTION}`).within(() => {
+        cy.get(`${ENRICHMENT_SECTION_BUTTON_CONTENT}`)
+          .should('exist')
+          .should(
+            'have.text',
+            `${indicatorMatchRuleEnrichment.field} ${indicatorMatchRuleEnrichment.value} from ${indicatorMatchRuleEnrichment.feedName}`
+          );
+      });
 
-      cy.get(`${INVESTIGATION_TIME_ENRICHMENT_SECTION} ${THREAT_DETAILS_ACCORDION}`)
-        .should('exist')
-        .should(
-          'have.text',
-          `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.feedName}`
-        );
+      const investigationTimeEnrichment = {
+        field: 'source.ip',
+        value: '192.168.1.1',
+        feedName: 'feed_name',
+      };
+      cy.get(`${INVESTIGATION_TIME_ENRICHMENT_SECTION}`).within(() => {
+        cy.get(`${ENRICHMENT_SECTION_BUTTON_CONTENT}`)
+          .should('exist')
+          .should(
+            'have.text',
+            `${investigationTimeEnrichment.field} ${investigationTimeEnrichment.value} from ${investigationTimeEnrichment.feedName}`
+          );
+      });
     });
   });
 });

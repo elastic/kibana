@@ -1,0 +1,19 @@
+{
+  "type": "plugin",
+  "id": "@kbn/licensing-plugin",
+  "owner": [
+    "@elastic/kibana-core"
+  ],
+  "group": "platform",
+  "visibility": "shared",
+  "plugin": {
+    "id": "licensing",
+    "browser": true,
+    "server": true,
+    "configPath": [
+      "xpack",
+      "licensing"
+    ],
+    "requiredBundles": []
+  }
+}

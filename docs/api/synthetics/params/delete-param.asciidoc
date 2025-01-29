@@ -8,9 +8,9 @@ Deletes one or more parameters from the Synthetics app.
 
 === {api-request-title}
 
-`DELETE <kibana host>:<port>/api/synthetics/params`
+`DELETE <kibana host>:<port>/api/synthetics/params/<param_id>`
 
-`DELETE <kibana host>:<port>/s/<space_id>/api/synthetics/params`
+`DELETE <kibana host>:<port>/s/<space_id>/api/synthetics/params/<param_id>`
 
 === {api-prereq-title}
 
@@ -20,26 +20,19 @@ You must have `all` privileges for the *Synthetics* feature in the *{observabili
 You must have `all` privileges for the *Synthetics* feature in the *{observability}* section of the
 <<kibana-feature-privileges,{kib} feature privileges>>.
 
-[[parameters-delete-request-body]]
-==== Request Body
+[[parameters-delete-path-param]]
+==== Path Parameters
 
 The request body should contain an array of parameter IDs that you want to delete.
 
-`ids`::
-(Required, array of strings) An array of parameter IDs to delete.
+`param_id`::
+(Required, string) An id of parameter to delete.
 
-
-Here is an example of a DELETE request to delete a list of parameters by ID:
+Here is an example of a DELETE request to delete a parameter by its ID:
 
 [source,sh]
 --------------------------------------------------
-DELETE /api/synthetics/params
-{
-  "ids": [
-    "param1-id",
-    "param2-id"
-  ]
-}
+DELETE /api/synthetics/params/param_id1
 --------------------------------------------------
 
 [[parameters-delete-response-example]]
@@ -58,10 +51,21 @@ Here's an example response for deleting multiple parameters:
   {
     "id": "param1-id",
     "deleted": true
-  },
-  {
-    "id": "param2-id",
-    "deleted": true
   }
 ]
 --------------------------------------------------
+
+==== Bulk delete parameters
+To delete multiple parameters, you can send a POST request to `/api/synthetics/params/_bulk_delete`  with an array of parameter IDs to delete via body.
+
+Here is an example of a POST request to delete multiple parameters:
+
+[source,sh]
+--------------------------------------------------
+POST /api/synthetics/params/_bulk_delete
+{
+  "ids": ["param1-id", "param2-id"]
+}
+--------------------------------------------------
+
+

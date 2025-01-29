@@ -9,9 +9,11 @@ import expect from '@kbn/expect';
 
 import type { FtrProviderContext } from '../../ftr_provider_context';
 import type { MlCommonFieldStatsFlyout } from './field_stats_flyout';
+import type { MlCommonUI } from './common_ui';
 
 export function MachineLearningJobWizardMultiMetricProvider(
   { getService }: FtrProviderContext,
+  mlCommonUI: MlCommonUI,
   mlCommonFieldStatsFlyout: MlCommonFieldStatsFlyout
 ) {
   const comboBox = getService('comboBox');
@@ -46,7 +48,11 @@ export function MachineLearningJobWizardMultiMetricProvider(
     },
 
     async selectSplitField(identifier: string) {
-      await comboBox.set('mlSplitFieldSelect > comboBoxInput', identifier);
+      await mlCommonUI.setOptionsListWithFieldStatsValue(
+        'mlSplitFieldSelect > comboBoxInput',
+        identifier
+      );
+
       await this.assertSplitFieldSelection([identifier]);
     },
 

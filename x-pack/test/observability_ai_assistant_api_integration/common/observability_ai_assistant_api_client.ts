@@ -15,9 +15,8 @@ import supertest from 'supertest';
 import { Subtract } from 'utility-types';
 import { format, UrlObject } from 'url';
 import { kbnTestConfig } from '@kbn/test';
-import { User } from './users/users';
 
-export async function getScopedApiClient(kibanaServer: UrlObject, username: User['username']) {
+export function getScopedApiClient(kibanaServer: UrlObject, username: string) {
   const { password } = kbnTestConfig.getUrlParts();
   const baseUrlWithAuth = format({
     ...kibanaServer,
@@ -27,6 +26,9 @@ export async function getScopedApiClient(kibanaServer: UrlObject, username: User
   return createObservabilityAIAssistantApiClient(supertest(baseUrlWithAuth));
 }
 
+export type ObservabilityAIAssistantApiClient = ReturnType<
+  typeof createObservabilityAIAssistantApiClient
+>;
 export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
   return <TEndpoint extends ObservabilityAIAssistantAPIEndpoint>(
     options: {
@@ -57,7 +59,7 @@ export function createObservabilityAIAssistantApiClient(st: supertest.Agent) {
         .set('Content-type', 'multipart/form-data');
 
       for (const field of fields) {
-        formDataRequest.field(field[0], field[1]);
+        void formDataRequest.field(field[0], field[1]);
       }
 
       res = formDataRequest;

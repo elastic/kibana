@@ -1,0 +1,63 @@
+openapi: 3.0.0
+
+info:
+  version: '2023-10-31'
+  title: Risk Scoring API
+  description: These APIs allow the consumer to manage Entity Risk Scores within Entity Analytics.
+
+servers:
+  - url: 'http://{kibana_host}:{port}'
+    variables:
+      kibana_host:
+        default: localhost
+      port:
+        default: '5601'
+
+paths:
+  /api/risk_score/engine/schedule_now:
+    post:
+      x-labels: [ess, serverless]
+      x-codegen-enabled: true
+      operationId: ScheduleRiskEngineNow
+      summary: Run the risk scoring engine
+      description: Schedule the risk scoring engine to run as soon as possible. You can use this to recalculate entity risk scores after updating their asset criticality.
+      requestBody:
+        content:
+          application/json: {}
+      responses:
+        '200':
+          description: Successful response
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowResponse'
+        '400':
+          description: Task manager is unavailable
+          content:
+            application/json:
+              schema:
+                $ref: '../common/common.schema.yaml#/components/schemas/TaskManagerUnavailableResponse'
+        default:
+          description: Unexpected error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/RiskEngineScheduleNowErrorResponse'
+
+components:
+  schemas:
+    RiskEngineScheduleNowResponse:
+      type: object
+      properties:
+        success:
+          type: boolean
+    RiskEngineScheduleNowErrorResponse:
+      type: object
+      required:
+        - message
+        - full_error
+      properties:
+        message:
+          type: string
+        full_error:
+          type: string

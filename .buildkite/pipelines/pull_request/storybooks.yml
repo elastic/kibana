@@ -2,9 +2,6 @@ steps:
   - command: .buildkite/scripts/steps/storybooks/build_and_upload.sh
     label: 'Build Storybooks'
     agents:
-      image: family/kibana-ubuntu-2004
-      imageProject: elastic-images-prod
-      provider: gcp
       machineType: n2-standard-8
       preemptible: true
     key: storybooks

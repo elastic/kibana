@@ -11,7 +11,7 @@
         "tags": [],
         "label": "Cluster",
         "description": [],
-        "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+        "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -22,7 +22,7 @@
             "tags": [],
             "label": "name",
             "description": [],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -36,7 +36,7 @@
             "signature": [
               "string[] | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -50,7 +50,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -64,7 +64,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -78,7 +78,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -92,7 +92,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -106,7 +106,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -120,7 +120,7 @@
             "signature": [
               "\"proxy\" | \"sniff\" | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -134,7 +134,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -148,7 +148,7 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -162,7 +162,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -176,7 +176,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -190,7 +190,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -204,7 +204,7 @@
             "signature": [
               "string | number | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -218,7 +218,7 @@
             "signature": [
               "number | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -232,7 +232,7 @@
             "signature": [
               "boolean | undefined"
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -246,7 +246,7 @@
             "signature": [
               "\"certificate\" | \"api_key\""
             ],
-            "path": "x-pack/plugins/remote_clusters/common/lib/cluster_serialization.ts",
+            "path": "x-pack/platform/plugins/private/remote_clusters/common/lib/cluster_serialization.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -266,7 +266,7 @@
         "signature": [
           "\"/api/remote_clusters\""
         ],
-        "path": "x-pack/plugins/remote_clusters/common/constants.ts",
+        "path": "x-pack/platform/plugins/private/remote_clusters/common/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -280,7 +280,7 @@
       "tags": [],
       "label": "RemoteClustersPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
+      "path": "x-pack/platform/plugins/private/remote_clusters/public/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -291,7 +291,7 @@
           "tags": [],
           "label": "isUiEnabled",
           "description": [],
-          "path": "x-pack/plugins/remote_clusters/public/plugin.ts",
+          "path": "x-pack/platform/plugins/private/remote_clusters/public/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         }
@@ -314,7 +314,7 @@
       "tags": [],
       "label": "RemoteClustersPluginSetup",
       "description": [],
-      "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
+      "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts",
       "deprecated": false,
       "trackAdoption": false,
       "children": [
@@ -325,7 +325,7 @@
           "tags": [],
           "label": "isUiEnabled",
           "description": [],
-          "path": "x-pack/plugins/remote_clusters/server/plugin.ts",
+          "path": "x-pack/platform/plugins/private/remote_clusters/server/plugin.ts",
           "deprecated": false,
           "trackAdoption": false
         }

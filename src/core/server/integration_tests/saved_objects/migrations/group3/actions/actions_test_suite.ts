@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import * as Either from 'fp-ts/lib/Either';
@@ -126,17 +127,19 @@ export const runActionTestSuite = ({
         properties: {},
       },
     })();
-    const docs100k = new Array(100000).fill({
+    const docs10k = new Array(10000).fill({
       _source: { title: new Array(1000).fill('a').join(), type: 'large' },
-    }) as unknown as SavedObjectsRawDoc[]; // 100k "large" saved objects
+    }) as unknown as SavedObjectsRawDoc[]; // 10k "large" saved objects
+    const operations = docs10k.map((doc) => createBulkIndexOperationTuple(doc));
 
-    await bulkOverwriteTransformedDocuments({
-      client,
-      index: 'existing_index_with_100k_docs',
-      operations: docs100k.map((doc) => createBulkIndexOperationTuple(doc)),
-      refresh: 'wait_for',
-    })();
-
+    for (let i = 0; i < 10; i++) {
+      await bulkOverwriteTransformedDocuments({
+        client,
+        index: 'existing_index_with_100k_docs',
+        operations,
+        refresh: 'wait_for',
+      })();
+    }
     await createIndex({
       client,
       indexName: 'existing_index_2',
@@ -769,9 +772,10 @@ export const runActionTestSuite = ({
     });
   });
 
-  // Reindex doesn't return any errors on it's own, so we have to test
+  // Reindex doesn't return any errors on its own, so we have to test
   // together with waitForReindexTask
-  // Failing: See https://github.com/elastic/kibana/issues/166190
+  // Flaky: https://github.com/elastic/kibana/issues/166190
+  // Reported here: https://github.com/elastic/kibana/issues/167273
   describe.skip('reindex & waitForReindexTask', () => {
     it('resolves right when reindex succeeds without reindex script', async () => {
       const res = (await reindex({
@@ -1443,8 +1447,7 @@ export const runActionTestSuite = ({
     });
   });
 
-  // FLAKY: https://github.com/elastic/kibana/issues/166199
-  describe.skip('waitForPickupUpdatedMappingsTask', () => {
+  describe('waitForPickupUpdatedMappingsTask', () => {
     it('rejects if there are failures', async () => {
       const res = (await pickupUpdatedMappings(
         client,
@@ -2084,31 +2087,6 @@ export const runActionTestSuite = ({
             },
           }
       `);
-    });
-
-    // no way to configure http.max_content_length on the serverless instance for now.
-    runOnTraditionalOnly(() => {
-      it('resolves left request_entity_too_large_exception when the payload is too large', async () => {
-        const newDocs = new Array(10000).fill({
-          _source: {
-            title:
-              'how do I create a document thats large enoug to exceed the limits without typing long sentences',
-          },
-        }) as SavedObjectsRawDoc[];
-        const task = bulkOverwriteTransformedDocuments({
-          client,
-          index: 'existing_index_with_docs',
-          operations: newDocs.map((doc) => createBulkIndexOperationTuple(doc)),
-        });
-        await expect(task()).resolves.toMatchInlineSnapshot(`
-        Object {
-          "_tag": "Left",
-          "left": Object {
-            "type": "request_entity_too_large_exception",
-          },
-        }
-      `);
-      });
     });
   });
 };

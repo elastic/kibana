@@ -6,7 +6,6 @@
  */
 
 import expect from '@kbn/expect';
-// @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { REPO_ROOT } from '@kbn/repo-info';
 import fs from 'fs';
 import path from 'path';

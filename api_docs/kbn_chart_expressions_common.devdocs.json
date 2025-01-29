@@ -28,16 +28,10 @@
         "description": [],
         "signature": [
           "(context?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
+          "KibanaExecutionContext",
           " | undefined) => string | undefined"
         ],
-        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -49,16 +43,10 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -76,16 +64,10 @@
         "description": [],
         "signature": [
           "(context?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
+          "KibanaExecutionContext",
           " | undefined) => string | undefined"
         ],
-        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -97,16 +79,10 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -133,9 +109,9 @@
             "section": "def-common.DatatableRow",
             "text": "DatatableRow"
           },
-          "[], accessor: string | undefined) => (string | string[])[]"
+          "[], accessor: string | undefined, isTransposed: boolean | undefined, exclude: any[] | undefined) => (string | string[])[]"
         ],
-        "path": "src/plugins/chart_expressions/common/color_categories.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -156,7 +132,7 @@
               },
               "[]"
             ],
-            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -171,7 +147,37 @@
             "signature": [
               "string | undefined"
             ],
-            "path": "src/plugins/chart_expressions/common/color_categories.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$3",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "isTransposed",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": false
+          },
+          {
+            "parentPluginId": "@kbn/chart-expressions-common",
+            "id": "def-common.getColorCategories.$4",
+            "type": "Array",
+            "tags": [],
+            "label": "exclude",
+            "description": [],
+            "signature": [
+              "any[] | undefined"
+            ],
+            "path": "src/platform/packages/shared/chart-expressions-common/color_categories.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -192,7 +198,7 @@
         "signature": [
           "(overrides: O | undefined, componentName: K) => { [k: string]: unknown; }"
         ],
-        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -208,7 +214,7 @@
             "signature": [
               "O | undefined"
             ],
-            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -225,7 +231,7 @@
             "signature": [
               "K"
             ],
-            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -254,7 +260,7 @@
           },
           ") => boolean"
         ],
-        "path": "src/plugins/chart_expressions/common/types.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -274,7 +280,7 @@
                 "text": "ExpressionRendererEvent"
               }
             ],
-            "path": "src/plugins/chart_expressions/common/types.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -292,16 +298,10 @@
         "description": [],
         "signature": [
           "(context?: ",
-          {
-            "pluginId": "@kbn/core-execution-context-common",
-            "scope": "common",
-            "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-            "section": "def-common.KibanaExecutionContext",
-            "text": "KibanaExecutionContext"
-          },
+          "KibanaExecutionContext",
           " | undefined) => boolean"
         ],
-        "path": "src/plugins/chart_expressions/common/utils.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -313,16 +313,10 @@
             "label": "context",
             "description": [],
             "signature": [
-              {
-                "pluginId": "@kbn/core-execution-context-common",
-                "scope": "common",
-                "docId": "kibKbnCoreExecutionContextCommonPluginApi",
-                "section": "def-common.KibanaExecutionContext",
-                "text": "KibanaExecutionContext"
-              },
+              "KibanaExecutionContext",
               " | undefined"
             ],
-            "path": "src/plugins/chart_expressions/common/utils.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/utils.ts",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": false
@@ -357,7 +351,7 @@
             "text": "ExpressionRendererEvent"
           }
         ],
-        "path": "src/plugins/chart_expressions/common/types.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -371,7 +365,7 @@
             "signature": [
               "\"chartSize\""
             ],
-            "path": "src/plugins/chart_expressions/common/types.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -391,7 +385,7 @@
                 "text": "ChartSizeSpec"
               }
             ],
-            "path": "src/plugins/chart_expressions/common/types.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -405,7 +399,7 @@
         "tags": [],
         "label": "ChartSizeSpec",
         "description": [],
-        "path": "src/plugins/chart_expressions/common/types.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -419,7 +413,7 @@
             "signature": [
               "ChartSizeDimensions | undefined"
             ],
-            "path": "src/plugins/chart_expressions/common/types.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -433,7 +427,7 @@
             "signature": [
               "ChartSizeDimensions | undefined"
             ],
-            "path": "src/plugins/chart_expressions/common/types.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -447,7 +441,7 @@
             "signature": [
               "{ x: number; y: number; } | undefined"
             ],
-            "path": "src/plugins/chart_expressions/common/types.ts",
+            "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -475,7 +469,7 @@
           },
           "<T[KeyType]> : NonNullable<T[KeyType]>; }"
         ],
-        "path": "src/plugins/chart_expressions/common/types.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -490,7 +484,7 @@
         "signature": [
           "{ [KeyType in keyof T]: T[KeyType]; }"
         ],
-        "path": "src/plugins/chart_expressions/common/types.ts",
+        "path": "src/platform/packages/shared/chart-expressions-common/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

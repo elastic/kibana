@@ -13,21 +13,21 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const esArchiver = getService('esArchiver');
   const filterBar = getService('filterBar');
   const testSubjects = getService('testSubjects');
-  const PageObjects = getPageObjects(['common', 'maps']);
+  const { common, maps } = getPageObjects(['common', 'maps']);
 
   describe('maps with multiple data views', () => {
     const mapTitle = 'map with multiple data views';
 
     const createLayerForDataView = async (dataView: string) => {
-      await PageObjects.maps.clickAddLayer();
+      await maps.clickAddLayer();
       await testSubjects.click('documents');
-      await PageObjects.maps.selectGeoIndexPatternLayer(dataView);
+      await maps.selectGeoIndexPatternLayer(dataView);
       await testSubjects.click('importFileButton');
       await testSubjects.click('layerPanelCancelButton');
     };
 
     before(async () => {
-      await PageObjects.common.setTime({
+      await common.setTime({
         from: 'Oct 23, 2018 @ 07:00:00.000',
         to: 'Oct 23, 2018 @ 08:00:00.000',
       });
@@ -43,7 +43,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       );
       await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': true });
 
-      await PageObjects.maps.openNewMap();
+      await maps.openNewMap();
     });
 
     after(async () => {
@@ -65,34 +65,34 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       // Flights layer
       await createLayerForDataView('kibana_sample_data_flights');
 
-      expect(await PageObjects.maps.getNumberOfLayers()).to.be(3);
-      expect(await PageObjects.maps.getLayerTocTooltipMsg('kibana_sample_data_flights')).to.equal(
+      expect(await maps.getNumberOfLayers()).to.be(3);
+      expect(await maps.getLayerTocTooltipMsg('kibana_sample_data_flights')).to.equal(
         'kibana_sample_data_flights\nFound 9 documents.\nResults narrowed by global time'
       );
-      expect(await PageObjects.maps.getLayerTocTooltipMsg('long-window-logstash-*')).to.equal(
+      expect(await maps.getLayerTocTooltipMsg('long-window-logstash-*')).to.equal(
         'long-window-logstash-*\nFound 2 documents.\nResults narrowed by global time'
       );
     });
 
     it('ignores global filters on layers using a data view without the filter field by default', async () => {
       await filterBar.addFilter({ field: '@message', operation: 'exists' });
-      expect(await PageObjects.maps.getLayerTocTooltipMsg('kibana_sample_data_flights')).to.equal(
+      expect(await maps.getLayerTocTooltipMsg('kibana_sample_data_flights')).to.equal(
         'kibana_sample_data_flights\nFound 9 documents.\nResults narrowed by global search\nResults narrowed by global time'
       );
-      expect(await PageObjects.maps.getLayerTocTooltipMsg('long-window-logstash-*')).to.equal(
+      expect(await maps.getLayerTocTooltipMsg('long-window-logstash-*')).to.equal(
         'long-window-logstash-*\nFound 2 documents.\nResults narrowed by global search\nResults narrowed by global time'
       );
 
-      await PageObjects.maps.saveMap(mapTitle);
+      await maps.saveMap(mapTitle);
     });
 
     it('applies global filters on layers using data view a without the filter field', async () => {
       await kibanaServer.uiSettings.update({ 'courier:ignoreFilterIfFieldNotInIndex': false });
-      await PageObjects.maps.loadSavedMap(mapTitle);
-      expect(await PageObjects.maps.getLayerTocTooltipMsg('kibana_sample_data_flights')).to.equal(
+      await maps.loadSavedMap(mapTitle);
+      expect(await maps.getLayerTocTooltipMsg('kibana_sample_data_flights')).to.equal(
         'kibana_sample_data_flights\nNo results found.\nResults narrowed by global search\nResults narrowed by global time'
       );
-      expect(await PageObjects.maps.getLayerTocTooltipMsg('long-window-logstash-*')).to.equal(
+      expect(await maps.getLayerTocTooltipMsg('long-window-logstash-*')).to.equal(
         'long-window-logstash-*\nFound 2 documents.\nResults narrowed by global search\nResults narrowed by global time'
       );
     });

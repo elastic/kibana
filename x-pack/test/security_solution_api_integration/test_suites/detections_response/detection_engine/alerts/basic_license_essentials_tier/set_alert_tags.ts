@@ -99,7 +99,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -133,7 +133,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -179,7 +179,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)
@@ -225,7 +225,7 @@ export default ({ getService }: FtrProviderContext) => {
         await waitForRuleSuccess({ supertest, log, id });
         await waitForAlertsToBePresent(supertest, log, 10, [id]);
         const alerts = await getAlertsByIds(supertest, log, [id]);
-        const alertIds = alerts.hits.hits.map((alert) => alert._id);
+        const alertIds = alerts.hits.hits.map((alert) => alert._id!);
 
         await supertest
           .post(DETECTION_ENGINE_ALERT_TAGS_URL)

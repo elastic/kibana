@@ -1,0 +1,4 @@
+title: Has authentication
+type: boolean
+description: If true, a username and password for login type authentication must be provided.
+default: true

@@ -97,11 +97,11 @@ describe(
 
       const timestampColumn = '@timestamp';
       cy.get(TIMESTAMP_COLUMN).should('be.visible');
-      cy.get(COLUMN_HEADER).should('contain.text', timestampColumn);
+      cy.get(COLUMN_HEADER).first().should('contain.text', timestampColumn);
       toggleColumnTableTabTable();
-      cy.get(COLUMN_HEADER).should('not.contain.text', timestampColumn);
+      cy.get(COLUMN_HEADER).first().should('not.contain.text', timestampColumn);
       toggleColumnTableTabTable();
-      cy.get(TIMESTAMP_COLUMN).should('be.visible');
+      cy.get(TIMESTAMP_COLUMN).first().should('be.visible');
       cy.get(COLUMN_HEADER).should('contain.text', timestampColumn);
     });
   }

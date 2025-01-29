@@ -67,8 +67,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   let testJobId = '';
 
-  // Failing: See https://github.com/elastic/kibana/issues/186261
-  describe.skip('anomaly detection alert', function () {
+  describe('anomaly detection alert', function () {
     before(async () => {
       await esArchiver.loadIfNeeded('x-pack/test/functional/es_archives/ml/ecommerce');
       await ml.testResources.createDataViewIfNeeded('ft_ecommerce', 'order_date');
@@ -135,6 +134,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.triggersActionsUI.setAlertName('ml-test-alert');
         await pageObjects.triggersActionsUI.setAlertInterval(10, 's');
         await pageObjects.triggersActionsUI.saveAlert();
+        await ml.navigation.navigateToAlertsAndAction();
         await pageObjects.triggersActionsUI.clickOnAlertInAlertsList('ml-test-alert');
       });
     });

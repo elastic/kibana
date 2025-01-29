@@ -1,0 +1,9 @@
+= View dashboard usage
+
+You can check how much a dashboard is being used by clicking its *View details* icon in your list of dashboards. 
+
+image:images/view-details-dashboards-8.16.0.png[View details icon in the list of dashboards, width=105%]
+
+These details include a graph showing the total number of views during the last 90 days.
+
+image:images/dashboard-usage-count.png[Graph showing the number of views during the last 90 days, width="50%"]

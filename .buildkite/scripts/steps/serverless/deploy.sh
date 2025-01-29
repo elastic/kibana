@@ -49,18 +49,18 @@ deploy() {
   PROJECT_EXISTS_LOGS=$(mktemp --suffix ".json")
   PROJECT_INFO_LOGS=$(mktemp --suffix ".json")
 
-  curl -s \
+  curl -s --fail \
     -H "Authorization: ApiKey $PROJECT_API_KEY" \
     "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
     -XGET &> $PROJECT_EXISTS_LOGS
 
   PROJECT_ID=$(jq -r '[.items[] | select(.name == "'$PROJECT_NAME'")] | .[0].id' $PROJECT_EXISTS_LOGS)
   if is_pr_with_label "ci:project-redeploy"; then
-    if [ -z "${PROJECT_ID}" ]; then
+    if [ -z "${PROJECT_ID}" ] || [ "${PROJECT_ID}" == "null" ]; then
       echo "No project to remove"
     else
       echo "Shutting down previous project..."
-      curl -s \
+      curl -s --fail \
         -H "Authorization: ApiKey $PROJECT_API_KEY" \
         -H "Content-Type: application/json" \
         "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
@@ -71,7 +71,7 @@ deploy() {
 
   if [ -z "${PROJECT_ID}" ] || [ "$PROJECT_ID" = 'null' ]; then
     echo "Creating project..."
-    curl -s \
+    curl -s --fail \
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}" \
@@ -95,15 +95,15 @@ deploy() {
 
   else
     echo "Updating project..."
-    curl -s \
+    curl -s --fail \
       -H "Authorization: ApiKey $PROJECT_API_KEY" \
       -H "Content-Type: application/json" \
       "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
-      -XPUT -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
+      -XPATCH -d "$PROJECT_UPDATE_CONFIGURATION" &> $PROJECT_DEPLOY_LOGS
   fi
 
   echo "Getting project info..."
-  curl -s \
+  curl -s --fail \
     -H "Authorization: ApiKey $PROJECT_API_KEY" \
     "${PROJECT_API_DOMAIN}/api/v1/serverless/projects/${PROJECT_TYPE}/${PROJECT_ID}" \
     -XGET &> $PROJECT_INFO_LOGS
@@ -159,11 +159,13 @@ EOF
 }
 
 is_pr_with_label "ci:project-deploy-elasticsearch" && deploy "elasticsearch"
-if is_pr_with_label "ci:project-deploy-observability" ; then
-  create_github_issue_oblt_test_environments
-  echo "--- Deploy observability with Kibana CI"
-  deploy "observability"
-fi
 is_pr_with_label "ci:project-deploy-security" && deploy "security"
+if is_pr_with_label "ci:project-deploy-observability" ; then
+  # Only deploy observability if the PR is targeting main
+  if [[ "$BUILDKITE_PULL_REQUEST_BASE_BRANCH" == "main" ]]; then
+    create_github_issue_oblt_test_environments
+    buildkite-agent annotate --context obl-test-info --style info 'See linked [Deploy Serverless Kibana] issue in pull request for project deployment information'
+  fi
+fi
 
 exit 0;

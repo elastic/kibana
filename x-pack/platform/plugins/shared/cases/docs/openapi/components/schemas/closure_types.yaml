@@ -1,0 +1,6 @@
+type: string
+description: Indicates whether a case is automatically closed when it is pushed to external systems (`close-by-pushing`) or not automatically closed (`close-by-user`).
+enum:
+  - close-by-pushing
+  - close-by-user
+example: close-by-user

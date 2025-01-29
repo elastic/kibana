@@ -24,7 +24,7 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
   describe('list view', function () {
     let roleAuthc: RoleCredentials;
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       await svlCases.api.createCase(
         svlCases.api.getPostCaseRequest(owner, {
           title: 'Metrics inventory',
@@ -55,26 +55,16 @@ export default function ({ getPageObject, getPageObjects, getService }: FtrProvi
         roleAuthc
       );
       caseIdMonitoring = caseMonitoring.id;
+      await pageObjects.svlCommonPage.loginWithPrivilegedRole();
     });
 
     after(async () => {
       await svlCases.api.deleteAllCaseItems();
-      await pageObjects.svlCommonPage.forceLogout();
-    });
-
-    beforeEach(async () => {
-      await pageObjects.svlCommonPage.loginWithRole('admin');
     });
 
     it('cases list screenshot', async () => {
       await navigateToCasesApp(getPageObject, getService, owner);
       await svlCommonScreenshots.takeScreenshot('cases', screenshotDirectories, 1700, 1024);
-    });
-
-    it('case settings screenshot', async () => {
-      await navigateToCasesApp(getPageObject, getService, owner);
-      await testSubjects.click('configure-case-button');
-      await svlCommonScreenshots.takeScreenshot('add-case-connector', screenshotDirectories);
     });
 
     it('case detail screenshot', async () => {

@@ -1,0 +1,12 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`Embedded Map it renders 1`] = `
+<div
+  class="css-1b7f711"
+>
+  <div
+    class="embPanel__content"
+    data-test-subj="xpack.ux.regionMap.embeddedPanel"
+  />
+</div>
+`;

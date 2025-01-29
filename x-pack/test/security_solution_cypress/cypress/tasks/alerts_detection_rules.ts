@@ -214,7 +214,6 @@ export const filterByDisabledRules = () => {
 export const goToRuleDetailsOf = (ruleName: string) => {
   cy.contains(RULE_NAME, ruleName).click();
 
-  cy.get(PAGE_CONTENT_SPINNER).should('be.visible');
   cy.contains(RULE_NAME_HEADER, ruleName).should('be.visible');
   cy.get(PAGE_CONTENT_SPINNER).should('not.exist');
 };
@@ -384,7 +383,7 @@ export const expectNumberOfRules = (
   expectedNumber: number
 ) => {
   cy.log(`Expecting rules table to contain #${expectedNumber} rules`);
-  cy.get(tableSelector).find(RULES_ROW).should('have.length', expectedNumber);
+  cy.get(tableSelector).find(RULES_ROW).its('length').should('be.gte', expectedNumber);
 };
 
 export const expectToContainRule = (

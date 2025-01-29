@@ -46,7 +46,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           basePath: '/s/custom_space',
         });
         const navLinks = (await appsMenu.readLinks()).map((link) => link.text);
-        expect(navLinks).to.contain('APM');
+        expect(navLinks).to.contain('Applications');
       });
 
       it('can navigate to APM app', async () => {

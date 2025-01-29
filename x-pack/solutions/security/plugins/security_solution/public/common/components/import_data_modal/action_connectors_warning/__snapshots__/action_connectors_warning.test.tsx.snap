@@ -1,0 +1,212 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`ActionConnectorWarnings should not render if importedActionConnectorsCount is falsy and empty warnings array 1`] = `<div />`;
+
+exports[`ActionConnectorWarnings should not render if importedActionConnectorsCount is truthy and empty warnings array 1`] = `<div />`;
+
+exports[`ActionConnectorWarnings should render if 1 connectors were imported and use the warning message with the correct imported number 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+    data-test-subj="actionConnectorsWarningsCallOut"
+  >
+    <h2
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+    >
+      <span
+        aria-hidden="true"
+        class="emotion-euiCallOut__icon"
+        color="inherit"
+        data-euiicon-type="warning"
+      />
+      <span
+        data-test-subj="actionConnectorsWarningsCallOutTitle"
+      >
+        1 connector imported
+      </span>
+    </h2>
+    <div
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          data-test-subj="actionConnectorsWarningsCallOutMessage"
+        >
+          <div
+            class="euiText emotion-euiText-xs"
+          >
+            1 connector has sensitive information that requires updates.
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
+              data-test-subj="actionConnectorsWarningsCallOutButton"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  Go to connectors
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ActionConnectorWarnings should render if 2 connectors were imported and use the button label when is set 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+    data-test-subj="actionConnectorsWarningsCallOut"
+  >
+    <h2
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+    >
+      <span
+        aria-hidden="true"
+        class="emotion-euiCallOut__icon"
+        color="inherit"
+        data-euiicon-type="warning"
+      />
+      <span
+        data-test-subj="actionConnectorsWarningsCallOutTitle"
+      >
+        2 connectors imported
+      </span>
+    </h2>
+    <div
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          data-test-subj="actionConnectorsWarningsCallOutMessage"
+        >
+          <div
+            class="euiText emotion-euiText-xs"
+          >
+            2 connectors have sensitive information that requires updates.
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
+              data-test-subj="actionConnectorsWarningsCallOutButton"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  Connectors
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;
+
+exports[`ActionConnectorWarnings should render if 2 connectors were imported and use the warning message with the correct imported number 1`] = `
+<div>
+  <div
+    class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+    data-test-subj="actionConnectorsWarningsCallOut"
+  >
+    <h2
+      class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+    >
+      <span
+        aria-hidden="true"
+        class="emotion-euiCallOut__icon"
+        color="inherit"
+        data-euiicon-type="warning"
+      />
+      <span
+        data-test-subj="actionConnectorsWarningsCallOutTitle"
+      >
+        2 connectors imported
+      </span>
+    </h2>
+    <div
+      class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+    />
+    <div
+      class="euiText emotion-euiText-s-euiTextColor-default"
+    >
+      <div
+        class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-stretch-column"
+      >
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+          data-test-subj="actionConnectorsWarningsCallOutMessage"
+        >
+          <div
+            class="euiText emotion-euiText-xs"
+          >
+            2 connectors have sensitive information that requires updates.
+          </div>
+        </div>
+        <div
+          class="euiFlexItem emotion-euiFlexItem-grow-1"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-none-flexStart-flexEnd-columnReverse"
+          >
+            <button
+              class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-warning"
+              data-test-subj="actionConnectorsWarningsCallOutButton"
+              type="button"
+            >
+              <span
+                class="emotion-euiButtonDisplayContent"
+              >
+                <span
+                  class="eui-textTruncate"
+                >
+                  Go to connectors
+                </span>
+              </span>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+`;

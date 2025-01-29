@@ -29,7 +29,7 @@
         "description": [
           "\nThe read-only set of capabilities available for the current UI session.\nCapabilities are simple key-value pairs of (string, boolean), where the string denotes the capability ID,\nand the boolean is a flag indicating if the capability is enabled or disabled.\n"
         ],
-        "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
+        "path": "src/core/packages/capabilities/common/src/capabilities.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -45,7 +45,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
+            "path": "src/core/packages/capabilities/common/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -61,7 +61,7 @@
             "signature": [
               "{ [sectionId: string]: Record<string, boolean>; }"
             ],
-            "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
+            "path": "src/core/packages/capabilities/common/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -77,7 +77,7 @@
             "signature": [
               "{ [x: string]: boolean; }"
             ],
-            "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
+            "path": "src/core/packages/capabilities/common/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -93,7 +93,7 @@
             "signature": [
               "[key: string]:  Record<string, boolean | Record<string, boolean>>"
             ],
-            "path": "packages/core/capabilities/core-capabilities-common/src/capabilities.ts",
+            "path": "src/core/packages/capabilities/common/src/capabilities.ts",
             "deprecated": false,
             "trackAdoption": false
           }

@@ -1,0 +1,37 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`apm_user deprecation roles mapped to a removed role logs a deprecation when a role was found that maps to the removed apm_user role 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Role Mappings to find roles mappings with the \\"apm_user\\" role.",
+        "Remove the \\"apm_user\\" role from all role mappings and add the built-in \\"viewer\\" role",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/main/kibana-privileges.html",
+    "level": "critical",
+    "message": "The \\"apm_user\\" role has been deprecated. Remove the \\"apm_user\\" role from affected role mappings in this cluster including: dungeon_master",
+    "title": "Check for role mappings using the deprecated \\"apm_user\\" role",
+  },
+]
+`;
+
+exports[`apm_user deprecation users assigned to a removed role logs a deprecation when a user was found with a removed apm_user role 1`] = `
+Array [
+  Object {
+    "correctiveActions": Object {
+      "manualSteps": Array [
+        "Go to Management > Security > Users to find users with the \\"apm_user\\" role.",
+        "Remove the \\"apm_user\\" role from all users and add the built-in \\"viewer\\" role.",
+      ],
+    },
+    "deprecationType": "feature",
+    "documentationUrl": "https://www.elastic.co/guide/en/kibana/main/kibana-privileges.html",
+    "level": "critical",
+    "message": "The \\"apm_user\\" role has been deprecated. Remove the \\"apm_user\\" role from affected users in this cluster including: foo",
+    "title": "Check for users assigned the deprecated \\"apm_user\\" role",
+  },
+]
+`;

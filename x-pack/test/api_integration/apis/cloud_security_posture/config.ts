@@ -5,13 +5,27 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
+import { FtrConfigProviderContext, getKibanaCliLoggers } from '@kbn/test';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const baseIntegrationTestsConfig = await readConfigFile(require.resolve('../../config.ts'));
+  const baseConfig = await readConfigFile(require.resolve('../../config.ts'));
 
   return {
-    ...baseIntegrationTestsConfig.getAll(),
+    ...baseConfig.getAll(),
     testFiles: [require.resolve('.')],
+    kbnTestServer: {
+      ...baseConfig.get('kbnTestServer'),
+      serverArgs: [
+        ...baseConfig.get('kbnTestServer.serverArgs'),
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(baseConfig.get('kbnTestServer.serverArgs')),
+          {
+            name: 'plugins.cloudSecurityPosture',
+            level: 'all',
+            appenders: ['default'],
+          },
+        ])}`,
+      ],
+    },
   };
 }

@@ -8,7 +8,7 @@
 import expect from '@kbn/expect';
 import { FtrProviderContext } from '../../ftr_provider_context';
 import { ObjectRemover } from '../../lib/object_remover';
-import { getTestAlertData, getTestActionData } from '../../lib/get_test_data';
+import { getTestAlertData } from '../../lib/get_test_data';
 
 export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const testSubjects = getService('testSubjects');
@@ -24,6 +24,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       before(async () => {
         await security.testUser.setRoles(['alerts_and_actions_role']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
@@ -35,10 +36,13 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('Loads the app with actions but not alerting privilege', () => {
+    describe('Loads the app with actions but not alerting privilege', function () {
+      this.tags('skipFIPS');
+
       before(async () => {
         await security.testUser.setRoles(['only_actions_role']);
       });
+
       after(async () => {
         await security.testUser.restoreDefaults();
       });
@@ -55,19 +59,35 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         await pageObjects.common.navigateToApp('triggersActions');
       });
 
-      after(async () => {
-        await objectRemover.removeAll();
-      });
-
       it('Loads the Alerts page', async () => {
-        await log.debug('Checking for section heading to say Rules.');
+        log.debug('Checking for section heading to say Rules.');
 
         const headingText = await pageObjects.triggersActionsUI.getSectionHeadingText();
         expect(headingText).to.be('Rules');
       });
 
       describe('Alerts tab', () => {
+        let createdRule: { name: string; id: string };
+
+        before(async () => {
+          const resRule = await supertest
+            .post(`/api/alerting/rule`)
+            .set('kbn-xsrf', 'foo')
+            .send(getTestAlertData())
+            .expect(200);
+
+          createdRule = resRule.body;
+          objectRemover.add(createdRule.id, 'rule', 'alerting');
+        });
+
+        after(async () => {
+          await objectRemover.removeAll();
+        });
+
         it('renders the alerts tab', async () => {
+          // refresh to see alert
+          await browser.refresh();
+
           // Navigate to the alerts tab
           await pageObjects.triggersActionsUI.changeTabs('rulesTab');
 
@@ -82,20 +102,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('navigates to an alert details page', async () => {
-          const { body: createdAction } = await supertest
-            .post(`/api/actions/connector`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestActionData())
-            .expect(200);
-          objectRemover.add(createdAction.id, 'action', 'actions');
-
-          const { body: createdAlert } = await supertest
-            .post(`/api/alerting/rule`)
-            .set('kbn-xsrf', 'foo')
-            .send(getTestAlertData())
-            .expect(200);
-          objectRemover.add(createdAlert.id, 'alert', 'alerts');
-
           // refresh to see alert
           await browser.refresh();
 
@@ -105,10 +111,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           await testSubjects.existOrFail('rulesList');
 
           // click on first alert
-          await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdAlert.name);
+          await pageObjects.triggersActionsUI.clickOnAlertInAlertsList(createdRule.name);
 
           // Verify url
-          expect(await browser.getCurrentUrl()).to.contain(`/rule/${createdAlert.id}`);
+          expect(await browser.getCurrentUrl()).to.contain(`/rule/${createdRule.id}`);
         });
       });
     });

@@ -54,7 +54,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
               secrets: {},
             })
             .expect(200);
-          objectRemover.add(space.id, createdConnector.id, 'action', 'actions');
+          objectRemover.add(space.id, createdConnector.id, 'connector', 'actions');
 
           const { body: createdRule } = await supertest
             .post(`${getUrlPrefix(space.id)}/api/alerting/rule`)
@@ -143,7 +143,7 @@ export default function createGetActionErrorLogTests({ getService }: FtrProvider
           secrets: {},
         })
         .expect(200);
-      objectRemover.add(Spaces[1].id, createdConnector.id, 'action', 'actions');
+      objectRemover.add(Spaces[1].id, createdConnector.id, 'connector', 'actions');
 
       // Create 2 rules, and then only pull the logs for one of them
       let watchedRuleId;

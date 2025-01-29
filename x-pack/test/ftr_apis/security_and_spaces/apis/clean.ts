@@ -43,7 +43,8 @@ export default function (ftrContext: FtrProviderContext) {
         expectResponse: ({ body }) => {
           expect(body).to.eql({
             error: 'Forbidden',
-            message: 'Forbidden',
+            message:
+              'API [POST /internal/ftr/kbn_client_so/_clean] is unauthorized for user, this action is granted by the Kibana privileges [ftrApis]',
             statusCode: 403,
           });
         },

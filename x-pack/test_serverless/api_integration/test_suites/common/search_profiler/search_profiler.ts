@@ -20,10 +20,10 @@ export default function ({ getService }: FtrProviderContext) {
 
   describe('Profile', () => {
     before(async () => {
-      roleAuthc = await svlUserManager.createApiKeyForRole('admin');
+      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
     });
     after(async () => {
-      await svlUserManager.invalidateApiKeyForRole(roleAuthc);
+      await svlUserManager.invalidateM2mApiKeyWithRoleScope(roleAuthc);
     });
 
     it('should return profile results for a valid index', async () => {

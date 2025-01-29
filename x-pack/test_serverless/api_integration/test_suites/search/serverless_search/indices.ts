@@ -6,35 +6,43 @@
  */
 
 import expect from 'expect';
+import { SupertestWithRoleScope } from '@kbn/test-suites-xpack/api_integration/deployment_agnostic/services/role_scoped_supertest';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const API_BASE_PATH = '/internal/serverless_search';
 
 export default function ({ getService }: FtrProviderContext) {
-  const svlCommonApi = getService('svlCommonApi');
-  const supertest = getService('supertest');
+  const roleScopedSupertest = getService('roleScopedSupertest');
+  let supertestViewerWithCookieCredentials: SupertestWithRoleScope;
 
   describe('Indices routes', function () {
     describe('GET indices', function () {
+      before(async () => {
+        supertestViewerWithCookieCredentials = await roleScopedSupertest.getSupertestWithRoleScope(
+          'viewer',
+          {
+            useCookieHeader: true,
+            withInternalHeaders: true,
+          }
+        );
+      });
+
       it('has route', async () => {
-        const { body } = await supertest
+        const { body } = await supertestViewerWithCookieCredentials
           .get(`${API_BASE_PATH}/indices`)
-          .set(svlCommonApi.getInternalRequestHeader())
           .expect(200);
 
         expect(body).toBeDefined();
       });
       it('accepts search_query', async () => {
-        await supertest
+        await supertestViewerWithCookieCredentials
           .get(`${API_BASE_PATH}/indices`)
-          .set(svlCommonApi.getInternalRequestHeader())
           .query({ search_query: 'foo' })
           .expect(200);
       });
       it('accepts from & size', async () => {
-        await supertest
+        await supertestViewerWithCookieCredentials
           .get(`${API_BASE_PATH}/indices`)
-          .set(svlCommonApi.getInternalRequestHeader())
           .query({ from: 0, size: 10 })
           .expect(200);
       });

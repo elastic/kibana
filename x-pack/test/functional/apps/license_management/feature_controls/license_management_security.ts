@@ -38,10 +38,18 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         expect(links.map((link) => link.text)).to.contain('Stack Management');
       });
 
-      it('should not render the "Stack" section', async () => {
-        await PageObjects.common.navigateToApp('management');
-        const sections = (await managementMenu.getSections()).map((section) => section.sectionId);
-        expect(sections).to.eql(['insightsAndAlerting', 'kibana']);
+      describe('"Stack" section', function () {
+        this.tags('skipFIPS');
+        it('should not render', async () => {
+          await PageObjects.common.navigateToApp('management');
+          const sections = await managementMenu.getSections();
+
+          const sectionIds = sections.map((section) => section.sectionId);
+          expect(sectionIds).to.eql(['data', 'insightsAndAlerting', 'kibana']);
+
+          const dataSection = sections.find((section) => section.sectionId === 'data');
+          expect(dataSection?.sectionLinks).to.eql(['data_quality']);
+        });
       });
     });
 
@@ -58,7 +66,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
       });
 
       describe('[SkipCloud] global dashboard with license management user and upgrade assistant : skip cloud', function () {
-        this.tags('skipCloud');
+        this.tags(['skipCloud', 'skipFIPS']);
         it('should render the "Stack" section with License Management and Upgrade Assistant', async () => {
           await PageObjects.common.navigateToApp('management');
           const sections = await managementMenu.getSections();

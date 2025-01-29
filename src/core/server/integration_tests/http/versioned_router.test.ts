@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { captureErrorMock } from './versioned_router.test.mocks';
@@ -111,14 +112,12 @@ describe('Routing versioned requests', () => {
 
     await server.start();
 
-    await expect(supertest.get('/my-path').expect(200)).resolves.toEqual(
-      expect.objectContaining({
-        body: { v: '1' },
-        header: expect.objectContaining({
-          'elastic-api-version': '2020-02-02',
-        }),
-      })
-    );
+    await expect(supertest.get('/my-path').expect(200)).resolves.toMatchObject({
+      body: { v: '1' },
+      header: expect.objectContaining({
+        'elastic-api-version': '2020-02-02',
+      }),
+    });
   });
 
   it('returns the expected output for badly formatted versions', async () => {
@@ -136,11 +135,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', 'abc')
         .expect(400)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        message: expect.stringMatching(/Invalid version/),
-      })
-    );
+    ).resolves.toMatchObject({
+      message: expect.stringMatching(/Invalid version/),
+    });
   });
 
   it('returns the expected responses for failed validation', async () => {
@@ -162,18 +159,14 @@ describe('Routing versioned requests', () => {
     await server.start();
 
     await expect(
-      supertest
-        .post('/my-path')
-        .send({})
-        .set('Elastic-Api-Version', '1')
-        .expect(400)
-        .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
+      supertest.post('/my-path').send({}).set('Elastic-Api-Version', '1').expect(400)
+    ).resolves.toMatchObject({
+      body: {
         error: 'Bad Request',
         message: expect.stringMatching(/expected value of type/),
-      })
-    );
+      },
+      headers: { 'elastic-api-version': '1' }, // includes version if validation failed
+    });
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
 
@@ -192,7 +185,25 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2023-10-31')
         .expect(200)
         .then(({ header }) => header)
-    ).resolves.toEqual(expect.objectContaining({ 'elastic-api-version': '2023-10-31' }));
+    ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
+  });
+
+  it('returns the version in response headers, even for HTTP resources', async () => {
+    router.versioned
+      .get({ path: '/my-path', access: 'public', options: { httpResource: true } })
+      .addVersion({ validate: false, version: '2023-10-31' }, async (ctx, req, res) => {
+        return res.ok({ body: { foo: 'bar' } });
+      });
+
+    await server.start();
+
+    await expect(
+      supertest
+        .get('/my-path')
+        .set('Elastic-Api-Version', '2023-10-31')
+        .expect(200)
+        .then(({ header }) => header)
+    ).resolves.toMatchObject({ 'elastic-api-version': '2023-10-31' });
   });
 
   it('runs response validation when in dev', async () => {
@@ -235,11 +246,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '1')
         .expect(500)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        message: expect.stringMatching(/Failed output validation/),
-      })
-    );
+    ).resolves.toMatchObject({
+      message: expect.stringMatching(/Failed output validation/),
+    });
 
     await expect(
       supertest
@@ -247,11 +256,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2')
         .expect(500)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        message: expect.stringMatching(/Failed output validation/),
-      })
-    );
+    ).resolves.toMatchObject({
+      message: expect.stringMatching(/Failed output validation/),
+    });
 
     // This should pass response validation
     await expect(
@@ -260,11 +267,9 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '3')
         .expect(200)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({
-        v: '3',
-      })
-    );
+    ).resolves.toMatchObject({
+      v: '3',
+    });
 
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
@@ -292,31 +297,31 @@ describe('Routing versioned requests', () => {
     ).resolves.toEqual('1');
   });
 
-  it('requires version headers to be set for internal HTTP APIs', async () => {
+  it('defaults to v1 for internal HTTP APIs to allow gracefully onboarding internal routes to versioned router', async () => {
     await setupServer({ dev: false });
 
     router.versioned
-      .get({ path: '/my-path', access: 'internal' })
+      .get({ path: '/my-internal-path', access: 'internal' })
       .addVersion(
         { version: '1', validate: { response: { 200: { body: () => schema.number() } } } },
-        async (ctx, req, res) => res.ok()
+        async (ctx, req, res) => res.ok({ body: 'v1' })
       )
       .addVersion(
         { version: '2', validate: { response: { 200: { body: () => schema.number() } } } },
-        async (ctx, req, res) => res.ok()
+        async (ctx, req, res) => res.ok({ body: 'v2' })
       );
     await server.start();
 
     await expect(
       supertest
-        .get('/my-path')
+        .get('/my-internal-path')
         .unset('Elastic-Api-Version')
-        .expect(400)
-        .then(({ body }) => body.message)
-    ).resolves.toMatch(/Please specify.+version/);
+        .expect(200)
+        .then(({ text }) => text)
+    ).resolves.toMatch('v1');
   });
 
-  it('requires version headers to be set for public endpoints when in dev', async () => {
+  it('requires version headers to be set for internal and public endpoints when in dev', async () => {
     await setupServer({ dev: true });
     router.versioned
       .get({
@@ -324,6 +329,14 @@ describe('Routing versioned requests', () => {
         access: 'public',
       })
       .addVersion({ version: '2023-10-31', validate: false }, async (ctx, req, res) => res.ok());
+
+    router.versioned
+      .get({
+        path: '/my-internal-path',
+        access: 'internal',
+      })
+      .addVersion({ version: '1', validate: false }, async (ctx, req, res) => res.ok());
+
     await server.start();
 
     await expect(
@@ -333,6 +346,18 @@ describe('Routing versioned requests', () => {
         .expect(400)
         .then(({ body }) => body.message)
     ).resolves.toMatch(/Please specify.+version/);
+
+    await supertest.get('/my-path').set('Elastic-Api-Version', '2023-10-31').expect(200);
+
+    await expect(
+      supertest
+        .get('/my-internal-path')
+        .unset('Elastic-Api-Version')
+        .expect(400)
+        .then(({ body }) => body.message)
+    ).resolves.toMatch(/Please specify.+version/);
+
+    await supertest.get('/my-internal-path').set('Elastic-Api-Version', '1').expect(200);
   });
 
   it('errors when no handler could be found', async () => {
@@ -346,9 +371,7 @@ describe('Routing versioned requests', () => {
         .set('Elastic-Api-Version', '2020-02-02')
         .expect(500)
         .then(({ body }) => body)
-    ).resolves.toEqual(
-      expect.objectContaining({ message: expect.stringMatching(/No handlers registered/) })
-    );
+    ).resolves.toMatchObject({ message: expect.stringMatching(/No handlers registered/) });
     expect(captureErrorMock).not.toHaveBeenCalled();
   });
 

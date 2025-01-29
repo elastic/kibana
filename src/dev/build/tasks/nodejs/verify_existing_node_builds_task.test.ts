@@ -1,9 +1,10 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import Path from 'path';
@@ -141,6 +142,11 @@ it('checks shasums for each downloaded node build', async () => {
           "<node version>",
           undefined,
         ],
+        Array [
+          <ToolingLog>,
+          "<node version>",
+          undefined,
+        ],
       ],
       "results": Array [
         Object {
@@ -152,6 +158,7 @@ it('checks shasums for each downloaded node build', async () => {
             "linux:default:linux-x64:downloadName": "valid shasum",
             "linux:serverless:linux-arm64:downloadName": "valid shasum",
             "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
             "win32:default:win32-x64:downloadName": "valid shasum",
           },
         },
@@ -164,6 +171,7 @@ it('checks shasums for each downloaded node build', async () => {
             "linux:default:linux-x64:downloadName": "valid shasum",
             "linux:serverless:linux-arm64:downloadName": "valid shasum",
             "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
             "win32:default:win32-x64:downloadName": "valid shasum",
           },
         },
@@ -176,6 +184,7 @@ it('checks shasums for each downloaded node build', async () => {
             "linux:default:linux-x64:downloadName": "valid shasum",
             "linux:serverless:linux-arm64:downloadName": "valid shasum",
             "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
             "win32:default:win32-x64:downloadName": "valid shasum",
           },
         },
@@ -188,6 +197,7 @@ it('checks shasums for each downloaded node build', async () => {
             "linux:default:linux-x64:downloadName": "valid shasum",
             "linux:serverless:linux-arm64:downloadName": "valid shasum",
             "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
             "win32:default:win32-x64:downloadName": "valid shasum",
           },
         },
@@ -200,6 +210,7 @@ it('checks shasums for each downloaded node build', async () => {
             "linux:default:linux-x64:downloadName": "valid shasum",
             "linux:serverless:linux-arm64:downloadName": "valid shasum",
             "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
             "win32:default:win32-x64:downloadName": "valid shasum",
           },
         },
@@ -212,6 +223,7 @@ it('checks shasums for each downloaded node build', async () => {
             "linux:default:linux-x64:downloadName": "valid shasum",
             "linux:serverless:linux-arm64:downloadName": "valid shasum",
             "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
             "win32:default:win32-x64:downloadName": "valid shasum",
           },
         },
@@ -224,6 +236,20 @@ it('checks shasums for each downloaded node build', async () => {
             "linux:default:linux-x64:downloadName": "valid shasum",
             "linux:serverless:linux-arm64:downloadName": "valid shasum",
             "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
+            "win32:default:win32-x64:downloadName": "valid shasum",
+          },
+        },
+        Object {
+          "type": "return",
+          "value": Object {
+            "darwin:default:darwin-arm64:downloadName": "valid shasum",
+            "darwin:default:darwin-x64:downloadName": "valid shasum",
+            "linux:default:linux-arm64:downloadName": "valid shasum",
+            "linux:default:linux-x64:downloadName": "valid shasum",
+            "linux:serverless:linux-arm64:downloadName": "valid shasum",
+            "linux:serverless:linux-x64:downloadName": "valid shasum",
+            "win32:default:win32-arm64:downloadName": "valid shasum",
             "win32:default:win32-x64:downloadName": "valid shasum",
           },
         },
@@ -274,6 +300,15 @@ it('checks shasums for each downloaded node build', async () => {
           Platform {
             "architecture": "x64",
             "buildName": "windows-x86_64",
+            "name": "win32",
+            "variant": null,
+          },
+        ],
+        Array [
+          <Config>,
+          Platform {
+            "architecture": "arm64",
+            "buildName": "windows-arm64",
             "name": "win32",
             "variant": null,
           },
@@ -347,6 +382,15 @@ it('checks shasums for each downloaded node build', async () => {
           "type": "return",
           "value": Array [
             Object {
+              "downloadName": "win32:default:win32-arm64:downloadName",
+              "downloadPath": "win32:default:win32-arm64:downloadPath",
+            },
+          ],
+        },
+        Object {
+          "type": "return",
+          "value": Array [
+            Object {
               "downloadName": "linux:serverless:linux-x64:downloadName",
               "downloadPath": "linux:serverless:linux-x64:downloadPath",
             },
@@ -388,6 +432,10 @@ it('checks shasums for each downloaded node build', async () => {
           "sha256",
         ],
         Array [
+          "win32:default:win32-arm64:downloadPath",
+          "sha256",
+        ],
+        Array [
           "linux:serverless:linux-x64:downloadPath",
           "sha256",
         ],
@@ -397,6 +445,10 @@ it('checks shasums for each downloaded node build', async () => {
         ],
       ],
       "results": Array [
+        Object {
+          "type": "return",
+          "value": "valid shasum",
+        },
         Object {
           "type": "return",
           "value": "valid shasum",

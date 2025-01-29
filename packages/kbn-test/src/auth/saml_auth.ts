@@ -1,14 +1,16 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { createSAMLResponse as createMockedSAMLResponse } from '@kbn/mock-idp-utils';
 import { ToolingLog } from '@kbn/tooling-log';
 import axios, { AxiosResponse } from 'axios';
+import util from 'util';
 import * as cheerio from 'cheerio';
 import { Cookie, parse as parseCookie } from 'tough-cookie';
 import Url from 'url';
@@ -17,6 +19,7 @@ import {
   CloudSamlSessionParams,
   CreateSamlSessionParams,
   LocalSamlSessionParams,
+  RetryParams,
   SAMLResponseValueParams,
   UserProfile,
 } from './types';
@@ -33,6 +36,8 @@ export class Session {
     return this.cookie.value;
   }
 }
+
+const REQUEST_TIMEOUT_MS = 60_000;
 
 const cleanException = (url: string, ex: any) => {
   if (ex.isAxiosError) {
@@ -53,7 +58,9 @@ const cleanException = (url: string, ex: any) => {
 const getCookieFromResponseHeaders = (response: AxiosResponse, errorMessage: string) => {
   const setCookieHeader = response?.headers['set-cookie'];
   if (!setCookieHeader) {
-    throw new Error(`Failed to parse 'set-cookie' header`);
+    throw new Error(
+      `${errorMessage}: no 'set-cookie' header, response.data: ${JSON.stringify(response?.data)}`
+    );
   }
 
   const cookie = parseCookie(setCookieHeader![0]);
@@ -81,7 +88,13 @@ const getCloudUrl = (hostname: string, pathname: string) => {
   });
 };
 
-export const createCloudSession = async (params: CreateSamlSessionParams) => {
+export const createCloudSession = async (
+  params: CreateSamlSessionParams,
+  retryParams: RetryParams = {
+    attemptsCount: 3,
+    attemptDelay: 15_000,
+  }
+): Promise<string> => {
   const { hostname, email, password, log } = params;
   const cloudLoginUrl = getCloudUrl(hostname, '/api/v1/saas/auth/_login');
   let sessionResponse: AxiosResponse | undefined;
@@ -89,6 +102,7 @@ export const createCloudSession = async (params: CreateSamlSessionParams) => {
     return {
       url: cloudUrl,
       method: 'post',
+      timeout: REQUEST_TIMEOUT_MS,
       data: {
         email,
         password,
@@ -102,24 +116,65 @@ export const createCloudSession = async (params: CreateSamlSessionParams) => {
     };
   };
 
-  try {
-    sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
-  } catch (ex) {
-    log.error(`Failed to create the new cloud session with 'POST ${cloudLoginUrl}'`);
-    cleanException(cloudLoginUrl, ex);
-    throw ex;
+  let attemptsLeft = retryParams.attemptsCount;
+  while (attemptsLeft > 0) {
+    try {
+      sessionResponse = await axios.request(requestConfig(cloudLoginUrl));
+      if (sessionResponse?.status !== 200) {
+        throw new Error(
+          `Failed to create the new cloud session: 'POST ${cloudLoginUrl}' returned ${sessionResponse?.status}`
+        );
+      } else {
+        const token = sessionResponse?.data?.token as string;
+        if (token) {
+          return token;
+        } else {
+          const keysToRedact = ['user_id', 'okta_session_id'];
+          const data = sessionResponse?.data;
+          if (data !== null && typeof data === 'object') {
+            Object.keys(data).forEach((key) => {
+              if (keysToRedact.includes(key)) {
+                data[key] = 'REDACTED';
+              }
+            });
+
+            // MFA must be disabled for test accounts
+            if (data.mfa_required === true) {
+              // Changing MFA configuration requires manual action, skip retry
+              attemptsLeft = 0;
+              throw new Error(
+                `Failed to create the new cloud session: MFA must be disabled for the test account`
+              );
+            }
+          }
+
+          throw new Error(
+            `Failed to create the new cloud session: token is missing in response data\n${JSON.stringify(
+              data
+            )}`
+          );
+        }
+      }
+    } catch (ex) {
+      cleanException(cloudLoginUrl, ex);
+      if (--attemptsLeft > 0) {
+        // log only error message
+        log.error(`${ex.message}\nWaiting ${retryParams.attemptDelay} ms before the next attempt`);
+        await new Promise((resolve) => setTimeout(resolve, retryParams.attemptDelay));
+      } else {
+        log.error(
+          `Failed to create the new cloud session with ${retryParams.attemptsCount} attempts`
+        );
+        // throw original error with stacktrace
+        throw ex;
+      }
+    }
   }
 
-  const token = sessionResponse?.data?.token as string;
-  if (!token) {
-    log.error(
-      `Failed to create cloud session, token is missing in response data: ${JSON.stringify(
-        sessionResponse?.data
-      )}`
-    );
-    throw new Error(`Unable to create Cloud session, token is missing.`);
-  }
-  return token;
+  // should never be reached
+  throw new Error(
+    `Failed to create the new cloud session, check retry arguments: ${JSON.stringify(retryParams)}`
+  );
 };
 
 export const createSAMLRequest = async (kbnUrl: string, kbnVersion: string, log: ToolingLog) => {
@@ -211,29 +266,32 @@ export const finishSAMLHandshake = async ({
 }) => {
   const encodedResponse = encodeURIComponent(samlResponse);
   const url = kbnHost + '/api/security/saml/callback';
+  const request = {
+    url,
+    method: 'post',
+    data: `SAMLResponse=${encodedResponse}`,
+    headers: {
+      'content-type': 'application/x-www-form-urlencoded',
+      ...(sid ? { Cookie: `sid=${sid}` } : {}),
+    },
+    validateStatus: () => true,
+    maxRedirects: 0,
+  };
   let authResponse: AxiosResponse;
 
   try {
-    authResponse = await axios.request({
-      url,
-      method: 'post',
-      data: `SAMLResponse=${encodedResponse}`,
-      headers: {
-        'content-type': 'application/x-www-form-urlencoded',
-        ...(sid ? { Cookie: `sid=${sid}` } : {}),
-      },
-      validateStatus: () => true,
-      maxRedirects: 0,
-    });
+    authResponse = await axios.request(request);
   } catch (ex) {
     log.error('Failed to call SAML callback');
     cleanException(url, ex);
+    // Logging the `Cookie: sid=xxxx` header is safe here since it’s an intermediate, non-authenticated cookie that cannot be reused if leaked.
+    log.error(`Request sent: ${util.inspect(request)}`);
     throw ex;
   }
 
   return getCookieFromResponseHeaders(
     authResponse,
-    'Failed to get cookie from SAML callback response headers'
+    'Failed to get cookie from SAML callback response'
   );
 };
 

@@ -31,7 +31,7 @@ export function SvlCasesOmitServiceProvider({}: FtrProviderContext) {
     removeServerGeneratedPropertiesFromSavedObject<T extends CommonSavedObjectAttributes>(
       attributes: T,
       keys: Array<keyof T> = []
-    ): Omit<T, typeof savedObjectCommonAttributes[number] | typeof keys[number]> {
+    ): Omit<T, (typeof savedObjectCommonAttributes)[number] | (typeof keys)[number]> {
       return this.removeServerGeneratedPropertiesFromObject(attributes, [
         ...savedObjectCommonAttributes,
         ...keys,

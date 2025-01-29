@@ -53,7 +53,7 @@ export default ({ getService }: FtrProviderContext): void => {
           config: { apiUrl: serviceNowSimulatorURL },
         },
       });
-      actionsRemover.add('default', connector.id, 'action', 'actions');
+      actionsRemover.add('default', connector.id, 'connector', 'actions');
 
       await createConfiguration(
         supertest,

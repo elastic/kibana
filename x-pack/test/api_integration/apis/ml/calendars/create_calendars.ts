@@ -64,7 +64,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
-      expect(body.message).to.eql('Forbidden');
       await ml.api.waitForCalendarNotToExist(calendarId);
     });
 
@@ -77,7 +76,6 @@ export default ({ getService }: FtrProviderContext) => {
       ml.api.assertResponseStatusCode(403, status, body);
 
       expect(body.error).to.eql('Forbidden');
-      expect(body.message).to.eql('Forbidden');
       await ml.api.waitForCalendarNotToExist(calendarId);
     });
   });

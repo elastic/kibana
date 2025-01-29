@@ -15,7 +15,7 @@ spec:
       description: Kibana / Pipeline migration staging
     spec:
       env:
-        SLACK_NOTIFICATIONS_ENABLED: 'false'
+        ELASTIC_SLACK_NOTIFICATIONS_ENABLED: 'false'
       repository: elastic/kibana
       pipeline_file: .buildkite/pipelines/upload_pipeline.yml
       provider_settings:
@@ -30,3 +30,5 @@ spec:
           access_level: MANAGE_BUILD_AND_READ
         everyone:
           access_level: BUILD_AND_READ
+      tags:
+        - kibana

@@ -1,5 +1,0 @@
-{
-  "type": "shared-common",
-  "id": "@kbn/ebt",
-  "owner": "@elastic/kibana-core"
-}

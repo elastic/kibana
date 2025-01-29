@@ -6,6 +6,7 @@
  */
 
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
+
 import { createTestConfig } from '../../config.base';
 
 export default createTestConfig({

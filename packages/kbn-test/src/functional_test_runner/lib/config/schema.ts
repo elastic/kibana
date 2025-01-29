@@ -1,15 +1,17 @@
 /*
  * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0 and the Server Side Public License, v 1; you may not use this file except
- * in compliance with, at your election, the Elastic License 2.0 or the Server
- * Side Public License, v 1.
+ * or more contributor license agreements. Licensed under the "Elastic License
+ * 2.0", the "GNU Affero General Public License v3.0 only", and the "Server Side
+ * Public License v 1"; you may not use this file except in compliance with, at
+ * your election, the "Elastic License 2.0", the "GNU Affero General Public
+ * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
 import { dirname, resolve } from 'path';
 
 import Joi from 'joi';
 import type { CustomHelpers } from 'joi';
+import { SCOUT_REPORTER_ENABLED } from '@kbn/scout-info';
 
 // valid pattern for ID
 // enforced camel-case identifiers for consistency
@@ -174,6 +176,12 @@ export const schema = Joi.object()
           !!process.env.CI && !process.env.DISABLE_CI_LOG_OUTPUT_CAPTURE
         ),
         sendToCiStats: Joi.boolean().default(!!process.env.CI),
+      })
+      .default(),
+
+    scoutReporter: Joi.object()
+      .keys({
+        enabled: Joi.boolean().default(SCOUT_REPORTER_ENABLED),
       })
       .default(),
 
