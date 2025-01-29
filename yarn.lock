@@ -7556,7 +7556,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/some-dev-log@link:packages/kbn-some-dev-log":
+"@kbn/some-dev-log@link:src/dev/packages/some-dev-log":
   version "0.0.0"
   uid ""
 
