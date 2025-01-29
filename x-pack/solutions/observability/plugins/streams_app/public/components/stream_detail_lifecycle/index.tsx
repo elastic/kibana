@@ -26,9 +26,12 @@ import {
   EuiButtonEmpty,
   EuiContextMenuPanel,
   EuiContextMenuItem,
+  EuiSelectable,
+  EuiSelectableOption,
+  EuiHighlight,
 } from '@elastic/eui';
 import { css } from '@emotion/css';
-import React, { ReactNode, useState } from 'react';
+import React, { ReactNode, useEffect, useState } from 'react';
 import {
   IngestStreamLifecycle,
   IngestUpsertRequest,
@@ -42,8 +45,9 @@ import {
   isUnwiredReadStream,
   isWiredReadStream,
 } from '@kbn/streams-schema';
-import { useKibana } from '../../hooks/use_kibana';
+import { Phases, PolicyFromES } from '@kbn/index-lifecycle-management-common-shared';
 import { useAbortController } from '@kbn/observability-utils-browser/hooks/use_abort_controller';
+import { useKibana } from '../../hooks/use_kibana';
 
 enum LifecycleEditAction {
   None,
@@ -69,6 +73,7 @@ export function StreamDetailLifecycle({
   const [openEditModal, setOpenEditModal] = useState(LifecycleEditAction.None);
 
   const {
+    core: { http },
     dependencies: {
       start: {
         streams: { streamsRepositoryClient },
@@ -80,6 +85,11 @@ export function StreamDetailLifecycle({
     return null;
   }
   const { signal } = useAbortController();
+
+  const getIlmPolicies = async () => {
+    const response = await http.get<PolicyFromES[]>('/api/index_lifecycle_management/policies');
+    return response;
+  };
 
   const updateLifecycle = async (lifecycle: IngestStreamLifecycle) => {
     try {
@@ -109,6 +119,7 @@ export function StreamDetailLifecycle({
         definition={definition}
         closeModal={() => setOpenEditModal(LifecycleEditAction.None)}
         updateLifecycle={updateLifecycle}
+        getIlmPolicies={getIlmPolicies}
       />
 
       <EuiFlexItem
@@ -345,6 +356,7 @@ function RetentionMetadata({
 interface ModalOptions {
   closeModal: () => void;
   updateLifecycle: (lifecycle: IngestStreamLifecycle) => void;
+  getIlmPolicies: () => Promise<PolicyFromES[]>;
   definition: ReadStreamDefinition;
 }
 
@@ -464,18 +476,76 @@ function DslModal({ closeModal, updateLifecycle }: ModalOptions) {
   );
 }
 
+interface IlmOptionData {
+  phases?: string;
+}
+
 function IlmModal({
   closeModal,
   updateLifecycle,
+  getIlmPolicies,
   definition: {
     stream: {
       ingest: { lifecycle: existingLifecycle },
     },
   },
 }: ModalOptions) {
+  const [policies, setPolicies] = useState<Array<EuiSelectableOption<IlmOptionData>>>([]);
   const [selectedPolicy, setSelectedPolicy] = useState(
-    isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : 'my-policy'
+    isIlmLifecycle(existingLifecycle) ? existingLifecycle.ilm.policy : undefined
   );
+
+  useEffect(() => {
+    const phasesDescription = (phases: Phases) => {
+      const desc: string[] = [];
+      if (phases.hot) {
+        const rollover = phases.hot.actions.rollover;
+        const rolloverWhen = [
+          rollover?.max_age && 'max age ' + rollover.max_age,
+          rollover?.max_docs && 'max docs ' + rollover.max_docs,
+          rollover?.max_primary_shard_docs &&
+            'primary shard docs ' + rollover.max_primary_shard_docs,
+          rollover?.max_primary_shard_size &&
+            'primary shard size ' + rollover.max_primary_shard_size,
+          rollover?.max_size && 'index size ' + rollover.max_size,
+        ]
+          .filter(Boolean)
+          .join(' or ');
+        desc.push(`Hot (${rolloverWhen ? 'rollover when ' + rolloverWhen : 'no rollover'})`);
+      }
+      if (phases.warm) {
+        desc.push(`Warm after ${phases.warm.min_age}`);
+      }
+      if (phases.cold) {
+        desc.push(`Cold after ${phases.cold.min_age}`);
+      }
+      if (phases.frozen) {
+        desc.push(`Frozen after ${phases.frozen.min_age}`);
+      }
+      if (phases.delete) {
+        desc.push(`Delete after ${phases.delete.min_age}`);
+      } else {
+        desc.push('Keep data indefinitely');
+      }
+
+      return desc.join(', ');
+    };
+
+    getIlmPolicies().then((policies) => {
+      const policyOptions = policies.map(
+        ({ name, policy }): EuiSelectableOption<IlmOptionData> => ({
+          label: `${name}`,
+          searchableLabel: name,
+          checked: selectedPolicy === name ? 'on' : undefined,
+          data: {
+            phases: phasesDescription(policy.phases),
+          },
+        })
+      );
+
+      setPolicies(policyOptions);
+    });
+  }, []);
 
   return (
     <EuiModal onClose={closeModal}>
@@ -486,7 +556,35 @@ function IlmModal({
       <EuiModalBody>
         Select a pre-defined policy or visit Index Lifecycle Policies to create a new one.
         <EuiSpacer />
-        <div>get the policies list here</div>
+        <EuiSelectable
+          searchable
+          singleSelection
+          options={policies}
+          onChange={(options) => {
+            setSelectedPolicy(options.find((option) => option.checked === 'on')?.label);
+            setPolicies(options);
+          }}
+          listProps={{
+            rowHeight: 50,
+          }}
+          renderOption={(option: EuiSelectableOption<IlmOptionData>, searchValue: string) => (
+            <>
+              <EuiHighlight search={searchValue}>{option.label}</EuiHighlight>
+              <EuiText size="xs" color="subdued" className="eui-displayBlock">
+                <small>
+                  <EuiHighlight search={searchValue}>{option.phases || ''}</EuiHighlight>
+                </small>
+              </EuiText>
+            </>
+          )}
+        >
+          {(list, search) => (
+            <>
+              {search}
+              {list}
+            </>
+          )}
+        </EuiSelectable>
         <RetentionChanges />
       </EuiModalBody>
 
@@ -496,6 +594,7 @@ function IlmModal({
         </EuiButtonEmpty>
         <EuiButton
           fill
+          disabled={!selectedPolicy}
           onClick={() => {
             updateLifecycle({ ilm: { policy: selectedPolicy } });
             closeModal();
