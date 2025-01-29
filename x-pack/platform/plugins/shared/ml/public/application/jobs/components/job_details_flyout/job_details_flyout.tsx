@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useMemo, useState } from 'react';
 import {
   EuiFlyout,
   EuiFlyoutHeader,
@@ -22,12 +22,13 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
 import useMountedState from 'react-use/lib/useMountedState';
 import type { CombinedJobWithStats } from '../../../../../common/types/anomaly_detection_jobs';
-import { useMlApi, useMlLocator, useNavigateToPath } from '../../../contexts/kibana';
+import { useMlApi } from '../../../contexts/kibana';
 import { JobDetails } from '../../jobs_list/components/job_details';
 import { loadFullJob } from '../../jobs_list/components/utils';
 import { useToastNotificationService } from '../../../services/toast_notification_service';
 import { ML_PAGES } from '../../../../../common/constants/locator';
 import { useJobInfoFlyouts } from './job_details_flyout_context';
+import { useCreateAndNavigateToManagementMlLink } from '../../../contexts/kibana/use_create_url';
 
 const doNothing = () => {};
 export const JobDetailsFlyout = () => {
@@ -71,23 +72,16 @@ export const JobDetailsFlyout = () => {
     fetchJobDetails();
   }, [jobId, mlApi, displayErrorToast, isMounted]);
 
-  const navigateToPath = useNavigateToPath();
-  const mlLocator = useMlLocator();
+  const pageState = useMemo(() => ({ jobId }), [jobId]);
+  const openJobsList = useCreateAndNavigateToManagementMlLink(
+    ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
+    'anomaly_detection',
+    pageState
+  );
 
   if (!jobId) {
     return null;
   }
-
-  const openJobsList = async () => {
-    const pageState = { jobId };
-    if (mlLocator) {
-      const url = await mlLocator.getUrl({
-        page: ML_PAGES.ANOMALY_DETECTION_JOBS_MANAGE,
-        pageState,
-      });
-      await navigateToPath(url);
-    }
-  };
 
   return isDetailFlyoutOpen ? (
     <EuiFlyout

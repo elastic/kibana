@@ -15,7 +15,7 @@ import type { ListingPageUrlState } from '@kbn/ml-url-state';
 import type { JobId } from './anomaly_detection_jobs/job';
 import type { ML_PAGES } from '../constants/locator';
 
-type OptionalPageState = object | undefined;
+type OptionalPageState = (object & { globalState?: MlCommonGlobalState }) | undefined;
 
 export type MLPageState<PageType, PageState> = PageState extends OptionalPageState
   ? { page: PageType; pageState?: PageState }

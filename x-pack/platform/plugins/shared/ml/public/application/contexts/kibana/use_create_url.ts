@@ -76,20 +76,23 @@ export const useCreateAndNavigateToMlLink = (
 
   const redirectToMlPage = useCallback(
     async (_page: MlLocatorParams['page']) => {
-      const pageState =
-        globalState?.refreshInterval !== undefined
-          ? {
-              globalState: {
-                refreshInterval: globalState.refreshInterval,
-              },
-            }
-          : undefined;
+      if (mlLocator) {
+        const pageState =
+          globalState?.refreshInterval !== undefined
+            ? {
+                globalState: {
+                  refreshInterval: globalState.refreshInterval,
+                },
+              }
+            : undefined;
 
-      // TODO: fix ts only interpreting it as MlUrlGenericState if pageState is passed
-      // @ts-ignore
-      const url = await mlLocator.getUrl({ page: _page, pageState });
+        const url = await mlLocator.getUrl({ page: _page, pageState });
 
-      await navigateToUrl(url);
+        await navigateToUrl(url);
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('mlLocator is not defined');
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
     [mlLocator, navigateToUrl]
@@ -101,7 +104,8 @@ export const useCreateAndNavigateToMlLink = (
 
 export const useCreateAndNavigateToManagementMlLink = (
   page: MlLocatorParams['page'],
-  appId: string
+  appId: string,
+  pageState?: MlLocatorParams['pageState']
 ): (() => Promise<void>) => {
   const mlManagementLocatorInternal = useMlManagementLocatorInternal();
   const [globalState] = useUrlState('_g');
@@ -114,20 +118,30 @@ export const useCreateAndNavigateToManagementMlLink = (
 
   const redirectToMlPage = useCallback(
     async (_page: MlLocatorParams['page']) => {
-      const pageState =
-        globalState?.refreshInterval !== undefined
-          ? {
-              globalState: {
-                refreshInterval: globalState.refreshInterval,
-              },
-            }
-          : undefined;
+      if (mlManagementLocatorInternal) {
+        const modifiedPageState: MlLocatorParams['pageState'] = pageState ?? {};
+        if (globalState?.refreshInterval !== undefined) {
+          // @ts-expect-error globalState override
+          modifiedPageState.globalState = {
+            // @ts-expect-error globalState override
+            ...(modifiedPageState.globalState ?? {}),
+            refreshInterval: globalState.refreshInterval,
+          };
+        }
 
-      const { path } = await mlManagementLocatorInternal.getUrl({ page: _page, pageState }, appId);
-      await mlManagementLocatorInternal.navigate(path, appId);
+        const { path } = await mlManagementLocatorInternal.getUrl(
+          // @ts-expect-error globalState modification
+          { page: _page, pageState: modifiedPageState },
+          appId
+        );
+        await mlManagementLocatorInternal.navigate(path, appId);
+      } else {
+        // eslint-disable-next-line no-console
+        console.error('mlManagementLocatorInternal is not defined');
+      }
     },
     // eslint-disable-next-line react-hooks/exhaustive-deps
-    [MlManagementLocatorInternal, navigateToUrl]
+    [MlManagementLocatorInternal, navigateToUrl, JSON.stringify(pageState)]
   );
 
   // returns the onClick callback

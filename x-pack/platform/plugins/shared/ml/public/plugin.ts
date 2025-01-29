@@ -54,7 +54,7 @@ import type { FieldFormatsRegistry } from '@kbn/field-formats-plugin/common';
 import { ENABLE_ESQL } from '@kbn/esql-utils';
 import type { MlSharedServices } from './application/services/get_shared_ml_services';
 import { getMlSharedServices } from './application/services/get_shared_ml_services';
-import { registerManagementSection } from './application/management';
+import { registerManagementSections } from './application/management';
 import type { MlLocatorParams } from './locator';
 import { MlLocatorDefinition, type MlLocator } from './locator';
 import { registerHomeFeature } from './register_home_feature';
@@ -75,6 +75,7 @@ import type { ElasticModels } from './application/services/elastic_models_servic
 import type { MlApi } from './application/services/ml_api_service';
 import type { MlCapabilities } from '../common/types/capabilities';
 import { AnomalySwimLane } from './shared_components';
+import { MlManagementLocatorInternal } from './locator/ml_management_locator';
 
 export interface MlStartDependencies {
   cases?: CasesPublicStart;
@@ -126,6 +127,8 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
   private locator: undefined | MlLocator;
 
+  private managementLocator: undefined | typeof MlManagementLocatorInternal;
+
   private sharedMlServices: MlSharedServices | undefined;
 
   private isServerless: boolean = false;
@@ -167,8 +170,20 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
   setup(
     core: MlCoreSetup,
     pluginsSetup: MlSetupDependencies
-  ): { locator?: LocatorPublic<MlLocatorParams>; elasticModels?: ElasticModels } {
+  ): {
+    locator?: LocatorPublic<MlLocatorParams>;
+    managementLocator?: typeof MlManagementLocatorInternal;
+    elasticModels?: ElasticModels;
+  } {
     this.sharedMlServices = getMlSharedServices(core.http);
+    const deps = {
+      // embeddable: pluginsSetup.embeddable,
+      // embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
+      home: pluginsSetup.home,
+      licenseManagement: pluginsSetup.licenseManagement,
+      management: pluginsSetup.management,
+      usageCollection: pluginsSetup.usageCollection,
+    };
 
     core.application.register({
       id: PLUGIN_ID,
@@ -195,12 +210,9 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             dataVisualizer: pluginsStart.dataVisualizer,
             embeddable: { ...pluginsSetup.embeddable, ...pluginsStart.embeddable },
             fieldFormats: pluginsStart.fieldFormats,
-            home: pluginsSetup.home,
             kibanaVersion: this.initializerContext.env.packageInfo.version,
             lens: pluginsStart.lens,
-            licenseManagement: pluginsSetup.licenseManagement,
             licensing: pluginsStart.licensing,
-            management: pluginsSetup.management,
             maps: pluginsStart.maps,
             observabilityAIAssistant: pluginsStart.observabilityAIAssistant,
             presentationUtil: pluginsStart.presentationUtil,
@@ -211,8 +223,6 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
             triggersActionsUi: pluginsStart.triggersActionsUi,
             uiActions: pluginsStart.uiActions,
             unifiedSearch: pluginsStart.unifiedSearch,
-            usageCollection: pluginsSetup.usageCollection,
-            spaces: pluginsStart.spaces,
             ...deps,
           },
           params,
@@ -226,18 +236,20 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     if (pluginsSetup.share) {
       this.locator = pluginsSetup.share.url.locators.create(new MlLocatorDefinition());
+      // @ts-ignore - TODO: fix
+      this.managementLocator = new MlManagementLocatorInternal(pluginsSetup.share);
     }
 
     if (pluginsSetup.management) {
-      registerManagementSection(
+      registerManagementSections(
         pluginsSetup.management,
         core,
-        {
-          usageCollection: pluginsSetup.usageCollection,
-        },
+        deps,
         this.isServerless,
-        this.enabledFeatures
-      ).enable();
+        this.enabledFeatures,
+        this.nlpSettings,
+        this.experimentalFeatures
+      );
     }
 
     const licensing = pluginsSetup.licensing.license$.pipe(take(1));
@@ -327,6 +339,7 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
 
     return {
       locator: this.locator,
+      managementLocator: this.managementLocator,
       elasticModels: this.sharedMlServices.elasticModels,
     };
   }
@@ -336,12 +349,14 @@ export class MlPlugin implements Plugin<MlPluginSetup, MlPluginStart> {
     deps: MlStartDependencies
   ): {
     locator?: LocatorPublic<MlLocatorParams>;
+    managementLocator?: typeof MlManagementLocatorInternal;
     elasticModels?: ElasticModels;
     mlApi?: MlApi;
     components: { AnomalySwimLane: typeof AnomalySwimLane };
   } {
     return {
       locator: this.locator,
+      managementLocator: this.managementLocator,
       elasticModels: this.sharedMlServices?.elasticModels,
       mlApi: this.sharedMlServices?.mlApi,
       components: {

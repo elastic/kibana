@@ -101,6 +101,7 @@ export function registerManagementSections(
             triggersActionsUi: pluginsStart.triggersActionsUi,
             uiActions: pluginsStart.uiActions,
             unifiedSearch: pluginsStart.unifiedSearch,
+            spaces: pluginsStart.spaces,
             ...deps,
           };
 
