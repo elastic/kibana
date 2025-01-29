@@ -5820,7 +5820,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-common-functional-services@link:packages/kbn-ftr-common-functional-services":
+"@kbn/ftr-common-functional-services@link:src/dev/packages/ftr-common-functional-services":
   version "0.0.0"
   uid ""
 
