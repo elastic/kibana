@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-find-used-node-modules'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/find-used-node-modules'],
 };

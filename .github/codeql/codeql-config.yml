@@ -49,7 +49,7 @@ paths-ignore:
   - packages/kbn-eslint-*
   - src/dev/packages/expect
   - src/dev/packages/failed-test-reporter-cli
-  - packages/kbn-find-used-node-modules
+  - src/dev/packages/find-used-node-modules
   - packages/kbn-ftr-*
   - packages/kbn-generate
   - packages/kbn-get-repo-files

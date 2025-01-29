@@ -1442,7 +1442,7 @@
     "@kbn/eslint-plugin-telemetry": "link:src/dev/packages/eslint-plugin-telemetry",
     "@kbn/expect": "link:src/dev/packages/expect",
     "@kbn/failed-test-reporter-cli": "link:src/dev/packages/failed-test-reporter-cli",
-    "@kbn/find-used-node-modules": "link:packages/kbn-find-used-node-modules",
+    "@kbn/find-used-node-modules": "link:src/dev/packages/find-used-node-modules",
     "@kbn/ftr-common-functional-services": "link:packages/kbn-ftr-common-functional-services",
     "@kbn/ftr-common-functional-ui-services": "link:packages/kbn-ftr-common-functional-ui-services",
     "@kbn/ftr-screenshot-filename": "link:packages/kbn-ftr-screenshot-filename",

@@ -5800,7 +5800,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/find-used-node-modules@link:packages/kbn-find-used-node-modules":
+"@kbn/find-used-node-modules@link:src/dev/packages/find-used-node-modules":
   version "0.0.0"
   uid ""
 
