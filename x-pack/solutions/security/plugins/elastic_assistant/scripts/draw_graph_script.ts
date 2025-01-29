@@ -68,6 +68,7 @@ async function getAssistantGraph(logger: Logger): Promise<Drawable> {
     createLlmInstance,
     tools: [],
     replacements: {},
+    contentReferencesEnabled: false,
     savedObjectsClient: savedObjectsClientMock.create(),
   });
   return graph.getGraph();

@@ -95,8 +95,8 @@ export const createStartServicesMock = ({ license }: StartServiceArgs = {}): Sta
       create_comment: true,
       cases_assign: true,
     },
-    visualize: { save: true, show: true },
-    dashboard: { show: true, createNew: true },
+    visualize_v2: { save: true, show: true },
+    dashboard_v2: { show: true, createNew: true },
   };
 
   return services;
