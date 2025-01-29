@@ -9,6 +9,7 @@
 
 import React, { Suspense, useMemo } from 'react';
 import { EuiCodeBlock, EuiSpacer, EuiLoadingSpinner, EuiErrorBoundary } from '@elastic/eui';
+import { INSTRUCTION_VARIANT } from '../../..'; // change import, but it had an error about using the same way to define imports
 import { Content } from './content';
 
 import { getServices } from '../../kibana_services';
@@ -19,8 +20,8 @@ interface InstructionProps {
   textPost?: string;
   textPre?: string;
   replaceTemplateStrings: (text: string, paramValues?: string) => string;
-  customComponentName: string;
-  variantId?: string;
+  customComponentName?: string;
+  variantId: keyof typeof INSTRUCTION_VARIANT; // it feels more typesafe, but can be too specific if someone adds another variant in the future;
   isCloudEnabled: boolean;
 }
 
@@ -55,11 +56,11 @@ export function Instruction({
       </>
     );
   }
-  const customComponent = tutorialService.getCustomComponent(customComponentName);
+  const customComponent = tutorialService.getCustomComponent(customComponentName as string);
   // Memoize the custom component so it wont rerender everytime
   const LazyCustomComponent = useMemo(() => {
     if (customComponent) {
-      return React.lazy(() => customComponent());
+      return React.lazy(() => customComponent()); // need to fix. can't figure out what is wrong when i am refactoring it following the manner in other places. to add {default: component}
     }
   }, [customComponent]);
 

@@ -25,19 +25,19 @@ import { euiThemeVars } from '@kbn/ui-theme'; // FIXME: remove this, and access 
 import { Instruction } from './instruction';
 import { ParameterForm } from './parameter_form';
 import { Content } from './content';
-import { INSTRUCTION_VARIANT, getDisplayText } from '../../../../common/instruction_variant';
+import { INSTRUCTION_VARIANT, getDisplayText } from '../../..';
 import * as StatusCheckStates from './status_check_states';
 
 interface InstructionShape {
   title: string;
-  textPre: string;
+  textPre?: string;
   commands: string[];
-  textPost: string;
-  customComponentName: string; // ?
+  textPost?: string;
+  customComponentName?: string; // ? should it be optional?
 }
 
 export interface InstructionVariantShape {
-  id: keyof typeof INSTRUCTION_VARIANT; // ?
+  id: keyof typeof INSTRUCTION_VARIANT; // it feels more typesafe, but can be too specific if someone adds another variant in the future
   instructions: InstructionShape[];
   initialSelected: boolean;
 }
@@ -51,41 +51,41 @@ export interface StatusCheckConfigShape {
   customStatusCheck: string;
 }
 
-export interface InstructionProps {
+export interface InstructionSetProps {
   // not sure if i should export props
   title: string;
-  callOut: {
-    iconType: string;
-    message: string;
-    title: string;
-  }; // ?
+  // callOut: {
+  //   iconType: string;
+  //   message: string;
+  //   title: string;
+  // }; // ?
   instructionVariants: InstructionVariantShape[];
-  statusCheckConfig: StatusCheckConfigShape;
+  // statusCheckConfig: StatusCheckConfigShape;
   statusCheckState: keyof typeof StatusCheckStates;
   onStatusCheck: () => void;
   offset: number;
-  params: unknown; // type
+  // params: unknown; // type
   paramValues: object; // ?
-  setParameter: (paramId: string, newValue: string) => void;
+  // setParameter: (paramId: string, newValue: string) => void;
   replaceTemplateStrings: (text: string) => string;
   isCloudEnabled: boolean;
-  intl: InjectedIntl;
+  intl?: InjectedIntl;
 }
 interface InstructionState {
   selectedTabId: string;
   isParamFormVisible: boolean;
-  tabs?: Tab; // ?
+  tabs?: Tab[]; // ?
 }
 interface Tab {
   id: string;
   name: string;
   initialSelected: boolean;
 }
-class InstructionSetUi extends React.Component<InstructionProps | any> {
-  tabs: Tab[]; // ? why state doesn't complain
+class InstructionSetUi extends React.Component<InstructionSetProps | any> {
+  tabs: Tab[];
   state: InstructionState;
 
-  constructor(props: InstructionProps) {
+  constructor(props: InstructionSetProps) {
     super(props);
 
     this.tabs = this.initializeTabs(props.instructionVariants);
@@ -112,7 +112,7 @@ class InstructionSetUi extends React.Component<InstructionProps | any> {
   }
   handleToggleVisibility = () => {
     this.setState((prevState: InstructionState) => ({
-      isParamFormVisible: !prevState.isParamFormVisible,
+      isParamFormVisible: !prevState.isParamFormVisible, // can remove !
     }));
   };
 
@@ -123,11 +123,11 @@ class InstructionSetUi extends React.Component<InstructionProps | any> {
   };
 
   renderTabs = () => {
-    return this.tabs.map((tab) => (
+    return this.tabs.map((tab, index) => (
       <EuiTab
         onClick={this.onSelectedTabChanged.bind(this, tab.id)}
         isSelected={tab.id === this.state.selectedTabId}
-        key={tab.id}
+        key={index}
       >
         {tab.name}
       </EuiTab>
@@ -169,7 +169,7 @@ class InstructionSetUi extends React.Component<InstructionProps | any> {
     );
   }
 
-  getStepStatus(statusCheckState: InstructionProps['statusCheckState']) {
+  getStepStatus(statusCheckState: InstructionSetProps['statusCheckState']) {
     switch (statusCheckState) {
       case undefined:
       case StatusCheckStates.NOT_CHECKED:
