@@ -14,6 +14,7 @@ export interface AlwaysShowPattern {
   index_pattern: string;
 }
 
+// TODO: Remove this type
 export interface CrawlerIndex extends ElasticsearchIndex {
   connector: Connector;
   crawler: Crawler;
