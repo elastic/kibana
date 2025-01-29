@@ -10,7 +10,7 @@ import { RunWithCommands } from '@kbn/dev-cli-runner';
 import { cli as reportingCLI } from '@kbn/scout-reporting';
 import { startServer } from './start_server';
 import { runTests } from './run_tests';
-import { discoverTests } from './discover_tests';
+import { discoverPlaywrightConfigs } from './config_discovery';
 
 export async function run() {
   await new RunWithCommands(
@@ -20,7 +20,7 @@ export async function run() {
     [
       startServer,
       runTests,
-      discoverTests,
+      discoverPlaywrightConfigs,
       reportingCLI.initializeReportDatastream,
       reportingCLI.uploadEvents,
     ]

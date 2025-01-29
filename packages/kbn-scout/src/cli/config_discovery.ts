@@ -14,14 +14,14 @@ import { measurePerformance } from '../common';
 /**
  * Discover Playwright configuration files with Scout tests
  */
-export const discoverTests: Command<void> = {
-  name: 'discover-tests',
+export const discoverPlaywrightConfigs: Command<void> = {
+  name: 'discover-playwright-configs',
   description: `
   Discover Playwright configuration files with Scout tests.
 
   Common usage:
-    node scripts/scout discover-tests --searchPaths <search_paths>
-    node scripts/scout discover-tests
+    node scripts/scout discover-playwright-configs --searchPaths <search_paths>
+    node scripts/scout discover-playwright-configs
   `,
   flags: {
     string: ['searchPaths'],
@@ -37,7 +37,7 @@ export const discoverTests: Command<void> = {
     const finalMessage =
       plugins.size === 0
         ? 'No playwright config files found'
-        : `Discovered playwright config files in '${plugins.size}' plugins`;
+        : `Found playwright config files in '${plugins.size}' plugins`;
 
     log.info(finalMessage);
 
