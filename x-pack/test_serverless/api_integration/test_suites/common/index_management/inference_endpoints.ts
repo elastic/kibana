@@ -17,7 +17,7 @@ export default function ({ getService }: FtrProviderContext) {
   const ml = getService('ml');
   const inferenceId = 'my-elser-model';
   const taskType = 'sparse_embedding';
-  const service = 'elser';
+  const service = 'elasticsearch';
 
   const modelId = '.elser_model_2';
   const svlCommonApi = getService('svlCommonApi');
@@ -26,8 +26,7 @@ export default function ({ getService }: FtrProviderContext) {
   let roleAuthc: RoleCredentials;
   let internalReqHeader: InternalRequestHeader;
 
-  // FLAKY: https://github.com/elastic/kibana/issues/193036
-  describe.skip('Inference endpoints', function () {
+  describe('Inference endpoints', function () {
     before(async () => {
       roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('admin');
       internalReqHeader = svlCommonApi.getInternalRequestHeader();
