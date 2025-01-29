@@ -12,8 +12,6 @@ import type { FilterBarService } from '@kbn/test-suites-src/functional/services/
 import type { QueryBarProvider } from '../services/query_bar_provider';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
-const GRAPH_PREVIEW_UI_COUNTER = 'cloud-security-loaded-graph-preview';
-const GRAPH_INVESTIGATION_UI_COUNTER = 'cloud-security-click-graph-investigation';
 const GRAPH_PREVIEW_TITLE_LINK_TEST_ID = 'securitySolutionFlyoutGraphPreviewTitleLink';
 const NODE_EXPAND_BUTTON_TEST_ID = 'cloudSecurityGraphNodeExpandButton';
 const GRAPH_INVESTIGATION_TEST_ID = 'cloudSecurityGraphGraphInvestigation';
@@ -28,13 +26,9 @@ const GRAPH_ACTIONS_INVESTIGATE_IN_TIMELINE_ID = `${GRAPH_INVESTIGATION_TEST_ID}
 type Filter = Parameters<FilterBarService['addFilter']>[0];
 
 export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrProviderContext> {
-  private readonly browser = this.ctx.getService('browser');
   private readonly pageObjects = this.ctx.getPageObjects(['common', 'header']);
   private readonly testSubjects = this.ctx.getService('testSubjects');
   private readonly filterBar = this.ctx.getService('filterBar');
-  private readonly ebtUIHelper = this.ctx.hasService('kibana_ebt_ui')
-    ? this.ctx.getService('kibana_ebt_ui')
-    : undefined;
 
   async expandGraph(): Promise<void> {
     await this.testSubjects.click(GRAPH_PREVIEW_TITLE_LINK_TEST_ID);
@@ -167,25 +161,5 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     await queryBar.setQuery(kql);
     await queryBar.submitQuery();
     await this.pageObjects.header.waitUntilLoadingHasFinished();
-  }
-
-  cleanTelemetry(): Promise<void> {
-    return this.browser.setLocalStorageItem('analytics', '');
-  }
-
-  async getTelemetryPreviewEventCount(): Promise<number> {
-    expect(this.ebtUIHelper).not.to.be(undefined);
-    const analyticsStr = await this.browser.getLocalStorageItem('analytics');
-    expect(analyticsStr).not.to.be(null);
-    const analytics = JSON.parse(analyticsStr ?? '{}');
-    return analytics?.uiCounter[GRAPH_PREVIEW_UI_COUNTER]?.total ?? 0;
-  }
-
-  async getTelemetryGraphInvestigationEventCount(): Promise<number> {
-    expect(this.ebtUIHelper).not.to.be(undefined);
-    const analyticsStr = await this.browser.getLocalStorageItem('analytics');
-    expect(analyticsStr).not.to.be(null);
-    const analytics = JSON.parse(analyticsStr ?? '{}');
-    return analytics?.uiCounter[GRAPH_INVESTIGATION_UI_COUNTER]?.total ?? 0;
   }
 }

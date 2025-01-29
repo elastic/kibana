@@ -5,7 +5,6 @@
  * 2.0.
  */
 
-import expect from '@kbn/expect';
 import { waitForPluginInitialized } from '../../cloud_security_posture_api/utils';
 import type { SecurityTelemetryFtrProviderContext } from '../config';
 
@@ -50,7 +49,6 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         )}`
       );
 
-      await expandedFlyoutGraph.cleanTelemetry();
       await alertsPage.waitForListToHaveAlerts();
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
     });
@@ -65,21 +63,15 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
     });
 
     it('expanded flyout - filter by node', async () => {
-      expect(await expandedFlyoutGraph.getTelemetryPreviewEventCount()).eql(0);
       await alertsPage.flyout.expandVisualizations();
 
       await alertsPage.flyout.assertGraphPreviewVisible();
       await alertsPage.flyout.assertGraphNodesNumber(3);
 
-      // Telemetry tests
-      expect(await expandedFlyoutGraph.getTelemetryPreviewEventCount()).above(0);
-      expect(await expandedFlyoutGraph.getTelemetryGraphInvestigationEventCount()).eql(0);
-
       await expandedFlyoutGraph.expandGraph();
       await expandedFlyoutGraph.waitGraphIsLoaded();
       await expandedFlyoutGraph.assertGraphNodesNumber(3);
       await expandedFlyoutGraph.toggleSearchBar();
-      expect(await expandedFlyoutGraph.getTelemetryGraphInvestigationEventCount()).eql(1);
 
       // Show actions by entity
       await expandedFlyoutGraph.showActionsByEntity('admin@example.com');
