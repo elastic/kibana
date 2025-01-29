@@ -18,7 +18,7 @@ webpack_cli(
     "@npm//url-loader",
     "@npm//@babel/plugin-transform-numeric-separator",
     "//src/platform/packages/private/kbn-ui-shared-deps-npm",
-    "//packages/kbn-babel-register",
+    "//src/dev/packages/babel-register:kbn-babel-register",
     "//src/dev/packages/babel-preset:kbn-babel-preset",
     # packages included in the shared deps src bundle
     "//src/platform/packages/shared/kbn-ui-theme",

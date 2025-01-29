@@ -104,7 +104,7 @@ src/dev/packages/apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs
 src/dev/packages/apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 src/dev/packages/axe-config @elastic/kibana-qa
 src/dev/packages/babel-preset @elastic/kibana-operations
-packages/kbn-babel-register @elastic/kibana-operations
+src/dev/packages/babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 src/dev/packages/bazel-runner @elastic/kibana-operations
 src/dev/packages/capture-oas-snapshot-cli @elastic/kibana-core

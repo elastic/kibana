@@ -4076,7 +4076,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/babel-register@link:packages/kbn-babel-register":
+"@kbn/babel-register@link:src/dev/packages/babel-register":
   version "0.0.0"
   uid ""
 
