@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { buildSortedEventsQuery, BuildSortedEventsQuery } from './build_sorted_events_query';
+import { buildSortedEventsQuery, type BuildSortedEventsQuery } from './build_sorted_events_query';
 import type { Writable } from '@kbn/utility-types';
 
 const DefaultQuery: Writable<Partial<BuildSortedEventsQuery>> = {
@@ -18,13 +18,13 @@ const DefaultQuery: Writable<Partial<BuildSortedEventsQuery>> = {
 };
 
 describe('buildSortedEventsQuery', () => {
-  let query: any;
+  let query: Partial<BuildSortedEventsQuery>;
   beforeEach(() => {
     query = { ...DefaultQuery };
   });
 
   test('it builds a filter with given date range', () => {
-    expect(buildSortedEventsQuery(query)).toEqual({
+    expect(buildSortedEventsQuery(query as BuildSortedEventsQuery)).toEqual({
       allow_no_indices: true,
       index: ['index-name'],
       size: 100,
@@ -73,7 +73,7 @@ describe('buildSortedEventsQuery', () => {
 
   test('it does not include searchAfterSortId if it is an empty string', () => {
     query.searchAfterSortId = '';
-    expect(buildSortedEventsQuery(query)).toEqual({
+    expect(buildSortedEventsQuery(query as BuildSortedEventsQuery)).toEqual({
       allow_no_indices: true,
       index: ['index-name'],
       size: 100,
@@ -123,7 +123,7 @@ describe('buildSortedEventsQuery', () => {
   test('it includes searchAfterSortId if it is a valid string', () => {
     const sortId = '123456789012';
     query.searchAfterSortId = sortId;
-    expect(buildSortedEventsQuery(query)).toEqual({
+    expect(buildSortedEventsQuery(query as BuildSortedEventsQuery)).toEqual({
       allow_no_indices: true,
       index: ['index-name'],
       size: 100,
@@ -174,7 +174,7 @@ describe('buildSortedEventsQuery', () => {
   test('it includes searchAfterSortId if it is a valid number', () => {
     const sortId = 123456789012;
     query.searchAfterSortId = sortId;
-    expect(buildSortedEventsQuery(query)).toEqual({
+    expect(buildSortedEventsQuery(query as BuildSortedEventsQuery)).toEqual({
       allow_no_indices: true,
       index: ['index-name'],
       size: 100,
@@ -230,7 +230,7 @@ describe('buildSortedEventsQuery', () => {
         },
       },
     };
-    expect(buildSortedEventsQuery(query)).toEqual({
+    expect(buildSortedEventsQuery(query as BuildSortedEventsQuery)).toEqual({
       allow_no_indices: true,
       index: ['index-name'],
       size: 100,
@@ -286,7 +286,7 @@ describe('buildSortedEventsQuery', () => {
 
   test('it uses sortOrder if specified', () => {
     query.sortOrder = 'desc';
-    expect(buildSortedEventsQuery(query)).toEqual({
+    expect(buildSortedEventsQuery(query as BuildSortedEventsQuery)).toEqual({
       allow_no_indices: true,
       index: ['index-name'],
       size: 100,
@@ -335,7 +335,7 @@ describe('buildSortedEventsQuery', () => {
 
   test('it uses track_total_hits if specified', () => {
     query.track_total_hits = true;
-    expect(buildSortedEventsQuery(query)).toEqual({
+    expect(buildSortedEventsQuery(query as BuildSortedEventsQuery)).toEqual({
       allow_no_indices: true,
       index: ['index-name'],
       size: 100,

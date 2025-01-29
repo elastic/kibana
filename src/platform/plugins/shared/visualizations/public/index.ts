@@ -20,7 +20,6 @@ export function plugin(initializerContext: PluginInitializerContext) {
 export { TypesService } from './vis_types/types_service';
 export { VIS_EVENT_TO_TRIGGER } from './embeddable/events';
 export { apiHasVisualizeConfig } from './embeddable/interfaces/has_visualize_config';
-export { COMMON_VISUALIZATION_GROUPING } from './legacy/embeddable/constants';
 export { VisualizationContainer } from './components';
 export { getVisSchemas } from './vis_schemas';
 export { prepareLogTable } from '../common/utils/prepare_log_table';

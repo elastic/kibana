@@ -13,6 +13,7 @@ import { getDiscoverStateMock } from '../../../../__mocks__/discover_state.mock'
 import { savedSearchMock } from '../../../../__mocks__/saved_search';
 import { render, screen } from '@testing-library/react';
 import userEvent from '@testing-library/user-event';
+import { spacesPluginMock } from '@kbn/spaces-plugin/public/mocks';
 
 const stateContainer = getDiscoverStateMock({ isTimeBased: true });
 const discoverServiceMock = createDiscoverServicesMock();
@@ -127,5 +128,28 @@ describe('getTopNavBadges()', function () {
       },
     });
     expect(topNavBadges).toMatchInlineSnapshot(`Array []`);
+  });
+
+  describe('solutions view badge', () => {
+    const discoverServiceWithSpacesMock = createDiscoverServicesMock();
+    discoverServiceWithSpacesMock.capabilities.discover.save = true;
+    discoverServiceWithSpacesMock.spaces = spacesPluginMock.createStartContract();
+
+    test('should return the solutions view badge when spaces is enabled', () => {
+      const topNavBadges = getTopNavBadges({
+        hasUnsavedChanges: false,
+        services: discoverServiceWithSpacesMock,
+        stateContainer,
+        topNavCustomization: undefined,
+      });
+      expect(topNavBadges).toMatchInlineSnapshot(`
+        Array [
+          Object {
+            "badgeText": "Check out context-aware Discover",
+            "renderCustomBadge": [Function],
+          },
+        ]
+      `);
+    });
   });
 });

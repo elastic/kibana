@@ -58,7 +58,10 @@ export function fetchAndValidate$({
     stateManager.sort,
     stateManager.searchTechnique,
     // cannot use requestSize directly, because we need to be able to reset the size to the default without refetching
-    api.loadMoreSubject.pipe(debounceTime(100)), // debounce load more so "loading" state briefly shows
+    api.loadMoreSubject.pipe(
+      startWith(null), // start with null so that `combineLatest` subscription fires
+      debounceTime(100) // debounce load more so "loading" state briefly shows
+    ),
     apiPublishesReload(api.parentApi)
       ? api.parentApi.reload$.pipe(
           tap(() => requestCache.clearCache()),

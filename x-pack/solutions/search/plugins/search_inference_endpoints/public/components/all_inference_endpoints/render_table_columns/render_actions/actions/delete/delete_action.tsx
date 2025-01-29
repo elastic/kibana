@@ -5,22 +5,23 @@
  * 2.0.
  */
 
-import { EuiButtonIcon } from '@elastic/eui';
-import { i18n } from '@kbn/i18n';
-import React, { useState } from 'react';
-import { isEndpointPreconfigured } from '../../../../../../utils/preconfigured_endpoint_helper';
+import React from 'react';
 import { useDeleteEndpoint } from '../../../../../../hooks/use_delete_endpoint';
 import { InferenceEndpointUI } from '../../../../types';
 import { ConfirmDeleteEndpointModal } from './confirm_delete_endpoint';
 
 interface DeleteActionProps {
   selectedEndpoint: InferenceEndpointUI;
+  onCancel: () => void;
+  displayModal: boolean;
 }
 
-export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) => {
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-
-  const { mutate: deleteEndpoint } = useDeleteEndpoint(() => setIsModalVisible(false));
+export const DeleteAction: React.FC<DeleteActionProps> = ({
+  selectedEndpoint,
+  onCancel,
+  displayModal,
+}) => {
+  const { mutate: deleteEndpoint } = useDeleteEndpoint(onCancel);
 
   const onConfirmDeletion = () => {
     if (!selectedEndpoint) {
@@ -33,30 +34,15 @@ export const DeleteAction: React.FC<DeleteActionProps> = ({ selectedEndpoint }) 
     });
   };
 
-  const isPreconfigured = isEndpointPreconfigured(selectedEndpoint.endpoint);
-  const testSubj = `inferenceUIDeleteAction-${isPreconfigured ? 'preconfigured' : 'user-defined'}`;
-
   return (
     <>
-      <EuiButtonIcon
-        aria-label={i18n.translate('xpack.searchInferenceEndpoints.actions.deleteEndpoint', {
-          defaultMessage: 'Delete inference endpoint {selectedEndpointName}',
-          values: { selectedEndpointName: selectedEndpoint.endpoint },
-        })}
-        data-test-subj={testSubj}
-        disabled={isPreconfigured}
-        key="delete"
-        iconType="trash"
-        color="danger"
-        onClick={() => setIsModalVisible(true)}
-      />
-      {isModalVisible && (
+      {displayModal ? (
         <ConfirmDeleteEndpointModal
-          onCancel={() => setIsModalVisible(false)}
+          onCancel={onCancel}
           onConfirm={onConfirmDeletion}
           inferenceEndpoint={selectedEndpoint}
         />
-      )}
+      ) : null}
     </>
   );
 };

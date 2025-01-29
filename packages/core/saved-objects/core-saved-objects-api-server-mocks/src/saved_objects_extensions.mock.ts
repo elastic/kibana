@@ -43,6 +43,7 @@ const createSecurityExtension = (): jest.Mocked<ISavedObjectsSecurityExtension> 
   authorizeDisableLegacyUrlAliases: jest.fn(),
   auditObjectsForSpaceDeletion: jest.fn(),
   getCurrentUser: jest.fn(),
+  includeSavedObjectNames: jest.fn(),
 });
 
 const createSpacesExtension = (): jest.Mocked<ISavedObjectsSpacesExtension> => ({

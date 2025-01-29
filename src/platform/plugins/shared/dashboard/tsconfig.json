@@ -83,7 +83,10 @@
     "@kbn/visualization-utils",
     "@kbn/std",
     "@kbn/core-rendering-browser",
-    "@kbn/grid-layout"
+    "@kbn/esql-variables-types",
+    "@kbn/grid-layout",
+    "@kbn/esql-validation-autocomplete",
+    "@kbn/ui-actions-browser"
   ],
   "exclude": ["target/**/*"]
 }

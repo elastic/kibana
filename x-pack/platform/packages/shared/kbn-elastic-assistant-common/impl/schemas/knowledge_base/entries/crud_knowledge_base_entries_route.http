@@ -1,5 +1,5 @@
 ### Create Document Entry [Admin] [Private]
-POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+POST http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
@@ -16,7 +16,7 @@ X-Kbn-Context: {{appContext.security}}
 }
 
 ### Create Document Entry [Admin] [Global]
-POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+POST http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
@@ -34,7 +34,7 @@ X-Kbn-Context: {{appContext.security}}
 }
 
 ### Create Document Entry [Assistant All] [Private]
-POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+POST http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
@@ -51,7 +51,7 @@ X-Kbn-Context: {{appContext.security}}
 }
 
 ### Create Document Entry [Assistant All] [Global]
-POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+POST http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
@@ -69,7 +69,7 @@ X-Kbn-Context: {{appContext.security}}
 }
 
 ### Create Index Entry [Admin] [Private]
-POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+POST http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
@@ -89,7 +89,7 @@ X-Kbn-Context: {{appContext.security}}
 }
 
 ### Create Index Entry [Admin] [Global]
-POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+POST http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
@@ -110,7 +110,7 @@ X-Kbn-Context: {{appContext.security}}
 }
 
 ### Create Index Entry [Assistant All] [Private]
-POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+POST http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}
@@ -129,7 +129,7 @@ X-Kbn-Context: {{appContext.security}}
 }
 
 ### Create Index Entry [Assistant All] [Global]
-POST http://{{host}}:{{port}}{{basePath}}/internal/elastic_assistant/knowledge_base/entries
+POST http://{{host}}:{{port}}{{basePath}}/api/security_ai_assistant/knowledge_base/entries
 kbn-xsrf: "true"
 Content-Type: application/json
 Elastic-Api-Version: {{elasticApiVersion}}

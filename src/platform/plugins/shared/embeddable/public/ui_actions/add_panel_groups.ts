@@ -9,6 +9,18 @@
 
 import { i18n } from '@kbn/i18n';
 
+export const ADD_PANEL_VISUALIZATION_GROUP = {
+  id: 'visualizations',
+  getDisplayName: () =>
+    i18n.translate('embeddableApi.common.constants.grouping.visualizations', {
+      defaultMessage: 'Visualizations',
+    }),
+  getIconType: () => {
+    return 'visGauge';
+  },
+  order: 1000,
+};
+
 export const ADD_PANEL_ANNOTATION_GROUP = {
   id: 'annotation-and-navigation',
   getDisplayName: () =>

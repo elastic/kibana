@@ -21,9 +21,15 @@ export {
   isQueryWrappedByPipes,
   retrieveMetadataColumns,
   getQueryColumnsFromESQLQuery,
+  mapVariableToColumn,
+  getValuesFromQueryField,
 } from './utils/query_parsing_helpers';
 export { queryCannotBeSampled } from './utils/query_cannot_be_sampled';
-export { appendToESQLQuery, appendWhereClauseToESQLQuery } from './utils/append_to_query';
+export {
+  appendToESQLQuery,
+  appendWhereClauseToESQLQuery,
+  appendStatsByToQuery,
+} from './utils/append_to_query';
 export {
   getESQLQueryColumns,
   getESQLQueryColumnsRaw,
@@ -31,6 +37,7 @@ export {
   formatESQLColumns,
   getStartEndParams,
   hasStartEndParams,
+  getNamedParams,
 } from './utils/run_query';
 export {
   isESQLColumnSortable,
