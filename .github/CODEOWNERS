@@ -141,7 +141,7 @@ src/dev/packages/ftr-common-functional-ui-services @elastic/appex-qa
 src/dev/packages/ftr-screenshot-filename @elastic/kibana-operations @elastic/appex-qa
 src/dev/packages/gen-ai-functional-testing @elastic/appex-ai-infra
 src/dev/packages/generate @elastic/kibana-operations
-packages/kbn-generate-console-definitions @elastic/kibana-management
+src/dev/packages/generate-console-definitions @elastic/kibana-management
 packages/kbn-get-repo-files @elastic/kibana-operations
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations

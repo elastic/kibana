@@ -5844,7 +5844,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/generate-console-definitions@link:packages/kbn-generate-console-definitions":
+"@kbn/generate-console-definitions@link:src/dev/packages/generate-console-definitions":
   version "0.0.0"
   uid ""
 
