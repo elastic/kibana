@@ -7,7 +7,15 @@
 
 import SemVer from 'semver/classes/semver';
 
-export class Version {
+export interface IVersion {
+  setup(version: string): void;
+  getCurrentVersion(): SemVer;
+  getMajorVersion(): number;
+  getNextMajorVersion(): number;
+  getPrevMajorVersion(): number;
+}
+
+export class Version implements IVersion {
   private version!: SemVer;
 
   public setup(version: string) {
