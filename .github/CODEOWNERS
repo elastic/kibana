@@ -107,7 +107,7 @@ packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
 src/dev/packages/bazel-runner @elastic/kibana-operations
-packages/kbn-capture-oas-snapshot-cli @elastic/kibana-core
+src/dev/packages/capture-oas-snapshot-cli @elastic/kibana-core
 packages/kbn-check-mappings-update-cli @elastic/kibana-core
 packages/kbn-check-prod-native-modules-cli @elastic/kibana-operations
 packages/kbn-ci-stats-core @elastic/kibana-operations
