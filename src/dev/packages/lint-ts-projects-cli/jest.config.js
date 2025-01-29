@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-lint-ts-projects-cli'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/lint-ts-projects-cli'],
 };

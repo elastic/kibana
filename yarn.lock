@@ -6188,7 +6188,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/lint-ts-projects-cli@link:packages/kbn-lint-ts-projects-cli":
+"@kbn/lint-ts-projects-cli@link:src/dev/packages/lint-ts-projects-cli":
   version "0.0.0"
   uid ""
 
