@@ -190,7 +190,7 @@ src/dev/packages/test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 src/dev/packages/test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 src/dev/packages/tooling-log @elastic/kibana-operations
 src/dev/packages/ts-projects @elastic/kibana-operations
-packages/kbn-ts-type-check-cli @elastic/kibana-operations
+src/dev/packages/ts-type-check-cli @elastic/kibana-operations
 packages/kbn-validate-next-docs-cli @elastic/kibana-operations
 packages/kbn-web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations

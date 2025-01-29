@@ -7792,7 +7792,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ts-type-check-cli@link:packages/kbn-ts-type-check-cli":
+"@kbn/ts-type-check-cli@link:src/dev/packages/ts-type-check-cli":
   version "0.0.0"
   uid ""
 

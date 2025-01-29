@@ -184,7 +184,7 @@
   "src/dev/packages/test/tsconfig.json",
   "src/dev/packages/tooling-log/tsconfig.json",
   "src/dev/packages/ts-projects/tsconfig.json",
-  "packages/kbn-ts-type-check-cli/tsconfig.json",
+  "src/dev/packages/ts-type-check-cli/tsconfig.json",
   "packages/kbn-validate-next-docs-cli/tsconfig.json",
   "packages/kbn-web-worker-stub/tsconfig.json",
   "packages/kbn-whereis-pkg-cli/tsconfig.json",
