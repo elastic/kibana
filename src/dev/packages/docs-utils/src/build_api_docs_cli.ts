@@ -39,7 +39,7 @@ function isStringArray(arr: unknown | string[]): arr is string[] {
   return Array.isArray(arr) && arr.every((p) => typeof p === 'string');
 }
 
-const rootDir = Path.join(__dirname, '../../..');
+const rootDir = Path.join(__dirname, '../../../../..');
 initApm(process.argv, rootDir, false, 'build_api_docs_cli');
 
 async function endTransactionWithFailure(transaction: Transaction | null) {

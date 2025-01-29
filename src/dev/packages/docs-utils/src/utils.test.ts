@@ -58,8 +58,8 @@ it('test getServiceForPath', () => {
 
   expect(
     getServiceForPath(
-      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index',
-      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/packages/kbn-docs-utils/src/integration_tests/__fixtures__/src/plugin_a'
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/src/dev/packages/docs-utils/src/integration_tests/__fixtures__/src/plugin_a/public/foo/index',
+      '/var/lib/jenkins/workspace/elastic+kibana+pipeline-pull-request/kibana/src/dev/packages/docs-utils/src/integration_tests/__fixtures__/src/plugin_a'
     )
   ).toBe('foo');
 });
