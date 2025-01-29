@@ -6236,7 +6236,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/managed-vscode-config-cli@link:packages/kbn-managed-vscode-config-cli":
+"@kbn/managed-vscode-config-cli@link:src/dev/packages/managed-vscode-config-cli":
   version "0.0.0"
   uid ""
 
