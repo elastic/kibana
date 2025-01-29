@@ -4068,7 +4068,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/axe-config@link:packages/kbn-axe-config":
+"@kbn/axe-config@link:src/dev/packages/axe-config":
   version "0.0.0"
   uid ""
 

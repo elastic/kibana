@@ -33,7 +33,7 @@ paths-ignore:
   - src/dev/packages/core-test-helpers-kbn-server
   - packages/kbn-ambient-*-types
   - src/dev/packages/apm-synthtrace
-  - packages/kbn-axe-config
+  - src/dev/packages/axe-config
   - packages/kbn-babel-*
   - packages/kbn-bazel-*
   - packages/kbn-ci-*

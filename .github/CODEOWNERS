@@ -102,7 +102,7 @@ src/dev/packages/ambient-storybook-types @elastic/kibana-operations
 src/dev/packages/ambient-ui-types @elastic/kibana-operations
 src/dev/packages/apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 src/dev/packages/apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-packages/kbn-axe-config @elastic/kibana-qa
+src/dev/packages/axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
 packages/kbn-babel-register @elastic/kibana-operations
 packages/kbn-babel-transform @elastic/kibana-operations
