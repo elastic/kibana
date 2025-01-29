@@ -1843,7 +1843,6 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
     it('project monitors - handles sending invalid private locations', async () => {
       const project = `test-project-${uuidv4()}`;
-      const secondPrivateLocation = await testPrivateLocationsService.addTestPrivateLocation();
       const response = await supertestWithoutAuth
         .put(
           `${SYNTHETICS_API_URLS.SYNTHETICS_MONITORS_PROJECT_UPDATE.replace(
