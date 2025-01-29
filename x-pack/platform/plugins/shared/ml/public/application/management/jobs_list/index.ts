@@ -28,7 +28,7 @@ const renderApp = (
   fieldFormats: FieldFormatsStart,
   isServerless: boolean,
   mlFeatures: MlFeatures,
-  spacesApi?: SpacesPluginStart,
+  spaces?: SpacesPluginStart,
   usageCollection?: UsageCollectionSetup
 ) => {
   ReactDOM.render(
@@ -37,7 +37,7 @@ const renderApp = (
       history,
       share,
       data,
-      spacesApi,
+      spaces,
       usageCollection,
       fieldFormats,
       isServerless,

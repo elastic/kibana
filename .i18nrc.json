@@ -13,7 +13,7 @@
     "charts": "src/platform/plugins/shared/charts",
     "console": "src/platform/plugins/shared/console",
     "contentManagement": "src/platform/packages/shared/content-management",
-    "core": ["src/core", "packages/core"],
+    "core": ["src/core"],
     "customIntegrations": "src/platform/plugins/shared/custom_integrations",
     "customIntegrationsPackage": "x-pack/solutions/observability/packages/kbn-custom-integrations",
     "dashboard": "src/platform/plugins/shared/dashboard",
