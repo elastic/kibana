@@ -23,7 +23,7 @@ import { dataViewPluginMocks } from '@kbn/data-views-plugin/public/mocks';
 import { DataViewsServerPluginStart } from '@kbn/data-views-plugin/server';
 import { encryptedSavedObjectsMock } from '@kbn/encrypted-saved-objects-plugin/server/mocks';
 import { IEventLogger } from '@kbn/event-log-plugin/server';
-import { eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
+import { eventLogClientMock, eventLoggerMock } from '@kbn/event-log-plugin/server/mocks';
 import { SharePluginStart } from '@kbn/share-plugin/server';
 import { ConcreteTaskInstance, TaskPriority, TaskStatus } from '@kbn/task-manager-plugin/server';
 import { usageCountersServiceMock } from '@kbn/usage-collection-plugin/server/usage_counters/usage_counters_service.mock';
@@ -93,9 +93,11 @@ import { RuleRunMetricsStore } from '../lib/rule_run_metrics_store';
 import { ConnectorAdapterRegistry } from '../connector_adapters/connector_adapter_registry';
 import { rulesSettingsServiceMock } from '../rules_settings/rules_settings_service.mock';
 import { maintenanceWindowsServiceMock } from './maintenance_windows/maintenance_windows_service.mock';
+import { updateGaps } from '../lib/rule_gaps/update/update_gaps';
 import { alertsClientMock } from '../alerts_client/alerts_client.mock';
 import { alertsServiceMock } from '../alerts_service/alerts_service.mock';
 
+jest.mock('../lib/rule_gaps/update/update_gaps');
 const UUID = '5f6aa57d-3e22-484e-bae8-cbed868f4d28';
 
 jest.mock('uuid', () => ({
@@ -153,6 +155,7 @@ const ruleTypeRegistry = ruleTypeRegistryMock.create();
 const savedObjectsService = savedObjectsServiceMock.createInternalStartContract();
 const services = alertsMock.createRuleExecutorServices();
 const uiSettingsService = uiSettingsServiceMock.createStartContract();
+const eventLogClient = eventLogClientMock.create();
 
 const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType = {
   actionsConfigMap: { default: { max: 1000 } },
@@ -180,6 +183,7 @@ const taskRunnerFactoryInitializerParams: TaskRunnerFactoryInitializerParamsType
   uiSettings: uiSettingsService,
   usageCounter: mockUsageCounter,
   isServerless: false,
+  getEventLogClient: jest.fn(),
 };
 
 const mockedTaskInstance: ConcreteTaskInstance = {
@@ -230,6 +234,7 @@ describe('Ad Hoc Task Runner', () => {
   let schedule4: AdHocRunSchedule;
   let schedule5: AdHocRunSchedule;
   let alertingEventLoggerInitializer: ContextOpts;
+  const mockUpdateGaps = updateGaps as jest.MockedFunction<typeof updateGaps>;
 
   beforeAll(() => {
     fakeTimer = sinon.useFakeTimers();
@@ -789,6 +794,9 @@ describe('Ad Hoc Task Runner', () => {
   });
 
   test('should delete ad hoc run SO and not return a new runAt date when all schedules have been processed ', async () => {
+    taskRunnerFactoryInitializerParams.getEventLogClient = jest
+      .fn()
+      .mockResolvedValue(eventLogClient);
     ruleTypeWithAlerts.executor.mockImplementation(
       async ({
         services: executorServices,
@@ -880,6 +888,25 @@ describe('Ad Hoc Task Runner', () => {
       'abc',
       { refresh: false, namespace: undefined }
     );
+
+    expect(mockUpdateGaps).toHaveBeenCalledWith({
+      ruleId: RULE_ID,
+      start: new Date(mockedAdHocRunSO.attributes.start),
+      end: mockedAdHocRunSO.attributes.end ? new Date(mockedAdHocRunSO.attributes.end) : new Date(),
+      eventLogger: taskRunnerFactoryInitializerParams.eventLogger,
+      eventLogClient,
+      logger: taskRunnerFactoryInitializerParams.logger,
+      backfillSchedule: [
+        { ...schedule1, status: adHocRunStatus.COMPLETE },
+        { ...schedule2, status: adHocRunStatus.TIMEOUT },
+        { ...schedule3, status: adHocRunStatus.ERROR },
+        { ...schedule4, status: adHocRunStatus.COMPLETE },
+        { ...schedule5, status: adHocRunStatus.COMPLETE },
+      ],
+      savedObjectsRepository: internalSavedObjectsRepository,
+      backfillClient: taskRunnerFactoryInitializerParams.backfillClient,
+      actionsClient,
+    });
 
     testAlertingEventLogCalls({
       status: 'ok',
