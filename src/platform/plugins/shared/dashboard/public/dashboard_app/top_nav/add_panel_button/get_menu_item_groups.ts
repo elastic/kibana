@@ -22,11 +22,9 @@ import { uiActionsService, visualizationsService } from '../../../services/kiban
 import { navigateToVisEditor } from './navigate_to_vis_editor';
 import type { MenuItem, MenuItemGroup } from './types';
 
-const VIS_GROUP_TO_ADD_PANEL_GROUP: Record<VisGroups, undefined | PresentableGroup> = {
-  [VisGroups.AGGBASED]: undefined,
+const VIS_GROUP_TO_ADD_PANEL_GROUP: Record<string, PresentableGroup> = {
   [VisGroups.PROMOTED]: ADD_PANEL_VISUALIZATION_GROUP,
   [VisGroups.TOOLS]: ADD_PANEL_ANNOTATION_GROUP,
-  [VisGroups.LEGACY]: undefined,
 };
 
 export async function getMenuItemGroups(
