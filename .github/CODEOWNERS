@@ -163,7 +163,7 @@ src/dev/packages/optimizer @elastic/kibana-operations
 src/dev/packages/optimizer-webpack-helpers @elastic/kibana-operations
 src/dev/packages/peggy @elastic/kibana-operations
 src/dev/packages/peggy-loader @elastic/kibana-operations
-packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
+src/dev/packages/performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-picomatcher @elastic/kibana-operations
 packages/kbn-plugin-check @elastic/appex-sharedux
 packages/kbn-plugin-generator @elastic/kibana-operations
@@ -1773,7 +1773,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /test/visual_regression @elastic/appex-qa
 /x-pack/test/visual_regression @elastic/appex-qa
 /packages/kbn-test/src/functional_test_runner @elastic/appex-qa
-/packages/kbn-performance-testing-dataset-extractor @elastic/appex-qa
+/src/dev/packages/performance-testing-dataset-extractor @elastic/appex-qa
 /x-pack/test_serverless/**/*config.base.ts @elastic/appex-qa
 /x-pack/test_serverless/**/deployment_agnostic_services.ts @elastic/appex-qa
 /x-pack/test_serverless/shared/ @elastic/appex-qa

@@ -6644,7 +6644,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/performance-testing-dataset-extractor@link:packages/kbn-performance-testing-dataset-extractor":
+"@kbn/performance-testing-dataset-extractor@link:src/dev/packages/performance-testing-dataset-extractor":
   version "0.0.0"
   uid ""
 

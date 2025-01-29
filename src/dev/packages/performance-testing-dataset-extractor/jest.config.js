@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-performance-testing-dataset-extractor'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/performance-testing-dataset-extractor'],
 };
