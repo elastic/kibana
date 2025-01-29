@@ -4,7 +4,7 @@
  * 2.0; you may not use this file except in compliance with the Elastic License
  * 2.0.
  */
-// eslint-disable-next-line import/no-extraneous-dependencies
+
 import { isDeepEqual } from 'react-use/lib/util';
 
 import { Logger, SavedObjectsClientContract, SavedObjectsErrorHelpers } from '@kbn/core/server';
@@ -74,7 +74,7 @@ export const persistTokenCloudData = async (
             solutionType:
               (solutionType as SolutionType) ?? cloudDataSo?.attributes.onboardingData.solutionType,
             token: onboardingToken ?? '',
-            security: security ?? securityAttributes,
+            security,
           },
         }
       );
