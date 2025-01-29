@@ -5580,7 +5580,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/eslint-plugin-telemetry@link:packages/kbn-eslint-plugin-telemetry":
+"@kbn/eslint-plugin-telemetry@link:src/dev/packages/eslint-plugin-telemetry":
   version "0.0.0"
   uid ""
 
