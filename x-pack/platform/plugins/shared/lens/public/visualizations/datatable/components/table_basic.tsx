@@ -405,12 +405,12 @@ export const DatatableComponent = (props: DatatableRenderProps) => {
       const dataType = getFieldMetaFromDatatable(firstLocalTable, originalId)?.type;
       const isBucketed = bucketedColumns.some((id) => id === columnId);
       const colorByTerms = shouldColorByTerms(dataType, isBucketed);
-
+      const categoryRows = (untransposedDataRef.current ?? firstLocalTable)?.rows;
       const data: ColorMappingInputData = colorByTerms
         ? {
             type: 'categories',
             // Must use non-transposed data here to correctly collate categories across transposed columns
-            categories: getColorCategories(untransposedDataRef.current?.rows, originalId, [null]),
+            categories: getColorCategories(categoryRows, originalId, [null]),
           }
         : {
             type: 'ranges',
