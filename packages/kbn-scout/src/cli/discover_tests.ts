@@ -8,14 +8,11 @@
  */
 
 import { Command } from '@kbn/dev-cli-runner';
-
-// import { startServers, parseServerFlags, SERVER_FLAG_OPTIONS } from '../servers';
-import { getScoutPlaywrightConfigs } from '../config';
-
-export const DEFAULT_TEST_PATH_PATTERNS = ['src/platform/plugins', 'x-pack/**/plugins'];
+import { getScoutPlaywrightConfigs, DEFAULT_TEST_PATH_PATTERNS } from '../config';
+import { measurePerformance } from '../common';
 
 /**
- * Start servers
+ * Discover Playwright configuration files with Scout tests
  */
 export const discoverTests: Command<void> = {
   name: 'discover-tests',
@@ -24,10 +21,20 @@ export const discoverTests: Command<void> = {
     string: ['searchPaths'],
     default: { searchPaths: DEFAULT_TEST_PATH_PATTERNS },
   },
-  run: ({ flagsReader, log }) => {
+  run: async ({ flagsReader, log }) => {
     const searchPaths = flagsReader.arrayOfStrings('searchPaths')!;
 
-    const plugins = getScoutPlaywrightConfigs(searchPaths, log);
+    const plugins = await measurePerformance(log, 'Discovering playwright config files', () => {
+      return getScoutPlaywrightConfigs(searchPaths, log);
+    });
+
+    const finalMessage =
+      plugins.size === 0
+        ? 'No playwright config files found'
+        : `Discovered playwright config files in '${plugins.size}' plugins`;
+
+    log.info(finalMessage);
+
     plugins.forEach((files, plugin) => {
       log.info(`[${plugin}] plugin:`);
       files.forEach((file) => {

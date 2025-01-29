@@ -14,9 +14,9 @@ import {
   createKbnClient,
   createLogger,
   createScoutConfig,
+  measurePerformance,
 } from '../../common';
 import { ScoutTestOptions } from '../types';
-import { measurePerformance } from '../utils';
 
 export async function ingestTestDataHook(config: FullConfig, archives: string[]) {
   const log = createLogger();

@@ -18,3 +18,17 @@ export async function silence(log: ToolingLog, milliseconds: number) {
     )
   );
 }
+
+export const measurePerformance = async <T>(
+  log: ToolingLog,
+  label: string,
+  fn: () => T | Promise<T>
+): Promise<T> => {
+  const startTime = performance.now();
+  const result = await Promise.resolve(fn());
+
+  const duration = performance.now() - startTime;
+  log.debug(`${label} took ${duration.toFixed(2)}ms`);
+
+  return result;
+};
