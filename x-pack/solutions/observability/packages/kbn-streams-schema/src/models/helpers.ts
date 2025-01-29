@@ -29,6 +29,11 @@ export const asIngestStreamDefinition = createAsSchemaOrThrow(
   ingestStreamDefinitionSchema
 );
 
+export const asWiredStreamDefinition = createAsSchemaOrThrow(
+  streamDefinitionSchema,
+  wiredStreamDefinitionSchema
+);
+
 export const isUnwiredStreamDefinition = createIsNarrowSchema(
   streamDefinitionSchema,
   unwiredStreamDefinitionSchema
