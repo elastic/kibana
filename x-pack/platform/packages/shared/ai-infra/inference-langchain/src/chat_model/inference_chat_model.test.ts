@@ -27,6 +27,7 @@ import {
   InferenceConnector,
   InferenceConnectorType,
   MessageRole,
+  createInferenceRequestError,
 } from '@kbn/inference-common';
 import { InferenceChatModel } from './inference_chat_model';
 
@@ -516,6 +517,25 @@ describe('InferenceChatModel', () => {
 
       expect(output.content).toEqual('response');
       expect(chatComplete).toHaveBeenCalledTimes(2);
+    });
+
+    it('does not retry unrecoverable errors', async () => {
+      const chatModel = new InferenceChatModel({
+        logger,
+        chatComplete,
+        connector,
+        maxRetries: 0,
+      });
+
+      chatComplete.mockImplementation(async () => {
+        throw createInferenceRequestError('bad parameter', 401);
+      });
+
+      await expect(() =>
+        chatModel.invoke('Some question')
+      ).rejects.toThrowErrorMatchingInlineSnapshot(`"bad parameter"`);
+
+      expect(chatComplete).toHaveBeenCalledTimes(1);
     });
   });
 
