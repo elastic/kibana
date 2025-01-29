@@ -6,6 +6,8 @@
  */
 
 import expect from 'expect';
+import { defaultOptions } from '@kbn/security-solution-plugin/server/lib/entity_analytics/entity_store/constants';
+import { omit } from 'lodash/fp';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { EntityStoreUtils } from '../../utils';
 import { dataViewRouteHelpersFactory } from '../../utils/data_view';
@@ -16,6 +18,8 @@ export default ({ getService }: FtrProviderContext) => {
   const utils = EntityStoreUtils(getService);
   describe('@ess @skipInServerlessMKI Entity Store APIs', () => {
     const dataView = dataViewRouteHelpersFactory(supertest);
+
+    const defaults = omit('docsPerSecond', defaultOptions);
 
     before(async () => {
       await utils.cleanEngines();
@@ -85,16 +89,9 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           expect(getResponse.body).toEqual({
+            ...defaults,
             status: 'started',
             type: 'host',
-            indexPattern: '',
-            filter: '',
-            fieldHistoryLength: 10,
-            lookbackPeriod: '24h',
-            delay: '1m',
-            enrichPolicyExecutionInterval: '1h',
-            frequency: '1m',
-            timeout: '180s',
           });
         });
 
@@ -106,16 +103,9 @@ export default ({ getService }: FtrProviderContext) => {
             .expect(200);
 
           expect(getResponse.body).toEqual({
+            ...defaults,
             status: 'started',
             type: 'user',
-            indexPattern: '',
-            filter: '',
-            fieldHistoryLength: 10,
-            lookbackPeriod: '24h',
-            delay: '1m',
-            enrichPolicyExecutionInterval: '1h',
-            frequency: '1m',
-            timeout: '180s',
           });
         });
       });
@@ -129,28 +119,14 @@ export default ({ getService }: FtrProviderContext) => {
 
           expect(sortedEngines).toEqual([
             {
+              ...defaults,
               status: 'started',
               type: 'host',
-              indexPattern: '',
-              filter: '',
-              fieldHistoryLength: 10,
-              lookbackPeriod: '24h',
-              delay: '1m',
-              enrichPolicyExecutionInterval: '1h',
-              frequency: '1m',
-              timeout: '180s',
             },
             {
+              ...defaults,
               status: 'started',
               type: 'user',
-              indexPattern: '',
-              filter: '',
-              fieldHistoryLength: 10,
-              lookbackPeriod: '24h',
-              delay: '1m',
-              enrichPolicyExecutionInterval: '1h',
-              frequency: '1m',
-              timeout: '180s',
             },
           ]);
         });
