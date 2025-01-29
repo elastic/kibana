@@ -26,7 +26,7 @@ interface ServiceOverviewDependenciesTableProps {
   link?: ReactNode;
   showPerPageOptions?: boolean;
   showSparkPlots?: boolean;
-  onTableLoad?: () => void;
+  onLoadTable?: () => void;
 }
 
 export function ServiceOverviewDependenciesTable({
@@ -34,7 +34,7 @@ export function ServiceOverviewDependenciesTable({
   link,
   showPerPageOptions = true,
   showSparkPlots,
-  onTableLoad,
+  onLoadTable,
 }: ServiceOverviewDependenciesTableProps) {
   const {
     query: {
@@ -54,7 +54,7 @@ export function ServiceOverviewDependenciesTable({
   const { serviceName, transactionType } = useApmServiceContext();
 
   const trackEvent = useUiTracker();
-  const [isTableLoaded, setIsTableLoaded] = useState(false);
+  const [hasTableLoaded, setHasTableLoaded] = useState(false);
   const { data, status } = useFetcher(
     (callApmApi) => {
       if (!start || !end) {
@@ -78,11 +78,11 @@ export function ServiceOverviewDependenciesTable({
   );
 
   useEffect(() => {
-    if (status === FETCH_STATUS.SUCCESS && onTableLoad && !isTableLoaded) {
-      onTableLoad();
-      setIsTableLoaded(true);
+    if (status === FETCH_STATUS.SUCCESS && onLoadTable && !hasTableLoaded) {
+      onLoadTable();
+      setHasTableLoaded(true);
     }
-  }, [status, onTableLoad, isTableLoaded, setIsTableLoaded]);
+  }, [status, onLoadTable, hasTableLoaded, setHasTableLoaded]);
 
   const dependencies =
     data?.serviceDependencies.map((dependency) => {

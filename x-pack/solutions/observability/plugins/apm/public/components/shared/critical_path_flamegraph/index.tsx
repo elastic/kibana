@@ -10,9 +10,8 @@ import { EuiFlexGroup, EuiFlexItem, EuiLoadingSpinner, euiPaletteColorBlind } fr
 import { css } from '@emotion/css';
 import { useChartThemes } from '@kbn/observability-shared-plugin/public';
 import { uniqueId } from 'lodash';
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import { i18n } from '@kbn/i18n';
-import { usePerformanceContext } from '@kbn/ebt-tools';
 import { FETCH_STATUS } from '../../../hooks/use_fetcher';
 import { useFetcher, isPending } from '../../../hooks/use_fetcher';
 import { CriticalPathFlamegraphTooltip } from './critical_path_flamegraph_tooltip';
@@ -28,10 +27,10 @@ export function CriticalPathFlamegraph(
     end: string;
     traceIds: string[];
     traceIdsFetchStatus: FETCH_STATUS;
+    onLoadTable?: () => void;
   } & ({ serviceName: string; transactionName: string } | {})
 ) {
-  const { start, end, traceIds, traceIdsFetchStatus } = props;
-  const { onPageReady } = usePerformanceContext();
+  const { start, end, traceIds, traceIdsFetchStatus, onLoadTable } = props;
 
   const serviceName = 'serviceName' in props ? props.serviceName : null;
   const transactionName = 'transactionName' in props ? props.transactionName : null;
@@ -42,6 +41,7 @@ export function CriticalPathFlamegraph(
   // of the search.
   const timerange = useRef({ start, end });
   timerange.current = { start, end };
+  const [hasTableLoaded, setHasTableLoaded] = useState(false);
 
   const { data: { criticalPath } = { criticalPath: null }, status: criticalPathFetchStatus } =
     useFetcher(
@@ -66,18 +66,22 @@ export function CriticalPathFlamegraph(
     );
 
   useEffect(() => {
-    if (criticalPathFetchStatus === FETCH_STATUS.SUCCESS) {
-      onPageReady({
-        meta: { rangeFrom: start, rangeTo: end },
-        customMetrics: {
-          key1: 'metadata',
-          value1: Object.keys(criticalPath?.metadata || {}).length,
-          key2: 'traceIds',
-          value2: traceIds.length,
-        },
-      });
+    if (
+      criticalPathFetchStatus === FETCH_STATUS.SUCCESS &&
+      traceIdsFetchStatus === FETCH_STATUS.SUCCESS &&
+      onLoadTable &&
+      !hasTableLoaded
+    ) {
+      onLoadTable();
+      setHasTableLoaded(true);
     }
-  }, [criticalPathFetchStatus, criticalPath, traceIds, onPageReady, start, end]);
+  }, [
+    criticalPathFetchStatus,
+    onLoadTable,
+    hasTableLoaded,
+    traceIdsFetchStatus,
+    setHasTableLoaded,
+  ]);
 
   const chartThemes = useChartThemes();
 

@@ -55,7 +55,7 @@ interface Props {
   comparisonEnabled?: boolean;
   saveTableOptionsToUrl?: boolean;
   showPerPageOptions?: boolean;
-  onTableLoad?: () => void;
+  onLoadTable?: () => void;
 }
 
 const defaultSorting = {
@@ -70,7 +70,7 @@ export function ErrorGroupList({
   comparisonEnabled,
   saveTableOptionsToUrl,
   showPerPageOptions = true,
-  onTableLoad,
+  onLoadTable,
 }: Props) {
   const { query } = useAnyOfApmParams(
     '/services/{serviceName}/overview',
@@ -84,7 +84,7 @@ export function ErrorGroupList({
   const { offset } = query;
 
   const [renderedItems, setRenderedItems] = useState<ErrorGroupItem[]>([]);
-  const [isTableLoaded, setIsTableLoaded] = useState(false);
+  const [hasTableLoaded, setHasTableLoaded] = useState(false);
   const [sorting, setSorting] = useState<TableOptions<ErrorGroupItem>['sort']>(defaultSorting);
 
   const {
@@ -102,18 +102,18 @@ export function ErrorGroupList({
     if (
       mainStatisticsStatus === FETCH_STATUS.SUCCESS &&
       detailedStatisticsStatus === FETCH_STATUS.SUCCESS &&
-      onTableLoad &&
-      !isTableLoaded
+      onLoadTable &&
+      !hasTableLoaded
     ) {
-      onTableLoad();
-      setIsTableLoaded(true);
+      onLoadTable();
+      setHasTableLoaded(true);
     }
   }, [
     mainStatisticsStatus,
     detailedStatisticsStatus,
-    onTableLoad,
-    isTableLoaded,
-    setIsTableLoaded,
+    onLoadTable,
+    hasTableLoaded,
+    setHasTableLoaded,
   ]);
 
   const columns = useMemo(() => {

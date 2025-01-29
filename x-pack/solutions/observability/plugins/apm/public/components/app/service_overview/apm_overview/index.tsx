@@ -45,7 +45,7 @@ export function ApmOverview() {
   } = useApmParams('/services/{serviceName}/overview');
 
   const { start, end } = useTimeRange({ rangeFrom, rangeTo });
-  const [tableHasBeenLoaded, setTableHasBeenLoaded] = useState({
+  const [haveTablesLoaded, setHaveTablesLoaded] = useState({
     transactions: false,
     dependencies: false,
     errors: false,
@@ -53,7 +53,7 @@ export function ApmOverview() {
   const { onPageReady } = usePerformanceContext();
 
   useEffect(() => {
-    const { transactions, dependencies, errors } = tableHasBeenLoaded;
+    const { transactions, dependencies, errors } = haveTablesLoaded;
     if (transactions && dependencies && errors) {
       onPageReady({
         meta: {
@@ -62,7 +62,7 @@ export function ApmOverview() {
         },
       });
     }
-  }, [tableHasBeenLoaded, onPageReady, rangeFrom, rangeTo]);
+  }, [haveTablesLoaded, onPageReady, rangeFrom, rangeTo]);
 
   const isRumAgent = isRumAgentName(agentName);
   const isOpenTelemetryAgent = isOpenTelemetryAgentName(agentName as AgentName);
@@ -81,8 +81,8 @@ export function ApmOverview() {
     false
   );
 
-  const onTableLoad = (key: string) => {
-    setTableHasBeenLoaded((currentValues) => ({ ...currentValues, [key]: true }));
+  const onLoadTable = (key: string) => {
+    setHaveTablesLoaded((currentValues) => ({ ...currentValues, [key]: true }));
   };
 
   return (
@@ -121,7 +121,7 @@ export function ApmOverview() {
                 kuery={kuery}
                 environment={environment}
                 fixedHeight={true}
-                onTableLoad={() => onTableLoad('transactions')}
+                onLoadTable={() => onLoadTable('transactions')}
                 start={start}
                 end={end}
                 showPerPageOptions={false}
@@ -147,7 +147,7 @@ export function ApmOverview() {
             <EuiPanel hasBorder={true}>
               <ServiceOverviewErrorsTable
                 serviceName={serviceName}
-                onTableLoad={() => onTableLoad('errors')}
+                onLoadTable={() => onLoadTable('errors')}
               />
             </EuiPanel>
           </EuiFlexItem>
@@ -178,7 +178,7 @@ export function ApmOverview() {
             <EuiFlexItem grow={7}>
               <EuiPanel hasBorder={true}>
                 <ServiceOverviewDependenciesTable
-                  onTableLoad={() => onTableLoad('dependencies')}
+                  onLoadTable={() => onLoadTable('dependencies')}
                   fixedHeight={true}
                   showPerPageOptions={false}
                   link={

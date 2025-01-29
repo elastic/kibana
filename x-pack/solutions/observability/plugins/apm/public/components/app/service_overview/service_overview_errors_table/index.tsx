@@ -15,10 +15,10 @@ import { ErrorGroupList } from '../../error_group_overview/error_group_list';
 
 interface Props {
   serviceName: string;
-  onTableLoad?: () => void;
+  onLoadTable?: () => void;
 }
 
-export function ServiceOverviewErrorsTable({ serviceName, onTableLoad }: Props) {
+export function ServiceOverviewErrorsTable({ serviceName, onLoadTable }: Props) {
   const { query } = useApmParams('/services/{serviceName}/overview');
 
   return (
@@ -47,7 +47,7 @@ export function ServiceOverviewErrorsTable({ serviceName, onTableLoad }: Props) 
         <OverviewTableContainer fixedHeight={true} isEmptyAndNotInitiated={false}>
           <ErrorGroupList
             serviceName={serviceName}
-            onTableLoad={onTableLoad}
+            onLoadTable={onLoadTable}
             initialPageSize={5}
             isCompactMode={true}
             saveTableOptionsToUrl={false}
