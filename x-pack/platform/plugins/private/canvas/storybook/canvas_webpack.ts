@@ -40,6 +40,9 @@ export const canvasWebpack: Configuration = {
             loader: 'sass-loader',
             options: {
               implementation: require('sass-embedded'),
+              sassOptions: {
+                quietDeps: true,
+              }
             },
           },
         ],
