@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { firstValueFrom } from 'rxjs';
+import { firstValueFrom, map } from 'rxjs';
 import type { Logger } from '@kbn/logging';
 import type { IConfigService } from '@kbn/config';
 import type { CoreContext, CoreService } from '@kbn/core-base-server-internal';
@@ -21,6 +21,7 @@ import type {
 } from '@kbn/core-deprecations-server';
 import { InternalCoreUsageDataSetup } from '@kbn/core-usage-data-base-server-internal';
 import type { KibanaRequest } from '@kbn/core-http-server';
+import { type InternalLoggingServiceSetup } from '@kbn/core-logging-server-internal';
 import { DeprecationsFactory } from './deprecations_factory';
 import { registerRoutes } from './routes';
 import { config as deprecationConfig, DeprecationConfigType } from './deprecation_config';
@@ -49,6 +50,7 @@ export type InternalDeprecationsServiceSetup = DeprecationRegistryProvider;
 export interface DeprecationsSetupDeps {
   http: InternalHttpServiceSetup;
   coreUsageData: InternalCoreUsageDataSetup;
+  logging: InternalLoggingServiceSetup;
 }
 
 /** @internal */
@@ -67,6 +69,7 @@ export class DeprecationsService
   public async setup({
     http,
     coreUsageData,
+    logging,
   }: DeprecationsSetupDeps): Promise<InternalDeprecationsServiceSetup> {
     this.logger.debug('Setting up Deprecations service');
 
@@ -81,7 +84,18 @@ export class DeprecationsService
       },
     });
 
-    registerRoutes({ http, coreUsageData });
+    const config$ = this.configService.atPath<DeprecationConfigType>(deprecationConfig.path);
+    logging.configure(
+      ['deprecations-service'],
+      config$.pipe(
+        map((cfg) => {
+          const logLevel = cfg.enable_http_debug_logs ? 'debug' : 'off';
+          return { loggers: [{ name: 'http', level: logLevel, appenders: [] }] };
+        })
+      )
+    );
+
+    registerRoutes({ http, coreUsageData, logger: this.logger.get('http') });
 
     registerConfigDeprecationsInfo({
       deprecationsFactory: this.deprecationsFactory,
