@@ -54,6 +54,9 @@ export const SummaryColumn = (props: AllSummaryColumnProps) => {
 // eslint-disable-next-line import/no-default-export
 export default SummaryColumn;
 
+const DEFAULT_ROW_COUNT = 1;
+const SINGLE_ROW_COUNT = 1;
+
 const SummaryCell = ({
   density: maybeNullishDensity,
   rowHeight: maybeNullishRowHeight,
@@ -64,8 +67,8 @@ const SummaryCell = ({
   const density = maybeNullishDensity ?? DataGridDensity.COMPACT;
   const isCompressed = density === DataGridDensity.COMPACT;
 
-  const rowHeight = maybeNullishRowHeight ?? 1;
-  const isSingleLine = rowHeight === 1;
+  const rowHeight = maybeNullishRowHeight ?? DEFAULT_ROW_COUNT;
+  const isSingleLine = rowHeight === SINGLE_ROW_COUNT;
 
   const resourceFields = createResourceFields(row, core, share);
   const shouldRenderResource = resourceFields.length > 0;
