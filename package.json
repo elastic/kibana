@@ -1475,7 +1475,7 @@
     "@kbn/picomatcher": "link:src/dev/packages/picomatcher",
     "@kbn/plugin-check": "link:src/dev/packages/plugin-check",
     "@kbn/plugin-generator": "link:src/dev/packages/plugin-generator",
-    "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
+    "@kbn/plugin-helpers": "link:src/dev/packages/plugin-helpers",
     "@kbn/product-doc-artifact-builder": "link:x-pack/packages/ai-infra/product-doc-artifact-builder",
     "@kbn/relocate": "link:packages/kbn-relocate",
     "@kbn/repo-file-maps": "link:packages/kbn-repo-file-maps",

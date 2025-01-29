@@ -29,7 +29,7 @@ The {kib} directory must be named `kibana`, and your plugin directory should be 
 === Build plugin distributable
 WARNING: {kib} distributable is not shipped with `@kbn/optimizer` anymore. You need to pre-build your plugin for use in production.
 
-You can leverage {kib-repo}blob/{branch}/packages/kbn-plugin-helpers[@kbn/plugin-helpers] to build a distributable archive for your plugin.
+You can leverage {kib-repo}blob/{branch}/src/dev/packages/plugin-helpers[@kbn/plugin-helpers] to build a distributable archive for your plugin.
 The package transpiles the plugin code, adds polyfills, and links necessary js modules in the runtime.
 You don't need to install the `plugin-helpers` dependency. If you created the plugin using `node scripts/generate_plugin` script, `package.json` is already pre-configured.
 To build your plugin run within your plugin folder:

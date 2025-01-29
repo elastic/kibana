@@ -12,8 +12,8 @@ is already the case if you use the new `node scripts/generate_plugin` script.
   "scripts" : {
     "build": "yarn plugin-helpers build",
     "dev": "yarn plugin-helpers dev",
-    "plugin-helpers": "node ../../scripts/plugin_helpers",
-    "kbn": "node ../../scripts/kbn"
+    "plugin-helpers": "node ../../../../scripts/plugin_helpers",
+    "kbn": "node ../../../../scripts/kbn"
   }
 }
 ```
@@ -101,7 +101,7 @@ Plugin code can be written in [TypeScript](http://www.typescriptlang.org/) if de
 ```js
 {
   // extend Kibana's tsconfig, or use your own settings
-  "extends": "../../tsconfig.json",
+  "extends": "../../../../tsconfig.json",
 
   // tell the TypeScript compiler where to find your source files
   "include": [

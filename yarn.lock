@@ -6660,7 +6660,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-helpers@link:packages/kbn-plugin-helpers":
+"@kbn/plugin-helpers@link:src/dev/packages/plugin-helpers":
   version "0.0.0"
   uid ""
 

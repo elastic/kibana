@@ -65,7 +65,7 @@ paths-ignore:
   - src/dev/packages/peggy-loader
   - src/dev/packages/performance-testing-dataset-extractor
   - src/dev/packages/plugin-generator
-  - packages/kbn-plugin-helpers
+  - src/dev/packages/plugin-helpers
   - packages/kbn-relocate
   - packages/kbn-repo-path
   - packages/kbn-repo-source-classifier
