@@ -42,6 +42,7 @@ interface EngineDescriptionParams {
   requestParams?: {
     indexPattern?: string;
     fieldHistoryLength?: number;
+    lookbackPeriod?: string;
     timestampField?: string;
   };
   defaultIndexPatterns: string[];
@@ -60,7 +61,10 @@ export const createEngineDescription = (options: EngineDescriptionParams) => {
   const settings: EntityEngineInstallationDescriptor['settings'] = {
     syncDelay: `${config.syncDelay.asSeconds()}s`,
     frequency: `${config.frequency.asSeconds()}s`,
-    lookbackPeriod: description.settings?.lookbackPeriod || DEFAULT_LOOKBACK_PERIOD,
+    lookbackPeriod:
+      requestParams?.lookbackPeriod ||
+      description.settings?.lookbackPeriod ||
+      DEFAULT_LOOKBACK_PERIOD,
     timestampField:
       requestParams?.timestampField ||
       description.settings?.timestampField ||

@@ -307,6 +307,12 @@ paths:
             schema:
               type: object
               properties:
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Interval'
+                entityTypes:
+                  items:
+                    $ref: '#/components/schemas/EntityType'
+                  type: array
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.
@@ -315,6 +321,11 @@ paths:
                   type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: The lookback period for the entity store
+                  pattern: '[smdh]$'
+                  type: string
                 timestampField:
                   default: '@timestamp'
                   description: The field to use as the timestamp.
@@ -422,6 +433,8 @@ paths:
             schema:
               type: object
               properties:
+                enrichPolicyExecutionInterval:
+                  $ref: '#/components/schemas/Interval'
                 fieldHistoryLength:
                   default: 10
                   description: The number of historical values to keep for each field.
@@ -1022,6 +1035,10 @@ components:
           type: string
         indexPattern:
           $ref: '#/components/schemas/IndexPattern'
+        lookbackPeriod:
+          default: 24h
+          pattern: '[smdh]$'
+          type: string
         status:
           $ref: '#/components/schemas/EngineStatus'
         timestampField:
@@ -1234,6 +1251,13 @@ components:
       required:
         - dsl
         - response
+    Interval:
+      description: >-
+        Interval in which enrich policy runs. For example, `"1h"` means the rule
+        runs every hour.
+      example: 1h
+      pattern: ^[1-9]\d*[smh]$
+      type: string
     RiskEngineScheduleNowErrorResponse:
       type: object
       properties:

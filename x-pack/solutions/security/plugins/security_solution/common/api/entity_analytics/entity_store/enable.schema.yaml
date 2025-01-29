@@ -23,10 +23,21 @@ paths:
                   type: integer
                   description: The number of historical values to keep for each field.
                   default: 10
+                lookbackPeriod: 
+                  type: string
+                  description: The lookback period for the entity store
+                  default: 24h
+                  pattern: '[smdh]$'
                 indexPattern:
                   $ref: './common.schema.yaml#/components/schemas/IndexPattern'
                 filter:
                   type: string
+                entityTypes:
+                  type: array
+                  items:
+                    $ref: './common.schema.yaml#/components/schemas/EntityType'
+                enrichPolicyExecutionInterval:
+                  $ref: './common.schema.yaml#/components/schemas/Interval'
                 timestampField:
                   type: string
                   description: The field to use as the timestamp.

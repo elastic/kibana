@@ -91,6 +91,7 @@ export default ({ getService }: FtrProviderContext) => {
             filter: '',
             fieldHistoryLength: 10,
             timestampField: '@timestamp',
+            lookbackPeriod: '24h',
           });
         });
 
@@ -108,6 +109,7 @@ export default ({ getService }: FtrProviderContext) => {
             filter: '',
             fieldHistoryLength: 10,
             timestampField: '@timestamp',
+            lookbackPeriod: '24h',
           });
         });
       });
@@ -127,6 +129,7 @@ export default ({ getService }: FtrProviderContext) => {
               filter: '',
               fieldHistoryLength: 10,
               timestampField: '@timestamp',
+              lookbackPeriod: '24h',
             },
             {
               status: 'started',
@@ -135,6 +138,7 @@ export default ({ getService }: FtrProviderContext) => {
               filter: '',
               fieldHistoryLength: 10,
               timestampField: '@timestamp',
+              lookbackPeriod: '24h',
             },
           ]);
         });
