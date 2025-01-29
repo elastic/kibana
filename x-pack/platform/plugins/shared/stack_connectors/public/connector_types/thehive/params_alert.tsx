@@ -211,9 +211,7 @@ export const TheHiveParamsAlertFields: React.FC<ActionParamsProps<ExecutorParams
               'subActionParams',
               {
                 ...alert,
-                body: isTest
-                  ? testBodyOption[e.target.value]
-                  : bodyOption[e.target.value],
+                body: isTest ? testBodyOption[e.target.value] : bodyOption[e.target.value],
                 template: e.target.value,
               },
               index

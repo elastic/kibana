@@ -79,21 +79,21 @@ const TheHiveParamsFields: React.FunctionComponent<ActionParamsProps<ExecutorPar
     const subActionParams =
       eventActionType === SUB_ACTION.CREATE_ALERT
         ? {
-          tlp: 2,
-          severity: 2,
-          tags: [],
-          sourceRef: isTest ? undefined : '{{alert.uuid}}',
-          template: TheHiveTemplate.BUILD_YOUR_OWN,
-          body: '{}',
-        }
-        : {
-          incident: {
             tlp: 2,
             severity: 2,
             tags: [],
-          },
-          comments: [],
-        };
+            sourceRef: isTest ? undefined : '{{alert.uuid}}',
+            template: TheHiveTemplate.BUILD_YOUR_OWN,
+            body: '{}',
+          }
+        : {
+            incident: {
+              tlp: 2,
+              severity: 2,
+              tags: [],
+            },
+            comments: [],
+          };
 
     setEventAction(eventActionType);
     editAction('subActionParams', subActionParams, index);

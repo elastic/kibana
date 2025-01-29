@@ -6,7 +6,12 @@
  */
 
 import { i18n } from '@kbn/i18n';
-import { TheHiveSeverity, TheHiveTLP, SUB_ACTION, TheHiveTemplate } from '../../../common/thehive/constants';
+import {
+  TheHiveSeverity,
+  TheHiveTLP,
+  SUB_ACTION,
+  TheHiveTemplate,
+} from '../../../common/thehive/constants';
 
 export const eventActionOptions = [
   {
@@ -154,9 +159,12 @@ export const templateOptions = [
 
 export const bodyOption: { [key: string]: string } = {
   [TheHiveTemplate.BUILD_YOUR_OWN]: '{}',
-  [TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION]: '{\r\n  "observables": [\r\n    {\r\n      "dataType": "mail",\r\n      "data": "{{#context.alerts}}{{user.email}}{{/context.alerts}}",\r\n      "tags": [\r\n        "phishing",\r\n        "targeted-user"\r\n      ]\r\n    },\r\n    {\r\n      "dataType": "other",\r\n      "data": "{{#context.alerts}}{{user.name}}{{/context.alerts}}",\r\n      "tags": [\r\n        "username",\r\n        "compromised-account",\r\n        "unauthorized-access"\r\n      ]\r\n    }\r\n  ],\r\n  "procedures": [\r\n    {\r\n      "patternId": "{{#context.alerts}}{{threat.technique.id}}{{/context.alerts}}",\r\n      "occurDate": {{#context.alerts}}{{#signal.original_time}}{{#FormatDate}} {{{signal.original_time}}} ; ; x {{/FormatDate}}{{/signal.original_time}}{{^signal.original_time}}1640000000000{{/signal.original_time}}{{/context.alerts}}\r\n    }\r\n  ]\r\n}',
-  [TheHiveTemplate.MALICIOUS_FILE_ANALYSIS]: '{\r\n  "observables": [\r\n    {\r\n      "dataType": "hash",\r\n      "data": "{{#context.alerts}}{{file.hash.md5}}{{/context.alerts}}",\r\n      "tags": ["malware", "file-analysis"]\r\n    },\r\n    {\r\n      "dataType": "hash",\r\n      "data": "{{#context.alerts}}{{file.hash.sha256}}{{/context.alerts}}",\r\n      "tags": ["malware", "suspicious-file"]\r\n    }\r\n  ]\r\n}',
-  [TheHiveTemplate.SUSPICIOUS_NETWORK_ACTIVITY]: '{\r\n  "observables":\r\n    [\r\n      {\r\n        "dataType": "ip",\r\n        "data": "{{#context.alerts}}{{threat.indicator.ip}}{{/context.alerts}}",\r\n        "tags": ["source", "malicious-activity"]\r\n      }\r\n    ],\r\n  "procedures":\r\n    [\r\n      {\r\n        "patternId": "{{#context.alerts}}{{threat.technique.id}}{{/context.alerts}}",\r\n        "occurDate": {{#context.alerts}}{{#signal.original_time}}{{#FormatDate}} {{{signal.original_time}}} ; ; x {{/FormatDate}}{{/signal.original_time}}{{^signal.original_time}}1640000000000{{/signal.original_time}}{{/context.alerts}}\r\n      }\r\n    ]\r\n}\r\n',
+  [TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION]:
+    '{\r\n  "observables": [\r\n    {\r\n      "dataType": "mail",\r\n      "data": "{{#context.alerts}}{{user.email}}{{/context.alerts}}",\r\n      "tags": [\r\n        "phishing",\r\n        "targeted-user"\r\n      ]\r\n    },\r\n    {\r\n      "dataType": "other",\r\n      "data": "{{#context.alerts}}{{user.name}}{{/context.alerts}}",\r\n      "tags": [\r\n        "username",\r\n        "compromised-account",\r\n        "unauthorized-access"\r\n      ]\r\n    }\r\n  ],\r\n  "procedures": [\r\n    {\r\n      "patternId": "{{#context.alerts}}{{threat.technique.id}}{{/context.alerts}}",\r\n      "occurDate": {{#context.alerts}}{{#signal.original_time}}{{#FormatDate}} {{{signal.original_time}}} ; ; x {{/FormatDate}}{{/signal.original_time}}{{^signal.original_time}}1640000000000{{/signal.original_time}}{{/context.alerts}}\r\n    }\r\n  ]\r\n}',
+  [TheHiveTemplate.MALICIOUS_FILE_ANALYSIS]:
+    '{\r\n  "observables": [\r\n    {\r\n      "dataType": "hash",\r\n      "data": "{{#context.alerts}}{{file.hash.md5}}{{/context.alerts}}",\r\n      "tags": ["malware", "file-analysis"]\r\n    },\r\n    {\r\n      "dataType": "hash",\r\n      "data": "{{#context.alerts}}{{file.hash.sha256}}{{/context.alerts}}",\r\n      "tags": ["malware", "suspicious-file"]\r\n    }\r\n  ]\r\n}',
+  [TheHiveTemplate.SUSPICIOUS_NETWORK_ACTIVITY]:
+    '{\r\n  "observables":\r\n    [\r\n      {\r\n        "dataType": "ip",\r\n        "data": "{{#context.alerts}}{{threat.indicator.ip}}{{/context.alerts}}",\r\n        "tags": ["source", "malicious-activity"]\r\n      }\r\n    ],\r\n  "procedures":\r\n    [\r\n      {\r\n        "patternId": "{{#context.alerts}}{{threat.technique.id}}{{/context.alerts}}",\r\n        "occurDate": {{#context.alerts}}{{#signal.original_time}}{{#FormatDate}} {{{signal.original_time}}} ; ; x {{/FormatDate}}{{/signal.original_time}}{{^signal.original_time}}1640000000000{{/signal.original_time}}{{/context.alerts}}\r\n      }\r\n    ]\r\n}\r\n',
 };
 
 export const testBodyOption: { [key: string]: string } = {

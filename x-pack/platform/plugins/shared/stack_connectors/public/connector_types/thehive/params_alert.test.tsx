@@ -72,26 +72,41 @@ describe('TheHiveParamsFields renders', () => {
     expect(getByTestId('severitySelectInput')).toHaveValue('2');
     expect(getByTestId('tlpSelectInput')).toHaveValue('2');
     expect(getByTestId('templateSelectInput')).toHaveValue(TheHiveTemplate.BUILD_YOUR_OWN);
-    expect(getByTestId('bodyJsonEditor')).toHaveProperty('value', bodyOption[TheHiveTemplate.BUILD_YOUR_OWN]);
+    expect(getByTestId('bodyJsonEditor')).toHaveProperty(
+      'value',
+      bodyOption[TheHiveTemplate.BUILD_YOUR_OWN]
+    );
   });
 
   it('changes the content of json editor when template is changed', () => {
     const { getByTestId } = render(<TheHiveParamsAlertFields {...defaultProps} />);
     const templateSelectEl = getByTestId('templateSelectInput');
 
-    fireEvent.change(templateSelectEl, { target: { value: TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION } });
+    fireEvent.change(templateSelectEl, {
+      target: { value: TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION },
+    });
     expect(editAction).toHaveBeenNthCalledWith(
       1,
       'subActionParams',
-      { ...subActionParams, body: bodyOption[TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION], template: TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION },
+      {
+        ...subActionParams,
+        body: bodyOption[TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION],
+        template: TheHiveTemplate.COMPROMISED_USER_ACCOUNT_INVESTIGATION,
+      },
       0
     );
 
-    fireEvent.change(templateSelectEl, { target: { value: TheHiveTemplate.MALICIOUS_FILE_ANALYSIS } });
+    fireEvent.change(templateSelectEl, {
+      target: { value: TheHiveTemplate.MALICIOUS_FILE_ANALYSIS },
+    });
     expect(editAction).toHaveBeenNthCalledWith(
       2,
       'subActionParams',
-      { ...subActionParams, body: bodyOption[TheHiveTemplate.MALICIOUS_FILE_ANALYSIS], template: TheHiveTemplate.MALICIOUS_FILE_ANALYSIS },
+      {
+        ...subActionParams,
+        body: bodyOption[TheHiveTemplate.MALICIOUS_FILE_ANALYSIS],
+        template: TheHiveTemplate.MALICIOUS_FILE_ANALYSIS,
+      },
       0
     );
   });
