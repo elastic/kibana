@@ -1470,7 +1470,50 @@ describe('UnifiedDataTable', () => {
 
   describe('enableInTableSearch', () => {
     it(
-      'should render find-button if enableInTableSearch is true',
+      'should render find-button if enableInTableSearch is true and no custom toolbar specified',
+      async () => {
+        await renderDataTable({ enableInTableSearch: true, columns: ['bytes'] });
+
+        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should render find-button if enableInTableSearch is true and renderCustomToolbar is provided',
+      async () => {
+        const renderCustomToolbarMock = jest.fn((props) => {
+          return (
+            <div data-test-subj="custom-toolbar">
+              Custom layout {props.gridProps.inTableSearchControl}
+            </div>
+          );
+        });
+
+        await renderDataTable({
+          enableInTableSearch: true,
+          columns: ['bytes'],
+          renderCustomToolbar: renderCustomToolbarMock,
+        });
+
+        expect(screen.getByTestId('custom-toolbar')).toBeInTheDocument();
+        expect(screen.getByTestId(BUTTON_TEST_SUBJ)).toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should not render find-button if enableInTableSearch is false',
+      async () => {
+        await renderDataTable({ enableInTableSearch: false, columns: ['bytes'] });
+
+        expect(screen.queryByTestId(BUTTON_TEST_SUBJ)).not.toBeInTheDocument();
+      },
+      EXTENDED_JEST_TIMEOUT
+    );
+
+    it(
+      'should find the search term in the table',
       async () => {
         await renderDataTable({ enableInTableSearch: true, columns: ['bytes'] });
 
@@ -1486,6 +1529,7 @@ describe('UnifiedDataTable', () => {
         expect(input).toHaveValue(searchTerm);
 
         await waitFor(() => {
+          // 3 results for `bytes` column with value `50`
           expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('1/3');
         });
 
@@ -1505,16 +1549,17 @@ describe('UnifiedDataTable', () => {
         await waitFor(() => {
           expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('2/3');
         });
-      },
-      EXTENDED_JEST_TIMEOUT
-    );
 
-    it(
-      'should not render find-button if enableInTableSearch is false',
-      async () => {
-        await renderDataTable({ enableInTableSearch: false, columns: ['bytes'] });
+        const anotherSearchTerm = 'random';
+        fireEvent.change(screen.getByTestId(INPUT_TEST_SUBJ), {
+          target: { value: anotherSearchTerm },
+        });
+        expect(screen.getByTestId(INPUT_TEST_SUBJ)).toHaveValue(anotherSearchTerm);
 
-        expect(screen.queryByTestId(BUTTON_TEST_SUBJ)).not.toBeInTheDocument();
+        await waitFor(() => {
+          // no results
+          expect(screen.getByTestId(COUNTER_TEST_SUBJ)).toHaveTextContent('0/0');
+        });
       },
       EXTENDED_JEST_TIMEOUT
     );

@@ -13,7 +13,7 @@ import {
   DataGridWithInTableSearchExample,
   generateMockData,
   getRenderCellValueMock,
-} from '../__mocks__';
+} from './__mocks__';
 import { useDataGridInTableSearch } from './use_data_grid_in_table_search';
 import {
   BUTTON_TEST_SUBJ,

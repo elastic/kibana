@@ -11,7 +11,7 @@ import React, { useMemo, useRef, useState } from 'react';
 import { EuiDataGrid, EuiDataGridProps, EuiDataGridRefProps } from '@elastic/eui';
 import { generateMockData } from './data';
 import { getRenderCellValueMock } from './render_cell_value_mock';
-import { useDataGridInTableSearch } from '../src/use_data_grid_in_table_search';
+import { useDataGridInTableSearch } from '../use_data_grid_in_table_search';
 
 export interface DataGridWithInTableSearchExampleProps {
   rowsCount: number;

@@ -11,7 +11,7 @@ import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { RowCellsRenderer } from './row_cells_renderer';
 import { wrapRenderCellValueWithInTableSearchSupport } from '../wrap_render_cell_value';
-import { getRenderCellValueMock } from '../../__mocks__/render_cell_value_mock';
+import { getRenderCellValueMock } from '../__mocks__';
 
 describe('RowCellsRenderer', () => {
   const testData = [

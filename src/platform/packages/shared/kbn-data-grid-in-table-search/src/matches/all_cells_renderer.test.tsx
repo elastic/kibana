@@ -10,7 +10,7 @@
 import React from 'react';
 import { render, waitFor } from '@testing-library/react';
 import { AllCellsRenderer } from './all_cells_renderer';
-import { getRenderCellValueMock, generateMockData } from '../../__mocks__';
+import { getRenderCellValueMock, generateMockData } from '../__mocks__';
 import { wrapRenderCellValueWithInTableSearchSupport } from '../wrap_render_cell_value';
 
 describe('AllCellsRenderer', () => {
