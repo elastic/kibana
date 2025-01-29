@@ -66,6 +66,7 @@ export const postAttackDiscoveryRoute = (
         const assistantContext = await context.elasticAssistant;
         const logger: Logger = assistantContext.logger;
         const telemetry = assistantContext.telemetry;
+        const savedObjectsClient = assistantContext.savedObjectsClient;
 
         try {
           // get the actions plugin start contract from the request context:
@@ -144,6 +145,7 @@ export const postAttackDiscoveryRoute = (
             latestReplacements,
             logger,
             onNewReplacements,
+            savedObjectsClient,
             size,
             start,
           })
