@@ -110,7 +110,7 @@
     "@kbn/fields-metadata-plugin",
     "@kbn/test-jest-helpers",
     "@kbn/core-saved-objects-utils-server",
-    "@kbn/integration-assistant-plugin",
+    "@kbn/automatic-import-plugin",
     "@kbn/core-security-server-mocks",
     "@kbn/server-http-tools",
     "@kbn/avc-banner",

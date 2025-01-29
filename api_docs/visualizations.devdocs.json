@@ -2213,7 +2213,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -6209,21 +6209,6 @@
       },
       {
         "parentPluginId": "visualizations",
-        "id": "def-public.COMMON_VISUALIZATION_GROUPING",
-        "type": "Array",
-        "tags": [],
-        "label": "COMMON_VISUALIZATION_GROUPING",
-        "description": [],
-        "signature": [
-          "{ id: string; getDisplayName: () => string; getIconType: () => string; order: number; }[]"
-        ],
-        "path": "src/platform/plugins/shared/visualizations/public/legacy/embeddable/constants.ts",
-        "deprecated": false,
-        "trackAdoption": false,
-        "initialIsOpen": false
-      },
-      {
-        "parentPluginId": "visualizations",
         "id": "def-public.DASHBOARD_VISUALIZATION_PANEL_TRIGGER",
         "type": "string",
         "tags": [],
@@ -8669,7 +8654,7 @@
             "section": "def-common.SerializableRecord",
             "text": "SerializableRecord"
           },
-          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; }[]; type: \"datatable\"; meta?: ",
+          " | undefined; }; id: string; name: string; isNull?: boolean | undefined; variable?: string | undefined; }[]; type: \"datatable\"; meta?: ",
           "DatatableMeta",
           " | undefined; rows: ",
           {
@@ -9031,7 +9016,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"full\" | \"custom\" | \"dataBounds\""
+              "\"custom\" | \"full\" | \"dataBounds\""
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,
@@ -13924,7 +13909,7 @@
             "label": "iconPosition",
             "description": [],
             "signature": [
-              "\"right\" | \"auto\" | \"above\" | \"below\" | \"left\" | undefined"
+              "\"right\" | \"auto\" | \"left\" | \"above\" | \"below\" | undefined"
             ],
             "path": "src/platform/plugins/shared/visualizations/common/convert_to_lens/types/configurations.ts",
             "deprecated": false,

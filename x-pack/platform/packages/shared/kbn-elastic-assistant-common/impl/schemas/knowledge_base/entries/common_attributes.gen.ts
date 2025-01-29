@@ -136,6 +136,11 @@ export const ResponseFields = z.object({
   updatedBy: z.string(),
 });
 
+export type DeleteResponseFields = z.infer<typeof DeleteResponseFields>;
+export const DeleteResponseFields = z.object({
+  id: NonEmptyString,
+});
+
 export type SharedResponseProps = z.infer<typeof SharedResponseProps>;
 export const SharedResponseProps = BaseResponseProps.merge(ResponseFields);
 
@@ -250,3 +255,6 @@ export const KnowledgeBaseEntryUpdateProps = z.discriminatedUnion('type', [
 
 export type KnowledgeBaseEntryResponse = z.infer<typeof KnowledgeBaseEntryResponse>;
 export const KnowledgeBaseEntryResponse = z.discriminatedUnion('type', [DocumentEntry, IndexEntry]);
+
+export type KnowledgeBaseEntryDeleteResponse = z.infer<typeof KnowledgeBaseEntryDeleteResponse>;
+export const KnowledgeBaseEntryDeleteResponse = DeleteResponseFields;
