@@ -23,6 +23,7 @@ describe('getUnitedEntityDefinition', () => {
         syncDelay: duration(60, 'seconds'),
         frequency: duration(60, 'seconds'),
         developer: { pipelineDebugMode: false },
+        timestampField: '@timestamp',
       },
     });
 
@@ -273,6 +274,7 @@ describe('getUnitedEntityDefinition', () => {
         syncDelay: duration(60, 'seconds'),
         frequency: duration(60, 'seconds'),
         developer: { pipelineDebugMode: false },
+        timestampField: '@timestamp',
       },
     });
 
@@ -489,6 +491,7 @@ describe('getUnitedEntityDefinition', () => {
         syncDelay: duration(60, 'seconds'),
         frequency: duration(60, 'seconds'),
         developer: { pipelineDebugMode: false },
+        timestampField: '@timestamp',
       },
     });
 
