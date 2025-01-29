@@ -67,30 +67,6 @@ const connectors = [
 ];
 
 describe('Search search provider', () => {
-  const mongoResult = {
-    icon: 'mongodb.svg',
-    id: 'mongodb',
-    score: 75,
-    title: 'MongoDB',
-    type: 'Elasticsearch',
-    url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector?connector_type=connector_client&service_type=mongodb`,
-      prependBasePath: true,
-    },
-  };
-
-  const nativeMongoResult = {
-    icon: 'mongodb.svg',
-    id: 'mongodb',
-    score: 75,
-    title: 'MongoDB',
-    type: 'Elasticsearch',
-    url: {
-      path: `${ENTERPRISE_SEARCH_CONTENT_PLUGIN.URL}/connectors/select_connector?connector_type=native&service_type=mongodb`,
-      prependBasePath: true,
-    },
-  };
-
   const customizedConnectorResult = {
     icon: 'custom.svg',
     id: '',
