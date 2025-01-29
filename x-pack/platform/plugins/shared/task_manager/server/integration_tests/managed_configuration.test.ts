@@ -292,7 +292,7 @@ describe('managed configuration', () => {
 
       clock.tick(ADJUST_THROUGHPUT_INTERVAL);
 
-      expect(logger.warn).toHaveBeenCalledWith(
+      expect(logger.debug).toHaveBeenCalledWith(
         'Poll interval configuration changing from 500 to 3000 after a change in the average task load: 0.'
       );
       expect(logger.debug).toHaveBeenCalledWith('Task poller now using interval of 3000ms');

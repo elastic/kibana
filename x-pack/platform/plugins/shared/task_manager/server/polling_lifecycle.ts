@@ -14,7 +14,11 @@ import { UsageCounter } from '@kbn/usage-collection-plugin/server';
 import type { Logger, ExecutionContextStart } from '@kbn/core/server';
 
 import { Result, asErr, mapErr, asOk, map, mapOk, isOk } from './lib/result_type';
-import { TaskManagerConfig, CLAIM_STRATEGY_UPDATE_BY_QUERY } from './config';
+import {
+  TaskManagerConfig,
+  CLAIM_STRATEGY_UPDATE_BY_QUERY,
+  WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS,
+} from './config';
 
 import {
   TaskMarkRunning,
@@ -49,8 +53,8 @@ import {
   createPollIntervalScan,
   countErrors,
   ADJUST_THROUGHPUT_INTERVAL,
-  TaskManagerUtilizationWindow,
 } from './lib/create_managed_configuration';
+import { createRunningAveragedStat } from './monitoring/task_run_calculators';
 
 const MAX_BUFFER_OPERATIONS = 100;
 
@@ -138,7 +142,8 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     this.currentPollInterval = pollInterval;
 
     const errorCheck$ = countErrors(taskStore.errors$, ADJUST_THROUGHPUT_INTERVAL);
-    const tmUtilizationWindow: TaskManagerUtilizationWindow[] = [];
+    const window = WORKER_UTILIZATION_RUNNING_AVERAGE_WINDOW_SIZE_MS / this.currentPollInterval;
+    const tmUtilizationQueue = createRunningAveragedStat<number>(window);
     this.capacityConfiguration$ = errorCheck$.pipe(
       createCapacityScan(config, logger, startingCapacity),
       startWith(startingCapacity),
@@ -146,7 +151,7 @@ export class TaskPollingLifecycle implements ITaskEventEmitter<TaskLifecycleEven
     );
     this.pollIntervalConfiguration$ = errorCheck$.pipe(
       withLatestFrom(this.currentTmUtilization$),
-      createPollIntervalScan(logger, this.currentPollInterval, claimStrategy, tmUtilizationWindow),
+      createPollIntervalScan(logger, this.currentPollInterval, claimStrategy, tmUtilizationQueue),
       startWith(this.currentPollInterval),
       distinctUntilChanged()
     );

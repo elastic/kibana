@@ -15,7 +15,6 @@ import {
   createCapacityScan,
   createPollIntervalScan,
   INTERVAL_AFTER_BLOCK_EXCEPTION,
-  TaskManagerUtilizationWindow,
 } from './create_managed_configuration';
 import { mockLogger } from '../test_utils';
 import {
@@ -27,6 +26,7 @@ import {
 } from '../config';
 import { MsearchError } from './msearch_error';
 import { BulkUpdateError } from './bulk_update_error';
+import { createRunningAveragedStat } from '../monitoring/task_run_calculators';
 
 describe('createManagedConfiguration()', () => {
   let clock: sinon.SinonFakeTimers;
@@ -335,10 +335,10 @@ describe('createManagedConfiguration()', () => {
       const utilization$ = new BehaviorSubject<number>(100);
       const errorCheck$ = countErrors(errors$, ADJUST_THROUGHPUT_INTERVAL);
       const subscription = jest.fn();
-      const window: TaskManagerUtilizationWindow[] = [];
+      const queue = createRunningAveragedStat<number>(5);
       const pollIntervalConfiguration$ = errorCheck$.pipe(
         withLatestFrom(utilization$),
-        createPollIntervalScan(logger, startingPollInterval, claimStrategy, window),
+        createPollIntervalScan(logger, startingPollInterval, claimStrategy, queue),
         startWith(startingPollInterval),
         distinctUntilChanged()
       );
@@ -535,7 +535,7 @@ describe('createManagedConfiguration()', () => {
         expect(subscription).toHaveBeenCalledTimes(5);
       });
 
-      test('should decrease configuration after error and reset to default poll interval when poll interval < default and TM utilization > 25%', async () => {
+      test('should decrease configuration after error and reset to default poll interval when poll interval < default and TM utilization < 25%', async () => {
         const { subscription, errors$, utilization$ } = setupScenario(2800, CLAIM_STRATEGY_MGET);
         errors$.next(SavedObjectsErrorHelpers.createTooManyRequestsError('a', 'b'));
         for (let i = 0; i < 10; i++) {
@@ -569,7 +569,7 @@ describe('createManagedConfiguration()', () => {
         const { utilization$ } = setupScenario(100, CLAIM_STRATEGY_MGET);
         utilization$.next(20);
         clock.tick(ADJUST_THROUGHPUT_INTERVAL);
-        expect(logger.warn).toHaveBeenCalledWith(
+        expect(logger.debug).toHaveBeenCalledWith(
           'Poll interval configuration changing from 100 to 3000 after a change in the average task load: 20.'
         );
       });

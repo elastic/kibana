@@ -5,9 +5,9 @@
  * 2.0.
  */
 
+import stats from 'stats-lite';
 import { interval, merge, of, Observable } from 'rxjs';
 import { filter, mergeScan, map, scan } from 'rxjs';
-import { sumBy } from 'lodash';
 import { SavedObjectsErrorHelpers } from '@kbn/core/server';
 import { Logger } from '@kbn/core/server';
 import { isEsCannotExecuteScriptError } from './identify_es_error';
@@ -46,16 +46,9 @@ const CAPACITY_INCREASE_PERCENTAGE = 1.05;
 const POLL_INTERVAL_DECREASE_PERCENTAGE = 0.95;
 const POLL_INTERVAL_INCREASE_PERCENTAGE = 1.2;
 
-const TM_UTILIZATION_WINDOW = 15000;
-
 interface ErrorScanResult {
   count: number;
   isBlockException: boolean;
-}
-
-export interface TaskManagerUtilizationWindow {
-  timestamp: number;
-  utilization: number;
 }
 
 export function createCapacityScan(
@@ -108,7 +101,7 @@ export function createPollIntervalScan(
   logger: Logger,
   startingPollInterval: number,
   claimStrategy: string,
-  window: TaskManagerUtilizationWindow[]
+  tmUtilizationQueue: (value?: number | undefined) => number[]
 ) {
   return scan(
     (previousPollInterval: number, [{ count: errorCount, isBlockException }, tmUtilization]) => {
@@ -153,7 +146,8 @@ export function createPollIntervalScan(
           }
 
           // If the task claim strategy is mget, increase the poll interval if the the avg used capacity over 15s is less than 25%.
-          avgTmUtilization = getAverageUtilization(tmUtilization, window);
+          const queue = tmUtilizationQueue(tmUtilization);
+          avgTmUtilization = stats.mean(queue);
           if (claimStrategy === CLAIM_STRATEGY_MGET && newPollInterval < DEFAULT_POLL_INTERVAL) {
             updatedForCapacity = true;
             if (avgTmUtilization < 25) {
@@ -167,13 +161,15 @@ export function createPollIntervalScan(
       }
       if (newPollInterval !== previousPollInterval) {
         if (previousPollInterval !== INTERVAL_AFTER_BLOCK_EXCEPTION) {
-          logger.warn(
-            `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after ${
-              updatedForCapacity
-                ? `a change in the average task load: ${avgTmUtilization}.`
-                : `seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).`
-            }`
-          );
+          if (updatedForCapacity) {
+            logger.debug(
+              `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after a change in the average task load: ${avgTmUtilization}.`
+            );
+          } else {
+            logger.warn(
+              `Poll interval configuration changing from ${previousPollInterval} to ${newPollInterval} after seeing ${errorCount} "too many request" and/or "execute [inline] script" error(s) and/or "cluster_block_exception" error(s).`
+            );
+          }
         }
       }
       return newPollInterval;
@@ -286,22 +282,4 @@ export function calculateStartingCapacity(
 
   // Neither are set, use the given default capacity
   return defaultCapacity;
-}
-
-function getAverageUtilization(
-  utilization: number,
-  window: TaskManagerUtilizationWindow[]
-): number {
-  const currentTime = Date.now();
-  window.push({ timestamp: currentTime, utilization });
-
-  // Remove utilizations outside the 15s window
-  // Added window.length > 1 to ensure there is at least one entry in the window
-  while (window.length > 1 && window[0].timestamp < currentTime - TM_UTILIZATION_WINDOW) {
-    window.shift();
-  }
-
-  // Return the avg utilization
-  const total = sumBy(window, (w) => w.utilization);
-  return total / window.length;
 }
