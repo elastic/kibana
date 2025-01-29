@@ -8,8 +8,8 @@
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 
 import type { Subscription } from 'rxjs';
-import { Observable } from 'rxjs';
-import { switchMap, combineLatest, BehaviorSubject } from 'rxjs';
+import type { Observable } from 'rxjs';
+import { switchMap, combineLatest, BehaviorSubject, of } from 'rxjs';
 import type { HttpSetup } from '@kbn/core/public';
 import type { IImporter } from '@kbn/file-upload-plugin/public/importer/types';
 import type { DataViewsServicePublic } from '@kbn/data-views-plugin/public/types';
@@ -57,11 +57,9 @@ export class FileManager {
   private readonly files$ = new BehaviorSubject<FileWrapper[]>([]);
   private readonly analysisValid$ = new BehaviorSubject<boolean>(false);
   public readonly fileAnalysisStatus$: Observable<FileAnalysis[]> = this.files$.pipe(
-    switchMap((files) => {
-      return files.length === 0
-        ? new Observable<FileAnalysis[]>((subscriber) => subscriber.next([]))
-        : combineLatest(files.map((file) => file.fileStatus$));
-    })
+    switchMap((files) =>
+      files.length > 0 ? combineLatest(files.map((file) => file.fileStatus$)) : of([])
+    )
   );
   private mappingsCheckSubscription: Subscription;
   private settings;
