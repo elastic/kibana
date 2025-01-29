@@ -5,6 +5,7 @@
  * 2.0.
  */
 import React from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { groupSamplesByCategory } from '../../../common/topn';
 import { useProfilingDependencies } from '../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { ProfilingAppPageTemplate } from '../../components/profiling_app_page_template';
@@ -17,6 +18,7 @@ import { useTimeRangeAsync } from '../../hooks/use_time_range_async';
 import { RouteBreadcrumb } from '../../routing/route_breadcrumb';
 import { getStackTracesTabs } from './get_stack_traces_tabs';
 import { getTracesViewRouteParams } from './utils';
+import { AsyncStatus } from '../../hooks/use_async';
 
 export function StackTracesView() {
   const routePath = useProfilingRoutePath();
@@ -69,6 +71,21 @@ export function StackTracesView() {
       '/stacktraces/{topNType}',
       getTracesViewRouteParams({ query, topNType: path.topNType, category })
     );
+  }
+
+  const { onPageReady } = usePerformanceContext();
+
+  if (state.status !== AsyncStatus.Loading) {
+    onPageReady({
+      meta: {
+        rangeFrom,
+        rangeTo,
+      },
+      customMetrics: {
+        key1: 'totalCount',
+        value1: state.data?.charts.length ?? 0,
+      },
+    });
   }
 
   return (

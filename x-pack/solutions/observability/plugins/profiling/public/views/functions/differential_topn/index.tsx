@@ -6,6 +6,7 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiHorizontalRule, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
 import { FramesSummary } from '../../../components/frames_summary';
@@ -22,6 +23,7 @@ import { useTimeRange } from '../../../hooks/use_time_range';
 import { useTimeRangeAsync } from '../../../hooks/use_time_range_async';
 
 export function DifferentialTopNFunctionsView() {
+  const { onPageReady } = usePerformanceContext();
   const { query } = useProfilingParams('/functions/differential');
   const {
     rangeFrom,
@@ -147,6 +149,23 @@ export function DifferentialTopNFunctionsView() {
     });
   }
 
+  function isLoading() {
+    return state.status === AsyncStatus.Loading || comparisonState.status === AsyncStatus.Loading;
+  }
+
+  if (!isLoading()) {
+    onPageReady({
+      meta: {
+        rangeFrom,
+        rangeTo,
+      },
+      customMetrics: {
+        key1: 'TotalCount',
+        value1: state.data?.TotalCount ?? 0,
+      },
+    });
+  }
+
   return (
     <>
       <EuiFlexGroup direction="column">
@@ -161,10 +180,7 @@ export function DifferentialTopNFunctionsView() {
             />
             <EuiSpacer />
             <FramesSummary
-              isLoading={
-                state.status === AsyncStatus.Loading ||
-                comparisonState.status === AsyncStatus.Loading
-              }
+              isLoading={isLoading()}
               baseValue={
                 state.data
                   ? {

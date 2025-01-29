@@ -6,6 +6,8 @@
  */
 import { EuiFlexGroup, EuiFlexItem, EuiPanel, EuiSpacer } from '@elastic/eui';
 import React from 'react';
+import { usePerformanceContext } from '@kbn/ebt-tools';
+
 import { profilingShowErrorFrames } from '@kbn/observability-plugin/common';
 import { AsyncComponent } from '../../../components/async_component';
 import { useProfilingDependencies } from '../../../components/contexts/profiling_dependencies/use_profiling_dependencies';
@@ -117,6 +119,21 @@ export function DifferentialFlameGraphsView() {
   function handleSearchTextChange(newSearchText: string) {
     // @ts-expect-error Code gets too complicated to satisfy TS constraints
     profilingRouter.push(routePath, { query: { ...query, searchText: newSearchText } });
+  }
+
+  const { onPageReady } = usePerformanceContext();
+
+  if (state.status !== AsyncStatus.Loading) {
+    onPageReady({
+      meta: {
+        rangeFrom,
+        rangeTo,
+      },
+      customMetrics: {
+        key1: 'totalSamples',
+        value1: state.data?.primaryFlamegraph.TotalSamples ?? 0,
+      },
+    });
   }
 
   return (
