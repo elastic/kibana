@@ -75,13 +75,18 @@ export const getV2 = (): KibanaFeatureConfig => {
           all: [...filesSavedObjectTypes],
           read: [...filesSavedObjectTypes],
         },
-        ui: capabilities.all,
+        ui: [
+          ...capabilities.all,
+          ...capabilities.createComment,
+          ...capabilities.reopenCase,
+          ...capabilities.assignCase,
+        ],
         replacedBy: {
           default: [{ feature: FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [
             {
               feature: FEATURE_ID_V3,
-              privileges: ['minimal_all', 'create_comment', 'case_reopen', 'cases_assign'],
+              privileges: ['minimal_all', 'cases_assign'],
             },
           ],
         },

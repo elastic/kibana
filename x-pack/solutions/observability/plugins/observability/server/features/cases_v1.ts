@@ -58,7 +58,12 @@ export const getCasesFeature = (
         all: [...filesSavedObjectTypes],
         read: [...filesSavedObjectTypes],
       },
-      ui: casesCapabilities.all,
+      ui: [
+        ...casesCapabilities.all,
+        ...casesCapabilities.createComment,
+        ...casesCapabilities.reopenCase,
+        ...casesCapabilities.assignCase,
+      ],
       replacedBy: {
         default: [{ feature: casesFeatureIdV3, privileges: ['all'] }],
         minimal: [

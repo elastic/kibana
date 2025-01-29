@@ -66,7 +66,12 @@ export const getCasesBaseKibanaFeature = ({
           all: [...savedObjects.files],
           read: [...savedObjects.files],
         },
-        ui: uiCapabilities.all,
+        ui: [
+          ...uiCapabilities.all,
+          ...uiCapabilities.createComment,
+          ...uiCapabilities.reopenCase,
+          ...uiCapabilities.assignCase,
+        ],
         replacedBy: {
           default: [{ feature: CASES_FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [
