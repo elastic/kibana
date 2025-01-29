@@ -1427,7 +1427,7 @@
     "@kbn/dependency-ownership": "link:src/dev/packages/dependency-ownership",
     "@kbn/dependency-usage": "link:src/dev/packages/dependency-usage",
     "@kbn/dev-cli-errors": "link:src/dev/packages/dev-cli-errors",
-    "@kbn/dev-cli-runner": "link:packages/kbn-dev-cli-runner",
+    "@kbn/dev-cli-runner": "link:src/dev/packages/dev-cli-runner",
     "@kbn/dev-proc-runner": "link:packages/kbn-dev-proc-runner",
     "@kbn/dev-utils": "link:packages/kbn-dev-utils",
     "@kbn/docs-utils": "link:packages/kbn-docs-utils",

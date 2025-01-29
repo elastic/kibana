@@ -5392,7 +5392,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/dev-cli-runner@link:packages/kbn-dev-cli-runner":
+"@kbn/dev-cli-runner@link:src/dev/packages/dev-cli-runner":
   version "0.0.0"
   uid ""
 
