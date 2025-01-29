@@ -20,6 +20,7 @@ import {
   ALERT_RULE_PRODUCER,
 } from '@kbn/rule-data-utils';
 import { EuiBadge, EuiLink } from '@elastic/eui';
+import { JsonValue } from '@kbn/utility-types';
 import { AlertsTableSupportedConsumers, GetAlertsTableProp } from '../types';
 import { alertProducersData, observabilityFeatureIds } from '../constants';
 import { useFieldFormatter } from '../hooks/use_field_formatter';
@@ -33,8 +34,8 @@ export const DefaultCellValue = ({
     services: { fieldFormats, http },
   } = useAlertsTableContext();
   const formatField = useFieldFormatter(fieldFormats);
-  const rawValue = alert[columnId]?.[0];
-  const value = getRenderValue(rawValue);
+  const rawValue = alert[columnId];
+  const value = extractFieldValue(rawValue);
 
   switch (columnId) {
     case TIMESTAMP:
@@ -72,11 +73,13 @@ export const DefaultCellValue = ({
 
     case ALERT_RULE_CONSUMER:
       const producer = alert?.[ALERT_RULE_PRODUCER]?.[0] as AlertConsumers;
-      const consumer: AlertsTableSupportedConsumers = observabilityFeatureIds.includes(producer)
-        ? 'observability'
-        : producer && (value === 'alerts' || value === 'stackAlerts' || value === 'discover')
-        ? producer
-        : value;
+      const consumer = (
+        observabilityFeatureIds.includes(producer)
+          ? 'observability'
+          : producer && (value === 'alerts' || value === 'stackAlerts' || value === 'discover')
+          ? producer
+          : value
+      ) as AlertsTableSupportedConsumers;
       const consumerData = alertProducersData[consumer];
       if (!consumerData) {
         return <>{value}</>;
@@ -88,8 +91,11 @@ export const DefaultCellValue = ({
   }
 };
 
-const getRenderValue = (mappedNonEcsValue: any) => {
-  const value = Array.isArray(mappedNonEcsValue) ? mappedNonEcsValue.join() : mappedNonEcsValue;
+/**
+ * Extracts the value from the raw json ES field
+ */
+const extractFieldValue = (rawValue: string | JsonValue[]) => {
+  const value = Array.isArray(rawValue) ? rawValue.join() : rawValue;
 
   if (!isEmpty(value)) {
     if (typeof value === 'object') {

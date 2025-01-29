@@ -46,7 +46,7 @@ export const DefaultAlertsFlyoutBody = <AC extends AdditionalContext>(
               const value = alert[column.id]?.[0];
 
               return {
-                title: column.displayAsText as string,
+                title: (column.displayAsText as string) ?? column.id,
                 description:
                   value != null ? (
                     <DefaultCellValue columnId={column.id} alert={props.alert} />
