@@ -1,59 +1,4 @@
-/*
- * Copyright Elasticsearch B.V. and/or licensed to Elasticsearch B.V. under one
- * or more contributor license agreements. Licensed under the Elastic License
- * 2.0; you may not use this file except in compliance with the Elastic License
- * 2.0.
- */
-
-import React from 'react';
-import type {
-  AppMountParameters,
-  AppUpdater,
-  CoreSetup,
-  CoreStart,
-  Plugin,
-  PluginInitializerContext,
-} from '@kbn/core/public';
-import { DEFAULT_APP_CATEGORIES } from '@kbn/core/public';
-import { i18n } from '@kbn/i18n';
-
-import type { NavigationPublicPluginStart } from '@kbn/navigation-plugin/public';
-import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
-
-import type {
-  CustomIntegrationsSetup,
-  CustomIntegrationsStart,
-} from '@kbn/custom-integrations-plugin/public';
-
-import type { SharePluginStart } from '@kbn/share-plugin/public';
-
-import { once } from 'lodash';
-
-import type { SpacesPluginStart } from '@kbn/spaces-plugin/public';
-import type { DiscoverStart } from '@kbn/discover-plugin/public';
-import type { CloudSetup, CloudStart } from '@kbn/cloud-plugin/public';
-import type {
-  UsageCollectionSetup,
-  UsageCollectionStart,
-} from '@kbn/usage-collection-plugin/public';
-
-import type { DataPublicPluginSetup, DataPublicPluginStart } from '@kbn/data-plugin/public';
-import type { DataViewsPublicPluginStart } from '@kbn/data-views-plugin/public';
-import type { HomePublicPluginSetup } from '@kbn/home-plugin/public';
-import { Storage } from '@kbn/kibana-utils-plugin/public';
-import type { LicensingPluginStart } from '@kbn/licensing-plugin/public';
-import type { GlobalSearchPluginSetup } from '@kbn/global-search-plugin/public';
-
-import type { SendRequestResponse } from '@kbn/es-ui-shared-plugin/public';
-
-import type { UnifiedSearchPublicPluginStart } from '@kbn/unified-search-plugin/public';
-import type { GuidedOnboardingPluginStart } from '@kbn/guided-onboarding-plugin/public';
-
-import type { DashboardStart } from '@kbn/dashboard-plugin/public';
-
 import { Subject } from 'rxjs';
-
-import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 
 import type { FleetAuthz } from '../common';
 import { appRoutesService, INTEGRATIONS_PLUGIN_ID, PLUGIN_ID, setupRouteService } from '../common';
@@ -89,6 +34,7 @@ import type {
 import { LazyCustomLogsAssetsExtension } from './lazy_custom_logs_assets_extension';
 import { setCustomIntegrations, setCustomIntegrationsStart } from './services/custom_integrations';
 import { getFleetDeepLinks } from './deep_links';
+import type { AutomaticImportPluginStart } from '@kbn/automatic-import-plugin/public';
 
 export type { FleetConfigType } from '../common/types';
 
