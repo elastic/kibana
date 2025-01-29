@@ -18,7 +18,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     'searchNavigation',
   ]);
   const es = getService('es');
-  const security = getService('security');
   const browser = getService('browser');
   const retry = getService('retry');
   const spaces = getService('spaces');
@@ -339,7 +338,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
         before(async () => {
           await esDeleteAllIndices(indexName);
           await es.indices.create({ index: indexName });
-          await security.testUser.setRoles(['index_management_user']);
         });
         beforeEach(async () => {
           // Navigate to search solution space
