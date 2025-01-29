@@ -49,7 +49,7 @@ export async function readStream({
     };
   }
 
-  // These queries are only relavate for IngestStreams
+  // These queries are only relavant for IngestStreams
   const [ancestors, dataStream] = await Promise.all([
     streamsClient.getAncestors(name),
     streamsClient.getDataStream(name),
