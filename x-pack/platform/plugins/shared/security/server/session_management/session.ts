@@ -30,6 +30,8 @@ import type { ConfigType } from '../config';
  * The shape of the value that represents user's session information.
  */
 export interface SessionValue {
+  _dasession: any;
+
   /**
    * Unique session ID.
    */
@@ -180,7 +182,11 @@ export class Session {
       return { error: new SessionExpiredError(), value: null };
     }
 
+    const bef = performance.now();
     const sessionIndexValue = await this.options.sessionIndex.get(sessionCookieValue.sid);
+    const aft = performance.now();
+    // console.log('success get session index value', aft - bef, sessionIndexValue);
+    // console.log(sessionIndexValue);
     if (!sessionIndexValue) {
       sessionLogger.debug(
         'Session value is not available in the index, session cookie will be invalidated.'
