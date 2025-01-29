@@ -34,8 +34,11 @@ import {
   DataFrameAnalyticsListColumn,
 } from './common';
 import { useActions } from './use_actions';
-import { useMlLink } from '../../../../../contexts/kibana';
+import { useMlLink, useMlKibana } from '../../../../../contexts/kibana';
 import { ML_PAGES } from '../../../../../../../common/constants/locator';
+import { MLSavedObjectsSpacesList } from '../../../../../components/ml_saved_objects_spaces_list';
+import { DFA_SAVED_OBJECT_TYPE } from '../../../../../../../common/types/saved_objects';
+import { useCanManageSpacesAndSavedObjects } from '../../../../../hooks/use_spaces';
 
 const TRUNCATE_TEXT_LINES = 3;
 
@@ -164,6 +167,9 @@ export const useColumns = (
   isMlEnabledInSpace: boolean = true,
   refresh: () => void = () => {}
 ) => {
+  const {
+    services: { spaces, application },
+  } = useMlKibana();
   const { actions, modals } = useActions();
   function toggleDetails(item: DataFrameAnalyticsListRow) {
     const index = expandedRowItemIds.indexOf(item.config.id);
@@ -177,6 +183,12 @@ export const useColumns = (
     // spread to a new array otherwise the component wouldn't re-render
     setExpandedRowItemIds([...expandedRowItemIds]);
   }
+
+  const canManageSpacesAndSavedObjects = useCanManageSpacesAndSavedObjects();
+  const shouldDisableSpacesColumn =
+    !canManageSpacesAndSavedObjects ||
+    !application.capabilities.savedObjectsManagement?.shareIntoSpace;
+
   // update possible column types to something like (FieldDataColumn | ComputedColumn | ActionsColumn)[] when they have been added to EUI
   const columns: any[] = [
     {
@@ -283,6 +295,33 @@ export const useColumns = (
       'data-test-subj': 'mlAnalyticsTableColumnStatus',
     },
     progressColumn,
+    ...(canManageSpacesAndSavedObjects && spaces
+      ? [
+          {
+            name: i18n.translate('xpack.ml.jobsList.jobActionsColumn.spaces', {
+              defaultMessage: 'Spaces',
+            }),
+            'data-test-subj': 'mlTableColumnSpaces',
+            truncateText: true,
+            align: 'right',
+            width: '10%',
+            disabled: shouldDisableSpacesColumn,
+            render: (item: DataFrameAnalyticsListRow) => {
+              return (
+                <MLSavedObjectsSpacesList
+                  disabled={shouldDisableSpacesColumn}
+                  spacesApi={spaces}
+                  spaceIds={item.spaces}
+                  id={item.id}
+                  mlSavedObjectType={DFA_SAVED_OBJECT_TYPE}
+                  refresh={refresh}
+                />
+              );
+            },
+          },
+        ]
+      : []),
+
     {
       name: i18n.translate('xpack.ml.dataframe.analyticsList.tableActionLabel', {
         defaultMessage: 'Actions',

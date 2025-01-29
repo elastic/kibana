@@ -150,11 +150,13 @@ export const performBulkCreate = async <T>(
   const authObjects: AuthorizeCreateObject[] = validObjects.map((element) => {
     const { object, preflightCheckIndex: index } = element.value;
     const preflightResult = index !== undefined ? preflightCheckResponse[index] : undefined;
+
     return {
       type: object.type,
       id: object.id,
       initialNamespaces: object.initialNamespaces,
       existingNamespaces: preflightResult?.existingDocument?._source.namespaces ?? [],
+      name: SavedObjectsUtils.getName(registry.getNameAttribute(object.type), object),
     };
   });
 

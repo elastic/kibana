@@ -25,7 +25,7 @@ import {
   createComment,
   updateComment,
   deleteAllComments,
-  getCaseUserActions,
+  findCaseUserActions,
 } from '../../../common/lib/api';
 import {
   superUser,
@@ -128,7 +128,7 @@ export default ({ getService }: FtrProviderContext): void => {
           },
         });
 
-        const userActions = await getCaseUserActions({
+        const { userActions } = await findCaseUserActions({
           supertest,
           caseID: postedCase.id,
           auth: { user: superUser, space: 'space1' },

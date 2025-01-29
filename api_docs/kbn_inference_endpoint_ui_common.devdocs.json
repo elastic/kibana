@@ -5,6 +5,39 @@
     "functions": [
       {
         "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.InferenceFlyoutWrapper",
+        "type": "Function",
+        "tags": [],
+        "label": "InferenceFlyoutWrapper",
+        "description": [],
+        "signature": [
+          "({ onFlyoutClose, http, toasts, isEdit, onSubmitSuccess, inferenceEndpoint, }: InferenceFlyoutWrapperProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.InferenceFlyoutWrapper.$1",
+            "type": "Object",
+            "tags": [],
+            "label": "{\n  onFlyoutClose,\n  http,\n  toasts,\n  isEdit,\n  onSubmitSuccess,\n  inferenceEndpoint,\n}",
+            "description": [],
+            "signature": [
+              "InferenceFlyoutWrapperProps"
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/components/inference_flyout_wrapper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
         "id": "def-public.InferenceServiceFormFields",
         "type": "Function",
         "tags": [],
@@ -524,6 +557,60 @@
               "string | number | boolean | null"
             ],
             "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/dynamic_config/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/inference-endpoint-ui-common",
+        "id": "def-public.InferenceEndpoint",
+        "type": "Interface",
+        "tags": [],
+        "label": "InferenceEndpoint",
+        "description": [],
+        "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.InferenceEndpoint.config",
+            "type": "Object",
+            "tags": [],
+            "label": "config",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-endpoint-ui-common",
+                "scope": "public",
+                "docId": "kibKbnInferenceEndpointUiCommonPluginApi",
+                "section": "def-public.Config",
+                "text": "Config"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "@kbn/inference-endpoint-ui-common",
+            "id": "def-public.InferenceEndpoint.secrets",
+            "type": "Object",
+            "tags": [],
+            "label": "secrets",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/inference-endpoint-ui-common",
+                "scope": "public",
+                "docId": "kibKbnInferenceEndpointUiCommonPluginApi",
+                "section": "def-public.Secrets",
+                "text": "Secrets"
+              }
+            ],
+            "path": "x-pack/platform/packages/shared/kbn-inference-endpoint-ui-common/src/types/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }

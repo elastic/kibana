@@ -163,7 +163,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -553,7 +553,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -703,7 +703,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -925,7 +925,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1217,7 +1217,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -1633,7 +1633,7 @@
             "label": "mode",
             "description": [],
             "signature": [
-              "\"full\" | \"custom\" | \"dataBounds\""
+              "\"custom\" | \"full\" | \"dataBounds\""
             ],
             "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
             "deprecated": false,
@@ -3317,7 +3317,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3371,7 +3371,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3419,7 +3419,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3473,7 +3473,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3527,7 +3527,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3581,7 +3581,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3635,7 +3635,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3689,7 +3689,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3763,7 +3763,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3817,7 +3817,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3865,7 +3865,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3919,7 +3919,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -3973,7 +3973,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4027,7 +4027,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4081,7 +4081,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4135,7 +4135,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4195,7 +4195,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4249,7 +4249,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4297,7 +4297,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4351,7 +4351,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4405,7 +4405,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4459,7 +4459,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4513,7 +4513,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4567,7 +4567,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -4631,7 +4631,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4685,7 +4685,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4733,7 +4733,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4787,7 +4787,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4841,7 +4841,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4895,7 +4895,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -4949,7 +4949,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5003,7 +5003,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -5063,7 +5063,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -5117,7 +5117,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -5165,7 +5165,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -5219,7 +5219,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -5273,7 +5273,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -5327,7 +5327,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -5381,7 +5381,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -5435,7 +5435,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -6314,7 +6314,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6368,7 +6368,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6416,7 +6416,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6470,7 +6470,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6524,7 +6524,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6578,7 +6578,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6632,7 +6632,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -6686,7 +6686,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -7005,7 +7005,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7059,7 +7059,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7107,7 +7107,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7161,7 +7161,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7215,7 +7215,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7269,7 +7269,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7323,7 +7323,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7377,7 +7377,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+                  "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -7565,7 +7565,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; adHocDataViews?: Record<string, ",
+              "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -7793,7 +7793,7 @@
                     "section": "def-common.Filter",
                     "text": "Filter"
                   },
-                  "[]; adHocDataViews?: Record<string, ",
+                  "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
                   {
                     "pluginId": "dataViews",
                     "scope": "common",
@@ -14861,7 +14861,7 @@
         "label": "AxisExtentMode",
         "description": [],
         "signature": [
-          "\"full\" | \"custom\" | \"dataBounds\""
+          "\"custom\" | \"full\" | \"dataBounds\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -15214,7 +15214,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15268,7 +15268,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15316,7 +15316,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15370,7 +15370,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15424,7 +15424,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15478,7 +15478,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15532,7 +15532,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15586,7 +15586,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15890,7 +15890,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15944,7 +15944,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -15992,7 +15992,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -16046,7 +16046,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -16100,7 +16100,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -16154,7 +16154,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -16208,7 +16208,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -16262,7 +16262,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -16484,7 +16484,7 @@
         "label": "IconPosition",
         "description": [],
         "signature": [
-          "\"right\" | \"auto\" | \"above\" | \"below\" | \"left\""
+          "\"right\" | \"auto\" | \"left\" | \"above\" | \"below\""
         ],
         "path": "src/platform/plugins/shared/chart_expressions/expression_xy/common/types/expression_functions.ts",
         "deprecated": false,
@@ -16703,7 +16703,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -17093,7 +17093,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -17243,7 +17243,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -17465,7 +17465,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -17757,7 +17757,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -18259,7 +18259,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -18313,7 +18313,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -18361,7 +18361,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -18415,7 +18415,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -18469,7 +18469,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -18523,7 +18523,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -18577,7 +18577,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -18631,7 +18631,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -19049,7 +19049,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -19439,7 +19439,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -19589,7 +19589,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -19811,7 +19811,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20103,7 +20103,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20452,7 +20452,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20506,7 +20506,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20554,7 +20554,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20608,7 +20608,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20662,7 +20662,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20716,7 +20716,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20770,7 +20770,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -20824,7 +20824,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21141,7 +21141,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21194,7 +21194,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21247,7 +21247,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; adHocDataViews?: Record<string, ",
+          "[]; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21512,7 +21512,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21566,7 +21566,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21614,7 +21614,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21668,7 +21668,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21722,7 +21722,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21776,7 +21776,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21830,7 +21830,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -21884,7 +21884,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -22039,7 +22039,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22093,7 +22093,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22141,7 +22141,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22195,7 +22195,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22249,7 +22249,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22303,7 +22303,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22357,7 +22357,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22411,7 +22411,7 @@
                 "section": "def-common.Filter",
                 "text": "Filter"
               },
-              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+              "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
               {
                 "pluginId": "dataViews",
                 "scope": "common",
@@ -22831,7 +22831,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -22885,7 +22885,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -22933,7 +22933,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -22987,7 +22987,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23041,7 +23041,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23095,7 +23095,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23149,7 +23149,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",
@@ -23203,7 +23203,7 @@
             "section": "def-common.Filter",
             "text": "Filter"
           },
-          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; adHocDataViews?: Record<string, ",
+          "[]; globalPalette?: { activePaletteId: string; state?: unknown; } | undefined; needsRefresh?: boolean | undefined; adHocDataViews?: Record<string, ",
           {
             "pluginId": "dataViews",
             "scope": "common",

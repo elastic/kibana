@@ -20,6 +20,7 @@ import {
   type SavedObject,
   type ISavedObjectsSerializer,
   SavedObjectsErrorHelpers,
+  WithAuditName,
 } from '@kbn/core-saved-objects-server';
 import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import { getObjectKey, parseObjectKey } from '@kbn/core-saved-objects-base-server-internal';
@@ -73,15 +74,15 @@ export interface CollectMultiNamespaceReferencesParams {
 export async function collectMultiNamespaceReferences(
   params: CollectMultiNamespaceReferencesParams
 ): Promise<SavedObjectsCollectMultiNamespaceReferencesResponse> {
-  const { createPointInTimeFinder, objects, securityExtension, options } = params;
+  const { createPointInTimeFinder, objects, securityExtension, options, registry } = params;
   if (!objects.length) {
     return { objects: [] };
   }
 
   const { objectMap, inboundReferencesMap } = await getObjectsAndReferences(params);
-  const objectsWithContext = Array.from(
-    inboundReferencesMap.entries()
-  ).map<SavedObjectReferenceWithContext>(([referenceKey, referenceVal]) => {
+  const objectsWithContext = Array.from(inboundReferencesMap.entries()).map<
+    WithAuditName<SavedObjectReferenceWithContext>
+  >(([referenceKey, referenceVal]) => {
     const inboundReferences = Array.from(referenceVal.entries()).map(([objectKey, name]) => {
       const { type, id } = parseObjectKey(objectKey);
       return { type, id, name };
@@ -90,12 +91,16 @@ export async function collectMultiNamespaceReferences(
     const object = objectMap.get(referenceKey);
     const originId = object?.originId;
     const spaces = object?.namespaces ?? [];
+
+    const name = SavedObjectsUtils.getName(registry.getNameAttribute(object?.type!), object);
+
     return {
       type,
       id,
       originId,
       spaces,
       inboundReferences,
+      name,
       ...(object === null && { isMissing: true }),
     };
   });
@@ -123,7 +128,14 @@ export async function collectMultiNamespaceReferences(
     const spacesWithMatchingAliases = aliasesVal && Array.from(aliasesVal).sort();
     const originsVal = originsMap.get(getObjectKey({ type: obj.type, id: obj.originId || obj.id }));
     const spacesWithMatchingOrigins = originsVal && Array.from(originsVal).sort();
-    return { ...obj, spacesWithMatchingAliases, spacesWithMatchingOrigins };
+    const { name, ...normalizedObject } = obj;
+
+    return {
+      ...normalizedObject,
+      spacesWithMatchingAliases,
+      spacesWithMatchingOrigins,
+      ...(securityExtension && { name }),
+    };
   });
 
   if (!securityExtension) {
