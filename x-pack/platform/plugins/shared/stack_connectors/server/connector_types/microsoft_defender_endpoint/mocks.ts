@@ -28,6 +28,7 @@ import {
 
 export interface CreateMicrosoftDefenderConnectorMockResponse {
   options: ServiceParams<MicrosoftDefenderEndpointConfig, MicrosoftDefenderEndpointSecrets>;
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   apiMock: { [msApiRoute: string]: (...args: any) => any | Promise<any> };
   instanceMock: ConnectorInstanceMock<MicrosoftDefenderEndpointConnector>;
   usageCollector: ConnectorUsageCollector;

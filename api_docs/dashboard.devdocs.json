@@ -840,6 +840,14 @@
             "text": "PublishesSavedObjectId"
           },
           " & ",
+          {
+            "pluginId": "@kbn/esql-variables-types",
+            "scope": "public",
+            "docId": "kibKbnEsqlVariablesTypesPluginApi",
+            "section": "def-public.PublishesESQLVariables",
+            "text": "PublishesESQLVariables"
+          },
+          " & ",
           "PublishesSearchSession",
           " & ",
           {

@@ -53,8 +53,6 @@ export class SecuritySolutionServerlessPlugin
       securitySolution.experimentalFeatures
     ).features;
 
-    setupDeps.discover.showInlineTopNav();
-
     return {};
   }
 

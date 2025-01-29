@@ -5,22 +5,20 @@
  * 2.0.
  */
 
-import React, { useState, useContext } from 'react';
+import React, { useContext, useEffect, useState } from 'react';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
+import { SECURITY_MODEL } from '../../../../../../common/constants';
 import {
   EuiSpacer,
   EuiCard,
   EuiFlexGroup,
   EuiFlexItem,
   EuiText,
-  EuiButton,
-  EuiButtonEmpty,
-} from '@elastic/eui';
+} from '../../../../../shared_imports';
 
-import * as docs from '../../../../services/documentation';
 import { AppContext } from '../../../../app_context';
-import { ConfirmTrustSetupModal } from './confirm_modal';
+import { ActionButtons } from '../components';
 
 const MIN_ALLOWED_VERSION_API_KEYS_METHOD = '8.10';
 const CARD_MAX_WIDTH = 400;
@@ -48,21 +46,23 @@ const i18nTexts = {
   ),
 };
 
-const docLinks = {
-  cert: docs.onPremSetupTrustWithCertUrl,
-  apiKey: docs.onPremSetupTrustWithApiKeyUrl,
-  cloud: docs.cloudSetupTrustUrl,
-};
-
 interface Props {
-  onBack: () => void;
-  onSubmit: () => void;
-  isSaving: boolean;
+  next: (model: string) => void;
+  onSecurityChange: (model: string) => void;
+  currentSecurityModel: string;
 }
 
-export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) => {
-  const [isModalVisible, setIsModalVisible] = useState<boolean>(false);
-  const { canUseAPIKeyTrustModel, isCloudEnabled } = useContext(AppContext);
+export const RemoteClusterSetupTrust = ({
+  next,
+  currentSecurityModel,
+  onSecurityChange,
+}: Props) => {
+  const { canUseAPIKeyTrustModel } = useContext(AppContext);
+  const [securityModel, setSecurityModel] = useState<string>(currentSecurityModel);
+
+  useEffect(() => {
+    onSecurityChange(securityModel);
+  }, [onSecurityChange, securityModel]);
 
   return (
     <div>
@@ -70,123 +70,72 @@ export const RemoteClusterSetupTrust = ({ onBack, onSubmit, isSaving }: Props) =
         <p>
           <FormattedMessage
             id="xpack.remoteClusters.clusterWizard.trustStep.title"
-            defaultMessage="Set up an authentication mechanism to connect to the remote cluster. Complete{br} this step using the instructions in our docs before continuing."
-            values={{
-              br: <br />,
-            }}
+            defaultMessage="Set up an authentication mechanism to connect to the remote cluster."
           />
         </p>
       </EuiText>
 
       <EuiSpacer size="xxl" />
 
-      <EuiFlexGroup wrap justifyContent="center">
+      <EuiFlexGroup gutterSize="l" wrap justifyContent="center">
         {canUseAPIKeyTrustModel && (
           <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
             <EuiCard
-              title={i18nTexts.apiKeyTitle}
               paddingSize="l"
-              data-test-subj="setupTrustApiKeyCard"
-            >
-              <EuiText size="s">
-                <p>{i18nTexts.apiKeyDescription}</p>
-              </EuiText>
-              <EuiSpacer size="xl" />
-              <EuiButton
-                href={isCloudEnabled ? docLinks.cloud : docLinks.apiKey}
-                target="_blank"
-                data-test-subj="setupTrustApiKeyCardDocs"
-              >
-                <FormattedMessage
-                  id="xpack.remoteClusters.clusterWizard.trustStep.docs"
-                  defaultMessage="View instructions"
-                />
-              </EuiButton>
-              <EuiSpacer size="xl" />
-              <EuiText size="xs" color="subdued">
-                <p>
-                  <FormattedMessage
-                    id="xpack.remoteClusters.clusterWizard.trustStep.apiKeyNote"
-                    defaultMessage="Both clusters must be on version {minAllowedVersion} or above."
-                    values={{ minAllowedVersion: MIN_ALLOWED_VERSION_API_KEYS_METHOD }}
-                  />
-                </p>
-              </EuiText>
-            </EuiCard>
+              data-test-subj="setupTrustApiMode"
+              title={i18nTexts.apiKeyTitle}
+              description={i18nTexts.apiKeyDescription}
+              footer={
+                <EuiText size="xs" color="subdued">
+                  <p>
+                    <FormattedMessage
+                      id="xpack.remoteClusters.clusterWizard.trustStep.apiKeyNote"
+                      defaultMessage="Both clusters must be on version {minAllowedVersion} or above."
+                      values={{ minAllowedVersion: MIN_ALLOWED_VERSION_API_KEYS_METHOD }}
+                    />
+                  </p>
+                </EuiText>
+              }
+              selectable={{
+                onClick: () => {
+                  setSecurityModel(SECURITY_MODEL.API);
+                },
+                isSelected: securityModel === SECURITY_MODEL.API,
+              }}
+            />
           </EuiFlexItem>
         )}
-
         <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
           <EuiCard
-            title={
-              <>
-                <EuiSpacer size="s" />
-                {i18nTexts.certTitle}
-              </>
-            }
             paddingSize="l"
-            data-test-subj="setupTrustCertCard"
-          >
-            <EuiText size="s">
-              <p>{i18nTexts.certDescription}</p>
-            </EuiText>
-            <EuiSpacer size="xl" />
-            <EuiButton
-              href={isCloudEnabled ? docLinks.cloud : docLinks.cert}
-              target="_blank"
-              data-test-subj="setupTrustCertCardDocs"
-            >
-              <FormattedMessage
-                id="xpack.remoteClusters.clusterWizard.trustStep.docs"
-                defaultMessage="View instructions"
-              />
-            </EuiButton>
-          </EuiCard>
+            data-test-subj="setupTrustCertMode"
+            title={i18nTexts.certTitle}
+            description={i18nTexts.certDescription}
+            selectable={{
+              onClick: () => {
+                setSecurityModel(SECURITY_MODEL.CERTIFICATE);
+              },
+              isSelected: securityModel === SECURITY_MODEL.CERTIFICATE,
+            }}
+          />
         </EuiFlexItem>
       </EuiFlexGroup>
 
       <EuiSpacer size="xxl" />
-
-      <EuiFlexGroup wrap justifyContent="center">
-        <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
-          <EuiFlexGroup justifyContent="flexStart">
-            <EuiFlexItem grow={false}>
-              <EuiButtonEmpty
-                data-test-subj="setupTrustBackButton"
-                iconType="arrowLeft"
-                onClick={onBack}
-              >
-                <FormattedMessage
-                  id="xpack.remoteClusters.clusterWizard.trustStep.backButtonLabel"
-                  defaultMessage="Back"
-                />
-              </EuiButtonEmpty>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-        <EuiFlexItem style={{ maxWidth: CARD_MAX_WIDTH }}>
-          <EuiFlexGroup justifyContent="flexEnd">
-            <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="setupTrustDoneButton"
-                color="primary"
-                fill
-                isLoading={isSaving}
-                onClick={() => setIsModalVisible(true)}
-              >
-                <FormattedMessage
-                  id="xpack.remoteClusters.clusterWizard.trustStep.doneButtonLabel"
-                  defaultMessage="Add remote cluster"
-                />
-              </EuiButton>
-            </EuiFlexItem>
-          </EuiFlexGroup>
-        </EuiFlexItem>
-
-        {isModalVisible && (
-          <ConfirmTrustSetupModal closeModal={() => setIsModalVisible(false)} onSubmit={onSubmit} />
-        )}
-      </EuiFlexGroup>
+      <ActionButtons
+        showRequest={false}
+        disabled={!securityModel}
+        handleNext={() => {
+          next(securityModel);
+        }}
+        confirmFormText={
+          <FormattedMessage
+            id="xpack.remoteClusters.remoteClusterForm.nextButtonLabel"
+            defaultMessage="Next"
+          />
+        }
+        nextButtonTestSubj={'remoteClusterTrustNextButton'}
+      />
     </div>
   );
 };
