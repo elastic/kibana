@@ -7,7 +7,8 @@
 
 import { StructuredOutputParser } from 'langchain/output_parsers';
 
-import { AttackDiscoveriesGenerationSchema } from '../../generate/schema';
+import { GenerationPrompts } from '../prompts';
+import { getAttackDiscoveriesGenerationSchema } from '../../generate/schema';
 
-export const getOutputParser = () =>
-  StructuredOutputParser.fromZodSchema(AttackDiscoveriesGenerationSchema);
+export const getOutputParser = (prompts: GenerationPrompts) =>
+  StructuredOutputParser.fromZodSchema(getAttackDiscoveriesGenerationSchema(prompts));

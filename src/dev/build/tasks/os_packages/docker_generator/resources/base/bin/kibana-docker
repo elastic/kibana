@@ -165,6 +165,7 @@ kibana_vars=(
     server.name
     server.port
     server.protocol
+    server.prototypeHardening
     server.publicBaseUrl
     server.requestId.allowFromAnyIp
     server.requestId.ipAllowlist
@@ -376,6 +377,7 @@ kibana_vars=(
     xpack.security.audit.appender.strategy.type
     xpack.security.audit.appender.type
     xpack.security.audit.enabled
+    xpack.security.audit.include_saved_object_names
     xpack.security.audit.ignore_filters
     xpack.security.authc.http.autoSchemesEnabled
     xpack.security.authc.http.enabled
