@@ -9,7 +9,7 @@
 
 import fastIsEqual from 'fast-deep-equal';
 import React, { useEffect } from 'react';
-import { BehaviorSubject, combineLatest, debounceTime, filter, map, skip } from 'rxjs';
+import { BehaviorSubject, combineLatest, debounceTime, filter, map, skip, Subject } from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
 import { useBatchedPublishingSubjects } from '@kbn/presentation-publishing';
@@ -164,7 +164,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
 
       /** Fetch the suggestions and perform validation */
-      const loadMoreSubject = new BehaviorSubject<null>(null);
+      const loadMoreSubject = new Subject<void>();
       const fetchSubscription = fetchAndValidate$({
         api: {
           ...dataControl.api,
