@@ -18,13 +18,19 @@ import {
 } from '@elastic/eui';
 import { css } from '@emotion/react';
 import type { Code, InlineCode, Parent, Text } from 'mdast';
-import React from 'react';
+import React, { useMemo } from 'react';
 import type { Node } from 'unist';
+import type { ContentReferences } from '@kbn/elastic-assistant-common';
 import { customCodeBlockLanguagePlugin } from '../custom_codeblock/custom_codeblock_markdown_plugin';
 import { CustomCodeBlock } from '../custom_codeblock/custom_code_block';
+import { ContentReferenceParser } from '../content_reference/content_reference_parser';
+import { contentReferenceComponentFactory } from '../content_reference/components/content_reference_component_factory';
 
 interface Props {
   content: string;
+  contentReferences?: ContentReferences;
+  contentReferencesVisible: boolean;
+  contentReferencesEnabled: boolean;
   index: number;
   loading: boolean;
   ['data-test-subj']?: string;
@@ -98,7 +104,19 @@ const loadingCursorPlugin = () => {
   };
 };
 
-const getPluginDependencies = () => {
+interface GetPluginDependencies {
+  contentReferences?: ContentReferences;
+  loading: boolean;
+  contentReferencesVisible: boolean;
+  contentReferencesEnabled: boolean;
+}
+
+const getPluginDependencies = ({
+  contentReferences,
+  contentReferencesVisible,
+  loading,
+  contentReferencesEnabled,
+}: GetPluginDependencies) => {
   const parsingPlugins = getDefaultEuiMarkdownParsingPlugins();
 
   const processingPlugins = getDefaultEuiMarkdownProcessingPlugins();
@@ -107,6 +125,15 @@ const getPluginDependencies = () => {
 
   processingPlugins[1][1].components = {
     ...components,
+    ...(contentReferencesEnabled
+      ? {
+          contentReference: contentReferenceComponentFactory({
+            contentReferences,
+            contentReferencesVisible,
+            loading,
+          }),
+        }
+      : {}),
     cursor: Cursor,
     customCodeBlock: (props) => {
       return (
@@ -138,17 +165,39 @@ const getPluginDependencies = () => {
   };
 
   return {
-    parsingPluginList: [loadingCursorPlugin, customCodeBlockLanguagePlugin, ...parsingPlugins],
+    parsingPluginList: [
+      loadingCursorPlugin,
+      customCodeBlockLanguagePlugin,
+      ...parsingPlugins,
+      ...(contentReferencesEnabled ? [ContentReferenceParser] : []),
+    ],
     processingPluginList: processingPlugins,
   };
 };
 
-export function MessageText({ loading, content, index, 'data-test-subj': dataTestSubj }: Props) {
+export function MessageText({
+  loading,
+  content,
+  contentReferences,
+  contentReferencesVisible,
+  contentReferencesEnabled,
+  index,
+  'data-test-subj': dataTestSubj,
+}: Props) {
   const containerCss = css`
     overflow-wrap: anywhere;
   `;
 
-  const { parsingPluginList, processingPluginList } = getPluginDependencies();
+  const { parsingPluginList, processingPluginList } = useMemo(
+    () =>
+      getPluginDependencies({
+        contentReferences,
+        contentReferencesVisible,
+        contentReferencesEnabled,
+        loading,
+      }),
+    [contentReferences, contentReferencesVisible, contentReferencesEnabled, loading]
+  );
 
   return (
     <EuiText css={containerCss} data-test-subj={dataTestSubj}>
