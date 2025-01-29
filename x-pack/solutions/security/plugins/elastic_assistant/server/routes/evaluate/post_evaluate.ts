@@ -30,6 +30,14 @@ import {
   createToolCallingAgent,
 } from 'langchain/agents';
 import { omit } from 'lodash/fp';
+import { promptGroupId } from '../../lib/prompt/local_prompt_object';
+import { getModelOrOss } from '../../lib/prompt/helpers';
+import { getAttackDiscoveryPrompts } from '../../lib/attack_discovery/graphs/default_attack_discovery_graph/nodes/helpers/prompts';
+import {
+  formatPrompt,
+  formatPromptStructured,
+} from '../../lib/langchain/graphs/default_assistant_graph/prompts';
+import { getPrompt, promptDictionary } from '../../lib/prompt';
 import { buildResponse } from '../../lib/build_response';
 import { AssistantDataClients } from '../../lib/langchain/executors/types';
 import { AssistantToolParams, ElasticAssistantRequestHandlerContext, GetElser } from '../../types';
@@ -42,12 +50,6 @@ import {
   DefaultAssistantGraph,
   getDefaultAssistantGraph,
 } from '../../lib/langchain/graphs/default_assistant_graph/graph';
-import {
-  bedrockToolCallingAgentPrompt,
-  geminiToolCallingAgentPrompt,
-  openAIFunctionAgentPrompt,
-  structuredChatAgentPrompt,
-} from '../../lib/langchain/graphs/default_assistant_graph/prompts';
 import { getLlmClass, getLlmType, isOpenSourceModel } from '../utils';
 import { getGraphsFromNames } from './get_graphs_from_names';
 
@@ -95,6 +97,7 @@ export const postEvaluateRoute = (
         const actions = ctx.elasticAssistant.actions;
         const logger = assistantContext.logger.get('evaluate');
         const abortSignal = getRequestAbortedSignal(request.events.aborted$);
+        const savedObjectsClient = ctx.elasticAssistant.savedObjectsClient;
 
         // Perform license, authenticated user and evaluation FF checks
         const checkResponse = performChecks({
@@ -176,6 +179,20 @@ export const postEvaluateRoute = (
             ids: connectorIds,
             throwIfSystemAction: false,
           });
+          const connectorsWithPrompts = await Promise.all(
+            connectors.map(async (connector) => {
+              const prompts = await getAttackDiscoveryPrompts({
+                actionsClient,
+                connectorId: connector.id,
+                connector,
+                savedObjectsClient,
+              });
+              return {
+                ...connector,
+                prompts,
+              };
+            })
+          );
 
           // Fetch any tools registered to the security assistant
           const assistantTools = assistantContext.getRegisteredTools(DEFAULT_PLUGIN_NAME);
@@ -190,7 +207,7 @@ export const postEvaluateRoute = (
                 actionsClient,
                 alertsIndexPattern,
                 attackDiscoveryGraphs,
-                connectors,
+                connectors: connectorsWithPrompts,
                 connectorTimeout: CONNECTOR_TIMEOUT,
                 datasetName,
                 esClient,
@@ -217,6 +234,7 @@ export const postEvaluateRoute = (
             graph: DefaultAssistantGraph;
             llmType: string | undefined;
             isOssModel: boolean | undefined;
+            connectorId: string;
           }> = await Promise.all(
             connectors.map(async (connector) => {
               const llmType = getLlmType(connector.actionTypeId);
@@ -293,31 +311,40 @@ export const postEvaluateRoute = (
                 (tool) => tool.getTool(assistantToolParams) ?? []
               );
 
+              const defaultSystemPrompt = await getPrompt({
+                actionsClient,
+                connector,
+                connectorId: connector.id,
+                model: getModelOrOss(llmType, isOssModel),
+                promptGroupId: promptGroupId.aiAssistant,
+                promptId: promptDictionary.systemPrompt,
+                provider: llmType,
+                savedObjectsClient,
+              });
+
               const agentRunnable = isOpenAI
                 ? await createOpenAIFunctionsAgent({
                     llm,
                     tools,
-                    prompt: openAIFunctionAgentPrompt,
+                    prompt: formatPrompt(defaultSystemPrompt),
                     streamRunnable: false,
                   })
                 : llmType && ['bedrock', 'gemini'].includes(llmType)
                 ? createToolCallingAgent({
                     llm,
                     tools,
-                    prompt:
-                      llmType === 'bedrock'
-                        ? bedrockToolCallingAgentPrompt
-                        : geminiToolCallingAgentPrompt,
+                    prompt: formatPrompt(defaultSystemPrompt),
                     streamRunnable: false,
                   })
                 : await createStructuredChatAgent({
                     llm,
                     tools,
-                    prompt: structuredChatAgentPrompt,
+                    prompt: formatPromptStructured(defaultSystemPrompt),
                     streamRunnable: false,
                   });
 
               return {
+                connectorId: connector.id,
                 name: `${runName} - ${connector.name}`,
                 llmType,
                 isOssModel,
@@ -326,6 +353,8 @@ export const postEvaluateRoute = (
                   dataClients,
                   createLlmInstance,
                   logger,
+                  actionsClient,
+                  savedObjectsClient,
                   tools,
                   replacements: {},
                 }),
@@ -334,7 +363,7 @@ export const postEvaluateRoute = (
           );
 
           // Run an evaluation for each graph so they show up separately (resulting in each dataset run grouped by connector)
-          await asyncForEach(graphs, async ({ name, graph, llmType, isOssModel }) => {
+          await asyncForEach(graphs, async ({ name, graph, llmType, isOssModel, connectorId }) => {
             // Wrapper function for invoking the graph (to parse different input/output formats)
             const predict = async (input: { input: string }) => {
               logger.debug(`input:\n ${JSON.stringify(input, null, 2)}`);
@@ -342,6 +371,7 @@ export const postEvaluateRoute = (
               const r = await graph.invoke(
                 {
                   input: input.input,
+                  connectorId,
                   conversationId: undefined,
                   responseLanguage: 'English',
                   llmType,
