@@ -157,7 +157,7 @@ src/dev/packages/management-storybook-config @elastic/kibana-management
 src/dev/packages/manifest @elastic/kibana-core
 src/dev/packages/mock-idp-plugin @elastic/kibana-security
 src/dev/packages/mock-idp-utils @elastic/kibana-security
-packages/kbn-openapi-bundler @elastic/security-detection-rule-management
+src/dev/packages/openapi-bundler @elastic/security-detection-rule-management
 packages/kbn-openapi-generator @elastic/security-detection-rule-management
 packages/kbn-optimizer @elastic/kibana-operations
 packages/kbn-optimizer-webpack-helpers @elastic/kibana-operations

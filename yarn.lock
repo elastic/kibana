@@ -6592,7 +6592,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/openapi-bundler@link:packages/kbn-openapi-bundler":
+"@kbn/openapi-bundler@link:src/dev/packages/openapi-bundler":
   version "0.0.0"
   uid ""
 
