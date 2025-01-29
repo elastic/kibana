@@ -8,5 +8,5 @@
 module.exports = {
   preset: '@kbn/test',
   rootDir: '../../../../..',
-  roots: ['<rootDir>/x-pack/solutions/security/packages/ai-prompt-manager'],
+  roots: ['<rootDir>/x-pack/solutions/security/packages/security-ai-prompts'],
 };

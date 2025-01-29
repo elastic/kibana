@@ -236,6 +236,6 @@
     "@kbn/charts-theme",
     "@kbn/product-doc-base-plugin",
     "@kbn/shared-ux-error-boundary",
-    "@kbn/ai-prompt-manager",
+    "@kbn/security-ai-prompts",
   ]
 }

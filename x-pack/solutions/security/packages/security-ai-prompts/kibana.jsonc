@@ -1,6 +1,6 @@
 {
   "type": "shared-server",
-  "id": "@kbn/ai-prompt-manager",
+  "id": "@kbn/security-ai-prompts",
   "owner": "@elastic/security-generative-ai",
   "group": "security",
   "visibility": "private"

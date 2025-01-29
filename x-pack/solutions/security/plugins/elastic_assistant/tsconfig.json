@@ -54,7 +54,7 @@
     "@kbn/llm-tasks-plugin",
     "@kbn/product-doc-base-plugin",
     "@kbn/core-saved-objects-api-server-mocks",
-    "@kbn/ai-prompt-manager"
+    "@kbn/security-ai-prompts"
   ],
   "exclude": [
     "target/**/*",

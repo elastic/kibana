@@ -11,7 +11,7 @@ import {
   type GetPromptArgs,
   type PromptArray,
   type GetPromptsByGroupIdArgs,
-} from '@kbn/ai-prompt-manager';
+} from '@kbn/security-ai-prompts';
 import { localPrompts } from './local_prompt_object';
 
 export const getPromptsByGroupId = async (

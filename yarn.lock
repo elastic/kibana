@@ -3904,7 +3904,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ai-prompt-manager@link:x-pack/solutions/security/packages/ai-prompt-manager":
+"@kbn/security-ai-prompts@link:x-pack/solutions/security/packages/security-ai-prompts":
   version "0.0.0"
   uid ""
 
