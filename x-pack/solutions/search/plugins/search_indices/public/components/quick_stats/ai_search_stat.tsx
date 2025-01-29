@@ -49,7 +49,7 @@ export const AISearchQuickStat = ({
               defaultMessage: 'Not configured',
             })
       }
-      content={vectorFieldCount === 0 && <SetupAISearchButton />}
+      content={vectorFieldCount === 0 ? <SetupAISearchButton /> : undefined}
       stats={[
         {
           title: i18n.translate('xpack.searchIndices.quickStats.sparse_vector', {

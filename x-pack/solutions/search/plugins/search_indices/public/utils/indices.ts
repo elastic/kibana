@@ -57,15 +57,6 @@ export const healthColorsMap: Record<HealthStatusStrings, IconColor> = {
   unavailable: '',
 };
 
-export const healthColorsMapSelectable = {
-  red: 'danger',
-  RED: 'danger',
-  green: 'success',
-  GREEN: 'success',
-  yellow: 'warning',
-  YELLOW: 'warning',
-};
-
 export const normalizeHealth = (health: HealthStatusStrings | HealthStatus): HealthStatusStrings =>
   health.toLowerCase() as HealthStatusStrings;
 export const indexHealthToHealthColor = (
