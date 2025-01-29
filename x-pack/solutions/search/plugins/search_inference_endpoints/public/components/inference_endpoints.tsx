@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 
 import { EuiPageTemplate } from '@elastic/eui';
 
@@ -15,19 +15,31 @@ import { InferenceEndpointsHeader } from './inference_endpoints_header';
 import { AddInferenceFlyoutWrapper } from './add_inference_endpoints/add_inference_flyout_wrapper';
 
 export const InferenceEndpoints: React.FC = () => {
-  const { data } = useQueryInferenceEndpoints();
+  const { data, refetch } = useQueryInferenceEndpoints();
   const [isAddInferenceFlyoutOpen, setIsAddInferenceFlyoutOpen] = useState<boolean>(false);
+
+  const onFlyoutOpen = useCallback(() => {
+    setIsAddInferenceFlyoutOpen(true);
+  }, []);
+
+  const onFlyoutClose = useCallback(() => {
+    setIsAddInferenceFlyoutOpen(false);
+  }, []);
+
+  const reload = useCallback(() => {
+    refetch();
+  }, [refetch]);
 
   const inferenceEndpoints = data || [];
 
   return (
     <>
-      <InferenceEndpointsHeader setIsAddInferenceFlyoutOpen={setIsAddInferenceFlyoutOpen} />
+      <InferenceEndpointsHeader onFlyoutOpen={onFlyoutOpen} />
       <EuiPageTemplate.Section className="eui-yScroll" data-test-subj="inferenceManagementPage">
         <TabularPage inferenceEndpoints={inferenceEndpoints} />
       </EuiPageTemplate.Section>
       {isAddInferenceFlyoutOpen && (
-        <AddInferenceFlyoutWrapper onClose={setIsAddInferenceFlyoutOpen} />
+        <AddInferenceFlyoutWrapper onFlyoutClose={onFlyoutClose} reloadFn={reload} />
       )}
     </>
   );
