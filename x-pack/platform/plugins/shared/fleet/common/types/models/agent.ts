@@ -24,10 +24,12 @@ export type AgentStatus = AgentStatusTuple[number];
 export type SimplifiedAgentStatus =
   | 'healthy'
   | 'unhealthy'
+  | 'orphaned'
   | 'updating'
   | 'offline'
   | 'inactive'
-  | 'unenrolled';
+  | 'unenrolled'
+  | 'uninstalled';
 
 export type AgentActionType =
   | 'UNENROLL'

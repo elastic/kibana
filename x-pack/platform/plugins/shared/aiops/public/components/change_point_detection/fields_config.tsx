@@ -188,7 +188,7 @@ const FieldPanel: FC<FieldPanelProps> = ({
   const [isActionMenuOpen, setIsActionMenuOpen] = useState(false);
   const [isDashboardFormValid, setIsDashboardFormValid] = useState(true);
 
-  const canEditDashboards = capabilities.dashboard?.createNew ?? false;
+  const canEditDashboards = capabilities.dashboard_v2?.createNew ?? false;
   const { create: canCreateCase, update: canUpdateCase } = cases?.helpers?.canUseCases() ?? {
     create: false,
     update: false,

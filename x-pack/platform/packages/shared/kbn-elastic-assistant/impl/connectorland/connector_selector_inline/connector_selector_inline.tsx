@@ -5,11 +5,10 @@
  * 2.0.
  */
 
-import { EuiFlexGroup, EuiFlexItem, EuiText } from '@elastic/eui';
+import { EuiFlexGroup, EuiFlexItem, EuiText, useEuiTheme } from '@elastic/eui';
 import React, { useCallback, useState } from 'react';
 
 import { css } from '@emotion/css';
-import { euiThemeVars } from '@kbn/ui-theme';
 import type { AttackDiscoveryStats } from '@kbn/elastic-assistant-common';
 import { AIConnector, ConnectorSelector } from '../connector_selector';
 import { Conversation } from '../../..';
@@ -62,6 +61,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
     onConnectorSelected,
     stats = null,
   }) => {
+    const { euiTheme } = useEuiTheme();
     const [isOpen, setIsOpen] = useState<boolean>(false);
     const { assistantAvailability } = useAssistantContext();
     const { setApiConfig } = useConversation();
@@ -120,7 +120,7 @@ export const ConnectorSelectorInline: React.FC<Props> = React.memo(
               <EuiText
                 className={inputDisplayClassName}
                 size="s"
-                color={euiThemeVars.euiColorPrimaryText}
+                color={euiTheme.colors.textPrimary}
               >
                 {displayText}
               </EuiText>

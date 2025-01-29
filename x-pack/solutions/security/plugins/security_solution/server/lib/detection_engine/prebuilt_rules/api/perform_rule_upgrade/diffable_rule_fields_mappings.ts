@@ -5,8 +5,8 @@
  * 2.0.
  */
 import { get, has } from 'lodash';
+import type { RuleSchedule } from '../../../../../../common/api/detection_engine/model/rule_schema/rule_schedule';
 import type {
-  RuleSchedule,
   DataSourceIndexPatterns,
   DataSourceDataView,
   InlineKqlQuery,
@@ -15,7 +15,6 @@ import type {
 } from '../../../../../../common/api/detection_engine';
 import { type AllFieldsDiff } from '../../../../../../common/api/detection_engine';
 import type { PrebuiltRuleAsset } from '../../model/rule_assets/prebuilt_rule_asset';
-import { calculateFromValue } from '../../../rule_types/utils/utils';
 
 /**
  * Retrieves and transforms the value for a specific field from a DiffableRule group.
@@ -31,11 +30,6 @@ import { calculateFromValue } from '../../../rule_types/utils/utils';
  * // For an 'index' field
  * mapDiffableRuleFieldValueToRuleSchema('index', { index_patterns: ['logs-*'] })
  * // Returns: ['logs-*']
- *
- * @example
- * // For a 'from' field in a rule schedule
- * mapDiffableRuleFieldValueToRuleSchema('from', { interval: '5d', lookback: '30d' })
- * // Returns: 'now-30d'
  *
  */
 export const mapDiffableRuleFieldValueToRuleSchemaFormat = (
@@ -142,8 +136,8 @@ const SUBFIELD_MAPPING: Record<string, string> = {
   timeline_id: 'timeline_id',
   timeline_title: 'timeline_title',
   interval: 'interval',
-  from: 'lookback',
-  to: 'lookback',
+  from: 'from',
+  to: 'to',
 };
 
 /**
@@ -156,10 +150,6 @@ const SUBFIELD_MAPPING: Record<string, string> = {
  * @example
  * mapRuleFieldToDiffableRuleSubfield('index')
  * // Returns: 'index_patterns'
- *
- * @example
- * mapRuleFieldToDiffableRuleSubfield('from')
- * // Returns: 'lookback'
  *
  */
 export function mapRuleFieldToDiffableRuleSubfield(fieldName: string): string {
@@ -190,11 +180,6 @@ type TransformValuesReturnType =
  *   - If not transformed: { type: 'NON_TRANSFORMED_FIELD' }
  *
  * @example
- * // Transforms 'from' field
- * transformDiffableFieldValues('from', { lookback: '30d' })
- * // Returns: { type: 'TRANSFORMED_FIELD', value: 'now-30d' }
- *
- * @example
  * // Transforms 'saved_id' field for inline queries
  * transformDiffableFieldValues('saved_id', { type: 'inline_query', ... })
  * // Returns: { type: 'TRANSFORMED_FIELD', value: undefined }
@@ -204,12 +189,7 @@ export const transformDiffableFieldValues = (
   fieldName: string,
   diffableFieldValue: RuleSchedule | InlineKqlQuery | unknown
 ): TransformValuesReturnType => {
-  if (fieldName === 'from' && isRuleSchedule(diffableFieldValue)) {
-    const from = calculateFromValue(diffableFieldValue.interval, diffableFieldValue.lookback);
-    return { type: 'TRANSFORMED_FIELD', value: from };
-  } else if (fieldName === 'to') {
-    return { type: 'TRANSFORMED_FIELD', value: `now` };
-  } else if (fieldName === 'saved_id' && isInlineQuery(diffableFieldValue)) {
+  if (fieldName === 'saved_id' && isInlineQuery(diffableFieldValue)) {
     // saved_id should be set only for rules with SavedKqlQuery, undefined otherwise
     return { type: 'TRANSFORMED_FIELD', value: undefined };
   } else if (fieldName === 'data_view_id' && isDataSourceIndexPatterns(diffableFieldValue)) {
@@ -220,10 +200,6 @@ export const transformDiffableFieldValues = (
 
   return { type: 'NON_TRANSFORMED_FIELD' };
 };
-
-function isRuleSchedule(value: unknown): value is RuleSchedule {
-  return typeof value === 'object' && value !== null && 'lookback' in value;
-}
 
 function isInlineQuery(value: unknown): value is InlineKqlQuery {
   return (

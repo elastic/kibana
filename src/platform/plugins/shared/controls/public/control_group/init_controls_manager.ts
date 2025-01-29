@@ -17,8 +17,11 @@ import type {
   PanelPackage,
   PresentationContainer,
 } from '@kbn/presentation-containers';
-import { apiHasSnapshottableState } from '@kbn/presentation-containers/interfaces/serialized_state';
-import type { PublishingSubject, StateComparators } from '@kbn/presentation-publishing';
+import {
+  type PublishingSubject,
+  type StateComparators,
+  apiHasSnapshottableState,
+} from '@kbn/presentation-publishing';
 import { BehaviorSubject, first, merge } from 'rxjs';
 import type {
   ControlPanelState,
@@ -99,7 +102,7 @@ export function initControlsManager(
   }
 
   async function addNewPanel(
-    { panelType, initialState }: PanelPackage<DefaultControlState>,
+    { panelType, initialState }: PanelPackage<{}, DefaultControlState>,
     index: number
   ) {
     if ((initialState as DefaultDataControlState)?.dataViewId) {

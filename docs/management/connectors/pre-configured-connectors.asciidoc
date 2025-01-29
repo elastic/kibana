@@ -48,6 +48,7 @@ connector:
       secrets:                  <5>
         user: elastic
         password: changeme
+      exposeConfig: true        <6>
 ```
 
 <1>  The key is the connector identifier, `my-slack1` in this example.
@@ -55,6 +56,7 @@ connector:
 <3> `name` is the name of the preconfigured connector.
 <4> `config` is the configuration specific to the connector type.
 <5> `secrets` is the sensitive configuration, such as username, password, and keys, specific to the connector type.
+<6> `exposeConfig` is the optional boolean flag, which identify if connector config will be exposed in the actions API
 
 [NOTE]
 ==============================================

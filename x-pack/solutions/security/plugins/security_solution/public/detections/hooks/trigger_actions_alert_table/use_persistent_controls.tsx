@@ -7,23 +7,25 @@
 
 import React, { useCallback, useMemo } from 'react';
 import { useDispatch } from 'react-redux';
+import type { ViewSelection } from '@kbn/securitysolution-data-table';
 import {
+  dataTableActions,
   dataTableSelectors,
   tableDefaults,
-  dataTableActions,
+  TableId,
 } from '@kbn/securitysolution-data-table';
-import type { ViewSelection, TableId } from '@kbn/securitysolution-data-table';
 import { useGetGroupSelectorStateless } from '@kbn/grouping/src/hooks/use_get_group_selector';
 import { getTelemetryEvent } from '@kbn/grouping/src/telemetry/const';
+import { EuiFlexGroup, EuiFlexItem } from '@elastic/eui';
+import { SummaryViewSelector } from '../../../common/components/events_viewer/summary_view_select';
 import { groupIdSelector } from '../../../common/store/grouping/selectors';
 import { useSourcererDataView } from '../../../sourcerer/containers';
 import { SourcererScopeName } from '../../../sourcerer/store/model';
 import { updateGroups } from '../../../common/store/grouping/actions';
 import { useKibana } from '../../../common/lib/kibana';
-import { METRIC_TYPE, AlertsEventTypes, track } from '../../../common/lib/telemetry';
+import { AlertsEventTypes, METRIC_TYPE, track } from '../../../common/lib/telemetry';
 import { useDataTableFilters } from '../../../common/hooks/use_data_table_filters';
 import { useDeepEqualSelector, useShallowEqualSelector } from '../../../common/hooks/use_selector';
-import { RightTopMenu } from '../../../common/components/events_viewer/right_top_menu';
 import { AdditionalFiltersAction } from '../../components/alerts_table/additional_filters_action';
 
 const { changeViewMode } = dataTableActions;
@@ -120,18 +122,15 @@ export const getPersistentControlsHook = (tableId: TableId) => {
 
     const rightTopMenu = useMemo(
       () => (
-        <RightTopMenu
-          position="relative"
-          tableView={tableView}
-          loading={false}
-          tableId={tableId}
-          title={'Some Title'}
-          onViewChange={handleChangeTableView}
-          hasRightOffset={false}
-          additionalFilters={additionalFiltersComponent}
-          showInspect={false}
-          additionalMenuOptions={groupSelector != null ? [groupSelector] : []}
-        />
+        <EuiFlexGroup alignItems="center" gutterSize="m">
+          {[TableId.alertsOnRuleDetailsPage, TableId.alertsOnAlertsPage].includes(tableId) && (
+            <EuiFlexItem grow={false} data-test-subj="summary-view-selector">
+              <SummaryViewSelector viewSelected={tableView} onViewChange={handleChangeTableView} />
+            </EuiFlexItem>
+          )}
+          <EuiFlexItem grow={false}>{additionalFiltersComponent}</EuiFlexItem>
+          <EuiFlexItem grow={false}>{groupSelector}</EuiFlexItem>
+        </EuiFlexGroup>
       ),
       [tableView, handleChangeTableView, additionalFiltersComponent, groupSelector]
     );

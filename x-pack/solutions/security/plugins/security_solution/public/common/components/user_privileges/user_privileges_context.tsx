@@ -7,17 +7,21 @@
 
 import React, { createContext, useEffect, useState } from 'react';
 import type { Capabilities } from '@kbn/core/types';
-import { SERVER_APP_ID } from '../../../../common/constants';
+import { SECURITY_FEATURE_ID } from '../../../../common/constants';
 import { useFetchListPrivileges } from '../../../detections/components/user_privileges/use_fetch_list_privileges';
 import { useFetchDetectionEnginePrivileges } from '../../../detections/components/user_privileges/use_fetch_detection_engine_privileges';
 import { getEndpointPrivilegesInitialState, useEndpointPrivileges } from './endpoint';
 import type { EndpointPrivileges } from '../../../../common/endpoint/types';
+import { extractTimelineCapabilities } from '../../utils/timeline_capabilities';
+import { extractNotesCapabilities } from '../../utils/notes_capabilities';
 
 export interface UserPrivilegesState {
   listPrivileges: ReturnType<typeof useFetchListPrivileges>;
   detectionEnginePrivileges: ReturnType<typeof useFetchDetectionEnginePrivileges>;
   endpointPrivileges: EndpointPrivileges;
   kibanaSecuritySolutionsPrivileges: { crud: boolean; read: boolean };
+  timelinePrivileges: { crud: boolean; read: boolean };
+  notesPrivileges: { crud: boolean; read: boolean };
 }
 
 export const initialUserPrivilegesState = (): UserPrivilegesState => ({
@@ -25,6 +29,8 @@ export const initialUserPrivilegesState = (): UserPrivilegesState => ({
   detectionEnginePrivileges: { loading: false, error: undefined, result: undefined },
   endpointPrivileges: getEndpointPrivilegesInitialState(),
   kibanaSecuritySolutionsPrivileges: { crud: false, read: false },
+  timelinePrivileges: { crud: false, read: false },
+  notesPrivileges: { crud: false, read: false },
 });
 export const UserPrivilegesContext = createContext<UserPrivilegesState>(
   initialUserPrivilegesState()
@@ -39,8 +45,8 @@ export const UserPrivilegesProvider = ({
   kibanaCapabilities,
   children,
 }: UserPrivilegesProviderProps) => {
-  const crud: boolean = kibanaCapabilities[SERVER_APP_ID].crud === true;
-  const read: boolean = kibanaCapabilities[SERVER_APP_ID].show === true;
+  const crud: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].crud === true;
+  const read: boolean = kibanaCapabilities[SECURITY_FEATURE_ID].show === true;
   const [kibanaSecuritySolutionsPrivileges, setKibanaSecuritySolutionsPrivileges] = useState({
     crud,
     read,
@@ -49,6 +55,34 @@ export const UserPrivilegesProvider = ({
   const listPrivileges = useFetchListPrivileges(read);
   const detectionEnginePrivileges = useFetchDetectionEnginePrivileges(read);
   const endpointPrivileges = useEndpointPrivileges();
+
+  const [timelinePrivileges, setTimelinePrivileges] = useState(
+    extractTimelineCapabilities(kibanaCapabilities)
+  );
+  const [notesPrivileges, setNotesPrivileges] = useState(
+    extractNotesCapabilities(kibanaCapabilities)
+  );
+
+  useEffect(() => {
+    setNotesPrivileges((currPrivileges) => {
+      const { read: notesRead, crud: notesCrud } = extractNotesCapabilities(kibanaCapabilities);
+      if (currPrivileges.read !== notesRead || currPrivileges.crud !== notesCrud) {
+        return { read: notesRead, crud: notesCrud };
+      }
+      return currPrivileges;
+    });
+  }, [kibanaCapabilities]);
+
+  useEffect(() => {
+    setTimelinePrivileges((currPrivileges) => {
+      const { read: timelineRead, crud: timelineCrud } =
+        extractTimelineCapabilities(kibanaCapabilities);
+      if (currPrivileges.read !== timelineRead || currPrivileges.crud !== timelineCrud) {
+        return { read: timelineRead, crud: timelineCrud };
+      }
+      return currPrivileges;
+    });
+  }, [kibanaCapabilities]);
 
   useEffect(() => {
     setKibanaSecuritySolutionsPrivileges((currPrivileges) => {
@@ -66,6 +100,8 @@ export const UserPrivilegesProvider = ({
         detectionEnginePrivileges,
         endpointPrivileges,
         kibanaSecuritySolutionsPrivileges,
+        timelinePrivileges,
+        notesPrivileges,
       }}
     >
       {children}

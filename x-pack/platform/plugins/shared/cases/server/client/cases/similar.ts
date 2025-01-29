@@ -7,6 +7,7 @@
 
 import { intersection } from 'lodash';
 import Boom from '@hapi/boom';
+import type { ObservableType } from '../../../common/types/domain/observable/v1';
 import { OWNER_FIELD } from '../../../common/constants';
 import type { CasesSimilarResponse, SimilarCasesSearchRequest } from '../../../common/types/api';
 import { SimilarCasesSearchRequestRt, CasesSimilarResponseRt } from '../../../common/types/api';
@@ -19,7 +20,7 @@ import { Operations } from '../../authorization';
 import { buildFilter, buildObservablesFieldsFilter, combineFilters } from '../utils';
 import { combineFilterWithAuthorizationFilter } from '../../authorization/utils';
 import type { CaseSavedObjectTransformed } from '../../common/types/case';
-import { getAvailableObservableTypesSet } from '../observable_types';
+import { getAvailableObservableTypesMap } from '../observable_types';
 
 interface Similarity {
   typeKey: string;
@@ -29,7 +30,7 @@ interface Similarity {
 const getSimilarities = (
   a: CaseSavedObjectTransformed,
   b: CaseSavedObjectTransformed,
-  availableObservableTypes: Set<string>
+  availableObservableTypes: Map<string, ObservableType>
 ): Similarity[] => {
   const stringify = (observable: { typeKey: string; value: string }) =>
     [observable.typeKey, observable.value].join(',');
@@ -46,6 +47,7 @@ const getSimilarities = (
       return {
         typeKey,
         value,
+        typeLabel: availableObservableTypes.get(typeKey)?.label,
       };
     })
     .filter((observable) => availableObservableTypes.has(observable.typeKey));
@@ -78,7 +80,7 @@ export const similar = async (
     const paramArgs = decodeWithExcessOrThrow(SimilarCasesSearchRequestRt)(params);
     const retrievedCase = await caseService.getCase({ id: caseId });
 
-    const availableObservableTypesSet = await getAvailableObservableTypesSet(
+    const availableObservableTypesMap = await getAvailableObservableTypesMap(
       casesClient,
       retrievedCase.attributes.owner
     );
@@ -95,7 +97,7 @@ export const similar = async (
     const similarCasesFilter = buildObservablesFieldsFilter(
       retrievedCase.attributes.observables.reduce((observableMap, observable) => {
         // NOTE: skip non-existent observable types
-        if (!availableObservableTypesSet.has(observable.typeKey)) {
+        if (!availableObservableTypesMap.has(observable.typeKey)) {
           return observableMap;
         }
 
@@ -144,7 +146,7 @@ export const similar = async (
       cases: cases.saved_objects.map((so) => ({
         ...flattenCaseSavedObject({ savedObject: so }),
         similarities: {
-          observables: getSimilarities(retrievedCase, so, availableObservableTypesSet),
+          observables: getSimilarities(retrievedCase, so, availableObservableTypesMap),
         },
       })),
       page: cases.page,

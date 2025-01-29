@@ -45,6 +45,7 @@ import {
   GetUninstallTokensMetadataResponse,
 } from '@kbn/fleet-plugin/common/types/rest_spec/uninstall_token';
 import { SimplifiedPackagePolicy } from '@kbn/fleet-plugin/common/services/simplified_package_policy_helper';
+import { type FleetUsage } from '@kbn/fleet-plugin/server/collectors/register';
 import { testUsers } from '../test_users';
 
 export class SpaceTestApiClient {
@@ -375,6 +376,16 @@ export class SpaceTestApiClient {
 
     return res;
   }
+  // Fleet Usage
+  async getFleetUsage(spaceId?: string): Promise<{ usage: FleetUsage }> {
+    const { body: res } = await this.supertest
+      .get(`${this.getBaseUrl(spaceId)}/internal/fleet/telemetry/usage`)
+      .set('kbn-xsrf', 'xxxx')
+      .set('elastic-api-version', '1')
+      .expect(200);
+
+    return res;
+  }
   // Space Settings
   async getSpaceSettings(spaceId?: string): Promise<GetSpaceSettingsResponse> {
     const { body: res } = await this.supertest
@@ -506,7 +517,8 @@ export class SpaceTestApiClient {
       .post(`${this.getBaseUrl(spaceId)}/internal/fleet/enable_space_awareness`)
       .auth(this.auth.username, this.auth.password)
       .set('kbn-xsrf', 'xxxx')
-      .set('elastic-api-version', '1');
+      .set('elastic-api-version', '1')
+      .expect(200);
 
     return res;
   }

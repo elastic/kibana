@@ -5,6 +5,7 @@ pageLoadAssetSize:
   aiops: 32733
   alerting: 106936
   apm: 64385
+  automaticImport: 25433
   banners: 17946
   canvas: 29355
   cases: 180037
@@ -18,11 +19,11 @@ pageLoadAssetSize:
   cloudSecurityPosture: 34398
   console: 61298
   contentManagement: 16254
-  controls: 60000
+  controls: 12000
   core: 564663
   crossClusterReplication: 65408
   customIntegrations: 22034
-  dashboard: 68015
+  dashboard: 19000
   dashboardEnhanced: 65646
   data: 454087
   dataQuality: 19384
@@ -37,7 +38,7 @@ pageLoadAssetSize:
   discover: 99999
   discoverEnhanced: 42730
   discoverShared: 17111
-  embeddable: 87309
+  embeddable: 24000
   embeddableEnhanced: 22107
   enterpriseSearch: 66810
   entityManager: 17175
@@ -84,7 +85,6 @@ pageLoadAssetSize:
   ingestPipelines: 58003
   inputControlVis: 172675
   inspector: 148711
-  integrationAssistant: 19524
   interactiveSetup: 80000
   inventory: 27430
   investigate: 17970
@@ -93,7 +93,6 @@ pageLoadAssetSize:
   kibanaReact: 74422
   kibanaUsageCollection: 16463
   kibanaUtils: 79713
-  kubernetesSecurity: 77234
   lens: 57135
   licenseManagement: 41817
   licensing: 29004
@@ -122,8 +121,8 @@ pageLoadAssetSize:
   observabilityShared: 111036
   osquery: 107090
   painlessLab: 179748
-  presentationPanel: 55463
-  presentationUtil: 58834
+  presentationPanel: 11468
+  presentationUtil: 25000
   productDocBase: 22500
   profiling: 36694
   remoteClusters: 51327
@@ -195,5 +194,5 @@ pageLoadAssetSize:
   visTypeVega: 153573
   visTypeVislib: 242838
   visTypeXy: 46868
-  visualizations: 90000
+  visualizations: 41000
   watcher: 43598

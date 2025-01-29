@@ -41,6 +41,7 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
     temperature,
     system,
     functionCalling,
+    modelName,
     stream,
     abortSignal,
   }: ChatCompleteOptions<ToolOptions, boolean>): ChatCompleteCompositeResponse<
@@ -84,6 +85,7 @@ export function createChatCompleteApi({ request, actions, logger }: CreateChatCo
           temperature,
           logger,
           functionCalling,
+          modelName,
           abortSignal,
         });
       }),

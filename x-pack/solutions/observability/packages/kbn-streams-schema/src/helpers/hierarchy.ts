@@ -34,3 +34,11 @@ export function getAncestors(id: string) {
   const parts = id.split('.');
   return parts.slice(0, parts.length - 1).map((_, index) => parts.slice(0, index + 1).join('.'));
 }
+
+export function getAncestorsAndSelf(id: string) {
+  return getAncestors(id).concat(id);
+}
+
+export function getSegments(id: string) {
+  return id.split('.');
+}

@@ -11,6 +11,8 @@ import { getCasesProductFeaturesConfigurator } from './cases_product_features_co
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
 import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discovery_product_features_config';
+import { getTimelineProductFeaturesConfigurator } from './timeline_product_features_config';
+import { getNotesProductFeaturesConfigurator } from './notes_product_features_config';
 
 export const getProductProductFeaturesConfigurator = (
   enabledProductFeatureKeys: ProductFeatureKeys
@@ -20,5 +22,7 @@ export const getProductProductFeaturesConfigurator = (
     security: getSecurityProductFeaturesConfigurator(enabledProductFeatureKeys),
     cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
     securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
+    timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
+    notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
   };
 };

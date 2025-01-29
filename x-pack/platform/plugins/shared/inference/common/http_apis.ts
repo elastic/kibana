@@ -17,6 +17,7 @@ export type ChatCompleteRequestBody = {
   stream?: boolean;
   system?: string;
   temperature?: number;
+  modelName?: string;
   messages: Message[];
   functionCalling?: FunctionCallingMode;
 } & ToolOptions;

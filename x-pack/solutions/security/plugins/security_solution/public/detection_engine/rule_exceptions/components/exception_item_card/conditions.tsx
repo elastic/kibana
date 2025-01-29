@@ -13,7 +13,9 @@ import {
   EuiFlexItem,
   EuiBadge,
   EuiPanel,
+  useEuiTheme,
 } from '@elastic/eui';
+import { css, cx } from '@emotion/css';
 import styled from 'styled-components';
 import type {
   EntryExists,
@@ -72,12 +74,6 @@ const StyledCondition = styled('span')`
   margin-right: 6px;
 `;
 
-const StyledConditionContent = styled(EuiPanel)`
-  border: 1px;
-  border-color: #d3dae6;
-  border-style: solid;
-`;
-
 export interface CriteriaConditionsProps {
   entries: ExceptionListItemSchema['entries'];
   dataTestSubj: string;
@@ -86,6 +82,12 @@ export interface CriteriaConditionsProps {
 
 export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
   ({ os, entries, dataTestSubj }) => {
+    const { euiTheme } = useEuiTheme();
+    const borderStyles = css`
+      border: ${euiTheme.border.thin};
+    `;
+    const panelStyles = cx('eui-xScroll', borderStyles);
+
     const osLabel = useMemo(() => {
       if (os != null && os.length > 0) {
         return os
@@ -176,7 +178,8 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
     );
 
     return (
-      <StyledConditionContent
+      <EuiPanel
+        className={panelStyles}
         color="subdued"
         hasBorder={true}
         hasShadow={false}
@@ -216,7 +219,7 @@ export const ExceptionItemCardConditions = memo<CriteriaConditionsProps>(
             </div>
           );
         })}
-      </StyledConditionContent>
+      </EuiPanel>
     );
   }
 );

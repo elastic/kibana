@@ -15,7 +15,8 @@ import type {
   QueryDslQueryContainer,
   Duration,
 } from '@elastic/elasticsearch/lib/api/types';
-import type { StoredRuleMigration } from '../types';
+import type { RuleMigrationFilters } from '../../../../../common/siem_migrations/types';
+import type { InternalUpdateRuleMigrationData, StoredRuleMigration } from '../types';
 import {
   SiemMigrationStatus,
   RuleTranslationResult,
@@ -24,12 +25,10 @@ import {
   type RuleMigration,
   type RuleMigrationTaskStats,
   type RuleMigrationTranslationStats,
-  type UpdateRuleMigrationData,
 } from '../../../../../common/siem_migrations/model/rule_migration.gen';
 import { RuleMigrationsDataBaseClient } from './rule_migrations_data_base_client';
 import { getSortingOptions, type RuleMigrationSort } from './sort';
 import { conditions as searchConditions } from './search';
-import { convertEsqlQueryToTranslationResult } from './utils';
 
 export type CreateRuleMigrationInput = Omit<
   RuleMigration,
@@ -38,18 +37,6 @@ export type CreateRuleMigrationInput = Omit<
 export type RuleMigrationDataStats = Omit<RuleMigrationTaskStats, 'status'>;
 export type RuleMigrationAllDataStats = RuleMigrationDataStats[];
 
-export interface RuleMigrationFilters {
-  status?: SiemMigrationStatus | SiemMigrationStatus[];
-  ids?: string[];
-  installed?: boolean;
-  installable?: boolean;
-  prebuilt?: boolean;
-  failed?: boolean;
-  fullyTranslated?: boolean;
-  partiallyTranslated?: boolean;
-  untranslatable?: boolean;
-  searchTerm?: string;
-}
 export interface RuleMigrationGetOptions {
   filters?: RuleMigrationFilters;
   sort?: RuleMigrationSort;
@@ -96,31 +83,23 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
   }
 
   /** Updates an array of rule migrations to be processed */
-  async update(ruleMigrations: UpdateRuleMigrationData[]): Promise<void> {
+  async update(ruleMigrations: InternalUpdateRuleMigrationData[]): Promise<void> {
     const index = await this.getIndexName();
     const profileId = await this.getProfileUid();
 
-    let ruleMigrationsSlice: UpdateRuleMigrationData[];
+    let ruleMigrationsSlice: InternalUpdateRuleMigrationData[];
     const updatedAt = new Date().toISOString();
     while ((ruleMigrationsSlice = ruleMigrations.splice(0, BULK_MAX_SIZE)).length) {
       await this.esClient
         .bulk({
           refresh: 'wait_for',
           operations: ruleMigrationsSlice.flatMap((ruleMigration) => {
-            const {
-              id,
-              translation_result: translationResult,
-              elastic_rule: elasticRule,
-              ...rest
-            } = ruleMigration;
+            const { id, ...rest } = ruleMigration;
             return [
               { update: { _index: index, _id: id } },
               {
                 doc: {
                   ...rest,
-                  elastic_rule: elasticRule,
-                  translation_result:
-                    translationResult ?? convertEsqlQueryToTranslationResult(elasticRule?.query),
                   updated_by: profileId,
                   updated_at: updatedAt,
                 },
@@ -407,66 +386,55 @@ export class RuleMigrationsDataRulesClient extends RuleMigrationsDataBaseClient 
 
   private getFilterQuery(
     migrationId: string,
-    {
-      status,
-      ids,
-      installed,
-      installable,
-      prebuilt,
-      searchTerm,
-      failed,
-      fullyTranslated,
-      partiallyTranslated,
-      untranslatable,
-    }: RuleMigrationFilters = {}
+    filters: RuleMigrationFilters = {}
   ): QueryDslQueryContainer {
     const filter: QueryDslQueryContainer[] = [{ term: { migration_id: migrationId } }];
-    if (status) {
-      if (Array.isArray(status)) {
-        filter.push({ terms: { status } });
+    if (filters.status) {
+      if (Array.isArray(filters.status)) {
+        filter.push({ terms: { status: filters.status } });
       } else {
-        filter.push({ term: { status } });
+        filter.push({ term: { status: filters.status } });
       }
     }
-    if (ids) {
-      filter.push({ terms: { _id: ids } });
+    if (filters.ids) {
+      filter.push({ terms: { _id: filters.ids } });
     }
-    if (searchTerm?.length) {
-      filter.push(searchConditions.matchTitle(searchTerm));
+    if (filters.searchTerm?.length) {
+      filter.push(searchConditions.matchTitle(filters.searchTerm));
     }
-    if (installed === true) {
+    if (filters.installed === true) {
       filter.push(searchConditions.isInstalled());
-    } else if (installed === false) {
+    } else if (filters.installed === false) {
       filter.push(searchConditions.isNotInstalled());
     }
-    if (installable === true) {
+    if (filters.installable === true) {
       filter.push(...searchConditions.isInstallable());
-    } else if (installable === false) {
+    } else if (filters.installable === false) {
       filter.push(...searchConditions.isNotInstallable());
     }
-    if (prebuilt === true) {
+    if (filters.prebuilt === true) {
       filter.push(searchConditions.isPrebuilt());
-    } else if (prebuilt === false) {
+    } else if (filters.prebuilt === false) {
       filter.push(searchConditions.isCustom());
     }
-    if (failed === true) {
+    if (filters.failed === true) {
       filter.push(searchConditions.isFailed());
-    } else if (failed === false) {
+    } else if (filters.failed === false) {
       filter.push(searchConditions.isNotFailed());
     }
-    if (fullyTranslated === true) {
+    if (filters.fullyTranslated === true) {
       filter.push(searchConditions.isFullyTranslated());
-    } else if (fullyTranslated === false) {
+    } else if (filters.fullyTranslated === false) {
       filter.push(searchConditions.isNotFullyTranslated());
     }
-    if (partiallyTranslated === true) {
+    if (filters.partiallyTranslated === true) {
       filter.push(searchConditions.isPartiallyTranslated());
-    } else if (partiallyTranslated === false) {
+    } else if (filters.partiallyTranslated === false) {
       filter.push(searchConditions.isNotPartiallyTranslated());
     }
-    if (untranslatable === true) {
+    if (filters.untranslatable === true) {
       filter.push(searchConditions.isUntranslatable());
-    } else if (untranslatable === false) {
+    } else if (filters.untranslatable === false) {
       filter.push(searchConditions.isNotUntranslatable());
     }
     return { bool: { filter } };

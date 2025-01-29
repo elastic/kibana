@@ -82,6 +82,8 @@ export class IndexPatternsFetcher {
     allowHidden?: boolean;
     fieldTypes?: string[];
     includeEmptyFields?: boolean;
+    abortSignal?: AbortSignal;
+    runtimeMappings?: estypes.MappingRuntimeFields;
   }): Promise<{ fields: FieldDescriptor[]; indices: string[] }> {
     const {
       pattern,
@@ -93,6 +95,8 @@ export class IndexPatternsFetcher {
       allowHidden,
       fieldTypes,
       includeEmptyFields,
+      abortSignal,
+      runtimeMappings,
     } = options;
     const allowNoIndices = fieldCapsOptions?.allow_no_indices || this.allowNoIndices;
 
@@ -112,6 +116,8 @@ export class IndexPatternsFetcher {
       expandWildcards,
       fieldTypes,
       includeEmptyFields,
+      runtimeMappings,
+      abortSignal,
     });
 
     if (this.rollupsEnabled && type === DataViewType.ROLLUP && rollupIndex) {

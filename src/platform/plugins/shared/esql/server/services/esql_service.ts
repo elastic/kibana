@@ -8,7 +8,7 @@
  */
 
 import type { ElasticsearchClient } from '@kbn/core/server';
-import type { JoinIndexAutocompleteItem, JoinIndicesAutocompleteResult } from './types';
+import type { JoinIndexAutocompleteItem, JoinIndicesAutocompleteResult } from '../../common';
 
 export interface EsqlServiceOptions {
   client: ElasticsearchClient;

@@ -177,6 +177,10 @@ export class AssetClient {
     await this.clients.storageClient.delete({ id });
   }
 
+  async clean() {
+    await this.clients.storageClient.clean();
+  }
+
   async getAssetIds({
     entityId,
     entityType,
@@ -264,7 +268,7 @@ export class AssetClient {
     ) as Record<AssetType, string[]>;
 
     assetLinks.forEach((assetLink) => {
-      const assetType = assetLink['asset.type'];
+      const assetType = assetLink['asset.type'] as AssetType;
       const assetId = assetLink['asset.id'];
       idsByType[assetType].push(assetId);
     });

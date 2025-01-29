@@ -20,7 +20,7 @@ import { i18n } from '@kbn/i18n';
 import { FormattedMessage, FormattedRelative } from '@kbn/i18n-react';
 
 import type { Agent, AgentPolicy } from '../../../../types';
-import { isAgentUpgradeable, ExperimentalFeaturesService } from '../../../../services';
+import { isAgentUpgradeable } from '../../../../services';
 import { AgentHealth } from '../../components';
 
 import type { Pagination } from '../../../../hooks';
@@ -99,7 +99,6 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
   } = props;
 
   const authz = useAuthz();
-  const { displayAgentMetrics } = ExperimentalFeaturesService.get();
 
   const { getHref } = useLink();
   const latestAgentVersion = useAgentVersion();
@@ -224,65 +223,59 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         );
       },
     },
-    ...(displayAgentMetrics
-      ? [
-          {
-            field: AGENTS_TABLE_FIELDS.METRICS,
-            sortable: false,
-            name: (
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.cpuTooltip"
-                    defaultMessage="Average CPU usage in the last 5 minutes. This includes usage from the Agent and the component it supervises. Possible value ranges from 0 to (number of available CPU cores * 100)"
-                  />
-                }
-              >
-                <span>
-                  <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
-                  &nbsp;
-                  <EuiIcon type="iInCircle" />
-                </span>
-              </EuiToolTip>
-            ),
-            width: '75px',
-            render: (metrics: AgentMetrics | undefined, agent: Agent) =>
-              formatAgentCPU(
-                agent.metrics,
-                agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
-              ),
-          },
-          {
-            field: AGENTS_TABLE_FIELDS.METRICS,
-            sortable: false,
-            name: (
-              <EuiToolTip
-                content={
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.memoryTooltip"
-                    defaultMessage="Average memory usage in the last 5 minutes"
-                  />
-                }
-              >
-                <span>
-                  <FormattedMessage
-                    id="xpack.fleet.agentList.memoryTitle"
-                    defaultMessage="Memory"
-                  />
-                  &nbsp;
-                  <EuiIcon type="iInCircle" />
-                </span>
-              </EuiToolTip>
-            ),
-            width: '90px',
-            render: (metrics: AgentMetrics | undefined, agent: Agent) =>
-              formatAgentMemory(
-                agent.metrics,
-                agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
-              ),
-          },
-        ]
-      : []),
+
+    {
+      field: AGENTS_TABLE_FIELDS.METRICS,
+      sortable: false,
+      name: (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.fleet.agentList.cpuTooltip"
+              defaultMessage="Average CPU usage in the last 5 minutes. This includes usage from the Agent and the component it supervises. Possible value ranges from 0 to (number of available CPU cores * 100)"
+            />
+          }
+        >
+          <span>
+            <FormattedMessage id="xpack.fleet.agentList.cpuTitle" defaultMessage="CPU" />
+            &nbsp;
+            <EuiIcon type="iInCircle" />
+          </span>
+        </EuiToolTip>
+      ),
+      width: '75px',
+      render: (metrics: AgentMetrics | undefined, agent: Agent) =>
+        formatAgentCPU(
+          agent.metrics,
+          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+        ),
+    },
+    {
+      field: AGENTS_TABLE_FIELDS.METRICS,
+      sortable: false,
+      name: (
+        <EuiToolTip
+          content={
+            <FormattedMessage
+              id="xpack.fleet.agentList.memoryTooltip"
+              defaultMessage="Average memory usage in the last 5 minutes"
+            />
+          }
+        >
+          <span>
+            <FormattedMessage id="xpack.fleet.agentList.memoryTitle" defaultMessage="Memory" />
+            &nbsp;
+            <EuiIcon type="iInCircle" />
+          </span>
+        </EuiToolTip>
+      ),
+      width: '90px',
+      render: (metrics: AgentMetrics | undefined, agent: Agent) =>
+        formatAgentMemory(
+          agent.metrics,
+          agent.policy_id ? agentPoliciesIndexedById[agent.policy_id] : undefined
+        ),
+    },
     {
       field: AGENTS_TABLE_FIELDS.LAST_CHECKIN,
       sortable: true,
@@ -349,25 +342,21 @@ export const AgentListTable: React.FC<Props> = (props: Props) => {
         totalItemCount: totalAgents,
         pageSizeOptions,
       }}
-      selection={
-        !authz.fleet.allAgents
-          ? undefined
-          : {
-              selected,
-              onSelectionChange,
-              selectable: isAgentSelectable,
-              selectableMessage: (selectable, agent) => {
-                if (selectable) return '';
-                if (!agent.active) {
-                  return 'This agent is not active';
-                }
-                if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
-                  return 'This action is not available for agents enrolled in an externally managed agent policy';
-                }
-                return '';
-              },
-            }
-      }
+      selection={{
+        selected,
+        onSelectionChange,
+        selectable: isAgentSelectable,
+        selectableMessage: (selectable, agent) => {
+          if (selectable) return '';
+          if (!agent.active) {
+            return 'This agent is not active';
+          }
+          if (agent.policy_id && agentPoliciesIndexedById[agent.policy_id].is_managed) {
+            return 'This action is not available for agents enrolled in an externally managed agent policy';
+          }
+          return '';
+        },
+      }}
       onChange={onTableChange}
       sorting={sorting}
     />

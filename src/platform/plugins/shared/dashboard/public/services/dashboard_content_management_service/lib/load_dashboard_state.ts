@@ -18,7 +18,8 @@ import { cleanFiltersForSerialize } from '../../../utils/clean_filters_for_seria
 import { getDashboardContentManagementCache } from '..';
 import { convertPanelsArrayToPanelMap, injectReferences } from '../../../../common';
 import type { DashboardGetIn, DashboardGetOut } from '../../../../server/content_management';
-import { DASHBOARD_CONTENT_ID, DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_constants';
+import { DASHBOARD_CONTENT_ID } from '../../../utils/telemetry_constants';
+import { DEFAULT_DASHBOARD_INPUT } from '../../../dashboard_api/default_dashboard_input';
 import {
   contentManagementService,
   dataService,

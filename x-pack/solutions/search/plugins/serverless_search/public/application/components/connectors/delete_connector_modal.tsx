@@ -93,12 +93,16 @@ export const DeleteConnectorModal: React.FC<DeleteConnectorModalProps> = ({
       </p>
       <EuiForm>
         <EuiFormRow
-          label={i18n.translate(
-            'xpack.serverlessSearch.connectors.deleteModal.connectorNameInput.label',
-            {
-              defaultMessage: 'Connector name',
-            }
-          )}
+          label={
+            connectorName
+              ? i18n.translate(
+                  'xpack.serverlessSearch.connectors.deleteModal.connectorNameInput.label',
+                  {
+                    defaultMessage: 'Connector name',
+                  }
+                )
+              : undefined
+          }
         >
           <EuiFieldText
             data-test-subj="serverlessSearchDeleteConnectorModalFieldText"

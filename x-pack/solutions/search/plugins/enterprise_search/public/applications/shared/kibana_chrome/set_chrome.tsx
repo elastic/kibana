@@ -40,7 +40,7 @@ import {
 
 /**
  * Helpers for setting Kibana chrome (breadcrumbs, doc titles) on React view mount
- * @see https://github.com/elastic/kibana/blob/main/src/core/public/chrome/chrome_service.tsx
+ * @see https://github.com/elastic/kibana/blob/main/src/core/packages/chrome/browser-internal/src/chrome_service.tsx
  *
  * Example usage (don't forget to i18n.translate() page titles!):
  *

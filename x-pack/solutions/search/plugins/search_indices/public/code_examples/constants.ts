@@ -34,3 +34,31 @@ export const CONNECT_CREATE_VECTOR_INDEX_CMD_DESCRIPTION = i18n.translate(
     defaultMessage: 'Use the Elasticsearch client to create an index with dense vector fields',
   }
 );
+
+export const CONNECT_CREATE_DEFAULT_INDEX_CMD_TITLE = i18n.translate(
+  'xpack.searchIndices.code.createIndexCommand.title',
+  {
+    defaultMessage: 'Create an index with text fields',
+  }
+);
+
+export const CONNECT_CREATE_DEFAULT_INDEX_CMD_DESCRIPTION = i18n.translate(
+  'xpack.searchIndices.code.createIndexCommand.description',
+  {
+    defaultMessage: 'Use the Elasticsearch client to create an index with text fields',
+  }
+);
+
+export const CONNECT_CREATE_SEMANTIC_INDEX_CMD_TITLE = i18n.translate(
+  'xpack.searchIndices.code.createIndexCommand.title',
+  {
+    defaultMessage: 'Create an index with semantic fields',
+  }
+);
+
+export const CONNECT_CREATE_SEMANTIC_INDEX_CMD_DESCRIPTION = i18n.translate(
+  'xpack.searchIndices.code.createIndexCommand.description',
+  {
+    defaultMessage: 'Use the Elasticsearch client to create an index with semantic fields',
+  }
+);

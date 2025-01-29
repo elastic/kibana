@@ -84,11 +84,11 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
         const [exec, eventAction] = execTuple;
         return (
           <div key={`executable-${idx}`} css={styles.ellipsis}>
-            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
+            <EuiTextColor color="default" css={styles.descriptionSemibold}>
               {exec}
             </EuiTextColor>
             {eventAction && (
-              <EuiTextColor color="subdued" css={styles.executableAction}>
+              <EuiTextColor color="default" css={styles.executableAction}>
                 {eventAction}
               </EuiTextColor>
             )}
@@ -131,9 +131,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
             textToCopy={`${LEADER_FIELD_PREFIX[idx]}.entity_id: "${id}"`}
             tooltipContent={id}
           >
-            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {id}
-            </EuiTextColor>
+            {id}
           </DetailPanelCopy>
         ),
       },
@@ -166,9 +164,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
             textToCopy={`${LEADER_FIELD_PREFIX[idx]}.interactive: "${interactive}"`}
             tooltipContent={interactive}
           >
-            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {interactive}
-            </EuiTextColor>
+            {interactive}
           </DetailPanelCopy>
         ),
       },
@@ -179,9 +175,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
             textToCopy={`${LEADER_FIELD_PREFIX[idx]}.working_directory: "${workingDirectory}"`}
             tooltipContent={workingDirectory}
           >
-            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {workingDirectory}
-            </EuiTextColor>
+            {workingDirectory}
           </DetailPanelCopy>
         ),
       },
@@ -192,9 +186,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
             textToCopy={`${LEADER_FIELD_PREFIX[idx]}.pid: "${pid}"`}
             tooltipContent={pid}
           >
-            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {pid}
-            </EuiTextColor>
+            {pid}
           </DetailPanelCopy>
         ),
       },
@@ -227,9 +219,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
             textToCopy={`${LEADER_FIELD_PREFIX[idx]}.exit_code: "${exitCode}"`}
             tooltipContent={exitCode}
           >
-            <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-              {exitCode}
-            </EuiTextColor>
+            {exitCode}
           </DetailPanelCopy>
         ),
       },
@@ -288,9 +278,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
               textToCopy={`${LEADER_FIELD_PREFIX[idx]}.entry_meta.type: "${entryMetaType}"`}
               tooltipContent={entryMetaType}
             >
-              <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                {entryMetaType}
-              </EuiTextColor>
+              {entryMetaType}
             </DetailPanelCopy>
           ),
         },
@@ -343,9 +331,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
                 textToCopy={`${PROCESS_FIELD_PREFIX}.entity_id: "${id}"`}
                 tooltipContent={id}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {id}
-                </EuiTextColor>
+                {id}
               </DetailPanelCopy>
             ),
           },
@@ -379,9 +365,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
                 textToCopy={`${PROCESS_FIELD_PREFIX}.interactive: "${interactive}"`}
                 tooltipContent={interactive}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {interactive}
-                </EuiTextColor>
+                {interactive}
               </DetailPanelCopy>
             ),
           },
@@ -392,9 +376,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
                 textToCopy={`${PROCESS_FIELD_PREFIX}.working_directory: "${workingDirectory}"`}
                 tooltipContent={workingDirectory}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {workingDirectory}
-                </EuiTextColor>
+                {workingDirectory}
               </DetailPanelCopy>
             ),
           },
@@ -405,9 +387,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
                 textToCopy={`${PROCESS_FIELD_PREFIX}.pid: "${pid}"`}
                 tooltipContent={pid}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {pid}
-                </EuiTextColor>
+                {pid}
               </DetailPanelCopy>
             ),
           },
@@ -440,9 +420,7 @@ export const DetailPanelProcessTab = ({ selectedProcess, index }: DetailPanelPro
                 textToCopy={`${PROCESS_FIELD_PREFIX}.exit_code: "${exitCode}"`}
                 tooltipContent={exitCode}
               >
-                <EuiTextColor color="subdued" css={styles.descriptionSemibold}>
-                  {exitCode}
-                </EuiTextColor>
+                {exitCode}
               </DetailPanelCopy>
             ),
           },

@@ -36,7 +36,6 @@
     "@kbn/ui-theme",
     "@kbn/config-schema",
     "@kbn/custom-integrations-plugin",
-    "@kbn/core-logging-server-mocks",
     "@kbn/repo-info",
     "@kbn/core-elasticsearch-server",
     "@kbn/core-http-server",
@@ -45,7 +44,6 @@
     "@kbn/cypress-config",
     "@kbn/discover-plugin",
     "@kbn/guided-onboarding",
-    "@kbn/safer-lodash-set",
     "@kbn/shared-ux-router",
     "@kbn/core-http-browser",
     "@kbn/es-query",
@@ -88,5 +86,6 @@
     "@kbn/ui-actions-plugin",
     "@kbn/fleet-plugin",
     "@kbn/search-shared-ui",
+    "@kbn/search-indices",
   ]
 }

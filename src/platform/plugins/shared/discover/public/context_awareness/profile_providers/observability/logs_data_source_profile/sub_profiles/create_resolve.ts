@@ -14,7 +14,7 @@ import { OBSERVABILITY_ROOT_PROFILE_ID } from '../../consts';
 
 export const createResolve = (baseIndexPattern: string): DataSourceProfileProvider['resolve'] => {
   const testIndexPattern = testPatternAgainstAllowedList([
-    createRegExpPatternFrom(baseIndexPattern),
+    createRegExpPatternFrom(baseIndexPattern, 'data'),
   ]);
 
   return (params) => {

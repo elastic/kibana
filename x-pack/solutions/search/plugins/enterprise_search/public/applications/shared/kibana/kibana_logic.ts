@@ -33,7 +33,7 @@ import { ConnectorDefinition } from '@kbn/search-connectors';
 import { AuthenticatedUser, SecurityPluginStart } from '@kbn/security-plugin/public';
 import { SharePluginStart } from '@kbn/share-plugin/public';
 
-import { ClientConfigType, ProductAccess, ProductFeatures } from '../../../../common/types';
+import { ClientConfigType, ProductFeatures } from '../../../../common/types';
 import { ESConfig, UpdateSideNavDefinitionFn } from '../../../plugin';
 
 import { HttpLogic } from '../http';
@@ -64,7 +64,6 @@ export interface KibanaLogicProps {
   lens?: LensPublicStart;
   ml?: MlPluginStart;
   navigateToUrl: RequiredFieldsOnly<ApplicationStart['navigateToUrl']>;
-  productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   security?: SecurityPluginStart;
@@ -100,7 +99,6 @@ export interface KibanaValues {
   lens: LensPublicStart | null;
   ml: MlPluginStart | null;
   navigateToUrl(path: string, options?: CreateHrefOptions): Promise<void>;
-  productAccess: ProductAccess;
   productFeatures: ProductFeatures;
   renderHeaderActions(HeaderActions?: FC): void;
   security: SecurityPluginStart | null;
@@ -146,7 +144,6 @@ export const KibanaLogic = kea<MakeLogicType<KibanaValues>>({
       },
       {},
     ],
-    productAccess: [props.productAccess, {}],
     productFeatures: [props.productFeatures, {}],
     renderHeaderActions: [props.renderHeaderActions, {}],
     security: [props.security || null, {}],
