@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useMemo } from 'react';
+import React, { useMemo, useState } from 'react';
 
 import { KibanaPageTemplate } from '@kbn/shared-ux-page-kibana-template';
 import {
@@ -28,7 +28,7 @@ export const SearchSynonymsOverview = () => {
     services: { console: consolePlugin, history, searchNavigation },
   } = useKibana();
   const { data: synonymsData, isInitialLoading } = useFetchSynonymsSets();
-  const [isCreateModalVisible, setIsCreateModalVisible] = React.useState(false);
+  const [isCreateModalVisible, setIsCreateModalVisible] = useState(false);
 
   const embeddableConsole = useMemo(
     () => (consolePlugin?.EmbeddableConsole ? <consolePlugin.EmbeddableConsole /> : null),

@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 import {
   EuiBasicTable,
   EuiBasicTableColumn,
@@ -31,23 +31,21 @@ import { useFetchSynonymRule } from '../../hooks/use_fetch_synonym_rule';
 import { useFetchGeneratedRuleId } from '../../hooks/use_fetch_generated_rule_id';
 
 export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: string }) => {
-  const [pageIndex, setPageIndex] = React.useState(0);
-  const [pageSize, setPageSize] = React.useState(DEFAULT_PAGE_VALUE.size);
+  const [pageIndex, setPageIndex] = useState(0);
+  const [pageSize, setPageSize] = useState(DEFAULT_PAGE_VALUE.size);
   const { from } = paginationToPage({ pageIndex, pageSize, totalItemCount: 0 });
-  const [synonymRuleToDelete, setSynonymRuleToDelete] = React.useState<string | null>(null);
+  const [synonymRuleToDelete, setSynonymRuleToDelete] = useState<string | null>(null);
   const { data, isLoading, isInitialLoading } = useFetchSynonymsSet(synonymsSetId, {
     from,
     size: pageSize,
   });
-  const [addNewRulePopoverOpen, setAddNewRulePopoverOpen] = React.useState(false);
+  const [addNewRulePopoverOpen, setAddNewRulePopoverOpen] = useState(false);
 
-  const [isRuleFlyoutOpen, setIsRuleFlyoutOpen] = React.useState(false);
-  const [synonymsRuleToEdit, setSynonymsRuleToEdit] = React.useState<string | null>(null);
-  const [generatedId, setGeneratedId] = React.useState<string | null>(null);
+  const [isRuleFlyoutOpen, setIsRuleFlyoutOpen] = useState(false);
+  const [synonymsRuleToEdit, setSynonymsRuleToEdit] = useState<string | null>(null);
+  const [generatedId, setGeneratedId] = useState<string | null>(null);
   const { data: synonymsRule } = useFetchSynonymRule(synonymsSetId, synonymsRuleToEdit || '');
-  const [ruleTypeToCreate, setRuleTypeToCreate] = React.useState<'equivalent' | 'explicit' | null>(
-    null
-  );
+  const [ruleTypeToCreate, setRuleTypeToCreate] = useState<'equivalent' | 'explicit' | null>(null);
 
   const { mutate: generateRuleId } = useFetchGeneratedRuleId((ruleId) => {
     if (synonymsSetId && ruleTypeToCreate) {
