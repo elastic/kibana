@@ -69,7 +69,7 @@ export const ContentReferenceParser: Plugin = function ContentReferenceParser() 
 
     const contentReferenceId = readArg('(', ')');
 
-    const closeChar = value[index++];
+    const closeChar = value[index];
     if (closeChar !== '}') return false;
 
     const now = eat.now();
