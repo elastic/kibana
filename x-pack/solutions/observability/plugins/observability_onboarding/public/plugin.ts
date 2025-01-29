@@ -35,7 +35,6 @@ import { ConfigSchema } from '.';
 import {
   OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT,
-  OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT,
   OBSERVABILITY_ONBOARDING_FLOW_DATASET_DETECTED_TELEMETRY_EVENT,
@@ -89,7 +88,7 @@ export class ObservabilityOnboardingPlugin
       order: 8500,
       euiIconType: 'logoObservability',
       category: DEFAULT_APP_CATEGORIES.observability,
-      keywords: [],
+      keywords: ['add data'],
       async mount(appMountParameters: AppMountParameters) {
         // Load application bundle and Get start service
         const [{ renderApp }, [coreStart, corePlugins]] = await Promise.all([
@@ -116,7 +115,7 @@ export class ObservabilityOnboardingPlugin
           },
         });
       },
-      visibleIn: [],
+      visibleIn: ['globalSearch'],
     });
 
     this.locators = {
@@ -125,7 +124,6 @@ export class ObservabilityOnboardingPlugin
 
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_TELEMETRY_EVENT);
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FEEDBACK_TELEMETRY_EVENT);
-    core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_AUTODETECT_TELEMETRY_EVENT);
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FLOW_PROGRESS_TELEMETRY_EVENT);
     core.analytics.registerEventType(OBSERVABILITY_ONBOARDING_FLOW_ERROR_TELEMETRY_EVENT);
     core.analytics.registerEventType(

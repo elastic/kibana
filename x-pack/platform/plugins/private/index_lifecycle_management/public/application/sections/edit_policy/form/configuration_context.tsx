@@ -26,7 +26,7 @@ export interface Configuration {
    * If this value is true, phases after hot cannot set shrink, forcemerge or
    * searchable_snapshot actions.
    *
-   * See https://github.com/elastic/elasticsearch/blob/master/docs/reference/ilm/actions/ilm-searchable-snapshot.asciidoc.
+   * See https://github.com/elastic/elasticsearch/blob/main/docs/reference/ilm/actions/ilm-searchable-snapshot.asciidoc
    */
   isUsingSearchableSnapshotInHotPhase: boolean;
   isUsingSearchableSnapshotInColdPhase: boolean;
