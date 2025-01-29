@@ -19,6 +19,7 @@ import type { ILicense } from '@kbn/licensing-plugin/server';
 import type { NewPackagePolicy, UpdatePackagePolicy } from '@kbn/fleet-plugin/common';
 import { FLEET_ENDPOINT_PACKAGE } from '@kbn/fleet-plugin/common';
 
+import { registerEntityStoreDataViewRefreshTask } from './lib/entity_analytics/entity_store/tasks/data_view_refresh/data_view_refresh_task';
 import { ensureIndicesExistsForPolicies } from './endpoint/migrations/ensure_indices_exists_for_policies';
 import { CompleteExternalResponseActionsTask } from './endpoint/lib/response_actions';
 import { registerAgentRoutes } from './endpoint/routes/agent';
@@ -118,7 +119,7 @@ import {
 
 import { ProductFeaturesService } from './lib/product_features_service/product_features_service';
 import { registerRiskScoringTask } from './lib/entity_analytics/risk_score/tasks/risk_scoring_task';
-import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/task';
+import { registerEntityStoreFieldRetentionEnrichTask } from './lib/entity_analytics/entity_store/tasks';
 import { registerProtectionUpdatesNoteRoutes } from './endpoint/routes/protection_updates_note';
 import {
   latestRiskScoreIndexPattern,
@@ -253,6 +254,18 @@ export class Plugin implements ISecuritySolutionPlugin {
         taskManager: plugins.taskManager,
         experimentalFeatures,
       });
+
+      registerEntityStoreDataViewRefreshTask({
+        getStartServices: core.getStartServices,
+        appClientFactory,
+        logger: this.logger,
+        telemetry: core.analytics,
+        taskManager: plugins.taskManager,
+        auditLogger: plugins.security?.audit.withoutRequest,
+        entityStoreConfig: config.entityAnalytics.entityStore,
+        experimentalFeatures,
+        kibanaVersion: pluginContext.env.packageInfo.version,
+      });
     }
 
     const requestContextFactory = new RequestContextFactory({
@@ -266,6 +279,7 @@ export class Plugin implements ISecuritySolutionPlugin {
       kibanaVersion: pluginContext.env.packageInfo.version,
       kibanaBranch: pluginContext.env.packageInfo.branch,
       buildFlavor: pluginContext.env.packageInfo.buildFlavor,
+      productFeaturesService,
     });
 
     productFeaturesService.registerApiAccessControl(core.http);
@@ -589,6 +603,7 @@ export class Plugin implements ISecuritySolutionPlugin {
     const features = {
       assistantModelEvaluation: config.experimentalFeatures.assistantModelEvaluation,
       attackDiscoveryAlertFiltering: config.experimentalFeatures.attackDiscoveryAlertFiltering,
+      contentReferencesEnabled: config.experimentalFeatures.contentReferencesEnabled,
     };
     plugins.elasticAssistant.registerFeatures(APP_UI_ID, features);
     plugins.elasticAssistant.registerFeatures('management', features);

@@ -102,6 +102,7 @@ export const App: FC<AppProps> = ({
       unifiedSearch: deps.unifiedSearch,
       usageCollection: deps.usageCollection,
       mlServices: getMlGlobalServices(coreStart, deps.data.dataViews, deps.usageCollection),
+      spaces: deps.spaces,
     };
   }, [deps, coreStart]);
 

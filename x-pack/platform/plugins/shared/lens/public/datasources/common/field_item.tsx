@@ -390,7 +390,7 @@ function getExploreInDiscover({
     getEsQueryConfig(services.uiSettings)
   );
   const discoverLocator = services.share?.url.locators.get('DISCOVER_APP_LOCATOR');
-  if (!discoverLocator || !services.application.capabilities.discover.show) {
+  if (!discoverLocator || !services.application.capabilities.discover_v2.show) {
     return;
   }
   return discoverLocator.getRedirectUrl({

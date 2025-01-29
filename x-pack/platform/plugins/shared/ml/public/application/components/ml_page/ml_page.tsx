@@ -12,6 +12,7 @@ import { Redirect } from 'react-router-dom';
 import { Routes, Route } from '@kbn/shared-ux-router';
 import { Subscription } from 'rxjs';
 import { EuiPageSection, EuiPageHeader } from '@elastic/eui';
+import { map, distinctUntilChanged } from 'rxjs';
 
 import { i18n } from '@kbn/i18n';
 import { type AppMountParameters } from '@kbn/core/public';
@@ -78,16 +79,20 @@ export const MlPage: FC<{ pageDeps: PageDependencies; entryPoint?: string }> = R
     useEffect(() => {
       const subscriptions = new Subscription();
 
-      subscriptions.add(
-        httpService.getLoadingCount$.subscribe((v) => {
-          setIsLoading(v !== 0);
+    subscriptions.add(
+      httpService.getLoadingCount$
+        .pipe(
+          map((v) => v !== 0),
+          distinctUntilChanged()
+        )
+        .subscribe((loading) => {
+          setIsLoading(loading);
         })
-      );
-      return function cleanup() {
-        subscriptions.unsubscribe();
-      };
-      // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    );
+    return function cleanup() {
+      subscriptions.unsubscribe();
+    };
+  }, [httpService?.getLoadingCount$]);
 
     const routeList = useMemo(
       () => {

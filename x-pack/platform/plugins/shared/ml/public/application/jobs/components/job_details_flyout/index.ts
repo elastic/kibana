@@ -6,4 +6,4 @@
  */
 
 export { JobDetailsFlyout } from './job_details_flyout';
-export { JobDetailsFlyoutProvider, useJobDetailFlyout } from './job_details_flyout_context';
+export { JobInfoFlyoutsProvider, useJobInfoFlyouts } from './job_details_flyout_context';
