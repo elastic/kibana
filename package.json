@@ -1480,7 +1480,7 @@
     "@kbn/relocate": "link:src/dev/packages/relocate",
     "@kbn/repo-file-maps": "link:src/dev/packages/repo-file-maps",
     "@kbn/repo-linter": "link:src/dev/packages/repo-linter",
-    "@kbn/repo-path": "link:packages/kbn-repo-path",
+    "@kbn/repo-path": "link:src/dev/packages/repo-path",
     "@kbn/repo-source-classifier": "link:packages/kbn-repo-source-classifier",
     "@kbn/repo-source-classifier-cli": "link:packages/kbn-repo-source-classifier-cli",
     "@kbn/reporting-mocks-server": "link:src/platform/packages/private/kbn-reporting/mocks_server",

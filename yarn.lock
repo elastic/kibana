@@ -6784,7 +6784,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/repo-path@link:packages/kbn-repo-path":
+"@kbn/repo-path@link:src/dev/packages/repo-path":
   version "0.0.0"
   uid ""
 
