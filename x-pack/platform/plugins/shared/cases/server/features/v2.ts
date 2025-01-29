@@ -64,8 +64,6 @@ export const getV2 = (): KibanaFeatureConfig => {
           read: [APP_ID],
           update: [APP_ID],
           push: [APP_ID],
-          createComment: [APP_ID],
-          reopenCase: [APP_ID],
           assign: [APP_ID],
         },
         management: {
@@ -75,12 +73,7 @@ export const getV2 = (): KibanaFeatureConfig => {
           all: [...filesSavedObjectTypes],
           read: [...filesSavedObjectTypes],
         },
-        ui: [
-          ...capabilities.all,
-          ...capabilities.createComment,
-          ...capabilities.reopenCase,
-          ...capabilities.assignCase,
-        ],
+        ui: [...capabilities.all, ...capabilities.assignCase],
         replacedBy: {
           default: [{ feature: FEATURE_ID_V3, privileges: ['all'] }],
           minimal: [

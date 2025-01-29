@@ -50,20 +50,13 @@ export const getCasesFeatureV2 = (
         read: [observabilityFeatureId],
         update: [observabilityFeatureId],
         push: [observabilityFeatureId],
-        createComment: [observabilityFeatureId],
-        reopenCase: [observabilityFeatureId],
         assign: [observabilityFeatureId],
       },
       savedObject: {
         all: [...filesSavedObjectTypes],
         read: [...filesSavedObjectTypes],
       },
-      ui: [
-        ...casesCapabilities.all,
-        ...casesCapabilities.createComment,
-        ...casesCapabilities.reopenCase,
-        ...casesCapabilities.assignCase,
-      ],
+      ui: [...casesCapabilities.all, ...casesCapabilities.assignCase],
       replacedBy: {
         default: [{ feature: casesFeatureIdV3, privileges: ['all'] }],
         minimal: [
