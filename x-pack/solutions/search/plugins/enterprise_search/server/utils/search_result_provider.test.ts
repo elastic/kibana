@@ -103,7 +103,7 @@ describe('Search search provider', () => {
     },
   };
 
-  const aiSearchResult = {
+  const searchAIResult = {
     icon: 'logoEnterpriseSearch',
     id: 'ai_search',
     score: 80,
@@ -141,7 +141,7 @@ describe('Search search provider', () => {
         ).toBe('(a|)', {
           a: expect.arrayContaining([
             { ...mongoResult, score: 80 },
-            { ...aiSearchResult, score: 80 },
+            { ...searchAIResult, score: 80 },
           ]),
         });
       });
@@ -281,7 +281,7 @@ describe('Search search provider', () => {
         ).toBe('(a|)', {
           a: expect.arrayContaining([
             { ...customizedConnectorResult, score: 80 },
-            { ...aiSearchResult, score: 80 },
+            { ...searchAIResult, score: 80 },
           ]),
         });
       });
