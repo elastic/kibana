@@ -47,7 +47,7 @@ describe('Count', () => {
 
     it('should return null if the value is undefined and the flag is enabled', () => {
       const agg = getCountMetricAgg();
-      expect(agg.getValue(makeAgg(true), getBucket(0))).toBe(null);
+      expect(agg.getValue(makeAgg(true), getBucket(undefined))).toBe(null);
     });
 
     it('should return null if the value is 0 and the flag is enabled on a shifted count', () => {
