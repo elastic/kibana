@@ -25,6 +25,7 @@ const createConversationsDataClientMock = () => {
     createConversation: jest.fn(),
     deleteConversation: jest.fn(),
     getConversation: jest.fn(),
+    getInferenceEndpointId: jest.fn(),
     updateConversation: jest.fn(),
     getReader: jest.fn(),
     getWriter: jest.fn().mockResolvedValue({ bulk: jest.fn() }),
