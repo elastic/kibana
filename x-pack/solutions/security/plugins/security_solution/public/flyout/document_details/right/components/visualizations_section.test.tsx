@@ -64,7 +64,7 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 }));
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
-
+useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
 const mockUseUiSetting = jest.fn().mockImplementation((key) => [false]);
 
 jest.mock('@kbn/kibana-react-plugin/public', () => {
