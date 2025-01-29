@@ -7,14 +7,10 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-export * from './types';
-export * from './profiles';
-export { getMergedAccessor } from './composable_profile';
-export { ProfilesManager } from './profiles_manager';
-export {
-  useProfileAccessor,
-  useRootProfile,
-  useAdditionalCellActions,
-  useDefaultAdHocDataViews,
-  BaseAppWrapper,
-} from './hooks';
+import { RootProfileProvider } from '../../..';
+
+export interface ObservabilityRootProfileContext {
+  allLogsIndexPattern: string | undefined;
+}
+
+export type ObservabilityRootProfileProvider = RootProfileProvider<ObservabilityRootProfileContext>;
