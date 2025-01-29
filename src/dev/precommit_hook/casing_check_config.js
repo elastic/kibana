@@ -145,7 +145,7 @@ export const IGNORE_DIRECTORY_GLOBS = [
  *
  * @type {Array}
  */
-export const REMOVE_EXTENSION = ['packages/kbn-plugin-generator/template/**/*.ejs'];
+export const REMOVE_EXTENSION = ['src/dev/packages/plugin-generator/template/**/*.ejs'];
 
 /**
  * DO NOT ADD FILES TO THIS LIST!!

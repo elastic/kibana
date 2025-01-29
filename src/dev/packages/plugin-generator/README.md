@@ -4,7 +4,7 @@ This package can be used to generate a Kibana plugin from the Kibana repo.
 
 ## Setup
 
-Before you can use this plugin generator you must setup your [Kibana development environment](../../CONTRIBUTING.md#development-environment-setup). If you can successfully run `yarn kbn bootstrap` then you are ready to generate plugins!
+Before you can use this plugin generator you must setup your [Kibana development environment](../../../../CONTRIBUTING.md#development-environment-setup). If you can successfully run `yarn kbn bootstrap` then you are ready to generate plugins!
 
 ## Compatibility
 

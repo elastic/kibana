@@ -166,7 +166,7 @@ src/dev/packages/peggy-loader @elastic/kibana-operations
 src/dev/packages/performance-testing-dataset-extractor @elastic/kibana-performance-testing
 src/dev/packages/picomatcher @elastic/kibana-operations
 src/dev/packages/plugin-check @elastic/appex-sharedux
-packages/kbn-plugin-generator @elastic/kibana-operations
+src/dev/packages/plugin-generator @elastic/kibana-operations
 packages/kbn-plugin-helpers @elastic/kibana-operations
 packages/kbn-relocate @elastic/kibana-core
 packages/kbn-repo-file-maps @elastic/kibana-operations

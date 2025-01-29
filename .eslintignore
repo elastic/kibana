@@ -30,7 +30,7 @@ snapshots.js
 
 # package overrides
 /src/dev/packages/eslint-config
-/packages/kbn-plugin-generator/template
+/src/dev/packages/plugin-generator/template
 /src/dev/packages/generate/templates
 /packages/kbn-test/src/functional_test_runner/__tests__/fixtures/
 /packages/kbn-test/src/functional_test_runner/lib/config/__tests__/fixtures/

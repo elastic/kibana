@@ -6656,7 +6656,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/plugin-generator@link:packages/kbn-plugin-generator":
+"@kbn/plugin-generator@link:src/dev/packages/plugin-generator":
   version "0.0.0"
   uid ""
 
