@@ -30,7 +30,7 @@ interface SavedObjectShape {
   id: string;
   type: string;
   attributes: unknown;
-  version: string;
+  version?: string;
 }
 
 // interface SavedObjectsInstallerUi {}
@@ -39,7 +39,7 @@ interface SavedObjectInstallerProps {
   bulkCreate: (
     objects: Array<SavedObjectsBulkCreateObject<unknown>>,
     options?: SavedObjectsBulkCreateOptions | undefined
-  ) => Promise<SavedObjectsBatchResponse<unknown>>; // is there anything to do with deprecated things?
+  ) => Promise<SavedObjectsBatchResponse<unknown>>;
   savedObjects: SavedObjectShape[];
   installMsg?: string;
 }

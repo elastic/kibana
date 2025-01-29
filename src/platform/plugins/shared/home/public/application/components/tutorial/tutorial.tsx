@@ -554,7 +554,7 @@ class TutorialUi extends React.Component<TutorialProps, TutorialState> {
 
       const instructions = this.getInstructions();
       content = (
-        <div>
+        <div style={{ border: '3px solid red' }}>
           <Introduction
             category={this.state.tutorial.category}
             title={this.state.tutorial.name}
