@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ES_TELEMETRY_NAME } from '../../collectors/enterprise_search/telemetry';
 import { incrementUICounter } from '../../collectors/lib/telemetry';
 
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 
 const productToTelemetryMap = {
   enterprise_search: ES_TELEMETRY_NAME,
