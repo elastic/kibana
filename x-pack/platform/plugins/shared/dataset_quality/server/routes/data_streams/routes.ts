@@ -54,7 +54,9 @@ const statsRoute = createDatasetQualityServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: ['read'],
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   async handler(resources): Promise<{
@@ -403,7 +405,9 @@ const dataStreamDetailsRoute = createDatasetQualityServerRoute({
   },
   security: {
     authz: {
-      requiredPrivileges: ['read'],
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
     },
   },
   async handler(resources): Promise<DataStreamDetails> {
