@@ -17,11 +17,13 @@ import type {
   SavedObjectsIncrementCounterField,
   SavedObjectsIncrementCounterOptions,
 } from '@kbn/core-saved-objects-api-server';
+import { SavedObjectsUtils } from '@kbn/core-saved-objects-utils-server';
 import {
   type SavedObjectsRawDocSource,
   type SavedObject,
   type BulkResolveError,
   type ISavedObjectsSerializer,
+  type WithAuditName,
   SavedObjectsErrorHelpers,
 } from '@kbn/core-saved-objects-server';
 import {
@@ -181,6 +183,7 @@ export async function internalBulkResolve<T>(
     if (isLeft(either)) {
       return either.value;
     }
+
     const exactMatchDoc = bulkGetResponse?.body.docs[getResponseIndex++];
     let aliasMatchDoc: MgetResponseItem<SavedObjectsRawDocSource> | undefined;
     const aliasInfo = aliasInfoArray[aliasInfoIndex++];
@@ -220,6 +223,13 @@ export async function internalBulkResolve<T>(
           alias_purpose: aliasInfo!.purpose,
         };
         resolveCounter.recordOutcome(REPOSITORY_RESOLVE_OUTCOME_STATS.ALIAS_MATCH);
+      }
+
+      if (result && securityExtension) {
+        (result.saved_object as WithAuditName<SavedObject>).name = SavedObjectsUtils.getName(
+          registry.getNameAttribute(type),
+          result.saved_object
+        );
       }
     } catch (error) {
       return {
@@ -264,6 +274,7 @@ export async function internalBulkResolve<T>(
     namespace,
     objects: resolvedObjects,
   });
+
   return { resolved_objects: redactedObjects };
 }
 

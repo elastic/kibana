@@ -22,8 +22,6 @@ import {
   EuiSwitch,
   EuiHealth,
   EuiLoadingSpinner,
-  EuiToolTip,
-  EuiBetaBadge,
   EuiTabs,
   EuiTab,
   EuiButtonEmpty,
@@ -47,7 +45,7 @@ import {
   useEntityStoreStatus,
   useStopEntityEngineMutation,
 } from '../components/entity_store/hooks/use_entity_store';
-import { TECHNICAL_PREVIEW, TECHNICAL_PREVIEW_TOOLTIP } from '../../common/translations';
+
 import { useEntityEnginePrivileges } from '../components/entity_store/hooks/use_entity_engine_privileges';
 import { MissingPrivilegesCallout } from '../components/entity_store/components/missing_privileges_callout';
 import { EngineStatus } from '../components/entity_store/components/engines_status';
@@ -58,7 +56,8 @@ enum TabId {
   Status = 'status',
 }
 
-const isSwitchDisabled = (status?: StoreStatus) => status === 'error' || status === 'installing';
+const isSwitchLoading = (status?: StoreStatus) => status === 'installing';
+const isSwitchDisabled = (status?: StoreStatus) => status === 'error' || isSwitchLoading(status);
 const isEntityStoreEnabled = (status?: StoreStatus) => status === 'running';
 const canDeleteEntityEngine = (status?: StoreStatus) =>
   !['not_installed', 'installing'].includes(status || '');
@@ -156,20 +155,13 @@ export const EntityStoreManagementPage = () => {
     <>
       <EuiPageHeader
         data-test-subj="entityStoreManagementPage"
-        pageTitle={
-          <>
-            {entityStoreLabel}{' '}
-            <EuiToolTip content={TECHNICAL_PREVIEW_TOOLTIP}>
-              <EuiBetaBadge label={TECHNICAL_PREVIEW} />
-            </EuiToolTip>
-          </>
-        }
+        pageTitle={entityStoreLabel}
         alignItems="center"
         rightSideItems={
           !isEntityStoreFeatureFlagDisabled && privileges?.has_all_required
             ? [
                 <EnablementButton
-                  isLoading={isMutationLoading}
+                  isLoading={isMutationLoading || isSwitchLoading(entityStoreStatus.data?.status)}
                   isDisabled={isSwitchDisabled(entityStoreStatus.data?.status)}
                   onSwitch={onSwitchClick}
                   status={entityStoreStatus.data?.status}

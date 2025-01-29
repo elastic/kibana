@@ -42,6 +42,7 @@ import {
   ActionTypeExecutorResult,
   ConnectorTokenClientContract,
   HookServices,
+  ActionType,
 } from '../types';
 import { PreconfiguredActionDisabledModificationError } from '../lib/errors/preconfigured_action_disabled_modification';
 import {
@@ -448,14 +449,22 @@ export class ActionsClient {
       attributes: { actionTypeId, config },
     } = rawAction;
 
-    const actionType = this.context.actionTypeRegistry.get(actionTypeId);
+    let actionType: ActionType | undefined;
+    try {
+      actionType = this.context.actionTypeRegistry.get(actionTypeId);
+    } catch (e) {
+      this.context.logger.error(
+        `Failed fetching action type from registry: ${e.message} - deletion will proceed.`
+      );
+    }
+
     const result = await this.context.unsecuredSavedObjectsClient.delete('action', id);
 
     const hookServices: HookServices = {
       scopedClusterClient: this.context.scopedClusterClient,
     };
 
-    if (actionType.postDeleteHook) {
+    if (actionType && actionType.postDeleteHook) {
       try {
         await actionType.postDeleteHook({
           connectorId: id,

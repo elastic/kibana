@@ -32,7 +32,6 @@
       "features",
       "fieldFormats",
       "inspector",
-      "kubernetesSecurity",
       "lens",
       "licensing",
       "maps",
@@ -77,7 +76,7 @@
       "osquery",
       "savedObjectsTaggingOss",
       "guidedOnboarding",
-      "integrationAssistant",
+      "automaticImport",
       "serverless"
     ],
     "requiredBundles": [

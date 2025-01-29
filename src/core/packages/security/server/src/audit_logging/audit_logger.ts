@@ -41,4 +41,9 @@ export interface AuditLogger {
    * logging is disabled.
    */
   readonly enabled: boolean;
+
+  /**
+   * Indicates whether to include saved objects names in audit log
+   */
+  readonly includeSavedObjectNames: boolean;
 }

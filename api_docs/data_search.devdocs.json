@@ -33185,16 +33185,16 @@
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.CidrMaskIpRangeAggKey",
-            "text": "CidrMaskIpRangeAggKey"
+            "section": "def-common.RangeIpRangeAggKey",
+            "text": "RangeIpRangeAggKey"
           },
           " | ",
           {
             "pluginId": "data",
             "scope": "common",
             "docId": "kibDataSearchPluginApi",
-            "section": "def-common.RangeIpRangeAggKey",
-            "text": "RangeIpRangeAggKey"
+            "section": "def-common.CidrMaskIpRangeAggKey",
+            "text": "CidrMaskIpRangeAggKey"
           }
         ],
         "path": "src/platform/plugins/shared/data/common/search/aggs/buckets/lib/ip_range.ts",
@@ -39759,7 +39759,15 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableWarningToasts?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; esqlVariables?: ",
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/remove_filter.ts",
             "deprecated": false,
@@ -40102,7 +40110,15 @@
                 "section": "def-common.TimeRange",
                 "text": "TimeRange"
               },
-              " | undefined; disableWarningToasts?: boolean | undefined; }"
+              " | undefined; disableWarningToasts?: boolean | undefined; esqlVariables?: ",
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined; }"
             ],
             "path": "src/platform/plugins/shared/data/common/search/expressions/select_filter.ts",
             "deprecated": false,

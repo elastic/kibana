@@ -154,9 +154,13 @@
             "parentPluginId": "@kbn/scout",
             "id": "def-common.Client.child",
             "type": "Function",
-            "tags": [],
+            "tags": [
+              "see"
+            ],
             "label": "child",
-            "description": [],
+            "description": [
+              "\nCreates a child client instance that shared its connection pool with the parent client"
+            ],
             "signature": [
               "(opts: ",
               "ClientOptions",
@@ -191,7 +195,9 @@
             "type": "Function",
             "tags": [],
             "label": "close",
-            "description": [],
+            "description": [
+              "\nCloses all connections in the connection pool. Connections shared with any parent or child instances will also be closed."
+            ],
             "signature": [
               "() => Promise<void>"
             ],

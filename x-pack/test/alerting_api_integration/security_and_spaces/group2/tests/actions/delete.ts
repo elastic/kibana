@@ -9,7 +9,7 @@ import { v4 as uuidv4 } from 'uuid';
 import expect from '@kbn/expect';
 import { ESTestIndexTool, ES_TEST_INDEX_NAME } from '@kbn/alerting-api-integration-helpers';
 
-import { UserAtSpaceScenarios } from '../../../scenarios';
+import { UserAtSpaceScenarios, SuperuserAtSpace1 } from '../../../scenarios';
 import { getUrlPrefix, ObjectRemover } from '../../../../common/lib';
 import { FtrProviderContext } from '../../../../common/ftr_provider_context';
 
@@ -19,6 +19,8 @@ export default function deleteConnectorTests({ getService }: FtrProviderContext)
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const es = getService('es');
   const retry = getService('retry');
+  const kibanaServer = getService('kibanaServer');
+
   const esTestIndexTool = new ESTestIndexTool(es, retry);
 
   describe('delete', () => {
@@ -28,6 +30,7 @@ export default function deleteConnectorTests({ getService }: FtrProviderContext)
       await esTestIndexTool.destroy();
       await esTestIndexTool.setup();
     });
+
     after(async () => {
       await esTestIndexTool.destroy();
       await objectRemover.removeAll();
@@ -297,5 +300,35 @@ export default function deleteConnectorTests({ getService }: FtrProviderContext)
         });
       });
     }
+
+    it('should delete a connector with an unsupported type', async () => {
+      await kibanaServer.importExport.load(
+        'x-pack/test/alerting_api_integration/security_and_spaces/group2/tests/actions/fixtures/unsupported_connector_type.json'
+      );
+
+      const { space, user } = SuperuserAtSpace1;
+      const { body: createdConnector } = await supertest
+        .post(`${getUrlPrefix(space.id)}/api/actions/connector`)
+        .set('kbn-xsrf', 'foo')
+        .send({
+          name: 'My Connector',
+          connector_type_id: 'test.index-record',
+          config: {
+            unencrypted: `This value shouldn't get encrypted`,
+          },
+          secrets: {
+            encrypted: 'This value should be encrypted',
+          },
+        })
+        .expect(200);
+
+      const response = await supertestWithoutAuth
+        .delete(`${getUrlPrefix(space.id)}/api/actions/connector/${createdConnector.id}`)
+        .auth(user.username, user.password)
+        .set('kbn-xsrf', 'foo');
+
+      expect(response.statusCode).to.eql(204);
+      expect(response.body).to.eql('');
+    });
   });
 }

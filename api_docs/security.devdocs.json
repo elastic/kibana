@@ -5976,7 +5976,7 @@
             },
             {
               "plugin": "observabilityAIAssistant",
-              "path": "x-pack/platform/plugins/shared/observability_solution/observability_ai_assistant/server/service/index.ts"
+              "path": "x-pack/platform/plugins/shared/observability_ai_assistant/server/service/index.ts"
             },
             {
               "plugin": "transform",
@@ -7515,12 +7515,12 @@
           {
             "parentPluginId": "security",
             "id": "def-common.RoleRemoteClusterPrivilege.clusters",
-            "type": "Array",
+            "type": "CompoundType",
             "tags": [],
             "label": "clusters",
             "description": [],
             "signature": [
-              "string[]"
+              "string | string[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
@@ -7534,7 +7534,14 @@
             "label": "privileges",
             "description": [],
             "signature": [
-              "string[]"
+              {
+                "pluginId": "@kbn/security-plugin-types-common",
+                "scope": "common",
+                "docId": "kibKbnSecurityPluginTypesCommonPluginApi",
+                "section": "def-common.RemoteClusterPrivilege",
+                "text": "RemoteClusterPrivilege"
+              },
+              "[]"
             ],
             "path": "x-pack/platform/packages/shared/security/plugin_types_common/src/authorization/role.ts",
             "deprecated": false,
