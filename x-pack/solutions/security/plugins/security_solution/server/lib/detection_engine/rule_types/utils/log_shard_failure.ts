@@ -16,16 +16,14 @@ export const logShardFailures = (
   result: SearchAfterAndBulkCreateReturnType,
   ruleExecutionLogger: IRuleExecutionLogForExecutors
 ) => {
-  if (shardFailures) {
-    const shardFailureMessage = i18n.EQL_SHARD_FAILURE_MESSAGE(
-      isSequenceQuery,
-      JSON.stringify(shardFailures)
-    );
-    ruleExecutionLogger.error(shardFailureMessage);
-    if (isSequenceQuery) {
-      result.errors.push(shardFailureMessage);
-    } else {
-      result.warningMessages.push(shardFailureMessage);
-    }
+  const shardFailureMessage = i18n.EQL_SHARD_FAILURE_MESSAGE(
+    isSequenceQuery,
+    JSON.stringify(shardFailures)
+  );
+  ruleExecutionLogger.error(shardFailureMessage);
+  if (isSequenceQuery) {
+    result.errors.push(shardFailureMessage);
+  } else {
+    result.warningMessages.push(shardFailureMessage);
   }
 };

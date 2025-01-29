@@ -15,6 +15,7 @@ import type {
 } from '@kbn/alerting-plugin/server';
 import type * as estypes from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import type { Filter } from '@kbn/es-query';
+import isEmpty from 'lodash/isEmpty';
 
 import { buildEqlSearchRequest } from './build_eql_search_request';
 import { createEnrichEventsFunction } from '../utils/enrichments';
@@ -176,7 +177,9 @@ export const eqlExecutor = async ({
       // https://github.com/elastic/elasticsearch-specification/pull/3372#issuecomment-2621835599
       // TODO: remove ts-expect-error when ES lib version is updated
       const shardFailures = response.shard_failures;
-      logShardFailures(isSequenceQuery, shardFailures, result, ruleExecutionLogger);
+      if (!isEmpty(shardFailures)) {
+        logShardFailures(isSequenceQuery, shardFailures, result, ruleExecutionLogger);
+      }
 
       const { events, sequences } = response.hits;
 
