@@ -1359,7 +1359,7 @@
     "@kbn/capture-oas-snapshot-cli": "link:src/dev/packages/capture-oas-snapshot-cli",
     "@kbn/check-mappings-update-cli": "link:src/dev/packages/check-mappings-update-cli",
     "@kbn/check-prod-native-modules-cli": "link:src/dev/packages/check-prod-native-modules-cli",
-    "@kbn/ci-stats-core": "link:packages/kbn-ci-stats-core",
+    "@kbn/ci-stats-core": "link:src/dev/packages/ci-stats-core",
     "@kbn/ci-stats-performance-metrics": "link:packages/kbn-ci-stats-performance-metrics",
     "@kbn/ci-stats-reporter": "link:packages/kbn-ci-stats-reporter",
     "@kbn/ci-stats-shipper-cli": "link:packages/kbn-ci-stats-shipper-cli",

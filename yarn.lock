@@ -4152,7 +4152,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-core@link:packages/kbn-ci-stats-core":
+"@kbn/ci-stats-core@link:src/dev/packages/ci-stats-core":
   version "0.0.0"
   uid ""
 
