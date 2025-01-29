@@ -417,7 +417,6 @@ export class TaskManagerPlugin
       aggregate: (opts: AggregationOpts): Promise<estypes.SearchResponse<ConcreteTaskInstance>> =>
         taskStore.aggregate(opts),
       get: (id: string) => taskStore.get(id),
-      bulkGetEncryptedTask: (ids: string[]) => taskStore.bulkGetEncryptedTask(ids),
       remove: (id: string) => taskStore.remove(id),
       bulkRemove: (ids: string[]) => taskStore.bulkRemove(ids),
       removeIfExists: (id: string) => removeIfExists(taskStore, id),

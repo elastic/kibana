@@ -50,6 +50,7 @@ import {
   SerializedConcreteTaskInstance,
   PartialConcreteTaskInstance,
   PartialSerializedConcreteTaskInstance,
+  ApiKeyOptions,
 } from './task';
 
 import { TaskTypeDictionary } from './task_type_dictionary';
@@ -303,12 +304,12 @@ export class TaskStore {
    */
   public async schedule(
     taskInstance: TaskInstance,
-    request?: KibanaRequest
+    options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance> {
     this.definitions.ensureHas(taskInstance.taskType);
 
-    const apiKey = await this.createAPIKey(request);
-    const soClient = this.getSoClient(request);
+    const apiKey = options?.apiKey || (await this.createAPIKey(options?.request));
+    const soClient = this.getSoClient(options?.request);
 
     let savedObject;
     try {
@@ -320,6 +321,9 @@ export class TaskStore {
         {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(apiKey ? { apiKey } : {}),
+          // Set invalidateApiKey to true if the user passed in a request, since we do
+          // not want to invalidate a specific API key that was not created by the task manager
+          ...(apiKey ? { invalidateApiKey: !!options?.request } : {}),
         },
         { id, refresh: false }
       );
@@ -342,10 +346,10 @@ export class TaskStore {
    */
   public async bulkSchedule(
     taskInstances: TaskInstance[],
-    request?: KibanaRequest
+    options?: ApiKeyOptions
   ): Promise<ConcreteTaskInstance[]> {
-    const apiKey = await this.createAPIKey(request);
-    const soClient = this.getSoClient(request);
+    const apiKey = options?.apiKey || (await this.createAPIKey(options?.request));
+    const soClient = this.getSoClient(options?.request);
 
     const objects = taskInstances.map((taskInstance) => {
       const id = taskInstance.id || v4();
@@ -357,6 +361,9 @@ export class TaskStore {
         attributes: {
           ...taskInstanceToAttributes(validatedTaskInstance, id),
           ...(apiKey ? { apiKey } : {}),
+          // Set invalidateApiKey to true if the user passed in a request, since we do
+          // not want to invalidate a specific API key that was not created by the task manager
+          ...(apiKey ? { invalidateApiKey: !!options?.request } : {}),
         },
         id,
       };
@@ -586,7 +593,7 @@ export class TaskStore {
   public async remove(id: string): Promise<void> {
     const taskInstance = await this.get(id);
 
-    if (taskInstance.apiKey) {
+    if (taskInstance.apiKey && taskInstance.invalidateApiKey) {
       const apiKeyId = Buffer.from(taskInstance.apiKey, 'base64').toString().split(':')[0];
       this.security.authc.apiKeys.invalidateAsInternalUser({ ids: [apiKeyId] });
     }
@@ -611,7 +618,7 @@ export class TaskStore {
 
     taskInstances.forEach((taskInstance) => {
       const unwrappedTaskInstance = unwrap(taskInstance) as ConcreteTaskInstance;
-      if (unwrappedTaskInstance.apiKey) {
+      if (unwrappedTaskInstance.apiKey && unwrappedTaskInstance.invalidateApiKey) {
         apiKeyIdsToRemove.push(
           Buffer.from(unwrappedTaskInstance.apiKey, 'base64').toString().split(':')[0]
         );
@@ -963,7 +970,7 @@ export function taskInstanceToAttributes(
   id: string
 ): SerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'apiKey'),
+    ...omit(doc, 'id', 'version', 'apiKey', 'invalidateApiKey'),
     params: JSON.stringify(doc.params || {}),
     state: JSON.stringify(doc.state || {}),
     attempts: (doc as ConcreteTaskInstance).attempts || 0,
@@ -980,7 +987,7 @@ export function partialTaskInstanceToAttributes(
   doc: PartialConcreteTaskInstance
 ): PartialSerializedConcreteTaskInstance {
   return {
-    ...omit(doc, 'id', 'version', 'apiKey'),
+    ...omit(doc, 'id', 'version', 'apiKey', 'invalidateApiKey'),
     ...(doc.params ? { params: JSON.stringify(doc.params) } : {}),
     ...(doc.state ? { state: JSON.stringify(doc.state) } : {}),
     ...(doc.scheduledAt ? { scheduledAt: doc.scheduledAt.toISOString() } : {}),

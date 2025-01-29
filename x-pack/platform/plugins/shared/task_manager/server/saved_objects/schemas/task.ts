@@ -44,7 +44,6 @@ export const taskSchemaV1 = schema.object({
     schema.literal('dead_letter'),
   ]),
   version: schema.maybe(schema.string()),
-  apiKey: schema.maybe(schema.string()),
 });
 
 export const taskSchemaV2 = taskSchemaV1.extends({
@@ -53,4 +52,9 @@ export const taskSchemaV2 = taskSchemaV1.extends({
 
 export const taskSchemaV3 = taskSchemaV2.extends({
   priority: schema.maybe(schema.number()),
+});
+
+export const taskSchemaV4 = taskSchemaV3.extends({
+  apiKey: schema.maybe(schema.string()),
+  invalidateApiKey: schema.maybe(schema.boolean()),
 });

@@ -6,14 +6,15 @@
  */
 
 import pMap from 'p-map';
-import { chunk, flatten } from 'lodash';
+import { chunk, flatten, omit } from 'lodash';
 import agent from 'elastic-apm-node';
-import { KibanaRequest, Logger } from '@kbn/core/server';
+import { Logger } from '@kbn/core/server';
 import { Middleware } from './lib/middleware';
 import { parseIntervalAsMillisecond } from './lib/intervals';
 import {
   ConcreteTaskInstance,
   IntervalSchedule,
+  ScheduleOptions,
   TaskInstanceWithDeprecatedFields,
   TaskInstanceWithId,
   TaskStatus,
@@ -79,11 +80,10 @@ export class TaskScheduling {
    */
   public async schedule(
     taskInstance: TaskInstanceWithDeprecatedFields,
-    options?: Record<string, unknown>,
-    request?: KibanaRequest
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance> {
     const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-      ...options,
+      ...omit(options, 'apiKey', 'request'),
       taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
     });
 
@@ -98,7 +98,10 @@ export class TaskScheduling {
         traceparent: traceparent || '',
         enabled: modifiedTask.enabled ?? true,
       },
-      request
+      {
+        apiKey: options?.apiKey,
+        request: options?.request,
+      }
     );
   }
 
@@ -110,8 +113,7 @@ export class TaskScheduling {
    */
   public async bulkSchedule(
     taskInstances: TaskInstanceWithDeprecatedFields[],
-    options?: Record<string, unknown>,
-    request?: KibanaRequest
+    options?: ScheduleOptions
   ): Promise<ConcreteTaskInstance[]> {
     const traceparent =
       agent.currentTransaction && agent.currentTransaction.type !== 'request'
@@ -120,7 +122,7 @@ export class TaskScheduling {
     const modifiedTasks = await Promise.all(
       taskInstances.map(async (taskInstance) => {
         const { taskInstance: modifiedTask } = await this.middleware.beforeSave({
-          ...options,
+          ...omit(options, 'apiKey', 'request'),
           taskInstance: ensureDeprecatedFieldsAreCorrected(taskInstance, this.logger),
         });
         return {
@@ -131,7 +133,10 @@ export class TaskScheduling {
       })
     );
 
-    return await this.store.bulkSchedule(modifiedTasks);
+    return await this.store.bulkSchedule(modifiedTasks, {
+      apiKey: options?.apiKey,
+      request: options?.request,
+    });
   }
 
   public async bulkDisable(taskIds: string[], clearStateIdsOrBoolean?: string[] | boolean) {

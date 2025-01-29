@@ -7,6 +7,7 @@
 
 import { ObjectType, schema, TypeOf } from '@kbn/config-schema';
 import { isNumber } from 'lodash';
+import { KibanaRequest } from '@kbn/core/server';
 import { isErr, tryAsResult } from './lib/result_type';
 import { Interval, isInterval, parseIntervalAsMillisecond } from './lib/intervals';
 import { DecoratedError } from './task_running';
@@ -353,6 +354,8 @@ export interface TaskInstance {
   partition?: number;
 
   apiKey?: string;
+
+  invalidateApiKey?: boolean;
 }
 
 /**
@@ -486,8 +489,16 @@ export type SerializedConcreteTaskInstance = Omit<
   runAt: string;
   partition?: number;
   apiKey?: string;
+  invalidateApiKey?: boolean;
 };
 
 export type PartialSerializedConcreteTaskInstance = Partial<SerializedConcreteTaskInstance> & {
   id: SerializedConcreteTaskInstance['id'];
 };
+
+export interface ApiKeyOptions {
+  request?: KibanaRequest;
+  apiKey?: string;
+}
+
+export type ScheduleOptions = Record<string, unknown> & ApiKeyOptions;

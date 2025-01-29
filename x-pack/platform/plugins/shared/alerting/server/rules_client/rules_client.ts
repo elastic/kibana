@@ -221,8 +221,9 @@ export class RulesClient {
         },
         enabled: true,
       },
-      undefined,
-      request
+      {
+        request,
+      }
     );
   };
 
