@@ -26,11 +26,8 @@ export interface HasReadOnlyCapabilities extends HasTypeDisplayName {
 export const hasReadOnlyCapabilities = (root: unknown): root is HasReadOnlyCapabilities => {
   return Boolean(
     root &&
-      (root as HasReadOnlyCapabilities).onShowConfig &&
       typeof (root as HasReadOnlyCapabilities).onShowConfig === 'function' &&
-      (root as HasReadOnlyCapabilities).getTypeDisplayName &&
       typeof (root as HasReadOnlyCapabilities).getTypeDisplayName === 'function' &&
-      (root as HasReadOnlyCapabilities).isReadOnlyEnabled &&
       typeof (root as HasReadOnlyCapabilities).isReadOnlyEnabled === 'function'
   );
 };
