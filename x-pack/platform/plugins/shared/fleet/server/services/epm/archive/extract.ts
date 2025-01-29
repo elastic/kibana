@@ -53,7 +53,7 @@ export async function unzipBuffer(
 
     try {
       if (shouldReadBuffer && !shouldReadBuffer(path)) {
-        return { path };
+        return onEntry({ path });
       }
       const entryBuffer = await getZipReadStream(zipfile, entry).then(streamToBuffer);
       await onEntry({ buffer: entryBuffer, path });
