@@ -9,36 +9,36 @@ import { z } from '@kbn/zod';
 import { NonEmptyString } from '@kbn/zod-helpers';
 import { StreamDefinitionBase } from '../base';
 
-interface GroupedBase {
+interface GroupBase {
   description?: string;
   members: string[];
 }
 
-const groupedBaseSchema: z.Schema<GroupedBase> = z.object({
+const groupedBaseSchema: z.Schema<GroupBase> = z.object({
   description: z.optional(z.string()),
   members: z.array(NonEmptyString),
 });
 
-interface GroupedStreamDefinitionBase {
-  grouped: GroupedBase;
+interface GroupStreamDefinitionBase {
+  grouped: GroupBase;
 }
 
-const groupedStreamDefinitionBaseSchema: z.Schema<GroupedStreamDefinitionBase> = z.object({
+const groupStreamDefinitionBaseSchema: z.Schema<GroupStreamDefinitionBase> = z.object({
   grouped: groupedBaseSchema,
 });
 
-type GroupedStreamDefinition = StreamDefinitionBase & GroupedStreamDefinitionBase;
+type GroupStreamDefinition = StreamDefinitionBase & GroupStreamDefinitionBase;
 
-const groupedStreamDefinitionSchema: z.Schema<GroupedStreamDefinition> = z.intersection(
+const groupStreamDefinitionSchema: z.Schema<GroupStreamDefinition> = z.intersection(
   z.object({ name: NonEmptyString }),
-  groupedStreamDefinitionBaseSchema
+  groupStreamDefinitionBaseSchema
 );
 
 export {
-  type GroupedBase,
-  type GroupedStreamDefinitionBase,
-  type GroupedStreamDefinition,
+  type GroupBase,
+  type GroupStreamDefinitionBase,
+  type GroupStreamDefinition,
   groupedBaseSchema,
-  groupedStreamDefinitionBaseSchema,
-  groupedStreamDefinitionSchema,
+  groupStreamDefinitionBaseSchema,
+  groupStreamDefinitionSchema,
 };

@@ -7,7 +7,7 @@
 
 import { SearchTotalHits } from '@elastic/elasticsearch/lib/api/types';
 import {
-  isGroupedStreamDefinition,
+  isGroupStreamDefinition,
   StreamDefinition,
   StreamGetResponse,
   streamUpsertRequestSchema,
@@ -77,7 +77,7 @@ export const streamDetailRoute = createServerRoute({
     const { scopedClusterClient, streamsClient } = await getScopedClients({ request });
     const streamEntity = await streamsClient.getStream(params.path.id);
 
-    const indexPattern = isGroupedStreamDefinition(streamEntity)
+    const indexPattern = isGroupStreamDefinition(streamEntity)
       ? streamEntity.grouped.members.join(',')
       : streamEntity.name;
     // check doc count

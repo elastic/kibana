@@ -11,39 +11,39 @@ import {
   StreamUpsertRequestBase,
   streamUpsertRequestSchemaBase,
 } from '../base/api';
-import { GroupedStreamDefinitionBase, groupedStreamDefinitionBaseSchema } from './base';
+import { GroupStreamDefinitionBase, groupStreamDefinitionBaseSchema } from './base';
 
 /**
- * Grouped get response
+ * Group get response
  */
-interface GroupedStreamGetResponse extends StreamGetResponseBase {
-  stream: GroupedStreamDefinitionBase;
+interface GroupStreamGetResponse extends StreamGetResponseBase {
+  stream: GroupStreamDefinitionBase;
 }
 
 /**
- * Grouped upsert request
+ * Group upsert request
  */
-interface GroupedStreamUpsertRequest extends StreamUpsertRequestBase {
-  stream: GroupedStreamDefinitionBase;
+interface GroupStreamUpsertRequest extends StreamUpsertRequestBase {
+  stream: GroupStreamDefinitionBase;
 }
 
-const groupedStreamGetResponseSchema: z.Schema<GroupedStreamGetResponse> = z.intersection(
+const groupStreamGetResponseSchema: z.Schema<GroupStreamGetResponse> = z.intersection(
   streamGetResponseSchemaBase,
   z.object({
-    stream: groupedStreamDefinitionBaseSchema,
+    stream: groupStreamDefinitionBaseSchema,
   })
 );
 
-const groupedStreamUpsertRequestSchema: z.Schema<GroupedStreamUpsertRequest> = z.intersection(
+const groupStreamUpsertRequestSchema: z.Schema<GroupStreamUpsertRequest> = z.intersection(
   streamUpsertRequestSchemaBase,
   z.object({
-    stream: groupedStreamDefinitionBaseSchema,
+    stream: groupStreamDefinitionBaseSchema,
   })
 );
 
 export {
-  type GroupedStreamGetResponse,
-  type GroupedStreamUpsertRequest,
-  groupedStreamGetResponseSchema,
-  groupedStreamUpsertRequestSchema,
+  type GroupStreamGetResponse,
+  type GroupStreamUpsertRequest,
+  groupStreamGetResponseSchema,
+  groupStreamUpsertRequestSchema,
 };

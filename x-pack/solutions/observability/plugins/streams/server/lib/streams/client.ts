@@ -15,7 +15,7 @@ import type { IScopedClusterClient, Logger } from '@kbn/core/server';
 import { isResponseError } from '@kbn/es-errors';
 import {
   Condition,
-  GroupedStreamDefinition,
+  GroupStreamDefinition,
   IngestStreamLifecycle,
   StreamDefinition,
   StreamUpsertRequest,
@@ -26,7 +26,7 @@ import {
   getAncestors,
   getParentId,
   isChildOf,
-  isGroupedStreamDefinition,
+  isGroupStreamDefinition,
   isIngestStreamDefinition,
   isDslLifecycle,
   isIlmLifecycle,
@@ -326,8 +326,8 @@ export class StreamsClient {
       validateStreamTypeChanges(existingDefinition, definition);
     }
 
-    if (isGroupedStreamDefinition(definition)) {
-      await this.validateGroupedStream({ definition });
+    if (isGroupStreamDefinition(definition)) {
+      await this.validateGroupStream({ definition });
     }
 
     if (isRootStreamDefinition(definition)) {
@@ -455,9 +455,9 @@ export class StreamsClient {
 
   /**
    * Validates the members of the group streams to ensure they are NOT
-   * GroupedStreamDefinitions
+   * GroupStreamDefinitions
    */
-  async validateGroupedStream({ definition }: { definition: GroupedStreamDefinition }) {
+  async validateGroupStream({ definition }: { definition: GroupStreamDefinition }) {
     const { members } = definition.grouped;
 
     if (members.includes(definition.name)) {
@@ -467,9 +467,9 @@ export class StreamsClient {
     await Promise.all(
       members.map(async (name) => {
         const memberStream = await this.getStream(name);
-        if (isGroupedStreamDefinition(memberStream)) {
+        if (isGroupStreamDefinition(memberStream)) {
           throw new ForbiddenMemberTypeError(
-            `Grouped streams can not be apart of a group, please remove [${name}]`
+            `Group streams can not be a member of a group, please remove [${name}]`
           );
         }
       })
@@ -687,13 +687,13 @@ export class StreamsClient {
 
     const privileges = await checkAccessBulk({
       ids: streams
-        .filter((stream) => !isGroupedStreamDefinition(stream))
+        .filter((stream) => !isGroupStreamDefinition(stream))
         .map((stream) => stream.name),
       scopedClusterClient,
     });
 
     return streams.filter((stream) => {
-      if (isGroupedStreamDefinition(stream)) return true;
+      if (isGroupStreamDefinition(stream)) return true;
       return privileges[stream.name]?.read === true;
     });
   }
@@ -782,7 +782,7 @@ export class StreamsClient {
     });
 
     const access =
-      definition && isGroupedStreamDefinition(definition)
+      definition && isGroupStreamDefinition(definition)
         ? { write: true, read: true }
         : await checkAccess({
             id: name,

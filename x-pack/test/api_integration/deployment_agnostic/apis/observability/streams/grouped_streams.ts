@@ -20,7 +20,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
   let apiClient: StreamsSupertestRepositoryClient;
 
   // An anticipated use case is that a user will want to flush a tree of streams from a config file
-  describe('GroupedStreamDefinition', () => {
+  describe('GroupStreamDefinition', () => {
     describe('CRUD API Operations', () => {
       before(async () => {
         apiClient = await createStreamsRepositoryAdminClient(roleScopedSupertest);
@@ -32,7 +32,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         await disableStreams(apiClient);
       });
 
-      it('successfully creates a GroupedStream', async () => {
+      it('successfully creates a GroupStream', async () => {
         await apiClient
           .fetch('PUT /api/streams/{id}', {
             params: {
@@ -51,7 +51,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .then((response) => expect(response.body.acknowledged).to.eql(true));
       });
 
-      it('successfully creates a second GroupedStream', async () => {
+      it('successfully creates a second GroupStream', async () => {
         await apiClient
           .fetch('PUT /api/streams/{id}', {
             params: {
@@ -70,7 +70,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .then((response) => expect(response.body.acknowledged).to.eql(true));
       });
 
-      it('unsuccessfully updates a GroupedStream with an uknown stream', async () => {
+      it('unsuccessfully updates a GroupStream with an uknown stream', async () => {
         await apiClient
           .fetch('PUT /api/streams/{id}', {
             params: {
@@ -88,7 +88,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(404);
       });
 
-      it('unsuccessfully updates a GroupedStream with an itself as a member', async () => {
+      it('unsuccessfully updates a GroupStream with an itself as a member', async () => {
         await apiClient
           .fetch('PUT /api/streams/{id}', {
             params: {
@@ -106,7 +106,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(400);
       });
 
-      it('unsuccessfully updates a GroupedStream with a forbidden member', async () => {
+      it('unsuccessfully updates a GroupStream with a forbidden member', async () => {
         await apiClient
           .fetch('PUT /api/streams/{id}', {
             params: {
@@ -124,7 +124,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(400);
       });
 
-      it('successfully deletes a GroupedStream', async () => {
+      it('successfully deletes a GroupStream', async () => {
         await apiClient
           .fetch('DELETE /api/streams/{id}', {
             params: {
@@ -134,7 +134,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
           .expect(200);
       });
 
-      it('successfully reads a GroupedStream', async () => {
+      it('successfully reads a GroupStream', async () => {
         const response = await apiClient
           .fetch('GET /api/streams/{id}', {
             params: {
@@ -152,7 +152,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
         });
       });
 
-      it('successfully lists a GroupedStream', async () => {
+      it('successfully lists a GroupStream', async () => {
         const response = await apiClient.fetch('GET /api/streams').expect(200);
         expect(response.body.streams.some((stream) => stream.name === 'test-group')).to.eql(true);
       });

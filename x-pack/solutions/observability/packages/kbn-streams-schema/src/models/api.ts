@@ -15,21 +15,21 @@ import {
   type IngestStreamUpsertRequest,
 } from './ingest';
 import {
-  GroupedStreamGetResponse,
-  groupedStreamGetResponseSchema,
-  GroupedStreamUpsertRequest,
-  groupedStreamUpsertRequestSchema,
+  GroupStreamGetResponse,
+  groupStreamGetResponseSchema,
+  GroupStreamUpsertRequest,
+  groupStreamUpsertRequestSchema,
 } from './grouped';
 import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
 
 export const streamGetResponseSchema: z.Schema<StreamGetResponse> = z.union([
   ingestStreamGetResponseSchema,
-  groupedStreamGetResponseSchema,
+  groupStreamGetResponseSchema,
 ]);
 
 export const streamUpsertRequestSchema: z.Schema<StreamUpsertRequest> = z.union([
   ingestStreamUpsertRequestSchema,
-  groupedStreamUpsertRequestSchema,
+  groupStreamUpsertRequestSchema,
 ]);
 
 export const isWiredStreamGetResponse = createIsNarrowSchema(
@@ -57,5 +57,5 @@ export const asIngestStreamGetResponse = createAsSchemaOrThrow(
   ingestStreamGetResponseSchema
 );
 
-export type StreamGetResponse = IngestStreamGetResponse | GroupedStreamGetResponse;
-export type StreamUpsertRequest = IngestStreamUpsertRequest | GroupedStreamUpsertRequest;
+export type StreamGetResponse = IngestStreamGetResponse | GroupStreamGetResponse;
+export type StreamUpsertRequest = IngestStreamUpsertRequest | GroupStreamUpsertRequest;

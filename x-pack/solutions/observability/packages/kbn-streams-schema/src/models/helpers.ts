@@ -7,7 +7,7 @@
 import { z } from '@kbn/zod';
 import { createAsSchemaOrThrow, createIsNarrowSchema } from '../helpers';
 import { streamDefinitionSchema } from './core';
-import { groupedStreamDefinitionBaseSchema, groupedStreamDefinitionSchema } from './grouped';
+import { groupStreamDefinitionBaseSchema, groupStreamDefinitionSchema } from './grouped';
 import {
   ingestStreamDefinitionSchema,
   unwiredStreamDefinitionSchema,
@@ -39,14 +39,14 @@ export const isUnwiredStreamDefinition = createIsNarrowSchema(
   unwiredStreamDefinitionSchema
 );
 
-export const isGroupedStreamDefinition = createIsNarrowSchema(
+export const isGroupStreamDefinition = createIsNarrowSchema(
   streamDefinitionSchema,
-  groupedStreamDefinitionSchema
+  groupStreamDefinitionSchema
 );
 
-export const isGroupedStreamDefinitionBase = createIsNarrowSchema(
+export const isGroupStreamDefinitionBase = createIsNarrowSchema(
   z.unknown(),
-  groupedStreamDefinitionBaseSchema
+  groupStreamDefinitionBaseSchema
 );
 
 export const isRootStreamDefinition = createIsNarrowSchema(

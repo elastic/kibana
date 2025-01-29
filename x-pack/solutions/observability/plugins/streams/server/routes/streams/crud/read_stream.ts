@@ -10,7 +10,7 @@ import {
   InheritedFieldDefinition,
   StreamGetResponse,
   WiredStreamGetResponse,
-  isGroupedStreamDefinition,
+  isGroupStreamDefinition,
   isUnwiredStreamDefinition,
 } from '@kbn/streams-schema';
 import { IScopedClusterClient } from '@kbn/core/server';
@@ -42,7 +42,7 @@ export async function readStream({
     }),
   ]);
 
-  if (isGroupedStreamDefinition(streamDefinition)) {
+  if (isGroupStreamDefinition(streamDefinition)) {
     return {
       stream: omit(streamDefinition, 'name'),
       dashboards,
