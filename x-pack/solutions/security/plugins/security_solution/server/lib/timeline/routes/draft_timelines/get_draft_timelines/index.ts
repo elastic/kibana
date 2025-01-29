@@ -26,7 +26,7 @@ export const getDraftTimelinesRoute = (router: SecuritySolutionPluginRouter) => 
       path: TIMELINE_DRAFT_URL,
       security: {
         authz: {
-          requiredPrivileges: ['securitySolution'],
+          requiredPrivileges: ['timeline_read'],
         },
       },
       access: 'public',

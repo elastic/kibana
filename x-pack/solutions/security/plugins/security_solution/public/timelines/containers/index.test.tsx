@@ -44,7 +44,17 @@ jest.mock('../../common/lib/kibana', () => ({
     addWarning: jest.fn(),
     remove: jest.fn(),
   }),
-  useKibana: jest.fn(),
+  useKibana: jest.fn().mockReturnValue({
+    services: {
+      application: {
+        capabilities: {
+          securitySolutionTimeline: {
+            crud: true,
+          },
+        },
+      },
+    },
+  }),
 }));
 
 const mockUseRouteSpy: jest.Mock = useRouteSpy as jest.Mock;

@@ -15,7 +15,7 @@ import {
 } from '@kbn/slo-schema';
 import { TransformGenerator, getElasticsearchQueryOrThrow } from '.';
 import {
-  SLO_DESTINATION_INDEX_NAME,
+  SLI_DESTINATION_INDEX_NAME,
   getSLOPipelineId,
   getSLOTransformId,
 } from '../../../common/constants';
@@ -132,7 +132,7 @@ export class ApmTransactionErrorRateTransformGenerator extends TransformGenerato
   private buildDestination(slo: SLODefinition) {
     return {
       pipeline: getSLOPipelineId(slo.id, slo.revision),
-      index: SLO_DESTINATION_INDEX_NAME,
+      index: SLI_DESTINATION_INDEX_NAME,
     };
   }
 

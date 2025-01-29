@@ -41,7 +41,7 @@ export const useStyles = ({ display }: StylesDeps) => {
       position: 'relative',
       borderRadius: euiTheme.border.radius.medium,
       '&:hover': {
-        background: transparentize(euiTheme.colors.primary, 0.1),
+        background: transparentize(euiTheme.colors.primary, 0.1), // TODO: Borealis migration - replace transparentize with color token
       },
       height: 'fit-content',
     };

@@ -30,9 +30,12 @@ describe('useGetSimilarCases', () => {
 
   it('calls getSimilarCases with correct arguments', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getSimilarCases');
-    renderHook(() => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0 }), {
-      wrapper: appMockRender.AppWrapper,
-    });
+    renderHook(
+      () => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0, enabled: true }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
 
     await waitFor(() => {
       expect(spyOnGetCases).toBeCalled();
@@ -46,6 +49,18 @@ describe('useGetSimilarCases', () => {
     });
   });
 
+  it('calls does not call getSimilarCases when enabled=false', async () => {
+    const spyOnGetCases = jest.spyOn(api, 'getSimilarCases');
+    renderHook(
+      () => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0, enabled: false }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
+
+    expect(spyOnGetCases).not.toBeCalled();
+  });
+
   it('shows a toast error message when an error occurs in the response', async () => {
     const spyOnGetCases = jest.spyOn(api, 'getSimilarCases');
     spyOnGetCases.mockImplementation(() => {
@@ -55,9 +70,12 @@ describe('useGetSimilarCases', () => {
     const addError = jest.fn();
     (useToasts as jest.Mock).mockReturnValue({ addSuccess, addError });
 
-    renderHook(() => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0 }), {
-      wrapper: appMockRender.AppWrapper,
-    });
+    renderHook(
+      () => useGetSimilarCases({ caseId: mockCase.id, perPage: 10, page: 0, enabled: true }),
+      {
+        wrapper: appMockRender.AppWrapper,
+      }
+    );
 
     await waitFor(() => {
       expect(addError).toHaveBeenCalled();

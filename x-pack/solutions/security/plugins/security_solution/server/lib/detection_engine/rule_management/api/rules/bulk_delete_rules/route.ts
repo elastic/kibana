@@ -6,7 +6,12 @@
  */
 
 import type { VersionedRouteConfig } from '@kbn/core-http-server';
-import type { IKibanaResponse, Logger, RequestHandler } from '@kbn/core/server';
+import type {
+  DocLinksServiceSetup,
+  IKibanaResponse,
+  Logger,
+  RequestHandler,
+} from '@kbn/core/server';
 import { transformError } from '@kbn/securitysolution-es-utils';
 import { buildRouteValidationWithZod } from '@kbn/zod-helpers';
 import type {
@@ -19,7 +24,10 @@ import {
   BulkDeleteRulesRequestBody,
   validateQueryRuleByIds,
 } from '../../../../../../../common/api/detection_engine/rule_management';
-import { DETECTION_ENGINE_RULES_BULK_DELETE } from '../../../../../../../common/constants';
+import {
+  DETECTION_ENGINE_RULES_BULK_ACTION,
+  DETECTION_ENGINE_RULES_BULK_DELETE,
+} from '../../../../../../../common/constants';
 import type {
   SecuritySolutionPluginRouter,
   SecuritySolutionRequestHandlerContext,
@@ -48,7 +56,11 @@ type Handler = RequestHandler<
  *
  * TODO: https://github.com/elastic/kibana/issues/193184 Delete this route and clean up the code
  */
-export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logger: Logger) => {
+export const bulkDeleteRulesRoute = (
+  router: SecuritySolutionPluginRouter,
+  logger: Logger,
+  docLinks: DocLinksServiceSetup
+) => {
   const handler: Handler = async (
     context,
     request,
@@ -126,6 +138,17 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
           body: buildRouteValidationWithZod(BulkDeleteRulesRequestBody),
         },
       },
+      options: {
+        deprecated: {
+          documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
+          severity: 'critical',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'POST',
+            newApiPath: DETECTION_ENGINE_RULES_BULK_ACTION,
+          },
+        },
+      },
     },
     handler
   );
@@ -135,6 +158,17 @@ export const bulkDeleteRulesRoute = (router: SecuritySolutionPluginRouter, logge
       validate: {
         request: {
           body: buildRouteValidationWithZod(BulkDeleteRulesPostRequestBody),
+        },
+      },
+      options: {
+        deprecated: {
+          documentationUrl: docLinks.links.securitySolution.legacyBulkApiDeprecations,
+          severity: 'critical',
+          reason: {
+            type: 'migrate',
+            newApiMethod: 'POST',
+            newApiPath: DETECTION_ENGINE_RULES_BULK_ACTION,
+          },
         },
       },
     },

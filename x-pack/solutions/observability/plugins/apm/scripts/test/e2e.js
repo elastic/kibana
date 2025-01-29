@@ -17,15 +17,22 @@ const { argv } = yargs(process.argv.slice(2))
     type: 'boolean',
     description: 'Runs Cypress in headed mode',
   })
+  .option('open', {
+    default: false,
+    type: 'boolean',
+    description: 'Opens Cypress dashboard',
+  })
   .help();
 
 const e2eDir = path.join(__dirname, '../../ftr_e2e');
 
 function runTests() {
-  const mode = argv.headed ? 'open' : 'run';
-  console.log(`Running e2e tests: "yarn cypress:${mode}"`);
+  const mode = argv.open ? 'open' : 'run';
+  const isHeaded = mode === 'run' && argv.headed ? ':headed' : '';
 
-  return childProcess.spawnSync('yarn', [`cypress:${mode}`], {
+  console.log(`Running e2e tests: "yarn cypress:${mode}${isHeaded}"`);
+
+  return childProcess.spawnSync('yarn', [`cypress:${mode}${isHeaded}`], {
     cwd: e2eDir,
     encoding: 'utf8',
     stdio: 'inherit',

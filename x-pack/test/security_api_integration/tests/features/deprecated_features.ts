@@ -183,6 +183,7 @@ export default function ({ getService }: FtrProviderContext) {
           "generalCases",
           "observabilityCases",
           "securitySolutionCases",
+          "siem",
         ]
       `);
     });
@@ -204,6 +205,7 @@ export default function ({ getService }: FtrProviderContext) {
       const featureIdsImplicitlyReplacedWithMultipleFeatures = new Set([
         'case_2_feature_a',
         'case_4_feature_a',
+        'siem',
       ]);
       for (const feature of features) {
         if (

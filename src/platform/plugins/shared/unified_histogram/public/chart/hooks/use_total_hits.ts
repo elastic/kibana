@@ -31,7 +31,7 @@ export const useTotalHits = ({
   filters,
   query,
   getTimeRange,
-  refetch$,
+  fetch$,
   onTotalHitsChange,
   isPlainRecord,
 }: {
@@ -43,7 +43,7 @@ export const useTotalHits = ({
   filters: Filter[];
   query: Query | AggregateQuery;
   getTimeRange: () => TimeRange;
-  refetch$: Observable<UnifiedHistogramInputMessage>;
+  fetch$: Observable<UnifiedHistogramInputMessage>;
   onTotalHitsChange?: (status: UnifiedHistogramFetchStatus, result?: number | Error) => void;
   isPlainRecord?: boolean;
 }) => {
@@ -65,9 +65,9 @@ export const useTotalHits = ({
   });
 
   useEffect(() => {
-    const subscription = refetch$.subscribe(fetch);
+    const subscription = fetch$.subscribe(fetch);
     return () => subscription.unsubscribe();
-  }, [fetch, refetch$]);
+  }, [fetch, fetch$]);
 };
 
 const fetchTotalHits = async ({

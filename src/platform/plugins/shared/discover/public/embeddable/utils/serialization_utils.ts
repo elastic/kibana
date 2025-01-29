@@ -11,8 +11,11 @@ import { omit, pick } from 'lodash';
 import deepEqual from 'react-fast-compare';
 
 import { EmbeddableStateWithType } from '@kbn/embeddable-plugin/common';
-import { SerializedPanelState } from '@kbn/presentation-containers';
-import { SerializedTimeRange, SerializedTitles } from '@kbn/presentation-publishing';
+import {
+  SerializedTimeRange,
+  SerializedTitles,
+  SerializedPanelState,
+} from '@kbn/presentation-publishing';
 import {
   SavedSearch,
   SavedSearchAttributes,

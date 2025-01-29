@@ -141,7 +141,7 @@ Tests run on buildkite PR pipeline are parallelized (8 parallel jobs) and are or
 ```yml
     ...
     depends_on: build
-    parallelism: 8
+    parallelism: 3
     ...
 ```
 
@@ -150,13 +150,19 @@ Tests run on buildkite PR pipeline are parallelized (8 parallel jobs) and are or
 #### Start Cypress dashboard
 
 ```
-node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --headed
+node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --open
 ```
 
 #### Run tests
 
 ```
 node x-pack/solutions/observability/plugins/apm/scripts/test/e2e
+```
+
+#### Run tests in headed mode
+
+```
+node x-pack/solutions/observability/plugins/apm/scripts/test/e2e --headed
 ```
 
 ### A11y checks

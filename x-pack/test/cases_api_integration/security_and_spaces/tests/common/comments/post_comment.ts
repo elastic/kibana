@@ -40,7 +40,7 @@ import {
   removeServerGeneratedPropertiesFromSavedObject,
   superUserSpace1Auth,
   updateCase,
-  getCaseUserActions,
+  findCaseUserActions,
   removeServerGeneratedPropertiesFromUserAction,
   getAllComments,
   bulkCreateAttachments,
@@ -148,7 +148,7 @@ export default ({ getService }: FtrProviderContext): void => {
           caseId: postedCase.id,
           params: postCommentUserReq,
         });
-        const userActions = await getCaseUserActions({ supertest, caseID: postedCase.id });
+        const { userActions } = await findCaseUserActions({ supertest, caseID: postedCase.id });
         const commentUserAction = removeServerGeneratedPropertiesFromUserAction(userActions[1]);
 
         expect(commentUserAction).to.eql({
@@ -162,7 +162,6 @@ export default ({ getService }: FtrProviderContext): void => {
               owner: 'securitySolutionFixture',
             },
           },
-          case_id: postedCase.id,
           comment_id: patchedCase.comments![0].id,
           owner: 'securitySolutionFixture',
         });

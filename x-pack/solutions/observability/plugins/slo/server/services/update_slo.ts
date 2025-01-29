@@ -10,17 +10,17 @@ import { UpdateSLOParams, UpdateSLOResponse, updateSLOResponseSchema } from '@kb
 import { asyncForEach } from '@kbn/std';
 import { isEqual, pick } from 'lodash';
 import {
-  SLO_DESTINATION_INDEX_PATTERN,
+  SLI_DESTINATION_INDEX_PATTERN,
   SLO_RESOURCES_VERSION,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_TEMP_INDEX_NAME,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
+  SUMMARY_TEMP_INDEX_NAME,
   getSLOPipelineId,
   getSLOSummaryPipelineId,
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '../../common/constants';
-import { getSLOPipelineTemplate } from '../assets/ingest_templates/slo_pipeline_template';
-import { getSLOSummaryPipelineTemplate } from '../assets/ingest_templates/slo_summary_pipeline_template';
+import { getSLIPipelineTemplate } from '../assets/ingest_templates/sli_pipeline_template';
+import { getSummaryPipelineTemplate } from '../assets/ingest_templates/summary_pipeline_template';
 import { SLODefinition } from '../domain/models';
 import { validateSLO } from '../domain/services';
 import { SecurityException } from '../errors';
@@ -39,7 +39,8 @@ export class UpdateSLO {
     private scopedClusterClient: IScopedClusterClient,
     private logger: Logger,
     private spaceId: string,
-    private basePath: IBasePath
+    private basePath: IBasePath,
+    private userId: string
   ) {}
 
   public async execute(sloId: string, params: UpdateSLOParams): Promise<UpdateSLOResponse> {
@@ -58,6 +59,7 @@ export class UpdateSLO {
 
     updatedSlo = Object.assign(updatedSlo, {
       updatedAt: new Date(),
+      updatedBy: this.userId,
       revision: requireRevisionBump ? originalSlo.revision + 1 : originalSlo.revision,
     });
 
@@ -75,7 +77,7 @@ export class UpdateSLO {
         await retryTransientEsErrors(
           () =>
             this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-              getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
+              getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
             ),
           { logger: this.logger }
         );
@@ -109,7 +111,7 @@ export class UpdateSLO {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLOPipelineTemplate(updatedSlo)
+            getSLIPipelineTemplate(updatedSlo)
           ),
         { logger: this.logger }
       );
@@ -129,7 +131,7 @@ export class UpdateSLO {
       await retryTransientEsErrors(
         () =>
           this.scopedClusterClient.asSecondaryAuthUser.ingest.putPipeline(
-            getSLOSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
+            getSummaryPipelineTemplate(updatedSlo, this.spaceId, this.basePath)
           ),
         { logger: this.logger }
       );
@@ -151,7 +153,7 @@ export class UpdateSLO {
       await retryTransientEsErrors(
         () =>
           this.esClient.index({
-            index: SLO_SUMMARY_TEMP_INDEX_NAME,
+            index: SUMMARY_TEMP_INDEX_NAME,
             id: `slo-${updatedSlo.id}`,
             document: createTempSummaryDocument(updatedSlo, this.spaceId, this.basePath),
             refresh: true,
@@ -236,7 +238,7 @@ export class UpdateSLO {
 
   private async deleteRollupData(sloId: string, sloRevision: number): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: SLO_DESTINATION_INDEX_PATTERN,
+      index: SLI_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       query: {
         bool: {
@@ -248,7 +250,7 @@ export class UpdateSLO {
 
   private async deleteSummaryData(sloId: string, sloRevision: number): Promise<void> {
     await this.esClient.deleteByQuery({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       refresh: true,
       query: {
         bool: {

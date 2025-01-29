@@ -35,6 +35,7 @@ import { useSourcererDataView } from '../../../../sourcerer/containers';
 import { useDeleteNote } from './hooks/use_delete_note';
 import { getTimelineNoteSelector } from '../../timeline/tabs/notes/selectors';
 import { DocumentEventTypes } from '../../../../common/lib/telemetry';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
 
 export const NotePreviewsContainer = styled.section`
   padding-top: ${({ theme }) => `${theme.eui.euiSizeS}`};
@@ -190,21 +191,10 @@ const NoteActions = React.memo<{
     savedObjectId,
     showToggleEventDetailsAction = true,
   }) => {
-    return eventId && timelineId ? (
-      <>
-        {showToggleEventDetailsAction ? (
-          <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
-        ) : null}
-        <DeleteNoteButton
-          noteId={noteId}
-          eventId={eventId}
-          confirmingNoteId={confirmingNoteId}
-          savedObjectId={savedObjectId}
-          timelineId={timelineId}
-          eventIdToNoteIds={eventIdToNoteIds}
-        />
-      </>
-    ) : (
+    const {
+      notesPrivileges: { crud: canCrudNotes },
+    } = useUserPrivileges();
+    const DeleteButton = canCrudNotes ? (
       <DeleteNoteButton
         noteId={noteId}
         eventId={eventId}
@@ -213,6 +203,17 @@ const NoteActions = React.memo<{
         timelineId={timelineId}
         eventIdToNoteIds={eventIdToNoteIds}
       />
+    ) : null;
+
+    return eventId && timelineId ? (
+      <>
+        {showToggleEventDetailsAction ? (
+          <ToggleEventDetailsButton eventId={eventId} timelineId={timelineId} />
+        ) : null}
+        {DeleteButton}
+      </>
+    ) : (
+      <>{DeleteButton}</>
     );
   }
 );

@@ -7,6 +7,8 @@
 
 import type { Severity } from '@kbn/securitysolution-io-ts-alerting-types';
 
+export const SIEM_MIGRATIONS_ASSISTANT_USER = 'assistant';
+
 export const SIEM_MIGRATIONS_PATH = '/internal/siem_migrations' as const;
 export const SIEM_RULE_MIGRATIONS_PATH = `${SIEM_MIGRATIONS_PATH}/rules` as const;
 
