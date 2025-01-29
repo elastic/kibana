@@ -55,6 +55,7 @@ import {
   getEntityStoreFieldRetentionEnrichTaskState as getEntityStoreFieldRetentionEnrichTaskStatus,
   removeEntityStoreDataViewRefreshTask,
   startEntityStoreDataViewRefreshTask,
+  getEntityStoreDataViewRefreshTaskState,
 } from './tasks';
 import {
   createEntityIndex,
@@ -203,6 +204,9 @@ export class EntityStoreDataClient {
       ? Promise.all([
           ...(taskManager
             ? [getEntityStoreFieldRetentionEnrichTaskStatus({ namespace, taskManager })]
+            : []),
+          ...(taskManager
+            ? [getEntityStoreDataViewRefreshTaskState({ namespace, taskManager })]
             : []),
           getPlatformPipelineStatus({
             engineId: definition.id,
