@@ -267,6 +267,34 @@ export const OutputFormRemoteEsSection: React.FunctionComponent<Props> = (props)
             </SecretFormRow>
           )}
           <EuiSpacer size="m" />
+          <EuiCallOut
+            title={
+              <FormattedMessage
+                id="xpack.fleet.settings.editOutputFlyout.kibanaAPIKeyCalloutText"
+                defaultMessage="Create an API Key by running this API request in the Remote Kibana Console and copy the encoded value"
+              />
+            }
+            data-test-subj="kibanaAPIKeyCallout"
+          >
+            <EuiCodeBlock isCopyable={true}>
+              {` POST /_security/api_key
+   {
+     "name": "integration_sync_api_key", 
+     "role_descriptors": {
+       "integration_writer": { 
+         "cluster": [],
+        "indices":[],
+        "applications": [{
+           "application": "kibana-.kibana",
+             "privileges": ["feature_fleet.read", "feature_fleetv2.read"],
+             "resources": ["*"]
+         }]
+        }
+     }
+   }`}
+            </EuiCodeBlock>
+          </EuiCallOut>
+          <EuiSpacer size="m" />
         </>
       ) : null}
     </>
