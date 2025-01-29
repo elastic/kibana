@@ -37,6 +37,30 @@ describe('ScheduleItemField', () => {
     expect(mockField.setValue).toHaveBeenCalledWith('5000000s');
   });
 
+  it(`uses the "units" prop when it's passed`, async () => {
+    const mockField = useFormFieldMock<string>({ value: '7d' });
+    const wrapper = mount(
+      <TestProviders>
+        <ScheduleItemField
+          field={mockField}
+          units={['m', 'h', 'd']}
+          dataTestSubj="schedule-item"
+          idAria="idAria"
+        />
+      </TestProviders>
+    );
+
+    expect(wrapper.find('[data-test-subj="interval"]').last().prop('value')).toEqual(7);
+    expect(wrapper.find('[data-test-subj="timeType"]').last().prop('value')).toEqual('d');
+
+    wrapper
+      .find('[data-test-subj="interval"]')
+      .last()
+      .simulate('change', { target: { value: '8' } });
+
+    expect(mockField.setValue).toHaveBeenCalledWith('8d');
+  });
+
   it.each([
     [-10, -5],
     [-5, 0],

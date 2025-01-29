@@ -38,7 +38,7 @@ export const useCanvasApi: () => CanvasContainerApi = () => {
 
   const getCanvasApi = useCallback((): CanvasContainerApi => {
     return {
-      viewMode: new BehaviorSubject<ViewMode>('edit'), // always in edit mode
+      viewMode$: new BehaviorSubject<ViewMode>('edit'), // always in edit mode
       addNewPanel: async ({
         panelType,
         initialState,

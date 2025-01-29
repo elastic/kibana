@@ -16,7 +16,7 @@
 
 import { z } from '@kbn/zod';
 
-import { EntityType, IndexPattern, EngineDescriptor } from '../common.gen';
+import { EntityType, IndexPattern, Interval, EngineDescriptor } from '../common.gen';
 
 export type InitEntityEngineRequestParams = z.infer<typeof InitEntityEngineRequestParams>;
 export const InitEntityEngineRequestParams = z.object({
@@ -35,6 +35,7 @@ export const InitEntityEngineRequestBody = z.object({
   fieldHistoryLength: z.number().int().optional().default(10),
   indexPattern: IndexPattern.optional(),
   filter: z.string().optional(),
+  enrichPolicyExecutionInterval: Interval.optional(),
 });
 export type InitEntityEngineRequestBodyInput = z.input<typeof InitEntityEngineRequestBody>;
 

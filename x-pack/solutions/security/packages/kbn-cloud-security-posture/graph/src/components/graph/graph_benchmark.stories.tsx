@@ -11,6 +11,7 @@ import { Story } from '@storybook/react';
 import { EuiListGroup, EuiHorizontalRule } from '@elastic/eui';
 import type { NodeProps, NodeViewModel } from '..';
 import { Graph } from '..';
+import { GlobalStylesStorybookDecorator } from '../../../.storybook/decorators';
 import { GraphPopover } from './graph_popover';
 import { ExpandButtonClickCallback } from '../types';
 import { useGraphPopover } from './use_graph_popover';
@@ -22,6 +23,7 @@ export default {
   title: 'Graph Benchmark',
   description: 'CDR - Graph visualization',
   argTypes: {},
+  decorators: [GlobalStylesStorybookDecorator],
 };
 
 const useExpandButtonPopover = () => {

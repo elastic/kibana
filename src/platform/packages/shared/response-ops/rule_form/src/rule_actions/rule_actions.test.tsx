@@ -28,6 +28,7 @@ const http = httpServiceMock.createStartContract();
 jest.mock('../hooks', () => ({
   useRuleFormState: jest.fn(),
   useRuleFormDispatch: jest.fn(),
+  useRuleFormScreenContext: jest.fn(),
 }));
 
 jest.mock('./rule_actions_system_actions_item', () => ({
@@ -94,7 +95,8 @@ const mockValidate = jest.fn().mockResolvedValue({
   errors: {},
 });
 
-const { useRuleFormState, useRuleFormDispatch } = jest.requireMock('../hooks');
+const { useRuleFormState, useRuleFormDispatch, useRuleFormScreenContext } =
+  jest.requireMock('../hooks');
 const { useLoadConnectors, useLoadConnectorTypes, useLoadRuleTypeAadTemplateField } =
   jest.requireMock('../common/hooks');
 
@@ -109,6 +111,7 @@ const mockActions = [getAction('1'), getAction('2')];
 const mockSystemActions = [getSystemAction('3')];
 
 const mockOnChange = jest.fn();
+const mockSetIsConnectorsScreenVisible = jest.fn();
 
 describe('ruleActions', () => {
   beforeEach(() => {
@@ -167,6 +170,9 @@ describe('ruleActions', () => {
       aadTemplateFields: [],
     });
     useRuleFormDispatch.mockReturnValue(mockOnChange);
+    useRuleFormScreenContext.mockReturnValue({
+      setIsConnectorsScreenVisible: mockSetIsConnectorsScreenVisible,
+    });
   });
 
   afterEach(() => {
@@ -216,29 +222,7 @@ describe('ruleActions', () => {
     render(<RuleActions />);
 
     await userEvent.click(screen.getByTestId('ruleActionsAddActionButton'));
-    expect(screen.getByText('RuleActionsConnectorsModal')).toBeInTheDocument();
-  });
-
-  test('should call onSelectConnector with the correct parameters', async () => {
-    render(<RuleActions />);
-
-    await userEvent.click(screen.getByTestId('ruleActionsAddActionButton'));
-    expect(screen.getByText('RuleActionsConnectorsModal')).toBeInTheDocument();
-
-    await userEvent.click(screen.getByText('select connector'));
-    expect(mockOnChange).toHaveBeenCalledWith({
-      payload: {
-        actionTypeId: 'actionType-1',
-        frequency: { notifyWhen: 'onActionGroupChange', summary: false, throttle: null },
-        group: 'test',
-        id: 'connector-1',
-        params: { key: 'value' },
-        uuid: 'xxxxxxxx-xxxx-xxxx-xxxx-xxxxxxxxxxxx',
-      },
-      type: 'addAction',
-    });
-
-    expect(screen.queryByText('RuleActionsConnectorsModal')).not.toBeInTheDocument();
+    expect(mockSetIsConnectorsScreenVisible).toHaveBeenCalledWith(true);
   });
 
   test('should use the rule producer ID if it is not a multi-consumer rule', async () => {

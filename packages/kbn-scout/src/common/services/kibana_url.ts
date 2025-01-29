@@ -55,8 +55,9 @@ export class KibanaUrl {
    * @param appName name of the app to get the URL for
    * @param options optional modifications to apply to the URL
    */
-  app(appName: string, options?: PathOptions) {
-    return this.get(`/app/${appName}`, options);
+  app(appName: string, options?: { space?: string; pathOptions?: PathOptions }) {
+    const relPath = options?.space ? `s/${options.space}/app/${appName}` : `/app/${appName}`;
+    return this.get(relPath, options?.pathOptions);
   }
 
   toString() {

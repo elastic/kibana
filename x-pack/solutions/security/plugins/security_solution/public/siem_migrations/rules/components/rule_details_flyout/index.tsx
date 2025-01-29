@@ -48,6 +48,7 @@ import {
   isMigrationCustomRule,
 } from '../../../../../common/siem_migrations/rules/utils';
 import { useUpdateMigrationRules } from '../../logic/use_update_migration_rules';
+import { UpdatedByLabel } from './updated_by';
 
 /*
  * Fixes tabs to the top and allows the content to scroll.
@@ -244,7 +245,8 @@ export const MigrationRuleDetailsFlyout: React.FC<MigrationRuleDetailsFlyoutProp
                 i18n.UNKNOWN_MIGRATION_RULE_TITLE}
             </h2>
           </EuiTitle>
-          <EuiSpacer size="l" />
+          <EuiSpacer size="s" />
+          <UpdatedByLabel ruleMigration={ruleMigration} />
         </EuiFlyoutHeader>
         <EuiFlyoutBody>
           <EuiSkeletonLoading

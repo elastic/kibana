@@ -135,7 +135,7 @@ export const MigrationRulesPage: React.FC<MigrationRulesPageProps> = React.memo(
         <MissingPrivilegesCallOut />
 
         <SecuritySolutionPageWrapper>
-          <HeaderPage title={pageTitle}>
+          <HeaderPage title={pageTitle} border>
             <HeaderButtons
               ruleMigrationsStats={ruleMigrationsStats}
               selectedMigrationId={migrationId}

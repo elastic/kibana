@@ -1,6 +1,6 @@
 openapi: 3.0.0
 info:
-  title: Patch list API endpoint
+  title: Patch value list API endpoint
   version: '2023-10-31'
 paths:
   /api/lists:
@@ -8,10 +8,10 @@ paths:
       x-labels: [serverless, ess]
       operationId: PatchList
       x-codegen-enabled: true
-      summary: Patch a list
-      description: Update specific fields of an existing list using the list ID.
+      summary: Patch a value list
+      description: Update specific fields of an existing list using the list `id`.
       requestBody:
-        description: List's properties
+        description: Value list's properties
         required: true
         content:
           application/json:
@@ -27,12 +27,14 @@ paths:
                 meta:
                   $ref: '../model/list_common.schema.yaml#/components/schemas/ListMetadata'
                 version:
-                  type: integer
-                  minimum: 1
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListVersion'
                 _version:
-                  type: string
+                  $ref: '../model/list_common.schema.yaml#/components/schemas/ListVersionId'
               required:
                 - id
+              example:
+                id: ip_list
+                name: Bad ips list - UPDATED
       responses:
         200:
           description: Successful response
@@ -40,6 +42,22 @@ paths:
             application/json:
               schema:
                 $ref: '../model/list_schemas.schema.yaml#/components/schemas/List'
+              examples:
+                ip:
+                  value:
+                    id: ip_list
+                    type: ip
+                    name: Bad ips list - UPDATED
+                    description: This list describes bad internet ips
+                    immutable: false
+                    '@timestamp': 2025-01-08T04:47:34.273Z
+                    version: 2
+                    _version: WzEsMV0=
+                    tie_breaker_id: f5508188-b1e9-4e6e-9662-d039a7d89899
+                    created_at: 2025-01-08T04:47:34.273Z
+                    created_by: elastic
+                    updated_at: 2025-01-08T05:21:53.843Z
+                    updated_by: elastic
         400:
           description: Invalid input data response
           content:
@@ -48,27 +66,55 @@ paths:
                 oneOf:
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
                   - $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                badRequest:
+                  value:
+                    statusCode: 400
+                    error: Bad Request
+                    message: '[request body]: name: Expected string, received number'
         401:
           description: Unsuccessful authentication response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                unauthorized:
+                  value:
+                    statusCode: 401
+                    error: Unauthorized
+                    message: '[security_exception\n\tRoot causes:\n\t\tsecurity_exception: unable to authenticate user [elastic] for REST request [/_security/_authenticate]]: unable to authenticate user [elastic] for REST request [/_security/_authenticate]'
         403:
           description: Not enough privileges response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/PlatformErrorResponse'
+              examples:
+                forbidden:
+                  value:
+                    statusCode: 403
+                    error: Forbidden
+                    message: 'API [PATCH /api/lists] is unauthorized for user, this action is granted by the Kibana privileges [lists-all]'
         404:
           description: List not found response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                notFound:
+                  value:
+                    message: 'list id: \"foo\" not found'
+                    status_code: 404
         500:
           description: Internal server error response
           content:
             application/json:
               schema:
                 $ref: '../../../../../../../src/platform/packages/shared/kbn-openapi-common/schemas/error_responses.schema.yaml#/components/schemas/SiemErrorResponse'
+              examples:
+                serverError:
+                  value:
+                    message: Internal Server Error
+                    status_code: 500

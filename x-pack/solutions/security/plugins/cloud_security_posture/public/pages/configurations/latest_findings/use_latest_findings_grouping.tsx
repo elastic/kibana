@@ -230,6 +230,11 @@ export const useLatestFindingsGrouping = ({
             },
           },
         },
+        ...(!isNoneGroup([currentSelectedGroup]) && {
+          nullGroupItems: {
+            missing: { field: currentSelectedGroup },
+          },
+        }),
       },
     ],
   });

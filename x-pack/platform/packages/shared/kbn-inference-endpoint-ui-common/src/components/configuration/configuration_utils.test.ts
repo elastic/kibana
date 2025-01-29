@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import { FieldType } from '@kbn/search-connectors/types';
+import { FieldType } from '../../types/types';
 import { ensureBooleanType, ensureCorrectTyping, ensureStringType } from './configuration_utils';
 
 describe('configuration utils', () => {

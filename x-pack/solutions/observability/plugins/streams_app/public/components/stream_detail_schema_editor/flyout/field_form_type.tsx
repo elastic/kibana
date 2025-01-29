@@ -9,7 +9,10 @@ import { EuiSelect } from '@elastic/eui';
 import React from 'react';
 import { SchemaEditorEditingState } from '../hooks/use_editing_state';
 
-type FieldFormTypeProps = Pick<SchemaEditorEditingState, 'nextFieldType' | 'setNextFieldType'>;
+type FieldFormTypeProps = Pick<SchemaEditorEditingState, 'nextFieldType' | 'setNextFieldType'> & {
+  isLoadingRecommendation: boolean;
+  recommendation?: string;
+};
 
 const TYPE_OPTIONS = {
   long: 'Long',
@@ -26,9 +29,13 @@ type FieldTypeOption = keyof typeof TYPE_OPTIONS;
 export const FieldFormType = ({
   nextFieldType: value,
   setNextFieldType: onChange,
+  isLoadingRecommendation,
+  recommendation,
 }: FieldFormTypeProps) => {
   return (
     <EuiSelect
+      disabled={!value && isLoadingRecommendation}
+      isLoading={isLoadingRecommendation}
       data-test-subj="streamsAppFieldFormTypeSelect"
       hasNoInitialSelection={!value}
       onChange={(event) => {

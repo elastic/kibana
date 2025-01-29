@@ -119,7 +119,10 @@ export async function getEnrollmentAPIKey(
 
     if (spaceId) {
       if (spaceId === DEFAULT_SPACE_ID) {
-        if (body._source?.namespaces && !body._source?.namespaces.includes(DEFAULT_SPACE_ID)) {
+        if (
+          (body._source?.namespaces?.length ?? 0) > 0 &&
+          !body._source?.namespaces?.includes(DEFAULT_SPACE_ID)
+        ) {
           throw new EnrollmentKeyNotFoundError(`Enrollment api key ${id} not found in namespace`);
         }
       } else if (!body._source?.namespaces?.includes(spaceId)) {
