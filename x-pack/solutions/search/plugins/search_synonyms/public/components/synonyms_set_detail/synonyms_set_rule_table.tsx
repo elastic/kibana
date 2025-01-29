@@ -60,7 +60,7 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
   if (!data) return null;
 
   const pagination = {
-    initialPageSize: 10,
+    initialPageSize: 25,
     pageSizeOptions: [10, 25, 50],
     ...data._meta,
     pageSize,

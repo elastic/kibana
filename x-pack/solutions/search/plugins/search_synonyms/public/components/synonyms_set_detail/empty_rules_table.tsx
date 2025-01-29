@@ -8,6 +8,7 @@
 import { EuiFlexGroup, EuiFlexItem, EuiLink, EuiTitle } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import React from 'react';
+import { docLinks } from '../../../common/doc_links';
 import { SynonymsSetEmptyRulesCards } from './empty_rules_cards';
 
 interface SynonymsSetEmptyRuleTableProps {
@@ -28,7 +29,10 @@ export const SynonymsSetEmptyRuleTable: React.FC<SynonymsSetEmptyRuleTableProps>
         </EuiTitle>
       </EuiFlexItem>
       <EuiFlexItem grow={false}>
-        <EuiLink data-test-subj="searchSynonymsSynonymsSetEmptyRuleTableViewDocumentationLink">
+        <EuiLink
+          data-test-subj="searchSynonymsSynonymsSetEmptyRuleTableViewDocumentationLink"
+          href={docLinks.synonymsApi}
+        >
           {i18n.translate('xpack.searchSynonyms.synonymsSetEmptyRuleTable.viewDocumentation', {
             defaultMessage: 'View documentation',
           })}

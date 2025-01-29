@@ -315,6 +315,9 @@ export function defineRoutes({ logger, router }: { logger: Logger; router: IRout
       const synonymsSetId = request.params.synonymsSetId;
       const result = await putSynonymsSet(asCurrentUser, synonymsSetId);
       return response.ok({
+        headers: {
+          'content-type': 'application/json',
+        },
         body: result,
       });
     })

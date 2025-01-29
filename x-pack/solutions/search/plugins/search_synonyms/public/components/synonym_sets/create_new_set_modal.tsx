@@ -67,7 +67,7 @@ export const CreateSynonymsSetModal = ({ onClose }: CreateSynonymsSetModalProps)
                     defaultMessage: 'Your synonyms set will be named: {name}',
                     values: { name },
                   })
-                : ''
+                : undefined
             }
           >
             <EuiFieldText

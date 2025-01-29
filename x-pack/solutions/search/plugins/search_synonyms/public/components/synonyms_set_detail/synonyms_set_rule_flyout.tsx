@@ -5,12 +5,13 @@
  * 2.0.
  */
 
-import React from 'react';
+import React, { useState } from 'react';
 
 import {
   EuiButton,
   EuiButtonEmpty,
   EuiComboBox,
+  EuiComboBoxOptionOption,
   EuiFieldText,
   EuiFlexGroup,
   EuiFlexItem,
@@ -25,7 +26,12 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { SynonymsSynonymRule } from '@elastic/elasticsearch/lib/api/types';
-import { getExplicitSynonym, isExplicitSynonym } from '../../utils/synonyms_utils';
+import {
+  getExplicitSynonym,
+  isExplicitSynonym,
+  synonymsOptionToString,
+  synonymsStringToOption,
+} from '../../utils/synonyms_utils';
 import { usePutSynonymsRule } from '../../hooks/use_put_synonyms_rule';
 
 interface SynonymsRuleFlyoutProps {
@@ -52,25 +58,18 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
 
   const [from, to] =
     flyoutMode === 'create' ? ['', ''] : isExplicit ? getExplicitSynonym(synonyms) : [synonyms, ''];
-  const hasChanges = synonyms.trim() === synonymsRule.synonyms.trim();
 
-  const [selectedFromTerms, setSelectedFromTerms] = React.useState(
-    from.length === 0
-      ? []
-      : from
-          .trim()
-          .split(',')
-          .map((s) => ({ label: s }))
+  const [selectedFromTerms, setSelectedFromTerms] = useState<EuiComboBoxOptionOption[]>(
+    synonymsStringToOption(from)
   );
 
-  const [selectedToTerms, setSelectedToTerms] = React.useState(
-    to.length === 0
-      ? []
-      : to
-          .trim()
-          .split(',')
-          .map((s) => ({ label: s }))
+  const [selectedToTerms, setSelectedToTerms] = useState<EuiComboBoxOptionOption[]>(
+    synonymsStringToOption(to)
   );
+
+  const hasChanges =
+    synonyms.trim() !==
+    synonymsOptionToString({ fromTerms: selectedFromTerms, toTerms: selectedToTerms, isExplicit });
 
   return (
     <EuiFlyout onClose={onClose}>
@@ -116,7 +115,10 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
                 return;
               }
               if (!options.find((option) => option.label.trim() === searchValue.toLowerCase())) {
-                setSelectedFromTerms([...selectedFromTerms, { label: searchValue }]);
+                setSelectedFromTerms([
+                  ...selectedFromTerms,
+                  { label: searchValue, key: searchValue },
+                ]);
               }
             }}
           />
@@ -140,7 +142,10 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
                   return;
                 }
                 if (!options.find((option) => option.label.trim() === searchValue.toLowerCase())) {
-                  setSelectedToTerms([...selectedToTerms, { label: searchValue }]);
+                  setSelectedToTerms([
+                    ...selectedToTerms,
+                    { label: searchValue, key: searchValue },
+                  ]);
                 }
               }}
             />
@@ -166,22 +171,8 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
                   iconType={'refresh'}
                   disabled={!hasChanges}
                   onClick={() => {
-                    setSelectedFromTerms(
-                      from.length === 0
-                        ? []
-                        : from
-                            .trim()
-                            .split(',')
-                            .map((s) => ({ label: s }))
-                    );
-                    setSelectedToTerms(
-                      to.length === 0
-                        ? []
-                        : to
-                            .trim()
-                            .split(',')
-                            .map((s) => ({ label: s }))
-                    );
+                    setSelectedFromTerms(synonymsStringToOption(from));
+                    setSelectedToTerms(synonymsStringToOption(to));
                   }}
                 >
                   {i18n.translate('xpack.searchSynonyms.synonymsSetRuleFlyout.reset', {
@@ -200,9 +191,11 @@ export const SynonymsRuleFlyout: React.FC<SynonymsRuleFlyoutProps> = ({
                     putSynonymsRule({
                       synonymsSetId,
                       ruleId: synonymsRule.id,
-                      synonyms: `${selectedFromTerms.map((s) => s.label).join(',')}${
-                        isExplicit ? ' => ' + selectedToTerms.map((s) => s.label).join(',') : ''
-                      }`,
+                      synonyms: synonymsOptionToString({
+                        fromTerms: selectedFromTerms,
+                        toTerms: selectedToTerms,
+                        isExplicit,
+                      }),
                     });
                   }}
                 >

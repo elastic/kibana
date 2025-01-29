@@ -34,14 +34,15 @@ export const usePutSynonymsSet = (onSuccess?: () => void, onError?: (error: stri
         queryClient.invalidateQueries(['synonyms-rule-fetch']);
         notifications?.toasts?.addSuccess({
           title: i18n.translate('xpack.searchSynonyms.putSynonymsSetSuccess', {
-            defaultMessage: 'Synonyms set {synonymsSetId} put',
-            values: { synonymsSetId },
+            defaultMessage: 'Synonyms set added',
           }),
         });
         if (onSuccess) {
           onSuccess();
         }
-        application.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/sets/${synonymsSetId}`);
+        application.navigateToUrl(
+          http.basePath.prepend(`${PLUGIN_ROUTE_ROOT}/sets/${synonymsSetId}`)
+        );
       },
       onError: (error: { body: KibanaServerError }) => {
         if (onError) {

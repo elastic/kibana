@@ -8,7 +8,7 @@ import { useMutation } from '@tanstack/react-query';
 import { useKibana } from './use_kibana';
 
 export const useFetchGeneratedRuleId = (
-  onSuccess?: (data: string) => void,
+  onSuccess: (data: string) => void,
   onError?: () => void
 ) => {
   const {
@@ -23,9 +23,7 @@ export const useFetchGeneratedRuleId = (
     },
     {
       onSuccess: (data) => {
-        if (onSuccess) {
-          onSuccess(data.id);
-        }
+        onSuccess(data.id);
       },
       onError: () => {
         if (onError) {
