@@ -10,6 +10,11 @@ import { __IntlProvider as IntlProvider } from '@kbn/i18n-react';
 import { render } from '@testing-library/react';
 import { useFetchGraphData } from '@kbn/cloud-security-posture-graph/src/hooks';
 import {
+  uiMetricService,
+  GRAPH_PREVIEW,
+} from '@kbn/cloud-security-posture-common/utils/ui_metrics';
+import { METRIC_TYPE } from '@kbn/analytics';
+import {
   ANALYZER_PREVIEW_TEST_ID,
   SESSION_PREVIEW_TEST_ID,
   GRAPH_PREVIEW_TEST_ID,
@@ -28,6 +33,11 @@ import { useInvestigateInTimeline } from '../../../../detections/components/aler
 import { useIsInvestigateInResolverActionEnabled } from '../../../../detections/components/alerts_table/timeline_actions/investigate_in_resolver';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
 import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { createUseUiSetting$Mock } from '../../../../common/lib/kibana/kibana_react.mock';
+import {
+  ENABLE_GRAPH_VISUALIZATION_SETTING,
+  ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
+} from '../../../../../common/constants';
 
 jest.mock('../hooks/use_expand_section');
 jest.mock('../../shared/hooks/use_alert_prevalence_from_process_tree', () => ({
@@ -59,13 +69,14 @@ jest.mock('../../../../common/hooks/use_experimental_features', () => ({
 }));
 
 const useIsExperimentalFeatureEnabledMock = useIsExperimentalFeatureEnabled as jest.Mock;
+useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+const mockUseUiSetting = jest.fn().mockImplementation((key) => [false]);
 
-const mockUseUiSetting = jest.fn().mockReturnValue([false]);
 jest.mock('@kbn/kibana-react-plugin/public', () => {
   const original = jest.requireActual('@kbn/kibana-react-plugin/public');
   return {
     ...original,
-    useUiSetting$: () => mockUseUiSetting(),
+    useUiSetting$: (...args: unknown[]) => mockUseUiSetting(...args),
   };
 });
 jest.mock('../../shared/hooks/use_graph_preview');
@@ -77,6 +88,14 @@ jest.mock('@kbn/cloud-security-posture-graph/src/hooks', () => ({
 }));
 
 const mockUseFetchGraphData = useFetchGraphData as jest.Mock;
+
+jest.mock('@kbn/cloud-security-posture-common/utils/ui_metrics', () => ({
+  uiMetricService: {
+    trackUiMetric: jest.fn(),
+  },
+}));
+
+const uiMetricServiceMock = uiMetricService as jest.Mocked<typeof uiMetricService>;
 
 const panelContextValue = {
   ...mockContextValue,
@@ -96,7 +115,7 @@ const renderVisualizationsSection = (contextValue = panelContextValue) =>
 
 describe('<VisualizationsSection />', () => {
   beforeEach(() => {
-    mockUseUiSetting.mockReturnValue([false]);
+    mockUseUiSetting.mockImplementation(() => [false]);
     mockUseTimelineDataFilters.mockReturnValue({ selectedPatterns: ['index'] });
     mockUseAlertPrevalenceFromProcessTree.mockReturnValue({
       loading: false,
@@ -139,8 +158,17 @@ describe('<VisualizationsSection />', () => {
     });
     (useIsInvestigateInResolverActionEnabled as jest.Mock).mockReturnValue(true);
     (useExpandSection as jest.Mock).mockReturnValue(true);
-    mockUseUiSetting.mockReturnValue([false]);
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+    mockUseUiSetting.mockImplementation((key, defaultValue) => {
+      const useUiSetting$Mock = createUseUiSetting$Mock();
+
+      if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
+        return [false, jest.fn()];
+      } else if (key === ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING) {
+        return [false, jest.fn()];
+      }
+
+      return useUiSetting$Mock(key, defaultValue);
+    });
 
     const { getByTestId, queryByTestId } = renderVisualizationsSection();
     expect(getByTestId(VISUALIZATIONS_SECTION_CONTENT_TEST_ID)).toBeVisible();
@@ -152,18 +180,40 @@ describe('<VisualizationsSection />', () => {
 
   it('should render the graph preview component if the feature is enabled', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
-    mockUseUiSetting.mockReturnValue([true]);
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    mockUseUiSetting.mockImplementation((key, defaultValue) => {
+      const useUiSetting$Mock = createUseUiSetting$Mock();
+
+      if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
+        return [true, jest.fn()];
+      } else if (key === ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING) {
+        return [true, jest.fn()];
+      }
+
+      return useUiSetting$Mock(key, defaultValue);
+    });
 
     const { getByTestId } = renderVisualizationsSection();
 
     expect(getByTestId(`${GRAPH_PREVIEW_TEST_ID}LeftSection`)).toBeInTheDocument();
+    expect(uiMetricServiceMock.trackUiMetric).toHaveBeenCalledWith(
+      METRIC_TYPE.LOADED,
+      GRAPH_PREVIEW
+    );
   });
 
-  it('should not render the graph preview component if the experimental feature is disabled', () => {
+  it('should not render the graph preview component if the graph feature is disabled', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
-    mockUseUiSetting.mockReturnValue([true]);
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(false);
+    mockUseUiSetting.mockImplementation((key, defaultValue) => {
+      const useUiSetting$Mock = createUseUiSetting$Mock();
+
+      if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
+        return [false, jest.fn()];
+      } else if (key === ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING) {
+        return [true, jest.fn()];
+      }
+
+      return useUiSetting$Mock(key, defaultValue);
+    });
 
     const { queryByTestId } = renderVisualizationsSection();
 
@@ -172,8 +222,17 @@ describe('<VisualizationsSection />', () => {
 
   it('should not render the graph preview component if the flyout feature is disabled', () => {
     (useExpandSection as jest.Mock).mockReturnValue(true);
-    mockUseUiSetting.mockReturnValue([false]);
-    useIsExperimentalFeatureEnabledMock.mockReturnValue(true);
+    mockUseUiSetting.mockImplementation((key, defaultValue) => {
+      const useUiSetting$Mock = createUseUiSetting$Mock();
+
+      if (key === ENABLE_GRAPH_VISUALIZATION_SETTING) {
+        return [true, jest.fn()];
+      } else if (key === ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING) {
+        return [false, jest.fn()];
+      }
+
+      return useUiSetting$Mock(key, defaultValue);
+    });
 
     const { queryByTestId } = renderVisualizationsSection();
 

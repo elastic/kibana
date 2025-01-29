@@ -25,28 +25,40 @@ export const getPrivateLocations = async (
   client: SavedObjectsClientContract
 ): Promise<SyntheticsPrivateLocationsAttributes['locations']> => {
   try {
-    const finder = client.createPointInTimeFinder<PrivateLocationAttributes>({
-      type: privateLocationSavedObjectName,
-      perPage: 1000,
-    });
+    const [results, legacyLocations] = await Promise.all([
+      getNewPrivateLocations(client),
+      getLegacyPrivateLocations(client),
+    ]);
 
-    const results: Array<SavedObject<PrivateLocationAttributes>> = [];
-
-    for await (const response of finder.find()) {
-      results.push(...response.saved_objects);
-    }
-
-    finder.close().catch((e) => {});
-
-    const legacyLocations = await getLegacyPrivateLocations(client);
-
-    return uniqBy([...results.map((r) => r.attributes), ...legacyLocations], 'id');
+    return uniqBy(
+      [
+        ...results.map((r) => ({ ...r.attributes, spaces: r.namespaces, id: r.id })),
+        ...legacyLocations,
+      ],
+      'id'
+    );
   } catch (getErr) {
     if (SavedObjectsErrorHelpers.isNotFoundError(getErr)) {
       return [];
     }
     throw getErr;
   }
+};
+
+const getNewPrivateLocations = async (client: SavedObjectsClientContract) => {
+  const finder = client.createPointInTimeFinder<PrivateLocationAttributes>({
+    type: privateLocationSavedObjectName,
+    perPage: 1000,
+  });
+
+  const results: Array<SavedObject<PrivateLocationAttributes>> = [];
+
+  for await (const response of finder.find()) {
+    results.push(...response.saved_objects);
+  }
+
+  finder.close().catch((e) => {});
+  return results;
 };
 
 const getLegacyPrivateLocations = async (client: SavedObjectsClientContract) => {

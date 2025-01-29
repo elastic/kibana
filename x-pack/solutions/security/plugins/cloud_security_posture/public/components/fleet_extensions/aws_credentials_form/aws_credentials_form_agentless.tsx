@@ -37,7 +37,6 @@ import {
   AwsCredentialTypeSelector,
   ReadDocumentation,
 } from './aws_credentials_form';
-
 const CLOUD_FORMATION_EXTERNAL_DOC_URL =
   'https://docs.aws.amazon.com/AWSCloudFormation/latest/UserGuide/cfn-whatis-howdoesitwork.html';
 
@@ -179,6 +178,7 @@ export const AwsCredentialsFormAgentless = ({
   newPolicy,
   packageInfo,
   updatePolicy,
+  hasInvalidRequiredVars,
 }: AwsFormProps) => {
   const awsCredentialsType = getAwsCredentialsType(input) || DEFAULT_AGENTLESS_AWS_CREDENTIALS_TYPE;
   const options = getAwsCredentialsFormOptions();
@@ -186,6 +186,18 @@ export const AwsCredentialsFormAgentless = ({
   const fields = getInputVarsFields(input, group.fields);
   const documentationLink = cspIntegrationDocsNavigation.cspm.awsGetStartedPath;
   const accountType = input?.streams?.[0].vars?.['aws.account_type']?.value ?? SINGLE_ACCOUNT;
+
+  // This should ony set the credentials after the initial render
+  if (!getAwsCredentialsType(input)) {
+    updatePolicy({
+      ...getPosturePolicy(newPolicy, input.type, {
+        'aws.credentials.type': {
+          value: awsCredentialsType,
+          type: 'text',
+        },
+      }),
+    });
+  }
 
   const isValidSemantic = semverValid(packageInfo.version);
   const showCloudCredentialsButton = isValidSemantic
@@ -282,6 +294,7 @@ export const AwsCredentialsFormAgentless = ({
         onChange={(key, value) => {
           updatePolicy(getPosturePolicy(newPolicy, input.type, { [key]: { value } }));
         }}
+        hasInvalidRequiredVars={hasInvalidRequiredVars}
       />
       <ReadDocumentation url={documentationLink} />
     </>
