@@ -1472,7 +1472,7 @@
     "@kbn/peggy": "link:src/dev/packages/peggy",
     "@kbn/peggy-loader": "link:src/dev/packages/peggy-loader",
     "@kbn/performance-testing-dataset-extractor": "link:src/dev/packages/performance-testing-dataset-extractor",
-    "@kbn/picomatcher": "link:packages/kbn-picomatcher",
+    "@kbn/picomatcher": "link:src/dev/packages/picomatcher",
     "@kbn/plugin-check": "link:packages/kbn-plugin-check",
     "@kbn/plugin-generator": "link:packages/kbn-plugin-generator",
     "@kbn/plugin-helpers": "link:packages/kbn-plugin-helpers",
