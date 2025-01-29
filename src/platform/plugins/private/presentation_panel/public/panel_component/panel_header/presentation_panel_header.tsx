@@ -16,21 +16,6 @@ import { DefaultPresentationPanelApi, PresentationPanelInternalProps } from '../
 import { PresentationPanelTitle } from './presentation_panel_title';
 import { usePresentationPanelHeaderActions } from './use_presentation_panel_header_actions';
 
-const placeholderTitle = i18n.translate('presentationPanel.placeholderTitle', {
-  defaultMessage: '[No Title]',
-});
-
-const getAriaLabelForTitle = (title?: string) => {
-  return title
-    ? i18n.translate('presentationPanel.enhancedAriaLabel', {
-        defaultMessage: 'Panel: {title}',
-        values: { title: title || placeholderTitle },
-      })
-    : i18n.translate('presentationPanel.ariaLabel', {
-        defaultMessage: 'Panel',
-      });
-};
-
 export type PresentationPanelHeaderProps<ApiType extends DefaultPresentationPanelApi> = {
   api: ApiType;
   headerId: string;
@@ -100,13 +85,6 @@ export const PresentationPanelHeader = <
 
   if (!showPanelBar) return null;
 
-  const ariaLabel = getAriaLabelForTitle(showPanelBar ? panelTitle : undefined);
-  const ariaLabelElement = (
-    <EuiScreenReaderOnly>
-      <span id={headerId}>{ariaLabel}</span>
-    </EuiScreenReaderOnly>
-  );
-
   return (
     <figcaption
       data-test-subj={`embeddablePanelHeading-${(panelTitle || '').replace(/\s/g, '')}`}
@@ -119,7 +97,20 @@ export const PresentationPanelHeader = <
         data-test-subj="dashboardPanelTitle"
         css={headerStyles}
       >
-        {ariaLabelElement}
+        <EuiScreenReaderOnly>
+          <span id={headerId}>
+            {panelTitle
+              ? i18n.translate('presentationPanel.ariaLabel', {
+                  defaultMessage: 'Panel: {title}',
+                  values: {
+                    title: panelTitle,
+                  },
+                })
+              : i18n.translate('presentationPanel.untitledPanelAriaLabel', {
+                  defaultMessage: 'Untitled panel',
+                })}
+          </span>
+        </EuiScreenReaderOnly>
         <PresentationPanelTitle
           api={api}
           viewMode={viewMode}
