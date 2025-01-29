@@ -4164,7 +4164,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-shipper-cli@link:packages/kbn-ci-stats-shipper-cli":
+"@kbn/ci-stats-shipper-cli@link:src/dev/packages/ci-stats-shipper-cli":
   version "0.0.0"
   uid ""
 

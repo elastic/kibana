@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-ci-stats-shipper-cli'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/ci-stats-shipper-cli'],
 };

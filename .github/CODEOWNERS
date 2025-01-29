@@ -113,7 +113,7 @@ src/dev/packages/check-prod-native-modules-cli @elastic/kibana-operations
 src/dev/packages/ci-stats-core @elastic/kibana-operations
 src/dev/packages/ci-stats-performance-metrics @elastic/kibana-operations
 src/dev/packages/ci-stats-reporter @elastic/kibana-operations
-packages/kbn-ci-stats-shipper-cli @elastic/kibana-operations
+src/dev/packages/ci-stats-shipper-cli @elastic/kibana-operations
 packages/kbn-cli-dev-mode @elastic/kibana-operations
 packages/kbn-code-owners @elastic/appex-qa
 packages/kbn-cypress-config @elastic/kibana-operations
