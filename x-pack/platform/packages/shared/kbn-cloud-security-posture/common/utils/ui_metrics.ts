@@ -48,7 +48,7 @@ export const CHANGE_RULE_STATE = 'change-rule-state' as const;
 export const GRAPH_PREVIEW = 'graph-preview' as const;
 export const GRAPH_INVESTIGATION = 'graph-investigation' as const;
 
-type CloudSecurityUiCounters =
+export type CloudSecurityUiCounters =
   | typeof ENTITY_FLYOUT_WITH_MISCONFIGURATION_VISIT
   | typeof ENTITY_FLYOUT_WITH_VULNERABILITY_PREVIEW
   | typeof ENTITY_FLYOUT_EXPAND_MISCONFIGURATION_VIEW_VISITS
