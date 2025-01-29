@@ -14,6 +14,7 @@ import * as healthIndicatorsMock from '../__fixtures__/health_indicators';
 import * as esMigrationsMock from '../__fixtures__/es_deprecations';
 import type { FeatureSet } from '../../../common/types';
 import { getESUpgradeStatus } from '.';
+import { MigrationDeprecationsResponse } from '@elastic/elasticsearch/lib/api/types';
 const fakeIndexNames = Object.keys(fakeDeprecations.index_settings);
 
 describe('getESUpgradeStatus', () => {
@@ -117,7 +118,6 @@ describe('getESUpgradeStatus', () => {
             message: 'Index created before 7.0',
             url: 'https://',
             details: '...',
-            // @ts-expect-error not full interface
             resolve_during_rolling_upgrade: false,
           },
         ],
@@ -168,7 +168,7 @@ describe('getESUpgradeStatus', () => {
     const mockResponse = {
       ...esMigrationsMock.getMockEsDeprecations(),
       ...esMigrationsMock.getMockDataStreamDeprecations(),
-    };
+    } as MigrationDeprecationsResponse;
     esClient.asCurrentUser.migration.deprecations.mockResponse(mockResponse);
 
     const enabledUpgradeStatus = await getESUpgradeStatus(esClient, { ...featureSet });

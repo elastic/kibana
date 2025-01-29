@@ -554,6 +554,7 @@ describe('features', () => {
         'getRuleExecutionKPI',
         'getBackfill',
         'findBackfill',
+        'findGaps',
       ],
       ...[
         'create',
@@ -575,6 +576,7 @@ describe('features', () => {
         'runSoon',
         'scheduleBackfill',
         'deleteBackfill',
+        'fillGaps',
       ],
     ];
 

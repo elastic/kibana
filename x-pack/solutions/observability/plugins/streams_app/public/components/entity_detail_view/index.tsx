@@ -10,7 +10,7 @@ import React from 'react';
 import { css } from '@emotion/css';
 import { ILM_LOCATOR_ID, IlmLocatorParams } from '@kbn/index-lifecycle-management-common-shared';
 import {
-  IngestStreamLifecycle,
+  IngestStreamEffectiveLifecycle,
   ReadStreamDefinition,
   isDslLifecycle,
   isIlmLifecycle,
@@ -143,7 +143,7 @@ export function EntityDetailViewWithoutParams({
   );
 }
 
-function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamLifecycle }) {
+function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamEffectiveLifecycle }) {
   const {
     dependencies: {
       start: { share },
@@ -155,6 +155,7 @@ function LifecycleBadge({ lifecycle }: { lifecycle: IngestStreamLifecycle }) {
     return (
       <EuiBadge color="hollow">
         <EuiLink
+          data-test-subj="streamsAppLifecycleBadgeIlmPolicyNameLink"
           color="text"
           href={ilmLocator?.getRedirectUrl({
             page: 'policy_edit',

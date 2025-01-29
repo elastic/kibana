@@ -28,7 +28,7 @@ import {
 import { WelcomeMessageKnowledgeBase } from '@kbn/ai-assistant/src/chat/welcome_message_knowledge_base';
 import { css } from '@emotion/css';
 import { KnowledgeBaseEntry } from '@kbn/observability-ai-assistant-plugin/public';
-import { useGenAIConnectors, useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
+import { useKnowledgeBase } from '@kbn/ai-assistant/src/hooks';
 import { AssistantBeacon } from '@kbn/ai-assistant-icon';
 import { useGetKnowledgeBaseEntries } from '../../hooks/use_get_knowledge_base_entries';
 import { categorizeEntries, KnowledgeBaseEntryCategory } from '../../helpers/categorize_entries';
@@ -49,8 +49,6 @@ const centerMaxWidthClassName = css`
 export function KnowledgeBaseTab() {
   const { uiSettings } = useKibana().services;
   const dateFormat = uiSettings.get('dateFormat');
-
-  const connectors = useGenAIConnectors();
 
   const knowledgeBase = useKnowledgeBase();
 
@@ -399,7 +397,7 @@ export function KnowledgeBaseTab() {
       <EuiSpacer size="l" />
 
       <EuiFlexItem grow className={centerMaxWidthClassName}>
-        <WelcomeMessageKnowledgeBase connectors={connectors} knowledgeBase={knowledgeBase} />
+        <WelcomeMessageKnowledgeBase knowledgeBase={knowledgeBase} />
       </EuiFlexItem>
     </EuiFlexGroup>
   );
