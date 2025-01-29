@@ -13,7 +13,6 @@ export class MapsPage {
   constructor(private readonly page: ScoutPage) {}
 
   async gotoNewMap() {
-    // see: https://github.com/elastic/kibana/pull/204607/files#r1932558888
     await this.page.gotoApp('maps/map');
   }
 }
