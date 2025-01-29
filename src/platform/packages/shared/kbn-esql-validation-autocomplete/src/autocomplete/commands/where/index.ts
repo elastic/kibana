@@ -29,6 +29,7 @@ import { getOverlapRange, getSuggestionsToRightOfOperatorExpression } from '../.
 import { getPosition } from './util';
 import { pipeCompleteItem } from '../../complete_items';
 import {
+  EDITOR_MARKER,
   UNSUPPORTED_COMMANDS_BEFORE_MATCH,
   UNSUPPORTED_COMMANDS_BEFORE_QSTR,
 } from '../../../shared/constants';
@@ -169,12 +170,14 @@ export async function suggest(
       if (priorCommands.some((c) => UNSUPPORTED_COMMANDS_BEFORE_QSTR.has(c))) {
         ignored.push('qstr');
       }
-
-      const columnSuggestions = await getColumnsByType('any', [], {
-        advanceCursor: true,
-        openSuggestions: true,
-      });
-
+      const last = fullTextAst?.[fullTextAst.length - 1];
+      let columnSuggestions: SuggestionRawDefinition[] = [];
+      if (!last?.text?.endsWith(`:${EDITOR_MARKER}`)) {
+        columnSuggestions = await getColumnsByType('any', [], {
+          advanceCursor: true,
+          openSuggestions: true,
+        });
+      }
       suggestions.push(
         ...columnSuggestions,
         ...getFunctionSuggestions({ command: 'where', ignored })
