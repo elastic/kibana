@@ -132,7 +132,7 @@ describe('getTopNavBadges()', function () {
 
   describe('solutions view badge', () => {
     const discoverServiceWithSpacesMock = createDiscoverServicesMock();
-    discoverServiceWithSpacesMock.capabilities.discover.save = true;
+    discoverServiceWithSpacesMock.capabilities.discover_v2.save = true;
     discoverServiceWithSpacesMock.spaces = spacesPluginMock.createStartContract();
 
     test('should return the solutions view badge when spaces is enabled', () => {
