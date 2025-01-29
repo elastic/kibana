@@ -4156,7 +4156,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ci-stats-performance-metrics@link:packages/kbn-ci-stats-performance-metrics":
+"@kbn/ci-stats-performance-metrics@link:src/dev/packages/ci-stats-performance-metrics":
   version "0.0.0"
   uid ""
 
