@@ -75,6 +75,28 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     }
   );
 
+  const ilmPoliciesMigrations = Object.entries(migrationsResponse.ilm_policies).flatMap(
+    ([indexName, ilmPolicyDeprecations]) => {
+      return ilmPolicyDeprecations.flatMap((ilmPolicyData) =>
+        createBaseMigrationDeprecation(ilmPolicyData, {
+          indexName,
+          deprecationType: 'ilm_policies',
+        })
+      );
+    }
+  );
+
+  const templatesMigrations = Object.entries(migrationsResponse.templates).flatMap(
+    ([indexName, templatesDeprecations]) => {
+      return templatesDeprecations.flatMap((templatesDataa) =>
+        createBaseMigrationDeprecation(templatesDataa, {
+          indexName,
+          deprecationType: 'data_streams',
+        })
+      );
+    }
+  );
+
   const mlSettingsMigrations = migrationsResponse.ml_settings.map((depractionData) =>
     createBaseMigrationDeprecation(depractionData, { deprecationType: 'ml_settings' })
   );
@@ -92,6 +114,8 @@ const normalizeEsResponse = (migrationsResponse: EsDeprecations) => {
     ...nodeSettingsMigrations,
     ...indexSettingsMigrations,
     ...dataStreamsMigrations,
+    ...ilmPoliciesMigrations,
+    ...templatesMigrations,
   ].flat();
 };
 
