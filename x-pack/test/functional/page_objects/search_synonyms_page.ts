@@ -9,7 +9,6 @@ import { FtrProviderContext } from '../ftr_provider_context';
 
 export function SearchSynonymsPageProvider({ getService }: FtrProviderContext) {
   const testSubjects = getService('testSubjects');
-  const browser = getService('browser');
 
   return {
     SynonymsGetStartedPage: {
