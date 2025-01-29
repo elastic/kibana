@@ -128,8 +128,10 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         ${singleWrapperStyles}
       }
 
-      // when in fullscreen mode, combine all floating actions on first row and nudge them down
-      .dshDashboardViewportWrapper--isFullscreen .dshDashboardGrid__item[data-grid-row='0'] & {
+      // when Dashboard is in fullscreen mode, combine all floating actions on first row and nudge them down;
+      // if the panel is **not** on the first row but it is expanded in fullscreen mode, do the same thing
+      .dshDashboardViewportWrapper--isFullscreen .dshDashboardGrid__item[data-grid-row='0'] &,
+      .dshDashboardViewportWrapper--isFullscreen .kbnGridPanel--expanded & {
         ${singleWrapperStyles}
         top: -${euiTheme.size.s} !important;
       }
