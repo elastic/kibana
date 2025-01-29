@@ -65,29 +65,25 @@ xpack.features.overrides:
       ### Security's `All` feature privilege should implicitly grant `All` access to Discover, Dashboard, Maps, and
       ### Visualize features.
       all.composedOf:
-        - feature: "discover_v2"
+        - feature: "discover"
           privileges: [ "all" ]
-        - feature: "dashboard_v2"
+        - feature: "dashboard"
           privileges: [ "all" ]
-        - feature: "visualize_v2"
+        - feature: "visualize"
           privileges: [ "all" ]
-        - feature: "maps_v2"
-          privileges: [ "all" ]
-        - feature: "savedQueryManagement"
+        - feature: "maps"
           privileges: [ "all" ]
       # Security's `Read` feature privilege should implicitly grant `Read` access to Discover, Dashboard, Maps, and
       # Visualize features. Additionally, it should implicitly grant privilege to create short URLs in Discover,
       ### Dashboard, and Visualize apps.
       read.composedOf:
-        - feature: "discover_v2"
+        - feature: "discover"
           privileges: [ "read" ]
-        - feature: "dashboard_v2"
+        - feature: "dashboard"
           privileges: [ "read" ]
-        - feature: "visualize_v2"
+        - feature: "visualize"
           privileges: [ "read" ]
-        - feature: "maps_v2"
-          privileges: [ "read" ]
-        - feature: "savedQueryManagement"
+        - feature: "maps"
           privileges: [ "read" ]
 
 ## Cloud settings
