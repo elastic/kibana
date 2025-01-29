@@ -619,7 +619,29 @@ function validateFunction({
   }
   // at this point we're sure that at least one signature is matching
   const failingSignatures: ESQLMessage[][] = [];
-  for (const signature of matchingSignatures) {
+  let relevantFuncSignatures = matchingSignatures;
+  const enrichedArgs = fn.args;
+
+  if (fn.name === 'in' || fn.name === 'not_in') {
+    for (let argIndex = 1; argIndex < fn.args.length; argIndex++) {
+      relevantFuncSignatures = fnDefinition.signatures.filter(
+        (s) =>
+          s.params?.length >= argIndex &&
+          s.params.slice(0, argIndex).every(({ type: dataType }, idx) => {
+            const arg = enrichedArgs[idx];
+
+            if (isLiteralItem(arg)) {
+              return (
+                dataType === arg.literalType || compareTypesWithLiterals(dataType, arg.literalType)
+              );
+            }
+            return false; // Non-literal arguments don't match
+          })
+      );
+    }
+  }
+
+  for (const signature of relevantFuncSignatures) {
     const failingSignature: ESQLMessage[] = [];
     fn.args.forEach((outerArg, index) => {
       const argDef = getParamAtPosition(signature, index);
@@ -674,7 +696,7 @@ function validateFunction({
     }
   }
 
-  if (failingSignatures.length && failingSignatures.length === matchingSignatures.length) {
+  if (failingSignatures.length && failingSignatures.length === relevantFuncSignatures.length) {
     const failingSignatureOrderedByErrorCount = failingSignatures
       .map((arr, index) => ({ index, count: arr.length }))
       .sort((a, b) => a.count - b.count);
