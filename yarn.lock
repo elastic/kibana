@@ -5736,7 +5736,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/failed-test-reporter-cli@link:packages/kbn-failed-test-reporter-cli":
+"@kbn/failed-test-reporter-cli@link:src/dev/packages/failed-test-reporter-cli":
   version "0.0.0"
   uid ""
 

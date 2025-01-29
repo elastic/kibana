@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test/jest_node',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-failed-test-reporter-cli'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/failed-test-reporter-cli'],
 };
