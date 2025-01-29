@@ -20,7 +20,7 @@ export type TutorialModuleNoticeComponent = React.FC<{
   moduleName: string;
 }>;
 
-type CustomStatusCheckCallback = () => Promise<boolean>;
+export type CustomStatusCheckCallback = () => Promise<boolean>; // not sure about exporting it (using inside tutorial.tsx)
 type CustomComponent = () => Promise<React.ReactNode>;
 
 export class TutorialService {

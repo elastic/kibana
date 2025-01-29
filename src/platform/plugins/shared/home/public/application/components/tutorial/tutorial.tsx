@@ -142,7 +142,7 @@ export interface Tutorial {
   category: unknown;
   shortDescription?: string;
   longDescription: string;
-  isBeta?: unknown;
+  isBeta?: boolean;
 }
 type StatusCheckStatesType = 'HAS_DATA' | 'NO_DATA' | 'ERROR' | 'NOT_CHECKED' | 'FETCHING';
 

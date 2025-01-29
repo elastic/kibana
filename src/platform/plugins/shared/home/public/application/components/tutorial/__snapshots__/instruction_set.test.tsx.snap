@@ -1,0 +1,2793 @@
+// Jest Snapshot v1, https://goo.gl/fbAQLP
+
+exports[`render 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+      >
+        <div
+          class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+        >
+          <div
+            class="euiTabs css-16d8ppv"
+            role="tablist"
+          >
+            <button
+              aria-selected="true"
+              class="euiTab euiTab-isSelected emotion-euiTab-selected"
+              role="tab"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                OSX
+              </span>
+            </button>
+            <button
+              aria-selected="false"
+              class="euiTab emotion-euiTab"
+              role="tab"
+              tabindex="-1"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                WINDOWS
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <h2
+                class="euiTitle emotion-euiTitle-m"
+              >
+                title1
+              </h2>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            />
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <div
+            class="euiSteps"
+          >
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 1
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    1
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 1
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      >
+                        Processed: do stuff in command line
+                      </code>
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 2
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    2
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 2
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      >
+                        Processed: do more stuff in command line
+                      </code>
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+      >
+        <div
+          class="euiTabs css-16d8ppv"
+          role="tablist"
+        >
+          <button
+            aria-selected="true"
+            class="euiTab euiTab-isSelected emotion-euiTab-selected"
+            role="tab"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              OSX
+            </span>
+          </button>
+          <button
+            aria-selected="false"
+            class="euiTab emotion-euiTab"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              WINDOWS
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-m"
+            >
+              title1
+            </h2>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          />
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiSteps"
+        >
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 1
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  1
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 1
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    >
+                      Processed: do stuff in command line
+                    </code>
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 2
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  2
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 2
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    >
+                      Processed: do more stuff in command line
+                    </code>
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`statusCheckState checking status 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+      >
+        <div
+          class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+        >
+          <div
+            class="euiTabs css-16d8ppv"
+            role="tablist"
+          >
+            <button
+              aria-selected="true"
+              class="euiTab euiTab-isSelected emotion-euiTab-selected"
+              role="tab"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                OSX
+              </span>
+            </button>
+            <button
+              aria-selected="false"
+              class="euiTab emotion-euiTab"
+              role="tab"
+              tabindex="-1"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                WINDOWS
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <h2
+                class="euiTitle emotion-euiTitle-m"
+              >
+                title1
+              </h2>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            />
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <div
+            class="euiSteps"
+          >
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 1
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    1
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 1
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 2
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    2
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 2
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs-incomplete"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 3 is incomplete
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number-incomplete"
+                  >
+                    3
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  custom title
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div
+                  class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+                >
+                  <p>
+                    custom status check description
+                  </p>
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
+                  disabled=""
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      aria-label="Loading"
+                      class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                      role="progressbar"
+                      style="border-color: #0077cc currentcolor currentcolor currentcolor;"
+                    />
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      custom btn label
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+      >
+        <div
+          class="euiTabs css-16d8ppv"
+          role="tablist"
+        >
+          <button
+            aria-selected="true"
+            class="euiTab euiTab-isSelected emotion-euiTab-selected"
+            role="tab"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              OSX
+            </span>
+          </button>
+          <button
+            aria-selected="false"
+            class="euiTab emotion-euiTab"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              WINDOWS
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-m"
+            >
+              title1
+            </h2>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          />
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiSteps"
+        >
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 1
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  1
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 1
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 2
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  2
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 2
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs-incomplete"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 3 is incomplete
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number-incomplete"
+                >
+                  3
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                custom title
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div
+                class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+              >
+                <p>
+                  custom status check description
+                </p>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
+                disabled=""
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    aria-label="Loading"
+                    class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                    role="progressbar"
+                    style="border-color: #0077cc currentcolor currentcolor currentcolor;"
+                  />
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    custom btn label
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`statusCheckState failed status check - error 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+      >
+        <div
+          class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+        >
+          <div
+            class="euiTabs css-16d8ppv"
+            role="tablist"
+          >
+            <button
+              aria-selected="true"
+              class="euiTab euiTab-isSelected emotion-euiTab-selected"
+              role="tab"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                OSX
+              </span>
+            </button>
+            <button
+              aria-selected="false"
+              class="euiTab emotion-euiTab"
+              role="tab"
+              tabindex="-1"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                WINDOWS
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <h2
+                class="euiTitle emotion-euiTitle-m"
+              >
+                title1
+              </h2>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            />
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <div
+            class="euiSteps"
+          >
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 1
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    1
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 1
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 2
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    2
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 2
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs-danger"
+                >
+                  <span
+                    class="euiStepNumber__icon emotion-euiStepNumber__icon-danger"
+                    data-euiicon-type="cross"
+                  >
+                    Step 3 has errors
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  custom title
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div
+                  class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+                >
+                  <p>
+                    custom status check description
+                  </p>
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      custom btn label
+                    </span>
+                  </span>
+                </button>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <div
+                  class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+                >
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+                  >
+                    custom error msg
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+      >
+        <div
+          class="euiTabs css-16d8ppv"
+          role="tablist"
+        >
+          <button
+            aria-selected="true"
+            class="euiTab euiTab-isSelected emotion-euiTab-selected"
+            role="tab"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              OSX
+            </span>
+          </button>
+          <button
+            aria-selected="false"
+            class="euiTab emotion-euiTab"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              WINDOWS
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-m"
+            >
+              title1
+            </h2>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          />
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiSteps"
+        >
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 1
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  1
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 1
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 2
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  2
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 2
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs-danger"
+              >
+                <span
+                  class="euiStepNumber__icon emotion-euiStepNumber__icon-danger"
+                  data-euiicon-type="cross"
+                >
+                  Step 3 has errors
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                custom title
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div
+                class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+              >
+                <p>
+                  custom status check description
+                </p>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    custom btn label
+                  </span>
+                </span>
+              </button>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <div
+                class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+              >
+                <p
+                  class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+                >
+                  custom error msg
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`statusCheckState failed status check - no data 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+      >
+        <div
+          class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+        >
+          <div
+            class="euiTabs css-16d8ppv"
+            role="tablist"
+          >
+            <button
+              aria-selected="true"
+              class="euiTab euiTab-isSelected emotion-euiTab-selected"
+              role="tab"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                OSX
+              </span>
+            </button>
+            <button
+              aria-selected="false"
+              class="euiTab emotion-euiTab"
+              role="tab"
+              tabindex="-1"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                WINDOWS
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <h2
+                class="euiTitle emotion-euiTitle-m"
+              >
+                title1
+              </h2>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            />
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <div
+            class="euiSteps"
+          >
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 1
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    1
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 1
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 2
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    2
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 2
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs-warning"
+                >
+                  <span
+                    class="euiStepNumber__icon emotion-euiStepNumber__icon-warning"
+                    data-euiicon-type="warning"
+                  >
+                    Step 3 has warnings
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  custom title
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div
+                  class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+                >
+                  <p>
+                    custom status check description
+                  </p>
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      custom btn label
+                    </span>
+                  </span>
+                </button>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <div
+                  class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+                >
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+                  >
+                    custom error msg
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+      >
+        <div
+          class="euiTabs css-16d8ppv"
+          role="tablist"
+        >
+          <button
+            aria-selected="true"
+            class="euiTab euiTab-isSelected emotion-euiTab-selected"
+            role="tab"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              OSX
+            </span>
+          </button>
+          <button
+            aria-selected="false"
+            class="euiTab emotion-euiTab"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              WINDOWS
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-m"
+            >
+              title1
+            </h2>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          />
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiSteps"
+        >
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 1
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  1
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 1
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 2
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  2
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 2
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs-warning"
+              >
+                <span
+                  class="euiStepNumber__icon emotion-euiStepNumber__icon-warning"
+                  data-euiicon-type="warning"
+                >
+                  Step 3 has warnings
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                custom title
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div
+                class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+              >
+                <p>
+                  custom status check description
+                </p>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    custom btn label
+                  </span>
+                </span>
+              </button>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <div
+                class="euiPanel euiPanel--warning euiPanel--paddingMedium euiCallOut euiCallOut--warning emotion-euiPanel-none-m-warning-euiCallOut"
+              >
+                <p
+                  class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-warning"
+                >
+                  custom error msg
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`statusCheckState initial state - no check has been attempted 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+      >
+        <div
+          class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+        >
+          <div
+            class="euiTabs css-16d8ppv"
+            role="tablist"
+          >
+            <button
+              aria-selected="true"
+              class="euiTab euiTab-isSelected emotion-euiTab-selected"
+              role="tab"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                OSX
+              </span>
+            </button>
+            <button
+              aria-selected="false"
+              class="euiTab emotion-euiTab"
+              role="tab"
+              tabindex="-1"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                WINDOWS
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <h2
+                class="euiTitle emotion-euiTitle-m"
+              >
+                title1
+              </h2>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            />
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <div
+            class="euiSteps"
+          >
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 1
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    1
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 1
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 2
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    2
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 2
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs-incomplete"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 3 is incomplete
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number-incomplete"
+                  >
+                    3
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  custom title
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div
+                  class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+                >
+                  <p>
+                    custom status check description
+                  </p>
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
+                  disabled=""
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      aria-label="Loading"
+                      class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                      role="progressbar"
+                      style="border-color: #0077cc currentcolor currentcolor currentcolor;"
+                    />
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      custom btn label
+                    </span>
+                  </span>
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+      >
+        <div
+          class="euiTabs css-16d8ppv"
+          role="tablist"
+        >
+          <button
+            aria-selected="true"
+            class="euiTab euiTab-isSelected emotion-euiTab-selected"
+            role="tab"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              OSX
+            </span>
+          </button>
+          <button
+            aria-selected="false"
+            class="euiTab emotion-euiTab"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              WINDOWS
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-m"
+            >
+              title1
+            </h2>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          />
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiSteps"
+        >
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 1
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  1
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 1
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 2
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  2
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 2
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs-incomplete"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 3 is incomplete
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number-incomplete"
+                >
+                  3
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                custom title
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div
+                class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+              >
+                <p>
+                  custom status check description
+                </p>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-isDisabled-base-disabled"
+                disabled=""
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    aria-label="Loading"
+                    class="euiLoadingSpinner emotion-euiLoadingSpinner-m"
+                    role="progressbar"
+                    style="border-color: #0077cc currentcolor currentcolor currentcolor;"
+                  />
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    custom btn label
+                  </span>
+                </span>
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
+
+exports[`statusCheckState successful status check 1`] = `
+Object {
+  "asFragment": [Function],
+  "baseElement": <body>
+    <div>
+      <div
+        class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+      >
+        <div
+          class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+        >
+          <div
+            class="euiTabs css-16d8ppv"
+            role="tablist"
+          >
+            <button
+              aria-selected="true"
+              class="euiTab euiTab-isSelected emotion-euiTab-selected"
+              role="tab"
+              tabindex="0"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                OSX
+              </span>
+            </button>
+            <button
+              aria-selected="false"
+              class="euiTab emotion-euiTab"
+              role="tab"
+              tabindex="-1"
+              type="button"
+            >
+              <span
+                class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+              >
+                WINDOWS
+              </span>
+            </button>
+          </div>
+        </div>
+        <div
+          class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+        >
+          <div
+            class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+          >
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            >
+              <h2
+                class="euiTitle emotion-euiTitle-m"
+              >
+                title1
+              </h2>
+            </div>
+            <div
+              class="euiFlexItem emotion-euiFlexItem-growZero"
+            />
+          </div>
+          <div
+            class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+          />
+          <div
+            class="euiSteps"
+          >
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 1
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    1
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 1
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs"
+                >
+                  <span
+                    class="emotion-euiScreenReaderOnly"
+                  >
+                    Step 2
+                  </span>
+                  <span
+                    aria-hidden="true"
+                    class="euiStepNumber__number emotion-euiStepNumber__number"
+                  >
+                    2
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  step 2
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div>
+                  <div>
+                    <pre>
+                      <code
+                        data-code-language="bash"
+                      />
+                    </pre>
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="euiStep emotion-euiStep-xs"
+            >
+              <div
+                class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+              >
+                <span
+                  class="euiStepNumber emotion-euiStepNumber-xs-complete"
+                >
+                  <span
+                    class="euiStepNumber__icon emotion-euiStepNumber__icon-complete"
+                    data-euiicon-type="check"
+                  >
+                    Step 3 is complete
+                  </span>
+                </span>
+                <p
+                  class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+                >
+                  custom title
+                </p>
+              </div>
+              <div
+                class="euiStep__content emotion-euiStep__content-xs"
+              >
+                <div
+                  class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+                >
+                  <p>
+                    custom status check description
+                  </p>
+                </div>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <button
+                  class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                  type="button"
+                >
+                  <span
+                    class="emotion-euiButtonDisplayContent"
+                  >
+                    <span
+                      class="eui-textTruncate"
+                    >
+                      custom btn label
+                    </span>
+                  </span>
+                </button>
+                <div
+                  class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+                />
+                <div
+                  class="euiPanel euiPanel--success euiPanel--paddingMedium euiCallOut euiCallOut--success emotion-euiPanel-none-m-success-euiCallOut"
+                >
+                  <p
+                    class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-success"
+                  >
+                    custom success msg
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </body>,
+  "container": <div>
+    <div
+      class="euiPanel euiPanel--plain euiSplitPanel emotion-euiPanel-m-plain-hasShadow-euiSplitPanelOuter-column"
+    >
+      <div
+        class="euiPanel euiPanel--subdued euiSplitPanel__inner emotion-euiPanel-grow-none-subdued-euiSplitPanelInner"
+      >
+        <div
+          class="euiTabs css-16d8ppv"
+          role="tablist"
+        >
+          <button
+            aria-selected="true"
+            class="euiTab euiTab-isSelected emotion-euiTab-selected"
+            role="tab"
+            tabindex="0"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              OSX
+            </span>
+          </button>
+          <button
+            aria-selected="false"
+            class="euiTab emotion-euiTab"
+            role="tab"
+            tabindex="-1"
+            type="button"
+          >
+            <span
+              class="euiTab__content eui-textTruncate emotion-euiTab__content-m"
+            >
+              WINDOWS
+            </span>
+          </button>
+        </div>
+      </div>
+      <div
+        class="euiPanel euiPanel--transparent euiPanel--paddingLarge euiSplitPanel__inner emotion-euiPanel-grow-none-l-transparent-euiSplitPanelInner"
+      >
+        <div
+          class="euiFlexGroup emotion-euiFlexGroup-wrap-l-spaceBetween-stretch-row"
+        >
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          >
+            <h2
+              class="euiTitle emotion-euiTitle-m"
+            >
+              title1
+            </h2>
+          </div>
+          <div
+            class="euiFlexItem emotion-euiFlexItem-growZero"
+          />
+        </div>
+        <div
+          class="euiSpacer euiSpacer--l emotion-euiSpacer-l"
+        />
+        <div
+          class="euiSteps"
+        >
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 1
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  1
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 1
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs"
+              >
+                <span
+                  class="emotion-euiScreenReaderOnly"
+                >
+                  Step 2
+                </span>
+                <span
+                  aria-hidden="true"
+                  class="euiStepNumber__number emotion-euiStepNumber__number"
+                >
+                  2
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                step 2
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div>
+                <div>
+                  <pre>
+                    <code
+                      data-code-language="bash"
+                    />
+                  </pre>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div
+            class="euiStep emotion-euiStep-xs"
+          >
+            <div
+              class="euiStep__titleWrapper emotion-euiStep__titleWrapper"
+            >
+              <span
+                class="euiStepNumber emotion-euiStepNumber-xs-complete"
+              >
+                <span
+                  class="euiStepNumber__icon emotion-euiStepNumber__icon-complete"
+                  data-euiicon-type="check"
+                >
+                  Step 3 is complete
+                </span>
+              </span>
+              <p
+                class="euiTitle euiStep__title emotion-euiTitle-xs-euiStep__title-xs"
+              >
+                custom title
+              </p>
+            </div>
+            <div
+              class="euiStep__content emotion-euiStep__content-xs"
+            >
+              <div
+                class="euiText euiMarkdownFormat emotion-euiText-m-euiTextColor-default-euiMarkdownFormat-m-default"
+              >
+                <p>
+                  custom status check description
+                </p>
+              </div>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <button
+                class="euiButton emotion-euiButtonDisplay-m-defaultMinWidth-base-primary"
+                type="button"
+              >
+                <span
+                  class="emotion-euiButtonDisplayContent"
+                >
+                  <span
+                    class="eui-textTruncate"
+                  >
+                    custom btn label
+                  </span>
+                </span>
+              </button>
+              <div
+                class="euiSpacer euiSpacer--s emotion-euiSpacer-s"
+              />
+              <div
+                class="euiPanel euiPanel--success euiPanel--paddingMedium euiCallOut euiCallOut--success emotion-euiPanel-none-m-success-euiCallOut"
+              >
+                <p
+                  class="euiTitle euiCallOutHeader__title emotion-euiTitle-xs-euiCallOutHeader-success"
+                >
+                  custom success msg
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>,
+  "debug": [Function],
+  "findAllByAltText": [Function],
+  "findAllByDisplayValue": [Function],
+  "findAllByLabelText": [Function],
+  "findAllByPlaceholderText": [Function],
+  "findAllByRole": [Function],
+  "findAllByTestId": [Function],
+  "findAllByText": [Function],
+  "findAllByTitle": [Function],
+  "findByAltText": [Function],
+  "findByDisplayValue": [Function],
+  "findByLabelText": [Function],
+  "findByPlaceholderText": [Function],
+  "findByRole": [Function],
+  "findByTestId": [Function],
+  "findByText": [Function],
+  "findByTitle": [Function],
+  "getAllByAltText": [Function],
+  "getAllByDisplayValue": [Function],
+  "getAllByLabelText": [Function],
+  "getAllByPlaceholderText": [Function],
+  "getAllByRole": [Function],
+  "getAllByTestId": [Function],
+  "getAllByText": [Function],
+  "getAllByTitle": [Function],
+  "getByAltText": [Function],
+  "getByDisplayValue": [Function],
+  "getByLabelText": [Function],
+  "getByPlaceholderText": [Function],
+  "getByRole": [Function],
+  "getByTestId": [Function],
+  "getByText": [Function],
+  "getByTitle": [Function],
+  "queryAllByAltText": [Function],
+  "queryAllByDisplayValue": [Function],
+  "queryAllByLabelText": [Function],
+  "queryAllByPlaceholderText": [Function],
+  "queryAllByRole": [Function],
+  "queryAllByTestId": [Function],
+  "queryAllByText": [Function],
+  "queryAllByTitle": [Function],
+  "queryByAltText": [Function],
+  "queryByDisplayValue": [Function],
+  "queryByLabelText": [Function],
+  "queryByPlaceholderText": [Function],
+  "queryByRole": [Function],
+  "queryByTestId": [Function],
+  "queryByText": [Function],
+  "queryByTitle": [Function],
+  "rerender": [Function],
+  "unmount": [Function],
+}
+`;
