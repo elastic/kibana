@@ -98,6 +98,7 @@ function alertingTaskLegacyIdToSavedObjectIds(
           params: JSON.stringify({
             ...params,
             alertId: newId,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           }) as any,
         },
       };
@@ -127,6 +128,7 @@ function actionsTasksLegacyIdToSavedObjectIds(
           params: JSON.stringify({
             ...params,
             actionTaskParamsId: newId,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           }) as any,
         },
       };

@@ -18,6 +18,8 @@ import merge from 'lodash/merge';
 import semverValid from 'semver/functions/valid';
 import semverCoerce from 'semver/functions/coerce';
 import semverLt from 'semver/functions/lt';
+import { PackagePolicyValidationResults } from '@kbn/fleet-plugin/common/services';
+import { getFlattenedObject } from '@kbn/std';
 import {
   CLOUDBEAT_AWS,
   CLOUDBEAT_AZURE,
@@ -395,6 +397,17 @@ export const findVariableDef = (packageInfo: PackageInfo, key: string) => {
     .find((vars) => vars?.name === key);
 };
 
+export const fieldIsInvalid = (value: string | undefined, hasInvalidRequiredVars: boolean) =>
+  hasInvalidRequiredVars && !value;
+
 export const POLICY_TEMPLATE_FORM_DTS = {
   LOADER: 'policy-template-form-loader',
+};
+
+export const hasErrors = (validationResults: PackagePolicyValidationResults | undefined) => {
+  if (!validationResults) return 0;
+
+  const flattenedValidation = getFlattenedObject(validationResults);
+  const errors = Object.values(flattenedValidation).filter((value) => Boolean(value)) || [];
+  return errors.length;
 };

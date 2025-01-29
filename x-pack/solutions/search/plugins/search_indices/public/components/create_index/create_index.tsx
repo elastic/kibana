@@ -112,8 +112,8 @@ export const CreateIndex = ({ indicesData }: CreateIndexProps) => {
           changeWorkflowId={(workflowId: WorkflowId) => {
             setSelectedWorkflowId(workflowId);
             usageTracker.click([
-              AnalyticsEvents.startCreateIndexWorkflowSelect,
-              `${AnalyticsEvents.startCreateIndexWorkflowSelect}_${workflowId}`,
+              AnalyticsEvents.createIndexWorkflowSelect,
+              `${AnalyticsEvents.createIndexWorkflowSelect}_${workflowId}`,
             ]);
           }}
           selectedWorkflow={workflow}
