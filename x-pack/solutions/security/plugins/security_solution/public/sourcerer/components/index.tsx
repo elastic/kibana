@@ -301,7 +301,6 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
 
   const createAdhocDataViewForCompatibility = useCallback(async () => {
     const adhocDataView = await createAdhocDataView(missingPatterns);
-    setPopoverIsOpen(false);
 
     if (adhocDataView && adhocDataView.id) {
       const patterns = adhocDataView.getIndexPattern().split(',');
