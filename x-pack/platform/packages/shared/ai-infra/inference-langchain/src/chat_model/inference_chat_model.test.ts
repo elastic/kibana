@@ -104,9 +104,6 @@ describe('InferenceChatModel', () => {
     connector = createConnector();
   });
 
-  // test completionWithRetry
-  // withStructuredOutput
-
   describe('Request conversion', () => {
     it('converts a basic message call', async () => {
       const chatModel = new InferenceChatModel({
@@ -496,6 +493,30 @@ describe('InferenceChatModel', () => {
         chatModel.invoke('Some question')
       ).rejects.toThrowErrorMatchingInlineSnapshot(`"something went wrong"`);
     });
+
+    it('respects the maxRetries parameter', async () => {
+      const chatModel = new InferenceChatModel({
+        logger,
+        chatComplete,
+        connector,
+        maxRetries: 1,
+      });
+
+      chatComplete
+        .mockImplementationOnce(async () => {
+          throw new Error('something went wrong');
+        })
+        .mockResolvedValueOnce(
+          createResponse({
+            content: 'response',
+          })
+        );
+
+      const output = await chatModel.invoke('Some question');
+
+      expect(output.content).toEqual('response');
+      expect(chatComplete).toHaveBeenCalledTimes(2);
+    });
   });
 
   describe('Streaming response handling', () => {
@@ -763,6 +784,124 @@ describe('InferenceChatModel', () => {
         ls_provider: 'inference-elastic',
         ls_temperature: 0.7,
       });
+    });
+  });
+
+  describe('#withStructuredOutput', () => {
+    it('binds the correct parameters', async () => {
+      const chatModel = new InferenceChatModel({
+        logger,
+        chatComplete,
+        connector,
+      });
+
+      const structuredOutputModel = chatModel.withStructuredOutput(
+        z
+          .object({
+            city: z.string().describe('The city to get the weather for'),
+            zipCode: z.number().optional().describe('The zipCode to get the weather for'),
+          })
+          .describe('Use to get the weather'),
+        { name: 'weather_tool' }
+      );
+
+      const response = createResponse({
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'myToolCallId',
+            function: {
+              name: 'weather_tool',
+              arguments: {
+                city: 'Paris',
+              },
+            },
+          },
+        ],
+      });
+      chatComplete.mockResolvedValue(response);
+
+      await structuredOutputModel.invoke([
+        new HumanMessage({
+          content: 'What is the weather like in Paris?',
+        }),
+      ]);
+
+      expect(chatComplete).toHaveBeenCalledTimes(1);
+      expect(chatComplete).toHaveBeenCalledWith({
+        connectorId: connector.connectorId,
+        messages: [
+          {
+            role: MessageRole.User,
+            content: 'What is the weather like in Paris?',
+          },
+        ],
+        toolChoice: {
+          function: 'weather_tool',
+        },
+        tools: {
+          weather_tool: {
+            description: 'Use to get the weather',
+            schema: {
+              properties: {
+                city: {
+                  description: 'The city to get the weather for',
+                  type: 'string',
+                },
+                zipCode: {
+                  description: 'The zipCode to get the weather for',
+                  type: 'number',
+                },
+              },
+              required: ['city'],
+              type: 'object',
+            },
+          },
+        },
+        stream: false,
+      });
+    });
+
+    it('returns the correct tool call', async () => {
+      const chatModel = new InferenceChatModel({
+        logger,
+        chatComplete,
+        connector,
+      });
+
+      const structuredOutputModel = chatModel.withStructuredOutput(
+        z
+          .object({
+            city: z.string().describe('The city to get the weather for'),
+            zipCode: z.number().optional().describe('The zipCode to get the weather for'),
+          })
+          .describe('Use to get the weather'),
+        { name: 'weather_tool' }
+      );
+
+      const response = createResponse({
+        content: '',
+        toolCalls: [
+          {
+            toolCallId: 'myToolCallId',
+            function: {
+              name: 'weather_tool',
+              arguments: {
+                city: 'Paris',
+              },
+            },
+          },
+        ],
+      });
+      chatComplete.mockResolvedValue(response);
+
+      const output = await structuredOutputModel.invoke([
+        new HumanMessage({
+          content: 'What is the weather like in Paris?',
+        }),
+      ]);
+
+      expect(output).toEqual({ city: 'Paris' });
     });
   });
 });
