@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import React, { useCallback, useState } from 'react';
+import React, { useCallback } from 'react';
 import { EuiLink } from '@elastic/eui';
 import { FormattedMessage } from '@kbn/i18n-react';
 import type { DataView } from '@kbn/data-views-plugin/common';
@@ -16,7 +16,6 @@ import { useAppToasts } from '../../common/hooks/use_app_toasts';
 import { ensurePatternFormat } from '../../../common/utils/sourcerer';
 
 export interface UseCreateAdhocDataViewReturnValue {
-  isLoading: boolean;
   createAdhocDataView: (missingPatterns: string[]) => Promise<DataView | null>;
 }
 
@@ -26,12 +25,8 @@ export const useCreateAdhocDataView = (
   const { dataViews, uiSettings } = useKibana().services;
   const { addError } = useAppToasts();
 
-  const [isLoading, setIsLoading] = useState(false);
-
   const createAdhocDataView = useCallback(
     async (missingPatterns: string[]): Promise<DataView | null> => {
-      setIsLoading(true);
-
       const asyncSearch = async (): Promise<DataView> => {
         const defaultPatterns = uiSettings.get<string[]>(DEFAULT_INDEX_KEY);
         const combinedPatterns = [...defaultPatterns, ...missingPatterns];
@@ -76,5 +71,5 @@ export const useCreateAdhocDataView = (
     [addError, onOpenAndReset, uiSettings, dataViews]
   );
 
-  return { createAdhocDataView, isLoading };
+  return { createAdhocDataView };
 };
