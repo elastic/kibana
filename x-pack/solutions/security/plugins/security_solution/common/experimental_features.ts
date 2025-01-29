@@ -190,11 +190,6 @@ export const allowedExperimentalValues = Object.freeze({
   jamfDataInAnalyzerEnabled: true,
 
   /**
-   * Enables graph visualization in alerts flyout
-   */
-  graphVisualizationInFlyoutEnabled: false,
-
-  /**
    * Enables an ability to customize Elastic prebuilt rules.
    *
    * Ticket: https://github.com/elastic/kibana/issues/174168
@@ -254,7 +249,7 @@ export const allowedExperimentalValues = Object.freeze({
   /**
    * Enables the Defend Insights feature
    */
-  defendInsights: false,
+  defendInsights: true,
 
   /**
    * Enables flyout history and new preview navigation
