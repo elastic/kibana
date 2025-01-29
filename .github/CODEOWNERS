@@ -100,7 +100,7 @@ src/dev/packages/ambient-common-types @elastic/kibana-operations
 src/dev/packages/ambient-ftr-types @elastic/kibana-operations @elastic/appex-qa
 src/dev/packages/ambient-storybook-types @elastic/kibana-operations
 src/dev/packages/ambient-ui-types @elastic/kibana-operations
-packages/kbn-apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
+src/dev/packages/apm-synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-apm-synthtrace-client @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
 packages/kbn-axe-config @elastic/kibana-qa
 packages/kbn-babel-preset @elastic/kibana-operations
@@ -1386,7 +1386,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /x-pack/solutions/observability/plugins/infra/server/routes/log_alerts @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/server/routes/log_analysis @elastic/obs-ux-logs-team
 /x-pack/solutions/observability/plugins/infra/server/services/rules @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team
-/x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/packages/kbn-apm-synthtrace/kibana.jsonc#L5
+/x-pack/test/common/utils/synthtrace @elastic/obs-ux-infra_services-team @elastic/obs-ux-logs-team # Assigned per https://github.com/elastic/kibana/blob/main/src/dev/packages/apm-synthtrace/kibana.jsonc#L5
 /x-pack/test/common/utils/server_route_repository @elastic/obs-knowledge-team
 
 # Infra Monitoring tests

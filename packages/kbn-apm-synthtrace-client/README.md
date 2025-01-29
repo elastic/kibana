@@ -1,1 +1,1 @@
-See packages/kbn-apm-synthtrace/README.json
+See src/dev/packages/apm-synthtrace/README.json
