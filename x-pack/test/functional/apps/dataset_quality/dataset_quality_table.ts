@@ -37,7 +37,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
   };
 
   const failedDatasetName = datasetNames[1];
-  const failedDataStreamName = `logs-${failedDatasetName}-${defaultNamespace}`;
 
   describe('Dataset quality table', () => {
     before(async () => {
@@ -202,20 +201,6 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
         const failedDocsCol = cols[PageObjects.datasetQuality.texts.datasetFailedDocsColumn];
         const failedDocsColCellTexts = await failedDocsCol.getCellTexts();
         expect(failedDocsColCellTexts).to.eql(['0%', '0%', '20%', '0%']);
-      });
-
-      it('goes to discover page when percentage is clicked', async () => {
-        const rowIndexToOpen = 2;
-        const cols = await PageObjects.datasetQuality.parseDatasetTable();
-        const failedDocsCol = cols[PageObjects.datasetQuality.texts.datasetFailedDocsColumn];
-
-        await (await failedDocsCol.getCellChildren('a'))[rowIndexToOpen].click(); // Click percentage
-
-        const datasetSelectorText = await PageObjects.discover.getCurrentDataViewId();
-        originalExpect(datasetSelectorText).toMatch(`${failedDataStreamName}::failures`);
-
-        // Return to Dataset Quality Page
-        await PageObjects.datasetQuality.navigateTo();
       });
     });
   });

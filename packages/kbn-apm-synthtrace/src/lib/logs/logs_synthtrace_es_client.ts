@@ -150,6 +150,15 @@ export class LogsSynthtraceEsClient extends SynthtraceEsClient<LogDocument> {
     }
   }
 
+  async deleteCustomPipeline(id = LogsCustom) {
+    try {
+      await this.client.ingest.deletePipeline({ id });
+      this.logger.info(`Pipeline successfully deleted: ${id}`);
+    } catch (err) {
+      this.logger.error(`Pipeline deletion failed: ${id} - ${err.message}`);
+    }
+  }
+
   getDefaultPipeline({ includeSerialization }: Pipeline = { includeSerialization: true }) {
     return logsPipeline({ includeSerialization });
   }

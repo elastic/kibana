@@ -123,6 +123,8 @@ export default function ApiTest({ getService }: FtrProviderContext) {
 
       after(async () => {
         await logsSynthtrace.clean();
+        await logsSynthtrace.deleteComponentTemplate(LogsCustom);
+        await logsSynthtrace.deleteCustomPipeline();
       });
 
       it('returns number of failed documents per DataStream', async () => {
