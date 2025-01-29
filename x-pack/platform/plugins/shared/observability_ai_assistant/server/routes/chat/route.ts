@@ -270,7 +270,7 @@ async function chatComplete(
     scopes,
   });
 
-  const response$ = client.complete({
+  const response$ = await client.complete({
     messages,
     connectorId,
     conversationId,
