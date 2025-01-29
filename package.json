@@ -1485,7 +1485,7 @@
     "@kbn/repo-source-classifier-cli": "link:src/dev/packages/repo-source-classifier-cli",
     "@kbn/reporting-mocks-server": "link:src/platform/packages/private/kbn-reporting/mocks_server",
     "@kbn/scout": "link:src/dev/packages/scout",
-    "@kbn/scout-info": "link:packages/kbn-scout-info",
+    "@kbn/scout-info": "link:src/dev/packages/scout-info",
     "@kbn/scout-reporting": "link:packages/kbn-scout-reporting",
     "@kbn/security-api-integration-helpers": "link:x-pack/test/security_api_integration/packages/helpers",
     "@kbn/serverless-storybook-config": "link:packages/serverless/storybook/config",
