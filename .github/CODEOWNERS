@@ -184,7 +184,7 @@ src/dev/packages/stdio-dev-helpers @elastic/kibana-operations
 src/dev/packages/storybook @elastic/kibana-operations
 src/dev/packages/styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 src/dev/packages/telemetry-tools @elastic/kibana-core
-packages/kbn-test @elastic/kibana-operations @elastic/appex-qa
+src/dev/packages/test @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-eui-helpers @elastic/kibana-visualizations
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
@@ -1772,7 +1772,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /test/functional/services/remote @elastic/appex-qa
 /test/visual_regression @elastic/appex-qa
 /x-pack/test/visual_regression @elastic/appex-qa
-/packages/kbn-test/src/functional_test_runner @elastic/appex-qa
+/src/dev/packages/test/src/functional_test_runner @elastic/appex-qa
 /src/dev/packages/performance-testing-dataset-extractor @elastic/appex-qa
 /x-pack/test_serverless/**/*config.base.ts @elastic/appex-qa
 /x-pack/test_serverless/**/deployment_agnostic_services.ts @elastic/appex-qa
@@ -1879,7 +1879,7 @@ packages/kbn-monaco/src/esql @elastic/kibana-esql
 /config/serverless.security.yml @elastic/kibana-core @elastic/kibana-security
 /typings/ @elastic/kibana-core
 /test/analytics @elastic/kibana-core
-/packages/kbn-test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
+/src/dev/packages/test/src/jest/setup/mocks.kbn_i18n_react.js @elastic/kibana-core
 /x-pack/test/saved_objects_field_count/ @elastic/kibana-core
 /x-pack/test_serverless/**/test_suites/common/saved_objects_management/ @elastic/kibana-core
 /x-pack/test_serverless/api_integration/test_suites/common/core/ @elastic/kibana-core
