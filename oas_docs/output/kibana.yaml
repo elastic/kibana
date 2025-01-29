@@ -28196,6 +28196,19 @@ components:
       required:
         - connectorId
         - actionTypeId
+    Security_AI_Assistant_API_BaseContentReference:
+      description: The basis of a content reference
+      type: object
+      properties:
+        id:
+          description: Id of the content reference
+          type: string
+        type:
+          description: Type of the content reference
+          type: string
+      required:
+        - id
+        - type
     Security_AI_Assistant_API_BulkCrudActionSummary:
       type: object
       properties:
@@ -28267,6 +28280,17 @@ components:
         - user
         - assistant
       type: string
+    Security_AI_Assistant_API_ContentReferences:
+      additionalProperties:
+        oneOf:
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_KnowledgeBaseEntryContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_SecurityAlertContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_SecurityAlertsPageContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_ProductDocumentationContentReference'
+          - $ref: '#/components/schemas/Security_AI_Assistant_API_EsqlContentReference'
+            additionalProperties: false
+      description: A union of all content reference types
+      type: object
     Security_AI_Assistant_API_ConversationCategory:
       description: The conversation category.
       enum:
@@ -28505,6 +28529,26 @@ components:
           required:
             - id
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
+    Security_AI_Assistant_API_EsqlContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            label:
+              description: Label of the query
+              type: string
+            query:
+              description: An ESQL query
+              type: string
+            type:
+              enum:
+                - EsqlQuery
+              type: string
+          required:
+            - type
+            - query
+            - label
+      description: References an ESQL query
     Security_AI_Assistant_API_FindAnonymizationFieldsSortField:
       enum:
         - created_at
@@ -28736,6 +28780,26 @@ components:
         - skipped
         - succeeded
         - total
+    Security_AI_Assistant_API_KnowledgeBaseEntryContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            knowledgeBaseEntryId:
+              description: Id of the Knowledge Base Entry
+              type: string
+            knowledgeBaseEntryName:
+              description: Name of the knowledge base entry
+              type: string
+            type:
+              enum:
+                - KnowledgeBaseEntry
+              type: string
+          required:
+            - type
+            - knowledgeBaseEntryId
+            - knowledgeBaseEntryName
+      description: References a knowledge base entry
     Security_AI_Assistant_API_KnowledgeBaseEntryCreateProps:
       anyOf:
         - $ref: '#/components/schemas/Security_AI_Assistant_API_DocumentEntryCreateFields'
@@ -28794,6 +28858,9 @@ components:
         isError:
           description: Is error message.
           type: boolean
+        metadata:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_MessageMetadata'
+          description: metadata
         reader:
           $ref: '#/components/schemas/Security_AI_Assistant_API_Reader'
           description: Message content.
@@ -28813,6 +28880,13 @@ components:
     Security_AI_Assistant_API_MessageData:
       additionalProperties: true
       type: object
+    Security_AI_Assistant_API_MessageMetadata:
+      description: Message metadata
+      type: object
+      properties:
+        contentReferences:
+          $ref: '#/components/schemas/Security_AI_Assistant_API_ContentReferences'
+          description: Data refered to by the message content.
     Security_AI_Assistant_API_MessageRole:
       description: Message role.
       enum:
@@ -28876,6 +28950,26 @@ components:
         - message
         - status_code
         - prompts
+    Security_AI_Assistant_API_ProductDocumentationContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            title:
+              description: Title of the documentation
+              type: string
+            type:
+              enum:
+                - ProductDocumentation
+              type: string
+            url:
+              description: URL to the documentation
+              type: string
+          required:
+            - type
+            - title
+            - url
+      description: References the product documentation
     Security_AI_Assistant_API_PromptCreateProps:
       type: object
       properties:
@@ -29087,6 +29181,34 @@ components:
         - createdBy
         - updatedAt
         - updatedBy
+    Security_AI_Assistant_API_SecurityAlertContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            alertId:
+              description: ID of the Alert
+              type: string
+            type:
+              enum:
+                - SecurityAlert
+              type: string
+          required:
+            - type
+            - alertId
+      description: References a security alert
+    Security_AI_Assistant_API_SecurityAlertsPageContentReference:
+      allOf:
+        - $ref: '#/components/schemas/Security_AI_Assistant_API_BaseContentReference'
+        - type: object
+          properties:
+            type:
+              enum:
+                - SecurityAlertsPage
+              type: string
+          required:
+            - type
+      description: References the security alerts page
     Security_AI_Assistant_API_SortOrder:
       enum:
         - asc
