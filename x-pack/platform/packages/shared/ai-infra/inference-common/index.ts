@@ -105,4 +105,8 @@ export {
   isSupportedConnector,
   type InferenceConnector,
 } from './src/connectors';
-export { defaultInferenceEndpoints } from './src/inference_endpoints';
+export {
+  defaultInferenceEndpoints,
+  InferenceEndpointProvider,
+  elasticModelIds,
+} from './src/inference_endpoints';
