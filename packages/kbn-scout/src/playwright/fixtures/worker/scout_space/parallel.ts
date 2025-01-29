@@ -8,9 +8,10 @@
  */
 
 import { UiSettingValues } from '@kbn/test/src/kbn_client/kbn_client_ui_settings';
-import { formatTime, isValidUTCDate, measurePerformance, serviceLoadedMsg } from '../../../utils';
+import { formatTime, isValidUTCDate, serviceLoadedMsg } from '../../../utils';
 import { coreWorkerFixtures } from '..';
 import { ImportSavedObjects, ScoutSpaceParallelFixture } from '.';
+import { measurePerformance } from '../../../../common';
 
 export const scoutSpaceParallelFixture = coreWorkerFixtures.extend<
   {},
