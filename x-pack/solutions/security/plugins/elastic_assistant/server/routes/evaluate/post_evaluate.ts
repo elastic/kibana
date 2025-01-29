@@ -15,6 +15,7 @@ import { v4 as uuidv4 } from 'uuid';
 import { getRequestAbortedSignal } from '@kbn/data-plugin/server';
 import {
   API_VERSIONS,
+  contentReferencesStoreFactory,
   ELASTIC_AI_ASSISTANT_EVALUATE_URL,
   ExecuteConnectorRequestBody,
   INTERNAL_API_ACCESS,
@@ -287,6 +288,13 @@ export const postEvaluateRoute = (
                   },
                 };
 
+              const contentReferencesEnabled =
+                assistantContext.getRegisteredFeatures(
+                  DEFAULT_PLUGIN_NAME
+                ).contentReferencesEnabled;
+              const contentReferencesStore =
+                contentReferencesEnabled && contentReferencesStoreFactory();
+
               // Fetch any applicable tools that the source plugin may have registered
               const assistantToolParams: AssistantToolParams = {
                 anonymizationFields,
@@ -300,6 +308,7 @@ export const postEvaluateRoute = (
                 alertsIndexPattern,
                 // onNewReplacements,
                 replacements,
+                contentReferencesStore,
                 inference,
                 connectorId: connector.id,
                 size,
@@ -357,6 +366,7 @@ export const postEvaluateRoute = (
                   savedObjectsClient,
                   tools,
                   replacements: {},
+                  contentReferencesEnabled: Boolean(contentReferencesStore),
                 }),
               };
             })
