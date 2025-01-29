@@ -30,7 +30,6 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     before(async () => {
       await dashboard.initTests();
       await dashboard.gotoDashboardEditMode('legacy visualizations');
-
     });
 
     it('should show notification in context menu if visualization can be converted', async () => {
