@@ -190,6 +190,9 @@ export default function ({ getService, getPageObjects }: DatasetQualityFtrProvid
       await PageObjects.datasetQuality.toggleShowInactiveDatasets();
       const rows = await PageObjects.datasetQuality.getDatasetTableRows();
       expect(rows.length).to.eql(activeDatasets.length);
+
+      // Return to Previous state
+      await PageObjects.datasetQuality.toggleShowInactiveDatasets();
     });
 
     describe('Failed docs', () => {
