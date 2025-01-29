@@ -102,7 +102,6 @@ export class RequestContextFactory implements IRequestContextFactory {
           modelIdOverride: params?.modelIdOverride,
           manageGlobalKnowledgeBaseAIAssistant:
             securitySolutionAssistant.manageGlobalKnowledgeBaseAIAssistant as boolean,
-          assistantDefaultInferenceEndpoint: params?.assistantDefaultInferenceEndpoint,
         });
       }),
 

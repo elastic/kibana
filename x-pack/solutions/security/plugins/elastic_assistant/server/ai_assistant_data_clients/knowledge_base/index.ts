@@ -70,7 +70,6 @@ import { AUDIT_OUTCOME, KnowledgeBaseAuditAction, knowledgeBaseAuditEvent } from
 export interface GetAIAssistantKnowledgeBaseDataClientParams {
   modelIdOverride?: string;
   manageGlobalKnowledgeBaseAIAssistant?: boolean;
-  assistantDefaultInferenceEndpoint?: boolean;
 }
 
 export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientParams {
@@ -80,13 +79,10 @@ export interface KnowledgeBaseDataClientParams extends AIAssistantDataClientPara
   ingestPipelineResourceName: string;
   setIsKBSetupInProgress: (isInProgress: boolean) => void;
   manageGlobalKnowledgeBaseAIAssistant: boolean;
-  assistantDefaultInferenceEndpoint: boolean;
 }
 export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
-  private assistantDefaultInferenceEndpoint = false;
   constructor(public readonly options: KnowledgeBaseDataClientParams) {
     super(options);
-    this.assistantDefaultInferenceEndpoint = options.assistantDefaultInferenceEndpoint ?? false;
   }
 
   public get isSetupInProgress() {
@@ -161,8 +157,6 @@ export class AIAssistantKnowledgeBaseDataClient extends AIAssistantDataClient {
    */
   public isInferenceEndpointExists = async (): Promise<boolean> => {
     try {
-      if (this.assistantDefaultInferenceEndpoint) return true;
-
       const esClient = await this.options.elasticsearchClientPromise;
 
       const inferenceExists = !!(await esClient.inference.get({

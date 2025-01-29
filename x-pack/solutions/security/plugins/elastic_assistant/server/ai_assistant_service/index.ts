@@ -247,10 +247,9 @@ export class AIAssistantService {
 
       if (this.assistantDefaultInferenceEndpoint) {
         const knowledgeBaseDataStreamExists = await esClient.indices.getDataStream({
+          // @ts-expect-error
           name: this.knowledgeBaseDataStream.name,
         });
-
-        console.error('knowledgeBaseDataStreamExists', knowledgeBaseDataStreamExists);
 
         // update component template for semantic_text field
         // rollover
@@ -260,15 +259,18 @@ export class AIAssistantService {
             index: '.kibana-elastic-ai-assistant-knowledge-base-default',
             fields: ['semantic_text'],
           });
-        } catch (error) {}
+        } catch (error) {
+          /* empty */
+        }
 
         const isUsingDedicatedInferenceEndpoint =
-          Object.values(mappings)[0]?.mappings?.semantic_text?.mapping?.semantic_text
-            ?.inference_id === ASSISTANT_ELSER_INFERENCE_ID;
+          (
+            Object.values(mappings)[0]?.mappings?.semantic_text?.mapping?.semantic_text as {
+              inference_id: string;
+            }
+          )?.inference_id === ASSISTANT_ELSER_INFERENCE_ID;
 
-        console.error('isUsingDedicatedInferenceEndpoint', isUsingDedicatedInferenceEndpoint);
-
-        if (isUsingDedicatedInferenceEndpoint) {
+        if (knowledgeBaseDataStreamExists && isUsingDedicatedInferenceEndpoint) {
           const currentDataStream = this.createDataStream({
             resource: 'knowledgeBase',
             kibanaVersion: this.options.kibanaVersion,
@@ -284,12 +286,14 @@ export class AIAssistantService {
             },
           });
 
+          // Add `search_inference_id` to the existing mappings
           await currentDataStream.install({
             esClient,
             logger: this.options.logger,
             pluginStop$: this.options.pluginStop$,
           });
 
+          // Migrate data stream mapping to the default inference_id
           const newDS = this.createDataStream({
             resource: 'knowledgeBase',
             kibanaVersion: this.options.kibanaVersion,
@@ -308,23 +312,44 @@ export class AIAssistantService {
             writeIndexOnly: true,
           });
 
+          // We need to first install the templates and then rollover the indices
           await newDS.installTemplates({
             esClient,
             logger: this.options.logger,
             pluginStop$: this.options.pluginStop$,
           });
 
-          const indexNames = (
-            await esClient.indices.getDataStream({ name: newDS.name })
-          ).data_streams.map((ds) => ds.name);
+          const indexNames = // @ts-expect-error
+            (await esClient.indices.getDataStream({ name: newDS.name })).data_streams.map(
+              (ds) => ds.name
+            );
 
           try {
-            const rollover = await Promise.all(
+            await Promise.all(
               indexNames.map((indexName) => esClient.indices.rollover({ alias: indexName }))
             );
-            console.error('rollover', rollover);
-          } catch (e) {}
+          } catch (e) {
+            /* empty */
+          }
         } else {
+          // We need to make sure that the data stream is created with the correct mappings
+          this.knowledgeBaseDataStream = this.createDataStream({
+            resource: 'knowledgeBase',
+            kibanaVersion: this.options.kibanaVersion,
+            fieldMap: {
+              ...omit(knowledgeBaseFieldMap, 'semantic_text'),
+              semantic_text: {
+                type: 'semantic_text',
+                array: false,
+                required: false,
+              },
+            },
+            settings: {
+              // force new semantic_text field behavior
+              'index.mapping.semantic_text.use_legacy_format': false,
+            },
+            writeIndexOnly: true,
+          });
           await this.knowledgeBaseDataStream.install({
             esClient,
             logger: this.options.logger,
@@ -332,6 +357,7 @@ export class AIAssistantService {
           });
         }
       } else {
+        // Legacy path
         await this.knowledgeBaseDataStream.install({
           esClient,
           logger: this.options.logger,
@@ -500,10 +526,6 @@ export class AIAssistantService {
       this.getElserId = async () => modelIdOverride;
     }
 
-    if (opts?.assistantDefaultInferenceEndpoint) {
-      this.assistantDefaultInferenceEndpoint = opts.assistantDefaultInferenceEndpoint;
-    }
-
     // If a V2 KnowledgeBase has never been initialized or a modelIdOverride is provided, we need to reinitialize all persistence resources to make sure
     // they're using the correct model/mappings. Technically all existing KB data is stale since it was created
     // with a different model/mappings, but modelIdOverride is only intended for testing purposes at this time
@@ -532,7 +554,6 @@ export class AIAssistantService {
       setIsKBSetupInProgress: this.setIsKBSetupInProgress.bind(this),
       spaceId: opts.spaceId,
       manageGlobalKnowledgeBaseAIAssistant: opts.manageGlobalKnowledgeBaseAIAssistant ?? false,
-      assistantDefaultInferenceEndpoint: opts.assistantDefaultInferenceEndpoint ?? false,
     });
   }
 
