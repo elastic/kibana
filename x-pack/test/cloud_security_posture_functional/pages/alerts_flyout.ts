@@ -50,6 +50,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         )}`
       );
 
+      await expandedFlyoutGraph.cleanTelemetry();
       await alertsPage.waitForListToHaveAlerts();
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
     });

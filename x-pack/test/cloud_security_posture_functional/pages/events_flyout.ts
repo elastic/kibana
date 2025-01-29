@@ -45,6 +45,7 @@ export default function ({ getPageObjects, getService }: SecurityTelemetryFtrPro
         )}&${networkEventsPage.getFlyoutFilter('1')}`
       );
 
+      await expandedFlyoutGraph.cleanTelemetry();
       await networkEventsPage.waitForListToHaveEvents();
       await ebtUIHelper.setOptIn(true); // starts the recording of events from this moment
     });

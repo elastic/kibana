@@ -169,6 +169,10 @@ export class ExpandedFlyoutGraph extends GenericFtrService<SecurityTelemetryFtrP
     await this.pageObjects.header.waitUntilLoadingHasFinished();
   }
 
+  cleanTelemetry(): Promise<void> {
+    return this.browser.setLocalStorageItem('analytics', '');
+  }
+
   async getTelemetryPreviewEventCount(): Promise<number> {
     expect(this.ebtUIHelper).not.to.be(undefined);
     const analyticsStr = await this.browser.getLocalStorageItem('analytics');
