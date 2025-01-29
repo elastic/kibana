@@ -117,7 +117,7 @@ export const resolveCase = async ({
     `${getCaseDetailsUrl(caseId)}/resolve`,
     {
       method: 'GET',
-      query: { includeComments: false },
+      query: { includeComments: true },
       signal,
     }
   );
