@@ -57,6 +57,7 @@ import { logEqlRequest } from '../utils/logged_requests';
 import * as i18n from '../translations';
 import { alertSuppressionTypeGuard } from '../utils/get_is_alert_suppression_active';
 import { isEqlSequenceQuery } from '../../../../../common/detection_engine/utils';
+import { logShardFailures } from '../utils/log_shard_failure';
 
 interface EqlExecutorParams {
   inputIndex: string[];
@@ -170,20 +171,14 @@ export const eqlExecutor = async ({
       let newSignals: Array<WrappedFieldsLatest<BaseFieldsLatest>> | undefined;
 
       // @ts-expect-error shard_failures exists in
-      // elasticsearch response v 8.18.x
+      // elasticsearch response v9
+      // needs to be spec needs to be backported
+      // https://github.com/elastic/elasticsearch-specification/pull/3372#issuecomment-2621835599
       // TODO: remove ts-expect-error when ES lib version is updated
       const shardFailures = response.shard_failures;
+      logShardFailures(isSequenceQuery, shardFailures, result, ruleExecutionLogger);
 
       const { events, sequences } = response.hits;
-
-      if (shardFailures) {
-        const shardFailureMessage = i18n.EQL_SHARD_FAILURE_MESSAGE(
-          isSequenceQuery,
-          JSON.stringify(shardFailures)
-        );
-        ruleExecutionLogger.error(shardFailureMessage);
-        result.errors.push(shardFailureMessage);
-      }
 
       if (events) {
         if (isAlertSuppressionActive) {
