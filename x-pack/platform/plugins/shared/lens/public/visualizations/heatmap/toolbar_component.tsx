@@ -202,6 +202,7 @@ export const HeatmapToolbar = memo(
             </TooltipWrapper>
           </EuiFlexGroup>
         </EuiFlexItem>
+
         <EuiFlexItem grow={false}>
           <LegendSettingsPopover
             legendOptions={legendOptions}
