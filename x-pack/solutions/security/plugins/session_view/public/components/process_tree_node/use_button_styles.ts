@@ -43,10 +43,12 @@ export const useButtonStyles = () => {
         transform: `rotate(180deg)`,
       },
       '&.isExpanded': {
-        color: colors.ghost,
+        color: colors.textInverse,
         background: colors.backgroundFilledPrimary,
+        borderColor: colors.borderStrongPrimary,
         '&:hover, &:focus': {
           background: colors.backgroundFilledPrimary,
+          borderColor: colors.borderStrongPrimary,
         },
       },
     };
@@ -64,10 +66,12 @@ export const useButtonStyles = () => {
         textDecoration: 'none',
       },
       '&.isExpanded': {
-        color: colors.ghost,
+        color: colors.textInverse,
         background: colors.backgroundFilledDanger,
+        borderColor: colors.borderStrongDanger,
         '&:hover, &:focus': {
           background: `${colors.backgroundFilledDanger}`,
+          borderColor: colors.borderStrongDanger,
         },
       },
 
@@ -82,18 +86,18 @@ export const useButtonStyles = () => {
 
     const outputButton: CSSObject = {
       ...button,
-      color: colors.textAccent,
-      background: colors.backgroundBaseAccent,
-      border: `${border.width.thin} solid ${colors.borderBaseAccent}`,
+      color: colors.textAccentSecondary,
+      background: colors.backgroundBaseAccentSecondary,
+      border: `${border.width.thin} solid ${colors.borderBaseAccentSecondary}`,
       '&&:hover, &&:focus': {
-        background: colors.backgroundLightAccent,
+        background: colors.backgroundLightAccentSecondary,
         textDecoration: 'none',
       },
       '&.isExpanded': {
         color: colors.ghost,
-        background: colors.backgroundFilledAccent,
+        background: colors.backgroundFilledAccentSecondary,
         '&:hover, &:focus': {
-          background: `${colors.backgroundFilledAccent}`,
+          background: `${colors.backgroundFilledAccentSecondary}`,
         },
       },
     };
@@ -101,12 +105,12 @@ export const useButtonStyles = () => {
     const userChangedButton: CSSObject = {
       ...button,
       cursor: 'default',
-      color: colors.textAccentSecondary,
-      background: colors.backgroundBaseAccentSecondary,
-      border: `${border.width.thin} solid ${colors.borderBaseAccentSecondary}`,
+      color: colors.textAccent,
+      background: colors.backgroundBaseAccent,
+      border: `${border.width.thin} solid ${colors.borderBaseAccent}`,
       '&&:hover, &&:focus': {
-        color: colors.textAccentSecondary,
-        background: colors.backgroundBaseAccentSecondary,
+        color: colors.textAccent,
+        background: colors.backgroundBaseAccent,
         textDecoration: 'none',
         transform: 'none',
         animation: 'none',

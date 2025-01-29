@@ -26,7 +26,7 @@ exports[`ExceptionItemCardComments should render comments panel closed 1`] = `
             class="euiAccordion__buttonContent"
           >
             <div
-              class="euiText emotion-EuiText"
+              class="euiText emotion-euiText-s"
               data-test-subj="ExceptionItemCardCommentsContainerTextButton"
             >
               Show comments (2)
@@ -46,7 +46,7 @@ exports[`ExceptionItemCardComments should render comments panel closed 1`] = `
           class="euiAccordion__children emotion-euiAccordion__children"
         >
           <div
-            class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+            class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
             data-test-subj="accordionContentPanel"
           >
             <ol
@@ -165,7 +165,7 @@ exports[`ExceptionItemCardComments should render comments panel opened when acco
             class="euiAccordion__buttonContent"
           >
             <div
-              class="euiText emotion-EuiText"
+              class="euiText emotion-euiText-s"
               data-test-subj="ExceptionItemCardCommentsContainerTextButton"
             >
               Show comments (2)
@@ -184,7 +184,7 @@ exports[`ExceptionItemCardComments should render comments panel opened when acco
           class="euiAccordion__children emotion-euiAccordion__children"
         >
           <div
-            class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasBorder"
+            class="euiPanel euiPanel--plain euiPanel--paddingMedium emotion-euiPanel-grow-m-m-plain-hasShadow"
             data-test-subj="accordionContentPanel"
           >
             <ol

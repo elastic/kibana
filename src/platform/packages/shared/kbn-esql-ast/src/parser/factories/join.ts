@@ -40,7 +40,7 @@ export const createJoinCommand = (ctx: JoinCommandContext): ESQLCommand => {
   const command = createCommand('join', ctx);
 
   // Pick-up the <TYPE> of the command.
-  command.commandType = (ctx._type_.text ?? '').toLocaleLowerCase();
+  command.commandType = (ctx._type_?.text ?? 'lookup').toLocaleLowerCase();
 
   const joinTarget = createNodeFromJoinTarget(ctx.joinTarget());
   const joinCondition = ctx.joinCondition();

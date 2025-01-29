@@ -7,7 +7,7 @@
 
 import { schema } from '@kbn/config-schema';
 
-import { RouteDependencies } from '../../../plugin';
+import type { RouteDependencies } from '../../../types';
 
 const extractionRuleSchema = schema.object({
   extraction_rule: schema.object({

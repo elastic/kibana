@@ -6,8 +6,10 @@
  */
 
 import type { DefaultInspectorAdapters } from '@kbn/expressions-plugin/common';
+import { apiPublishesESQLVariables } from '@kbn/esql-variables-types';
 import { apiPublishesUnifiedSearch, fetch$ } from '@kbn/presentation-publishing';
 import { type KibanaExecutionContext } from '@kbn/core/public';
+import { ESQLControlVariable } from '@kbn/esql-validation-autocomplete';
 import {
   BehaviorSubject,
   type Subscription,
@@ -18,6 +20,7 @@ import {
   merge,
   tap,
   map,
+  of,
 } from 'rxjs';
 import fastIsEqual from 'fast-deep-equal';
 import { pick } from 'lodash';
@@ -41,6 +44,7 @@ const blockingMessageDisplayLocations: UserMessagesDisplayLocationId[] = [
 ];
 
 type ReloadReason =
+  | 'ESQLvariables'
   | 'attributes'
   | 'savedObjectId'
   | 'overrides'
@@ -48,7 +52,7 @@ type ReloadReason =
   | 'viewMode'
   | 'searchContext';
 
-function getSearchContext(parentApi: unknown) {
+function getSearchContext(parentApi: unknown, esqlVariables: ESQLControlVariable[] = []) {
   const unifiedSearch$ = apiPublishesUnifiedSearch(parentApi)
     ? pick(parentApi, 'filters$', 'query$', 'timeslice$', 'timeRange$')
     : {
@@ -59,6 +63,7 @@ function getSearchContext(parentApi: unknown) {
       };
 
   return {
+    esqlVariables,
     filters: unifiedSearch$.filters$.getValue(),
     query: unifiedSearch$.query$.getValue(),
     timeRange: unifiedSearch$.timeRange$.getValue(),
@@ -186,9 +191,11 @@ export function loadEmbeddableData(
       callbacks
     );
 
+    const esqlVariables = internalApi?.esqlVariables$?.getValue();
+
     const searchContext = getMergedSearchContext(
       currentState,
-      getSearchContext(parentApi),
+      getSearchContext(parentApi, esqlVariables),
       api.timeRange$,
       parentApi,
       services
@@ -249,9 +256,15 @@ export function loadEmbeddableData(
     return pipe(distinctUntilChanged(fastIsEqual), skip(1));
   }
 
+  // Read ESQL variables from the parent if it provides them
+  const esqlVariables$ = apiPublishesESQLVariables(parentApi)
+    ? parentApi.esqlVariables$
+    : of([] as ESQLControlVariable[]);
+
   const mergedSubscriptions = merge(
     // on search context change, reload
     fetch$(api).pipe(map(() => 'searchContext' as ReloadReason)),
+    esqlVariables$.pipe(map(() => 'ESQLvariables' as ReloadReason)),
     // On state change, reload
     // this is used to refresh the chart on inline editing
     // just make sure to avoid to rerender if there's no substantial change

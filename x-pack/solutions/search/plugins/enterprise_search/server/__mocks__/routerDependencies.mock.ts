@@ -23,12 +23,25 @@ export const mockRequestHandler = {
 
 export const mockMl = mlPluginServerMock.createSetupContract();
 
-export const mockConfig = {
+export const mockConfig: ConfigType = {
+  enabled: true,
   host: 'http://localhost:3002',
   accessCheckTimeout: 5000,
   accessCheckTimeoutWarning: 300,
-  ssl: {},
-} as ConfigType;
+  ssl: {
+    verificationMode: 'none',
+  },
+  hasConnectors: true,
+  hasDefaultIngestPipeline: true,
+  hasDocumentLevelSecurityEnabled: true,
+  hasIncrementalSyncEnabled: true,
+  hasNativeConnectors: true,
+  hasWebCrawler: true,
+  isCloud: false,
+  ui: {
+    enabled: true,
+  },
+};
 
 /**
  * This is useful for tests that don't use either config or log,
@@ -37,8 +50,10 @@ export const mockConfig = {
 export const mockDependencies = {
   // Mock router should be handled on a per-test basis
   config: mockConfig,
+  enterpriseSearchRequestHandler: mockRequestHandler as any,
+  getSavedObjectsService: jest.fn(),
+  getStartServices: jest.fn(),
   globalConfigService: new GlobalConfigService(),
   log: mockLogger,
-  enterpriseSearchRequestHandler: mockRequestHandler as any,
   ml: mockMl,
 };

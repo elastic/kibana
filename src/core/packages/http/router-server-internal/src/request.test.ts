@@ -470,6 +470,28 @@ describe('CoreKibanaRequest', () => {
       });
     });
 
+    describe('route.options.excludeFromRateLimiter property', () => {
+      it.each`
+        value        | expected
+        ${true}      | ${true}
+        ${false}     | ${false}
+        ${undefined} | ${undefined}
+      `('handles excludeFromRateLimiter: ${value}', ({ value, expected }) => {
+        const request = hapiMocks.createRequest({
+          route: {
+            settings: {
+              app: {
+                excludeFromRateLimiter: value,
+              },
+            },
+          },
+        });
+        const kibanaRequest = CoreKibanaRequest.from(request);
+
+        expect(kibanaRequest.route.options.excludeFromRateLimiter).toBe(expected);
+      });
+    });
+
     describe('RouteSchema type inferring', () => {
       it('should work with config-schema', () => {
         const body = Buffer.from('body!');

@@ -83,17 +83,6 @@ export const SearchIndex: React.FC = () => {
 
   useEffect(() => {
     const subscription = guidedOnboarding?.guidedOnboardingApi
-      ?.isGuideStepActive$('appSearch', 'add_data')
-      .subscribe((isStepActive) => {
-        if (isStepActive && index?.count) {
-          guidedOnboarding?.guidedOnboardingApi?.completeGuideStep('appSearch', 'add_data');
-        }
-      });
-    return () => subscription?.unsubscribe();
-  }, [guidedOnboarding, index?.count]);
-
-  useEffect(() => {
-    const subscription = guidedOnboarding?.guidedOnboardingApi
       ?.isGuideStepActive$('websiteSearch', 'add_data')
       .subscribe((isStepActive) => {
         if (isStepActive && index?.count) {

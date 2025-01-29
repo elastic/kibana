@@ -188,9 +188,10 @@ export function useOnSubmit({
   // Validation state
   const [validationResults, setValidationResults] = useState<PackagePolicyValidationResults>();
   const [hasAgentPolicyError, setHasAgentPolicyError] = useState<boolean>(false);
-  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   const { isAgentlessIntegration, isAgentlessAgentPolicy } = useAgentless();
+
+  const hasErrors = validationResults ? validationHasErrors(validationResults) : false;
 
   // Update agent policy method
   const updateAgentPolicies = useCallback(
@@ -307,11 +308,11 @@ export function useOnSubmit({
     useSetupTechnology({
       newAgentPolicy,
       setNewAgentPolicy,
-      updateAgentPolicies,
       updatePackagePolicy,
       setSelectedPolicyTab,
       packageInfo,
       packagePolicy,
+      integrationToEnable,
     });
   const setupTechnologyRef = useRef<SetupTechnology | undefined>(selectedSetupTechnology);
   // sync the inputs with the agentless selector change
@@ -340,7 +341,6 @@ export function useOnSubmit({
   }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
 
   const onSaveNavigate = useOnSaveNavigate({
-    packagePolicy,
     queryParamsPolicyId,
   });
 
