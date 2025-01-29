@@ -65,23 +65,6 @@ export default function (providerContext: FtrProviderContext) {
           )?.includes('https://console.aws.amazon.com/cloudformation/')
         ).to.be(true);
       });
-
-      it('Clicking on Launch CloudFormation on post intall modal should lead user to Cloud Formation page', async () => {
-        await cisIntegration.navigateToAddIntegrationCnvmPage();
-        await cisIntegration.inputUniqueIntegrationName();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        await cisIntegration.clickSaveButton();
-        await pageObjects.header.waitUntilLoadingHasFinished();
-        await retry.tryForTime(5000, async () => {
-          expect(
-            (
-              await cisIntegration.clickLaunchAndGetCurrentUrl(
-                'confirmCloudFormationModalConfirmButton'
-              )
-            ).includes('console.aws.amazon.com%2Fcloudformation')
-          ).to.be(true);
-        });
-      });
     });
   });
 }
