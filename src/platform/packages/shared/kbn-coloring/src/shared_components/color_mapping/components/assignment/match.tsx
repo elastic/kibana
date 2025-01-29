@@ -150,12 +150,19 @@ export const Match: React.FC<{
                   acc.push({
                     type: 'match',
                     pattern: key,
+                    matchEntireWord: true,
                   } satisfies RuleMatch);
                   // TODO: handle remaining rule types
                 }
               }
               return acc;
             }, [])
+          );
+        }}
+        optionMatcher={({ option, normalizedSearchValue }) => {
+          return (
+            String(option.value ?? '').includes(normalizedSearchValue) ||
+            option.label.includes(normalizedSearchValue)
           );
         }}
         onCreateOption={
@@ -166,6 +173,7 @@ export const Match: React.FC<{
                   {
                     type: 'match',
                     pattern: label,
+                    matchEntireWord: true,
                   } satisfies RuleMatch,
                 ]);
               }
@@ -185,6 +193,7 @@ function getOptionForRawValueFn(fieldFormat?: IFieldFormat) {
     const key = String(rawValue);
     return {
       key,
+      value: typeof rawValue === 'number' ? String(rawValue) : undefined,
       label: formatter(rawValue),
     } satisfies EuiComboBoxOptionOption<string>;
   };

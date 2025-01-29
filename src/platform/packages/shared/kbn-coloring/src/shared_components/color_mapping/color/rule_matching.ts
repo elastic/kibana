@@ -28,6 +28,7 @@ export function ruleMatchFn(rawValue: RawValue) {
   return function ruleMatch(rule: ColorMapping.ColorRule) {
     switch (rule.type) {
       case 'raw': {
+        // TODO: update to compare numbers as numbers
         const key = String(deserializeField(rule.value));
         return key === String(rawValue);
       }
