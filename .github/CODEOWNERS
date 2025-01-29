@@ -185,7 +185,7 @@ src/dev/packages/storybook @elastic/kibana-operations
 src/dev/packages/styled-components-mapping-cli @elastic/kibana-operations @elastic/eui-team
 src/dev/packages/telemetry-tools @elastic/kibana-core
 src/dev/packages/test @elastic/kibana-operations @elastic/appex-qa
-packages/kbn-test-eui-helpers @elastic/kibana-visualizations
+src/dev/packages/test-eui-helpers @elastic/kibana-visualizations
 packages/kbn-test-jest-helpers @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-test-subj-selector @elastic/kibana-operations @elastic/appex-qa
 packages/kbn-tooling-log @elastic/kibana-operations

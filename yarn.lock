@@ -7688,7 +7688,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/test-eui-helpers@link:packages/kbn-test-eui-helpers":
+"@kbn/test-eui-helpers@link:src/dev/packages/test-eui-helpers":
   version "0.0.0"
   uid ""
 

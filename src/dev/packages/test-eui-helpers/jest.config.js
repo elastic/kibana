@@ -9,6 +9,6 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-test-eui-helpers'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/test-eui-helpers'],
 };
