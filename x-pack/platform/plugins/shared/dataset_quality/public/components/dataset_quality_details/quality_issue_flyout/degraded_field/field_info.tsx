@@ -117,7 +117,7 @@ export const DegradedFieldInfo = () => {
                 <EuiBadgeGroup gutterSize="s">
                   {degradedFieldValues?.values.map((value, idx) => (
                     <EuiBadge color="hollow" key={idx}>
-                      <EuiTextColor color={euiTheme.colors.vis.euiColorVis3}>
+                      <EuiTextColor color="#765B96">
                         <strong>{value}</strong>
                       </EuiTextColor>
                     </EuiBadge>

@@ -19,10 +19,10 @@ import {
   overviewPanelTitleDocuments,
   overviewPanelTitleResources,
 } from '../../../../../common/translations';
+import { useDatasetQualityDetailsState } from '../../../../hooks';
 import { useOverviewSummaryPanel } from '../../../../hooks/use_overview_summary_panel';
 import { DatasetQualityIndicator } from '../../../quality_indicator';
 import { Panel, PanelIndicator } from './panel';
-import { useDatasetQualityDetailsContext } from '../../context';
 
 const degradedDocsTooltip = (
   <FormattedMessage
@@ -48,7 +48,7 @@ const failedDocsColumnTooltip = (
 // Allow for lazy loading
 // eslint-disable-next-line import/no-default-export
 export default function Summary() {
-  const { isServerless } = useDatasetQualityDetailsContext();
+  const { isFailureStoreEnabled } = useDatasetQualityDetailsState();
   const {
     isSummaryPanelLoading,
     totalDocsCount,
@@ -103,7 +103,7 @@ export default function Summary() {
           isLoading={isSummaryPanelLoading}
           tooltip={degradedDocsTooltip}
         />
-        {!isServerless && (
+        {isFailureStoreEnabled && (
           <PanelIndicator
             label={overviewPanelDatasetQualityIndicatorFailedDocs}
             value={totalFailedDocsCount}

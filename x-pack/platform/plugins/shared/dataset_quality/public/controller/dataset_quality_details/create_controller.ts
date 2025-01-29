@@ -22,10 +22,17 @@ interface Dependencies {
   plugins: DatasetQualityStartDeps;
   dataStreamStatsService: DataStreamsStatsServiceStart;
   dataStreamDetailsService: DataStreamDetailsServiceStart;
+  isServerless: boolean;
 }
 
 export const createDatasetQualityDetailsControllerFactory =
-  ({ core, plugins, dataStreamStatsService, dataStreamDetailsService }: Dependencies) =>
+  ({
+    core,
+    plugins,
+    dataStreamStatsService,
+    dataStreamDetailsService,
+    isServerless,
+  }: Dependencies) =>
   async ({
     initialState,
   }: {
@@ -44,6 +51,7 @@ export const createDatasetQualityDetailsControllerFactory =
       toasts: core.notifications.toasts,
       dataStreamStatsClient,
       dataStreamDetailsClient,
+      isServerless,
     });
 
     const service = interpret(machine, {

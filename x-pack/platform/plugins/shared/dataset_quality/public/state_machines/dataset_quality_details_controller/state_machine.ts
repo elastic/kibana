@@ -45,7 +45,8 @@ import {
 } from './notifications';
 
 export const createPureDatasetQualityDetailsControllerStateMachine = (
-  initialContext: DatasetQualityDetailsControllerContext
+  initialContext: DatasetQualityDetailsControllerContext,
+  isServerless: boolean
 ) =>
   createMachine<
     DatasetQualityDetailsControllerContext,
@@ -779,6 +780,7 @@ export interface DatasetQualityDetailsControllerStateMachineDependencies {
   toasts: IToasts;
   dataStreamStatsClient: IDataStreamsStatsClient;
   dataStreamDetailsClient: IDataStreamDetailsClient;
+  isServerless: boolean;
 }
 
 export const createDatasetQualityDetailsControllerStateMachine = ({
@@ -787,8 +789,9 @@ export const createDatasetQualityDetailsControllerStateMachine = ({
   toasts,
   dataStreamStatsClient,
   dataStreamDetailsClient,
+  isServerless,
 }: DatasetQualityDetailsControllerStateMachineDependencies) =>
-  createPureDatasetQualityDetailsControllerStateMachine(initialContext).withConfig({
+  createPureDatasetQualityDetailsControllerStateMachine(initialContext, isServerless).withConfig({
     actions: {
       notifyFailedFetchForAggregatableDatasets: (_context, event: DoneInvokeEvent<Error>) =>
         fetchNonAggregatableDatasetsFailedNotifier(toasts, event.data),
