@@ -7,24 +7,17 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { PanelInteractionEvent, RuntimeGridSettings } from '../types';
+import { PanelInteractionEvent } from '../types';
 import { getPointerPosition } from './sensors';
 import { UserInteractionEvent } from './types';
-
-const getGridWidth = (runtimeSettings: RuntimeGridSettings) => {
-  const { columnCount, gutterSize, columnPixelWidth } = runtimeSettings;
-  return (gutterSize + columnPixelWidth) * columnCount + gutterSize * 2;
-};
 
 // Calculates the preview rect coordinates for a resized panel
 export const getResizePreviewRect = ({
   interactionEvent,
   pointerPixel,
-  runtimeSettings,
 }: {
   pointerPixel: { clientX: number; clientY: number };
   interactionEvent: PanelInteractionEvent;
-  runtimeSettings: RuntimeGridSettings;
 }) => {
   const panelRect = interactionEvent.panelDiv.getBoundingClientRect();
 
@@ -32,11 +25,7 @@ export const getResizePreviewRect = ({
     left: panelRect.left,
     top: panelRect.top,
     bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
-    right: Math.min(
-      pointerPixel.clientX - interactionEvent.pointerOffsets.right,
-      interactionEvent.panelDiv.parentElement?.getBoundingClientRect().right ??
-        getGridWidth(runtimeSettings)
-    ),
+    right: pointerPixel.clientX - interactionEvent.pointerOffsets.right,
   };
 };
 
