@@ -14,7 +14,7 @@ import {
   EuiSuperSelect,
 } from '@elastic/eui';
 import type { ChangeEventHandler } from 'react';
-import React, { useCallback, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useState, useRef } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 
 import * as i18n from './translations';
@@ -127,6 +127,7 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
   const isTimelineSourcerer = scopeId === SourcererScopeName.timeline;
   const isDefaultSourcerer = scopeId === SourcererScopeName.default;
   const updateUrlParam = useUpdateUrlParam<SourcererUrlState>(URL_PARAM_KEY.sourcerer);
+  const adhocDataViewRef = useRef(false);
 
   const signalIndexName = useSelector(sourcererSelectors.signalIndexName);
   const defaultDataView = useSelector(sourcererSelectors.defaultDataView);
@@ -306,12 +307,14 @@ export const Sourcerer = React.memo<SourcererComponentProps>(({ scope: scopeId }
     }
   }, [createAdhocDataView, missingPatterns, dispatchChangeDataView]);
 
+  // FIXME: ensure the view is created only once
   useEffect(() => {
-    if (isAdhocDataviewLoading) {
-      return;
-    }
-
     if ((dataViewId === null && isModified === 'deprecated') || isModified === 'missingPatterns') {
+      if (adhocDataViewRef.current) {
+        return;
+      }
+
+      adhocDataViewRef.current = true;
       createAdhocDataViewForCompatibility();
     }
   }, [dataViewId, isModified, createAdhocDataViewForCompatibility, isAdhocDataviewLoading]);
