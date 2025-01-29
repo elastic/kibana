@@ -9,8 +9,8 @@
 
 module.exports = {
   preset: '@kbn/test',
-  rootDir: '../..',
-  roots: ['<rootDir>/packages/kbn-apm-synthtrace-client'],
+  rootDir: '../../../..',
+  roots: ['<rootDir>/src/dev/packages/apm-synthtrace-client'],
   setupFiles: [],
   setupFilesAfterEnv: [],
 };

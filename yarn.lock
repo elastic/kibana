@@ -4032,7 +4032,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/apm-synthtrace-client@link:packages/kbn-apm-synthtrace-client":
+"@kbn/apm-synthtrace-client@link:src/dev/packages/apm-synthtrace-client":
   version "0.0.0"
   uid ""
 

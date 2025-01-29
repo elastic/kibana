@@ -12,7 +12,7 @@
     - 'x-pack/solutions/observability/plugins/apm/**/*.*'
     - 'x-pack/test/apm_api_integration/**/*.*'
     - 'src/dev/packages/apm-synthtrace/**/*.*'
-    - 'packages/kbn-apm-synthtrace-client/**/*.*'
+    - 'src/dev/packages/apm-synthtrace-client/**/*.*'
     - 'src/platform/packages/shared/kbn-apm-utils/**/*.*'
     - 'x-pack/solutions/observability/plugins/ux/**/*.*'
 - 'Team:Fleet':
