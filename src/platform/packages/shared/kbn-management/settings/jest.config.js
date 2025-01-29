@@ -13,6 +13,8 @@ module.exports = {
   roots: ['<rootDir>/src/platform/packages/shared/kbn-management/settings'],
   coverageDirectory: '<rootDir>/target/kibana-coverage/jest/packages/kbn-management/settings',
   coverageReporters: ['text', 'html'],
-  collectCoverageFrom: ['<rootDir>/src/platform/packages/shared/kbn-management/settings/**/*.{ts,tsx}'],
+  collectCoverageFrom: [
+    '<rootDir>/src/platform/packages/shared/kbn-management/settings/**/*.{ts,tsx}',
+  ],
   coveragePathIgnorePatterns: ['__stories__', '.stories.tsx', 'storybook', 'mocks'],
 };
