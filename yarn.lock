@@ -6292,7 +6292,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/management-storybook-config@link:packages/kbn-management/storybook/config":
+"@kbn/management-storybook-config@link:src/dev/packages/management-storybook-config":
   version "0.0.0"
   uid ""
 

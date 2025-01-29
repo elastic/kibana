@@ -153,7 +153,7 @@ src/dev/packages/lint-packages-cli @elastic/kibana-operations
 src/dev/packages/lint-ts-projects-cli @elastic/kibana-operations
 src/dev/packages/managed-vscode-config @elastic/kibana-operations
 src/dev/packages/managed-vscode-config-cli @elastic/kibana-operations
-packages/kbn-management/storybook/config @elastic/kibana-management
+src/dev/packages/management-storybook-config @elastic/kibana-management
 packages/kbn-manifest @elastic/kibana-core
 packages/kbn-mock-idp-plugin @elastic/kibana-security
 packages/kbn-mock-idp-utils @elastic/kibana-security
