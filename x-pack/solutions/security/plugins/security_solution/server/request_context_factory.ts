@@ -35,6 +35,7 @@ import { createDetectionRulesClient } from './lib/detection_engine/rule_manageme
 import { buildMlAuthz } from './lib/machine_learning/authz';
 import { EntityStoreDataClient } from './lib/entity_analytics/entity_store/entity_store_data_client';
 import type { SiemMigrationsService } from './lib/siem_migrations/siem_migrations_service';
+import type { ProductFeaturesService } from './lib/product_features_service';
 
 export interface IRequestContextFactory {
   create(
@@ -54,6 +55,7 @@ interface ConstructorOptions {
   kibanaVersion: string;
   kibanaBranch: string;
   buildFlavor: BuildFlavor;
+  productFeaturesService: ProductFeaturesService;
 }
 
 export class RequestContextFactory implements IRequestContextFactory {
@@ -75,6 +77,7 @@ export class RequestContextFactory implements IRequestContextFactory {
       endpointAppContextService,
       ruleMonitoringService,
       siemMigrationsService,
+      productFeaturesService,
     } = options;
 
     const { lists, ruleRegistry, security } = plugins;
@@ -154,7 +157,9 @@ export class RequestContextFactory implements IRequestContextFactory {
           actionsClient,
           savedObjectsClient: coreContext.savedObjects.client,
           mlAuthz,
-          isRuleCustomizationEnabled: config.experimentalFeatures.prebuiltRulesCustomizationEnabled,
+          experimentalFeatures: config.experimentalFeatures,
+          productFeaturesService,
+          license: licensing.license,
         });
       }),
 

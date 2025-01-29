@@ -135,4 +135,5 @@ export const securityDefaultProductFeaturesConfig: DefaultSecurityProductFeature
 
   // Security PLIs
   [ProductFeatureSecurityKey.integrationAssistant]: {},
+  [ProductFeatureSecurityKey.prebuiltRuleCustomization]: {},
 };
