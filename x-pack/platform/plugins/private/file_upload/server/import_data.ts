@@ -42,8 +42,8 @@ export function importDataProvider({ asCurrentUser }: IScopedClusterClient) {
 
         // create the pipeline if one has been supplied
         if (createPipelines !== undefined) {
-          for (let i = 0; i < createPipelines.length; i++) {
-            const resp = await createPipeline(createPipelines[i].id, createPipelines[i].pipeline);
+          for (const p of createPipelines) {
+            const resp = await createPipeline(p.id, p.pipeline);
             if (resp.acknowledged !== true) {
               throw resp;
             }

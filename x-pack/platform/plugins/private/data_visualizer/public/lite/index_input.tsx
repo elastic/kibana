@@ -11,6 +11,8 @@ import React, { useState } from 'react';
 import useDebounce from 'react-use/lib/useDebounce';
 import type { FileUploadStartApi } from '@kbn/file-upload-plugin/public/api';
 import { i18n } from '@kbn/i18n';
+import useMountedState from 'react-use/lib/useMountedState';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { STATUS } from './file_manager/file_manager';
 
 interface Props {
@@ -22,6 +24,7 @@ interface Props {
 export const IndexInput: FC<Props> = ({ setIndexName, setIndexValidationStatus, fileUpload }) => {
   const [indexNameLocal, setIndexNameLocal] = useState('');
   const [indexNameError, setIndexNameError] = useState('');
+  const isMounted = useMountedState();
 
   useDebounce(
     async () => {
@@ -41,6 +44,11 @@ export const IndexInput: FC<Props> = ({ setIndexName, setIndexValidationStatus, 
             }
           )
         : isIndexNameValid(indexNameLocal);
+
+      if (!isMounted()) {
+        return;
+      }
+
       setIndexName(indexNameLocal);
       setIndexNameError(error);
       setIndexValidationStatus(error === '' ? STATUS.COMPLETED : STATUS.FAILED);
@@ -52,13 +60,20 @@ export const IndexInput: FC<Props> = ({ setIndexName, setIndexValidationStatus, 
   return (
     <>
       <EuiTitle size="s">
-        <h3>Create new index</h3>
+        <h3>
+          <FormattedMessage
+            id="xpack.dataVisualizer.file.importView.createIndexTitle"
+            defaultMessage="Create new index"
+          />
+        </h3>
       </EuiTitle>
 
       <EuiSpacer size="xs" />
 
       <EuiFormRow
-        label="Index name"
+        label={i18n.translate('xpack.dataVisualizer.file.importView.indexNameLabel', {
+          defaultMessage: 'Index name',
+        })}
         isInvalid={indexNameError !== ''}
         error={indexNameError}
         fullWidth

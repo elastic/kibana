@@ -412,8 +412,8 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
    * @apiDescription Remove a list of ingest pipelines by id
    */
   router.versioned
-    .post({
-      path: '/internal/file_upload/remove_pipelines',
+    .delete({
+      path: '/internal/file_upload/remove_pipelines/{pipelineIds}',
       access: 'internal',
       security: {
         authz: {
@@ -426,19 +426,17 @@ export function fileUploadRoutes(coreSetup: CoreSetup<StartDeps, unknown>, logge
         version: '1',
         validate: {
           request: {
-            body: schema.object({
-              pipelineIds: schema.arrayOf(schema.string()),
-            }),
+            params: schema.object({ pipelineIds: schema.string() }),
           },
         },
       },
       async (context, request, response) => {
         try {
-          const { pipelineIds } = request.body;
+          const { pipelineIds } = request.params;
           const esClient = (await context.core).elasticsearch.client;
 
           const resp = await Promise.all(
-            pipelineIds.map((id) => esClient.asCurrentUser.ingest.deletePipeline({ id }))
+            pipelineIds.split(',').map((id) => esClient.asCurrentUser.ingest.deletePipeline({ id }))
           );
 
           return response.ok({

@@ -18,9 +18,5 @@ export const OverallUploadProgress: FC<Props> = ({ filesStatus }) => {
     filesStatus.map((file) => file.importProgress).reduce((acc, progress) => acc + progress, 0) /
     filesStatus.length;
 
-  return (
-    <>
-      <EuiProgress value={overallProgress} max={100} size="s" />
-    </>
-  );
+  return <EuiProgress value={overallProgress} max={100} size="s" />;
 };

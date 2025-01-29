@@ -39,49 +39,46 @@ export function createFlyout(
 
   let results: FileUploadResults | null = null;
   const { onUploadComplete, autoAddInference, indexSettings } = props;
-  try {
-    const onFlyoutClose = () => {
+
+  const onFlyoutClose = () => {
+    flyoutSession.close();
+    if (results !== null && typeof onUploadComplete === 'function') {
+      onUploadComplete(results);
+    }
+  };
+
+  const flyoutSession = overlays.openFlyout(
+    toMountPoint(
+      <Suspense fallback={<LoadingContents />}>
+        <LazyFlyoutContents
+          coreStart={coreStart}
+          share={share}
+          data={data}
+          props={{ autoAddInference, indexSettings }}
+          onFlyoutClose={onFlyoutClose}
+          setUploadResults={(res) => {
+            if (res) {
+              results = res;
+            }
+          }}
+        />
+      </Suspense>,
+      startServices
+    ),
+    {
+      'data-test-subj': 'mlFlyoutLayerSelector',
+      ownFocus: true,
+      onClose: onFlyoutClose,
+      size: '500px',
+    }
+  );
+
+  // Close the flyout when user navigates out of the current plugin
+  currentAppId$
+    .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
+    .subscribe(() => {
       flyoutSession.close();
-      if (results !== null && typeof onUploadComplete === 'function') {
-        onUploadComplete(results);
-      }
-    };
-
-    const flyoutSession = overlays.openFlyout(
-      toMountPoint(
-        <Suspense fallback={<LoadingContents />}>
-          <LazyFlyoutContents
-            coreStart={coreStart}
-            share={share}
-            data={data}
-            props={{ autoAddInference, indexSettings }}
-            onFlyoutClose={onFlyoutClose}
-            setUploadResults={(res) => {
-              if (res) {
-                results = res;
-              }
-            }}
-          />
-        </Suspense>,
-        startServices
-      ),
-      {
-        'data-test-subj': 'mlFlyoutLayerSelector',
-        ownFocus: true,
-        onClose: onFlyoutClose,
-        size: '500px',
-      }
-    );
-
-    // Close the flyout when user navigates out of the current plugin
-    currentAppId$
-      .pipe(skip(1), takeUntil(from(flyoutSession.onClose)), distinctUntilChanged())
-      .subscribe(() => {
-        flyoutSession.close();
-      });
-  } catch (error) {
-    //
-  }
+    });
 }
 
 const LoadingContents: FC = () => (

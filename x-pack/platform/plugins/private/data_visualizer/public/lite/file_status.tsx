@@ -78,7 +78,7 @@ export const FileStatus: FC<Props> = ({ fileStatus, uploadStatus, deleteFile, in
                       aria-label={i18n.translate(
                         'xpack.dataVisualizer.file.fileStatus.deleteFile',
                         {
-                          defaultMessage: 'remove file',
+                          defaultMessage: 'Remove file',
                         }
                       )}
                     />

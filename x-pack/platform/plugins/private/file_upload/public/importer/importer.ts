@@ -293,15 +293,14 @@ export abstract class Importer implements IImporter {
 
   public async deletePipelines(pipelineIds: string[]) {
     // remove_pipelines
-    const body = JSON.stringify({
-      pipelineIds,
-    });
+    // const body = JSON.stringify({
+    //   pipelineIds,
+    // });
 
     return await getHttp().fetch<IngestDeletePipelineResponse[]>({
-      path: `/internal/file_upload/remove_pipelines`,
-      method: 'POST',
+      path: `/internal/file_upload/remove_pipelines/${pipelineIds.join(',')}`,
+      method: 'DELETE',
       version: '1',
-      body,
     });
   }
 }

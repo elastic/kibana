@@ -20,11 +20,11 @@ export const FilePicker: FC<Props> = ({ fileManager: fm }) => {
   const filePickerRef = useRef<EuiFilePickerClass>(null);
 
   const onFilePickerChange = useCallback(
-    (files: FileList | null) => {
+    async (files: FileList | null) => {
       if (files && files.length > 0) {
-        fm.addFiles(files).then((res) => {
-          filePickerRef.current?.removeFiles();
-        });
+        await fm.addFiles(files);
+        // Clear the file picker after adding files
+        filePickerRef.current?.removeFiles();
       }
     },
     [fm]
