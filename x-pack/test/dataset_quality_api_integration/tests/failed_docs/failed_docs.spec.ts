@@ -76,7 +76,7 @@ export default function ApiTest({ getService }: FtrProviderContext) {
   }
 
   registry.when('Failed docs', { config: 'basic' }, () => {
-    describe('index privileges', () => {
+    describe('get failed docs', () => {
       before(async () => {
         await logsSynthtrace.createCustomPipeline(processors);
         await logsSynthtrace.createComponentTemplate({
