@@ -6640,7 +6640,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/peggy@link:packages/kbn-peggy":
+"@kbn/peggy@link:src/dev/packages/peggy":
   version "0.0.0"
   uid ""
 

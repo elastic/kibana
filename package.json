@@ -1469,7 +1469,7 @@
     "@kbn/openapi-generator": "link:src/dev/packages/openapi-generator",
     "@kbn/optimizer": "link:src/dev/packages/optimizer",
     "@kbn/optimizer-webpack-helpers": "link:src/dev/packages/optimizer-webpack-helpers",
-    "@kbn/peggy": "link:packages/kbn-peggy",
+    "@kbn/peggy": "link:src/dev/packages/peggy",
     "@kbn/peggy-loader": "link:packages/kbn-peggy-loader",
     "@kbn/performance-testing-dataset-extractor": "link:packages/kbn-performance-testing-dataset-extractor",
     "@kbn/picomatcher": "link:packages/kbn-picomatcher",

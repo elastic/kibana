@@ -161,7 +161,7 @@ src/dev/packages/openapi-bundler @elastic/security-detection-rule-management
 src/dev/packages/openapi-generator @elastic/security-detection-rule-management
 src/dev/packages/optimizer @elastic/kibana-operations
 src/dev/packages/optimizer-webpack-helpers @elastic/kibana-operations
-packages/kbn-peggy @elastic/kibana-operations
+src/dev/packages/peggy @elastic/kibana-operations
 packages/kbn-peggy-loader @elastic/kibana-operations
 packages/kbn-performance-testing-dataset-extractor @elastic/kibana-performance-testing
 packages/kbn-picomatcher @elastic/kibana-operations
