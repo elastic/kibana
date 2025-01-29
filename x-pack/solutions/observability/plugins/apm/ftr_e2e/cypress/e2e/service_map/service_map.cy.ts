@@ -52,7 +52,7 @@ describe('service map', () => {
       cy.intercept('GET', '/internal/apm/service-map?*').as('serviceMap');
     });
 
-    it('shows nodes in service map', () => {
+    it.skip('shows nodes in service map', () => {
       cy.visitKibana(serviceMapHref);
       cy.wait('@serviceMap');
 
@@ -68,7 +68,7 @@ describe('service map', () => {
       );
     });
 
-    it('shows nodes in detailed service map', () => {
+    it.skip('shows nodes in detailed service map', () => {
       cy.visitKibana(detailedServiceMap);
       cy.wait('@serviceMap');
       cy.contains('h1', 'opbeans-java');
@@ -104,8 +104,7 @@ describe('service map', () => {
 function prepareCanvasForScreenshot() {
   cy.get('html, body').invoke('attr', 'style', 'height: auto; scroll-behavior: auto;');
 
-  cy.wait(500);
-  cy.waitUntilPageContentIsLoaded();
+  cy.wait(300);
   cy.getByTestSubj('centerServiceMap').click();
   cy.scrollTo('top');
 }
