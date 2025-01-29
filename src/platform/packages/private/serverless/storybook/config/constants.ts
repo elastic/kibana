@@ -8,8 +8,8 @@
  */
 
 /** The title of the Storybook. */
-export const TITLE = 'kbn-management storybook';
+export const TITLE = 'Serverless Storybook';
 
-/** The remote URL of the root from which Storybook loads stories for kbn-management. */
-// FIXME @ignaciorivas: Update this URL to the correct one.
-export const URL = 'https://github.com/elastic/kibana/tree/main/packages/kbn-management';
+/** The remote URL of the root from which Storybook loads stories for Serverless. */
+// FIXME revert serverless-storybook-config
+export const URL = 'https://github.com/elastic/kibana/tree/main/packages/serverless';

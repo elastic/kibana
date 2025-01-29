@@ -79,8 +79,8 @@ export async function runCheckFtrConfigsCli() {
           return false;
         }
 
-        // No FTR configs in /packages/
-        if (file.match(/\/packages\//)) {
+        // No FTR configs in /src/dev/packages/
+        if (file.match(/\/src\/dev\/packages\//)) {
           return false;
         }
 

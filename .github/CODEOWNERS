@@ -330,7 +330,6 @@ src/dev/packages/repo-source-classifier-cli @elastic/kibana-operations
 src/dev/packages/scout @elastic/appex-qa
 src/dev/packages/scout-info @elastic/appex-qa
 src/dev/packages/scout-reporting @elastic/appex-qa
-src/dev/packages/serverless-storybook-config @elastic/appex-sharedux
 src/dev/packages/set-map @elastic/kibana-operations
 src/dev/packages/some-dev-log @elastic/kibana-operations
 src/dev/packages/sort-package-json @elastic/kibana-operations
@@ -394,6 +393,7 @@ src/platform/packages/private/kbn-ui-shared-deps-src @elastic/kibana-operations
 src/platform/packages/private/kbn-unsaved-changes-badge @elastic/kibana-data-discovery
 src/platform/packages/private/serverless/project_switcher @elastic/appex-sharedux
 src/platform/packages/private/serverless/settings/common @elastic/appex-sharedux @elastic/kibana-management
+src/platform/packages/private/serverless/storybook/config @elastic/appex-sharedux
 src/platform/packages/private/serverless/types @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/impl @elastic/appex-sharedux
 src/platform/packages/private/shared-ux/page/analytics_no_data/mocks @elastic/appex-sharedux

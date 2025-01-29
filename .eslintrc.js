@@ -2015,7 +2015,7 @@ module.exports = {
      */
     {
       files: [
-        'src/dev/packages/kbn-{package-*,repo-*,dep-*}/**/*',
+        'src/dev/packages/{repo-*,dep-*}/**/*',
         'src/dev/packages/validate-next-docs-cli/**/*',
         'src/dev/packages/find-used-node-modules/**/*',
       ],

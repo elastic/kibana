@@ -107,7 +107,7 @@ const findModules = ({ teams, paths, included, excluded }: FindModulesParams, lo
   // find modules selected by user filters
   return (
     sortBy(modules, ['directory'])
-      // exclude devOnly modules (they will remain in /packages)
+      // exclude devOnly modules
       .filter(({ manifest }) => !manifest.devOnly)
       // explicit exclusions
       .filter(({ id }) => !EXCLUDED_MODULES.includes(id) && !excluded.includes(id))
