@@ -23,6 +23,7 @@ const initialGraphState: GraphState = {
   anonymizedAlerts: [...mockAnonymizedAlerts],
   combinedGenerations: 'generations',
   combinedRefinements: '',
+  continuePrompt: 'continue',
   errors: [],
   generationAttempts: 2,
   generations: ['gen', 'erations'],

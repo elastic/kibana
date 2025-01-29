@@ -1,0 +1,51 @@
+openapi: 3.0.3
+info:
+  title: Automatic Import ECS Mapping API endpoint
+  version: "1"
+paths:
+  /internal/automatic_import/ecs:
+    post:
+      summary: Builds ECS Mapping based on the input samples
+      operationId: EcsMapping
+      x-codegen-enabled: true
+      description: Perform ECS mapping for the given input JSON samples
+      tags:
+        - ECS Mapping API
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - packageName
+                - dataStreamName
+                - rawSamples
+                - samplesFormat
+                - connectorId
+              properties:
+                packageName:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/PackageName"
+                dataStreamName:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/DataStreamName"
+                rawSamples:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/RawSamples"
+                samplesFormat:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/SamplesFormat"
+                mapping:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/Mapping"
+                additionalProcessors:
+                  type: array
+                  items:
+                    $ref: "../model/processor_attributes.schema.yaml#/components/schemas/ESProcessorItem"
+                connectorId:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/Connector"
+                langSmithOptions:
+                  $ref: "../model/common_attributes.schema.yaml#/components/schemas/LangSmithOptions"
+      responses:
+        200:
+          description: Indicates a successful call.
+          content:
+            application/json:
+              schema:
+                $ref: "../model/response_schemas.schema.yaml#/components/schemas/EcsMappingAPIResponse"

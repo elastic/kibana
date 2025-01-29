@@ -18,6 +18,11 @@ const deleteModalTitle = 'confirmModalTitleText';
 const detailsTitle = 'remoteClusterDetailsFlyoutTitle';
 const requestButton = 'remoteClustersRequestButton';
 const requestTitle = 'remoteClusterRequestFlyoutTitle';
+const selectApiKeyButton = 'setupTrustApiMode';
+const trustStepNextButton = 'remoteClusterTrustNextButton';
+const formStepNextButton = 'remoteClusterFormNextButton';
+const addRemoteClusterButton = 'remoteClusterReviewtNextButton';
+const closeFlyoutButton = 'euiFlyoutCloseButton';
 
 interface Payload {
   persistent: {
@@ -80,7 +85,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
   const retry = getService('retry');
 
   describe('Remote Clusters Accessibility', () => {
-    beforeEach(async () => {
+    before(async () => {
       await PageObjects.common.navigateToApp('remoteClusters');
     });
 
@@ -92,32 +97,50 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await a11y.testAppSnapshot();
       });
 
-      it('renders add remote cluster form', async () => {
-        await retry.waitFor('add remote cluster button to be rendered', async () => {
+      it('renders add remote cluster form - trust step', async () => {
+        await retry.waitFor('add remote cluster button to be rendered - trust step', async () => {
           return testSubjects.isDisplayed(createButton);
         });
 
         await testSubjects.click(createButton);
-        await retry.waitFor('add remote cluster form to be rendered', async () => {
+        await retry.waitFor('add remote cluster form to be rendered - trust step', async () => {
           return (await testSubjects.getVisibleText(pageTitle)) === 'Add remote cluster';
         });
 
         await a11y.testAppSnapshot();
       });
 
+      it('renders add remote cluster form - form step', async () => {
+        await retry.waitFor('select api key button to be rendered - form step', async () => {
+          return testSubjects.isDisplayed(selectApiKeyButton);
+        });
+
+        await testSubjects.click(selectApiKeyButton);
+        await testSubjects.click(trustStepNextButton);
+        await retry.waitFor('next button form step to be rendered', async () => {
+          return testSubjects.isDisplayed(formStepNextButton);
+        });
+
+        await a11y.testAppSnapshot();
+      });
+
       it('renders request flyout', async () => {
-        await retry.waitFor('add remote cluster button to be rendered', async () => {
-          return testSubjects.isDisplayed(createButton);
-        });
-
-        await testSubjects.click(createButton);
-        await retry.waitFor('add remote cluster form to be rendered', async () => {
-          return (await testSubjects.getVisibleText(pageTitle)) === 'Add remote cluster';
-        });
-
         await testSubjects.click(requestButton);
         await retry.waitFor('request flyout to be rendered', async () => {
           return (await testSubjects.getVisibleText(requestTitle)) === 'Request';
+        });
+
+        await a11y.testAppSnapshot();
+      });
+
+      it('renders add remote cluster form - review step', async () => {
+        await testSubjects.click(closeFlyoutButton);
+        await testSubjects.setValue('remoteClusterFormNameInput', 'testRemoteCluster');
+        await testSubjects.setValue('remoteClusterFormSeedsInput', '1:1');
+        await testSubjects.click(formStepNextButton);
+
+        await retry.waitFor('add remote cluster button to be rendered', async () => {
+          return testSubjects.isDisplayed(addRemoteClusterButton);
         });
 
         await a11y.testAppSnapshot();
@@ -133,6 +156,11 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
           mode === 'sniff'
             ? getPayloadClusterSniffMode(clusterName)
             : getPayloadClusterProxyMode(clusterName);
+
+        beforeEach(async () => {
+          await PageObjects.common.navigateToApp('remoteClusters');
+        });
+
         before(async () => {
           await esClient.cluster.putSettings({ body });
         });
