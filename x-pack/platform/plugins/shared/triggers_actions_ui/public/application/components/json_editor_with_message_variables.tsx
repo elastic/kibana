@@ -175,7 +175,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
           return (
             <EuiText size="xs" color="subdued">
               {i18n.translate(
-                'xpack.triggerActionsUI.components.jsonEditorWithMessageVariable.optionalFieldLabel',
+                'xpack.triggersActionsUI.components.jsonEditorWithMessageVariable.optionalFieldLabel',
                 {
                   defaultMessage: 'Optional',
                 }
@@ -189,7 +189,7 @@ export const JsonEditorWithMessageVariables: React.FunctionComponent<Props> = ({
               <EuiFlexItem grow={false}>
                 <EuiText size="xs" color="subdued">
                   {i18n.translate(
-                    'xpack.triggerActionsUI.components.jsonEditorWithMessageVariable.optionalFieldLabel',
+                    'xpack.triggersActionsUI.components.jsonEditorWithMessageVariable.optionalFieldLabel',
                     {
                       defaultMessage: 'Optional',
                     }
