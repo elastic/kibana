@@ -25,14 +25,14 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiAssistant,
     provider: 'openai',
     prompt: {
-      default: 'DEFAULT_SYSTEM_PROMPT',
+      default: 'provider:openai default system prompt',
     },
   },
   {
     promptId: promptDictionary.systemPrompt,
     promptGroupId: promptGroupId.aiAssistant,
     prompt: {
-      default: 'DEFAULT_SYSTEM_PROMPT',
+      default: 'provider:default default system prompt',
     },
   },
   {
@@ -40,7 +40,7 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiAssistant,
     provider: 'bedrock',
     prompt: {
-      default: 'BEDROCK_SYSTEM_PROMPT',
+      default: 'provider:bedrock default system prompt',
     },
   },
   {
@@ -48,7 +48,7 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiAssistant,
     provider: 'gemini',
     prompt: {
-      default: 'GEMINI_SYSTEM_PROMPT',
+      default: 'provider:gemini default system prompt',
     },
   },
   {
@@ -57,7 +57,7 @@ export const localPrompts: Prompt[] = [
     provider: 'openai',
     model: 'oss',
     prompt: {
-      default: 'STRUCTURED_SYSTEM_PROMPT',
+      default: 'provider:openai model:oss default system prompt',
     },
   },
   {
@@ -65,21 +65,21 @@ export const localPrompts: Prompt[] = [
     promptGroupId: promptGroupId.aiAssistant,
     provider: 'gemini',
     prompt: {
-      default: 'GEMINI_USER_PROMPT',
+      default: 'provider:gemini user prompt',
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryDefault,
     promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
-      default: 'ATTACK_DISCOVERY_DEFAULT',
+      default: 'provider:default attack discovery default prompt',
     },
   },
   {
     promptId: promptDictionary.attackDiscoveryRefine,
     promptGroupId: promptGroupId.attackDiscovery,
     prompt: {
-      default: 'ATTACK_DISCOVERY_REFINE',
+      default: 'provider:default attack discovery refine prompt',
     },
   },
 ];

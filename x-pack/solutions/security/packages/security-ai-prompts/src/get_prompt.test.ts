@@ -297,7 +297,7 @@ describe('get_prompt', () => {
         connectorId: 'connector-123',
       });
 
-      expect(result).toBe('BEDROCK_SYSTEM_PROMPT');
+      expect(result).toBe('provider:bedrock default system prompt');
     });
 
     it('returns the default prompt when no prompts are found', async () => {
@@ -317,7 +317,7 @@ describe('get_prompt', () => {
         connectorId: 'connector-123',
       });
 
-      expect(result).toBe('DEFAULT_SYSTEM_PROMPT');
+      expect(result).toBe('provider:default default system prompt');
     });
 
     it('throws an error when no prompts are found', async () => {
@@ -448,7 +448,7 @@ describe('get_prompt', () => {
         },
         {
           promptId: promptDictionary.userPrompt,
-          prompt: 'GEMINI_USER_PROMPT',
+          prompt: 'provider:gemini user prompt',
         },
       ]);
     });
@@ -481,7 +481,7 @@ describe('get_prompt', () => {
         },
         {
           promptId: promptDictionary.userPrompt,
-          prompt: 'GEMINI_USER_PROMPT',
+          prompt: 'provider:gemini user prompt',
         },
       ]);
     });
