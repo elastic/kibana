@@ -5824,7 +5824,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ftr-common-functional-ui-services@link:packages/kbn-ftr-common-functional-ui-services":
+"@kbn/ftr-common-functional-ui-services@link:src/dev/packages/ftr-common-functional-ui-services":
   version "0.0.0"
   uid ""
 
