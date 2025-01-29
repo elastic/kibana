@@ -58,7 +58,7 @@ export const useHoverActionStyles = (isEditMode: boolean, showBorder?: boolean) 
         transition: ${euiTheme.animation.extraFast} opacity ease-in,
           ${euiTheme.animation.extraFast} z-index linear,
           ${euiTheme.animation.extraFast} visibility linear;
-        transition-delay: ${euiTheme.animation.normal};
+        transition-delay: ${euiTheme.animation.fast};
       }
 
       &:hover .embPanel__hoverActions,
