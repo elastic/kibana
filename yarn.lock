@@ -5960,7 +5960,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/import-locator@link:packages/kbn-import-locator":
+"@kbn/import-locator@link:src/dev/packages/import-locator":
   version "0.0.0"
   uid ""
 
