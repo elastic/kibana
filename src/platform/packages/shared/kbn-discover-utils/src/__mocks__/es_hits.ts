@@ -61,7 +61,7 @@ export const esHitsMockWithSort = esHitsMock.map((hit) => ({
 }));
 
 const baseDate = new Date('2024-01-1').getTime();
-const dateInc = 100_000_000;
+const dateInc = 100 * 1000 * 1000;
 
 const generateFieldValue = (field: DataViewField, index: number) => {
   switch (field.type) {
