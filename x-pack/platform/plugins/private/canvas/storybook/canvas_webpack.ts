@@ -42,7 +42,7 @@ export const canvasWebpack: Configuration = {
               implementation: require('sass-embedded'),
               sassOptions: {
                 quietDeps: true,
-              }
+              },
             },
           },
         ],
