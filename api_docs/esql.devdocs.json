@@ -54,6 +54,150 @@
     "interfaces": [
       {
         "parentPluginId": "esql",
+        "id": "def-public.ESQLControlState",
+        "type": "Interface",
+        "tags": [],
+        "label": "ESQLControlState",
+        "description": [],
+        "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLControlState.grow",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "grow",
+            "description": [],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLControlState.width",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "width",
+            "description": [],
+            "signature": [
+              "ControlWidthOptions",
+              " | undefined"
+            ],
+            "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLControlState.title",
+            "type": "string",
+            "tags": [],
+            "label": "title",
+            "description": [],
+            "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLControlState.availableOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "availableOptions",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLControlState.selectedOptions",
+            "type": "Array",
+            "tags": [],
+            "label": "selectedOptions",
+            "description": [],
+            "signature": [
+              "string[]"
+            ],
+            "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLControlState.variableName",
+            "type": "string",
+            "tags": [],
+            "label": "variableName",
+            "description": [],
+            "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLControlState.variableType",
+            "type": "Enum",
+            "tags": [],
+            "label": "variableType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLVariableType",
+                "text": "ESQLVariableType"
+              }
+            ],
+            "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLControlState.esqlQuery",
+            "type": "string",
+            "tags": [],
+            "label": "esqlQuery",
+            "description": [],
+            "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLControlState.controlType",
+            "type": "Enum",
+            "tags": [],
+            "label": "controlType",
+            "description": [],
+            "signature": [
+              {
+                "pluginId": "esql",
+                "scope": "public",
+                "docId": "kibEsqlPluginApi",
+                "section": "def-public.EsqlControlType",
+                "text": "EsqlControlType"
+              }
+            ],
+            "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          }
+        ],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "esql",
         "id": "def-public.ESQLEditorProps",
         "type": "Interface",
         "tags": [],
@@ -303,6 +447,22 @@
           },
           {
             "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.hideRunQueryButton",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "hideRunQueryButton",
+            "description": [
+              "Hide the Run query button which appears when editor is inlined"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
             "id": "def-public.ESQLEditorProps.editorIsInline",
             "type": "CompoundType",
             "tags": [],
@@ -428,12 +588,131 @@
             "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.supportsControls",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "supportsControls",
+            "description": [
+              "The editor supports the creation of controls,\nThis flag should be set to true to display the \"Create control\" suggestion"
+            ],
+            "signature": [
+              "boolean | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.onSaveControl",
+            "type": "Function",
+            "tags": [],
+            "label": "onSaveControl",
+            "description": [
+              "Function to be called after the control creation"
+            ],
+            "signature": [
+              "((controlState: Record<string, unknown>, updatedQuery: string) => Promise<void>) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [
+              {
+                "parentPluginId": "esql",
+                "id": "def-public.ESQLEditorProps.onSaveControl.$1",
+                "type": "Object",
+                "tags": [],
+                "label": "controlState",
+                "description": [],
+                "signature": [
+                  "Record<string, unknown>"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              },
+              {
+                "parentPluginId": "esql",
+                "id": "def-public.ESQLEditorProps.onSaveControl.$2",
+                "type": "string",
+                "tags": [],
+                "label": "updatedQuery",
+                "description": [],
+                "signature": [
+                  "string"
+                ],
+                "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+                "deprecated": false,
+                "trackAdoption": false,
+                "isRequired": true
+              }
+            ],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.onCancelControl",
+            "type": "Function",
+            "tags": [],
+            "label": "onCancelControl",
+            "description": [
+              "Function to be called after cancelling the control creation"
+            ],
+            "signature": [
+              "(() => void) | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false,
+            "children": [],
+            "returnComment": []
+          },
+          {
+            "parentPluginId": "esql",
+            "id": "def-public.ESQLEditorProps.esqlVariables",
+            "type": "Array",
+            "tags": [],
+            "label": "esqlVariables",
+            "description": [
+              "The available ESQL variables from the page context this editor was opened in"
+            ],
+            "signature": [
+              {
+                "pluginId": "@kbn/esql-validation-autocomplete",
+                "scope": "common",
+                "docId": "kibKbnEsqlValidationAutocompletePluginApi",
+                "section": "def-common.ESQLControlVariable",
+                "text": "ESQLControlVariable"
+              },
+              "[] | undefined"
+            ],
+            "path": "src/platform/packages/private/kbn-esql-editor/src/types.ts",
+            "deprecated": false,
+            "trackAdoption": false
           }
         ],
         "initialIsOpen": false
       }
     ],
-    "enums": [],
+    "enums": [
+      {
+        "parentPluginId": "esql",
+        "id": "def-public.EsqlControlType",
+        "type": "Enum",
+        "tags": [],
+        "label": "EsqlControlType",
+        "description": [],
+        "path": "src/platform/plugins/shared/esql/public/triggers/esql_controls/types.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "misc": [],
     "objects": [],
     "start": {
@@ -470,6 +749,20 @@
           "trackAdoption": false,
           "children": [],
           "returnComment": []
+        },
+        {
+          "parentPluginId": "esql",
+          "id": "def-public.EsqlPluginStart.variablesService",
+          "type": "Object",
+          "tags": [],
+          "label": "variablesService",
+          "description": [],
+          "signature": [
+            "EsqlVariablesService"
+          ],
+          "path": "src/platform/plugins/shared/esql/public/plugin.ts",
+          "deprecated": false,
+          "trackAdoption": false
         }
       ],
       "lifecycle": "start",

@@ -60,6 +60,7 @@ export const GridHeightSmoother = ({
 
         &:has(.kbnGridPanel--expanded) {
           min-height: 100% !important;
+          max-height: 100vh; // fallback in case if the parent doesn't set the height correctly
           position: relative;
           transition: none;
         }

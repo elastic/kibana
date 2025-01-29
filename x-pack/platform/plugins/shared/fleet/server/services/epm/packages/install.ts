@@ -83,7 +83,6 @@ import type { PackageUpdateEvent } from '../../upgrade_sender';
 import { sendTelemetryEvents, UpdateEventType } from '../../upgrade_sender';
 import { auditLoggingService } from '../../audit_logging';
 import { getFilteredInstallPackages } from '../filtered_packages';
-
 import { isAgentlessEnabled, isOnlyAgentlessIntegration } from '../../utils/agentless';
 
 import { _stateMachineInstallPackage } from './install_state_machine/_state_machine_package_install';
@@ -494,7 +493,6 @@ async function installPackageFromRegistry({
           useStreaming,
         }),
       ]);
-
     const packageInstallContext: PackageInstallContext = {
       packageInfo,
       assetsMap,
@@ -941,6 +939,7 @@ export async function installPackage(args: InstallPackageParams): Promise<Instal
       skipDataStreamRollover,
       retryFromLastState,
     });
+
     return response;
   } else if (args.installSource === 'upload') {
     const {
