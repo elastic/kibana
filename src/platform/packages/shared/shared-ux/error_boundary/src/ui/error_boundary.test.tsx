@@ -48,8 +48,8 @@ describe('<KibanaErrorBoundary>', () => {
     );
     (await findByTestId('clickForErrorBtn')).click();
 
-    expect(await findByText(strings.recoverable.callout.title())).toBeVisible();
-    expect(await findByText(strings.recoverable.callout.pageReloadButton())).toBeVisible();
+    expect(await findByText(strings.page.callout.recoverable.title())).toBeVisible();
+    expect(await findByText(strings.page.callout.recoverable.pageReloadButton())).toBeVisible();
 
     (await findByTestId('errorBoundaryRecoverablePromptReloadBtn')).click();
 
@@ -66,10 +66,10 @@ describe('<KibanaErrorBoundary>', () => {
     );
     (await findByTestId('clickForErrorBtn')).click();
 
-    expect(await findByText(strings.fatal.callout.title())).toBeVisible();
-    expect(await findByText(strings.fatal.callout.body())).toBeVisible();
-    expect(await findByText(strings.fatal.callout.showDetailsButton())).toBeVisible();
-    expect(await findByText(strings.fatal.callout.pageReloadButton())).toBeVisible();
+    expect(await findByText(strings.page.callout.fatal.title())).toBeVisible();
+    expect(await findByText(strings.page.callout.fatal.body())).toBeVisible();
+    expect(await findByText(strings.page.callout.fatal.showDetailsButton())).toBeVisible();
+    expect(await findByText(strings.page.callout.fatal.pageReloadButton())).toBeVisible();
 
     (await findByTestId('errorBoundaryFatalPromptReloadBtn')).click();
 

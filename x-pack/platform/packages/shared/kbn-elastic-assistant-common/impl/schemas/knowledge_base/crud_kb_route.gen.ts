@@ -11,7 +11,7 @@
  *
  * info:
  *   title: KnowledgeBase API endpoints
- *   version: 1
+ *   version: 2023-10-31
  */
 
 import { z } from '@kbn/zod';

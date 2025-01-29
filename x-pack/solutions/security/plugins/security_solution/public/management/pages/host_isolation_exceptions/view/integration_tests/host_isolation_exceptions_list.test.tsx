@@ -60,10 +60,10 @@ describe('When on the host isolation exceptions page', () => {
   it('should search using expected exception item fields', async () => {
     const expectedFilterString = parseQueryFilterToKQL('fooFooFoo', SEARCHABLE_FIELDS);
     const { renderResult, apiMocks, user } = prepareTest();
-    const { findAllByTestId } = renderResult;
+    const { getAllByTestId } = renderResult;
 
-    await waitFor(async () => {
-      expect(await findAllByTestId(`${pageTestId}-card`)).toHaveLength(10);
+    await waitFor(() => {
+      expect(getAllByTestId(`${pageTestId}-card`)).toHaveLength(10);
     });
 
     apiMocks.responseProvider.exceptionsFind.mockClear();

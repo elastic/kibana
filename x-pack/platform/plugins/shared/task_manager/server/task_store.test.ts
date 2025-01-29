@@ -65,6 +65,7 @@ beforeEach(() => {
 
 const mockedDate = new Date('2019-02-12T21:01:22.479Z');
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 (global as any).Date = class Date {
   constructor() {
     return mockedDate;

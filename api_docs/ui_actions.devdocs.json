@@ -319,50 +319,6 @@
                 "path": "src/platform/plugins/shared/ui_actions_enhanced/public/dynamic_actions/dynamic_action_manager.ts"
               },
               {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/plugin.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/plugin.ts"
-              },
-              {
-                "plugin": "controls",
-                "path": "src/platform/plugins/shared/controls/public/plugin.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/index.ts"
-              },
-              {
                 "plugin": "ml",
                 "path": "x-pack/platform/plugins/shared/ml/public/ui_actions/index.ts"
               },
@@ -687,12 +643,8 @@
                 "path": "src/platform/plugins/shared/esql/public/plugin.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
+                "plugin": "esql",
+                "path": "src/platform/plugins/shared/esql/public/plugin.ts"
               },
               {
                 "plugin": "lens",
@@ -733,10 +685,6 @@
               {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/public/plugin.ts"
-              },
-              {
-                "plugin": "dashboard",
-                "path": "src/platform/plugins/shared/dashboard/public/dashboard_actions/index.ts"
               },
               {
                 "plugin": "cases",

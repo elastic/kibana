@@ -9,8 +9,8 @@ import { cleanup, generate } from '@kbn/data-forge';
 import expect from '@kbn/expect';
 import { RoleCredentials } from '@kbn/ftr-common-functional-services';
 import {
-  SLO_DESTINATION_INDEX_PATTERN,
-  SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+  SLI_DESTINATION_INDEX_PATTERN,
+  SUMMARY_DESTINATION_INDEX_PATTERN,
   getSLOSummaryTransformId,
   getSLOTransformId,
 } from '@kbn/slo-plugin/common/constants';
@@ -73,7 +73,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
       // expect summary and rollup documents to be deleted
       await retry.waitForWithTimeout('SLO summary data is deleted', 60 * 1000, async () => {
         const sloSummaryResponseAfterDeletion = await esClient.search({
-          index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+          index: SUMMARY_DESTINATION_INDEX_PATTERN,
           body: {
             query: {
               bool: {
@@ -97,7 +97,7 @@ export default function ({ getService }: DeploymentAgnosticFtrProviderContext) {
 
       await retry.waitForWithTimeout('SLO rollup data is deleted', 60 * 1000, async () => {
         const sloRollupResponseAfterDeletion = await esClient.search({
-          index: SLO_DESTINATION_INDEX_PATTERN,
+          index: SLI_DESTINATION_INDEX_PATTERN,
           body: {
             query: {
               bool: {

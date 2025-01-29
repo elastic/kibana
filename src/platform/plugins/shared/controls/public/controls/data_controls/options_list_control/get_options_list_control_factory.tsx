@@ -17,6 +17,7 @@ import {
   filter,
   map,
   skip,
+  Subject,
 } from 'rxjs';
 
 import { buildExistsFilter, buildPhraseFilter, buildPhrasesFilter, Filter } from '@kbn/es-query';
@@ -126,7 +127,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       const loadingSuggestions$ = new BehaviorSubject<boolean>(false);
       const dataLoadingSubscription = combineLatest([
         loadingSuggestions$,
-        dataControl.api.dataLoading,
+        dataControl.api.dataLoading$,
       ])
         .pipe(
           debounceTime(100), // debounce set loading so that it doesn't flash as the user types
@@ -172,7 +173,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
 
       /** Fetch the suggestions and perform validation */
-      const loadMoreSubject = new BehaviorSubject<null>(null);
+      const loadMoreSubject = new Subject<void>();
       const fetchSubscription = fetchAndValidate$({
         api: {
           ...dataControl.api,
@@ -188,7 +189,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         if (Object.hasOwn(result, 'error')) {
           dataControl.api.setBlockingError((result as { error: Error }).error);
           return;
-        } else if (dataControl.api.blockingError.getValue()) {
+        } else if (dataControl.api.blockingError$.getValue()) {
           // otherwise,  if there was a previous error, clear it
           dataControl.api.setBlockingError(undefined);
         }
@@ -231,7 +232,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
         });
       /** Output filters when selections change */
       const outputFilterSubscription = combineLatest([
-        dataControl.api.dataViews,
+        dataControl.api.dataViews$,
         dataControl.stateManager.fieldName,
         selections.selectedOptions$,
         selections.existsSelected$,
@@ -263,7 +264,7 @@ export const getOptionsListControlFactory = (): DataControlFactory<
       const api = buildApi(
         {
           ...dataControl.api,
-          dataLoading: dataLoading$,
+          dataLoading$,
           getTypeDisplayName: OptionsListStrings.control.getDisplayName,
           serializeState: () => {
             const { rawState: dataControlState, references } = dataControl.serialize();

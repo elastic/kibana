@@ -7,16 +7,34 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORTER_ENABLED, SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import { createPlaywrightConfig } from './create_config';
 import { VALID_CONFIG_MARKER } from '../types';
+import { generateTestRunId } from '@kbn/scout-reporting';
+
+jest.mock('@kbn/scout-reporting', () => ({
+  ...jest.requireActual('@kbn/scout-reporting'),
+  generateTestRunId: jest.fn(),
+}));
 
 describe('createPlaywrightConfig', () => {
+  const mockGenerateTestRunId = generateTestRunId as jest.Mock;
+
+  beforeEach(() => {
+    jest.clearAllMocks();
+  });
+
   it('should return a valid default Playwright configuration', () => {
+    const testRunId = 'test-run-id';
+    mockGenerateTestRunId.mockImplementationOnce(() => testRunId);
+
     const testDir = './my_tests';
     const config = createPlaywrightConfig({ testDir });
 
+    expect(mockGenerateTestRunId).toHaveBeenCalledTimes(1);
+
     expect(config.testDir).toBe(testDir);
+    expect(config.retries).toBe(0);
     expect(config.workers).toBe(1);
     expect(config.fullyParallel).toBe(false);
     expect(config.use).toEqual({
@@ -30,7 +48,16 @@ describe('createPlaywrightConfig', () => {
     expect(config.reporter).toEqual([
       ['html', { open: 'never', outputFolder: './output/reports' }],
       ['json', { outputFile: './output/reports/test-results.json' }],
-      ['@kbn/scout-reporting/src/reporting/playwright.ts', { name: 'scout-playwright' }],
+      SCOUT_REPORTER_ENABLED
+        ? [
+            '@kbn/scout-reporting/src/reporting/playwright/events',
+            { name: 'scout-playwright', runId: testRunId },
+          ]
+        : ['null'],
+      [
+        '@kbn/scout-reporting/src/reporting/playwright/failed_test',
+        { name: 'scout-playwright-failed-tests', runId: testRunId },
+      ],
     ]);
     expect(config.timeout).toBe(60000);
     expect(config.expect?.timeout).toBe(10000);

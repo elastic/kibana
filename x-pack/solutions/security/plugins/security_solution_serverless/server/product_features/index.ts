@@ -13,6 +13,8 @@ import { getAttackDiscoveryProductFeaturesConfigurator } from './attack_discover
 import { getCasesProductFeaturesConfigurator } from './cases_product_features_config';
 import { getSecurityProductFeaturesConfigurator } from './security_product_features_config';
 import { getSecurityAssistantProductFeaturesConfigurator } from './assistant_product_features_config';
+import { getTimelineProductFeaturesConfigurator } from './timeline_product_features_config';
+import { getNotesProductFeaturesConfigurator } from './notes_product_features_config';
 import { enableRuleActions } from '../rules/enable_rule_actions';
 import type { ServerlessSecurityConfig } from '../config';
 import type { Tier, SecuritySolutionServerlessPluginSetupDeps } from '../types';
@@ -40,6 +42,8 @@ export const registerProductFeatures = (
     ),
     cases: getCasesProductFeaturesConfigurator(enabledProductFeatureKeys),
     securityAssistant: getSecurityAssistantProductFeaturesConfigurator(enabledProductFeatureKeys),
+    timeline: getTimelineProductFeaturesConfigurator(enabledProductFeatureKeys),
+    notes: getNotesProductFeaturesConfigurator(enabledProductFeatureKeys),
   });
 
   // enable rule actions based on the enabled product features
@@ -48,9 +52,9 @@ export const registerProductFeatures = (
     productFeatureKeys: enabledProductFeatureKeys,
   });
 
-  // set availability for the integration assistant plugin based on the product features
-  pluginsSetup.integrationAssistant?.setIsAvailable(
-    enabledProductFeatureKeys.includes(ProductFeatureKey.integrationAssistant)
+  // set availability for the automatic import plugin based on the product features
+  pluginsSetup.automaticImport?.setIsAvailable(
+    enabledProductFeatureKeys.includes(ProductFeatureKey.automaticImport)
   );
 };
 

@@ -11,7 +11,7 @@ import { isCCSRemoteIndexName } from '@kbn/es-query';
 import { ALL_VALUE } from '@kbn/slo-schema';
 import { assertNever } from '@kbn/std';
 import { partition } from 'lodash';
-import { SLO_SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
+import { SUMMARY_DESTINATION_INDEX_PATTERN } from '../../../common/constants';
 import { StoredSLOSettings } from '../../domain/models';
 import { toHighPrecision } from '../../utils/number';
 import { createEsParams, typedSearch } from '../../utils/queries';
@@ -170,7 +170,7 @@ export class DefaultSummarySearchClient implements SummarySearchClient {
     // The temp summary documents are _eventually_ removed as we get through the real summary documents
 
     await this.esClient.deleteByQuery({
-      index: SLO_SUMMARY_DESTINATION_INDEX_PATTERN,
+      index: SUMMARY_DESTINATION_INDEX_PATTERN,
       wait_for_completion: false,
       query: {
         bool: {

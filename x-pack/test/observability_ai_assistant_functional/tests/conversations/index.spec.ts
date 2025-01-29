@@ -272,7 +272,19 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
                   conversationInterceptor.waitForIntercept(),
                 ]);
 
-                await titleSimulator.next('My title');
+                await titleSimulator.next({
+                  content: '',
+                  tool_calls: [
+                    {
+                      id: 'id',
+                      index: 0,
+                      function: {
+                        name: 'title_conversation',
+                        arguments: JSON.stringify({ title: 'My title' }),
+                      },
+                    },
+                  ],
+                });
 
                 await titleSimulator.tokenCount({ completion: 1, prompt: 1, total: 2 });
 
@@ -405,30 +417,16 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                   expect(events.length).to.eql(1);
 
-                  const { messageWithFeedback, conversation } = events[0]
+                  const { feedback, conversation } = events[0]
                     .properties as unknown as ChatFeedback;
 
-                  expect(messageWithFeedback.feedback).to.eql('positive');
-                  expect(messageWithFeedback.message.message).to.eql({
-                    content: 'My response',
-                    function_call: {
-                      arguments: '',
-                      name: '',
-                      trigger: 'assistant',
-                    },
-                    role: 'assistant',
-                  });
-
-                  expect(conversation.conversation.title).to.eql('My title');
+                  expect(feedback).to.eql('positive');
                   expect(conversation.namespace).to.eql('default');
                   expect(conversation.public).to.eql(false);
                   expect(conversation.user?.name).to.eql('editor');
 
-                  const { messages } = conversation;
-
-                  expect(messages.length).to.eql(9);
-
-                  expect(messages[0].message.role).to.eql('system');
+                  expect(conversation.conversation).to.not.have.property('title');
+                  expect(conversation).to.not.have.property('messages');
                 });
               });
             });
@@ -480,30 +478,16 @@ export default function ApiTest({ getService, getPageObjects }: FtrProviderConte
 
                     expect(events.length).to.eql(2);
 
-                    const { messageWithFeedback, conversation } = events[1]
+                    const { feedback, conversation } = events[1]
                       .properties as unknown as ChatFeedback;
 
-                    expect(messageWithFeedback.feedback).to.eql('positive');
-                    expect(messageWithFeedback.message.message).to.eql({
-                      content:
-                        'Service Level Indicators (SLIs) are quantifiable defined metrics that measure the performance and availability of a service or distributed system.',
-                      function_call: {
-                        arguments: '',
-                        name: '',
-                        trigger: 'assistant',
-                      },
-                      role: 'assistant',
-                    });
-
-                    expect(conversation.conversation.title).to.eql('My old conversation');
+                    expect(feedback).to.eql('positive');
                     expect(conversation.namespace).to.eql('default');
                     expect(conversation.public).to.eql(false);
                     expect(conversation.user?.name).to.eql('editor');
 
-                    const { messages } = conversation;
-
-                    // Verify that data changed after user interaction before being sent to telemetry
-                    expect(messages.length).to.eql(9);
+                    expect(conversation.conversation).to.not.have.property('title');
+                    expect(conversation).to.not.have.property('messages');
                   });
                 });
               });
