@@ -16,6 +16,7 @@ import {
 } from '@kbn/streams-schema';
 import { z } from '@kbn/zod';
 import { isEmpty } from 'lodash';
+import { MessageRole } from '@kbn/inference-common';
 import { formatToIngestProcessors } from '../../../lib/streams/helpers/processing';
 import { checkAccess } from '../../../lib/streams/stream_crud';
 import { createServerRoute } from '../../create_server_route';
@@ -260,6 +261,46 @@ const isSuccessfulDocument = (entry: any) => entry.doc.error === undefined;
 const isMappingFailure = (entry: any) =>
   !isSuccessfulDocument(entry) && entry.doc.error.type === 'document_parsing_exception';
 
+const suggestionsParamsSchema = z.object({
+  path: z.object({ id: z.string() }),
+});
+
+type SuggestionsParams = z.infer<typeof suggestionsParamsSchema>;
+
+export const processingSuggestionRoute = createServerRoute({
+  endpoint: 'POST /api/streams/{id}/processing/_suggestions',
+  options: {
+    access: 'internal',
+  },
+  security: {
+    authz: {
+      enabled: false,
+      reason:
+        'This API delegates security to the currently logged in user and their Elasticsearch permissions.',
+    },
+  },
+  params: suggestionsParamsSchema,
+  handler: async ({ params, request, getScopedClients }) => {
+    const { inferenceClient } = await getScopedClients({ request });
+
+    const chatResponse = await inferenceClient.chatComplete({
+      connectorId: 'azure-gpt4',
+      system: `Here is my system message`,
+      messages: [
+        {
+          role: MessageRole.User,
+          content: 'Do something',
+        },
+      ],
+    });
+
+    return {
+      chatResponse,
+    };
+  },
+});
+
 export const processingRoutes = {
   ...simulateProcessorRoute,
+  ...processingSuggestionRoute,
 };
