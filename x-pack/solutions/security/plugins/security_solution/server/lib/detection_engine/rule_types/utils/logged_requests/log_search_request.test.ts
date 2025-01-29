@@ -9,7 +9,7 @@ import { logSearchRequest } from './log_search_request';
 import type * as estypes from '@elastic/elasticsearch/lib/api/types';
 
 describe('logSearchRequest', () => {
-  it('should match inline snapshot when deprecated search request used', () => {
+  it('should match inline snapshot when search request used', () => {
     const searchRequest = {
       allow_no_indices: true,
       index: ['close_alerts*'],

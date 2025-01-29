@@ -34,7 +34,7 @@ export const logSearchRequest = (searchRequest: estypes.SearchRequest): string =
 
   const url = `/${index}/_search${urlParams ? `?${urlParams}` : ''}`;
 
-  if (query || aggregations) {
+  if (query || aggregations || aggs) {
     const body = {
       size,
       query,

@@ -8,8 +8,29 @@
 import type { EqlSearchRequest } from '@elastic/elasticsearch/lib/api/types';
 
 export const logEqlRequest = (request: EqlSearchRequest): string => {
-  const allowNoIndices =
-    request.allow_no_indices != null ? `?allow_no_indices=${request.allow_no_indices}` : '';
+  const {
+    index,
+    allow_no_indices: allowNoIndices,
+    expand_wildcards: expandWildcards,
+    ignore_unavailable: ignoreUnavailable,
+    ...requestBody
+  } = request;
 
-  return `POST /${request.index}/_eql/search${allowNoIndices}\n${JSON.stringify(request, null, 2)}`;
+  const urlParams = Object.entries({
+    allow_no_indices: allowNoIndices,
+    expand_wildcards: expandWildcards,
+    ignore_unavailable: ignoreUnavailable,
+  })
+    .reduce<string[]>((acc, [key, value]) => {
+      if (value != null) {
+        acc.push(`${key}=${value}`);
+      }
+
+      return acc;
+    }, [])
+    .join('&');
+
+  const url = `/${request.index}/_eql/search${urlParams ? `?${urlParams}` : ''}`;
+
+  return `POST ${url}\n${JSON.stringify(requestBody, null, 2)}`;
 };
