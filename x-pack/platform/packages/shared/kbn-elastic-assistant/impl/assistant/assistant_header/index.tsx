@@ -51,7 +51,7 @@ interface OwnProps {
 
 type Props = OwnProps;
 
-export const AI_ASSISTANT_SETTINGS_MENU_CONTAINER = 'aiAssistantSettingsMenuContainer'
+export const AI_ASSISTANT_SETTINGS_MENU_CONTAINER = 'aiAssistantSettingsMenuContainer';
 
 /**
  * Renders the header of the Elastic AI Assistant.

@@ -450,15 +450,17 @@ const AssistantComponent: React.FC<Props> = ({
 
   return (
     <>
-      {contentReferencesEnabled && <AnonymizedValuesAndCitationsTour conversation={currentConversation} />}
+      {contentReferencesEnabled && (
+        <AnonymizedValuesAndCitationsTour conversation={currentConversation} />
+      )}
       <EuiFlexGroup direction={'row'} wrap={false} gutterSize="none">
         {chatHistoryVisible && (
           <EuiFlexItem
             grow={false}
             css={css`
-            inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
-            border-right: ${euiTheme.border.thin};
-          `}
+              inline-size: ${CONVERSATION_SIDE_PANEL_WIDTH}px;
+              border-right: ${euiTheme.border.thin};
+            `}
           >
             <ConversationSidePanel
               currentConversation={currentConversation}
@@ -472,19 +474,19 @@ const AssistantComponent: React.FC<Props> = ({
         )}
         <EuiFlexItem
           css={css`
-          overflow: hidden;
-        `}
+            overflow: hidden;
+          `}
         >
           <CommentContainer data-test-subj="assistantChat">
             <EuiFlexGroup
               css={css`
-              overflow: hidden;
-            `}
+                overflow: hidden;
+              `}
             >
               <EuiFlexItem
                 css={css`
-                max-width: 100%;
-              `}
+                  max-width: 100%;
+                `}
               >
                 <EuiFlyoutHeader hasBorder>
                   <AssistantHeader
@@ -512,25 +514,25 @@ const AssistantComponent: React.FC<Props> = ({
                 </EuiFlyoutHeader>
                 <EuiFlyoutBody
                   css={css`
-                  min-height: 100px;
-                  flex: 1;
+                    min-height: 100px;
+                    flex: 1;
 
-                  > div {
-                    display: flex;
-                    flex-direction: column;
-                    align-items: stretch;
-
-                    > .euiFlyoutBody__banner {
-                      overflow-x: unset;
-                    }
-
-                    > .euiFlyoutBody__overflowContent {
+                    > div {
                       display: flex;
-                      flex: 1;
-                      overflow: auto;
+                      flex-direction: column;
+                      align-items: stretch;
+
+                      > .euiFlyoutBody__banner {
+                        overflow-x: unset;
+                      }
+
+                      > .euiFlyoutBody__overflowContent {
+                        display: flex;
+                        flex: 1;
+                        overflow: auto;
+                      }
                     }
-                  }
-                `}
+                  `}
                   banner={
                     !isDisabled &&
                     showMissingConnectorCallout &&
@@ -560,20 +562,20 @@ const AssistantComponent: React.FC<Props> = ({
                 </EuiFlyoutBody>
                 <EuiFlyoutFooter
                   css={css`
-                  background: none;
-                  border-top: ${euiTheme.border.thin};
-                  overflow: hidden;
-                  max-height: 60%;
-                  display: flex;
-                  flex-direction: column;
-                `}
+                    background: none;
+                    border-top: ${euiTheme.border.thin};
+                    overflow: hidden;
+                    max-height: 60%;
+                    display: flex;
+                    flex-direction: column;
+                  `}
                 >
                   <EuiPanel
                     paddingSize="m"
                     hasShadow={false}
                     css={css`
-                    overflow: auto;
-                  `}
+                      overflow: auto;
+                    `}
                   >
                     {!isDisabled &&
                       Object.keys(promptContexts).length !== selectedPromptContextsCount && (
@@ -621,8 +623,8 @@ const AssistantComponent: React.FC<Props> = ({
                   {!isDisabled && (
                     <EuiPanel
                       css={css`
-                      background: ${euiTheme.colors.backgroundBaseSubdued};
-                    `}
+                        background: ${euiTheme.colors.backgroundBaseSubdued};
+                      `}
                       hasShadow={false}
                       paddingSize="m"
                       borderRadius="none"

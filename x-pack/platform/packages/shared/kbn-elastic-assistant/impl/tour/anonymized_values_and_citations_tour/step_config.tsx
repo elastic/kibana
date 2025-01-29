@@ -7,20 +7,24 @@
 
 import { EuiText, EuiSpacer } from '@elastic/eui';
 import React from 'react';
-import { FormattedMessage } from 'react-intl';
+import { FormattedMessage } from '@kbn/i18n-react';
 import { AI_ASSISTANT_SETTINGS_MENU_CONTAINER } from '../../assistant/assistant_header';
 
 const isMac = navigator.platform.toLowerCase().indexOf('mac') >= 0;
 
 export const anonymizedValuesAndCitationsTourStep1 = {
-  title: <FormattedMessage
-    id="xpack.elasticAssistant.anonymizedValuesAndCitations.tour.title"
-    defaultMessage="Citations & Anonymized values"
-  />,
-  subTitle: <FormattedMessage
-    id="xpack.elasticAssistant.anonymizedValuesAndCitations.tour.subtitle"
-    defaultMessage="New and improved!"
-  />,
+  title: (
+    <FormattedMessage
+      id="xpack.elasticAssistant.anonymizedValuesAndCitations.tour.title"
+      defaultMessage="Citations & Anonymized values"
+    />
+  ),
+  subTitle: (
+    <FormattedMessage
+      id="xpack.elasticAssistant.anonymizedValuesAndCitations.tour.subtitle"
+      defaultMessage="New and improved!"
+    />
+  ),
   anchor: `#${AI_ASSISTANT_SETTINGS_MENU_CONTAINER}`,
   content: (
     <EuiText size="s">

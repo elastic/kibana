@@ -34,20 +34,18 @@ export const alertConvo: Conversation = {
 };
 
 export const messageWithContentReferences: ClientMessage = {
-  content:
-    'You have 1 alert.{reference(abcde)}',
+  content: 'You have 1 alert.{reference(abcde)}',
   role: 'user',
   timestamp: '2023-03-19T18:59:18.174Z',
   metadata: {
-    "contentReferences": {
-      "abcde" : {
-        "id": "abcde",
-        "type" : "SecurityAlertsPage"
-      }
-    }
-  }
-}
-
+    contentReferences: {
+      abcde: {
+        id: 'abcde',
+        type: 'SecurityAlertsPage',
+      },
+    },
+  },
+};
 
 export const emptyWelcomeConvo: Conversation = {
   id: '',
@@ -65,8 +63,8 @@ export const emptyWelcomeConvo: Conversation = {
 
 export const conversationWithContentReferences: Conversation = {
   ...emptyWelcomeConvo,
-  messages: [messageWithContentReferences]
-}
+  messages: [messageWithContentReferences],
+};
 
 export const welcomeConvo: Conversation = {
   ...emptyWelcomeConvo,
