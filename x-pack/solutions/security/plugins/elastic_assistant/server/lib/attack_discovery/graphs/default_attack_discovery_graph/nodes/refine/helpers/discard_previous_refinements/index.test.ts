@@ -15,6 +15,7 @@ const initialState: GraphState = {
   attackDiscoveryPrompt: 'attackDiscoveryPrompt',
   combinedGenerations: 'generation1generation2',
   combinedRefinements: 'refinement1', // <-- existing refinements
+  continuePrompt: 'continue',
   errors: [],
   generationAttempts: 3,
   generations: ['generation1', 'generation2'],

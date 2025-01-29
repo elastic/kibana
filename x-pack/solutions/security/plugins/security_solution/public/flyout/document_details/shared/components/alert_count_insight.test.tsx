@@ -6,14 +6,22 @@
  */
 
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, renderHook } from '@testing-library/react';
 import { TestProviders } from '../../../../common/mock';
 import { AlertCountInsight, getFormattedAlertStats } from './alert_count_insight';
 import { useAlertsByStatus } from '../../../../overview/components/detection_response/alerts_by_status/use_alerts_by_status';
 import type { ParsedAlertsData } from '../../../../overview/components/detection_response/alerts_by_status/types';
-import { SEVERITY_COLOR } from '../../../../overview/components/detection_response/utils';
+import { useEuiTheme } from '@elastic/eui';
+import {
+  INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID,
+  INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID,
+} from './test_ids';
+import { useUserPrivileges } from '../../../../common/components/user_privileges';
+import { useSignalIndex } from '../../../../detections/containers/detection_engine/alerts/use_signal_index';
 
 jest.mock('../../../../common/lib/kibana');
+jest.mock('../../../../detections/containers/detection_engine/alerts/use_signal_index');
+jest.mock('../../../../common/components/user_privileges');
 
 jest.mock('react-router-dom', () => {
   const actual = jest.requireActual('react-router-dom');
@@ -66,15 +74,42 @@ const renderAlertCountInsight = () => {
 };
 
 describe('AlertCountInsight', () => {
+  beforeEach(() => {
+    (useSignalIndex as jest.Mock).mockReturnValue({ signalIndexName: '' });
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: true } });
+  });
+
   it('renders', () => {
     (useAlertsByStatus as jest.Mock).mockReturnValue({
       isLoading: false,
       items: mockAlertData,
     });
-    const { getByTestId } = renderAlertCountInsight();
+
+    const { getByTestId, queryByTestId } = renderAlertCountInsight();
+
     expect(getByTestId(testId)).toBeInTheDocument();
     expect(getByTestId(`${testId}-distribution-bar`)).toBeInTheDocument();
     expect(getByTestId(`${testId}-count`)).toHaveTextContent('8');
+    expect(
+      getByTestId(INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)
+    ).toBeInTheDocument();
+    expect(queryByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).not.toBeInTheDocument();
+  });
+
+  it('renders the count as text instead of button', () => {
+    (useUserPrivileges as jest.Mock).mockReturnValue({ timelinePrivileges: { read: false } });
+    (useAlertsByStatus as jest.Mock).mockReturnValue({
+      isLoading: false,
+      items: mockAlertData,
+    });
+
+    const { getByTestId, queryByTestId } = renderAlertCountInsight();
+
+    expect(getByTestId(`${testId}-count`)).toHaveTextContent('8');
+    expect(getByTestId(INSIGHTS_ALERTS_COUNT_TEXT_TEST_ID)).toBeInTheDocument();
+    expect(
+      queryByTestId(INSIGHTS_ALERTS_COUNT_INVESTIGATE_IN_TIMELINE_BUTTON_TEST_ID)
+    ).not.toBeInTheDocument();
   });
 
   it('renders loading spinner if data is being fetched', () => {
@@ -110,26 +145,32 @@ describe('AlertCountInsight', () => {
 });
 
 describe('getFormattedAlertStats', () => {
+  const { result } = renderHook(() => useEuiTheme());
+  const euiTheme = result.current.euiTheme;
+
   it('should return alert stats', () => {
-    const alertStats = getFormattedAlertStats(mockAlertData);
+    const alertStats = getFormattedAlertStats(mockAlertData, euiTheme);
     expect(alertStats).toEqual([
-      { key: 'High', count: 2, color: SEVERITY_COLOR.high },
-      { key: 'Low', count: 2, color: SEVERITY_COLOR.low },
-      { key: 'Medium', count: 2, color: SEVERITY_COLOR.medium },
-      { key: 'Critical', count: 2, color: SEVERITY_COLOR.critical },
+      { key: 'High', count: 2, color: '#ff7e62' },
+      { key: 'Low', count: 2, color: '#54b399' },
+      { key: 'Medium', count: 2, color: '#f1d86f' },
+      { key: 'Critical', count: 2, color: '#bd271e' },
     ]);
   });
 
   it('should return empty array if no active alerts are available', () => {
-    const alertStats = getFormattedAlertStats({
-      closed: {
-        total: 2,
-        severities: [
-          { key: 'high', value: 1, label: 'High' },
-          { key: 'low', value: 1, label: 'Low' },
-        ],
+    const alertStats = getFormattedAlertStats(
+      {
+        closed: {
+          total: 2,
+          severities: [
+            { key: 'high', value: 1, label: 'High' },
+            { key: 'low', value: 1, label: 'Low' },
+          ],
+        },
       },
-    });
+      euiTheme
+    );
     expect(alertStats).toEqual([]);
   });
 });

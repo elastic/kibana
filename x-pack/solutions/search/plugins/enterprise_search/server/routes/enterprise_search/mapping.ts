@@ -10,7 +10,7 @@ import { schema } from '@kbn/config-schema';
 import { ErrorCode } from '../../../common/types/error_codes';
 
 import { fetchMapping } from '../../lib/fetch_mapping';
-import { RouteDependencies } from '../../plugin';
+import type { RouteDependencies } from '../../types';
 import { createError } from '../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../utils/elasticsearch_error_handler';
 import { isIndexNotFoundException } from '../../utils/identify_exceptions';
