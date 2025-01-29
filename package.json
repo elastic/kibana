@@ -1347,7 +1347,7 @@
     "@kbn/ambient-common-types": "link:src/dev/packages/ambient-common-types",
     "@kbn/ambient-ftr-types": "link:src/dev/packages/ambient-ftr-types",
     "@kbn/ambient-storybook-types": "link:src/dev/packages/ambient-storybook-types",
-    "@kbn/ambient-ui-types": "link:packages/kbn-ambient-ui-types",
+    "@kbn/ambient-ui-types": "link:src/dev/packages/ambient-ui-types",
     "@kbn/apm-ftr-e2e": "link:x-pack/solutions/observability/plugins/apm/ftr_e2e",
     "@kbn/apm-synthtrace": "link:packages/kbn-apm-synthtrace",
     "@kbn/apm-synthtrace-client": "link:packages/kbn-apm-synthtrace-client",

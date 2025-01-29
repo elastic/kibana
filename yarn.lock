@@ -3992,7 +3992,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/ambient-ui-types@link:packages/kbn-ambient-ui-types":
+"@kbn/ambient-ui-types@link:src/dev/packages/ambient-ui-types":
   version "0.0.0"
   uid ""
 
