@@ -43,11 +43,7 @@ export const SynonymsSetDetail = () => {
         rightSideItems={[
           <EuiFlexGroup alignItems="center">
             <EuiFlexItem grow={false}>
-              <EuiButton
-                data-test-subj="searchSynonymsSynonymsSetDetailConnectToApiButton"
-                color="text"
-                iconType="endpoint"
-              >
+              <EuiButton color="text" iconType="endpoint">
                 <FormattedMessage
                   id="xpack.searchSynonyms.synonymsSetDetail.connectToApiButton"
                   defaultMessage="Connect to API"
@@ -55,12 +51,7 @@ export const SynonymsSetDetail = () => {
               </EuiButton>
             </EuiFlexItem>
             <EuiFlexItem grow={false}>
-              <EuiButtonIcon
-                data-test-subj="searchSynonymsSynonymsSetDetailButton"
-                iconType="boxesHorizontal"
-                size="m"
-                color="text"
-              />
+              <EuiButtonIcon iconType="boxesHorizontal" size="m" color="text" />
             </EuiFlexItem>
           </EuiFlexGroup>,
         ]}

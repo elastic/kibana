@@ -53,7 +53,6 @@ export const SynonymsSetRuleTable = ({ synonymsSetId = '' }: { synonymsSetId: st
           <EuiFlexGroup responsive={false}>
             <EuiFlexItem grow={false}>
               <EuiButtonIcon
-                data-test-subj="searchSynonymsColumnsButton"
                 iconType="expand"
                 aria-label={i18n.translate(
                   'xpack.searchSynonyms.synonymsSetTable.expandSynonyms.aria.label',

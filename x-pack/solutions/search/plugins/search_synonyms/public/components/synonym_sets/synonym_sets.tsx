@@ -44,10 +44,7 @@ export const SynonymSets = () => {
       }),
       render: (name: string) => (
         <div data-test-subj="synonyms-set-item-name">
-          <EuiLink
-            data-test-subj="searchSynonymsColumnsLink"
-            onClick={() => application?.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/sets/${name}`)}
-          >
+          <EuiLink onClick={() => application?.navigateToUrl(`${PLUGIN_ROUTE_ROOT}/sets/${name}`)}>
             {name}
           </EuiLink>
         </div>
