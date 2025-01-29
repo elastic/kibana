@@ -55,6 +55,10 @@ const ObsAIAssistantParamsFields: React.FunctionComponent<
         index
       );
     }
+    // forward-compatible fallback.
+    if (actionParams.prompts && actionParams.prompts[0].message !== actionParams.message) {
+      editAction('message', actionParams.prompts[0].message, index);
+    }
   }, [actionParams, editAction, index]);
 
   const handleOnChange = (
