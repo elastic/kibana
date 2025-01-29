@@ -51,17 +51,7 @@ export const TriggerComponent: FC<Props> = ({
           </StyledBadge>
         );
       case 'deprecated':
-        return (
-          <StyledBadge color="warning" data-test-subj="sourcerer-deprecated-badge">
-            {i18n.DEPRECATED_BADGE_TITLE}
-          </StyledBadge>
-        );
       case 'missingPatterns':
-        return (
-          <StyledBadge color="warning" data-test-subj="sourcerer-missingPatterns-badge">
-            {i18n.DEPRECATED_BADGE_TITLE}
-          </StyledBadge>
-        );
       case '':
       default:
         return null;
