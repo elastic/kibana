@@ -11,6 +11,7 @@ import type {
   FindFileStructureResponse,
   IngestPipeline,
 } from '@kbn/file-upload-plugin/common/types';
+import type { MappingTypeMapping } from '@elastic/elasticsearch/lib/api/types';
 import { isSupportedFormat } from '../../../common/constants';
 import { isTikaType } from '../../../common/utils/tika_utils';
 import { processResults, readFile } from '../../application/common/components/utils';
@@ -27,7 +28,7 @@ interface AnalysisResults {
   analysisError?: any;
 }
 
-export type AnalyzedFile = AnalysisResults & {
+export type FileAnalysis = AnalysisResults & {
   loaded: boolean;
   importStatus: STATUS;
   fileName: string;
@@ -46,7 +47,7 @@ export type AnalyzedFile = AnalysisResults & {
 };
 
 export class FileWrapper {
-  private analyzedFile$ = new BehaviorSubject<AnalyzedFile>({
+  private analyzedFile$ = new BehaviorSubject<FileAnalysis>({
     analysisStatus: STATUS.NOT_STARTED,
     fileContents: '',
     fileSize: '',
@@ -125,7 +126,7 @@ export class FileWrapper {
 
   private async analyzeStandardFile(
     fileContents: string,
-    overrides: any,
+    overrides: Record<string, string>,
     isRetry = false
   ): Promise<AnalysisResults> {
     try {
@@ -151,7 +152,7 @@ export class FileWrapper {
     }
   }
 
-  private setStatus(status: Partial<AnalyzedFile>) {
+  private setStatus(status: Partial<FileAnalysis>) {
     this.analyzedFile$.next({
       ...this.getStatus(),
       ...status,
@@ -183,7 +184,7 @@ export class FileWrapper {
     return this.analyzedFile$.getValue().data;
   }
 
-  public async import(id: string, index: string, mappings: any, pipelineId: string) {
+  public async import(id: string, index: string, mappings: MappingTypeMapping, pipelineId: string) {
     this.setStatus({ importStatus: STATUS.STARTED });
     const format = this.analyzedFile$.getValue().results!.format;
     const importer = await this.fileUpload.importerFactory(format, {

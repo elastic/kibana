@@ -18,13 +18,13 @@ import {
 } from '@elastic/eui';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import type { AnalyzedFile } from './file_manager/file_wrapper';
+import type { FileAnalysis } from './file_manager/file_wrapper';
 import { STATUS, type UploadStatus } from './file_manager/file_manager';
 import { CLASH_TYPE } from './file_manager/merge_tools';
 
 interface Props {
   uploadStatus: UploadStatus;
-  fileStatus: AnalyzedFile;
+  fileStatus: FileAnalysis;
   deleteFile: () => void;
   index: number;
 }

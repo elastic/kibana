@@ -20,7 +20,7 @@ import type {
 } from '@elastic/elasticsearch/lib/api/typesWithBodyKey';
 import { i18n } from '@kbn/i18n';
 import type { FileUploadResults } from '@kbn/file-upload-common';
-import type { AnalyzedFile } from './file_wrapper';
+import type { FileAnalysis } from './file_wrapper';
 import { FileWrapper } from './file_wrapper';
 import {
   createKibanaDataView,
@@ -47,7 +47,7 @@ export interface UploadStatus {
   dataViewCreated: STATUS;
   pipelinesDeleted: STATUS;
   fileImport: STATUS;
-  filesStatus: AnalyzedFile[];
+  filesStatus: FileAnalysis[];
   fileClashes: FileClash[];
   formatMix: boolean;
   errors: Array<{ title: string; error: any }>;
@@ -56,10 +56,10 @@ export interface UploadStatus {
 export class FileManager {
   private readonly files$ = new BehaviorSubject<FileWrapper[]>([]);
   private readonly analysisValid$ = new BehaviorSubject<boolean>(false);
-  public readonly analysisStatus$: Observable<AnalyzedFile[]> = this.files$.pipe(
+  public readonly fileAnalysisStatus$: Observable<FileAnalysis[]> = this.files$.pipe(
     switchMap((files) => {
       return files.length === 0
-        ? new Observable<AnalyzedFile[]>((subscriber) => subscriber.next([]))
+        ? new Observable<FileAnalysis[]>((subscriber) => subscriber.next([]))
         : combineLatest(files.map((file) => file.fileStatus$));
     })
   );
@@ -99,7 +99,7 @@ export class FileManager {
     this.autoAddSemanticTextField = this.autoAddInferenceEndpointName !== null;
     this.settings = indexSettingsOverride ?? {};
 
-    this.mappingsCheckSubscription = this.analysisStatus$.subscribe((statuses) => {
+    this.mappingsCheckSubscription = this.fileAnalysisStatus$.subscribe((statuses) => {
       const allFilesAnalyzed = statuses.every((status) => status.loaded);
       if (allFilesAnalyzed) {
         this.analysisValid$.next(true);
@@ -319,7 +319,7 @@ export class FileManager {
           await file.import(
             initializeImportResp!.id,
             indexName,
-            this.mappings,
+            this.mappings!,
             `${indexName}-${i}-pipeline`
           );
         })

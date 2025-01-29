@@ -78,7 +78,7 @@ export const FileUploadLiteView: FC<Props> = ({
   );
   const deleteFile = useCallback((i: number) => fm.removeFile(i), [fm]);
 
-  const filesStatus = useObservable(fm.analysisStatus$, []);
+  const filesStatus = useObservable(fm.fileAnalysisStatus$, []);
   const uploadStatus = useObservable(fm.uploadStatus$, fm.uploadStatus$.getValue());
   const fileClashes = useMemo(
     () => uploadStatus.fileClashes.some((f) => f.clash),

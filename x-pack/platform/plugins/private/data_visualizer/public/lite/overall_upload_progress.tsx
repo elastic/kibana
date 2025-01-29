@@ -7,10 +7,10 @@
 import { EuiProgress } from '@elastic/eui';
 import type { FC } from 'react';
 import React from 'react';
-import type { AnalyzedFile } from './file_manager/file_wrapper';
+import type { FileAnalysis } from './file_manager/file_wrapper';
 
 interface Props {
-  filesStatus: AnalyzedFile[];
+  filesStatus: FileAnalysis[];
 }
 
 export const OverallUploadProgress: FC<Props> = ({ filesStatus }) => {

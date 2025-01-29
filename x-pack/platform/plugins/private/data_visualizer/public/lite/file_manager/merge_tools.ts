@@ -5,7 +5,7 @@
  * 2.0.
  */
 
-import type { AnalyzedFile, FileWrapper } from './file_wrapper';
+import type { FileAnalysis, FileWrapper } from './file_wrapper';
 
 export enum CLASH_TYPE {
   MAPPING,
@@ -89,7 +89,7 @@ export function createMergedMappings(files: FileWrapper[]) {
 
 export function getMappingClashInfo(
   mappingClashes: MappingClash[],
-  filesStatus: AnalyzedFile[]
+  filesStatus: FileAnalysis[]
 ): FileClash[] {
   const clashCounts = filesStatus
     .reduce<Array<{ index: number; count: number }>>((acc, file, i) => {

@@ -11,14 +11,14 @@ import type { EuiStepStatus } from '@elastic/eui';
 import { EuiSpacer, EuiSteps } from '@elastic/eui';
 import type { EuiContainedStepProps } from '@elastic/eui/src/components/steps/steps';
 import { i18n } from '@kbn/i18n';
-import type { AnalyzedFile } from './file_manager/file_wrapper';
+import type { FileAnalysis } from './file_manager/file_wrapper';
 import { STATUS } from './file_manager/file_manager';
 import { type UploadStatus } from './file_manager/file_manager';
 import { FileStatus } from './file_status';
 
 interface Props {
   uploadStatus: UploadStatus;
-  filesStatus: AnalyzedFile[];
+  filesStatus: FileAnalysis[];
 }
 
 export const OverallUploadStatus: FC<Props> = ({ filesStatus, uploadStatus }) => {
