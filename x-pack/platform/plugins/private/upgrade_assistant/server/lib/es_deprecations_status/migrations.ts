@@ -20,10 +20,11 @@ import { type EsMetadata, getCorrectiveAction } from './get_corrective_actions';
 import { esIndicesStateCheck } from '../es_indices_state_check';
 
 /**
- * Remove once the data_streams type is added to the `MigrationDeprecationsResponse` type
+ * Remove once the these keys are added to the `MigrationDeprecationsResponse` type
  */
 interface EsDeprecations extends MigrationDeprecationsResponse {
-  data_streams: Record<string, MigrationDeprecationsDeprecation[]>;
+  templates: Record<string, MigrationDeprecationsDeprecation[]>;
+  ilm_policies: Record<string, MigrationDeprecationsDeprecation[]>;
 }
 
 const createBaseMigrationDeprecation = (
@@ -120,6 +121,8 @@ export const getEnrichedDeprecations = async (
           return !systemIndicesList.includes(deprecation.index);
         }
         case 'cluster_settings':
+        case 'templates':
+        case 'ilm_policies':
         case 'ml_settings':
         case 'node_settings':
         case 'data_streams': {
