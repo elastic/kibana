@@ -11,7 +11,7 @@ import type { EuiButtonGroupOptionProps } from '@elastic/eui/src/components/butt
 import { useExpandableFlyoutApi, useExpandableFlyoutState } from '@kbn/expandable-flyout';
 import { i18n } from '@kbn/i18n';
 import { FormattedMessage } from '@kbn/i18n-react';
-import { useIsExperimentalFeatureEnabled } from '../../../../common/hooks/use_experimental_features';
+import { useUiSetting$ } from '@kbn/kibana-react-plugin/public';
 import { useDocumentDetailsContext } from '../../shared/context';
 import { useWhichFlyout } from '../../shared/hooks/use_which_flyout';
 import { DocumentDetailsAnalyzerPanelKey } from '../../shared/constants/panel_keys';
@@ -31,7 +31,7 @@ import { ALERTS_ACTIONS } from '../../../../common/lib/apm/user_actions';
 import { useStartTransaction } from '../../../../common/lib/apm/use_start_transaction';
 import { GRAPH_ID, GraphVisualization } from '../components/graph_visualization';
 import { useGraphPreview } from '../../shared/hooks/use_graph_preview';
-import { GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE } from '../../shared/constants/experimental_features';
+import { ENABLE_GRAPH_VISUALIZATION_SETTING } from '../../../../../common/constants';
 
 const visualizeButtons: EuiButtonGroupOptionProps[] = [
   {
@@ -127,13 +127,11 @@ export const VisualizeTab = memo(() => {
     dataFormattedForFieldBrowser,
   });
 
-  const isGraphFeatureEnabled = useIsExperimentalFeatureEnabled(
-    GRAPH_VISUALIZATION_IN_FLYOUT_ENABLED_EXPERIMENTAL_FEATURE
-  );
+  const [graphVisualizationEnabled] = useUiSetting$<boolean>(ENABLE_GRAPH_VISUALIZATION_SETTING);
 
   const options = [...visualizeButtons];
 
-  if (hasGraphRepresentation && isGraphFeatureEnabled) {
+  if (hasGraphRepresentation && graphVisualizationEnabled) {
     options.push(graphVisualizationButton);
   }
 
