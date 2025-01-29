@@ -17,7 +17,7 @@ export const createAlert = async (
 ) => {
   const supertest = getService('supertestWithoutAuth');
   const { body: response, status } = await supertest
-    .post(`${getSpaceUrlPrefix(spaceId)}/api/alerts/alert`)
+    .post(`${getSpaceUrlPrefix(spaceId)}/api/alerting/rule`)
     .auth(user.username, user.password)
     .send(alertDef)
     .set('kbn-xsrf', 'foo');

@@ -7,8 +7,8 @@
 
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export async function SecuritySolutionServerlessBsearchCreator({ getService }: FtrProviderContext) {
-  const { createBsearch } = getService('securitySolutionUtils');
+export async function SecuritySolutionServerlessSearchCreator({ getService }: FtrProviderContext) {
+  const { createSearch } = getService('securitySolutionUtils');
 
-  return await createBsearch('admin');
+  return await createSearch('admin');
 }

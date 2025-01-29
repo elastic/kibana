@@ -6,7 +6,7 @@
  */
 
 import { IndexedHostsAndAlertsResponse } from '@kbn/security-solution-plugin/common/endpoint/index_data';
-import { TimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
+import { PatchTimelineResponse } from '@kbn/security-solution-plugin/common/api/timeline';
 // @ts-expect-error we have to check types with "allowJs: false" for now, causing this import to fail
 import { kibanaPackageJson } from '@kbn/repo-info';
 import { type IndexedEndpointRuleAlerts } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_endpoint_rule_alerts';
@@ -64,7 +64,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
     // failing tests: https://github.com/elastic/kibana/issues/170705
     describe.skip('from Timeline', () => {
-      let timeline: TimelineResponse;
+      let timeline: PatchTimelineResponse;
 
       before(async () => {
         log.info(
@@ -86,21 +86,15 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         );
 
         await pageObjects.timeline.navigateToTimelineList();
-        await pageObjects.timeline.openTimelineById(
-          timeline.data.persistTimeline.timeline.savedObjectId
-        );
+        await pageObjects.timeline.openTimelineById(timeline.savedObjectId);
         await pageObjects.timeline.setDateRange('Last 1 year');
         await pageObjects.timeline.waitForEvents(60_000 * 2);
       });
 
       after(async () => {
         if (timeline) {
-          log.info(
-            `Cleaning up created timeline [${timeline.data.persistTimeline.timeline.title} - ${timeline.data.persistTimeline.timeline.savedObjectId}]`
-          );
-          await timelineTestService.deleteTimeline(
-            timeline.data.persistTimeline.timeline.savedObjectId
-          );
+          log.info(`Cleaning up created timeline [${timeline.title} - ${timeline.savedObjectId}]`);
+          await timelineTestService.deleteTimeline(timeline.savedObjectId);
         }
       });
 

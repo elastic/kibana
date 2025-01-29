@@ -7,30 +7,16 @@
 import expect from '@kbn/expect';
 import { ELASTIC_HTTP_VERSION_HEADER } from '@kbn/core-http-common';
 import type { CspSetupStatus } from '@kbn/cloud-security-posture-common';
-import {
-  FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-  VULNERABILITIES_INDEX_DEFAULT_NS,
-} from '@kbn/cloud-security-posture-plugin/common/constants';
-import {
-  deleteIndex,
-  addIndex,
-  createPackagePolicy,
-} from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN } from '@kbn/cloud-security-posture-common';
+import { LATEST_FINDINGS_INDEX_DEFAULT_NS } from '@kbn/cloud-security-posture-plugin/common/constants';
+import { createPackagePolicy } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/helper';
+import { EsIndexDataProvider } from '@kbn/test-suites-xpack/cloud_security_posture_api/utils';
 import {
   findingsMockData,
   vulnerabilityMockData,
 } from '@kbn/test-suites-xpack/api_integration/apis/cloud_security_posture/mock_data';
 import { FtrProviderContext } from '../../../../ftr_provider_context';
 import { RoleCredentials } from '../../../../../shared/services';
-
-const INDEX_ARRAY = [
-  FINDINGS_INDEX_DEFAULT_NS,
-  LATEST_FINDINGS_INDEX_DEFAULT_NS,
-  CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN,
-  VULNERABILITIES_INDEX_DEFAULT_NS,
-];
 
 export default function (providerContext: FtrProviderContext) {
   const { getService } = providerContext;
@@ -40,6 +26,11 @@ export default function (providerContext: FtrProviderContext) {
   const supertestWithoutAuth = getService('supertestWithoutAuth');
   const svlCommonApi = getService('svlCommonApi');
   const svlUserManager = getService('svlUserManager');
+  const latestFindingsIndex = new EsIndexDataProvider(es, LATEST_FINDINGS_INDEX_DEFAULT_NS);
+  const latestVulnerabilitiesIndex = new EsIndexDataProvider(
+    es,
+    CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN
+  );
 
   describe('GET /internal/cloud_security_posture/status', function () {
     // security_exception: action [indices:admin/create] is unauthorized for user [elastic] with effective roles [superuser] on restricted indices [.fleet-actions-7], this action is granted by the index privileges [create_index,manage,all]
@@ -74,13 +65,13 @@ export default function (providerContext: FtrProviderContext) {
 
         agentPolicyId = agentPolicyResponse.item.id;
 
-        await deleteIndex(es, INDEX_ARRAY);
-        await addIndex(es, findingsMockData, LATEST_FINDINGS_INDEX_DEFAULT_NS);
-        await addIndex(es, vulnerabilityMockData, CDR_LATEST_NATIVE_VULNERABILITIES_INDEX_PATTERN);
+        await latestFindingsIndex.deleteAll();
+        await latestVulnerabilitiesIndex.deleteAll();
       });
 
       afterEach(async () => {
-        await deleteIndex(es, INDEX_ARRAY);
+        await latestFindingsIndex.deleteAll();
+        await latestVulnerabilitiesIndex.deleteAll();
         await kibanaServer.savedObjects.cleanStandardList();
         await esArchiver.unload('x-pack/test/functional/es_archives/fleet/empty_fleet_server');
       });
@@ -97,6 +88,8 @@ export default function (providerContext: FtrProviderContext) {
           roleAuthc,
           internalRequestHeader
         );
+
+        await latestFindingsIndex.addBulk(findingsMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/status`)
@@ -124,6 +117,8 @@ export default function (providerContext: FtrProviderContext) {
           internalRequestHeader
         );
 
+        await latestFindingsIndex.addBulk(findingsMockData);
+
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/status`)
           .set(ELASTIC_HTTP_VERSION_HEADER, '1')
@@ -149,6 +144,8 @@ export default function (providerContext: FtrProviderContext) {
           roleAuthc,
           internalRequestHeader
         );
+
+        await latestVulnerabilitiesIndex.addBulk(vulnerabilityMockData);
 
         const { body: res }: { body: CspSetupStatus } = await supertestWithoutAuth
           .get(`/internal/cloud_security_posture/status`)

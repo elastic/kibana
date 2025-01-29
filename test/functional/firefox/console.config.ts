@@ -17,7 +17,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
   return {
     ...baseConfig.getAll(),
 
-    testFiles: [require.resolve('../apps/console/monaco')],
+    testFiles: [require.resolve('../apps/console')],
 
     junit: {
       reportName: 'Firefox UI Functional Tests - Console',

@@ -55,16 +55,17 @@ export default function ({ getService }: FtrProviderContext) {
   const testAlias = 'test_alias';
   const testIlmPolicy = 'test_policy';
   describe('GET indices with data enrichers', () => {
-    before(async () => {
+    beforeEach(async () => {
       await createIndex(testIndex);
-      await createIlmPolicy('test_policy');
-      await addPolicyToIndex(testIlmPolicy, testIndex, testAlias);
     });
-    after(async () => {
+    afterEach(async () => {
       await esDeleteAllIndices([testIndex]);
     });
 
     it(`ILM data is fetched by the ILM data enricher`, async () => {
+      await createIlmPolicy('test_policy');
+      await addPolicyToIndex(testIlmPolicy, testIndex, testAlias);
+
       const { body: indices } = await supertest
         .get(`${API_BASE_PATH}/indices`)
         .set('kbn-xsrf', 'xxx')
@@ -74,6 +75,19 @@ export default function ({ getService }: FtrProviderContext) {
 
       const { ilm } = index;
       expect(ilm.policy).to.eql(testIlmPolicy);
+    });
+
+    it(`ILM data is not empty even if the index unmanaged`, async () => {
+      const { body: indices } = await supertest
+        .get(`${API_BASE_PATH}/indices`)
+        .set('kbn-xsrf', 'xxx')
+        .expect(200);
+
+      const index = indices.find((item: Index) => item.name === testIndex);
+
+      const { ilm } = index;
+      expect(ilm.index).to.eql(testIndex);
+      expect(ilm.managed).to.eql(false);
     });
   });
 }

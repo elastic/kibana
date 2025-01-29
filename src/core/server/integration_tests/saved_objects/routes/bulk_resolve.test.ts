@@ -20,7 +20,7 @@ import {
   type InternalSavedObjectsRequestHandlerContext,
 } from '@kbn/core-saved-objects-server-internal';
 import { loggerMock } from '@kbn/logging-mocks';
-import { setupConfig } from './routes_test_utils';
+import { deprecationMock, setupConfig } from './routes_test_utils';
 
 type SetupServerReturn = Awaited<ReturnType<typeof setupServer>>;
 
@@ -36,6 +36,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
   let savedObjectsClient: ReturnType<typeof savedObjectsClientMock.create>;
   let coreUsageStatsClient: jest.Mocked<ICoreUsageStatsClient>;
   let loggerWarnSpy: jest.SpyInstance;
+  let registrationSpy: jest.SpyInstance;
 
   beforeEach(async () => {
     ({ server, httpSetup, handlerContext } = await setupServer());
@@ -58,11 +59,17 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
     const coreUsageData = coreUsageDataServiceMock.createSetupContract(coreUsageStatsClient);
     const logger = loggerMock.create();
     loggerWarnSpy = jest.spyOn(logger, 'warn').mockImplementation();
+    registrationSpy = jest.spyOn(router, 'post');
 
     const config = setupConfig();
     const access = 'public';
-
-    registerBulkResolveRoute(router, { config, coreUsageData, logger, access });
+    registerBulkResolveRoute(router, {
+      config,
+      coreUsageData,
+      logger,
+      access,
+      deprecationInfo: deprecationMock,
+    });
 
     await server.start();
   });
@@ -91,6 +98,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
 
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_resolve')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           id: 'abc123',
@@ -116,6 +124,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
 
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_resolve')
+      .set('x-elastic-internal-origin', 'kibana')
       .send(docs)
       .expect(200);
 
@@ -128,6 +137,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
   it('returns with status 400 when a type is hidden from the HTTP APIs', async () => {
     const result = await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_resolve')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           id: 'hiddenID',
@@ -141,6 +151,7 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
   it('logs a warning message when called', async () => {
     await supertest(httpSetup.server.listener)
       .post('/api/saved_objects/_bulk_resolve')
+      .set('x-elastic-internal-origin', 'kibana')
       .send([
         {
           id: 'abc123',
@@ -149,5 +160,21 @@ describe('POST /api/saved_objects/_bulk_resolve', () => {
       ])
       .expect(200);
     expect(loggerWarnSpy).toHaveBeenCalledTimes(1);
+  });
+
+  it('passes deprecation configuration to the router arguments', async () => {
+    await supertest(httpSetup.server.listener)
+      .post('/api/saved_objects/_bulk_resolve')
+      .set('x-elastic-internal-origin', 'kibana')
+      .send([
+        {
+          id: 'abc123',
+          type: 'index-pattern',
+        },
+      ])
+      .expect(200);
+    expect(registrationSpy.mock.calls[0][0]).toMatchObject({
+      options: { deprecated: deprecationMock },
+    });
   });
 });

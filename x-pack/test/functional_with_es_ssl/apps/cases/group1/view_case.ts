@@ -41,7 +41,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
 
   // https://github.com/elastic/kibana/pull/190690
   // fails after missing `awaits` were added
-  describe.skip('View case', () => {
+  describe('View case', () => {
     describe('page', () => {
       createOneCaseBeforeDeleteAllAfter(getPageObject, getService);
 
@@ -581,12 +581,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await commentArea.getVisibleText()).to.be('Test comment from automation');
       });
 
-      /**
-       * There is this bug https://github.com/elastic/kibana/issues/157280
-       * where this test randomly reproduces thus making the test flaky.
-       * Skipping for now until we fix it.
-       */
-      it.skip('should persist the draft of new comment while description is updated', async () => {
+      it('should persist the draft of new comment while description is updated', async () => {
         let commentArea = await find.byCssSelector(
           '[data-test-subj="add-comment"] textarea.euiMarkdownEditorTextArea'
         );
@@ -786,6 +781,8 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         expect(await historyBadge.getAttribute('aria-label')).equal('1 available filters');
 
         await cases.common.selectSeverity(CaseSeverity.MEDIUM);
+
+        await header.waitUntilLoadingHasFinished();
 
         await cases.common.changeCaseStatusViaDropdownAndVerify(CaseStatuses['in-progress']);
 
@@ -1241,6 +1238,13 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
           defaultValue: false,
           required: true,
         },
+        {
+          key: 'valid_key_3',
+          label: 'Sync',
+          type: CustomFieldTypes.NUMBER as const,
+          defaultValue: 123,
+          required: true,
+        },
       ];
 
       before(async () => {
@@ -1258,6 +1262,11 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
               type: CustomFieldTypes.TOGGLE,
               value: true,
             },
+            {
+              key: 'valid_key_3',
+              type: CustomFieldTypes.NUMBER,
+              value: 1234,
+            },
           ],
         });
         await cases.casesTable.waitForCasesToBeListed();
@@ -1265,7 +1274,7 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         await header.waitUntilLoadingHasFinished();
       });
 
-      afterEach(async () => {
+      after(async () => {
         await cases.api.deleteAllCases();
       });
 
@@ -1310,6 +1319,33 @@ export default ({ getPageObject, getService }: FtrProviderContext) => {
         );
 
         expect(userActions).length(2);
+      });
+
+      it('updates a number custom field correctly', async () => {
+        const numberField = await testSubjects.find(
+          `case-number-custom-field-${customFields[2].key}`
+        );
+        expect(await numberField.getVisibleText()).equal('1234');
+
+        await testSubjects.click(`case-number-custom-field-edit-button-${customFields[2].key}`);
+
+        await retry.waitFor('custom field edit form to exist', async () => {
+          return await testSubjects.exists(
+            `case-number-custom-field-form-field-${customFields[2].key}`
+          );
+        });
+
+        const inputField = await testSubjects.find(
+          `case-number-custom-field-form-field-${customFields[2].key}`
+        );
+
+        await inputField.type('12345');
+
+        await testSubjects.click(`case-number-custom-field-submit-button-${customFields[2].key}`);
+
+        await header.waitUntilLoadingHasFinished();
+
+        expect(await numberField.getVisibleText()).equal('123412345');
       });
     });
   });

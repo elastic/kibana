@@ -19,23 +19,23 @@
         "label": "Fonts",
         "description": [],
         "signature": [
-          "({ url }: React.PropsWithChildren<Props>) => JSX.Element"
+          "({ url }: Props) => React.JSX.Element"
         ],
-        "path": "packages/core/rendering/core-rendering-server-internal/src/views/fonts.tsx",
+        "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
           {
             "parentPluginId": "@kbn/core-rendering-server-internal",
             "id": "def-server.Fonts.$1",
-            "type": "CompoundType",
+            "type": "Object",
             "tags": [],
             "label": "{ url }",
             "description": [],
             "signature": [
-              "React.PropsWithChildren<Props>"
+              "Props"
             ],
-            "path": "packages/core/rendering/core-rendering-server-internal/src/views/fonts.tsx",
+            "path": "src/core/packages/rendering/server-internal/src/views/fonts.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true

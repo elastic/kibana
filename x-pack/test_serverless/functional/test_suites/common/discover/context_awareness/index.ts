@@ -35,13 +35,14 @@ export default function ({ getService, getPageObjects, loadTestFile }: FtrProvid
       await PageObjects.timePicker.resetDefaultAbsoluteRangeViaUiSettings();
     });
 
-    loadTestFile(require.resolve('./_root_profile'));
-    loadTestFile(require.resolve('./_data_source_profile'));
+    loadTestFile(require.resolve('./_framework'));
     loadTestFile(require.resolve('./extensions/_get_row_indicator_provider'));
     loadTestFile(require.resolve('./extensions/_get_row_additional_leading_controls'));
     loadTestFile(require.resolve('./extensions/_get_doc_viewer'));
     loadTestFile(require.resolve('./extensions/_get_cell_renderers'));
     loadTestFile(require.resolve('./extensions/_get_default_app_state'));
     loadTestFile(require.resolve('./extensions/_get_additional_cell_actions'));
+    loadTestFile(require.resolve('./extensions/_get_app_menu'));
+    loadTestFile(require.resolve('./extensions/_get_render_app_wrapper'));
   });
 }

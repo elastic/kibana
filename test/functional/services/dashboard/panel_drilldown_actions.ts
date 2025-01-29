@@ -37,7 +37,7 @@ export function DashboardDrilldownPanelActionsProvider({
     async clickCreateDrilldown() {
       log.debug('clickCreateDrilldown');
       await this.expectExistsCreateDrilldownAction();
-      await dashboardPanelActions.clickContextMenuItem(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickPanelAction(CREATE_DRILLDOWN_DATA_TEST_SUBJ);
     }
 
     async expectExistsManageDrilldownsAction() {
@@ -52,7 +52,7 @@ export function DashboardDrilldownPanelActionsProvider({
 
     async clickManageDrilldowns() {
       log.debug('clickManageDrilldowns');
-      await dashboardPanelActions.clickContextMenuItem(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
+      await dashboardPanelActions.clickPanelAction(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ);
     }
 
     async expectMultipleActionsMenuOpened() {
@@ -93,14 +93,13 @@ export function DashboardDrilldownPanelActionsProvider({
     async getPanelDrilldownCount(panelIndex = 0): Promise<number> {
       log.debug('getPanelDrilldownCount');
       const panel = (await dashboard.getDashboardPanels())[panelIndex];
-      await dashboardPanelActions.openContextMenu(panel);
 
       try {
         const exists = await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ, {
           timeout: 500,
         });
         if (!exists) {
-          await dashboardPanelActions.clickContextMenuMoreItem();
+          await dashboardPanelActions.openContextMenu(panel);
           if (!(await testSubjects.exists(MANAGE_DRILLDOWNS_DATA_TEST_SUBJ, { timeout: 500 }))) {
             return 0;
           }

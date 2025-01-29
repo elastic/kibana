@@ -34,7 +34,7 @@
         "signature": [
           "\"Shared UX Storybook\""
         ],
-        "path": "packages/shared-ux/storybook/config/constants.ts",
+        "path": "src/platform/packages/private/shared-ux/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false
@@ -51,7 +51,7 @@
         "signature": [
           "\"https://github.com/elastic/kibana/tree/main/packages/shared_ux\""
         ],
-        "path": "packages/shared-ux/storybook/config/constants.ts",
+        "path": "src/platform/packages/private/shared-ux/storybook/config/constants.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

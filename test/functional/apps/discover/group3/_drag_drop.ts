@@ -51,7 +51,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedFieldList.getSidebarAriaDescription()).to.be(
           '48 available fields. 5 empty fields. 4 meta fields.'
         );
-        expect((await discover.getColumnHeaders()).join(', ')).to.be('@timestamp, Document');
+        expect((await discover.getColumnHeaders()).join(', ')).to.be('@timestamp, Summary');
 
         await discover.dragFieldToTable('extension');
 
@@ -71,7 +71,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(await unifiedFieldList.getSidebarAriaDescription()).to.be(
           '48 available fields. 5 empty fields. 4 meta fields.'
         );
-        expect((await discover.getColumnHeaders()).join(', ')).to.be('@timestamp, Document');
+        expect((await discover.getColumnHeaders()).join(', ')).to.be('@timestamp, Summary');
 
         await discover.dragFieldWithKeyboardToTable('@message');
 

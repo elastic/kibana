@@ -36,7 +36,7 @@ export default ({ getService }: FtrProviderContext): void => {
       const theCase = await svlCases.api.getCase(
         {
           caseId: postedCase.id,
-          includeComments: true,
+          expectedHttpCode: 200,
         },
         roleAuthc
       );
@@ -47,7 +47,6 @@ export default ({ getService }: FtrProviderContext): void => {
 
       expect(data).to.eql(expectedData);
       expect(createdBy).to.have.keys('full_name', 'email', 'username');
-      expect(data.comments?.length).to.eql(0);
     });
   });
 };

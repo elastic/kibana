@@ -18,8 +18,6 @@ export function AddCisIntegrationFormPageProvider({
   const PageObjects = getPageObjects(['common', 'header']);
   const browser = getService('browser');
 
-  const SETUP_TECHNOLOGY_SELECTOR = 'setup-technology-selector';
-  const SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ = 'setup-technology-selector-accordion';
   const AWS_CREDENTIAL_SELECTOR = 'aws-credentials-type-selector';
 
   const testSubjectIds = {
@@ -27,8 +25,8 @@ export function AddCisIntegrationFormPageProvider({
     CIS_AWS_OPTION_TEST_ID: 'cisAwsTestId',
     AWS_CREDENTIAL_SELECTOR: 'aws-credentials-type-selector',
     SETUP_TECHNOLOGY_SELECTOR: 'setup-technology-selector',
-    SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ: 'setup-technology-selector-accordion',
-    SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_OPTION: 'setup-technology-agentless-option',
+    SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO: 'setup-technology-agentless-radio',
+    SETUP_TECHNOLOGY_SELECTOR_AGENT_BASED_RADIO: 'setup-technology-agent-based-radio',
     DIRECT_ACCESS_KEYS: 'direct_access_keys',
     DIRECT_ACCESS_KEY_ID_TEST_ID: 'awsDirectAccessKeyId',
     DIRECT_ACCESS_SECRET_KEY_TEST_ID: 'passwordInput-secret-access-key',
@@ -154,6 +152,27 @@ export function AddCisIntegrationFormPageProvider({
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
+  const navigateToAddIntegrationWithVersionPage = async (
+    packageVersion: string,
+    space?: string
+  ) => {
+    const options = space
+      ? {
+          basePath: `/s/${space}`,
+          shouldUseHashForSubUrl: false,
+        }
+      : {
+          shouldUseHashForSubUrl: false,
+        };
+
+    await PageObjects.common.navigateToUrl(
+      'fleet',
+      `integrations/cloud_security_posture-${packageVersion}/add-integration`,
+      options
+    );
+    await PageObjects.header.waitUntilLoadingHasFinished();
+  };
+
   const navigateToAddIntegrationCspmWithVersionPage = async (
     packageVersion: string,
     space?: string
@@ -195,6 +214,10 @@ export function AddCisIntegrationFormPageProvider({
 
   const navigateToEditIntegrationPage = async () => {
     await testSubjects.click('integrationNameLink');
+  };
+
+  const navigateToEditAgentlessIntegrationPage = async () => {
+    await testSubjects.click('agentlessIntegrationNameLink');
   };
 
   const navigateToAddIntegrationKspmPage = async (space?: string) => {
@@ -275,16 +298,15 @@ export function AddCisIntegrationFormPageProvider({
   };
 
   const selectSetupTechnology = async (setupTechnology: 'agentless' | 'agent-based') => {
-    await clickAccordianButton(SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-    await clickOptionButton(SETUP_TECHNOLOGY_SELECTOR);
-
-    const agentOption = await testSubjects.find(
-      setupTechnology === 'agentless'
-        ? 'setup-technology-agentless-option'
-        : 'setup-technology-agent-based-option'
-    );
-    await agentOption.click();
+    const radioGroup = await testSubjects.find(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
+    const radio = await radioGroup.findByCssSelector(`input[value='${setupTechnology}']`);
+    await radio.click();
   };
+
+  const showSetupTechnologyComponent = async () => {
+    return await testSubjects.exists(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
+  };
+
   const selectAwsCredentials = async (credentialType: 'direct' | 'temporary') => {
     await clickOptionButton(AWS_CREDENTIAL_SELECTOR);
     await selectValue(
@@ -406,10 +428,8 @@ export function AddCisIntegrationFormPageProvider({
     const directAccessSecretKey = 'directAccessSecretKeyTest';
 
     await clickOptionButton(testSubjectIds.CIS_AWS_OPTION_TEST_ID);
-    await clickAccordianButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
 
-    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_OPTION);
+    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO);
     await selectValue(testSubjectIds.AWS_CREDENTIAL_SELECTOR, 'direct_access_keys');
     await fillInTextField(testSubjectIds.DIRECT_ACCESS_KEY_ID_TEST_ID, directAccessKeyId);
     await fillInTextField(testSubjectIds.DIRECT_ACCESS_SECRET_KEY_TEST_ID, directAccessSecretKey);
@@ -421,9 +441,7 @@ export function AddCisIntegrationFormPageProvider({
 
     await clickOptionButton(testSubjectIds.CIS_GCP_OPTION_TEST_ID);
     await clickOptionButton(testSubjectIds.GCP_SINGLE_ACCOUNT_TEST_ID);
-    await clickAccordianButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_ACCORDION_TEST_SUBJ);
-    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR);
-    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_OPTION);
+    await clickOptionButton(testSubjectIds.SETUP_TECHNOLOGY_SELECTOR_AGENTLESS_RADIO);
     await fillInTextField(testSubjectIds.PRJ_ID_TEST_ID, projectId);
     await fillInTextField(testSubjectIds.CREDENTIALS_JSON_TEST_ID, credentialJson);
   };
@@ -459,7 +477,7 @@ export function AddCisIntegrationFormPageProvider({
     await navigateToIntegrationCspList();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
-    await navigateToEditIntegrationPage();
+    await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
 
     // Fill out form to edit an agentless integration
@@ -472,7 +490,7 @@ export function AddCisIntegrationFormPageProvider({
     // Check if the Direct Access Key is updated package policy api with successful toast
     expect(await testSubjects.exists('policyUpdateSuccessToast')).to.be(true);
 
-    await navigateToEditIntegrationPage();
+    await navigateToEditAgentlessIntegrationPage();
     await PageObjects.header.waitUntilLoadingHasFinished();
   };
 
@@ -485,8 +503,19 @@ export function AddCisIntegrationFormPageProvider({
     return await integration.getVisibleText();
   };
 
+  const getFirstCspmIntegrationPageAgentlessIntegration = async () => {
+    const integration = await testSubjects.find('agentlessIntegrationNameLink');
+    return await integration.getVisibleText();
+  };
+
   const getFirstCspmIntegrationPageAgent = async () => {
     const agent = await testSubjects.find('agentPolicyNameLink');
+    // this is assuming that the agent was just created therefor should be the first element
+    return await agent.getVisibleText();
+  };
+
+  const getFirstCspmIntegrationPageAgentlessStatus = async () => {
+    const agent = await testSubjects.find('agentlessStatusBadge');
     // this is assuming that the agent was just created therefor should be the first element
     return await agent.getVisibleText();
   };
@@ -500,6 +529,7 @@ export function AddCisIntegrationFormPageProvider({
     cisAzure,
     cisAws,
     cisGcp,
+    navigateToAddIntegrationWithVersionPage,
     navigateToAddIntegrationCspmPage,
     navigateToAddIntegrationCspmWithVersionPage,
     navigateToAddIntegrationCnvmPage,
@@ -541,8 +571,13 @@ export function AddCisIntegrationFormPageProvider({
     testSubjectIds,
     inputIntegrationName,
     getFirstCspmIntegrationPageIntegration,
+    getFirstCspmIntegrationPageAgentlessIntegration,
     getFirstCspmIntegrationPageAgent,
+    getFirstCspmIntegrationPageAgentlessStatus,
     getAgentBasedPolicyValue,
     showSuccessfulToast,
+    showSetupTechnologyComponent,
+    navigateToEditIntegrationPage,
+    navigateToEditAgentlessIntegrationPage,
   };
 }

@@ -40,8 +40,15 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       });
     }
 
+    function expectBreakdown(breakdown: string) {
+      return retry.try(async () => {
+        const breakdownFieldValue = await discover.getBreakdownFieldValue();
+        expect(breakdownFieldValue).to.be(breakdown);
+      });
+    }
+
     describe('ES|QL mode', () => {
-      it('should render default columns and row height', async () => {
+      it('should render default state', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
           query: {
@@ -57,9 +64,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
-      it('should render default columns and row height when switching index patterns', async () => {
+      it('should render state when switching index patterns', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
           query: {
@@ -69,7 +77,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await common.navigateToActualUrl('discover', `?_a=${state}`, {
           ensureCurrentUrl: false,
         });
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -83,9 +91,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
-      it('should reset default columns and row height when clicking "New"', async () => {
+      it('should reset default state when clicking "New"', async () => {
         const state = kbnRison.encode({
           dataSource: { type: 'esql' },
           query: {
@@ -99,7 +108,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.clickFieldListItemRemove('log.level');
         await unifiedFieldList.clickFieldListItemRemove('message');
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
@@ -111,6 +120,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should merge and dedup configured default columns with default profile columns', async () => {
@@ -131,7 +141,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
     });
 
     describe('data view mode', () => {
-      it('should render default columns and row height', async () => {
+      it('should render default state', async () => {
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
@@ -144,16 +154,17 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
-      it('should render default columns and row height when switching data views', async () => {
+      it('should render default state when switching data views', async () => {
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
         await header.waitUntilLoadingHasFinished();
         await discover.waitUntilSearchingHasFinished();
         await dataViews.switchToAndValidate('my-example-*');
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
         expect(rowHeightValue).to.be('Custom');
@@ -166,9 +177,10 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
-      it('should reset default columns and row height when clicking "New"', async () => {
+      it('should reset default state when clicking "New"', async () => {
         await common.navigateToActualUrl('discover', undefined, {
           ensureCurrentUrl: false,
         });
@@ -178,7 +190,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         await discover.waitUntilSearchingHasFinished();
         await unifiedFieldList.clickFieldListItemRemove('log.level');
         await unifiedFieldList.clickFieldListItemRemove('message');
-        await expectColumns(['@timestamp', 'Document']);
+        await expectColumns(['@timestamp', 'Summary']);
         await dataGrid.clickGridSettings();
         await dataGrid.changeRowHeightValue('Single');
         let rowHeightValue = await dataGrid.getCurrentRowHeightValue();
@@ -190,6 +202,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
         expect(rowHeightValue).to.be('Custom');
         const rowHeightNumber = await dataGrid.getCustomRowHeightNumber();
         expect(rowHeightNumber).to.be(5);
+        await expectBreakdown('Breakdown by log.level');
       });
 
       it('should merge and dedup configured default columns with default profile columns', async () => {

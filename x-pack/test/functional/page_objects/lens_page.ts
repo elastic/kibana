@@ -34,6 +34,7 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
   const browser = getService('browser');
   const dashboardAddPanel = getService('dashboardAddPanel');
   const queryBar = getService('queryBar');
+  const dataViews = getService('dataViews');
 
   const { common, header, timePicker, dashboard, timeToVisualize, unifiedSearch, share } =
     getPageObjects([
@@ -915,6 +916,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
         }
       });
     },
+    async getChartTypeFromChartSwitcher() {
+      const chartSwitcher = await testSubjects.find('lnsChartSwitchPopover');
+      return await chartSwitcher.getVisibleText();
+    },
 
     async openChartSwitchPopover(layerIndex = 0) {
       if (await testSubjects.exists('lnsChartSwitchList', { timeout: 50 })) {
@@ -1255,21 +1260,14 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       );
     },
 
-    async changeTableSortingBy(colIndex = 0, direction: 'none' | 'ascending' | 'descending') {
+    async changeTableSortingBy(colIndex = 0, direction: 'ascending' | 'descending') {
       const el = await this.getDatatableHeader(colIndex);
       await el.moveMouseTo({ xOffset: 0, yOffset: -16 }); // Prevent the first data row's cell actions from overlapping/intercepting the header click
       const popoverToggle = await el.findByClassName('euiDataGridHeaderCell__button');
       await popoverToggle.click();
-      let buttonEl;
-      if (direction !== 'none') {
-        buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
-        );
-      } else {
-        buttonEl = await find.byCssSelector(
-          `[data-test-subj^="dataGridHeaderCellActionGroup"] li[class*="selected"] [title^="Sort"]`
-        );
-      }
+      const buttonEl = await find.byCssSelector(
+        `[data-test-subj^="dataGridHeaderCellActionGroup"] [title="Sort ${direction}"]`
+      );
       return buttonEl.click();
     },
 
@@ -1489,10 +1487,12 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       title,
       redirectToOrigin,
       ignoreTimeFilter,
+      useAdHocDataView,
     }: {
       title?: string;
       redirectToOrigin?: boolean;
       ignoreTimeFilter?: boolean;
+      useAdHocDataView?: boolean;
     }) {
       log.debug(`createAndAddLens${title}`);
       const inViewMode = await dashboard.getIsInViewMode();
@@ -1503,6 +1503,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
 
       if (!ignoreTimeFilter) {
         await this.goToTimeRange();
+      }
+
+      if (useAdHocDataView) {
+        await dataViews.createFromSearchBar({ name: '*stash*', adHoc: true });
       }
 
       await this.configureDimension({
@@ -2046,6 +2050,10 @@ export function LensPageProvider({ getService, getPageObjects }: FtrProviderCont
       ]);
 
       return { maxWidth, maxHeight, minWidth, minHeight, aspectRatio };
+    },
+
+    async toggleDebug(enable: boolean = true) {
+      await browser.execute(`window.ELASTIC_LENS_LOGGER = arguments[0];`, enable);
     },
   });
 }

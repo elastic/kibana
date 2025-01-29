@@ -51,13 +51,7 @@
             "description": [],
             "signature": [
               "() => jest.Mocked<",
-              {
-                "pluginId": "@kbn/core-logging-server",
-                "scope": "server",
-                "docId": "kibKbnCoreLoggingServerPluginApi",
-                "section": "def-server.LoggingServiceSetup",
-                "text": "LoggingServiceSetup"
-              },
+              "LoggingServiceSetup",
               ">"
             ],
             "path": "packages/core/logging/core-logging-server-mocks/src/logging_service.mock.ts",
@@ -306,7 +300,7 @@
                 "signature": [
                   "string[]"
                 ],
-                "path": "packages/kbn-logging-mocks/src/logger.mock.ts",
+                "path": "src/platform/packages/shared/kbn-logging-mocks/src/logger.mock.ts",
                 "deprecated": false,
                 "trackAdoption": false
               }

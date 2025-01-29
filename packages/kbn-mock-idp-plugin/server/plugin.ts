@@ -7,17 +7,18 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import type { PluginInitializer, Plugin } from '@kbn/core-plugins-server';
+import { resolve } from 'path';
+
+import type { CloudSetup } from '@kbn/cloud-plugin/server';
 import { schema } from '@kbn/config-schema';
 import type { TypeOf } from '@kbn/config-schema';
-import { MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH, createSAMLResponse } from '@kbn/mock-idp-utils';
+import type { Plugin, PluginInitializer } from '@kbn/core-plugins-server';
 import {
+  readRolesFromResource,
   SERVERLESS_ROLES_ROOT_PATH,
   STATEFUL_ROLES_ROOT_PATH,
-  readRolesFromResource,
 } from '@kbn/es';
-import { resolve } from 'path';
-import { CloudSetup } from '@kbn/cloud-plugin/server';
+import { createSAMLResponse, MOCK_IDP_LOGIN_PATH, MOCK_IDP_LOGOUT_PATH } from '@kbn/mock-idp-utils';
 
 export interface PluginSetupDependencies {
   cloud: CloudSetup;

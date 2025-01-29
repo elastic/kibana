@@ -26,7 +26,7 @@ import type {
 import { AuthStatus } from '@kbn/core-http-server';
 import { mockRouter, RouterMock } from '@kbn/core-http-router-server-mocks';
 
-import { CspConfig, ExternalUrlConfig } from '@kbn/core-http-server-internal';
+import { CspConfig, ExternalUrlConfig, config } from '@kbn/core-http-server-internal';
 import type {
   HttpService,
   InternalHttpServicePreboot,
@@ -127,6 +127,7 @@ const createInternalPrebootContractMock = (args: CreateMockArgs = {}) => {
     basePath,
     staticAssets: createInternalStaticAssetsMock(basePath, args.cdnUrl),
     csp: CspConfig.DEFAULT,
+    prototypeHardening: false,
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     getServerInfo: jest.fn(),
@@ -171,6 +172,9 @@ const createInternalSetupContractMock = () => {
     createCookieSessionStorageFactory: jest.fn(),
     registerOnPreRouting: jest.fn(),
     registerOnPreAuth: jest.fn(),
+    getDeprecatedRoutes: jest.fn(),
+    getRegisteredDeprecatedApis: jest.fn(),
+    registerOnPostValidation: jest.fn(),
     registerAuth: jest.fn(),
     registerOnPostAuth: jest.fn(),
     registerRouteHandlerContext: jest.fn(),
@@ -179,12 +183,14 @@ const createInternalSetupContractMock = () => {
     registerStaticDir: jest.fn(),
     basePath,
     csp: CspConfig.DEFAULT,
+    prototypeHardening: false,
     staticAssets: createInternalStaticAssetsMock(basePath),
     externalUrl: ExternalUrlConfig.DEFAULT,
     auth: createAuthMock(),
     authRequestHeaders: createAuthHeaderStorageMock(),
     getServerInfo: jest.fn(),
     registerRouterAfterListening: jest.fn(),
+    rateLimiter: config.schema.getSchema().extract('rateLimiter').validate({}).value,
   };
   mock.createCookieSessionStorageFactory.mockResolvedValue(sessionStorageMock.createFactory());
   mock.createRouter.mockImplementation(() => mockRouter.create());
@@ -207,6 +213,7 @@ const createSetupContractMock = <
     createCookieSessionStorageFactory: internalMock.createCookieSessionStorageFactory,
     registerOnPreRouting: internalMock.registerOnPreRouting,
     registerOnPreAuth: jest.fn(),
+    getDeprecatedRoutes: jest.fn(),
     registerAuth: internalMock.registerAuth,
     registerOnPostAuth: internalMock.registerOnPostAuth,
     registerOnPreResponse: internalMock.registerOnPreResponse,
@@ -276,6 +283,7 @@ const createOnPreAuthToolkitMock = (): jest.Mocked<OnPreAuthToolkit> => ({
 
 const createOnPostAuthToolkitMock = (): jest.Mocked<OnPostAuthToolkit> => ({
   next: jest.fn(),
+  authzResultNext: jest.fn(),
 });
 
 const createOnPreRoutingToolkitMock = (): jest.Mocked<OnPreRoutingToolkit> => ({

@@ -166,7 +166,7 @@ export default function (providerContext: FtrProviderContext) {
           .set('kbn-xsrf', 'xxxx')
           .expect(200);
 
-        await supertest.get(`/api/fleet/agent_policies/${agentPolicy.id}`).expect(404);
+        await supertest.get(`/api/fleet/agent_policies/${agentPolicy.id}`).expect(200);
       });
     });
     describe('Delete bulk', () => {

@@ -19,7 +19,7 @@
         "tags": [],
         "label": "DocLinksServiceSetup",
         "description": [],
-        "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+        "path": "src/core/packages/doc-links/server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -32,7 +32,7 @@
             "description": [
               "The branch/version the docLinks are pointing to"
             ],
-            "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+            "path": "src/core/packages/doc-links/server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -45,7 +45,7 @@
             "description": [
               "The base url for the elastic website"
             ],
-            "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+            "path": "src/core/packages/doc-links/server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           },
@@ -67,7 +67,7 @@
                 "text": "DocLinks"
               }
             ],
-            "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+            "path": "src/core/packages/doc-links/server/src/types.ts",
             "deprecated": false,
             "trackAdoption": false
           }
@@ -85,15 +85,9 @@
         "label": "DocLinksServiceStart",
         "description": [],
         "signature": [
-          {
-            "pluginId": "@kbn/core-doc-links-server",
-            "scope": "server",
-            "docId": "kibKbnCoreDocLinksServerPluginApi",
-            "section": "def-server.DocLinksServiceSetup",
-            "text": "DocLinksServiceSetup"
-          }
+          "DocLinksServiceSetup"
         ],
-        "path": "packages/core/doc-links/core-doc-links-server/src/types.ts",
+        "path": "src/core/packages/doc-links/server/src/types.ts",
         "deprecated": false,
         "trackAdoption": false,
         "initialIsOpen": false

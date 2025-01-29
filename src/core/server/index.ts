@@ -71,6 +71,11 @@ export type {
 
 export type { KibanaExecutionContext } from '@kbn/core-execution-context-common';
 export type { IExecutionContextContainer } from '@kbn/core-execution-context-server';
+export type {
+  EvaluationContext,
+  FeatureFlagsStart,
+  FeatureFlagsSetup,
+} from '@kbn/core-feature-flags-server';
 export type { Capabilities } from '@kbn/core-capabilities-common';
 export type {
   CapabilitiesProvider,
@@ -152,7 +157,7 @@ export type {
 } from '@kbn/core-user-profile-server';
 
 export { CspConfig } from '@kbn/core-http-server-internal';
-export { CoreKibanaRequest, kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
+export { kibanaResponseFactory } from '@kbn/core-http-router-server-internal';
 
 export type {
   AuthenticationHandler,
@@ -195,7 +200,6 @@ export type {
   KibanaRequestRoute,
   KibanaRequestRouteOptions,
   IKibanaResponse,
-  LifecycleResponseFactory,
   KnownHeaders,
   ErrorHttpResponseOptions,
   IKibanaSocket,
@@ -237,7 +241,11 @@ export type {
 } from '@kbn/core-http-server';
 export type { IExternalUrlPolicy } from '@kbn/core-http-common';
 
-export { validBodyOutput } from '@kbn/core-http-server';
+export {
+  validBodyOutput,
+  OnPostAuthResultType,
+  ReservedPrivilegesSet,
+} from '@kbn/core-http-server';
 
 export type {
   HttpResourcesRenderOptions,
@@ -262,7 +270,6 @@ export { PluginType } from '@kbn/core-base-common';
 export type {
   PrebootPlugin,
   Plugin,
-  AsyncPlugin,
   PluginConfigDescriptor,
   PluginConfigSchema,
   PluginInitializer,
@@ -600,3 +607,12 @@ export type {
 };
 
 export type { CustomBrandingSetup } from '@kbn/core-custom-branding-server';
+export type {
+  AuthzDisabled,
+  AuthzEnabled,
+  RouteAuthz,
+  RouteSecurity,
+  RouteSecurityGetter,
+  Privilege,
+  PrivilegeSet,
+} from '@kbn/core-http-server';

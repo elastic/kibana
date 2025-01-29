@@ -101,6 +101,10 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
       });
   };
 
+  const startSlm = () => {
+    return es.slm.start();
+  };
+
   return {
     createRepository,
     createPolicy,
@@ -110,5 +114,6 @@ export const registerEsHelpers = (getService: FtrProviderContext['getService']) 
     executePolicy,
     createSnapshot,
     deleteSnapshots,
+    startSlm,
   };
 };

@@ -9,7 +9,33 @@ import { FtrConfigProviderContext, GenericFtrProviderContext } from '@kbn/test';
 import { createLogger, LogLevel, LogsSynthtraceEsClient } from '@kbn/apm-synthtrace';
 import { FtrProviderContext } from '../../ftr_provider_context';
 
-export default async function createTestConfig({ readConfigFile }: FtrConfigProviderContext) {
+import { FtrProviderContext as InheritedFtrProviderContext } from '../../ftr_provider_context';
+
+export type InheritedServices = InheritedFtrProviderContext extends GenericFtrProviderContext<
+  infer TServices,
+  {}
+>
+  ? TServices
+  : {};
+
+export type InheritedPageObjects = InheritedFtrProviderContext extends GenericFtrProviderContext<
+  infer TServices,
+  infer TPageObjects
+>
+  ? TPageObjects
+  : {};
+
+interface DatasetQualityConfig {
+  services: InheritedServices & {
+    logSynthtraceEsClient: (
+      context: InheritedFtrProviderContext
+    ) => Promise<LogsSynthtraceEsClient>;
+  };
+}
+
+export default async function createTestConfig({
+  readConfigFile,
+}: FtrConfigProviderContext): Promise<DatasetQualityConfig> {
   const functionalConfig = await readConfigFile(require.resolve('../../config.base.js'));
   const services = functionalConfig.get('services');
   const pageObjects = functionalConfig.get('pageObjects');
@@ -34,7 +60,7 @@ export default async function createTestConfig({ readConfigFile }: FtrConfigProv
 export type CreateTestConfig = Awaited<ReturnType<typeof createTestConfig>>;
 
 export type DatasetQualityServices = CreateTestConfig['services'];
-export type DatasetQualityPageObject = CreateTestConfig['pageObjects'];
+export type DatasetQualityPageObject = InheritedPageObjects;
 
 export type DatasetQualityFtrProviderContext = GenericFtrProviderContext<
   DatasetQualityServices,

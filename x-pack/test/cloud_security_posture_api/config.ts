@@ -5,24 +5,30 @@
  * 2.0.
  */
 import { resolve } from 'path';
-import type { FtrConfigProviderContext } from '@kbn/test';
+import { getKibanaCliLoggers, type FtrConfigProviderContext } from '@kbn/test';
 import { CLOUD_SECURITY_PLUGIN_VERSION } from '@kbn/cloud-security-posture-plugin/common/constants';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {
-  const xpackFunctionalConfig = await readConfigFile(
-    require.resolve('../functional/config.base.js')
-  );
+  const xPackAPITestsConfig = await readConfigFile(require.resolve('../api_integration/config.ts'));
 
   return {
-    ...xpackFunctionalConfig.getAll(),
-    testFiles: [resolve(__dirname, './routes')],
+    ...xPackAPITestsConfig.getAll(),
+    testFiles: [resolve(__dirname, './routes'), resolve(__dirname, './telemetry')],
     junit: {
       reportName: 'X-Pack Cloud Security Posture API Tests',
     },
     kbnTestServer: {
-      ...xpackFunctionalConfig.get('kbnTestServer'),
+      ...xPackAPITestsConfig.get('kbnTestServer'),
       serverArgs: [
-        ...xpackFunctionalConfig.get('kbnTestServer.serverArgs'),
+        ...xPackAPITestsConfig.get('kbnTestServer.serverArgs'),
+        `--logging.loggers=${JSON.stringify([
+          ...getKibanaCliLoggers(xPackAPITestsConfig.get('kbnTestServer.serverArgs')),
+          {
+            name: 'plugins.cloudSecurityPosture',
+            level: 'all',
+            appenders: ['default'],
+          },
+        ])}`,
         /**
          * Package version is fixed (not latest) so FTR won't suddenly break when package is changed.
          *

@@ -71,7 +71,8 @@ import {
   RULES_CREATION_FORM,
 } from '../../../../screens/create_new_rule';
 
-describe('EQL rules', { tags: ['@ess', '@serverless'] }, () => {
+// Skip in MKI due to flake
+describe('EQL rules', { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] }, () => {
   beforeEach(() => {
     login();
     deleteAlertsAndRules();

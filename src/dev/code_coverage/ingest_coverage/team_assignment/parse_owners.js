@@ -13,8 +13,9 @@ import { pipe } from '../utils';
 
 const allLines$ = (lineReader) =>
   fromEvent(lineReader, 'line').pipe(
-    filter(function dropEmptiesAndDropComments(x) {
-      return x !== '' && !/^#\s{1,3}/.test(x);
+    filter(function dropEmptiesAndDropCommentsAndDropKibanamachine(x) {
+      // kibanamachine is an assignment override on backport branches to avoid review requests
+      return x !== '' && !/^#\s{1,3}/.test(x) && !x.includes('@kibanamachine');
     }),
     map(pipe(dropCCDelim, pathAndTeams)),
     takeUntil(fromEvent(lineReader, 'close'))

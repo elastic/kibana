@@ -45,9 +45,9 @@ export const getAllFtrConfigsAndManifests = () => {
   const allFtrConfigs: string[] = [];
 
   for (const manifestRelPath of manifestPaths.all) {
-    const manifest: FtrConfigsManifest = JsYaml.safeLoad(
+    const manifest = JsYaml.load(
       Fs.readFileSync(Path.resolve(REPO_ROOT, manifestRelPath), 'utf8')
-    );
+    ) as FtrConfigsManifest;
 
     const ftrConfigsInManifest = [
       Object.values(manifest.enabled ?? []),

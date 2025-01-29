@@ -5,8 +5,8 @@
  * 2.0.
  */
 
-import { FtrConfigProviderContext } from '@kbn/test';
 import { CA_CERT_PATH } from '@kbn/dev-utils';
+import type { FtrConfigProviderContext } from '@kbn/test';
 import { configureHTTP2 } from '@kbn/test-suites-src/common/configure_http2';
 
 export default async function ({ readConfigFile }: FtrConfigProviderContext) {

@@ -2,6 +2,8 @@
   "type": "plugin",
   "id": "@kbn/exploratory-view-example-plugin",
   "owner": "@elastic/obs-ux-infra_services-team",
+  "group": "observability",
+  "visibility": "private",
   "plugin": {
     "id": "exploratoryViewExample",
     "server": false,

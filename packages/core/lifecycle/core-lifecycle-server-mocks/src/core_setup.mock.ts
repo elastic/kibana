@@ -30,6 +30,7 @@ import { userSettingsServiceMock } from '@kbn/core-user-settings-server-mocks';
 import { securityServiceMock } from '@kbn/core-security-server-mocks';
 import { userProfileServiceMock } from '@kbn/core-user-profile-server-mocks';
 import { createCoreStartMock } from './core_start.mock';
+import { coreFeatureFlagsMock } from '@kbn/core-feature-flags-server-mocks';
 
 type CoreSetupMockType = MockedKeys<CoreSetup> & {
   elasticsearch: ReturnType<typeof elasticsearchServiceMock.createSetup>;
@@ -61,6 +62,7 @@ export function createCoreSetupMock({
     userSettings: userSettingsServiceMock.createSetupContract(),
     docLinks: docLinksServiceMock.createSetupContract(),
     elasticsearch: elasticsearchServiceMock.createSetup(),
+    featureFlags: coreFeatureFlagsMock.createSetup(),
     http: httpMock,
     i18n: i18nServiceMock.createSetupContract(),
     savedObjects: savedObjectsServiceMock.createInternalSetupContract(),
@@ -74,6 +76,8 @@ export function createCoreSetupMock({
     userProfile: userProfileServiceMock.createSetup(),
     coreUsageData: {
       registerUsageCounter: coreUsageDataServiceMock.createSetupContract().registerUsageCounter,
+      registerDeprecatedUsageFetch:
+        coreUsageDataServiceMock.createSetupContract().registerDeprecatedUsageFetch,
     },
     plugins: {
       onSetup: jest.fn(),

@@ -11,7 +11,7 @@ import moment from 'moment';
 import { FtrProviderContext } from '../../../ftr_provider_context';
 
 const CF_COMMAND_REGEXP =
-  /aws cloudformation create-stack --stack-name (\S+) --template-url \S+ --parameters ParameterKey=FirehoseStreamNameForLogs,ParameterValue=(\S+) .+? --capabilities CAPABILITY_IAM/;
+  /aws cloudformation create-stack --stack-name (\S+) --template-url \S+ --parameters ParameterKey=FirehoseStreamName,ParameterValue=(\S+) .+? --capabilities CAPABILITY_IAM/;
 
 export default function ({ getPageObjects, getService }: FtrProviderContext) {
   const PageObjects = getPageObjects(['common', 'svlCommonPage']);
@@ -38,6 +38,7 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     });
 
     beforeEach(async () => {
+      await (await testSubjects.find('createCloudFormationOptionAWSCLI', 20000)).click();
       await testSubjects.existOrFail('observabilityOnboardingFirehoseCreateStackCommand');
     });
 
@@ -51,17 +52,17 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
     it('starts to monitor for incoming data after user leaves the page', async () => {
       await browser.execute(`window.dispatchEvent(new Event("blur"))`);
 
-      await testSubjects.isDisplayed('observabilityOnboardingAWSServiceList');
+      await testSubjects.isDisplayed('observabilityOnboardingFirehoseProgressCallout');
     });
 
-    it('highlights an AWS service when data is detected', async () => {
+    it('shows an AWS service when data is detected', async () => {
       const DATASET = 'aws.vpcflow';
       const AWS_SERVICE_ID = 'vpc-flow';
       await testSubjects.clickWhenNotDisabled('observabilityOnboardingCopyToClipboardButton');
       const copiedCommand = await browser.getClipboardValue();
-      const [, _stackName, logsStreamName] = copiedCommand.match(CF_COMMAND_REGEXP) ?? [];
+      const [, _stackName, streamName] = copiedCommand.match(CF_COMMAND_REGEXP) ?? [];
 
-      expect(logsStreamName).toBeDefined();
+      expect(streamName).toBeDefined();
 
       await browser.execute(`window.dispatchEvent(new Event("blur"))`);
 
@@ -74,16 +75,47 @@ export default function ({ getPageObjects, getService }: FtrProviderContext) {
           .rate(1)
           .generator((timestamp) => {
             return log.create().dataset(DATASET).timestamp(timestamp).defaults({
-              'aws.kinesis.name': logsStreamName,
+              'aws.kinesis.name': streamName,
             });
           })
       );
 
-      // Checking that an AWS service item is enabled after data is detected
-      await testSubjects
-        .find(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`)
-        .then((el) => el.findByTagName('button'))
-        .then((el) => el.isEnabled());
+      // Checking that an AWS service item is visible after data is detected
+      await testSubjects.isDisplayed(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`);
+    });
+
+    it('shows the existing data callout and detected AWS services when data was ingested previously', async () => {
+      const DATASET = 'aws.vpcflow';
+      const AWS_SERVICE_ID = 'vpc-flow';
+      await testSubjects.clickWhenNotDisabled('observabilityOnboardingCopyToClipboardButton');
+      const copiedCommand = await browser.getClipboardValue();
+      const [, _stackName, streamName] = copiedCommand.match(CF_COMMAND_REGEXP) ?? [];
+
+      await testSubjects.missingOrFail('observabilityOnboardingFirehosePanelExistingDataCallout');
+
+      expect(streamName).toBeDefined();
+
+      // Simulate Firehose stream ingesting log files
+      const to = new Date().toISOString();
+      const count = 1;
+      await synthtrace.index(
+        timerange(moment(to).subtract(count, 'minute'), moment(to))
+          .interval('1m')
+          .rate(1)
+          .generator((timestamp) => {
+            return log.create().dataset(DATASET).timestamp(timestamp).defaults({
+              'aws.kinesis.name': streamName,
+            });
+          })
+      );
+
+      await browser.refresh();
+
+      // Checking that the existing data callout is visible after data is detected
+      await testSubjects.isDisplayed('observabilityOnboardingFirehosePanelExistingDataCallout');
+
+      // Checking that an AWS service item is visible after data is detected
+      await testSubjects.isDisplayed(`observabilityOnboardingAWSService-${AWS_SERVICE_ID}`);
     });
   });
 }

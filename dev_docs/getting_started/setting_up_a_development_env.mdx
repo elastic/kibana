@@ -109,6 +109,7 @@ Kibana also supports using a [dev container](https://containers.dev/) which can 
 1. You should see the Kibana repo and your terminal will be inside the container. You can develop as normal now, including running `yarn es` from inside the container.
 
 ### Customizing the Dev Container
+
 Installing any extra extensions or making adjustments to the OS environment inside the container will not have an effect on your local OS or VS Code installation. Editing the `devcontainer.json` or `.devcontainer/Dockerfile` should be reserved for changes to all dev environments.
 
 ### FIPS Mode
@@ -116,4 +117,9 @@ Installing any extra extensions or making adjustments to the OS environment insi
 The dev container is pre-configured to run Kibana in FIPS mode if needed. Simply change the `.env` file to `FIPS=1` and reopen your terminal. There should be a log message in your terminal which indicates `FIPS mode enabled`.
 
 ### Troubleshooting
+
 - Sometimes when rebuilding the container, there will be an error message that it failed. Usually hitting retry will fix this, and is only related to VS Code trying to reconnect to the container too quickly.
+
+### Limitations
+
+- Git worktrees are not supported when using the repo from the Local Filesystem. [VSCode issue](https://github.com/microsoft/vscode/issues/68038) for tracking, and a possible workaround though it is untested.

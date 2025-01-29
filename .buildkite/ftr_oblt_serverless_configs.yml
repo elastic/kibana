@@ -12,6 +12,7 @@ enabled:
   - x-pack/test_serverless/api_integration/test_suites/observability/config.feature_flags.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/common_configs/config.group1.ts
   - x-pack/test_serverless/api_integration/test_suites/observability/fleet/config.ts
+  - x-pack/test_serverless/api_integration/test_suites/observability/ai_assistant/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.examples.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts
@@ -23,6 +24,10 @@ enabled:
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group4.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group5.ts
   - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group6.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group7.ts
+  - x-pack/test_serverless/functional/test_suites/observability/common_configs/config.group8.ts
   - x-pack/test_serverless/functional/test_suites/observability/config.screenshots.ts
+  - x-pack/test_serverless/functional/test_suites/observability/config.telemetry.ts
   # serverless config files that run deployment-agnostic tests
   - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.serverless.config.ts
+  - x-pack/test/api_integration/deployment_agnostic/configs/serverless/oblt.apm.serverless.config.ts

@@ -16,11 +16,40 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
     ...functionalConfig.getAll(),
     kbnTestServer: {
       ...functionalConfig.get('kbnTestServer'),
-      serverArgs: [...functionalConfig.get('kbnTestServer.serverArgs')],
+      serverArgs: [
+        ...functionalConfig
+          .get('kbnTestServer.serverArgs')
+          // ssl: false as ML vocab API is broken with SSL enabled
+          .filter(
+            (a: string) =>
+              !(
+                a.startsWith('--elasticsearch.hosts=') ||
+                a.startsWith('--elasticsearch.ssl.certificateAuthorities=')
+              )
+          ),
+        '--elasticsearch.hosts=http://localhost:9220',
+      ],
     },
     testFiles: [require.resolve('..')],
     junit: {
       reportName: 'GenAI - Knowledge Base Entries Tests - ESS Env - Trial License',
+    },
+    // ssl: false as ML vocab API is broken with SSL enabled
+    servers: {
+      ...functionalConfig.get('servers'),
+      elasticsearch: {
+        ...functionalConfig.get('servers.elasticsearch'),
+        protocol: 'http',
+      },
+    },
+    esTestCluster: {
+      ...functionalConfig.get('esTestCluster'),
+      ssl: false,
+      esJavaOpts: '-Xms4g -Xmx4g',
+    },
+    mochaOpts: {
+      ...functionalConfig.get('mochaOpts'),
+      timeout: 360000 * 2,
     },
   };
 }

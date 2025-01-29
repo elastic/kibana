@@ -1,6 +1,12 @@
 [[osquery-manager-api]]
 == Osquery manager API
 
+.New API Reference
+[sidebar]
+--
+For the most up-to-date API details, refer to {api-kibana}/group/endpoint-security-osquery-api[Osquery APIs].
+--
+
 experimental[] Run live queries, manage packs and saved queries
 
 Use the osquery manager APIs for managing packs and saved queries.

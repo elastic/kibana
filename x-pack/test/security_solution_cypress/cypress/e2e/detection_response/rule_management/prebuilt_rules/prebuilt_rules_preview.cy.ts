@@ -77,7 +77,7 @@ const PREVIEW_TABS = {
 
 describe(
   'Detection rules, Prebuilt Rules Installation and Update workflow',
-  { tags: ['@ess', '@serverless'] },
+  { tags: ['@ess', '@serverless', '@skipInServerlessMKI'] },
   () => {
     const commonProperties: Partial<PrebuiltRuleAsset> = {
       author: ['Elastic', 'Another author'],
@@ -544,7 +544,7 @@ describe(
           const { threshold } = THRESHOLD_RULE_INDEX_PATTERN['security-rule'] as {
             threshold: Threshold;
           };
-          assertThresholdPropertyShown(threshold.value);
+          assertThresholdPropertyShown(threshold);
 
           const { index } = THRESHOLD_RULE_INDEX_PATTERN['security-rule'] as { index: string[] };
           assertIndexPropertyShown(index);
@@ -952,7 +952,7 @@ describe(
           const { threshold } = UPDATED_THRESHOLD_RULE_INDEX_PATTERN['security-rule'] as {
             threshold: Threshold;
           };
-          assertThresholdPropertyShown(threshold.value);
+          assertThresholdPropertyShown(threshold);
 
           const { index } = UPDATED_THRESHOLD_RULE_INDEX_PATTERN['security-rule'] as {
             index: string[];

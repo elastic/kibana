@@ -1,0 +1,52 @@
+extends:
+  - recommended
+rules:
+# Built-in rules
+ # Descriptions
+  parameter-description: warn
+  tag-description: warn
+  operation-description: off
+ # Document info
+  info-contact: warn
+  info-license: warn
+ # Examples
+  no-invalid-media-type-examples:
+    severity: warn
+    allowAdditionalProperties: false
+  no-invalid-schema-examples:
+    severity: warn
+    allowAdditionalProperties: false
+ # Operations
+  operation-operationId: error
+  operation-operationId-unique: error
+  operation-operationId-url-safe: warn
+  operation-summary: warn
+ # Parameters
+  path-parameters-defined: warn
+ # Paths
+  no-ambiguous-paths: warn
+  no-identical-paths: error
+  path-excludes-patterns:
+    severity: error
+    patterns:
+      - ^\/internal
+ # Responses
+  operation-4xx-response: off
+  operation-2xx-response: off
+ # Schema
+  spec: off
+  spec-strict-refs: off
+ # Tags
+  operation-tag-defined: off
+  tags-alphabetical: off
+  operation-singular-tag: off
+# Custom rules
+  rule/operation-summary-length:
+    subject:
+      type: Operation
+      property: summary
+    message: Operation summary must have a minimum of 5 and maximum of 45 characters
+    severity: warn
+    assertions:
+      maxLength: 45
+      minLength: 5

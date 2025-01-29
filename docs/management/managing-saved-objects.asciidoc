@@ -4,7 +4,8 @@
 Edit, import, export, and copy your saved objects. These objects include
 dashboards, visualizations, maps, {data-sources}, *Canvas* workpads, and other saved objects.
 
-To get started, open the main menu, and then click *Stack Management > Saved Objects*.
+You can find the *Saved Objects* page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 [role="screenshot"]
 image::images/management-saved-objects.png[Saved Objects]
@@ -14,7 +15,8 @@ image::images/management-saved-objects.png[Saved Objects]
 
 To access *Saved Objects*, you must have the required `Saved Objects Management` {kib} privilege.
 
-To add the privilege, open the main menu, and then click *Stack Management > Roles*.
+To add the privilege, go to the *Roles* management page using the navigation menu or the 
+<<kibana-navigation-search,global search field>>.
 
 NOTE: Granting access to `Saved Objects Management` authorizes users to
 manage all saved objects in {kib}, including objects that are managed by
@@ -100,7 +102,6 @@ into an older version of {kib}. For example:
 
 
 [float]
-[role="xpack"]
 [[managing-saved-objects-copy-to-space]]
 === Copy to other {kib} spaces
 
@@ -117,7 +118,6 @@ the saved object. If you don't want this behavior, use
 the <<spaces-api-copy-saved-objects, copy saved objects to space API>> instead.
 
 [float]
-[role="xpack"]
 [[managing-saved-objects-share-to-space]]
 === Share to other {kib} spaces
 
@@ -135,4 +135,79 @@ those space icons to open the Share UI.
 +
 The share operation automatically includes child objects that are related to the saved objects.
 
-include::saved-objects/saved-object-ids.asciidoc[]
+[[spaces-api-update-objects-spaces-example-1]]
+To share a saved object to a space programmatically with the {api-kibana}/group/endpoint-spaces[spaces APIs], follow these steps:
+
+1. Collect reference graph and spaces context for each saved object that you want to share using get shareable references API:
++
+[source,sh]
+----
+$ curl -X POST /api/spaces/_get_shareable_references
+{
+  "objects": [
+    {
+      "type": "index-pattern",
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247"
+    }
+  ]
+}
+----
++
+The API returns the following:
++
+[source,json]
+----
+{
+  "objects": [
+    {
+      "type": "index-pattern",
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "spaces": ["default"],
+      "inboundReferences": [],
+      "spacesWithMatchingOrigins": ["default"]
+    }
+  ]
+}
+----
+
+2. Check each saved object for `spacesWithMatchingOrigins` conflicts.
++
+Objects should not be shared to spaces with matching origins or you will create URL conflicts (causing the same URL to point to different saved objects).
+
+3. Check each saved object for `spacesWithMatchingAliases` conflicts.
++
+If these match the spaces that these saved objects will be shared to you should disable legacy URL aliases for them using the disable legacy URL aliases API.
++
+When sharing to all spaces (`*`) all entries in `spacesWithMatchingAliases` should be checked.
+
+4. Update spaces of each saved object and all its references:
++
+[source,sh]
+----
+$ curl -X POST /api/spaces/_update_objects_spaces
+{
+  "objects": [
+    {
+      "type": "index-pattern",
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247"
+    }
+  ],
+  "spacesToAdd": ["test"],
+  "spacesToRemove": []
+}
+----
++
+The API returns the following:
++
+[source,json]
+----
+{
+  "objects": [
+    {
+      "type": "index-pattern",
+      "id": "90943e30-9a47-11e8-b64d-95841ca0b247",
+      "spaces": ["default", "test"]
+    }
+  ]
+}
+----

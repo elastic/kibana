@@ -45,6 +45,8 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types/d3security'));
     loadTestFile(require.resolve('./connector_types/thehive'));
     loadTestFile(require.resolve('./connector_types/bedrock'));
+    loadTestFile(require.resolve('./connector_types/gemini'));
+    loadTestFile(require.resolve('./connector_types/microsoft_defender_endpoint'));
     loadTestFile(require.resolve('./create'));
     loadTestFile(require.resolve('./delete'));
     loadTestFile(require.resolve('./execute'));
@@ -55,6 +57,7 @@ export default function connectorsTests({ loadTestFile, getService }: FtrProvide
     loadTestFile(require.resolve('./connector_types_system'));
     loadTestFile(require.resolve('./update'));
     loadTestFile(require.resolve('./bulk_enqueue'));
+    loadTestFile(require.resolve('./sub_feature_descriptions'));
 
     /**
      * Sub action framework

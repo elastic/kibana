@@ -6,9 +6,11 @@
  */
 
 import { resolve } from 'path';
-import { FtrConfigProviderContext } from '@kbn/test';
-import { services } from '../functional/services';
+
+import type { FtrConfigProviderContext } from '@kbn/test';
+
 import { pageObjects } from '../functional/page_objects';
+import { services } from '../functional/services';
 
 // the default export of config files must be a config provider
 // that returns an object with the projects config values
@@ -64,6 +66,7 @@ export default async function ({ readConfigFile }: FtrConfigProviderContext) {
         '--xpack.security.authc.providers.saml.saml1.order=0',
         '--xpack.security.authc.providers.saml.saml1.realm=saml1',
         '--xpack.security.authc.providers.basic.basic1.order=1',
+        '--server.restrictInternalApis=false',
       ],
     },
     uiSettings: {

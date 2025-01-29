@@ -1,5 +1,0 @@
-{
-  "type": "shared-browser",
-  "id": "@kbn/avc-banner",
-  "owner": "@elastic/security-defend-workflows"
-}

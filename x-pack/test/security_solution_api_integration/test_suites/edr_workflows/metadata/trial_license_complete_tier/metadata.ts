@@ -13,12 +13,12 @@ import {
   ENDPOINT_DEFAULT_SORT_FIELD,
   HOST_METADATA_LIST_ROUTE,
   METADATA_DATASTREAM,
-  METADATA_TRANSFORMS_STATUS_ROUTE,
   METADATA_UNITED_INDEX,
   METADATA_UNITED_TRANSFORM,
   METADATA_UNITED_TRANSFORM_V2,
   metadataTransformPrefix,
   METADATA_CURRENT_TRANSFORM_V2,
+  METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE,
 } from '@kbn/security-solution-plugin/common/endpoint/constants';
 import { AGENTS_INDEX } from '@kbn/fleet-plugin/common';
 import { indexFleetEndpointPolicy } from '@kbn/security-solution-plugin/common/endpoint/data_loaders/index_fleet_endpoint_policy';
@@ -426,9 +426,9 @@ export default function ({ getService }: FtrProviderContext) {
         const ca = config.get('servers.kibana').certificateAuthorities;
 
         await t1AnalystSupertest
-          .get(METADATA_TRANSFORMS_STATUS_ROUTE)
+          .get(METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE)
           .set('kbn-xsrf', 'xxx')
-          .set('Elastic-Api-Version', '2023-10-31')
+          .set('Elastic-Api-Version', '1')
           .ca(ca)
           .expect(401);
       });
@@ -438,9 +438,9 @@ export default function ({ getService }: FtrProviderContext) {
         await endpointDataStreamHelpers.stopTransform(getService, `${unitedTransformName}*`);
 
         const { body } = await adminSupertest
-          .get(METADATA_TRANSFORMS_STATUS_ROUTE)
+          .get(METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE)
           .set('kbn-xsrf', 'xxx')
-          .set('Elastic-Api-Version', '2023-10-31')
+          .set('Elastic-Api-Version', '1')
           .expect(200);
 
         const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(
@@ -466,9 +466,9 @@ export default function ({ getService }: FtrProviderContext) {
 
       it('correctly returns started transform stats', async () => {
         const { body } = await adminSupertest
-          .get(METADATA_TRANSFORMS_STATUS_ROUTE)
+          .get(METADATA_TRANSFORMS_STATUS_INTERNAL_ROUTE)
           .set('kbn-xsrf', 'xxx')
-          .set('Elastic-Api-Version', '2023-10-31')
+          .set('Elastic-Api-Version', '1')
           .expect(200);
 
         const transforms = (body.transforms as TransformGetTransformStatsTransformStats[]).filter(

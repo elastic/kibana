@@ -13,10 +13,12 @@ import {
   MOCK_IDP_ATTRIBUTE_NAME,
 } from '@kbn/mock-idp-utils';
 import {
+  fleetPackageRegistryDockerImage,
   esTestConfig,
   kbnTestConfig,
   systemIndicesSuperuser,
   FtrConfigProviderContext,
+  defineDockerServersConfig,
 } from '@kbn/test';
 import path from 'path';
 import { REPO_ROOT } from '@kbn/repo-info';
@@ -46,6 +48,17 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
     // if config is executed on CI or locally
     const isRunOnCI = process.env.CI;
 
+    const packageRegistryConfig = path.join(__dirname, './fixtures/package_registry_config.yml');
+    const dockerArgs: string[] = ['-v', `${packageRegistryConfig}:/package-registry/config.yml`];
+
+    /**
+     * This is used by CI to set the docker registry port
+     * you can also define this environment variable locally when running tests which
+     * will spin up a local docker package registry locally for you
+     * if this is defined it takes precedence over the `packageRegistryOverride` variable
+     */
+    const dockerRegistryPort: string | undefined = process.env.FLEET_PACKAGE_REGISTRY_PORT;
+
     const xPackAPITestsConfig = await readConfigFile(require.resolve('../../config.ts'));
 
     // TODO: move to kbn-es because currently metadata file has hardcoded entityID and Location
@@ -72,12 +85,26 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
 
     return {
       servers,
+      dockerServers: defineDockerServersConfig({
+        registry: {
+          enabled: !!dockerRegistryPort,
+          image: fleetPackageRegistryDockerImage,
+          portInContainer: 8080,
+          port: dockerRegistryPort,
+          args: dockerArgs,
+          waitForLogLine: 'package manifests loaded',
+          waitForLogLineTimeoutMs: 60 * 2 * 1000, // 2 minutes
+        },
+      }),
       testFiles: options.testFiles,
       security: { disableTestUser: true },
       // services can be customized, but must extend DeploymentAgnosticCommonServices
       services: options.services || services,
       junit: options.junit,
-      suiteTags: options.suiteTags,
+      suiteTags: {
+        include: options.suiteTags?.include,
+        exclude: [...(options.suiteTags?.exclude || []), 'skipStateful'],
+      },
 
       esTestCluster: {
         ...xPackAPITestsConfig.get('esTestCluster'),
@@ -100,7 +127,6 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
           path.resolve(REPO_ROOT, STATEFUL_ROLES_ROOT_PATH, 'roles.yml'),
         ],
       },
-
       kbnTestServer: {
         ...xPackAPITestsConfig.get('kbnTestServer'),
         serverArgs: [
@@ -122,6 +148,10 @@ export function createStatefulTestConfig<T extends DeploymentAgnosticCommonServi
             basic: { 'cloud-basic': { order: 1 } },
           })}`,
           `--server.publicBaseUrl=${servers.kibana.protocol}://${servers.kibana.hostname}:${servers.kibana.port}`,
+          '--xpack.uptime.service.password=test',
+          '--xpack.uptime.service.username=localKibanaIntegrationTestsUser',
+          '--xpack.uptime.service.devUrl=mockDevUrl',
+          '--xpack.uptime.service.manifestUrl=mockDevUrl',
         ],
       },
     };

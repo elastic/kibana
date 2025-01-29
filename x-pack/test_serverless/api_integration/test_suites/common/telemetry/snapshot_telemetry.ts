@@ -11,8 +11,14 @@ import ossRootTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_root.json';
 import xpackRootTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_root.json';
 import ossPluginsTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_plugins.json';
 import ossPackagesTelemetrySchema from '@kbn/telemetry-plugin/schema/kbn_packages.json';
+import ossPlatformTelemetrySchema from '@kbn/telemetry-plugin/schema/oss_platform.json';
 import xpackPluginsTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_plugins.json';
+import xpackPlatformTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_platform.json';
+import xpackObservabilityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_observability.json';
+import xpackSearchTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_search.json';
+import xpackSecurityTelemetrySchema from '@kbn/telemetry-collection-xpack-plugin/schema/xpack_security.json';
 import { assertTelemetryPayload } from '@kbn/telemetry-tools';
+import type { TelemetrySchemaObject } from '@kbn/telemetry-tools/src/schema_ftr_validations/schema_to_config_schema';
 import type { UsageStatsPayloadTestFriendly } from '@kbn/test-suites-xpack/api_integration/services/usage_api';
 import type { RoleCredentials } from '../../../../shared/services';
 import { FtrProviderContext } from '../../../ftr_provider_context';
@@ -42,10 +48,18 @@ export default function ({ getService }: FtrProviderContext) {
 
     it('should pass the schema validation (ensures BWC with Classic offering)', () => {
       const root = deepmerge(ossRootTelemetrySchema, xpackRootTelemetrySchema);
-      const plugins = deepmerge(
-        deepmerge(ossPluginsTelemetrySchema, ossPackagesTelemetrySchema),
-        xpackPluginsTelemetrySchema
-      );
+      const schemas = [
+        ossPluginsTelemetrySchema,
+        ossPackagesTelemetrySchema,
+        ossPlatformTelemetrySchema,
+        xpackPluginsTelemetrySchema,
+        xpackPlatformTelemetrySchema,
+        xpackObservabilityTelemetrySchema,
+        xpackSearchTelemetrySchema,
+        xpackSecurityTelemetrySchema,
+      ] as TelemetrySchemaObject[];
+
+      const plugins = schemas.reduce((acc, schema) => deepmerge(acc, schema));
 
       try {
         assertTelemetryPayload({ root, plugins }, stats);

@@ -30,7 +30,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await esArchiver.loadIfNeeded('test/functional/fixtures/es_archiver/logstash_functional');
       await kibanaServer.uiSettings.replace({
         defaultIndex: 'logstash-*',
-        'discover:searchFieldsFromSource': false,
       });
 
       log.debug('management');
@@ -46,7 +45,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await discover.waitUntilSearchingHasFinished();
 
       await retry.try(async function () {
-        expect(await discover.getDocHeader()).to.have.string('Document');
+        expect(await discover.getDocHeader()).to.have.string('Summary');
       });
     });
 

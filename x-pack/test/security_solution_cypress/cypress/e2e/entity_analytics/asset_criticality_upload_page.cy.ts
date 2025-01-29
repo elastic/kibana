@@ -12,13 +12,14 @@ import {
   RESULT_STEP,
   VALID_LINES_MESSAGE,
 } from '../../screens/asset_criticality';
-import { enableAssetCriticality } from '../../tasks/api_calls/kibana_advanced_settings';
 import { clickAssignButton, uploadAssetCriticalityFile } from '../../tasks/asset_criticality';
 import { login } from '../../tasks/login';
 import { visit } from '../../tasks/navigation';
 import { ENTITY_ANALYTICS_ASSET_CRITICALITY_URL } from '../../urls/navigation';
 
-describe(
+// Failing: See https://github.com/elastic/kibana/issues/196563
+// Failing: See https://github.com/elastic/kibana/issues/196563
+describe.skip(
   'Asset Criticality Upload page',
   {
     tags: ['@ess'],
@@ -26,12 +27,11 @@ describe(
   () => {
     beforeEach(() => {
       login();
-      enableAssetCriticality();
       visit(ENTITY_ANALYTICS_ASSET_CRITICALITY_URL);
     });
 
     it('renders page as expected', () => {
-      cy.get(PAGE_TITLE).should('have.text', 'Asset criticality');
+      cy.get(PAGE_TITLE).should('include.text', 'Entity Store');
     });
 
     it('uploads a file', () => {

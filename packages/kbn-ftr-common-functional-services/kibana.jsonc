@@ -1,6 +1,11 @@
 {
   "type": "test-helper",
   "id": "@kbn/ftr-common-functional-services",
-  "owner": ["@elastic/kibana-operations", "@elastic/appex-qa"],
+  "owner": [
+    "@elastic/kibana-operations",
+    "@elastic/appex-qa"
+  ],
+  "group": "platform",
+  "visibility": "shared",
   "devOnly": true
 }

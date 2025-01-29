@@ -89,16 +89,6 @@ export const Sidebar = ({ history }: { history: ScopedHistory }) => {
                 name: 'Rule Edit',
                 onClick: () => history.push('/rule/edit/test'),
               },
-              {
-                id: 'rule-actions',
-                name: 'Rule Actions',
-                onClick: () => history.push('/rule_actions'),
-              },
-              {
-                id: 'rule-details',
-                name: 'Rule Details',
-                onClick: () => history.push('/rule_details'),
-              },
             ],
           },
         ]}

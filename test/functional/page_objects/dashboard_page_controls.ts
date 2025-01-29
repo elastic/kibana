@@ -12,7 +12,7 @@ import {
   OPTIONS_LIST_CONTROL,
   RANGE_SLIDER_CONTROL,
 } from '@kbn/controls-plugin/common';
-import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common/control_group/types';
+import { ControlGroupChainingSystem } from '@kbn/controls-plugin/common';
 import { OptionsListSearchTechnique } from '@kbn/controls-plugin/common/options_list/suggestions_searching';
 import { OptionsListSortingType } from '@kbn/controls-plugin/common/options_list/suggestions_sorting';
 import expect from '@kbn/expect';

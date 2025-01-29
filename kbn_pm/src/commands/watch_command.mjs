@@ -27,6 +27,7 @@ export const command = {
   async run({ args, log }) {
     await Bazel.watch(log, {
       offline: args.getBooleanValue('offline') ?? true,
+      reactVersion: process.env.REACT_18 ? '18' : '17',
     });
   },
 };

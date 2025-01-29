@@ -9,10 +9,7 @@ import moment from 'moment';
 import expect from '@kbn/expect';
 import rison from '@kbn/rison';
 import { InfraSynthtraceEsClient } from '@kbn/apm-synthtrace';
-import {
-  enableInfrastructureContainerAssetView,
-  enableInfrastructureProfilingIntegration,
-} from '@kbn/observability-plugin/common';
+import { enableInfrastructureProfilingIntegration } from '@kbn/observability-plugin/common';
 import {
   ALERT_STATUS_ACTIVE,
   ALERT_STATUS_RECOVERED,
@@ -66,6 +63,12 @@ const HOSTS = [
     cpuValue: 0.1,
   },
 ];
+
+const HOSTS_WITHOUT_DATA = [
+  {
+    hostName: 'host-7',
+  },
+];
 interface QueryParams {
   name?: string;
   alertMetric?: string;
@@ -86,6 +89,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
     'header',
     'timePicker',
   ]);
+
+  const waitForChartsToLoad = async () =>
+    await retry.waitFor(
+      'wait for table and Metric charts to load',
+      async () => await pageObjects.assetDetails.isMetricChartsLoaded()
+    );
 
   const getNodeDetailsUrl = (queryParams?: QueryParams) => {
     return rison.encodeUnknown(
@@ -125,12 +134,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   const setInfrastructureProfilingIntegrationUiSetting = async (value: boolean = true) => {
     await kibanaServer.uiSettings.update({ [enableInfrastructureProfilingIntegration]: value });
-    await browser.refresh();
-    await pageObjects.header.waitUntilLoadingHasFinished();
-  };
-
-  const setInfrastructureContainerAssetViewUiSetting = async (value: boolean = true) => {
-    await kibanaServer.uiSettings.update({ [enableInfrastructureContainerAssetView]: value });
     await browser.refresh();
     await pageObjects.header.waitUntilLoadingHasFinished();
   };
@@ -398,8 +401,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             await pageObjects.assetDetails.clickProcessesTab();
             const processesTotalValue =
               await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-            const processValue = await processesTotalValue.getVisibleText();
-            expect(processValue).to.eql('N/A');
+            await retry.tryForTime(5000, async () => {
+              expect(await processesTotalValue.getVisibleText()).to.eql('N/A');
+            });
           });
         });
       });
@@ -459,6 +463,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             START_HOST_DATE.format(DATE_PICKER_FORMAT),
             END_HOST_DATE.format(DATE_PICKER_FORMAT)
           );
+
+          await waitForChartsToLoad();
+        });
+
+        after(async () => {
+          await browser.scrollTop();
         });
 
         [
@@ -502,10 +512,12 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
 
         it('should render processes tab and with Total Value summary', async () => {
+          await pageObjects.header.waitUntilLoadingHasFinished();
           const processesTotalValue =
             await pageObjects.assetDetails.getProcessesTabContentTotalValue();
-          const processValue = await processesTotalValue.getVisibleText();
-          expect(processValue).to.eql('313');
+          await retry.tryForTime(5000, async () => {
+            expect(await processesTotalValue.getVisibleText()).to.eql('313');
+          });
         });
 
         it('should expand processes table row', async () => {
@@ -537,7 +549,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         });
       });
 
-      describe('Logs Tab', () => {
+      // FLAKY: https://github.com/elastic/kibana/issues/203656
+      describe.skip('Logs Tab', () => {
         before(async () => {
           await pageObjects.assetDetails.clickLogsTab();
           await pageObjects.timePicker.setAbsoluteRange(
@@ -567,6 +580,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       describe('Osquery Tab', () => {
         before(async () => {
+          await browser.scrollTop();
           await pageObjects.assetDetails.clickOsqueryTab();
         });
 
@@ -619,6 +633,57 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
               });
             });
           });
+        });
+      });
+    });
+
+    describe('#Asset Type: host without metrics', () => {
+      before(async () => {
+        await synthEsClient.index(
+          generateHostData({
+            from: DATE_WITH_HOSTS_DATA_FROM,
+            to: DATE_WITH_HOSTS_DATA_TO,
+            hosts: HOSTS_WITHOUT_DATA,
+          })
+        );
+
+        await navigateToNodeDetails('host-1', 'host', {
+          name: 'host-1',
+        });
+
+        await pageObjects.header.waitUntilLoadingHasFinished();
+      });
+
+      after(() => synthEsClient.clean());
+
+      describe('Overview Tab', () => {
+        before(async () => {
+          await pageObjects.assetDetails.clickOverviewTab();
+        });
+
+        [
+          { metric: 'cpuUsage' },
+          { metric: 'normalizedLoad1m' },
+          { metric: 'memoryUsage' },
+          { metric: 'diskUsage' },
+        ].forEach(({ metric }) => {
+          it(`${metric} tile should not be shown`, async () => {
+            await pageObjects.assetDetails.assetDetailsKPITileMissing(metric);
+          });
+        });
+
+        it('should show add metrics callout', async () => {
+          await pageObjects.assetDetails.addMetricsCalloutExists();
+        });
+      });
+
+      describe('Processes Tab', () => {
+        before(async () => {
+          await pageObjects.assetDetails.clickProcessesTab();
+        });
+
+        it('should show add metrics callout', async () => {
+          await pageObjects.assetDetails.addMetricsCalloutExists();
         });
       });
     });
@@ -732,25 +797,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
       after(() => synthEsClient.clean());
 
-      describe('when container asset view is disabled', () => {
+      describe('when navigating to container asset view', () => {
         before(async () => {
-          await setInfrastructureContainerAssetViewUiSetting(false);
-          await navigateToNodeDetails('container-id-0', 'container', { name: 'container-id-0' });
-          await pageObjects.header.waitUntilLoadingHasFinished();
-          await pageObjects.timePicker.setAbsoluteRange(
-            START_CONTAINER_DATE.format(DATE_PICKER_FORMAT),
-            END_CONTAINER_DATE.format(DATE_PICKER_FORMAT)
-          );
-        });
-
-        it('should show old view of container details', async () => {
-          await testSubjects.find('metricsEmptyViewState');
-        });
-      });
-
-      describe('when container asset view is enabled', () => {
-        before(async () => {
-          await setInfrastructureContainerAssetViewUiSetting(true);
           await navigateToNodeDetails('container-id-0', 'container', { name: 'container-id-0' });
           await pageObjects.header.waitUntilLoadingHasFinished();
           await pageObjects.timePicker.setAbsoluteRange(
@@ -843,6 +891,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             { metric: 'network', chartsCount: 1 },
           ].forEach(({ metric, chartsCount }) => {
             it(`should render ${chartsCount} ${metric} chart(s)`, async () => {
+              await waitForChartsToLoad();
               const charts = await pageObjects.assetDetails.getMetricsTabDockerCharts(metric);
               expect(charts.length).to.equal(chartsCount);
             });

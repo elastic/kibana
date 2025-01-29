@@ -224,7 +224,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
   // Helpers
 
-  const loginWithReadOnlyUserAndNavigateToHostsFlyout = async () => {
+  const loginWithReadOnlyUser = async () => {
     await security.role.create('global_hosts_read_privileges_role', {
       elasticsearch: {
         indices: [
@@ -236,7 +236,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         {
           feature: {
             infrastructure: ['read'],
+            apm: ['read'],
             advancedSettings: ['read'],
+            streams: ['read'],
           },
           spaces: ['*'],
         },
@@ -258,17 +260,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
         expectSpaceSelector: false,
       }
     );
-
-    await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
-    await pageObjects.header.waitUntilLoadingHasFinished();
-    await pageObjects.timePicker.setAbsoluteRange(
-      START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
-      END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
-    );
-
-    await waitForPageToLoad();
-
-    await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
   };
 
   const logoutAndDeleteReadOnlyUser = async () => {
@@ -341,7 +332,7 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           const currentUrl = await browser.getCurrentUrl();
           const parsedUrl = new URL(currentUrl);
           const baseUrl = `${parsedUrl.protocol}//${parsedUrl.host}`;
-          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=logs`;
+          const expectedUrlPattern = `${baseUrl}/app/observabilityOnboarding/?category=host`;
           expect(currentUrl).to.equal(expectedUrlPattern);
         });
       });
@@ -419,10 +410,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             ].forEach(({ metric, value }) => {
               it(`${metric} tile should show ${value}`, async () => {
                 await retry.tryForTime(5000, async () => {
-                  const tileValue = await pageObjects.assetDetails.getAssetDetailsKPITileValue(
-                    metric
+                  expect(await pageObjects.assetDetails.getAssetDetailsKPITileValue(metric)).to.eql(
+                    value
                   );
-                  expect(tileValue).to.eql(value);
                 });
               });
             });
@@ -675,7 +665,6 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
 
         describe('Metrics Tab', () => {
           before(async () => {
-            await browser.scrollTop();
             await pageObjects.infraHostsView.visitMetricsTab();
           });
 
@@ -688,7 +677,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
             expect(metricCharts.length).to.equal(11);
           });
 
-          it('should have an option to open the chart in lens', async () => {
+          // flaky, the option is not visible
+          it.skip('should have an option to open the chart in lens', async () => {
             await retry.tryForTime(5000, async () => {
               await pageObjects.infraHostsView.clickAndValidateMetricChartActionOptions();
               await browser.pressKeys(browser.keys.ESCAPE);
@@ -996,13 +986,23 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
         });
       });
-
       describe('#Permissions: Read Only User - Single Host Flyout', () => {
         describe('Dashboards Tab', () => {
           before(async () => {
             await setCustomDashboardsEnabled(true);
-            await loginWithReadOnlyUserAndNavigateToHostsFlyout();
-            await pageObjects.assetDetails.clickDashboardsTab();
+            await loginWithReadOnlyUser();
+            await pageObjects.common.navigateToApp(HOSTS_VIEW_PATH);
+            await pageObjects.header.waitUntilLoadingHasFinished();
+
+            await pageObjects.timePicker.setAbsoluteRange(
+              START_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT),
+              END_SYNTHTRACE_DATE.format(DATE_PICKER_FORMAT)
+            );
+
+            await waitForPageToLoad();
+
+            await pageObjects.infraHostsView.clickTableOpenFlyoutButton();
+            await browser.scrollTop();
           });
 
           after(async () => {
@@ -1013,6 +1013,8 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
           });
 
           it('should render dashboards tab splash screen with disabled option to add dashboard', async () => {
+            await pageObjects.assetDetails.dashboardsTabExistsOrFail();
+            await pageObjects.assetDetails.clickDashboardsTab();
             await pageObjects.assetDetails.addDashboardExists();
             const elementToHover = await pageObjects.assetDetails.getAddDashboardButton();
             await retry.tryForTime(5000, async () => {

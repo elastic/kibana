@@ -1,0 +1,26 @@
+summary: Resolve conflict errors
+description: >
+  Resolve conflict errors for a data view, visualization, and Canvas workpad by overwriting the existing saved objects.
+  NOTE: If a prior copy attempt resulted in resolvable errors, you must include a retry for each object you want to copy, including any that were returned in the successResults array.
+  In this example, we retried copying the dashboard accordingly.
+value:
+  objects:
+    - type: dashboard
+      id: my-dashboard
+  includeReferences: true
+  createNewCopies: false
+  retries:
+    sales:
+      - type: index-pattern
+        id: my-pattern
+        overwrite: true
+      - type: visualization
+        id: my-vis
+        overwrite: true,
+        destinationId: another-vis
+      - type: canvas
+        id: my-canvas
+        overwrite: true
+        destinationId: yet-another-canvas
+      - type: dashboard
+        id: my-dashboard

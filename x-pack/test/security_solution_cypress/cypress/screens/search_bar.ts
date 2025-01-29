@@ -48,3 +48,9 @@ export const AUTO_SUGGEST_HOST_NAME_VALUE = `[data-test-subj='autocompleteSugges
 export const EDIT_AS_QUERY_DSL = getDataTestSubjectSelector('editQueryDSL');
 
 export const KIBANA_CODE_EDITOR = getDataTestSubjectSelector('kibanaCodeEditor');
+
+export const NAV_SEARCH_INPUT = '[data-test-subj="nav-search-input"]';
+
+export const NAV_SEARCH_RESULTS = '[aria-label="Filter options"]';
+
+export const NAV_SEARCH_NO_RESULTS = '[data-test-subj="nav-search-no-results"]';

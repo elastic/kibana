@@ -143,31 +143,122 @@ describe("my test suite", async function() {
 
 #### API integration test example
 
+API Authentication in Kibana: Public vs. Internal APIs
+
+Kibana provides both public and internal APIs, each requiring authentication with the correct privileges. However, the method of testing these APIs varies, depending on how they are untilized by end users.
+
+- Public APIs: When testing HTTP requests to public APIs, API key-based authentication should be used. It reflects how an end user calls these APIs. Due to existing restrictions, we utilize `Admin` user credentials to generate API keys for various roles. While the API key permissions are correctly scoped according to the assigned role, the user will internally be recognized as `Admin` during authentication.
+
+- Internal APIs: Direct HTTP requests to internal APIs are generally not expected. However, for testing purposes, authentication should be performed using the Cookie header. This approach simulates client-side behavior during browser interactions, mirroring how internal APIs are indirectly invoked.
+
 Recommendations:
-- in each test file top level `describe` suite should start with `createM2mApiKeyWithRoleScope` call in `before` hook
-- don't forget to invalidate api key using `invalidateApiKeyWithRoleScope` in `after` hook
-- make api calls using `supertestWithoutAuth` with generated api key header
+- use `roleScopedSupertest` service to create a supertest instance scoped to a specific role and predefined request headers
+- `roleScopedSupertest.getSupertestWithRoleScope(<role>)` authenticates requests with an API key by default
+- pass `useCookieHeader: true` to use Cookie header for request authentication
+- don't forget to invalidate API keys by using `destroy()` on the supertest scoped instance in the `after` hook
 
 ```
-describe("my test suite", async function() {
+describe("my public APIs test suite", async function() {
     before(async () => {
-      roleAuthc = await svlUserManager.createM2mApiKeyWithRoleScope('viewer');
-      commonRequestHeader = svlCommonApi.getCommonRequestHeader();
-      internalRequestHeader = svlCommonApi.getInternalRequestHeader();
+      supertestViewerWithApiKey =
+        await roleScopedSupertest.getSupertestWithRoleScope('viewer', {
+          withInternalHeaders: true,
+        });
     });
 
     after(async () => {
-      await svlUserManager.invalidateApiKeyWithRoleScope(roleAuthc);
+      await supertestViewerWithApiKey.destroy();
     });
 
     it(''test step', async () => {
-      const { body, status } = await supertestWithoutAuth
+      const { body, status } = await supertestViewerWithApiKey
         .delete('/api/spaces/space/default')
-        .set(commonRequestHeader)
-        .set(roleAuthc.apiKeyHeader);
       ...
     });
 });
+```
+
+```
+describe("my internal APIs test suite", async function() {
+    before(async () => {
+      supertestViewerWithCookieCredentials =
+        await roleScopedSupertest.getSupertestWithRoleScope('admin', {
+          useCookieHeader: true, // to avoid generating API key and use Cookie header instead
+          withInternalHeaders: true,
+        });
+    });
+
+    after(async () => {
+      // no need to call '.destroy' since we didn't create API key and Cookie persist for the role within FTR run
+    });
+
+    it(''test step', async () => {
+      await supertestAdminWithCookieCredentials
+        .post(`/internal/kibana/settings`)
+        .send({ changes: { [TEST_SETTING]: 500 } })
+        .expect(200);
+      ...
+    });
+});
+```
+
+#### Testing with custom roles
+
+With custom native roles now enabled for the Security and Search projects on MKI, the FTR supports
+defining and authenticating with custom roles in both UI functional tests and API integration tests.
+
+To test role management within the Observability project, you can execute the tests using the existing [config.feature_flags.ts](x-pack/test_serverless/functional/test_suites/observability/config.feature_flags.ts), where this functionality is explicitly enabled. Though the config is not run on MKI, it provides the ability to test custom roles in Kibana CI before the functionality is enabled in MKI. When roles management is enabled on MKI, these tests can be migrated to the regular FTR config and will be run on MKI.
+
+For compatibility with MKI, the role name `customRole` is reserved for use in tests. The test user is automatically assigned to this role, but before logging in via the browser, generating a cookie header, or creating an API key in each test suite, the role’s privileges must be updated.
+
+Note: We are still working on a solution to run these tests against MKI. In the meantime, please tag the suite with `skipMKI`.
+
+FTR UI test example:
+```
+// First, set privileges for the custom role
+await samlAuth.setCustomRole({
+  elasticsearch: {
+    indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      feature: {
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+});
+// Then, log in via the browser as a user with the newly defined privileges
+await pageObjects.svlCommonPage.loginWithCustomRole();
+
+// Make sure to delete the custom role in the 'after' hook
+await samlAuth.deleteCustomRole();
+```
+
+FTR api_integration test example:
+```
+// First, set privileges for the custom role
+await samlAuth.setCustomRole({
+  elasticsearch: {
+    indices: [{ names: ['logstash-*'], privileges: ['read', 'view_index_metadata'] }],
+  },
+  kibana: [
+    {
+      feature: {
+        discover: ['read'],
+      },
+      spaces: ['*'],
+    },
+  ],
+});
+
+// Then, generate an API key with the newly defined privileges
+const roleAuthc = await samlAuth.createM2mApiKeyWithRoleScope('customRole');
+
+// Remember to invalidate the API key after use and delete the custom role
+await samlAuth.invalidateM2mApiKeyWithRoleScope(roleAuthc);
+await samlAuth.deleteCustomRole();
 ```
 
 ### Testing with feature flags

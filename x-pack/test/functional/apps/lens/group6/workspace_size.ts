@@ -44,7 +44,6 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
 
       await visualize.navigateToNewVisualization();
       await visualize.clickVisType('lens');
-      await lens.goToTimeRange();
       // Detect here if the Chrome bug is present, and adjust the aspect ratio accordingly if not
       if (!within(width, DEFAULT_WINDOW_SIZE[0]) || !within(height, DEFAULT_WINDOW_SIZE[1])) {
         const { width: containerWidth, height: containerHeight } =
@@ -268,8 +267,7 @@ export default function ({ getService, getPageObjects }: FtrProviderContext) {
       await assertWorkspaceDimensions('600px', '375px');
     });
 
-    // Fails in chrome 128+
-    it.skip('gauge size (absolute pixels) - major arc', async () => {
+    it('gauge size (absolute pixels) - major arc', async () => {
       await lens.openVisualOptions();
       await lens.setGaugeShape('Major arc');
       await assertWorkspaceDimensions('600px', '430px');

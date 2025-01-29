@@ -19,7 +19,10 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
   const platformSecurityUtils = getService('platformSecurityUtils');
 
   describe('Roles', function () {
-    describe('as Viewer', () => {
+    // custom roles are not enabled for observability projects
+    this.tags(['skipSvlOblt']);
+
+    describe('as Viewer', function () {
       before(async () => {
         await pageObjects.svlCommonPage.loginAsViewer();
         await pageObjects.common.navigateToApp('management');
@@ -30,7 +33,9 @@ export default ({ getPageObjects, getService }: FtrProviderContext) => {
       });
     });
 
-    describe('as Admin', () => {
+    describe('as Admin', function () {
+      this.tags(['failsOnMKI']);
+
       before(async () => {
         await pageObjects.svlCommonPage.loginAsAdmin();
         await pageObjects.common.navigateToApp('management');

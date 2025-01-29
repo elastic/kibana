@@ -214,18 +214,6 @@ export function getWebpackConfig(
                       includePaths: [Path.resolve(worker.repoRoot, 'node_modules')],
                       sourceMap: true,
                       quietDeps: true,
-                      logger: {
-                        warn: (message: string, warning: any) => {
-                          // Muted - see https://github.com/elastic/kibana/issues/190345 for tracking remediation
-                          if (warning?.deprecationType?.id === 'mixed-decls') return;
-
-                          if (warning.deprecation)
-                            return process.stderr.write(
-                              `DEPRECATION WARNING: ${message}\n${warning.stack}`
-                            );
-                          process.stderr.write('WARNING: ' + message);
-                        },
-                      },
                     },
                   },
                 },
@@ -260,6 +248,47 @@ export function getWebpackConfig(
           },
         },
         {
+          test: /node_modules\/@?xstate5\/.*\.js$/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              babelrc: false,
+              envName: worker.dist ? 'production' : 'development',
+              presets: [BABEL_PRESET],
+              plugins: ['@babel/plugin-transform-logical-assignment-operators'],
+            },
+          },
+        },
+        {
+          test: /\.js$/,
+          include: /node_modules[\\\/]@dagrejs/,
+          use: {
+            loader: 'babel-loader',
+            options: {
+              envName: worker.dist ? 'production' : 'development',
+              presets: ['@babel/preset-env'], // Doesn't work with BABEL_PRESET
+              plugins: ['@babel/plugin-proposal-class-properties'],
+            },
+          },
+        },
+        {
+          test: /node_modules[\/\\]@?xyflow[\/\\].*.js$/,
+          loaders: 'babel-loader',
+          options: {
+            envName: worker.dist ? 'production' : 'development',
+            presets: [BABEL_PRESET],
+            plugins: ['@babel/plugin-transform-logical-assignment-operators'],
+          },
+        },
+        {
+          test: /node_modules[\/\\]launchdarkly[^\/\\]+[\/\\].*.js$/,
+          loaders: 'babel-loader',
+          options: {
+            envName: worker.dist ? 'production' : 'development',
+            presets: [BABEL_PRESET],
+          },
+        },
+        {
           test: /\.(html|md|txt|tmpl)$/,
           use: {
             loader: 'raw-loader',
@@ -281,6 +310,10 @@ export function getWebpackConfig(
           'src/core/public/styles/core_app/images'
         ),
         vega: Path.resolve(worker.repoRoot, 'node_modules/vega/build-es5/vega.js'),
+        'react-dom$':
+          worker.reactVersion === '18' ? 'react-dom-18/profiling' : 'react-dom/profiling',
+        'scheduler/tracing': 'scheduler/tracing-profiling',
+        react: worker.reactVersion === '18' ? 'react-18' : 'react',
       },
     },
 

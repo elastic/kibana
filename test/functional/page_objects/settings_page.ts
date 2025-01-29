@@ -9,7 +9,6 @@
 
 import expect from '@kbn/expect';
 import { FtrService } from '../ftr_provider_context';
-
 export class SettingsPageObject extends FtrService {
   private readonly log = this.ctx.getService('log');
   private readonly retry = this.ctx.getService('retry');
@@ -264,10 +263,12 @@ export class SettingsPageObject extends FtrService {
   }
 
   async getScriptedFieldsTabCount() {
-    return await this.retry.try(async () => {
+    try {
       const text = await this.testSubjects.getVisibleText('tab-scriptedFields');
-      return text.split(' ')[2].replace(/\((.*)\)/, '$1');
-    });
+      return text.split(' ')[2].replace(/\((.*)\)/, '$1') || '0';
+    } catch (e) {
+      return '0';
+    }
   }
 
   async getRelationshipsTabCount() {
@@ -387,6 +388,11 @@ export class SettingsPageObject extends FtrService {
     const input = await this.testSubjects.find('indexPatternFieldFilter');
     await input.clearValueWithKeyboard();
     await input.type(name);
+    const value = await this.testSubjects.getAttribute('indexPatternFieldFilter', 'value');
+    expect(value).to.eql(
+      name,
+      `Expected new value to be the input: [${name}}], but got: [${value}]`
+    );
   }
 
   async openControlsByName(name: string) {
@@ -723,7 +729,7 @@ export class SettingsPageObject extends FtrService {
     popularity: string,
     script: string
   ) {
-    await this.clickAddScriptedField();
+    await this.goToAddScriptedField();
     await this.setScriptedFieldName(name);
     if (language) await this.setScriptedFieldLanguage(language);
     if (type) await this.setScriptedFieldType(type);
@@ -892,9 +898,12 @@ export class SettingsPageObject extends FtrService {
     await this.monacoEditor.setCodeEditorValue(script);
   }
 
-  async clickAddScriptedField() {
-    this.log.debug('click Add Scripted Field');
-    await this.testSubjects.click('addScriptedFieldLink');
+  async goToAddScriptedField() {
+    this.log.debug('go to Add Scripted Field url');
+    const url = await this.browser.getCurrentUrl();
+    const newUrl = url.split('#')[0];
+    await this.browser.get(newUrl + '/create-field/');
+    await this.header.waitUntilLoadingHasFinished();
   }
 
   async clickSaveScriptedField() {
@@ -1047,5 +1056,30 @@ export class SettingsPageObject extends FtrService {
       `select[data-test-subj="managementChangeIndexSelection-${oldIndexPatternId}"] >
       [data-test-subj="indexPatternOption-${newIndexPatternTitle}"]`
     );
+  }
+
+  async changeAndValidateFieldFormat({
+    name,
+    fieldType,
+    expectedPreviewText,
+  }: {
+    name: string;
+    fieldType: string;
+    expectedPreviewText: string;
+  }) {
+    await this.filterField(name);
+    await this.setFieldTypeFilter(fieldType);
+    await this.testSubjects.click('editFieldFormat');
+
+    expect(await this.testSubjects.getVisibleText('flyoutTitle')).to.eql(`Edit field '${name}'`);
+
+    await this.retry.tryForTime(5000, async () => {
+      const previewText = await this.testSubjects.getVisibleText('fieldPreviewItem > value');
+      expect(previewText).to.eql(
+        expectedPreviewText,
+        `Expected previewText to eql [${expectedPreviewText}], but got: [${previewText}]`
+      );
+    });
+    await this.closeIndexPatternFieldEditor();
   }
 }

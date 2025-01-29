@@ -66,7 +66,7 @@ export default ({ getService }: FtrProviderContext): void => {
     });
 
     // Both serverless and ESS
-    describe('@serverless @ess tests', () => {
+    describe('@ess @serverless @skipInServerlessMKI tests', () => {
       describe('base cases', () => {
         it('returns an empty response if there are no rules', async () => {
           const body = await getCoverageOverview(supertest);
