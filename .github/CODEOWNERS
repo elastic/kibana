@@ -142,7 +142,7 @@ src/dev/packages/ftr-screenshot-filename @elastic/kibana-operations @elastic/app
 src/dev/packages/gen-ai-functional-testing @elastic/appex-ai-infra
 src/dev/packages/generate @elastic/kibana-operations
 src/dev/packages/generate-console-definitions @elastic/kibana-management
-packages/kbn-get-repo-files @elastic/kibana-operations
+src/dev/packages/get-repo-files @elastic/kibana-operations
 packages/kbn-import-locator @elastic/kibana-operations
 packages/kbn-import-resolver @elastic/kibana-operations
 packages/kbn-jest-serializers @elastic/kibana-operations

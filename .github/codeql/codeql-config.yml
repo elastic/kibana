@@ -52,7 +52,7 @@ paths-ignore:
   - src/dev/packages/find-used-node-modules
   - packages/kbn-ftr-*
   - src/dev/packages/generate
-  - packages/kbn-get-repo-files
+  - src/dev/packages/get-repo-files
   - packages/kbn-import-resolver
   - packages/kbn-jest-*
   - packages/kbn-journeys
