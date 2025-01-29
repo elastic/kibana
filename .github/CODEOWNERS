@@ -192,7 +192,7 @@ src/dev/packages/tooling-log @elastic/kibana-operations
 src/dev/packages/ts-projects @elastic/kibana-operations
 src/dev/packages/ts-type-check-cli @elastic/kibana-operations
 src/dev/packages/validate-next-docs-cli @elastic/kibana-operations
-packages/kbn-web-worker-stub @elastic/kibana-operations
+src/dev/packages/web-worker-stub @elastic/kibana-operations
 packages/kbn-whereis-pkg-cli @elastic/kibana-operations
 packages/kbn-yarn-lock-validator @elastic/kibana-operations
 packages/serverless/storybook/config @elastic/appex-sharedux

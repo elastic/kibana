@@ -8012,7 +8012,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/web-worker-stub@link:packages/kbn-web-worker-stub":
+"@kbn/web-worker-stub@link:src/dev/packages/web-worker-stub":
   version "0.0.0"
   uid ""
 
