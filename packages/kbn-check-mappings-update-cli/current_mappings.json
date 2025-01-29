@@ -3647,10 +3647,16 @@
   "task": {
     "dynamic": false,
     "properties": {
+      "apiKey": {
+        "type": "binary"
+      },
       "attempts": {
         "type": "integer"
       },
       "enabled": {
+        "type": "boolean"
+      },
+      "invalidateApiKey": {
         "type": "boolean"
       },
       "ownerId": {
