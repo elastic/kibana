@@ -112,12 +112,13 @@ export function monitorDetailsPageProvider({ page, kibanaUrl }: { page: Page; ki
     },
 
     async updateAlert({ id, threshold }: AlertType) {
+      await this.selectAlertThreshold(threshold);
       await page.click(byTestId('ruleFormStep-details'));
       await this.fillByTestSubj('ruleDetailsNameInput', id);
-      await this.selectAlertThreshold(threshold);
     },
 
     async selectAlertThreshold(threshold: string) {
+      await page.click(byTestId('ruleFormStep-definition'));
       await page.click(byTestId('uptimeAnomalySeverity'));
       await page.click(byTestId('anomalySeveritySelect'));
       await page.click(`text=${threshold}`);
