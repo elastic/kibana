@@ -27,9 +27,9 @@ export const getResizePreviewRect = ({
   return {
     left: panelRect.left,
     top: panelRect.top,
-    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
+    bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
     right: Math.min(
-      pointerPixel.clientX - interactionEvent.sensorOffsets.right,
+      pointerPixel.clientX - interactionEvent.pointerOffsets.right,
       getGridWidth(runtimeSettings)
     ),
   };
@@ -44,16 +44,16 @@ export const getDragPreviewRect = ({
   interactionEvent: PanelInteractionEvent;
 }) => {
   return {
-    left: pointerPixel.clientX - interactionEvent.sensorOffsets.left,
-    top: pointerPixel.clientY - interactionEvent.sensorOffsets.top,
-    bottom: pointerPixel.clientY - interactionEvent.sensorOffsets.bottom,
-    right: pointerPixel.clientX - interactionEvent.sensorOffsets.right,
+    left: pointerPixel.clientX - interactionEvent.pointerOffsets.left,
+    top: pointerPixel.clientY - interactionEvent.pointerOffsets.top,
+    bottom: pointerPixel.clientY - interactionEvent.pointerOffsets.bottom,
+    right: pointerPixel.clientX - interactionEvent.pointerOffsets.right,
   };
 };
 
 // Calculates the cursor's offset relative to the active panel's edges (top, left, right, bottom).
 // This ensures the dragged or resized panel maintains its position under the cursor during the interaction.
-export function getSensorOffsets(e: UserInteractionEvent, { top, left, right, bottom }: DOMRect) {
+export function getPointerOffsets(e: UserInteractionEvent, { top, left, right, bottom }: DOMRect) {
   if (isTouchEvent(e) || isMouseEvent(e)) {
     const { clientX, clientY } = getPointerPosition(e);
     return {

@@ -11,11 +11,11 @@ import { cloneDeep } from 'lodash';
 import deepEqual from 'fast-deep-equal';
 import { MutableRefObject } from 'react';
 import { GridLayoutStateManager, GridPanelData } from '../types';
-import { getDragPreviewRect, getSensorOffsets, getResizePreviewRect } from './pointer_event_utils';
+import { getDragPreviewRect, getPointerOffsets, getResizePreviewRect } from './pointer_event_utils';
 import { resolveGridRow } from '../utils/resolve_grid_row';
 import { isGridDataEqual } from '../utils/equality_checks';
 import { UserInteractionEvent } from './types';
-import { getSensorType, isKeyboardEvent } from './sensors';
+import { isKeyboardEvent } from './sensors';
 import { getKeyboardDragPreviewRect, getKeyboardResizePreviewRect } from './sensors/keyboard/utils';
 
 export const startAction = (
@@ -36,8 +36,7 @@ export const startAction = (
     id: panelId,
     panelDiv: panelRef,
     targetRowIndex: rowIndex,
-    sensorOffsets: getSensorOffsets(e, panelRect),
-    sensor: getSensorType(e),
+    pointerOffsets: getPointerOffsets(e, panelRect),
   });
 
   gridLayoutStateManager.proposedGridLayout$.next(
@@ -104,7 +103,8 @@ export const moveAction = (
   // find the grid that the preview rect is over
   const lastRowIndex = interactionEvent.targetRowIndex;
   const targetRowIndex = (() => {
-    if (isResize) return lastRowIndex;
+    // temporary blocking of moving with keyboard between sections till we have a better way to handle keyboard events between rows
+    if (isResize || isKeyboardEvent(e)) return lastRowIndex;
     const previewBottom = previewRect.top + rowHeight;
 
     let highestOverlap = -Infinity;

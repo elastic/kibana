@@ -23,10 +23,3 @@ export function getPointerPosition(e: UserInteractionEvent) {
   }
   return isTouchEvent(e) ? e.touches[0] : e;
 }
-
-export const getSensorType = (e: UserInteractionEvent) => {
-  if (isMouseEvent(e)) return 'mouse';
-  if (isTouchEvent(e)) return 'touch';
-  if (isKeyboardEvent(e)) return 'keyboard';
-  return 'unknown';
-};

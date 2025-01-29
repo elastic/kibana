@@ -9,6 +9,7 @@
 
 import { RuntimeGridSettings, PanelInteractionEvent, ActivePanel } from '../../../types';
 import { KeyboardCode, UserKeyboardEvent } from './types';
+import { getGridWidth } from '../../math_utils';
 
 export const getKeyboardDragPreviewRect = ({
   e,
@@ -21,7 +22,7 @@ export const getKeyboardDragPreviewRect = ({
   runtimeSettings: RuntimeGridSettings;
   activePanel: ActivePanel | undefined;
 }) => {
-  const { top, bottom, left, right } = activePanel?.position || interactionEvent.sensorOffsets;
+  const { top, bottom, left, right } = activePanel?.position || interactionEvent.pointerOffsets;
   const currentCoordinates = { top, bottom, left, right };
   const { columnPixelWidth, gutterSize, rowHeight } = runtimeSettings;
   switch (e.code) {
@@ -58,7 +59,7 @@ export const getKeyboardDragPreviewRect = ({
 export const getKeyboardResizePreviewRect = ({
   e,
   interactionEvent,
-  runtimeSettings: { columnPixelWidth, gutterSize, rowHeight },
+  runtimeSettings,
   activePanel,
 }: {
   e: UserKeyboardEvent;
@@ -66,18 +67,20 @@ export const getKeyboardResizePreviewRect = ({
   runtimeSettings: RuntimeGridSettings;
   activePanel: ActivePanel | undefined;
 }) => {
+  const { columnPixelWidth, gutterSize, rowHeight } = runtimeSettings;
   const { top, bottom, left, right } = interactionEvent.panelDiv.getBoundingClientRect();
   const currentCoordinates = { top, bottom, left, right };
+  console.log(currentCoordinates, getGridWidth(runtimeSettings))
   switch (e.code) {
     case KeyboardCode.Right:
       return {
         ...currentCoordinates,
-        right: right + columnPixelWidth + gutterSize,
+        right: Math.min(right + columnPixelWidth + gutterSize,  getGridWidth(runtimeSettings)),
       };
     case KeyboardCode.Left:
       return {
         ...currentCoordinates,
-        right: right - columnPixelWidth - gutterSize,
+        right: Math.min( right - columnPixelWidth - gutterSize, getGridWidth(runtimeSettings)),
       };
     case KeyboardCode.Down:
       return {

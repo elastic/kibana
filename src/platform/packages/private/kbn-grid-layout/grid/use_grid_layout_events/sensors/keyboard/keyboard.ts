@@ -48,75 +48,37 @@ export const startKeyboardInteraction = ({
     interactionEvent$: { value: interactionEvent },
   } = gridLayoutStateManager;
 
-  if (keyboardCodes.move.includes(e.code)) {
-    e.preventDefault();
-  }
-
-  function handleActiveEvent(event: UserKeyboardEvent) {
-    console.log('handleActiveEvent', event.code);
-
-    if (!gridLayoutStateManager.interactionEvent$.value) {
-      return;
-    }
-    console.log('keydown', event);
-
-    // if the user pressed a move key, move the interaction event
-    if (isMoveKey(event)) {
-      event.stopPropagation();
-      event.preventDefault();
-      handleScrollToView(e.target, interactionEvent?.panelDiv, gridLayoutStateManager.runtimeSettings$.value);
-      return onMove(event);
-    }
-
-    if (isEndKey(event)) {
-      event.preventDefault();
-      // document.removeEventListener('scroll', () => onMove(e, gridLayoutStateManager));
-      removeEventListener();
-      return onEnd();
-    }
-
-    if (isCancelKey(event)) {
-      removeEventListener();
-      return onCancel();
-    }
-  }
-
-  const removeEventListener = () => {
-    console.log('removeEventListener');
-    document.removeEventListener('keydown', handleActiveEvent);
-  };
-
   if (!interactionEvent) {
     if (isStartKey(e)) {
       e.stopPropagation();
       e.preventDefault();
-      //   document.addEventListener('scroll', () => onMove(e, gridLayoutStateManager));
       onStart();
-      document.addEventListener('keydown', handleActiveEvent);
-      e.target!.addEventListener(
-        'blur',
-        () => {
-          onBlur();
-        },
-        { once: true }
-      );
+      document.addEventListener('scroll', onMove, { passive: true });
+      e.target!.addEventListener('blur', onBlur, { once: true });
     }
     // if user pressed anything else, ignore the event
     return;
   } else {
-  }
-};
 
-export const handleScrollToView = (
-  target: UserKeyboardEvent['target'],
-  { gutterSize, rowHeight }: RuntimeGridSettings
-) => {
-  const keyboardDif = gutterSize + rowHeight;
-  // get window height
-  const windowHeight = window.innerHeight;
-  if (target.getBoundingClientRect().top < 0.2 *  interactionEvent?.panelDiv) {
-    scrollBy(0, -keyboardDif);
-  } else if (target.getBoundingClientRect().bottom >  interactionEvent?.panelDiv) {
-    scrollBy(0, keyboardDif);
+    if (isMoveKey(e)) {
+      e.stopPropagation();
+      e.preventDefault();
+      // handleScrollToView(e.target, interactionEvent?.panelDiv, gridLayoutStateManager.runtimeSettings$.value);
+      console.log('moveKeyboardInteraction', document.activeElement);
+      document.activeElement?.scrollIntoView(false);
+      return onMove(e);
+    }
+
+    if (isEndKey(e)) {
+      document.removeEventListener('scroll', onMove);
+      e.preventDefault();
+      // document.removeEventListener('scroll', () => onMove(e, gridLayoutStateManager));
+      return onEnd();
+    }
+
+    if (isCancelKey(e)) {
+      document.removeEventListener('scroll', onMove);
+      return onCancel();
+    }
   }
 };
