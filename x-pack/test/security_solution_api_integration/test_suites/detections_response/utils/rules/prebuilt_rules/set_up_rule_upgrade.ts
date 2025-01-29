@@ -51,10 +51,13 @@ export async function setUpRuleUpgrade({
     }),
   ]);
   await installPrebuiltRules(deps.es, deps.supertest);
-  await patchRule(deps.supertest, deps.log, {
-    rule_id: 'rule-1',
-    ...assets.patch,
-  });
+
+  if (Object.keys(assets.patch).length > 0) {
+    await patchRule(deps.supertest, deps.log, {
+      rule_id: 'rule-1',
+      ...assets.patch,
+    });
+  }
 
   if (removeInstalledAssets) {
     await deleteAllPrebuiltRuleAssets(deps.es, deps.log);
