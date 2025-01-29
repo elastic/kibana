@@ -321,6 +321,11 @@ paths:
                   type: string
                 indexPattern:
                   $ref: '#/components/schemas/IndexPattern'
+                lookbackPeriod:
+                  default: 24h
+                  description: The lookback period for the entity store
+                  pattern: '[smdh]$'
+                  type: string
         description: Schema for the entity store initialization
         required: true
       responses:
@@ -937,6 +942,10 @@ components:
           type: string
         indexPattern:
           $ref: '#/components/schemas/IndexPattern'
+        lookbackPeriod:
+          default: 24h
+          pattern: '[smdh]$'
+          type: string
         status:
           $ref: '#/components/schemas/EngineStatus'
         type:

@@ -41,6 +41,7 @@ import {
   EXCLUDE_COLD_AND_FROZEN_TIERS_IN_ANALYZER,
   EXCLUDED_DATA_TIERS_FOR_RULE_EXECUTION,
   ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING,
+  ENABLE_GRAPH_VISUALIZATION_SETTING,
 } from '../common/constants';
 import type { ExperimentalFeatures } from '../common/experimental_features';
 import { LogLevelSetting } from '../common/api/detection_engine/rule_monitoring';
@@ -64,6 +65,12 @@ export const initUiSettings = (
   experimentalFeatures: ExperimentalFeatures,
   validationsEnabled: boolean
 ) => {
+  const enableVisualizationsInFlyoutLabel = i18n.translate(
+    'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel',
+    {
+      defaultMessage: 'Enable visualizations in flyout',
+    }
+  );
   const securityUiSettings: Record<string, UiSettingsParams<unknown>> = {
     [DEFAULT_APP_REFRESH_INTERVAL]: {
       type: 'json',
@@ -201,9 +208,7 @@ export const initUiSettings = (
       schema: schema.boolean(),
     },
     [ENABLE_VISUALIZATIONS_IN_FLYOUT_SETTING]: {
-      name: i18n.translate('xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutLabel', {
-        defaultMessage: 'Enable visualizations in flyout',
-      }),
+      name: enableVisualizationsInFlyoutLabel,
       value: false,
       description: i18n.translate(
         'xpack.securitySolution.uiSettings.enableVisualizationsInFlyoutDescription',
@@ -214,6 +219,28 @@ export const initUiSettings = (
         }
       ),
       type: 'boolean',
+      category: [APP_ID],
+      requiresPageReload: true,
+      schema: schema.boolean(),
+    },
+    [ENABLE_GRAPH_VISUALIZATION_SETTING]: {
+      name: i18n.translate('xpack.securitySolution.uiSettings.enableGraphVisualizationLabel', {
+        defaultMessage: 'Enable graph visualization',
+      }),
+      description: i18n.translate(
+        'xpack.securitySolution.uiSettings.enableGraphVisualizationDescription',
+        {
+          defaultMessage: `<em>[technical preview]</em> Enable the Graph Visualization feature within the Security Solution.
+            <br/>Note: This feature requires the {visualizationFlyoutFeatureFlag} setting to be enabled.
+            <br/>Please ensure both settings are enabled to use graph visualizations in flyout.`,
+          values: {
+            em: (chunks) => `<em>${chunks}</em>`,
+            visualizationFlyoutFeatureFlag: `<code>${enableVisualizationsInFlyoutLabel}</code>`,
+          },
+        }
+      ),
+      type: 'boolean',
+      value: false,
       category: [APP_ID],
       requiresPageReload: true,
       schema: schema.boolean(),
