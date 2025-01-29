@@ -1233,7 +1233,23 @@
     ],
     "interfaces": [],
     "enums": [],
-    "misc": [],
+    "misc": [
+      {
+        "parentPluginId": "@kbn/core-saved-objects-server-internal",
+        "id": "def-server.SAVED_OBJECT_TYPES_COUNT",
+        "type": "number",
+        "tags": [],
+        "label": "SAVED_OBJECT_TYPES_COUNT",
+        "description": [],
+        "signature": [
+          "127"
+        ],
+        "path": "src/core/packages/saved-objects/server-internal/src/object_types/index.ts",
+        "deprecated": false,
+        "trackAdoption": false,
+        "initialIsOpen": false
+      }
+    ],
     "objects": [
       {
         "parentPluginId": "@kbn/core-saved-objects-server-internal",

@@ -46,10 +46,36 @@ export function useMLModelNotificationToasts() {
   const showErrorToasts = (error: ErrorType) => {
     const errorObj = extractErrorProperties(error);
     return toasts.addError(new MLRequestFailure(errorObj, error), {
-      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.modelDeploymentErrorTitle', {
+      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.inferenceErrorTitle', {
         defaultMessage: 'Model deployment failed',
       }),
     });
   };
-  return { showSuccessToasts, showErrorToasts, showSuccessfullyDeployedToast };
+
+  const showInferenceCreationErrorToasts = (error: ErrorType) => {
+    const errorObj = extractErrorProperties(error);
+    return toasts.addError(new MLRequestFailure(errorObj, error), {
+      title: i18n.translate(
+        'xpack.idxMgmt.mappingsEditor.createField.inferenceCreationErrorTitle',
+        {
+          defaultMessage: 'Endpoint creation failed',
+        }
+      ),
+    });
+  };
+
+  const showInferenceSuccessToast = () => {
+    return toasts.addSuccess({
+      title: i18n.translate('xpack.idxMgmt.mappingsEditor.createField.endpointAddedSuccess', {
+        defaultMessage: 'Inference endpoint added',
+      }),
+    });
+  };
+  return {
+    showSuccessToasts,
+    showErrorToasts,
+    showSuccessfullyDeployedToast,
+    showInferenceCreationErrorToasts,
+    showInferenceSuccessToast,
+  };
 }

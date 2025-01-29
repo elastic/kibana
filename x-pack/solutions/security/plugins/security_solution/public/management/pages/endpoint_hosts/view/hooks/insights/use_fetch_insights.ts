@@ -31,6 +31,7 @@ export const useFetchInsights = ({ endpointId, onSuccess }: UseFetchInsightsConf
           query: {
             actionTypes: JSON.stringify([ActionType.Refreshed]),
             targetIds: JSON.stringify([endpointId]),
+            size: 100,
           },
         });
         onSuccess();

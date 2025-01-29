@@ -643,14 +643,6 @@
                 "path": "src/platform/plugins/shared/esql/public/plugin.ts"
               },
               {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
-              },
-              {
-                "plugin": "visualizations",
-                "path": "src/platform/plugins/shared/visualizations/public/plugin.ts"
-              },
-              {
                 "plugin": "lens",
                 "path": "x-pack/platform/plugins/shared/lens/public/plugin.ts"
               },

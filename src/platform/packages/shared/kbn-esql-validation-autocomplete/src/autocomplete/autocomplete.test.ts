@@ -472,11 +472,13 @@ describe('autocomplete', () => {
       const expectedDateDiff2ndArgSuggestions = [
         TIME_PICKER_SUGGESTION,
         ...TIME_SYSTEM_PARAMS.map((t) => `${t}, `),
-        ...getFieldNamesByType('date').map((name) => `${name}, `),
-        ...getFunctionSignaturesByReturnType('eval', 'date', { scalar: true }).map((s) => ({
-          ...s,
-          text: `${s.text},`,
-        })),
+        ...getFieldNamesByType(['date', 'date_nanos']).map((name) => `${name}, `),
+        ...getFunctionSignaturesByReturnType('eval', ['date', 'date_nanos'], { scalar: true }).map(
+          (s) => ({
+            ...s,
+            text: `${s.text},`,
+          })
+        ),
       ];
       testSuggestions('FROM a | EVAL DATE_DIFF("day", /)', expectedDateDiff2ndArgSuggestions);
 

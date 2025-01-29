@@ -147,25 +147,37 @@ describe('autocomplete.suggest', () => {
         '| ',
         ...getFunctionSignaturesByReturnType('eval', 'any', { builtin: true, skipAssign: true }, [
           'double',
+          'long',
         ]),
+        'IN $0',
+        'IS NOT NULL',
+        'IS NULL',
       ]);
       await assertSuggestions(
         'from a | eval a=round(doubleField, /',
         [
-          ...getFieldNamesByType('integer'),
-          ...getFunctionSignaturesByReturnType('eval', 'integer', { scalar: true }, undefined, [
-            'round',
-          ]),
+          ...getFieldNamesByType(['integer', 'long']),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['integer', 'long'],
+            { scalar: true },
+            undefined,
+            ['round']
+          ),
         ],
         { triggerCharacter: '(' }
       );
       await assertSuggestions(
         'from a | eval round(doubleField, /',
         [
-          ...getFieldNamesByType('integer'),
-          ...getFunctionSignaturesByReturnType('eval', 'integer', { scalar: true }, undefined, [
-            'round',
-          ]),
+          ...getFieldNamesByType(['integer', 'long']),
+          ...getFunctionSignaturesByReturnType(
+            'eval',
+            ['integer', 'long'],
+            { scalar: true },
+            undefined,
+            ['round']
+          ),
         ],
         { triggerCharacter: '(' }
       );

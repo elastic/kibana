@@ -11,4 +11,6 @@ export { TableListViewTable, TableListViewProvider, TableListViewKibanaProvider 
 
 export type { TableListViewTableProps, RowActions } from './src';
 
+export type { CustomSortingOptions } from './src/components';
+
 export type { TableListViewKibanaDependencies } from './src/services';

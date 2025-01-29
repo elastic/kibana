@@ -41,6 +41,7 @@ import { useStartMigration } from '../../service/hooks/use_start_migration';
 import type { FilterOptions } from '../../types';
 import { MigrationRulesFilter } from './filters';
 import { convertFilterOptions } from './utils/filters';
+import { SiemTranslatedRulesTour } from '../tours/translation_guide';
 
 const DEFAULT_PAGE_SIZE = 10;
 const DEFAULT_SORT_FIELD = 'translation_result';
@@ -299,6 +300,8 @@ export const MigrationRulesTable: React.FC<MigrationRulesTableProps> = React.mem
 
     return (
       <>
+        {!isStatsLoading && translationStats?.rules.total && <SiemTranslatedRulesTour />}
+
         <EuiSkeletonLoading
           isLoading={isStatsLoading}
           loadingContent={

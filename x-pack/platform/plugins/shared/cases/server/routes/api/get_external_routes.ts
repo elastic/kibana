@@ -22,7 +22,6 @@ import { deleteAllCommentsRoute } from './comments/delete_all_comments';
 import { deleteCommentRoute } from './comments/delete_comment';
 import { findCommentsRoute } from './comments/find_comments';
 import { getCommentRoute } from './comments/get_comment';
-import { getAllCommentsRoute } from './comments/get_all_comment';
 import { patchCommentRoute } from './comments/patch_comment';
 import { postCommentRoute } from './comments/post_comment';
 import { getCaseConfigureRoute } from './configure/get_configure';
@@ -58,7 +57,6 @@ export const getExternalRoutes = ({
     deleteAllCommentsRoute,
     findCommentsRoute,
     getCommentRoute,
-    getAllCommentsRoute({ isServerless, docLinks }),
     patchCommentRoute,
     postCommentRoute,
     getCaseConfigureRoute,

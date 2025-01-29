@@ -12903,6 +12903,10 @@
                 "path": "x-pack/platform/plugins/shared/fleet/server/services/security/fleet_router.ts"
               },
               {
+                "plugin": "inferenceEndpoint",
+                "path": "x-pack/platform/plugins/shared/inference_endpoint/server/routes/index.ts"
+              },
+              {
                 "plugin": "maps",
                 "path": "x-pack/platform/plugins/shared/maps/server/mvt/mvt_routes.ts"
               },

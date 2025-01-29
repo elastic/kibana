@@ -104,6 +104,9 @@ const mockKibana = (license: ILicense | null = licenseMock) => {
       docLinks: {
         links: {
           query: {},
+          observability: {
+            slo: 'dummy_link',
+          },
         },
       },
       http: {

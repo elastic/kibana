@@ -11934,7 +11934,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"nested\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -21825,7 +21825,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"nested\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -30324,7 +30324,7 @@
               "\nThe Kibana normalized type of the column"
             ],
             "signature": [
-              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"nested\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+              "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
             "deprecated": false,
@@ -36171,7 +36171,7 @@
             "label": "metric",
             "description": [],
             "signature": [
-              "\"min\" | \"sum\" | \"max\" | \"average\""
+              "\"min\" | \"max\" | \"sum\" | \"average\""
             ],
             "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/overall_metric.ts",
             "deprecated": false,
@@ -36608,7 +36608,7 @@
           "\nThis type represents the `type` of any `DatatableColumn` in a `Datatable`.\nits duplicated from KBN_FIELD_TYPES"
         ],
         "signature": [
-          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"nested\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
+          "\"string\" | \"number\" | \"boolean\" | \"object\" | \"unknown\" | \"nested\" | \"geo_point\" | \"geo_shape\" | \"ip\" | \"date\" | \"murmur3\" | \"histogram\" | \"conflict\" | \"_source\" | \"attachment\" | \"null\""
         ],
         "path": "src/platform/plugins/shared/expressions/common/expression_types/specs/datatable.ts",
         "deprecated": false,
@@ -41678,7 +41678,7 @@
                     "label": "types",
                     "description": [],
                     "signature": [
-                      "(\"string\" | \"number\" | \"boolean\" | \"null\")[]"
+                      "(\"string\" | \"boolean\" | \"number\" | \"null\")[]"
                     ],
                     "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/map_column.ts",
                     "deprecated": false,
@@ -43846,7 +43846,7 @@
                     "label": "options",
                     "description": [],
                     "signature": [
-                      "(\"sum\" | \"max\" | \"min\" | \"average\")[]"
+                      "(\"min\" | \"max\" | \"sum\" | \"average\")[]"
                     ],
                     "path": "src/platform/plugins/shared/expressions/common/expression_functions/specs/overall_metric.ts",
                     "deprecated": false,

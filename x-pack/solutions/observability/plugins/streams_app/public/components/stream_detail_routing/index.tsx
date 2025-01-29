@@ -41,6 +41,7 @@ import {
   isDescendantOf,
   RoutingDefinition,
   IngestUpsertRequest,
+  getAncestorsAndSelf,
 } from '@kbn/streams-schema';
 import { useUnsavedChangesPrompt } from '@kbn/unsaved-changes-prompt';
 import { AbortableAsyncState } from '@kbn/observability-utils-browser/hooks/use_abortable_async';
@@ -818,8 +819,7 @@ function ChildStreamList({
 
 function CurrentStreamEntry({ definition }: { definition: ReadStreamDefinition }) {
   const router = useStreamsAppRouter();
-  const breadcrumbs: EuiBreadcrumb[] = definition.name.split('.').map((_part, pos, parts) => {
-    const parentId = parts.slice(0, pos + 1).join('.');
+  const breadcrumbs: EuiBreadcrumb[] = getAncestorsAndSelf(definition.name).map((parentId) => {
     const isBreadcrumbsTail = parentId === definition.name;
 
     return {

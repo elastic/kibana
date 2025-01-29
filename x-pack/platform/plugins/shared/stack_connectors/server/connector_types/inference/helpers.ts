@@ -102,6 +102,11 @@ export function chunksIntoMessage(obs$: Observable<UnifiedChatCompleteResponse>)
           if (concatenatedChunk.choices[0].message.content === '') {
             concatenatedChunk.choices[0].message.content = null;
           }
+          concatenatedChunk.choices[0].message.tool_calls?.forEach((toolCall: any) => {
+            if (toolCall.function?.arguments?.trim() === '') {
+              toolCall.function.arguments = '{}';
+            }
+          });
           return concatenatedChunk;
         })
       )

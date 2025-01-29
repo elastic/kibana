@@ -114,7 +114,6 @@ describe('useAgentless', () => {
 
 describe('useSetupTechnology', () => {
   const setNewAgentPolicy = jest.fn();
-  const updateAgentPoliciesMock = jest.fn();
   const updatePackagePolicyMock = jest.fn();
   const setSelectedPolicyTabMock = jest.fn();
   const newAgentPolicyMock = {
@@ -233,7 +232,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         updatePackagePolicy: updatePackagePolicyMock,
@@ -261,7 +259,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         isEditPage: true,
@@ -291,7 +288,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         updatePackagePolicy: updatePackagePolicyMock,
@@ -331,7 +327,6 @@ describe('useSetupTechnology', () => {
     const initialProps = {
       setNewAgentPolicy,
       newAgentPolicy: newAgentPolicyMock,
-      updateAgentPolicies: updateAgentPoliciesMock,
       setSelectedPolicyTab: setSelectedPolicyTabMock,
       packagePolicy: packagePolicyMock,
       updatePackagePolicy: updatePackagePolicyMock,
@@ -357,7 +352,6 @@ describe('useSetupTechnology', () => {
     rerender({
       setNewAgentPolicy,
       newAgentPolicy: newAgentPolicyMock,
-      updateAgentPolicies: updateAgentPoliciesMock,
       setSelectedPolicyTab: setSelectedPolicyTabMock,
       packagePolicy: {
         ...packagePolicyMock,
@@ -388,7 +382,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         updatePackagePolicy: updatePackagePolicyMock,
@@ -423,7 +416,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         updatePackagePolicy: updatePackagePolicyMock,
@@ -457,7 +449,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         updatePackagePolicy: updatePackagePolicyMock,
@@ -497,7 +488,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
@@ -567,7 +557,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
@@ -614,7 +603,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoWithoutResources,
@@ -654,7 +642,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoWithoutAgentless,
@@ -694,7 +681,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,
@@ -767,7 +753,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoWithoutGlobalDataTags,
@@ -842,7 +827,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoWithoutGlobalDataTags,
@@ -889,7 +873,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         updatePackagePolicy: updatePackagePolicyMock,
@@ -935,7 +918,6 @@ describe('useSetupTechnology', () => {
       useSetupTechnology({
         setNewAgentPolicy,
         newAgentPolicy: newAgentPolicyMock,
-        updateAgentPolicies: updateAgentPoliciesMock,
         setSelectedPolicyTab: setSelectedPolicyTabMock,
         packagePolicy: packagePolicyMock,
         packageInfo: packageInfoMock,

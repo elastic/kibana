@@ -307,7 +307,6 @@ export function useOnSubmit({
     useSetupTechnology({
       newAgentPolicy,
       setNewAgentPolicy,
-      updateAgentPolicies,
       updatePackagePolicy,
       setSelectedPolicyTab,
       packageInfo,
@@ -340,7 +339,6 @@ export function useOnSubmit({
   }, [newInputs, prevSetupTechnology, selectedSetupTechnology, updatePackagePolicy, packagePolicy]);
 
   const onSaveNavigate = useOnSaveNavigate({
-    packagePolicy,
     queryParamsPolicyId,
   });
 
