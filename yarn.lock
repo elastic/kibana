@@ -7636,7 +7636,7 @@
   version "0.0.0"
   uid ""
 
-"@kbn/styled-components-mapping-cli@link:packages/kbn-styled-components-mapping-cli":
+"@kbn/styled-components-mapping-cli@link:src/dev/packages/styled-components-mapping-cli":
   version "0.0.0"
   uid ""
 
