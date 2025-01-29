@@ -7,7 +7,7 @@
  * License v3.0 only", or the "Server Side Public License, v 1".
  */
 
-import { SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
+import { SCOUT_REPORTER_ENABLED, SCOUT_SERVERS_ROOT } from '@kbn/scout-info';
 import { createPlaywrightConfig } from './create_config';
 import { VALID_CONFIG_MARKER } from '../types';
 import { generateTestRunId } from '@kbn/scout-reporting';
@@ -48,10 +48,12 @@ describe('createPlaywrightConfig', () => {
     expect(config.reporter).toEqual([
       ['html', { open: 'never', outputFolder: './output/reports' }],
       ['json', { outputFile: './output/reports/test-results.json' }],
-      [
-        '@kbn/scout-reporting/src/reporting/playwright/events',
-        { name: 'scout-playwright', runId: testRunId },
-      ],
+      SCOUT_REPORTER_ENABLED
+        ? [
+            '@kbn/scout-reporting/src/reporting/playwright/events',
+            { name: 'scout-playwright', runId: testRunId },
+          ]
+        : ['null'],
       [
         '@kbn/scout-reporting/src/reporting/playwright/failed_test',
         { name: 'scout-playwright-failed-tests', runId: testRunId },

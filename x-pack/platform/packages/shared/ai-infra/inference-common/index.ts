@@ -96,6 +96,7 @@ export {
   isInferenceRequestError,
   isInferenceRequestAbortedError,
 } from './src/errors';
+export { elasticModelDictionary } from './src/const';
 
 export { truncateList } from './src/truncate_list';
 export {
@@ -104,4 +105,8 @@ export {
   isSupportedConnector,
   type InferenceConnector,
 } from './src/connectors';
-export { defaultInferenceEndpoints } from './src/inference_endpoints';
+export {
+  defaultInferenceEndpoints,
+  InferenceEndpointProvider,
+  elasticModelIds,
+} from './src/inference_endpoints';

@@ -9,80 +9,32 @@
 
 import { useEuiTheme } from '@elastic/eui';
 import { css } from '@emotion/react';
-import { METRIC_TYPE } from '@kbn/analytics';
-import React, { useCallback, useMemo } from 'react';
+import React, { useCallback } from 'react';
 
 import { AddFromLibraryButton, Toolbar, ToolbarButton } from '@kbn/shared-ux-button-toolbar';
-import { BaseVisType, VisTypeAlias } from '@kbn/visualizations-plugin/public';
 
 import { useStateFromPublishingSubject } from '@kbn/presentation-publishing';
 import { useDashboardApi } from '../../dashboard_api/use_dashboard_api';
-import { DASHBOARD_UI_METRIC_ID } from '../../utils/telemetry_constants';
-import {
-  dataService,
-  embeddableService,
-  usageCollectionService,
-  visualizationsService,
-} from '../../services/kibana_services';
+import { visualizationsService } from '../../services/kibana_services';
 import { getCreateVisualizationButtonTitle } from '../_dashboard_app_strings';
 import { ControlsToolbarButton } from './controls_toolbar_button';
-import { EditorMenu } from './editor_menu';
+import { AddPanelButton } from './add_panel_button/components/add_panel_button';
 import { addFromLibrary } from '../../dashboard_container/embeddable/api';
+import { navigateToVisEditor } from './add_panel_button/navigate_to_vis_editor';
 
 export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }) {
   const { euiTheme } = useEuiTheme();
 
   const dashboardApi = useDashboardApi();
 
-  const lensAlias = useMemo(
-    () => visualizationsService.getAliases().find(({ name }) => name === 'lens'),
-    []
-  );
-
-  const createNewVisType = useCallback(
-    (visType?: BaseVisType | VisTypeAlias) => () => {
-      let path = '';
-      let appId = '';
-
-      if (visType) {
-        const trackUiMetric = usageCollectionService?.reportUiCounter.bind(
-          usageCollectionService,
-          DASHBOARD_UI_METRIC_ID
-        );
-        if (trackUiMetric) {
-          trackUiMetric(METRIC_TYPE.CLICK, `${visType.name}:create`);
-        }
-
-        if (!('alias' in visType)) {
-          // this visualization is not an alias
-          appId = 'visualize';
-          path = `#/create?type=${encodeURIComponent(visType.name)}`;
-        } else if (visType.alias && 'path' in visType.alias) {
-          // this visualization **is** an alias, and it has an app to redirect to for creation
-          appId = visType.alias.app;
-          path = visType.alias.path;
-        }
-      } else {
-        appId = 'visualize';
-        path = '#/create?';
-      }
-
-      const stateTransferService = embeddableService.getStateTransfer();
-      stateTransferService.navigateToEditor(appId, {
-        path,
-        state: {
-          originatingApp: dashboardApi.getAppContext()?.currentAppId,
-          originatingPath: dashboardApi.getAppContext()?.getCurrentPath?.(),
-          searchSessionId: dataService.search.session.getSessionId(),
-        },
-      });
-    },
-    [dashboardApi]
-  );
+  const navigateToDefaultEditor = useCallback(() => {
+    const lensAlias = visualizationsService.getAliases().find(({ name }) => name === 'lens');
+    navigateToVisEditor(dashboardApi, lensAlias);
+  }, [dashboardApi]);
 
   const controlGroupApi = useStateFromPublishingSubject(dashboardApi.controlGroupApi$);
   const extraButtons = [
-    <EditorMenu createNewVisType={createNewVisType} isDisabled={isDisabled} />,
+    <AddPanelButton isDisabled={isDisabled} />,
     <AddFromLibraryButton
       onClick={() => addFromLibrary(dashboardApi)}
       size="s"
@@ -106,7 +58,7 @@ export function DashboardEditingToolbar({ isDisabled }: { isDisabled?: boolean }
               isDisabled={isDisabled}
               iconType="lensApp"
               size="s"
-              onClick={createNewVisType(lensAlias)}
+              onClick={navigateToDefaultEditor}
               label={getCreateVisualizationButtonTitle()}
               data-test-subj="dashboardAddNewPanelButton"
             />

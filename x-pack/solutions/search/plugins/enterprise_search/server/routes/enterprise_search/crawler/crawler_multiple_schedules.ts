@@ -13,7 +13,7 @@ import { ErrorCode } from '../../../../common/types/error_codes';
 
 import { fetchCrawlerCustomSchedulingByIndexName } from '../../../lib/crawler/fetch_crawler_multiple_schedules';
 import { postCrawlerCustomScheduling } from '../../../lib/crawler/post_crawler_multiple_schedules';
-import { RouteDependencies } from '../../../plugin';
+import type { RouteDependencies } from '../../../types';
 import { createError } from '../../../utils/create_error';
 import { elasticsearchErrorHandler } from '../../../utils/elasticsearch_error_handler';
 
