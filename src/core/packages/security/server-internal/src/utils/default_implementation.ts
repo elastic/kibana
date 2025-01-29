@@ -29,11 +29,12 @@ export const getDefaultSecurityImplementation = (): CoreSecurityDelegateContract
     },
     audit: {
       asScoped: () => {
-        return { log: () => undefined, enabled: false };
+        return { log: () => undefined, enabled: false, includeSavedObjectNames: false };
       },
       withoutRequest: {
         log: () => undefined,
         enabled: false,
+        includeSavedObjectNames: false,
       },
     },
   };
