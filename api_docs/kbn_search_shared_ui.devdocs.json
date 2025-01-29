@@ -13,7 +13,7 @@
         "signature": [
           "({ name, serviceType, iconPath, showTooltip, }: ConnectorIconProps) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/search/packages/search/shared_ui/src/connector_icon/connector_icon.tsx",
+        "path": "x-pack/solutions/search/packages/shared_ui/src/connector_icon/connector_icon.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -27,7 +27,7 @@
             "signature": [
               "ConnectorIconProps"
             ],
-            "path": "x-pack/solutions/search/packages/search/shared_ui/src/connector_icon/connector_icon.tsx",
+            "path": "x-pack/solutions/search/packages/shared_ui/src/connector_icon/connector_icon.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -46,7 +46,7 @@
         "signature": [
           "({ stepCount, }: DecorativeHorizontalStepperProps) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/search/packages/search/shared_ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
+        "path": "x-pack/solutions/search/packages/shared_ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -60,7 +60,73 @@
             "signature": [
               "DecorativeHorizontalStepperProps"
             ],
-            "path": "x-pack/solutions/search/packages/search/shared_ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
+            "path": "x-pack/solutions/search/packages/shared_ui/src/decorative_horizontal_stepper/decorative_horizontal_stepper.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.EuiIconPlugs",
+        "type": "Function",
+        "tags": [],
+        "label": "EuiIconPlugs",
+        "description": [],
+        "signature": [
+          "({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/search/packages/shared_ui/src/icons/EuiIconPlugs.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-shared-ui",
+            "id": "def-public.EuiIconPlugs.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ title, titleId, ...props }",
+            "description": [],
+            "signature": [
+              "React.SVGProps<SVGSVGElement> & SVGRProps"
+            ],
+            "path": "x-pack/solutions/search/packages/shared_ui/src/icons/EuiIconPlugs.tsx",
+            "deprecated": false,
+            "trackAdoption": false,
+            "isRequired": true
+          }
+        ],
+        "returnComment": [],
+        "initialIsOpen": false
+      },
+      {
+        "parentPluginId": "@kbn/search-shared-ui",
+        "id": "def-public.EuiIconWeb",
+        "type": "Function",
+        "tags": [],
+        "label": "EuiIconWeb",
+        "description": [],
+        "signature": [
+          "({ title, titleId, ...props }: React.SVGProps<SVGSVGElement> & SVGRProps) => React.JSX.Element"
+        ],
+        "path": "x-pack/solutions/search/packages/shared_ui/src/icons/EuiIconWeb.tsx",
+        "deprecated": false,
+        "trackAdoption": false,
+        "children": [
+          {
+            "parentPluginId": "@kbn/search-shared-ui",
+            "id": "def-public.EuiIconWeb.$1",
+            "type": "CompoundType",
+            "tags": [],
+            "label": "{ title, titleId, ...props }",
+            "description": [],
+            "signature": [
+              "React.SVGProps<SVGSVGElement> & SVGRProps"
+            ],
+            "path": "x-pack/solutions/search/packages/shared_ui/src/icons/EuiIconWeb.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -79,7 +145,7 @@
         "signature": [
           "({ actions, label, value, copyValue, dataTestSubj, copyValueDataTestSubj, }: FormInfoFieldProps) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/search/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
+        "path": "x-pack/solutions/search/packages/shared_ui/src/form_info_field/form_info_field.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -93,7 +159,7 @@
             "signature": [
               "FormInfoFieldProps"
             ],
-            "path": "x-pack/solutions/search/packages/search/shared_ui/src/form_info_field/form_info_field.tsx",
+            "path": "x-pack/solutions/search/packages/shared_ui/src/form_info_field/form_info_field.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
@@ -112,7 +178,7 @@
         "signature": [
           "({ actions, backButton, body, description, icon, isComingSoon, comingSoonLabel, title, }: SearchEmptyPromptProps) => React.JSX.Element"
         ],
-        "path": "x-pack/solutions/search/packages/search/shared_ui/src/search_empty_prompt/search_empty_prompt.tsx",
+        "path": "x-pack/solutions/search/packages/shared_ui/src/search_empty_prompt/search_empty_prompt.tsx",
         "deprecated": false,
         "trackAdoption": false,
         "children": [
@@ -126,7 +192,7 @@
             "signature": [
               "SearchEmptyPromptProps"
             ],
-            "path": "x-pack/solutions/search/packages/search/shared_ui/src/search_empty_prompt/search_empty_prompt.tsx",
+            "path": "x-pack/solutions/search/packages/shared_ui/src/search_empty_prompt/search_empty_prompt.tsx",
             "deprecated": false,
             "trackAdoption": false,
             "isRequired": true
