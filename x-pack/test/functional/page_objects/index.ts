@@ -59,6 +59,7 @@ import { SearchClassicNavigationProvider } from './search_classic_navigation';
 import { SearchStartProvider } from './search_start';
 import { SearchApiKeysProvider } from './search_api_keys';
 import { SearchIndexDetailPageProvider } from './search_index_details_page';
+import { SearchOverviewProvider } from './search_overview_page';
 import { SearchNavigationProvider } from './search_navigation';
 
 // just like services, PageObjects are defined as a map of
@@ -104,6 +105,7 @@ export const pageObjects = {
   searchStart: SearchStartProvider,
   searchIndexDetailsPage: SearchIndexDetailPageProvider,
   searchNavigation: SearchNavigationProvider,
+  searchOverview: SearchOverviewProvider,
   searchProfiler: SearchProfilerPageProvider,
   searchPlayground: SearchPlaygroundPageProvider,
   searchSynonyms: SearchSynonymsPageProvider,
